@@ -26,13 +26,28 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(context.space_data.node_tree, "addon_name")
-        layout.prop(context.space_data.node_tree, "addon_author")
-        layout.prop(context.space_data.node_tree, "addon_description")
-        layout.prop(context.space_data.node_tree, "addon_location")
-        layout.prop(context.space_data.node_tree, "addon_warning")
-        layout.prop(context.space_data.node_tree, "addon_category")
-        layout.prop(context.space_data.node_tree, "addon_version")
+        col = layout.column(align=True)
+        col.label(text="Name")
+        col.prop(context.space_data.node_tree, "addon_name", text="")
+        col.separator()
+        col.label(text="Author")
+        col.prop(context.space_data.node_tree, "addon_author", text="")
+        col.separator()
+        col.label(text="Description")
+        col.prop(context.space_data.node_tree, "addon_description", text="")
+        col.separator()
+        col.label(text="Location")
+        col.prop(context.space_data.node_tree, "addon_location", text="")
+        col.separator()
+        col.label(text="Warning")
+        col.prop(context.space_data.node_tree, "addon_warning", text="")
+        col.separator()
+        col.label(text="Category")
+        col.prop(context.space_data.node_tree, "addon_category", text="")
+        col.separator()
+        col.label(text="Version")
+        row = col.row()
+        row.prop(context.space_data.node_tree, "addon_version", text="")
 
 class SN_PT_ErrorLogPanel(bpy.types.Panel):
     """Creates a panel for displaying error messages in the node editors sidebar"""
