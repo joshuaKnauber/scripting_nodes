@@ -7,14 +7,20 @@ class SN_NumberNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Outputs a number'''
     bl_idname = 'SN_NumberNode'
     bl_label = "Number"
-    bl_icon = node_icons["INPUT"]  #<-- see node_looks.py
+    bl_icon = node_icons["INPUT"]  
+
+    number: bpy.props.IntProperty(
+        name="Number",
+        description="Value",
+        default=0
+    )
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["INPUT"]  #<-- see node_looks.py
+        self.color = node_colors["INPUT"] 
 
-        self.outputs.new('SN_NumberSocket', "Value")
+        self.outputs.new('SN_NumberSocket', "")
 
     
     def draw_buttons(self, context, layout):
-        pass# draws extra buttons on node without inputs
+        layout.prop(self,"number",text="")

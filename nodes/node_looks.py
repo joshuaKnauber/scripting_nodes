@@ -18,12 +18,12 @@ socket_colors = {
 node_colors = {
     "INTERFACE": to_percentage("367d51",False),
     "LOGIC": to_percentage("00fff5",False),
-    "INPUT": to_percentage("0ff34c",False)
+    "INPUT": to_percentage("095c1f",False)
 }
 
 
 node_icons = {
     "INTERFACE": "MENU_PANEL",
     "LOGIC": "DRIVER_TRANSFORM",
-    "INPUT": "X"
+    "INPUT": "NODE"
 }
