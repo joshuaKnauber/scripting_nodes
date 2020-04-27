@@ -42,3 +42,15 @@ class SN_NumberSocket(bpy.types.NodeSocket):
 
     def draw_color(self, context, node):
         return socket_colors["NUMBER"]
+
+
+class SN_LayoutSocket(bpy.types.NodeSocket):
+    '''Layout Socket for connecting layouts'''
+    bl_idname = 'SN_LayoutSocket'
+    bl_label = "Layout"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text="Layout")
+
+    def draw_color(self, context, node):
+        return socket_colors["LAYOUT"]

@@ -8,7 +8,8 @@ def to_percentage(hex,alpha):
 
 socket_colors = {
     "STRING": to_percentage("cd9077",True),
-    "NUMBER": to_percentage("0048ff",True)
+    "NUMBER": to_percentage("0048ff",True),
+    "LAYOUT": to_percentage("cc3399",True)
 }
 
 
