@@ -7,16 +7,22 @@ class SN_UiMathNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node for basic math'''
     bl_idname = 'SN_UiMathNode'
     bl_label = "Math"
-    bl_icon = node_icons["MATH"]
+    bl_icon = node_icons["LOGIC"]
+
+    operation: bpy.props.EnumProperty(
+        items=[("test", "Add", "test2"), ("test2", "Subtract", "test2"),
+                ("test", "MULTIPLY", "test2"), ("test", "DIVIDE", "test2")],
+        name="Operation",
+        description="Math operation for this node"
+    )
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["MATH"]
+        self.color = node_colors["LOGIC"]
 
-        self.inputs.new('SN_ENUMSocket', "FUNCTION")
-        self.inputs.new('SN_IntSocket', "INPUT")
-        self.inputs.new('SN_IntSocket', "INPUT2")
-        self.outputs.new('SN_IntSocket', "OUTPUT")
+        self.inputs.new('SN_NumberSocket', "Value")
+        self.inputs.new('SN_NumberSocket', "Value")
+        self.outputs.new('SN_NumberSocket', "Value")
 
     def copy(self, node):
         pass# called when node is copied
@@ -25,4 +31,4 @@ class SN_UiMathNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# called when node is removed
 
     def draw_buttons(self, context, layout):
-        pass# draws extra buttons on node
+        layout.prop(self,"operation",text="")

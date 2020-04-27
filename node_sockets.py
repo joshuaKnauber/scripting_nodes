@@ -23,43 +23,22 @@ class SN_StringSocket(bpy.types.NodeSocket):
         return socket_colors["STRING"]
 
 
-class SN_IntSocket(bpy.types.NodeSocket):
-    '''Int Socket for handeling integers'''
-    bl_idname = 'SN_IntSocket'
-    bl_label = "Int"
+class SN_NumberSocket(bpy.types.NodeSocket):
+    '''Number Socket for handeling integers'''
+    bl_idname = 'SN_NumberSocket'
+    bl_label = "Number"
 
-    integer_value: bpy.props.IntProperty(
-        name="Int",
-        description="Socket for a integer value",
+    number_value: bpy.props.FloatProperty(
+        name="Number",
+        description="Socket for a number value",
         default=0,
     )
 
     def draw(self, context, layout, node, text):
         if self.is_output or self.is_linked:
-            layout.label(text=self.integer_value)
+            layout.label(text="Value")
         else:
-            layout.prop(self, "integer_value", text=text)
+            layout.prop(self, "number_value", text=text)
 
     def draw_color(self, context, node):
-        return socket_colors["INT"]
-
-
-class SN_ENUMSocket(bpy.types.NodeSocket):
-    '''Enumerating Socket'''
-    bl_idname = 'SN_ENUMSocket'
-    bl_label = "Enum"
-
-    enum_value: bpy.props.EnumProperty(
-        items=[("test", "+", "test2"), ("test2", "-", "test2"), ("test", "*", "test2"), ("test", ":", "test2")],
-        name="Choose your Function",
-        description="Enumaration Socket"
-    )
-
-    def draw(self, context, layout, node, text):
-        if self.is_output or self.is_linked:
-            layout.label(text=self.enum_value)
-        else:
-            layout.prop(self, "enum_value", text=text)
-
-    def draw_color(self, context, node):
-        return socket_colors["INT"]
+        return socket_colors["NUMBER"]
