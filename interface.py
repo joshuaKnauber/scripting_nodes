@@ -10,13 +10,31 @@ def node_tree_header(self, context):
         row.label(text="test")
 
 
+class SN_PT_AddonInfoPanel(bpy.types.Panel):
+    """Creates a panel that lets you edit the Addon Info for the current NodeTree"""
+    bl_label = "Addon Info"
+    bl_order = 0
+    bl_idname = "SN_PT_AddonInfoPanel"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Visual Scripting"
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == 'ScriptingNodesTree'
+
+    def draw(self, context):
+        layout = self.layout
+        column = layout.column(align=False)
+
 class SN_PT_ErrorLogPanel(bpy.types.Panel):
     """Creates a panel for displaying error messages in the node editors sidebar"""
     bl_label = "Errors"
+    bl_order = 1
     bl_idname = "SN_PT_ErrorLogPanel"
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
-    bl_category = "Scripting"
+    bl_category = "Visual Scripting"
 
     @classmethod
     def poll(cls, context):
