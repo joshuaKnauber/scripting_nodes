@@ -3,7 +3,7 @@ import bpy
 
 class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
-    auto_reload: bpy.props.BoolProperty(default=False,name="Auto Reload",description="Automatically reload the node tree on change")
+    auto_compile: bpy.props.BoolProperty(default=False,name="Auto Reload",description="Automatically reload the node tree on change")
 
 
 

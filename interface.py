@@ -1,5 +1,5 @@
 import bpy
-from .properties.property_utils import error_props
+from .properties.property_utils import sn_props, error_props
 
 def node_tree_header(self, context):
     if context.space_data.tree_type == 'ScriptingNodesTree' and context.space_data.node_tree != None:
@@ -8,6 +8,7 @@ def node_tree_header(self, context):
         row.scale_x = 1.3
 
         row.operator("scripting_nodes.compile", icon='FILE_REFRESH')
+        row.prop(sn_props(),"auto_compile")
 
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
