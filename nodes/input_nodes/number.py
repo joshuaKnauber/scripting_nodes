@@ -2,7 +2,6 @@ import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 
-
 class SN_NumberNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Outputs a number'''
     bl_idname = 'SN_NumberNode'

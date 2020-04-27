@@ -2,7 +2,6 @@ import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 
-
 class SN_UiMathNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node for basic math'''
     bl_idname = 'SN_UiMathNode'

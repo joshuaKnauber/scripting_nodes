@@ -1,7 +1,6 @@
 import bpy
 from .nodes.node_looks import socket_colors
 
-
 class SN_StringSocket(bpy.types.NodeSocket):
     '''String Socket for handling text'''
     bl_idname = 'SN_StringSocket'
