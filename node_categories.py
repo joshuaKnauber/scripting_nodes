@@ -32,9 +32,16 @@ node_categories = [
         }),
 
     ]),
-    SN_ScriptingNodesCategory('MATH', "Logic", items=[
+    SN_ScriptingNodesCategory('LOGIC', "Logic", items=[
         
         NodeItem("SN_UiMathNode", settings={
+        }),
+
+    ]),
+
+    SN_ScriptingNodesCategory('INPUT', "Input", items=[
+        
+        NodeItem("SN_NumberNode", settings={
         }),
 
     ]),
