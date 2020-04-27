@@ -73,7 +73,7 @@ class SN_VectorSocket(bpy.types.NodeSocket):
     vector_value: bpy.props.FloatVectorProperty(
         name="Vector",
         description="Socket for a vector value",
-        default=False,
+        default=(0,0,0),
     )
 
     def draw(self, context, layout, node, text):
