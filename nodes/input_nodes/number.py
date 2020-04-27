@@ -9,12 +9,11 @@ class SN_NumberNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Number"
     bl_icon = node_icons["INPUT"]  
 
-    number: bpy.props.IntProperty(
+    number: bpy.props.FloatProperty(
         name="Number",
         description="Value",
         default=0
     )
-
     def init(self, context):
         self.use_custom_color = True
         self.color = node_colors["INPUT"] 
