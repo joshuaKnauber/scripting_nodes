@@ -20,5 +20,5 @@ node_colors = {
 
 node_icons = {
     "INTERFACE": "MENU_PANEL",
-    "LOGIC": "ADD"
+    "LOGIC": "DRIVER_TRANSFORM"
 }
