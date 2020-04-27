@@ -7,15 +7,18 @@ def to_percentage(hex,alpha):
 
 
 socket_colors = {
-    "STRING": to_percentage("cd9077",True)
+    "STRING": to_percentage("cd9077",True),
+    "INT": to_percentage("0048ff",True)
 }
 
 
 node_colors = {
-    "INTERFACE": to_percentage("367d51",False)
+    "INTERFACE": to_percentage("367d51",False),
+    "MATH": to_percentage("00fff5",False)
 }
 
 
 node_icons = {
-    "INTERFACE": "MENU_PANEL"
+    "INTERFACE": "MENU_PANEL",
+    "MATH": "ADD"
 }
