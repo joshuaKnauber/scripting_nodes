@@ -13,7 +13,7 @@
 
 bl_info = {
     "name" : "Visual Scripting",
-    "author" : "Joshua Knauber",
+    "author" : "Joshua Knauber, Finn Knauber",
     "description" : "",
     "blender" : (2, 80, 0),
     "version" : (0, 0, 1),
