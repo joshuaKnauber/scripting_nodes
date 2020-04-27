@@ -1,5 +1,8 @@
 import bpy
 
+def sn_props():
+    return bpy.context.scene.sn_properties
+
 def error_props():
     return bpy.context.scene.sn_error_properties
 
