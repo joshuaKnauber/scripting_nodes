@@ -13,6 +13,7 @@ class SN_NumberNode(bpy.types.Node, SN_ScriptingBaseNode):
         description="Value",
         default=0
     )
+
     def init(self, context):
         self.use_custom_color = True
         self.color = node_colors["INPUT"] 
@@ -22,3 +23,6 @@ class SN_NumberNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def draw_buttons(self, context, layout):
         layout.prop(self,"number",text="")
+
+    def evaluate(self):
+        return self.number
