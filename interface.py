@@ -1,13 +1,13 @@
 import bpy
 from .properties.property_utils import error_props
 
-
 def node_tree_header(self, context):
-    if context.space_data.tree_type == 'ScriptingNodesTree':
+    if context.space_data.tree_type == 'ScriptingNodesTree' and context.space_data.node_tree != None:
         layout = self.layout
         row = layout.row(align=True)
         row.scale_x = 1.3
-        row.label(text="test")
+
+        row.operator("scripting_nodes.compile", icon='FILE_REFRESH')
 
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
