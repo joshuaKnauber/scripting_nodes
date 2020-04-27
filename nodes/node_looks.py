@@ -7,18 +7,18 @@ def to_percentage(hex,alpha):
 
 
 socket_colors = {
-    "STRING": to_percentage("cd9077",True),
-    "NUMBER": to_percentage("0048ff",True),
-    "LAYOUT": to_percentage("cc3399",True),
-    "BOOLEAN": to_percentage("ff9933",True),
-    "VECTOR": to_percentage("ffff66",True)
+    "STRING": to_percentage("63C763",True),
+    "NUMBER": to_percentage("A1A1A1",True),
+    "LAYOUT": to_percentage("ed5700",True),
+    "BOOLEAN": to_percentage("2A5CFF",True),
+    "VECTOR": to_percentage("6363C7",True)
 }
 
 
 node_colors = {
-    "INTERFACE": to_percentage("367d51",False),
-    "LOGIC": to_percentage("00fff5",False),
-    "INPUT": to_percentage("095c1f",False)
+    "INTERFACE": to_percentage("A5CFC9",False),
+    "LOGIC": to_percentage("4D4D4D",False),
+    "INPUT": to_percentage("ACACAC",False)
 }
 
 
