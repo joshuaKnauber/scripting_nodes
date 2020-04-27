@@ -26,15 +26,17 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
         char_width = 15
         return bpy.context.region.width // char_width
 
-    def draw_error(self, layout, error_type, error_message):
+    def draw_error(self, layout, error_type, error_message, fatal):
         box = layout.box()
+        col = box.column(align=True)
 
-        box.label(text=error_type)
+        row = col.row()
+        row.alert = fatal
+        row.label(text=error_type)
 
         line_length = self.get_line_length()
         error_message = [error_message[i:i+line_length] for i in range(0, len(error_message), line_length)]
 
-        col = box.column(align=True)
         for line in error_message:
             col.label(text=line)
 
@@ -43,4 +45,4 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
         column = layout.column(align=False)
 
         for error in error_props():
-            self.draw_error(column, error.error_type, error.error_message)
+            self.draw_error(column, error.error_type, error.error_message, error.fatal_error)
