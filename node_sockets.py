@@ -15,7 +15,7 @@ class SN_StringSocket(bpy.types.NodeSocket):
 
     def draw(self, context, layout, node, text):
         if self.is_output or self.is_linked:
-            layout.label(text=self.string_value)
+            layout.label(text=text)
         else:
             layout.prop(self, "string_value", text=text)
 
@@ -36,12 +36,54 @@ class SN_NumberSocket(bpy.types.NodeSocket):
 
     def draw(self, context, layout, node, text):
         if self.is_output or self.is_linked:
-            layout.label(text="Value")
+            layout.label(text=text)
         else:
             layout.prop(self, "number_value", text=text)
 
     def draw_color(self, context, node):
         return socket_colors["NUMBER"]
+
+
+class SN_BooleanSocket(bpy.types.NodeSocket):
+    '''Boolean Socket for handeling booleans'''
+    bl_idname = 'SN_BooleanSocket'
+    bl_label = "Boolean"
+
+    boolean_value: bpy.props.BoolProperty(
+        name="Boolean",
+        description="Socket for a boolean value",
+        default=False,
+    )
+
+    def draw(self, context, layout, node, text):
+        if self.is_output or self.is_linked:
+            layout.label(text=text)
+        else:
+            layout.prop(self, "boolean_value", text=text)
+
+    def draw_color(self, context, node):
+        return socket_colors["BOOLEAN"]
+
+
+class SN_VectorSocket(bpy.types.NodeSocket):
+    '''Vector Socket for handeling vectors'''
+    bl_idname = 'SN_VectorSocket'
+    bl_label = "Vector"
+
+    vector_value: bpy.props.FloatVectorProperty(
+        name="Vector",
+        description="Socket for a vector value",
+        default=False,
+    )
+
+    def draw(self, context, layout, node, text):
+        if self.is_output or self.is_linked:
+            layout.label(text=text)
+        else:
+            layout.prop(self, "vector_value", text=text)
+
+    def draw_color(self, context, node):
+        return socket_colors["VECTOR"]
 
 
 class SN_LayoutSocket(bpy.types.NodeSocket):
