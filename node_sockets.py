@@ -42,3 +42,24 @@ class SN_INTSocket(bpy.types.NodeSocket):
 
     def draw_color(self, context, node):
         return socket_colors["INT"]
+
+
+class SN_ENUMSocket(bpy.types.NodeSocket):
+    '''Enumerating Socket'''
+    bl_idname = 'SN_ENUMSocket'
+    bl_label = "Enum"
+
+    enum_value: bpy.props.EnumProperty(
+        items=[("test", "+", "test2"), ("test2", "-", "test2"), ("test", "*", "test2"), ("test", ":", "test2")],
+        name="Choose your Function",
+        description="Enumaration Socket"
+    )
+
+    def draw(self, context, layout, node, text):
+        if self.is_output or self.is_linked:
+            layout.label(text=self.enum_value)
+        else:
+            layout.prop(self, "enum_value", text=text)
+
+    def draw_color(self, context, node):
+        return socket_colors["INT"]

@@ -13,10 +13,10 @@ class SN_UiMathNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.use_custom_color = True
         self.color = node_colors["MATH"]
 
+        self.inputs.new('SN_ENUMSocket', "FUNCTION")
         self.inputs.new('SN_INTSocket', "INPUT")
         self.inputs.new('SN_INTSocket', "INPUT2")
         self.outputs.new('SN_INTSocket', "OUTPUT")
-
 
     def copy(self, node):
         pass# called when node is copied
