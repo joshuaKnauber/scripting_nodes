@@ -21,11 +21,18 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.space_data.tree_type == 'ScriptingNodesTree'
+        if context.space_data.tree_type == 'ScriptingNodesTree':
+            return context.space_data.node_tree != None
 
     def draw(self, context):
         layout = self.layout
-        column = layout.column(align=False)
+        layout.prop(context.space_data.node_tree, "addon_name")
+        layout.prop(context.space_data.node_tree, "addon_author")
+        layout.prop(context.space_data.node_tree, "addon_description")
+        layout.prop(context.space_data.node_tree, "addon_location")
+        layout.prop(context.space_data.node_tree, "addon_warning")
+        layout.prop(context.space_data.node_tree, "addon_category")
+        layout.prop(context.space_data.node_tree, "addon_version")
 
 class SN_PT_ErrorLogPanel(bpy.types.Panel):
     """Creates a panel for displaying error messages in the node editors sidebar"""
@@ -38,7 +45,8 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.space_data.tree_type == 'ScriptingNodesTree'
+        if context.space_data.tree_type == 'ScriptingNodesTree':
+            return context.space_data.node_tree != None
 
     def get_line_length(self):
         char_width = 15
