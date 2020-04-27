@@ -23,9 +23,9 @@ class SN_StringSocket(bpy.types.NodeSocket):
         return socket_colors["STRING"]
 
 
-class SN_INTSocket(bpy.types.NodeSocket):
+class SN_IntSocket(bpy.types.NodeSocket):
     '''Int Socket for handeling integers'''
-    bl_idname = 'SN_INTSocket'
+    bl_idname = 'SN_IntSocket'
     bl_label = "Int"
 
     integer_value: bpy.props.IntProperty(
