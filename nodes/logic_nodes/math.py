@@ -9,8 +9,8 @@ class SN_UiMathNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = node_icons["LOGIC"]
 
     operation: bpy.props.EnumProperty(
-        items=[("test", "Add", "test2"), ("test2", "Subtract", "test2"),
-                ("test", "MULTIPLY", "test2"), ("test", "DIVIDE", "test2")],
+        items=[("ADD", "Add", "Add numbers"), ("SUBTRACT", "Subtract", "Subtract numbers"),
+                ("MULTIPLY", "Multiply", "Multiply Numbers"), ("DIVIDE", "Divide", "Divide Numbers")],
         name="Operation",
         description="Math operation for this node"
     )
@@ -31,3 +31,13 @@ class SN_UiMathNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         layout.prop(self,"operation",text="")
+
+    def evaluate(self):
+        if self.operation == "ADD":
+            print("BEEF")
+        elif self.operation == "SUBTRACT":
+            print("BEEF")
+        elif self.operation == "MULTIPLY":
+            print("BEEF")
+        elif self.operation == "DIVIDE":
+            print("BEEF")
