@@ -8,6 +8,7 @@ def node_tree_header(self, context):
         row.scale_x = 1.3
 
         row.operator("scripting_nodes.compile", icon='FILE_REFRESH')
+        row.separator()
         row.prop(sn_props(),"auto_compile")
 
 
