@@ -55,6 +55,8 @@ node_categories = [
         }),
         NodeItem("SN_CompareNode", settings={
         }),
+        NodeItem("SN_AndOrNode", settings={
+        }),
         NodeItem("SN_IfNode", settings={
         }),
 
