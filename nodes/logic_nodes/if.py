@@ -35,9 +35,28 @@ class SN_IfNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass
 
     def evaluate(self,output):
-        value1 = str(self.inputs[0])
+        value = str(self.inputs[1].value)
 
-        if self.inputs[0].is_linked:
-            value1 = self.inputs[0].links[0].from_socket
+        if self.inputs[1].is_linked:
+            value = self.inputs[1].links[0].from_socket
 
-        return {"code": ["if", " ", value1, ": "]}
+        do_next_node = None
+        if self.outputs[1].is_linked:
+            do_next_node = self.outputs[1].links[0].to_node
+        else_next_node = None
+        if self.outputs[2].is_linked:
+            else_next_node = self.outputs[2].links[0].to_node
+
+        return {
+                "code": [],
+                "indented_blocks": [
+                    {
+                        "code": ["if ", value, ": "],
+                        "function_node": do_next_node
+                    },
+                    {
+                        "code": ["else:"],
+                        "function_node": else_next_node
+                    }
+                ]
+                }
