@@ -34,6 +34,6 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, output):
         if len(self.inputs["Value"].links) == 1:
-            return {"code": ["print(", self.inputs["Value"].links[0].from_socket, ")"], "error": False}
+            return {"code": ["print(", self.inputs["Value"].links[0].from_socket, ")"], "error": 0}
         else:
-            return{"code": [], "error": True}
+            return{"code": [], "error": 1}

@@ -25,4 +25,7 @@ class SN_NumberNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"number",text="")
 
     def evaluate(self, output):
-        return {"code": [str(self.number)]}
+        if self.outputs[0].is_linked:
+            return {"code": [str(self.number)]}
+        else:
+            return {"code": [], "error": 2}

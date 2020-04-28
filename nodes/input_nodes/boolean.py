@@ -31,4 +31,7 @@ class SN_BoolNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"value",text=str(self.value), toggle=True)
 
     def evaluate(self, output):
-        return {"code": [str(self.value)]}
+        if self.outputs[0].is_linked:
+            return {"code": [str(self.value)]}
+        else:
+            return {"code": [], "error": 2}

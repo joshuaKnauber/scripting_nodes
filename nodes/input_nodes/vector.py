@@ -26,4 +26,8 @@ class SN_VectorNode(bpy.types.Node, SN_ScriptingBaseNode):
         col.prop(self,"vector",text="")
 
     def evaluate(self, output):
-        return {"code": [str(self.vector[0]) + " ", str(self.vector[1]) + " ", str(self.vector[2])]}
+        if self.outputs[0].is_linked:
+            return {"code": [str(self.vector[0]) + " ", str(self.vector[1]) + " ", str(self.vector[2])]}
+        else:
+            return {"code": [], "error": 2}
+        
