@@ -15,6 +15,12 @@ class ScriptingNodesCompiler():
     def _reset(self):
         pass
 
+    def _only_string(self, value_list):
+        for value in value_list:
+            if not type(value) == str:
+                return False
+        return True
+
     def _compile_functions(self, tree):
         function_nodes = []
         functions = []
@@ -30,7 +36,19 @@ class ScriptingNodesCompiler():
             while active_function_node.outputs["Program"].links > 0:
                 active_function_node = active_function_node.outputs["Program"].links[0].to_node
 
-                line = active_function_node.evaluate()
+                line = active_function_node.evaluate()["code"]
+
+                while not self._only_string(line):
+                    for i, snippet in enumerate(line):
+                        if not type(snippet) == str:
+                            line[i] = snippet.node.evaluate(snippet)
+
+                line = ("").join(line)
+                function += line + "\n"
+
+            functions.append(function)
+        
+        self._functions = functions
 
     def _compile_operators(self, tree):
         operator_starts = []
@@ -54,6 +72,10 @@ class ScriptingNodesCompiler():
         text.write("\n")
         text.write(addon_info(tree))
         text.write("\n")
+        
+        for function in self._functions:
+            text.write(function)
+            text.write("\n")
 
         return text
 
