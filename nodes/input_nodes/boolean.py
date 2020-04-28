@@ -30,5 +30,5 @@ class SN_BoolNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self,"value",text=str(self.value), toggle=True)
 
-    def evaluate(self):
-        return self.value
+    def evaluate(self, output):
+        return {"code": [str(self.value)]}
