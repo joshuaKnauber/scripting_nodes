@@ -1,5 +1,4 @@
 import bpy
-from .compiler import compile_tree
 
 class SN_OT_ReloadButton(bpy.types.Operator):
     bl_idname = "scripting_nodes.compile"
@@ -12,7 +11,7 @@ class SN_OT_ReloadButton(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        compile_tree()
+        context.space_data.node_tree.compiler.recompile()
         return {"FINISHED"}
 
 

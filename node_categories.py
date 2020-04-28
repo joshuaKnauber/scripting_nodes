@@ -1,6 +1,7 @@
 import bpy
 import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
+from .compile.compiler import ScriptingNodesCompiler
 
 
 class ScriptingNodesTree(bpy.types.NodeTree):
@@ -16,6 +17,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     addon_warning: bpy.props.StringProperty(default="",name="Warning",description="Warning message for your addon")
     addon_category: bpy.props.StringProperty(default="General",name="Category",description="Category of your addon")
     addon_version: bpy.props.IntVectorProperty(default=(1, 0, 0),min=0,name="Version",description="Version of your addon")
+
+    compiler = ScriptingNodesCompiler()
 
 
 class SN_ScriptingNodesCategory(NodeCategory):
