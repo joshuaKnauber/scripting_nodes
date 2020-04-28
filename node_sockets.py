@@ -108,3 +108,14 @@ class SN_ProgramSocket(bpy.types.NodeSocket):
 
     def draw_color(self, context, node):
         return socket_colors["PROGRAM"]
+
+class SN_DataSocket(bpy.types.NodeSocket):
+    '''Socket that can be connected to everything'''
+    bl_idname = 'SN_DataSocket'
+    bl_label = "Data"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    def draw_color(self, context, node):
+        return socket_colors["DATA"]

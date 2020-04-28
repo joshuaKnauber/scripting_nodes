@@ -31,18 +31,10 @@ import nodeitems_utils
 
 auto_load.init()
 
-@bpy.app.handlers.persistent
-def load_post(scene):
-    from .properties.property_utils import add_error_prop, clear_error_props
-    clear_error_props()
-    add_error_prop("BAD ERROR","test message for this errors message",True,"")
-    add_error_prop("BAD ERROR","test message for this errors message",True,"Panel")
-
 def register():
     auto_load.register()
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
     bpy.types.NODE_HT_header.append(node_tree_header)
-    bpy.app.handlers.load_post.append(load_post)
 
 def unregister():
     auto_load.unregister()

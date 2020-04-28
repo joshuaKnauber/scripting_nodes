@@ -30,4 +30,8 @@ class SN_TextNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "text", text="")
 
     def evaluate(self, output):
-        return {"code": [self.text]}
+        if self.outputs[0].is_linked:
+            return {"code": [self.text]}
+        else:
+            return {"code": [], "error": 2}
+        

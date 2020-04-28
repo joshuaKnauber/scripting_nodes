@@ -12,7 +12,8 @@ socket_colors = {
     "LAYOUT": to_percentage("F1B01A",True),
     "BOOLEAN": to_percentage("2A5CFF",True),
     "VECTOR": to_percentage("6363C7",True),
-    "PROGRAM": to_percentage("F81033",True)
+    "PROGRAM": to_percentage("F81033",True),
+    "DATA": to_percentage("696969",True)
 }
 
 

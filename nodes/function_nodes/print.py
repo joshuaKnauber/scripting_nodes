@@ -17,7 +17,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp = self.inputs.new('SN_ProgramSocket', "Program")
         inp.display_shape = "DIAMOND"
 
-        self.inputs.new('SN_NumberSocket', "Value")
+        self.inputs.new('SN_DataSocket', "Value")
 
         #Node Outputs
         out = self.outputs.new('SN_ProgramSocket', "Program")
@@ -34,6 +34,6 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, output):
         if len(self.inputs["Value"].links) == 1:
-            return {"code": ["print(", self.inputs["Value"].links[0].from_socket, ")"], "error": False}
+            return {"code": ["print(", self.inputs["Value"].links[0].from_socket, ")"], "error": 0}
         else:
-            return{"code": ["print()"], "error": True}
+            return{"code": [], "error": 1}
