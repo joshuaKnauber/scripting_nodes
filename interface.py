@@ -7,12 +7,11 @@ def node_tree_header(self, context):
         row = layout.row(align=True)
         row.scale_x = 1.3
 
+        row.prop(sn_props(), "examples", icon='LINENUMBERS_ON', text="")
+        row.separator()
         row.operator("scripting_nodes.compile", icon='FILE_REFRESH')
         row.separator()
         row.prop(sn_props(),"auto_compile")
-        #row.separator()
-        row.prop(sn_props(),"examples", icon='LINENUMBERS_ON', text="Examples")
-
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
     """Creates a panel that lets you edit the Addon Info for the current NodeTree"""
