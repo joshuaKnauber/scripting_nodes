@@ -104,7 +104,7 @@ class SN_ProgramSocket(bpy.types.NodeSocket):
     bl_label = "Program"
 
     def draw(self, context, layout, node, text):
-        layout.label(text="Program")
+        layout.label(text=text)
 
     def draw_color(self, context, node):
         return socket_colors["PROGRAM"]

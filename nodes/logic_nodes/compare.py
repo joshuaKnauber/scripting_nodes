@@ -42,4 +42,4 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.inputs[1].is_linked:
             value2 = self.inputs[1].links[0].from_socket
 
-        return {"code": [value1,self.operation,value2]}
+        return {"code": [value1, " ", self.operation, " ", value2]}
