@@ -1,10 +1,12 @@
 import bpy
 from .compiler_data import gpl_block, addon_info
+from ..properties.property_utils import clear_error_props, add_error_prop
 
 class ScriptingNodesCompiler():
 
     def __init__(self):
         self._indents = 4
+        self._errors = []
         self._functions = []
         self._operators = []
         self._panels = []
@@ -14,7 +16,9 @@ class ScriptingNodesCompiler():
             return bpy.context.space_data.node_tree != None
 
     def _reset(self):
-        pass
+        clear_error_props()
+        self._errors.clear()
+        self._functions.clear()
 
     def _only_string(self, value_list):
         for value in value_list:
@@ -29,7 +33,10 @@ class ScriptingNodesCompiler():
                     line.pop(i)
                     line_part1 = line[:i]
                     line_part2 = line[i:]
-                    line = line_part1 + snippet.node.evaluate(snippet)["code"] + line_part2
+                    function_value = snippet.node.evaluate(snippet)
+                    if "error" in function_value:
+                        self._errors.append([function_value["error"],True,snippet.node])
+                    line = line_part1 + function_value["code"] + line_part2
                     break
         return line
 
@@ -41,6 +48,8 @@ class ScriptingNodesCompiler():
                 function_node = function_node.outputs[0].links[0].to_node
 
             function_value = function_node.evaluate(None)
+            if "error" in function_value:
+                self._errors.append([function_value["error"],True,function_node])
             code_block = function_value["code"]
 
             code_block = self._compile_script_line(code_block)
@@ -65,7 +74,6 @@ class ScriptingNodesCompiler():
 
     def _compile_functions(self, tree):
         function_nodes = []
-        functions = []
         
         for node in tree.nodes:
             if node.bl_idname == "SN_FunctionNode":
@@ -73,9 +81,7 @@ class ScriptingNodesCompiler():
 
         for function_node in function_nodes:
             function = self._compile_tree_branch(function_node,self._indents) + "\n"
-            functions.append(function)
-        
-        self._functions = functions
+            self._functions.append(function)
 
     def _compile_operators(self, tree):
         operator_starts = []
@@ -109,6 +115,10 @@ class ScriptingNodesCompiler():
     def _register_file(self, addon):
         pass
 
+    def _draw_errors(self):
+        for error in self._errors:
+            add_error_prop("test","test message",error[1],error[2].name)
+
     def recompile(self):
         tree = bpy.context.space_data.node_tree
         if self._is_scripting_tree():
@@ -120,6 +130,8 @@ class ScriptingNodesCompiler():
             self._compile_operators(tree)
 
             self._compile_interface(tree)
+
+            self._draw_errors()
 
             addon = self._create_file(tree)
 
