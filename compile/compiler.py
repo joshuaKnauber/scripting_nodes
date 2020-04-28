@@ -4,6 +4,7 @@ from .compiler_data import gpl_block, addon_info
 class ScriptingNodesCompiler():
 
     def __init__(self):
+        self._indents = 4
         self._functions = []
         self._operators = []
         self._panels = []
@@ -21,7 +22,7 @@ class ScriptingNodesCompiler():
                 return False
         return True
 
-    def _compile_function_line(self, line):
+    def _compile_script_line(self, line):
         while not self._only_string(line):
             for i, snippet in enumerate(line):
                 if not type(snippet) == str:
@@ -32,32 +33,35 @@ class ScriptingNodesCompiler():
                     break
         return line
 
-    def _compile_tree_branch(self, function_node, evaluate_start_node=False):
-        code_block = ""
+    def _compile_tree_branch(self, function_node, indents, evaluate_start_node=False):
+        code_blocks = ""
         while len(function_node.outputs[0].links) > 0 or evaluate_start_node:
-            evaluate_start_node = False
 
-            if len(function_node.outputs[0].links) > 0:
+            if len(function_node.outputs[0].links) > 0 and not evaluate_start_node:
                 function_node = function_node.outputs[0].links[0].to_node
 
             function_value = function_node.evaluate(None)
             code_block = function_value["code"]
 
-            code_block = self._compile_function_line(code_block)
+            code_block = self._compile_script_line(code_block)
+
+            code_blocks += "\n" + " "*indents + ("").join(code_block)
 
             if "indented_blocks" in function_value:
                 for block in function_value["indented_blocks"]:
-                    code_block += self._compile_function_line(block["code"]) + ["\n"]
-                    if block["function_node"]:
-                        code_block.append("    ")
-                        code_block.append(self._compile_tree_branch(block["function_node"], True))
-                        code_block.append("\n")
+                    indented_block = self._compile_script_line(block["code"])
+                    code_blocks += "\n" + " "*indents + ("").join(indented_block)
 
-            code_block = self._compile_function_line(code_block)
-            
-            code_block = ("").join(code_block)
+                    if block["function_node"]:
+                        code_block = self._compile_tree_branch(block["function_node"],indents+self._indents, True)
+                    else:
+                        code_block = "\n" + " "*(indents+self._indents) + "pass"
+
+                    code_blocks += code_block
+
+            evaluate_start_node = False
         
-        return code_block
+        return code_blocks
 
     def _compile_functions(self, tree):
         function_nodes = []
@@ -68,7 +72,7 @@ class ScriptingNodesCompiler():
                 function_nodes.append(node)
 
         for function_node in function_nodes:
-            function = self._compile_tree_branch(function_node) + "\n"
+            function = self._compile_tree_branch(function_node,self._indents) + "\n"
             functions.append(function)
         
         self._functions = functions
