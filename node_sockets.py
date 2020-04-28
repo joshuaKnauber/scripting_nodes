@@ -79,7 +79,8 @@ class SN_VectorSocket(bpy.types.NodeSocket):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:
-            layout.prop(self, "vector_value", text=text)
+            col = layout.column()
+            col.prop(self, "vector_value", text=text)
 
     def draw_color(self, context, node):
         return socket_colors["VECTOR"]
