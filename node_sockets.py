@@ -108,15 +108,3 @@ class SN_ProgramSocket(bpy.types.NodeSocket):
 
     def draw_color(self, context, node):
         return socket_colors["PROGRAM"]
-
-
-class SN_SubprogramSocket(bpy.types.NodeSocket):
-    '''Subprogram Socket for connecting subprograms in for example if statements'''
-    bl_idname = 'SN_SubprogramSocket'
-    bl_label = "Subprogram"
-
-    def draw(self, context, layout, node, text):
-        layout.label(text="Subprogram")
-
-    def draw_color(self, context, node):
-        return socket_colors["SUBPROGRAM"]
