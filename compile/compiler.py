@@ -16,7 +16,21 @@ class ScriptingNodesCompiler():
         pass
 
     def _compile_functions(self, tree):
-        pass
+        function_nodes = []
+        functions = []
+        
+        for node in tree.nodes:
+            if node.bl_idname == "SN_FunctionNode":
+                function_nodes.append(node)
+
+        for function_node in function_nodes:
+            active_function_node = function_node
+            function = ""
+
+            while active_function_node.outputs["Program"].links > 0:
+                active_function_node = active_function_node.outputs["Program"].links[0].to_node
+
+                line = active_function_node.evaluate()
 
     def _compile_operators(self, tree):
         operator_starts = []
@@ -39,6 +53,7 @@ class ScriptingNodesCompiler():
         text.write(gpl_block)
         text.write("\n")
         text.write(addon_info(tree))
+        text.write("\n")
 
         return text
 

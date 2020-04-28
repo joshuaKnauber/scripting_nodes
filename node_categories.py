@@ -44,6 +44,8 @@ node_categories = [
         }),
         NodeItem("SN_FunctionEndNode", settings={
         }),
+        NodeItem("SN_PrintNode", settings={
+        }),
 
     ]),
 
