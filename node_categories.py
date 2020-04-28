@@ -49,6 +49,8 @@ node_categories = [
         
         NodeItem("SN_UiMathNode", settings={
         }),
+        NodeItem("SN_IfNode", settings={
+        }),
 
     ]),
 
