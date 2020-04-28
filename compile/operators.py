@@ -37,4 +37,6 @@ class SN_OT_FindErrorNode(bpy.types.Operator):
                     bpy.ops.node.view_selected()
                 else:
                     node.select = False
+        if not found:
+            self.report({"INFO"},message ="Couldn't find the corresponding node. Try to reload the node tree.")
         return {"FINISHED"}
