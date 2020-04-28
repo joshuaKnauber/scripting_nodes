@@ -43,6 +43,8 @@ node_categories = [
         
         NodeItem("SN_NumberNode", settings={
         }),
+        NodeItem("SN_BoolNode", settings={
+        }),
 
     ]),
 
