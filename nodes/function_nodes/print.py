@@ -17,7 +17,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp = self.inputs.new('SN_ProgramSocket', "Program")
         inp.display_shape = "DIAMOND"
 
-        self.inputs.new('SN_NumberSocket', "Value")
+        self.inputs.new('SN_DataSocket', "Value")
 
         #Node Outputs
         out = self.outputs.new('SN_ProgramSocket', "Program")
