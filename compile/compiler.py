@@ -3,6 +3,7 @@ import bpy
 class ScriptingNodesCompiler():
 
     def __init__(self):
+        self.registered_functions = []
         self.registered_operators = []
         self.registered_panels = []
 

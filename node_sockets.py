@@ -96,3 +96,27 @@ class SN_LayoutSocket(bpy.types.NodeSocket):
 
     def draw_color(self, context, node):
         return socket_colors["LAYOUT"]
+
+
+class SN_ProgramSocket(bpy.types.NodeSocket):
+    '''Program Socket for connecting nodes in the order they should be executed'''
+    bl_idname = 'SN_ProgramSocket'
+    bl_label = "Program"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text="Program")
+
+    def draw_color(self, context, node):
+        return socket_colors["PROGRAM"]
+
+
+class SN_SubprogramSocket(bpy.types.NodeSocket):
+    '''Subprogram Socket for connecting subprograms in for example if statements'''
+    bl_idname = 'SN_SubprogramSocket'
+    bl_label = "Subprogram"
+
+    def draw(self, context, layout, node, text):
+        layout.label(text="Subprogram")
+
+    def draw_color(self, context, node):
+        return socket_colors["SUBPROGRAM"]
