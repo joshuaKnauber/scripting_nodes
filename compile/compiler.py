@@ -42,8 +42,9 @@ class ScriptingNodesCompiler():
                     for i, snippet in enumerate(line):
                         if not type(snippet) == str:
                             line.pop(i)
-                            for subsnippet in snippet.node.evaluate(snippet)["code"]:
-                                line.insert(i,subsnippet) 
+                            line_part1 = line[:i]
+                            line_part2 = line[i:]
+                            line = line_part1 + snippet.node.evaluate(snippet)["code"] + line_part2
 
                 line = ("").join(line)
                 function += line + "\n"

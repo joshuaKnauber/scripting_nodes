@@ -9,8 +9,8 @@ class SN_UiMathNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = node_icons["LOGIC"]
 
     operation: bpy.props.EnumProperty(
-        items=[("ADD", "Add", "Add numbers"), ("SUBTRACT", "Subtract", "Subtract numbers"),
-                ("MULTIPLY", "Multiply", "Multiply Numbers"), ("DIVIDE", "Divide", "Divide Numbers")],
+        items=[("+", "Add", "Add numbers"), ("-", "Subtract", "Subtract numbers"),
+                ("*", "Multiply", "Multiply Numbers"), ("/", "Divide", "Divide Numbers")],
         name="Operation",
         description="Math operation for this node"
     )
@@ -32,11 +32,13 @@ class SN_UiMathNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self,"operation",text="")
 
-    def evaluate(self):
-        firstInput = self.inputs[0].is_linked
-        secondInput = self.inputs[1].is_linked
-        if not firstInput:
-            firstInput = self.inputs[0].number_value
-        if not secondInput:
-            secondInput = self.inputs[1].number_value
-        return self.operation, firstInput, secondInput
+    def evaluate(self,output):
+        value1 = str(self.inputs[0].value)
+        value2 = str(self.inputs[1].value)
+
+        if self.inputs[0].is_linked:
+            value1 = self.inputs[0].links[0].from_socket
+        if self.inputs[1].is_linked:
+            value2 = self.inputs[1].links[0].from_socket
+
+        return {"code": [value1,self.operation,value2]}
