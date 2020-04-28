@@ -45,4 +45,4 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
         if str(type(self.outputs[0].links[0].to_socket)) == "<class 'blender_visual_scripting_addon.node_sockets.SN_BooleanSocket'>":
             return {"code": [value1, " ", self.operation, " ", value2]}
         else:
-            return {"code": ["0"], "error": ["wrong_socket"]}
+            return {"code": [value1, " ", self.operation, " ", value2], "error": ["wrong_socket"]}
