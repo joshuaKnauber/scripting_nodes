@@ -9,10 +9,10 @@ class SN_BoolNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Boolean"
     bl_icon = node_icons["INPUT"] 
 
-    value: bpy.props.EnumProperty(
-        items=[("TRUE", "True", "Output is True"), ("FALSE", "False", "Output is False")],
+    value: bpy.props.BoolProperty(
         name="Value",
-        description="Output Value"
+        description="Output Value",
+        default=False
     )
 
     def init(self, context):
@@ -28,7 +28,7 @@ class SN_BoolNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# called when node is removed
 
     def draw_buttons(self, context, layout):
-        layout.prop(self,"value",text="")
+        layout.prop(self,"value",text=str(self.value), toggle=True)
 
     def evaluate(self):
         return self.value
