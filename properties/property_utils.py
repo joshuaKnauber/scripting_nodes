@@ -14,11 +14,12 @@ def error_props():
 def clear_error_props():
     bpy.context.scene.sn_error_properties.clear()
 
-def add_error_prop(error_type, error_message, fatal):
+def add_error_prop(error_type, error_message, fatal, node):
     prop = bpy.context.scene.sn_error_properties.add()
     prop.error_type = error_type
     prop.error_message = error_message
     prop.fatal_error = fatal
+    prop.node = node
     return prop
 
 def remove_error_prop(error_property):

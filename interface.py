@@ -69,11 +69,14 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
         char_width = 15
         return bpy.context.region.width // char_width
 
-    def draw_error(self, layout, error_type, error_message, fatal):
+    def draw_error(self, layout, error_type, error_message, fatal, node):
         box = layout.box()
         col = box.column(align=True)
 
         row = col.row()
+        if node != "":
+            row.operator("scripting_nodes.find_error_node",text="",emboss=False,icon="NETWORK_DRIVE").node_name = node
+
         row.alert = fatal
         row.label(text=error_type)
 
@@ -87,5 +90,8 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
         layout = self.layout
         column = layout.column(align=False)
 
-        for error in error_props():
-            self.draw_error(column, error.error_type, error.error_message, error.fatal_error)
+        if len(error_props()) > 0:
+            for error in error_props():
+                self.draw_error(column, error.error_type, error.error_message, error.fatal_error, error.node)
+        else:
+            column.label(text="No errors found")

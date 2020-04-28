@@ -32,8 +32,10 @@ auto_load.init()
 
 @bpy.app.handlers.persistent
 def load_post(scene):
-    from .properties.property_utils import add_error_prop
-    add_error_prop("BAD ERROR","test message for this errors message",True)
+    from .properties.property_utils import add_error_prop, clear_error_props
+    clear_error_props()
+    add_error_prop("BAD ERROR","test message for this errors message",True,"")
+    add_error_prop("BAD ERROR","test message for this errors message",True,"Panel")
 
 def register():
     auto_load.register()
