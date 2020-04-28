@@ -10,6 +10,8 @@ def node_tree_header(self, context):
         row.operator("scripting_nodes.compile", icon='FILE_REFRESH')
         row.separator()
         row.prop(sn_props(),"auto_compile")
+        #row.separator()
+        row.prop(sn_props(),"examples", icon='LINENUMBERS_ON', text="Examples")
 
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
