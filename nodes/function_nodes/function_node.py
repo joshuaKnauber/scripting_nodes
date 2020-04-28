@@ -13,8 +13,6 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.use_custom_color = True
         self.color = node_colors["FUNCTION"]
 
-        #Node Inputs
-
         #Node Outputs
         out = self.outputs.new('SN_ProgramSocket', "Program")
         out.display_shape = "DIAMOND"

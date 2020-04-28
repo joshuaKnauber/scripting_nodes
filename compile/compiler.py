@@ -37,7 +37,7 @@ class ScriptingNodesCompiler():
                 active_function_node = active_function_node.outputs["Program"].links[0].to_node
 
                 line = active_function_node.evaluate(None)["code"]
-
+                
                 while not self._only_string(line):
                     for i, snippet in enumerate(line):
                         if not type(snippet) == str:
@@ -45,6 +45,7 @@ class ScriptingNodesCompiler():
                             line_part1 = line[:i]
                             line_part2 = line[i:]
                             line = line_part1 + snippet.node.evaluate(snippet)["code"] + line_part2
+                            break
 
                 line = ("").join(line)
                 function += line + "\n"
