@@ -30,4 +30,4 @@ class SN_TextNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "text", text="")
 
     def evaluate(self):
-        return self.number
+        return self.text
