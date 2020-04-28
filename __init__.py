@@ -18,6 +18,7 @@ bl_info = {
     "blender" : (2, 80, 0),
     "version" : (1, 0, 0),
     "location" : "Editors -> Scripting Nodes",
+    "wiki_url": "",
     "warning" : "",
     "category" : "Node"
 }

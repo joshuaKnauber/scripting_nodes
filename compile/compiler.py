@@ -1,4 +1,5 @@
 import bpy
+from .compiler_data import gpl_block, addon_info
 
 class ScriptingNodesCompiler():
 
@@ -35,7 +36,9 @@ class ScriptingNodesCompiler():
 
         text.clear()
 
-        text.write("print('test')")
+        text.write(gpl_block)
+        text.write("\n")
+        text.write(addon_info(tree))
 
         return text
 

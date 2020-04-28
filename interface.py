@@ -41,13 +41,19 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
         col.label(text="Location")
         col.prop(context.space_data.node_tree, "addon_location", text="")
         col.separator()
+        col.label(text="Wiki")
+        col.prop(context.space_data.node_tree, "addon_wiki", text="")
+        col.separator()
         col.label(text="Warning")
         col.prop(context.space_data.node_tree, "addon_warning", text="")
         col.separator()
         col.label(text="Category")
         col.prop(context.space_data.node_tree, "addon_category", text="")
         col.separator()
-        col.label(text="Version")
+        col.label(text="Blender version")
+        row = col.row()
+        row.prop(context.space_data.node_tree, "addon_blender", text="")
+        col.label(text="Addon version")
         row = col.row()
         row.prop(context.space_data.node_tree, "addon_version", text="")
 
@@ -75,7 +81,7 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
 
         row = col.row()
         if node != "":
-            row.operator("scripting_nodes.find_error_node",text="",emboss=False,icon="NETWORK_DRIVE").node_name = node
+            row.operator("scripting_nodes.find_error_node",text="",emboss=False,icon="NODE").node_name = node
 
         row.alert = fatal
         row.label(text=error_type)
