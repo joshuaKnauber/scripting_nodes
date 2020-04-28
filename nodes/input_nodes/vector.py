@@ -25,5 +25,5 @@ class SN_VectorNode(bpy.types.Node, SN_ScriptingBaseNode):
         col=layout.column()
         col.prop(self,"vector",text="")
 
-    def evaluate(self):
-        return self.vector
+    def evaluate(self, output):
+        return {"code": [str(self.vector)]}

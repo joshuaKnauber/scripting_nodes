@@ -45,5 +45,5 @@ class SN_NodeName(bpy.types.Node, SN_ScriptingBaseNode):
         pass# draws extra buttons on node without inputs
     
     def evaluate(self):
-        pass
+        pass# return function for compiler
 """

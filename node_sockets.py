@@ -58,7 +58,7 @@ class SN_BooleanSocket(bpy.types.NodeSocket):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:
-            layout.prop(self, "boolean_value", text=text)
+            layout.prop(self, "boolean_value", text=text, toggle=True)
 
     def draw_color(self, context, node):
         return socket_colors["BOOLEAN"]

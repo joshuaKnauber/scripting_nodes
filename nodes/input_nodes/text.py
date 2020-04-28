@@ -29,5 +29,5 @@ class SN_TextNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "text", text="")
 
-    def evaluate(self):
-        return self.text
+    def evaluate(self, output):
+        return {"code": [self.text]}
