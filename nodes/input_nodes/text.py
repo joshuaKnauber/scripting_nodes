@@ -30,5 +30,9 @@ class SN_TextNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "text", text="")
 
     def evaluate(self, output):
-        return {"code": [self.text]}
+        if str(type(self.outputs[0].links[0].to_socket)) == "<class 'blender_visual_scripting_addon.node_sockets.SN_StringSocket'>":
+            return {"code": [self.text]}
+        else:
+            return {"code": [""], "error": ["wrong_socket"]}
+        
         

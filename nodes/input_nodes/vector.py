@@ -26,5 +26,8 @@ class SN_VectorNode(bpy.types.Node, SN_ScriptingBaseNode):
         col.prop(self,"vector",text="")
 
     def evaluate(self, output):
-        return {"code": [str(self.vector[0]) + " ", str(self.vector[1]) + " ", str(self.vector[2])]}
+        if str(type(self.outputs[0].links[0].to_socket)) == "<class 'blender_visual_scripting_addon.node_sockets.SN_VectorSocket'>":
+            return {"code": [str(self.vector[0]) + " ", str(self.vector[1]) + " ", str(self.vector[2])]}
+        else:
+            return {"code": ["(0, 0, 0)"], "error": ["wrong_socket"]}
         
