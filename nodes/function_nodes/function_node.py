@@ -16,7 +16,8 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         #Node Inputs
 
         #Node Outputs
-        self.outputs.new('SN_ProgramSocket', "Program")
+        out = self.outputs.new('SN_ProgramSocket', "Program")
+        out.display_shape = "DIAMOND"
 
     def copy(self, node):
         pass# called when node is copied

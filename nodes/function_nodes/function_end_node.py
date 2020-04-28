@@ -14,8 +14,9 @@ class SN_FunctionEndNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.color = node_colors["FUNCTION"]
 
         #Node Inputs
-        self.inputs.new('SN_ProgramSocket', "Program")
-
+        inp = self.inputs.new('SN_ProgramSocket', "Program")
+        inp.display_shape = "DIAMOND"
+        
         #Node Outputs
 
     def copy(self, node):
