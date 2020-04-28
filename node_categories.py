@@ -35,6 +35,16 @@ node_categories = [
         }),
 
     ]),
+
+    SN_ScriptingNodesCategory('FUNCTIONS', "Functions", items=[
+        
+        NodeItem("SN_FunctionNode", settings={
+        }),
+        NodeItem("SN_FunctionEndNode", settings={
+        }),
+
+    ]),
+
     SN_ScriptingNodesCategory('LOGIC', "Logic", items=[
         
         NodeItem("SN_UiMathNode", settings={
