@@ -60,6 +60,8 @@ node_categories = [
         }),
         NodeItem("SN_TextNode", settings={
         }),
+        NodeItem("SN_VectorNode", settings={
+        }),
 
     ]),
 
