@@ -31,3 +31,9 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         pass# draws extra buttons on node without inputs
+
+    def evaluate(self, output):
+        if len(self.inputs["Value"].links) == 1:
+            return {"code": ["print("+ self.inputs["Value"].links[0].from_socket + ")"], "error": False}
+        else:
+            return{"code": [], "error": True}
