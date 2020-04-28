@@ -27,17 +27,16 @@ class SN_UiMathNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# called when node is copied
 
     def free(self):
-        pass# called when node is removed
+        pass
 
     def draw_buttons(self, context, layout):
         layout.prop(self,"operation",text="")
 
     def evaluate(self):
-        if self.operation == "ADD":
-            print("BEEF")
-        elif self.operation == "SUBTRACT":
-            print("BEEF")
-        elif self.operation == "MULTIPLY":
-            print("BEEF")
-        elif self.operation == "DIVIDE":
-            print("BEEF")
+        firstInput = self.inputs[0].is_linked
+        secondInput = self.inputs[1].is_linked
+        if not firstInput:
+            firstInput = self.inputs[0].number_value
+        if not secondInput:
+            secondInput = self.inputs[1].number_value
+        return self.operation, firstInput, secondInput
