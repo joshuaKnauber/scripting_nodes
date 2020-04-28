@@ -33,15 +33,17 @@ class ScriptingNodesCompiler():
             active_function_node = function_node
             function = ""
 
-            while active_function_node.outputs["Program"].links > 0:
+            while len(active_function_node.outputs["Program"].links) > 0:
                 active_function_node = active_function_node.outputs["Program"].links[0].to_node
 
-                line = active_function_node.evaluate()["code"]
+                line = active_function_node.evaluate(None)["code"]
 
                 while not self._only_string(line):
                     for i, snippet in enumerate(line):
                         if not type(snippet) == str:
-                            line[i] = snippet.node.evaluate(snippet)
+                            line.pop(i)
+                            for subsnippet in snippet.node.evaluate(snippet)["code"]:
+                                line.insert(i,subsnippet) 
 
                 line = ("").join(line)
                 function += line + "\n"
