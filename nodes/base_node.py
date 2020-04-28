@@ -43,4 +43,7 @@ class SN_NodeName(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         pass# draws extra buttons on node without inputs
+    
+    def evaluate(self):
+        pass
 """

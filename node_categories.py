@@ -58,6 +58,8 @@ node_categories = [
         }),
         NodeItem("SN_BoolNode", settings={
         }),
+        NodeItem("SN_TextNode", settings={
+        }),
 
     ]),
 
