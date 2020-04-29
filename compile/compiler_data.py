@@ -36,3 +36,12 @@ def addon_info(tree):
 
     info = "bl_info = {" + info + "\n}"
     return info
+
+
+error_logs = {
+    "wrong_socket": {
+        "title": "Wrong connection",
+        "message": "One of the inputs of this node has an incorrect output connected",
+        "fatal": True
+    }
+}

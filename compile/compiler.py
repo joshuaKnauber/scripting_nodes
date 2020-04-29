@@ -1,5 +1,5 @@
 import bpy
-from .compiler_data import gpl_block, addon_info
+from .compiler_data import gpl_block, addon_info, error_logs
 from ..properties.property_utils import clear_error_props, add_error_prop
 
 class ScriptingNodesCompiler():
@@ -35,7 +35,8 @@ class ScriptingNodesCompiler():
                     line_part2 = line[i:]
                     function_value = snippet.node.evaluate(snippet)
                     if "error" in function_value:
-                        self._errors.append([function_value["error"],True,snippet.node])
+                        for error in function_value["error"]:
+                            self._errors.append([error,snippet.node])
                     line = line_part1 + function_value["code"] + line_part2
                     break
         return line
@@ -49,7 +50,8 @@ class ScriptingNodesCompiler():
 
             function_value = function_node.evaluate(None)
             if "error" in function_value:
-                self._errors.append([function_value["error"],True,function_node])
+                for error in function_value["error"]:
+                    self._errors.append([error,function_node])
             code_block = function_value["code"]
 
             code_block = self._compile_script_line(code_block)
@@ -117,7 +119,8 @@ class ScriptingNodesCompiler():
 
     def _draw_errors(self):
         for error in self._errors:
-            add_error_prop("test","test message",error[1],error[2].name)
+            log = error_logs[error[0]]
+            add_error_prop(log["title"],log["message"],log["fatal"],error[1].name)
 
     def recompile(self):
         tree = bpy.context.space_data.node_tree
