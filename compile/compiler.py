@@ -1,6 +1,6 @@
 import bpy
 from .compiler_data import gpl_block, addon_info, error_logs
-from ..properties.property_utils import clear_error_props, add_error_prop
+from ..properties.property_utils import clear_error_props, add_error_prop, sn_props
 
 class ScriptingNodesCompiler():
 
@@ -121,6 +121,10 @@ class ScriptingNodesCompiler():
         for error in self._errors:
             log = error_logs[error[0]]
             add_error_prop(log["title"],log["message"],log["fatal"],error[1].name)
+
+    def autocompile(self):
+        if sn_props().auto_compile:
+            self.recompile()
 
     def recompile(self):
         tree = bpy.context.space_data.node_tree
