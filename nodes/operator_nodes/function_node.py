@@ -7,7 +7,7 @@ from ...utitlity_functions import to_lower_camelcase
 class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node for starting a function'''
     bl_idname = 'SN_FunctionNode'
-    bl_label = "Function"
+    bl_label = "Function Start"
     bl_icon = node_icons["FUNCTION"]
 
     def update_function_name(self,context):

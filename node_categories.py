@@ -38,13 +38,20 @@ node_categories = [
 
     ]),
 
-    SN_ScriptingNodesCategory('FUNCTIONS', "Functions", items=[
+    SN_ScriptingNodesCategory('OPERATORS', "Operators", items=[
         
         NodeItem("SN_FunctionNode", settings={
         }),
         NodeItem("SN_FunctionEndNode", settings={
         }),
+
+    ]),
+
+    SN_ScriptingNodesCategory('FUNCTIONS', "Functions", items=[
+      
         NodeItem("SN_PrintNode", settings={
+        }),
+        NodeItem("SN_IfNode", settings={
         }),
 
     ]),
@@ -57,7 +64,7 @@ node_categories = [
         }),
         NodeItem("SN_AndOrNode", settings={
         }),
-        NodeItem("SN_IfNode", settings={
+        NodeItem("SN_ToStringNode", settings={
         }),
 
     ]),
