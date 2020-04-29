@@ -16,13 +16,12 @@ class SN_ToStringNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.outputs.new('SN_StringSocket', "Text")
 
-    
-    def draw_buttons(self, context, layout):
-        layout.prop(self,"number",text="")
-
     def evaluate(self, output):
         if self.inputs[0].is_linked:
-            return {"code": ["str(",self.inputs[0].links[0].from_socket,")"]}
+            if self.inputs[0].links[0].from_socket.is_data_socket:
+                return {"code": ["str(",self.inputs[0].links[0].from_socket,")"]}
+            else:
+                return {"code": ["str('')"],"error":["wrong_socket"]}
         else:
             return {"code": ["str('')"]}
         

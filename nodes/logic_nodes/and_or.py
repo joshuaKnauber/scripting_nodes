@@ -35,12 +35,17 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
         value1 = str(self.inputs[0].value)
         value2 = str(self.inputs[1].value)
 
-        if self.inputs[0].is_linked:
-            value1 = self.inputs[0].links[0].from_socket
-        if self.inputs[1].is_linked:
-            value2 = self.inputs[1].links[0].from_socket
+        errors = []
 
-        if str(type(self.outputs[0].links[0].to_socket)) == "<class 'blender_visual_scripting_addon.node_sockets.SN_BooleanSocket'>":
-            return {"code": [value1, " ", self.operation, " ", value2]}
-        else:
-            return {"code": [value1, " ", self.operation, " ", value2], "error": ["wrong_socket"]}
+        if self.inputs[0].is_linked:
+            if self.inputs[0].links[0].from_socket.bl_idname == "SN_BooleanSocket":
+                value1 = self.inputs[0].links[0].from_socket
+            else:
+                errors.append("wrong_socket")
+        if self.inputs[1].is_linked:
+            if self.inputs[1].links[0].from_socket.bl_idname == "SN_BooleanSocket":
+                value2 = self.inputs[1].links[0].from_socket
+            else:
+                errors.append("wrong_socket")
+
+        return {"code": [value1," ",self.operation," ",value2],"error":errors}

@@ -20,8 +20,8 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.use_custom_color = True
         self.color = node_colors["LOGIC"]
 
-        self.inputs.new('SN_NumberSocket', "Value")
-        self.inputs.new('SN_NumberSocket', "Value")
+        self.inputs.new('SN_DataSocket', "Data")
+        self.inputs.new('SN_DataSocket', "Data")
         self.outputs.new('SN_BooleanSocket', "Output")
 
     def copy(self, node):
@@ -34,15 +34,20 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"operation",text="")
 
     def evaluate(self,output):
-        value1 = str(self.inputs[0].value)
-        value2 = str(self.inputs[1].value)
+        value1 = "0"
+        value2 = "0"
+
+        errors = []
 
         if self.inputs[0].is_linked:
-            value1 = self.inputs[0].links[0].from_socket
+            if self.inputs[0].links[0].from_socket.is_data_socket:
+                value1 = self.inputs[0].links[0].from_socket
+            else:
+                errors.append("wrong_socket")
         if self.inputs[1].is_linked:
-            value2 = self.inputs[1].links[0].from_socket
+            if self.inputs[1].links[0].from_socket.is_data_socket:
+                value2 = self.inputs[1].links[0].from_socket
+            else:
+                errors.append("wrong_socket")
 
-        if str(type(self.outputs[0].links[0].to_socket)) == "<class 'blender_visual_scripting_addon.node_sockets.SN_BooleanSocket'>":
-            return {"code": [value1, " ", self.operation, " ", value2]}
-        else:
-            return {"code": [value1, " ", self.operation, " ", value2], "error": ["wrong_socket"]}
+        return {"code": [value1," ",self.operation," ",value2],"error":errors}
