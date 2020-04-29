@@ -1,4 +1,5 @@
 import bpy
+from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 
@@ -12,7 +13,8 @@ class SN_UiMathNode(bpy.types.Node, SN_ScriptingBaseNode):
         items=[("+", "Add", "Add numbers"), ("-", "Subtract", "Subtract numbers"),
                 ("*", "Multiply", "Multiply Numbers"), ("/", "Divide", "Divide Numbers")],
         name="Operation",
-        description="Math operation for this node"
+        description="Math operation for this node",
+        update = update_socket_autocompile
     )
 
     def init(self, context):

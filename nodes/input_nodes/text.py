@@ -1,4 +1,5 @@
 import bpy
+from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 
@@ -11,7 +12,8 @@ class SN_TextNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     text: bpy.props.StringProperty(
         name="Text",
-        description="Text Input"
+        description="Text Input",
+        update=update_socket_autocompile
     )
 
     def init(self, context):

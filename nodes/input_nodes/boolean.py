@@ -1,4 +1,5 @@
 import bpy
+from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 
@@ -12,7 +13,8 @@ class SN_BoolNode(bpy.types.Node, SN_ScriptingBaseNode):
     value: bpy.props.BoolProperty(
         name="Value",
         description="Output Value",
-        default=False
+        default=False,
+        update=update_socket_autocompile
     )
 
     def init(self, context):

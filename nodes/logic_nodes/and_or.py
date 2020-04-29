@@ -1,4 +1,5 @@
 import bpy
+from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 
@@ -11,7 +12,8 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
     operation: bpy.props.EnumProperty(
         items=[("and", "and", "Both values need to be True"), ("or", "or", "Only one value needs to be True")],
         name="Operation",
-        description="Operation for this node"
+        description="Operation for this node",
+        update= update_socket_autocompile
     )
 
     def init(self, context):

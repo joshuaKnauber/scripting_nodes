@@ -1,4 +1,5 @@
 import bpy
+from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 
@@ -11,7 +12,8 @@ class SN_VectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     value: bpy.props.FloatVectorProperty(
         name="Vector",
         description="Values",
-        default=(0, 0, 0)
+        default=(0, 0, 0),
+        update=update_socket_autocompile
     )
 
     def init(self, context):

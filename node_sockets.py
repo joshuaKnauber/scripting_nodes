@@ -1,6 +1,9 @@
 import bpy
 from .nodes.node_looks import socket_colors
 
+def update_socket_autocompile(self,context):
+    context.space_data.node_tree.compiler.autocompile()
+
 class SN_StringSocket(bpy.types.NodeSocket):
     '''String Socket for handling text'''
     bl_idname = 'SN_StringSocket'
@@ -12,6 +15,7 @@ class SN_StringSocket(bpy.types.NodeSocket):
         name="String",
         description="Socket for a string value",
         default="",
+        update=update_socket_autocompile
     )
 
     def draw(self, context, layout, node, text):
@@ -35,6 +39,7 @@ class SN_NumberSocket(bpy.types.NodeSocket):
         name="Number",
         description="Socket for a number value",
         default=0,
+        update=update_socket_autocompile
     )
 
     def draw(self, context, layout, node, text):
@@ -58,6 +63,7 @@ class SN_BooleanSocket(bpy.types.NodeSocket):
         name="Boolean",
         description="Socket for a boolean value",
         default=False,
+        update=update_socket_autocompile
     )
 
     def draw(self, context, layout, node, text):
@@ -81,6 +87,7 @@ class SN_VectorSocket(bpy.types.NodeSocket):
         name="Vector",
         description="Socket for a vector value",
         default=(0,0,0),
+        update=update_socket_autocompile
     )
 
     def draw(self, context, layout, node, text):

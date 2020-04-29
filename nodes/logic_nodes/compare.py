@@ -1,4 +1,5 @@
 import bpy
+from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 
@@ -13,7 +14,8 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
                 (">", ">", "Bigger than"), ("<", "<", "Smaller than"),
                 (">=", "≥", "Bigger or equal to"), ("<=", "≤", "Smaller or equal to")],
         name="Operation",
-        description="Compare operation for this node"
+        description="Compare operation for this node",
+        update = update_socket_autocompile
     )
 
     def init(self, context):
