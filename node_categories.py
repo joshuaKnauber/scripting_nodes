@@ -22,6 +22,20 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     compiler = ScriptingNodesCompiler()
 
+    def update(self):
+        links_to_remove = []
+        for link in self.links:
+            if link.from_socket.bl_idname != link.to_socket.bl_idname:
+                pass
+                #if not link.from_socket.is_data_socket and link.to_socket.bl_idname == "SN_DataSocket":
+                #    links_to_remove.append(link)
+            else:
+                if link.from_socket.bl_idname == "SN_ProgramSocket" and len(link.from_socket.links) > 1:
+                    links_to_remove.append(link.from_socket.links[0])
+        for link in links_to_remove:
+            self.links.remove(link)
+        self.compiler.autocompile()
+
 
 class SN_ScriptingNodesCategory(NodeCategory):
     @classmethod

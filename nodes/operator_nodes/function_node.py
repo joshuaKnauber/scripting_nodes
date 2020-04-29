@@ -39,9 +39,6 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def socket_value_update(self, context):
         print("socket update")
 
-    def insert_link(self, link):
-        pass
-
     def evaluate(self,output):
         next_node = None
         if len(self.outputs[0].links) > 0:
