@@ -33,4 +33,15 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass
 
     def evaluate(self,output):
-        return {"code": ["def testfunction():"]}
+        next_node = None
+        if len(self.outputs[0].links) > 0:
+            next_node = self.outputs[0].links[0].to_node
+        return {
+                "code": [],
+                "indented_blocks": [
+                    {
+                        "code": ["def testfunction():\n"],
+                        "function_node": next_node
+                    }
+                ]
+                }

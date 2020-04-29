@@ -51,11 +51,11 @@ class SN_IfNode(bpy.types.Node, SN_ScriptingBaseNode):
                 "code": [],
                 "indented_blocks": [
                     {
-                        "code": ["if ", value, ": "],
+                        "code": ["if ", value, ":\n"],
                         "function_node": do_next_node
                     },
                     {
-                        "code": ["else:"],
+                        "code": ["else:\n"],
                         "function_node": else_next_node
                     }
                 ]

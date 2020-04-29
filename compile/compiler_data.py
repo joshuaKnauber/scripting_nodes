@@ -43,5 +43,10 @@ error_logs = {
         "title": "Wrong connection",
         "message": "One of the inputs of this node has an incorrect output connected",
         "fatal": True
-    }
+    },
+    "no_connection": {
+        "title": "No connections",
+        "message": "One of the program outputs of this node has no connections",
+        "fatal": False
+    },
 }

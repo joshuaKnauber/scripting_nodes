@@ -45,29 +45,38 @@ class ScriptingNodesCompiler():
         code_blocks = ""
         while len(function_node.outputs[0].links) > 0 or evaluate_start_node:
 
+            #get the next connected node if it's not the start node
             if len(function_node.outputs[0].links) > 0 and not evaluate_start_node:
                 function_node = function_node.outputs[0].links[0].to_node
 
+            #get the values from the function node
             function_value = function_node.evaluate(None)
+            code_block = function_value["code"]
+
+            #handle errors in the function node
             if "error" in function_value:
                 for error in function_value["error"]:
                     self._errors.append([error,function_node])
-            code_block = function_value["code"]
 
+            #add function nodes code to the entire code
             code_block = self._compile_script_line(code_block)
+            if len(code_block) > 0:
+                code_blocks += " "*indents + ("").join(code_block)
 
-            code_blocks += "\n" + " "*indents + ("").join(code_block)
-
+            #get the code for all the indented code blocks
             if "indented_blocks" in function_value:
                 for block in function_value["indented_blocks"]:
-                    indented_block = self._compile_script_line(block["code"])
-                    code_blocks += "\n" + " "*indents + ("").join(indented_block)
+                    #add the indented blocks code to the entire code
+                    code_block = self._compile_script_line(block["code"])
+                    if len(code_block) > 0:
+                        code_blocks += " "*indents + ("").join(code_block)
 
+                    #compile the connected tree and add it to the entire code
                     if block["function_node"]:
                         code_block = self._compile_tree_branch(block["function_node"],indents+self._indents, True)
                     else:
-                        code_block = "\n" + " "*(indents+self._indents) + "pass"
-
+                        self._errors.append(["no_connection",function_node])
+                        code_block = " "*(indents+self._indents) + "pass\n"
                     code_blocks += code_block
 
             evaluate_start_node = False
@@ -82,7 +91,7 @@ class ScriptingNodesCompiler():
                 function_nodes.append(node)
 
         for function_node in function_nodes:
-            function = self._compile_tree_branch(function_node,self._indents) + "\n"
+            function = self._compile_tree_branch(function_node,0,True)
             self._functions.append(function)
 
     def _compile_operators(self, tree):
@@ -109,8 +118,8 @@ class ScriptingNodesCompiler():
         text.write("\n")
         
         for function in self._functions:
-            text.write(function)
             text.write("\n")
+            text.write(function)
 
         return text
 
@@ -143,3 +152,5 @@ class ScriptingNodesCompiler():
             addon = self._create_file(tree)
 
             self._register_file(addon)
+
+            bpy.context.area.tag_redraw()
