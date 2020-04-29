@@ -67,6 +67,8 @@ node_categories = [
         }),
         NodeItem("SN_IfNode", settings={
         }),
+        NodeItem("SN_RepeatNode", settings={
+        }),
 
     ]),
 
