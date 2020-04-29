@@ -41,9 +41,9 @@ class ScriptingNodesCompiler():
                     break
         return line
 
-    def _compile_tree_branch(self, function_node, indents, evaluate_start_node=False):
+    def _compile_tree_branch(self, function_node, indents, evaluate_start_node, only_evaluate_start_node):
         code_blocks = ""
-        while len(function_node.outputs[0].links) > 0 or evaluate_start_node:
+        while len(function_node.outputs[0].links) > 0 and not only_evaluate_start_node or evaluate_start_node:
 
             #get the next connected node if it's not the start node
             if len(function_node.outputs[0].links) > 0 and not evaluate_start_node:
@@ -73,7 +73,7 @@ class ScriptingNodesCompiler():
 
                     #compile the connected tree and add it to the entire code
                     if block["function_node"]:
-                        code_block = self._compile_tree_branch(block["function_node"],indents+self._indents, True)
+                        code_block = self._compile_tree_branch(block["function_node"],indents+self._indents, True, False)
                     else:
                         self._errors.append(["no_connection",function_node])
                         code_block = " "*(indents+self._indents) + "pass\n"
@@ -91,7 +91,7 @@ class ScriptingNodesCompiler():
                 function_nodes.append(node)
 
         for function_node in function_nodes:
-            function = self._compile_tree_branch(function_node,0,True)
+            function = self._compile_tree_branch(function_node,0,True,True)
             self._functions.append(function)
 
     def _compile_operators(self, tree):
