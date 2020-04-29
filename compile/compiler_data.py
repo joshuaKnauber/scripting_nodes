@@ -50,3 +50,6 @@ error_logs = {
         "fatal": False
     },
 }
+
+
+import_texts = """import bpy"""

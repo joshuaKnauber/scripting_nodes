@@ -1,5 +1,5 @@
 import bpy
-from .compiler_data import gpl_block, addon_info, error_logs
+from .compiler_data import gpl_block, addon_info, error_logs, import_texts
 from ..properties.property_utils import clear_error_props, add_error_prop, sn_props
 
 class ScriptingNodesCompiler():
@@ -124,6 +124,8 @@ class ScriptingNodesCompiler():
         text.write(gpl_block)
         text.write("\n")
         text.write(addon_info(tree))
+        text.write("\n\n")
+        text.write(import_texts)
         text.write("\n")
         
         for function in self._functions:
