@@ -6,6 +6,8 @@ class SN_StringSocket(bpy.types.NodeSocket):
     bl_idname = 'SN_StringSocket'
     bl_label = "String"
 
+    is_data_socket = True
+
     value: bpy.props.StringProperty(
         name="String",
         description="Socket for a string value",
@@ -26,6 +28,8 @@ class SN_NumberSocket(bpy.types.NodeSocket):
     '''Number Socket for handeling integers'''
     bl_idname = 'SN_NumberSocket'
     bl_label = "Number"
+
+    is_data_socket = True
 
     value: bpy.props.FloatProperty(
         name="Number",
@@ -48,6 +52,8 @@ class SN_BooleanSocket(bpy.types.NodeSocket):
     bl_idname = 'SN_BooleanSocket'
     bl_label = "Boolean"
 
+    is_data_socket = True
+
     value: bpy.props.BoolProperty(
         name="Boolean",
         description="Socket for a boolean value",
@@ -68,6 +74,8 @@ class SN_VectorSocket(bpy.types.NodeSocket):
     '''Vector Socket for handeling vectors'''
     bl_idname = 'SN_VectorSocket'
     bl_label = "Vector"
+
+    is_data_socket = True
 
     value: bpy.props.FloatVectorProperty(
         name="Vector",
@@ -91,6 +99,8 @@ class SN_LayoutSocket(bpy.types.NodeSocket):
     bl_idname = 'SN_LayoutSocket'
     bl_label = "Layout"
 
+    is_data_socket = False
+
     def draw(self, context, layout, node, text):
         layout.label(text="Layout")
 
@@ -103,6 +113,8 @@ class SN_ProgramSocket(bpy.types.NodeSocket):
     bl_idname = 'SN_ProgramSocket'
     bl_label = "Program"
 
+    is_data_socket = False
+
     def draw(self, context, layout, node, text):
         layout.label(text=text)
 
@@ -113,6 +125,8 @@ class SN_DataSocket(bpy.types.NodeSocket):
     '''Socket that can be connected to everything'''
     bl_idname = 'SN_DataSocket'
     bl_label = "Data"
+
+    is_data_socket = True
 
     def draw(self, context, layout, node, text):
         layout.label(text=text)

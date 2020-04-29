@@ -6,7 +6,7 @@ from ..node_looks import node_colors, node_icons
 class SN_TextNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Text Node for outputing Text'''
     bl_idname = 'SN_TextNode'
-    bl_label = "Text Node"
+    bl_label = "Text"
     bl_icon = node_icons["INPUT"]
 
     text: bpy.props.StringProperty(
@@ -30,9 +30,6 @@ class SN_TextNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "text", text="")
 
     def evaluate(self, output):
-        if str(type(self.outputs[0].links[0].to_socket)) == "<class 'blender_visual_scripting_addon.node_sockets.SN_StringSocket'>":
-            return {"code": [self.text]}
-        else:
-            return {"code": [""], "error": ["wrong_socket"]}
+        return {"code": ["'",self.text,"'"]}
         
         

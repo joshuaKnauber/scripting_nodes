@@ -17,7 +17,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp = self.inputs.new('SN_ProgramSocket', "Program")
         inp.display_shape = "DIAMOND"
 
-        self.inputs.new('SN_DataSocket', "Value")
+        self.inputs.new('SN_DataSocket', "Data")
 
         #Node Outputs
         out = self.outputs.new('SN_ProgramSocket', "Program")
@@ -33,7 +33,10 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# draws extra buttons on node without inputs
 
     def evaluate(self, output):
-        if len(self.inputs["Value"].links) == 1:
-            return {"code": ["print(", self.inputs["Value"].links[0].from_socket, ")\n"]}
+        if self.inputs["Data"].is_linked:
+            if self.inputs["Data"].links[0].from_socket.is_data_socket:
+                return {"code": ["print(", self.inputs["Data"].links[0].from_socket, ")\n"]}
+            else:
+                return{"code": ["print('')\n"], "error": ["wrong_socket"]}
         else:
             return{"code": ["print('')\n"], "error": []}
