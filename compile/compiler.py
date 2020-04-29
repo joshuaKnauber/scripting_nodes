@@ -43,11 +43,14 @@ class ScriptingNodesCompiler():
 
     def _compile_tree_branch(self, function_node, indents, evaluate_start_node, only_evaluate_start_node):
         code_blocks = ""
-        while len(function_node.outputs[0].links) > 0 and not only_evaluate_start_node or evaluate_start_node:
+        continue_program = True
+
+        while continue_program > 0 and not only_evaluate_start_node or evaluate_start_node:
 
             #get the next connected node if it's not the start node
-            if len(function_node.outputs[0].links) > 0 and not evaluate_start_node:
-                function_node = function_node.outputs[0].links[0].to_node
+            if len(function_node.outputs) > 0:
+                if len(function_node.outputs[0].links) > 0 and not evaluate_start_node:
+                    function_node = function_node.outputs[0].links[0].to_node
 
             #get the values from the function node
             function_value = function_node.evaluate(None)
@@ -78,6 +81,12 @@ class ScriptingNodesCompiler():
                         self._errors.append(["no_connection",function_node])
                         code_block = " "*(indents+self._indents) + "pass\n"
                     code_blocks += code_block
+
+            #check if the program branch reached the end
+            continue_program = False
+            if len(function_node.outputs) > 0:
+                if len(function_node.outputs[0].links) > 0:
+                    continue_program = True
 
             evaluate_start_node = False
         
