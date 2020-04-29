@@ -136,6 +136,7 @@ class ScriptingNodesCompiler():
         ctx = bpy.context.copy()
         ctx["edit_text"] = addon
         bpy.ops.text.run_script(ctx)
+        #bpy.data.texts.remove(addon)
 
     def _draw_errors(self):
         for error in self._errors:
