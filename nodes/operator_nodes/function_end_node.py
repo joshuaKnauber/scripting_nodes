@@ -7,11 +7,11 @@ class SN_FunctionEndNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node for ending a function'''
     bl_idname = 'SN_FunctionEndNode'
     bl_label = "Function End"
-    bl_icon = node_icons["FUNCTION"]
+    bl_icon = node_icons["OPERATOR"]
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["FUNCTION"]
+        self.color = node_colors["OPERATOR"]
 
         #Node Inputs
         inp = self.inputs.new('SN_ProgramSocket', "Program")

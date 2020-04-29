@@ -6,11 +6,11 @@ class SN_IfNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''If Node for spliting to do and else'''
     bl_idname = 'SN_IfNode'
     bl_label = "If"
-    bl_icon = node_icons["LOGIC"]
+    bl_icon = node_icons["FUNCTION"]
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["LOGIC"]
+        self.color = node_colors["FUNCTION"]
 
         inp = self.inputs.new('SN_ProgramSocket', "Program")
         inp.display_shape = "DIAMOND"

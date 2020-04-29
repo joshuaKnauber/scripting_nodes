@@ -21,7 +21,8 @@ node_colors = {
     "INTERFACE": to_percentage("A17835",False),
     "LOGIC": to_percentage("4D4D4D",False),
     "INPUT": to_percentage("ACACAC",False),
-    "FUNCTION": to_percentage("A13546",False)
+    "OPERATOR": to_percentage("A13546",False),
+    "FUNCTION": to_percentage("3D141B",False)
 }
 
 
@@ -29,5 +30,6 @@ node_icons = {
     "INTERFACE": "RESTRICT_VIEW_OFF",
     "LOGIC": "CONSOLE",
     "INPUT": "DRIVER_TRANSFORM",
-    "FUNCTION": "SCRIPT"
+    "FUNCTION": "SCRIPT",
+    "OPERATOR": "FILE_SCRIPT"
 }

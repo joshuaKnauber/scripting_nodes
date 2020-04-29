@@ -8,7 +8,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node for starting a function'''
     bl_idname = 'SN_FunctionNode'
     bl_label = "Function Start"
-    bl_icon = node_icons["FUNCTION"]
+    bl_icon = node_icons["OPERATOR"]
 
     def update_function_name(self,context):
         if not self.updating_props:
@@ -21,7 +21,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["FUNCTION"]
+        self.color = node_colors["OPERATOR"]
 
         #Node Outputs
         out = self.outputs.new('SN_ProgramSocket', "Program")
