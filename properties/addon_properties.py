@@ -3,7 +3,10 @@ import bpy
 
 class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
-    auto_compile: bpy.props.BoolProperty(default=False,name="Auto Reload",description="Automatically reload the node tree on change")
+    def update_autocompile(self,context):
+        context.space_data.node_tree.compiler.autocompile()
+
+    auto_compile: bpy.props.BoolProperty(default=False,name="Auto Reload",description="Automatically reload the node tree on change",update=update_autocompile)
 
     examples: bpy.props.EnumProperty(
         items=[("None", "Please choose an example", "Please choose an example"),

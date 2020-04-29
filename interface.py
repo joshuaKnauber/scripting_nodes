@@ -99,6 +99,10 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
 
         if len(error_props()) > 0:
             for error in error_props():
-                self.draw_error(column, error.error_type, error.error_message, error.fatal_error, error.node)
+                if error.fatal_error:
+                    self.draw_error(column, error.error_type, error.error_message, True, error.node)
+            for error in error_props():
+                if not error.fatal_error:
+                    self.draw_error(column, error.error_type, error.error_message, False, error.node)
         else:
             column.label(text="No errors found")
