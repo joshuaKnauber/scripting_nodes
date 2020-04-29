@@ -8,7 +8,7 @@ class SN_VectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Vector"
     bl_icon = node_icons["INPUT"]
 
-    vector: bpy.props.FloatVectorProperty(
+    value: bpy.props.FloatVectorProperty(
         name="Vector",
         description="Values",
         default=(0, 0, 0)
@@ -22,12 +22,9 @@ class SN_VectorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     
     def draw_buttons(self, context, layout):
-        col=layout.column()
-        col.prop(self,"vector",text="")
+        col = layout.column()
+        col.prop(self,"value",text="")
 
     def evaluate(self, output):
-        if str(type(self.outputs[0].links[0].to_socket)) == "<class 'blender_visual_scripting_addon.node_sockets.SN_VectorSocket'>":
-            return {"code": [str(self.vector[0]) + " ", str(self.vector[1]) + " ", str(self.vector[2])]}
-        else:
-            return {"code": ["(0, 0, 0)"], "error": ["wrong_socket"]}
+        return {"code": ["("+str(self.value[0])+","+str(self.value[1])+","+str(self.value[2])+")"]}
         
