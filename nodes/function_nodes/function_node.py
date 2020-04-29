@@ -26,5 +26,11 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         pass# draws extra buttons on node without inputs
 
+    def socket_value_update(self, context):
+        print("socket update")
+
+    def insert_link(self, link):
+        pass
+
     def evaluate(self,output):
         return {"code": ["def testfunction():"]}
