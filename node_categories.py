@@ -46,8 +46,6 @@ node_categories = [
         }),
         NodeItem("SN_PrintNode", settings={
         }),
-        NodeItem("SN_SetVariableNode", settings={
-        }),
 
     ]),
 

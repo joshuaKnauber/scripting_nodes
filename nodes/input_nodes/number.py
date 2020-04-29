@@ -25,4 +25,8 @@ class SN_NumberNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"number",text="")
 
     def evaluate(self, output):
-        return {"code": [str(self.number)]}
+        if str(type(self.outputs[0].links[0].to_socket)) == "<class 'blender_visual_scripting_addon.node_sockets.SN_NumberSocket'>":
+            return {"code": [str(self.number)]}
+        else:
+            return {"code": ["0"], "error": ["wrong_socket"]}
+        

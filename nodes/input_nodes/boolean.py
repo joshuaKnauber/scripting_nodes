@@ -31,4 +31,7 @@ class SN_BoolNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"value",text=str(self.value), toggle=True)
 
     def evaluate(self, output):
-        return {"code": [str(self.value)]}
+        if str(type(self.outputs[0].links[0].to_socket)) == "<class 'blender_visual_scripting_addon.node_sockets.SN_BooleanSocket'>":
+            return {"code": [str(self.value)]}
+        else:
+            return {"code": ["False"], "error": ["wrong_socket"]}
