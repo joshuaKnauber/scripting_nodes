@@ -46,7 +46,7 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
                 "code": [],
                 "indented_blocks": [
                     {
-                        "code": ["for i in range(int(", value, ")):\n"],
+                        "code": ["for i in range(abs(int(", value, "))):\n"],
                         "function_node": repeat_next_node
                     }
                 ]
