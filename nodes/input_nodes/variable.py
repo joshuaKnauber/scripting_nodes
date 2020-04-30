@@ -1,6 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
+from ...node_sockets import update_socket_autocompile
 
 
 class SN_VariableNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -40,7 +41,7 @@ class SN_VariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         return variable_nodes
 
     
-    name: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Name of the variable", default=None, update=None, get=None, set=None)
+    name: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Name of the variable", default=None, update=update_socket_autocompile, get=None, set=None)
 
     def init(self, context):
         self.use_custom_color = True

@@ -1,6 +1,8 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
+from ...node_sockets import update_socket_autocompile
+
 
 
 class SN_VariableSetNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -9,7 +11,7 @@ class SN_VariableSetNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Create Variable"
     bl_icon = node_icons["OPERATOR"]
 
-    name: bpy.props.StringProperty(name="Name", description="Name of the variable")
+    name: bpy.props.StringProperty(name="Name", description="Name of the variable", update=update_socket_autocompile)
 
     def init(self, context):
         self.use_custom_color = True
