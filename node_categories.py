@@ -83,6 +83,8 @@ node_categories = [
         }),
         NodeItem("SN_RepeatNode", settings={
         }),
+        NodeItem("SN_VariableChangeNode", settings={
+        }),
 
     ]),
 

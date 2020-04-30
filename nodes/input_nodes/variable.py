@@ -21,7 +21,6 @@ class SN_VariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     name: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Name of the variable", default=None, update=None, get=None, set=None)
 
-
     def init(self, context):
         self.use_custom_color = True
         self.color = node_colors["OPERATOR"]
