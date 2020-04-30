@@ -9,18 +9,30 @@ class SN_VariableChangeNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Change Variable"
     bl_icon = node_icons["OPERATOR"]
 
-    def allNodes(self, context):
-        all_nodes = []
-        for inNodes in self.inputs[0].links[0].from_node:
-            pass
-        return all_nodes
+    def connected_nodes(self, node):
+        nodes = []
+        for inp in node.inputs:
+            if inp.is_linked:
+                nodes.append(inp.links[0].from_node)
+        for out in node.outputs:
+            if out.is_linked:
+                nodes.append(out.links[0].to_node)
+        return nodes
 
     def items_fetch(self, context):
-        variable_nodes = allNodes(context)
+        all_nodes = [self]
 
-        print(self.inputs[0].links[0].from_node)
+        found_new_node = True
+        while found_new_node:
+            found_new_node = False
+            for node in all_nodes:
+                for connected in self.connected_nodes(node):
+                    if not connected in all_nodes:
+                        all_nodes.append(connected)
+                        found_new_node = True
         
-        for node in context.space_data.node_tree.nodes:
+        variable_nodes = []
+        for node in all_nodes:
             if node.bl_idname == "SN_VariableSetNode":
                 if node.name != "":
                     variable_nodes.append((str(node.name), str(node.name), ""))
