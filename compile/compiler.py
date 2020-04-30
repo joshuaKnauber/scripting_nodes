@@ -12,21 +12,26 @@ class ScriptingNodesCompiler():
         self._panels = []
 
     def _is_scripting_tree(self):
+        #returns if the current tree is a scripting tree
         if bpy.context.space_data.tree_type == 'ScriptingNodesTree':
             return bpy.context.space_data.node_tree != None
 
     def _reset(self):
+        #resets the compiler data and errors
         clear_error_props()
         self._errors.clear()
         self._functions.clear()
 
     def _only_string(self, value_list):
+        #returns if the given list contains only strings
         for value in value_list:
             if not type(value) == str:
                 return False
         return True
 
     def _compile_script_line(self, line):
+        #goes through every entry in the line while it contains node references
+        #it calls evaluate on the nodes that are still in the list
         while not self._only_string(line):
             for i, snippet in enumerate(line):
                 if not type(snippet) == str:
@@ -93,12 +98,15 @@ class ScriptingNodesCompiler():
         return code_blocks
 
     def _compile_functions(self, tree):
+        #compiles all functions in the node tree
         function_nodes = []
         
+        #finds all function nodes
         for node in tree.nodes:
             if node.bl_idname == "SN_FunctionNode":
                 function_nodes.append(node)
 
+        #compiles the tree branch for every function node and adds the code string to the list
         for function_node in function_nodes:
             function = self._compile_tree_branch(function_node,0,True,True)
             self._functions.append(function)
@@ -115,12 +123,14 @@ class ScriptingNodesCompiler():
     def _create_file(self, tree):
         name = tree.addon_name.lower().replace(" ","_") + ".py"
 
+        #creates the python file for the addon
         if not name in bpy.data.texts:
             bpy.data.texts.new(name=name)
         text = bpy.data.texts[name]
 
         text.clear()
 
+        #writes all basic in the text fie
         text.write(gpl_block)
         text.write("\n")
         text.write(addon_info(tree))
@@ -128,6 +138,7 @@ class ScriptingNodesCompiler():
         text.write(import_texts)
         text.write("\n")
         
+        #writes all functions in the text file
         for function in self._functions:
             text.write("\n")
             text.write(function)
@@ -135,21 +146,26 @@ class ScriptingNodesCompiler():
         return text
 
     def _register_file(self, addon):
+        #registers the addon in the blend file
         ctx = bpy.context.copy()
         ctx["edit_text"] = addon
         bpy.ops.text.run_script(ctx)
         #bpy.data.texts.remove(addon)
 
     def _draw_errors(self):
+        #adds all the errors from the error list to the props
         for error in self._errors:
             log = error_logs[error[0]]
             add_error_prop(log["title"],log["message"],log["fatal"],error[1].name)
 
     def autocompile(self):
+        #checks if autocompile is on and runs compile
+        #this should be called when changes to the node tree are made
         if sn_props().auto_compile:
             self.recompile()
 
     def recompile(self):
+        #compiles the node tree to code and registers the file
         tree = bpy.context.space_data.node_tree
         if self._is_scripting_tree():
 
