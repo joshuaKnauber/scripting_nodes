@@ -6,7 +6,7 @@ from ..node_looks import node_colors, node_icons
 class SN_FunctionEndNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node for ending a function'''
     bl_idname = 'SN_FunctionEndNode'
-    bl_label = "Function End"
+    bl_label = "End Function"
     bl_icon = node_icons["OPERATOR"]
 
     def init(self, context):

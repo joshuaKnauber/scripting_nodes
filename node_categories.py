@@ -70,6 +70,8 @@ node_categories = [
         }),
         NodeItem("SN_FunctionRunNode", settings={
         }),
+        NodeItem("SN_VariableSetNode", settings={
+        }),
 
     ]),
 
@@ -98,7 +100,9 @@ node_categories = [
     ]),
 
     SN_ScriptingNodesCategory('INPUT', "Input", items=[
-        
+
+        NodeItem("SN_VariableNode", settings={
+        }),        
         NodeItem("SN_NumberNode", settings={
         }),
         NodeItem("SN_BoolNode", settings={

@@ -1,13 +1,12 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
-from ...utitlity_functions import to_lower_camelcase
 
 
 class SN_FunctionRunNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node for running a function'''
     bl_idname = 'SN_FunctionRunNode'
-    bl_label = "Function Run"
+    bl_label = "Run Function"
     bl_icon = node_icons["OPERATOR"]
 
     def items_fetch(self, context):
