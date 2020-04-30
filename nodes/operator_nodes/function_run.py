@@ -1,0 +1,45 @@
+import bpy
+from ..base_node import SN_ScriptingBaseNode
+from ..node_looks import node_colors, node_icons
+from ...utitlity_functions import to_lower_camelcase
+
+
+class SN_FunctionRunNode(bpy.types.Node, SN_ScriptingBaseNode):
+    '''Node for running a function'''
+    bl_idname = 'SN_FunctionRunNode'
+    bl_label = "Function Run"
+    bl_icon = node_icons["OPERATOR"]
+
+    def items_fetch(self, context):
+        function_nodes = []
+        
+        for node in context.space_data.node_tree.nodes:
+            if node.bl_idname == "SN_FunctionNode":
+                function_nodes.append((str(node.name), str(node.name), ""))
+
+        return function_nodes
+
+    name: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Function Name", default=None, options={'ANIMATABLE'}, update=None, get=None, set=None)
+
+
+    def init(self, context):
+        self.use_custom_color = True
+        self.color = node_colors["OPERATOR"]
+
+        pIn = self.inputs.new('SN_ProgramSocket', "Program")
+        pIn.display_shape = "DIAMOND"
+
+        out = self.outputs.new('SN_ProgramSocket', "Program")
+        out.display_shape = "DIAMOND"
+
+    def copy(self, node):
+        pass# called when node is copied
+
+    def free(self):
+        pass# called when node is removed
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self,"name",text="Name")
+
+    def evaluate(self,output):
+        return {"code": [self.name, "()"]}
