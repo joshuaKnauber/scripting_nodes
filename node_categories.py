@@ -27,6 +27,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         for link in self.links:
             if link.from_socket.bl_idname == "SN_ProgramSocket" and link.to_socket.bl_idname != "SN_ProgramSocket":
                 links_to_remove.append(link)
+            elif link.from_socket.bl_idname == "SN_LayoutSocket" and link.to_socket.bl_idname != "SN_LayoutSocket":
+                links_to_remove.append(link)
             if link.from_socket.bl_idname == "SN_ProgramSocket" and len(link.from_socket.links) > 1:
                 links_to_remove.append(link.from_socket.links[0])
         for link in links_to_remove:
