@@ -25,5 +25,13 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         pass# draws extra buttons on node
 
+    def evaluate(self,output):
+        code = ["'panel code'\n"]
+        for inp in self.inputs:
+            if inp.bl_idname == "SN_LayoutSocket" and inp.is_linked:
+                code += ["layout.",inp.links[0].from_socket,"\n"]
+        
+        return {"code":code}
+
     def update(self):
         register_dynamic_input(self, "SN_LayoutSocket", "Layout")

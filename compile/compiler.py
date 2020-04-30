@@ -9,7 +9,7 @@ class ScriptingNodesCompiler():
         self._errors = []
         self._functions = []
         self._operators = []
-        self._panels = []
+        self._interface = []
 
     def _is_scripting_tree(self):
         #returns if the current tree is a scripting tree
@@ -21,6 +21,7 @@ class ScriptingNodesCompiler():
         clear_error_props()
         self._errors.clear()
         self._functions.clear()
+        self._interface.clear()
 
     def _only_string(self, value_list):
         #returns if the given list contains only strings
@@ -118,7 +119,17 @@ class ScriptingNodesCompiler():
                 operator_starts.append(node)
 
     def _compile_interface(self, tree):
-        pass
+        #compiles all interface nodes in the node tree
+        panel_nodes = []
+        
+        #finds all function nodes
+        for node in tree.nodes:
+            if node.bl_idname == "SN_UiPanelNode":
+                panel_nodes.append(node)
+
+        for panel in panel_nodes:
+            panel = self._compile_tree_branch(panel,0,True,True)
+            self._interface.append(panel)
 
     def _create_file(self, tree):
         name = tree.addon_name.lower().replace(" ","_") + ".py"
@@ -143,13 +154,18 @@ class ScriptingNodesCompiler():
             text.write("\n")
             text.write(function)
 
+        #writes all interfaces in the text file
+        for interface in self._interface:
+            text.write("\n")
+            text.write(interface)
+
         return text
 
     def _register_file(self, addon):
         #registers the addon in the blend file
         ctx = bpy.context.copy()
         ctx["edit_text"] = addon
-        bpy.ops.text.run_script(ctx)
+        #bpy.ops.text.run_script(ctx)
         #bpy.data.texts.remove(addon)
 
     def _draw_errors(self):

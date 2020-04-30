@@ -25,3 +25,15 @@ class SN_UiLabelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         pass# draws extra buttons on node
+
+    def evaluate(self, output):
+        value = "'" + self.inputs[0].value + "'"
+        errors = []
+
+        if self.inputs[0].is_linked:
+            if self.inputs[0].links[0].from_socket.bl_idname == "SN_StringSocket":
+                value = self.inputs[0].links[0].from_socket
+            else:
+                errors.append("wrong_socket")
+
+        return {"code":["label(text=",value,")"], "error":errors}

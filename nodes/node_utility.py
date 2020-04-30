@@ -10,5 +10,10 @@ def register_dynamic_input(self, socket_idname, socket_name):
 
     for i in range(len(all_sockets)):
         if not all_sockets[i]:
-            self.inputs.remove(self.inputs[i])
+            all_sockets[i] = self.inputs[i]
+            
+    for inp in all_sockets:
+        if not inp == True:
+            self.inputs.remove(inp)
+
     self.inputs.new(socket_idname, socket_name)
