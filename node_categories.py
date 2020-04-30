@@ -53,6 +53,8 @@ node_categories = [
         }),
         NodeItem("SN_UiLabelNode", settings={
         }),
+        NodeItem("SN_UiRowNode", settings={
+        }),
         NodeItem("SN_IfNode", settings={
             "is_layout": repr(True),
         }),
