@@ -31,13 +31,15 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         return "layout"
 
     def evaluate(self,output):
-        header = ["class LayoutDemoPanel(bpy.types.Panel):\n",
+        idname = "SN_PT_" + self.panel_name.title().replace(" ","")
+        header = ["class " + idname + "(bpy.types.Panel):\n",
                 "_INDENT_bl_label = '"+self.panel_name+"'\n",
-                "_INDENT_bl_idname = 'SN_PT_"+self.panel_name.title().replace(" ","")+"'\n",
+                "_INDENT_bl_idname = '" + idname + "'\n",
                 "_INDENT_bl_space_type = 'PROPERTIES'\n",
                 "_INDENT_bl_region_type = 'WINDOW'\n",
                 "_INDENT_bl_context = 'scene'\n\n",
-                "_INDENT_def draw(self, context):\n"]
+                "_INDENT_def draw(self, context):\n",
+                "_INDENT__INDENT_layout = self.layout\n"]
 
         code = []
         for inp in self.inputs:

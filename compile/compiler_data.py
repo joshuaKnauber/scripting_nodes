@@ -63,3 +63,12 @@ error_logs = {
 
 
 import_texts = """import bpy"""
+
+
+def register_text(indents,unregister):
+    if not unregister:
+        text = "def register():\n"+(" "*indents)+"for cls in classes:\n"+(" "*indents*2)+"bpy.utils.register_class(cls)"
+    else:
+        text = "def unregister():\n"+(" "*indents)+"for cls in classes:\n"+(" "*indents*2)+"bpy.utils.unregister_class(cls)"
+
+    return text
