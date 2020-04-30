@@ -8,22 +8,41 @@ class SN_IfNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "If"
     bl_icon = node_icons["FUNCTION"]
 
+    def register_sockets(self,context):
+        for inp in self.inputs:
+            self.inputs.remove(inp)
+        for out in self.outputs:
+            self.outputs.remove(out)
+
+        if self.is_layout:
+            socket_type = "SN_LayoutSocket"
+            socket_name = "Layout"
+            socket_shape = "CIRCLE"
+        else:
+            socket_type = "SN_ProgramSocket"
+            socket_name = "Program"
+            socket_shape = "DIAMOND"
+
+        inp = self.inputs.new(socket_type, socket_name)
+        inp.display_shape = socket_shape
+
+        self.inputs.new('SN_BooleanSocket', "Value")
+
+        out = self.outputs.new(socket_type, socket_name)
+        out.display_shape = socket_shape
+
+        do = self.outputs.new(socket_type, "Do")
+        do.display_shape = socket_shape
+        els = self.outputs.new(socket_type, "Else")
+        els.display_shape = socket_shape
+
+    is_layout: bpy.props.BoolProperty(default=False,update=register_sockets)
+
     def init(self, context):
         self.use_custom_color = True
         self.color = node_colors["FUNCTION"]
 
-        inp = self.inputs.new('SN_ProgramSocket', "Program")
-        inp.display_shape = "DIAMOND"
-
-        self.inputs.new('SN_BooleanSocket', "Value")
-
-        out = self.outputs.new('SN_ProgramSocket', "Continue")
-        out.display_shape = "DIAMOND"
-
-        do = self.outputs.new('SN_ProgramSocket', "Do")
-        do.display_shape = "DIAMOND"
-        els = self.outputs.new('SN_ProgramSocket', "Else")
-        els.display_shape = "DIAMOND"
+        self.register_sockets(context)
 
     def copy(self, node):
         pass# called when node is copied
@@ -32,7 +51,7 @@ class SN_IfNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass
 
     def draw_buttons(self, context, layout):
-        pass
+        pass#layout.prop(self,"is_layout",text="Layout Node")
 
     def evaluate(self,output):
         value = str(self.inputs[1].value)

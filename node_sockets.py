@@ -109,7 +109,7 @@ class SN_LayoutSocket(bpy.types.NodeSocket):
     is_data_socket = False
 
     def draw(self, context, layout, node, text):
-        layout.label(text="Layout")
+        layout.label(text=text)
 
     def draw_color(self, context, node):
         return socket_colors["LAYOUT"]

@@ -8,20 +8,39 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Repeat"
     bl_icon = node_icons["FUNCTION"]
 
+    def register_sockets(self,context):
+        for inp in self.inputs:
+            self.inputs.remove(inp)
+        for out in self.outputs:
+            self.outputs.remove(out)
+
+        if self.is_layout:
+            socket_type = "SN_LayoutSocket"
+            socket_name = "Layout"
+            socket_shape = "CIRCLE"
+        else:
+            socket_type = "SN_ProgramSocket"
+            socket_name = "Program"
+            socket_shape = "DIAMOND"
+
+        inp = self.inputs.new(socket_type, socket_name)
+        inp.display_shape = socket_shape
+
+        self.inputs.new('SN_NumberSocket', "Value")
+
+        out = self.outputs.new(socket_type, socket_name)
+        out.display_shape = socket_shape
+
+        repeat = self.outputs.new(socket_type, "Repeat")
+        repeat.display_shape = socket_shape
+
+    is_layout: bpy.props.BoolProperty(default=False,update=register_sockets)
+
     def init(self, context):
         self.use_custom_color = True
         self.color = node_colors["FUNCTION"]
 
-        inp = self.inputs.new('SN_ProgramSocket', "Program")
-        inp.display_shape = "DIAMOND"
-
-        self.inputs.new('SN_NumberSocket', "Value")
-
-        out = self.outputs.new('SN_ProgramSocket', "Program")
-        out.display_shape = "DIAMOND"
-
-        repeat = self.outputs.new('SN_ProgramSocket', "Repeat")
-        repeat.display_shape = "DIAMOND"
+        register_sockets(context)
 
     def copy(self, node):
         pass# called when node is copied
