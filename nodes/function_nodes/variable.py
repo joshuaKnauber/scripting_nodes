@@ -64,6 +64,9 @@ class SN_VariableChangeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self,output):
         errors = []
+        if self.name == "":
+            errors.append("no_available")
+
         if not self.inputs[1].is_linked:
             errors.append("no_connection")
             return {"code": [self.name, " = ", "0", "\n"], "error": errors}

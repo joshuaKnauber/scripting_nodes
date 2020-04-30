@@ -34,8 +34,12 @@ class SN_VariableSetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self,output):
         errors = []
+
+        if self.name == "":
+            errors.append("no_name")
+
         if not self.inputs[1].is_linked:
             errors.append("no_connection")
             return {"code": [self.name, " = ", "0", "\n"], "error": errors}
-        else:
-            return {"code": [self.name, " = ", self.inputs[1].links[0].from_socket, "\n"]}
+
+        return {"code": [self.name, " = ", self.inputs[1].links[0].from_socket, "\n"], "error": errors}

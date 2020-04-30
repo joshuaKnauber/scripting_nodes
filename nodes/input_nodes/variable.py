@@ -59,5 +59,9 @@ class SN_VariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "name")
 
     def evaluate(self,output):
-        return {"code": [self.name]}
+        error = []
 
+        if self.name == "":
+            error.append("no_available")
+
+        return {"code": [self.name], "error": error}
