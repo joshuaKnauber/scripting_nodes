@@ -10,15 +10,18 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     bl_label = "Scripting Nodes"
     bl_icon = 'SCRIPT'
 
-    addon_name: bpy.props.StringProperty(default="New Addon",name="Name",description="Name of your addon")
-    addon_author: bpy.props.StringProperty(default="",name="Author",description="Your name")
-    addon_description: bpy.props.StringProperty(default="",name="Description",description="Description of what your addon does")
-    addon_location: bpy.props.StringProperty(default="",name="Location",description="Location of your addon in blender")
-    addon_wiki: bpy.props.StringProperty(default="",name="Wiki",description="Link to the documentation of your addon")
-    addon_warning: bpy.props.StringProperty(default="",name="Warning",description="Warning message for your addon")
-    addon_category: bpy.props.StringProperty(default="General",name="Category",description="Category of your addon")
-    addon_blender: bpy.props.IntVectorProperty(default=bpy.app.version,min=0,name="Version",description="Required blender version for your addon")
-    addon_version: bpy.props.IntVectorProperty(default=(1, 0, 0),min=0,name="Version",description="Version of your addon")
+    def update_info(self,context):
+        self.update()
+
+    addon_name: bpy.props.StringProperty(default="New Addon",name="Name",description="Name of your addon",update=update_info)
+    addon_author: bpy.props.StringProperty(default="",name="Author",description="Your name",update=update_info)
+    addon_description: bpy.props.StringProperty(default="",name="Description",description="Description of what your addon does",update=update_info)
+    addon_location: bpy.props.StringProperty(default="",name="Location",description="Location of your addon in blender",update=update_info)
+    addon_wiki: bpy.props.StringProperty(default="",name="Wiki",description="Link to the documentation of your addon",update=update_info)
+    addon_warning: bpy.props.StringProperty(default="",name="Warning",description="Warning message for your addon",update=update_info)
+    addon_category: bpy.props.StringProperty(default="General",name="Category",description="Category of your addon",update=update_info)
+    addon_blender: bpy.props.IntVectorProperty(default=bpy.app.version,min=0,name="Version",description="Required blender version for your addon",update=update_info)
+    addon_version: bpy.props.IntVectorProperty(default=(1, 0, 0),min=0,name="Version",description="Version of your addon",update=update_info)
 
     compiler = ScriptingNodesCompiler()
 
