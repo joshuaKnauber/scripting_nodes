@@ -2,6 +2,7 @@ import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 from ...utitlity_functions import to_lower_camelcase
+from ...node_sockets import update_socket_autocompile
 
 
 class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -13,11 +14,12 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_function_name(self,context):
         if not self.updating_props:
             self.updating_props = True
-            self.name = to_lower_camelcase(self.name)
+            self.functionName = to_lower_camelcase(self.functionName)
             self.updating_props = False
+        update_socket_autocompile(self, context)
 
     updating_props: bpy.props.BoolProperty(default=False)
-    name: bpy.props.StringProperty(default="newFunction", update=update_function_name)
+    functionName: bpy.props.StringProperty(default="newFunction", update=update_function_name)
 
     def init(self, context):
         self.use_custom_color = True
@@ -34,12 +36,18 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# called when node is removed
 
     def draw_buttons(self, context, layout):
-        layout.prop(self,"name",text="Name")
+        layout.prop(self,"functionName",text="Name")
 
-    def socket_value_update(self, context):
-        print("socket update")
+    def evaluate(self,output):  
+        error = []
 
-    def evaluate(self,output):
+        context = bpy.context
+
+        for node in context.space_data.node_tree.nodes:
+            if node.bl_idname == "SN_FunctionNode":
+                if self.functionName == node.functionName:
+                    error.append("same_name")
+
         next_node = None
         if len(self.outputs[0].links) > 0:
             next_node = self.outputs[0].links[0].to_node
@@ -47,8 +55,9 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 "code": [],
                 "indented_blocks": [
                     {
-                        "code": ["def " + self.name + "():\n"],
+                        "code": ["def " + self.functionName + "():\n"],
                         "function_node": next_node
                     }
-                ]
+                ],
+                "error": error
                 }

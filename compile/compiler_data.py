@@ -59,6 +59,11 @@ error_logs = {
         "message": "With your current connections there is no variable availble to use",
         "fatal": True
     },
+    "same_name": {
+        "title": "Same name",
+        "message": "Two functions have the same name",
+        "fatal": True
+    },
 }
 
 

@@ -1,6 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
+from ...node_sockets import update_socket_autocompile
 
 
 class SN_VariableNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -34,13 +35,13 @@ class SN_VariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         variable_nodes = []
         for node in all_nodes:
             if node.bl_idname == "SN_VariableSetNode":
-                if node.name != "":
-                    variable_nodes.append((str(node.name), str(node.name), ""))
+                if node.variable_name != "":
+                    variable_nodes.append((str(node.variable_name), str(node.variable_name), ""))
 
         return variable_nodes
 
     
-    name: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Name of the variable", default=None, update=None, get=None, set=None)
+    variable_name: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Name of the variable", default=None, update=update_socket_autocompile, get=None, set=None)
 
     def init(self, context):
         self.use_custom_color = True
@@ -56,12 +57,12 @@ class SN_VariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# called when node is removed
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "name")
+        layout.prop(self, "variable_name")
 
     def evaluate(self,output):
         error = []
 
-        if self.name == "":
+        if self.variable_name == "":
             error.append("no_available")
 
-        return {"code": [self.name], "error": error}
+        return {"code": [self.variable_name], "error": error}
