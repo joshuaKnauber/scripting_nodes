@@ -46,14 +46,6 @@ class ScriptingNodesCompiler():
                     line = line_part1 + function_value["code"] + line_part2
                     break
 
-        #remove everything before line starts
-        new_line = []
-        for i, snippet in enumerate(line):
-            if "_LINESTART_" in snippet and len(new_line) > 0:
-                new_line.pop(-1)
-            new_line.append(snippet.replace("_LINESTART_",""))
-        line = new_line
-
         #add indents if in line
         for i, snippet in enumerate(line):
             line[i] = snippet.replace("_INDENT_"," "*self._indents)
