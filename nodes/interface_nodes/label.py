@@ -36,4 +36,5 @@ class SN_UiLabelNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 errors.append("wrong_socket")
 
-        return {"code":["label(text=",value,")"], "error":errors}
+        return {"code":["_INDENT__INDENT_",self.outputs[0].links[0].to_node.layout_type(),
+                        ".label(text=",value,")"], "error":errors}

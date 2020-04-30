@@ -45,6 +45,10 @@ class ScriptingNodesCompiler():
                             self._errors.append([error,snippet.node])
                     line = line_part1 + function_value["code"] + line_part2
                     break
+
+        #add indents if in line
+        for i, snippet in enumerate(line):
+            line[i] = snippet.replace("_INDENT_"," "*self._indents)
         return line
 
     def _compile_tree_branch(self, function_node, indents, evaluate_start_node, only_evaluate_start_node):
