@@ -4,6 +4,31 @@ from ..node_looks import node_colors, node_icons
 from ..node_utility import register_dynamic_input
 
 
+# bl_category
+# bl_context
+# bl_idname
+# bl_label
+# bl_options
+# bl_order
+# bl_owner_id
+# bl_parent_id
+# bl_region_type
+# bl_space_type
+# bl_translation_context
+# bl_ui_units_x
+# is_popover
+# layout
+# text
+# use_pin
+
+# def poll(context):
+#    return true to display the panel and false to hide it
+# draw_header(context):
+#    draw a header for the panel
+# draw_header_preset(context)
+#    draw elements for presets for the header
+
+
 class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to create a panel in the user interface'''
     bl_idname = 'SN_UiPanelNode'

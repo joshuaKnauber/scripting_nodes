@@ -65,6 +65,8 @@ node_categories = [
         }),
         NodeItem("SN_UiRowNode", settings={
         }),
+        NodeItem("SN_UiColumnNode", settings={
+        }),
         NodeItem("SN_UiBoxNode", settings={
         }),
         NodeItem("SN_IfNode", settings={
