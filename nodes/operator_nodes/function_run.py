@@ -14,11 +14,11 @@ class SN_FunctionRunNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         for node in context.space_data.node_tree.nodes:
             if node.bl_idname == "SN_FunctionNode":
-                function_nodes.append((str(node.name), str(node.name), ""))
+                function_nodes.append((str(node.functionName), str(node.functionName), ""))
 
         return function_nodes
 
-    name: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Function Name", default=None, update=None, get=None, set=None)
+    functionName: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Function Name", default=None, update=None, get=None, set=None)
 
 
     def init(self, context):
@@ -38,7 +38,7 @@ class SN_FunctionRunNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# called when node is removed
 
     def draw_buttons(self, context, layout):
-        layout.prop(self,"name",text="Name")
+        layout.prop(self,"functionName",text="Name")
 
     def evaluate(self,output):
-        return {"code": [self.name, "()\n"]}
+        return {"code": [self.functionName, "()\n"]}
