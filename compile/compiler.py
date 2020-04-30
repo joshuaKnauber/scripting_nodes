@@ -1,5 +1,5 @@
 import bpy
-from .compiler_data import gpl_block, addon_info, error_logs, import_texts
+from .compiler_data import gpl_block, addon_info, error_logs, import_texts, register_text
 from ..properties.property_utils import clear_error_props, add_error_prop, sn_props
 
 class ScriptingNodesCompiler():
@@ -15,9 +15,16 @@ class ScriptingNodesCompiler():
         #returns if the current tree is a scripting tree
         if bpy.context.space_data.tree_type == 'ScriptingNodesTree':
             return bpy.context.space_data.node_tree != None
+    
+    def _unregister(self):
+        for interface in self._interface:
+            idname = interface.split(":")[0].split("(")[0].split(" ")[-1]
+            if hasattr(bpy.types,idname):
+                bpy.utils.unregister_class(eval("bpy.types." + idname))
 
     def _reset(self):
         #resets the compiler data and errors
+        self._unregister()
         clear_error_props()
         self._errors.clear()
         self._functions.clear()
@@ -163,13 +170,32 @@ class ScriptingNodesCompiler():
             text.write("\n")
             text.write(interface)
 
+        #write classes
+        text.write("classes = [\n")
+        for interface in self._interface:
+            idname = interface.split(":")[0].split("(")[0].split(" ")[-1]
+            text.write(" "*self._indents + idname + "\n")
+        text.write("]\n\n")
+
+        #register function
+        text.write(register_text(self._indents,False))
+        text.write("\n\n")
+
+        #unregister function
+        text.write(register_text(self._indents,True))
+
+        #call register
+        text.write("\n\n")
+        text.write("if __name__ == '__main__':\n")
+        text.write(" "*self._indents + "register()")
+
         return text
 
     def _register_file(self, addon):
         #registers the addon in the blend file
         ctx = bpy.context.copy()
         ctx["edit_text"] = addon
-        #bpy.ops.text.run_script(ctx)
+        bpy.ops.text.run_script(ctx)
         #bpy.data.texts.remove(addon)
 
     def _draw_errors(self):
