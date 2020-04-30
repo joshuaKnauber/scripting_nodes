@@ -41,13 +41,23 @@ def addon_info(tree):
 error_logs = {
     "wrong_socket": {
         "title": "Wrong connection",
-        "message": "One of the inputs of this node has an incorrect output connected",
+        "message": "At least one of the inputs of this node has an incorrect output connected",
         "fatal": True
     },
     "no_connection": {
         "title": "No connections",
-        "message": "One of the program outputs of this node has no connections",
+        "message": "At least one of the program outputs of this node has no connections",
         "fatal": False
+    },
+    "no_name": {
+        "title": "No name",
+        "message": "The variable doesn't have a name",
+        "fatal": True
+    },
+    "no_available": {
+        "title": "No variable available",
+        "message": "With your current connections there is no variable availble to use",
+        "fatal": True
     },
 }
 
