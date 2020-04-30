@@ -49,6 +49,8 @@ node_categories = [
 
         NodeItem("SN_UiPanelNode", settings={
         }),
+        NodeItem("SN_UiLabelNode", settings={
+        }),
 
     ]),
 
