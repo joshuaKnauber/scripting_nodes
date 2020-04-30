@@ -10,7 +10,7 @@ class SN_VariableSetNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Create Variable"
     bl_icon = node_icons["OPERATOR"]
 
-    functionName: bpy.props.StringProperty(name="Name", description="Name of the variable", update=update_socket_autocompile)
+    variable_name: bpy.props.StringProperty(name="Name", description="Name of the variable", update=update_socket_autocompile)
 
     def init(self, context):
         self.use_custom_color = True
@@ -31,16 +31,16 @@ class SN_VariableSetNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# called when node is removed
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "functionName")
+        layout.prop(self, "variable_name")
 
     def evaluate(self,output):
         errors = []
 
-        if self.functionName == "":
+        if self.variable_name == "":
             errors.append("no_name")
 
         if not self.inputs[1].is_linked:
             errors.append("no_connection")
-            return {"code": [self.functionName, " = ", "0", "\n"], "error": errors}
+            return {"code": [self.variable_name, " = ", "0", "\n"], "error": errors}
 
-        return {"code": [self.functionName, " = ", self.inputs[1].links[0].from_socket, "\n"], "error": errors}
+        return {"code": [self.variable_name, " = ", self.inputs[1].links[0].from_socket, "\n"], "error": errors}
