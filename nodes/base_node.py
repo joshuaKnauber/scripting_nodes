@@ -11,6 +11,9 @@ class SN_ScriptingBaseNode:
     def poll(cls, ntree):
         return ntree.bl_idname == 'SN_ScriptingNodesTree'
 
+    def update(self):
+        pass
+
 
 #Example Node
 """
