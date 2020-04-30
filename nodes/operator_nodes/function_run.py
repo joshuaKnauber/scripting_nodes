@@ -19,7 +19,7 @@ class SN_FunctionRunNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         return function_nodes
 
-    name: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Function Name", default=None, options={'ANIMATABLE'}, update=None, get=None, set=None)
+    name: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Function Name", default=None, update=None, get=None, set=None)
 
 
     def init(self, context):
@@ -42,4 +42,4 @@ class SN_FunctionRunNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"name",text="Name")
 
     def evaluate(self,output):
-        return {"code": [self.name, "()"]}
+        return {"code": [self.name, "()\n"]}
