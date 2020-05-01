@@ -79,6 +79,7 @@ class ScriptingNodesCompiler():
                 for error in function_value["error"]:
                     self._errors.append([error,function_node])
 
+            #handle additional functions in operators
             if "functions" in function_value:
                 for func in function_value["functions"]:
                     if func["socket"]:
