@@ -14,6 +14,10 @@ class SN_UiRowNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.use_custom_color = True
         self.color = node_colors["INTERFACE"]
 
+        self.inputs.new('SN_BooleanSocket', "Align")
+        self.inputs.new('SN_BooleanSocket', "Enabled").value = True
+        self.inputs.new('SN_BooleanSocket', "Alert")
+
         self.outputs.new('SN_LayoutSocket', "Layout")
 
     def copy(self, node):
@@ -28,12 +32,33 @@ class SN_UiRowNode(bpy.types.Node, SN_ScriptingBaseNode):
     def layout_type(self):
         return "row"
 
-    def evaluate(self, output):
+    def get_input_value(self,name,socket_type):
+        value = str(self.inputs[name].value)
+        errors = []
+        if self.inputs[name].is_linked:
+            if self.inputs[name].links[0].from_socket.bl_idname == socket_type:
+                value = self.inputs[name].links[0].from_socket
+            else:
+                errors.append("wrong_socket")
+        return value, errors
 
-        header = ["_INDENT__INDENT_row = ",self.outputs[0].links[0].to_node.layout_type(),".row()\n"]
+    def evaluate(self, output):
+        errors = []
+        
+        align, error = self.get_input_value("Align","SN_BooleanSocket")
+        errors += error
+
+        enabled, error = self.get_input_value("Enabled","SN_BooleanSocket")
+        errors += error
+
+        alert, error = self.get_input_value("Alert","SN_BooleanSocket")
+        errors += error
+
+        header = ["_INDENT__INDENT_row = ",self.outputs[0].links[0].to_node.layout_type(),".row(align = ",align,")\n"]
+        header += ["_INDENT__INDENT_row.enabled = ",enabled,"\n"]
+        header += ["_INDENT__INDENT_row.alert = ",alert,"\n"]
 
         code = []
-        errors = []
         for inp in self.inputs:
             if inp.bl_idname == "SN_LayoutSocket" and inp.is_linked:
                 if inp.links[0].from_socket.bl_idname == "SN_LayoutSocket":
