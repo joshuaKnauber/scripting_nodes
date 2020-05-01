@@ -3,6 +3,7 @@ from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 
 
+
 class SN_UiLabelNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to create a label in the user interface'''
     bl_idname = 'SN_UiLabelNode'
