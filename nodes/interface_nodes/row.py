@@ -1,7 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
-from ..node_utility import register_dynamic_input
+from ..node_utility import register_dynamic_input, get_input_value
 
 
 class SN_UiRowNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -32,26 +32,16 @@ class SN_UiRowNode(bpy.types.Node, SN_ScriptingBaseNode):
     def layout_type(self):
         return "row"
 
-    def get_input_value(self,name,socket_type):
-        value = str(self.inputs[name].value)
-        errors = []
-        if self.inputs[name].is_linked:
-            if self.inputs[name].links[0].from_socket.bl_idname == socket_type:
-                value = self.inputs[name].links[0].from_socket
-            else:
-                errors.append("wrong_socket")
-        return value, errors
-
     def evaluate(self, output):
         errors = []
         
-        align, error = self.get_input_value("Align","SN_BooleanSocket")
+        align, error = get_input_value(self,"Align","SN_BooleanSocket")
         errors += error
 
-        enabled, error = self.get_input_value("Enabled","SN_BooleanSocket")
+        enabled, error = get_input_value(self,"Enabled","SN_BooleanSocket")
         errors += error
 
-        alert, error = self.get_input_value("Alert","SN_BooleanSocket")
+        alert, error = get_input_value(self,"Alert","SN_BooleanSocket")
         errors += error
 
         header = ["_INDENT__INDENT_row = ",self.outputs[0].links[0].to_node.layout_type(),".row(align = ",align,")\n"]

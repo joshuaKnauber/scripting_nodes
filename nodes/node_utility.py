@@ -17,3 +17,14 @@ def register_dynamic_input(self, socket_idname, socket_name):
             self.inputs.remove(inp)
 
     self.inputs.new(socket_idname, socket_name)
+
+
+def get_input_value(self,name,socket_type):
+        value = str(self.inputs[name].value)
+        errors = []
+        if self.inputs[name].is_linked:
+            if self.inputs[name].links[0].from_socket.bl_idname == socket_type:
+                value = self.inputs[name].links[0].from_socket
+            else:
+                errors.append("wrong_socket")
+        return value, errors
