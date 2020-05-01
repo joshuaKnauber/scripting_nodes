@@ -9,14 +9,11 @@ from ...node_sockets import update_socket_autocompile
 
 # bl_category
 # bl_context
-# bl_label
 # bl_options
 # bl_order
 # bl_region_type
 # bl_space_type
 
-# def poll(context):
-#    return true to display the panel and false to hide it
 # draw_header(context):
 #    draw a header for the panel
 # draw_header_preset(context):
