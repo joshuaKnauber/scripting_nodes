@@ -72,8 +72,8 @@ import_texts = """import bpy"""
 
 def register_text(indents,unregister):
     if not unregister:
-        text = "def register():\n"+(" "*indents)+"for cls in classes:\n"+(" "*indents*2)+"bpy.utils.register_class(cls)"
+        text = "def register():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if not hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.register_class(cls)"
     else:
-        text = "def unregister():\n"+(" "*indents)+"for cls in classes:\n"+(" "*indents*2)+"bpy.utils.unregister_class(cls)"
+        text = "def unregister():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.unregister_class(cls)"
 
     return text
