@@ -26,7 +26,7 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp = self.inputs.new(socket_type, socket_name)
         inp.display_shape = socket_shape
 
-        self.inputs.new('SN_NumberSocket', "Value")
+        self.inputs.new('SN_NumberSocket', "Value").value = 2
 
         out = self.outputs.new(socket_type, socket_name)
         out.display_shape = socket_shape
@@ -40,7 +40,7 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.use_custom_color = True
         self.color = node_colors["FUNCTION"]
 
-        register_sockets(context)
+        self.register_sockets(context)
 
     def copy(self, node):
         pass# called when node is copied
