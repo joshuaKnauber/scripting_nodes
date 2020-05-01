@@ -8,8 +8,7 @@ from ...node_sockets import update_socket_autocompile
 # https://docs.blender.org/api/current/bpy.types.Panel.html
 
 # bl_context
-# bl_region_type
-# bl_category
+# bl_order
 
 # draw_header(context):
 #    draw a header for the panel
@@ -61,6 +60,7 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                                ("TOOL_HEADER", "Tool Header", "")], 
                                         name="Region Type", description="The region where the panel is going to be used in", update=update_socket_autocompile)
 
+    category: bpy.props.StringProperty(name="Category", description="The name of category", update=update_socket_autocompile)
 
     def init(self, context):
         self.use_custom_color = True
@@ -80,6 +80,7 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"panel_name",text="Name")
         layout.prop(self,"space_type_name")
         layout.prop(self,"region_type_name")
+        layout.prop(self,"category")
         layout.prop(self, "default_closed")
         layout.prop(self, "hide_header")        
 
