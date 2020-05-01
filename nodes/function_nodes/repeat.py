@@ -31,7 +31,10 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
         out = self.outputs.new(socket_type, socket_name)
         out.display_shape = socket_shape
 
-        repeat = self.outputs.new(socket_type, "Repeat")
+        if self.is_layout:
+            repeat = self.inputs.new(socket_type, "Repeat")
+        else:
+            repeat = self.outputs.new(socket_type, "Repeat")
         repeat.display_shape = socket_shape
 
     is_layout: bpy.props.BoolProperty(default=False,update=register_sockets)

@@ -82,10 +82,11 @@ class ScriptingNodesCompiler():
             #handle additional functions in operators
             if "functions" in function_value:
                 for func in function_value["functions"]:
+                    function_result = ""
                     if func["socket"]:
-                        function_result = self._compile_tree_branch(func["socket"].node,self._indents*2,True,False)
-                        function_result += " "*self._indents*2 + func["followup"]
-                        code_block += [function_result]
+                        function_result += self._compile_tree_branch(func["socket"].node,self._indents*2,True,False)
+                    function_result += " "*self._indents*2 + func["followup"]
+                    code_block += [function_result]
 
             #add function nodes code to the entire code
             code_block = self._compile_script_line(code_block)
