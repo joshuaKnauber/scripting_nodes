@@ -17,8 +17,8 @@ class ScriptingNodesCompiler():
             return bpy.context.space_data.node_tree != None
     
     def _unregister(self):
-        for interface in self._interface:
-            idname = interface.split(":")[0].split("(")[0].split(" ")[-1]
+        for registered in self._interface + self._operators:
+            idname = registered.split(":")[0].split("(")[0].split(" ")[-1]
             if hasattr(bpy.types,idname):
                 bpy.utils.unregister_class(eval("bpy.types." + idname))
 
@@ -29,6 +29,7 @@ class ScriptingNodesCompiler():
         self._errors.clear()
         self._functions.clear()
         self._interface.clear()
+        self._operators.clear()
 
     def _only_string(self, value_list):
         #returns if the given list contains only strings
@@ -62,7 +63,7 @@ class ScriptingNodesCompiler():
         code_blocks = ""
         continue_program = True
 
-        while continue_program > 0 and not only_evaluate_start_node or evaluate_start_node:
+        while continue_program and not only_evaluate_start_node or evaluate_start_node:
 
             #get the next connected node if it's not the start node
             if len(function_node.outputs) > 0:
@@ -77,6 +78,13 @@ class ScriptingNodesCompiler():
             if "error" in function_value:
                 for error in function_value["error"]:
                     self._errors.append([error,function_node])
+
+            if "functions" in function_value:
+                for func in function_value["functions"]:
+                    if func["socket"]:
+                        function_result = self._compile_tree_branch(func["socket"].node,self._indents*2,True,False)
+                        function_result += " "*self._indents*2 + func["followup"]
+                        code_block += [function_result]
 
             #add function nodes code to the entire code
             code_block = self._compile_script_line(code_block)
@@ -124,10 +132,17 @@ class ScriptingNodesCompiler():
             self._functions.append(function)
 
     def _compile_operators(self, tree):
-        operator_starts = []
+        #compiles all operators in the node tree
+        operator_nodes = []
+
+        #finds all operator nodes in the node tree
         for node in tree.nodes:
-            if node.bl_idname == "":
-                operator_starts.append(node)
+            if node.bl_idname == "SN_OperatorNode":
+                operator_nodes.append(node)
+
+        for operator in operator_nodes:
+            operator = self._compile_tree_branch(operator,0,True,True)
+            self._operators.append(operator)
 
     def _compile_interface(self, tree):
         #compiles all interface nodes in the node tree
@@ -165,6 +180,11 @@ class ScriptingNodesCompiler():
             text.write("\n")
             text.write(function)
 
+        #writes all operators in the text file
+        for operator in self._operators:
+            text.write("\n")
+            text.write(operator)
+
         #writes all interfaces in the text file
         for interface in self._interface:
             text.write("\n")
@@ -172,8 +192,8 @@ class ScriptingNodesCompiler():
 
         #write classes
         text.write("\nclasses = [\n")
-        for interface in self._interface:
-            idname = interface.split(":")[0].split("(")[0].split(" ")[-1]
+        for register in self._interface + self._operators:
+            idname = register.split(":")[0].split("(")[0].split(" ")[-1]
             text.write(" "*self._indents + idname + ",\n")
         text.write("]\n\n")
 
@@ -195,7 +215,7 @@ class ScriptingNodesCompiler():
         #registers the addon in the blend file
         ctx = bpy.context.copy()
         ctx["edit_text"] = addon
-        bpy.ops.text.run_script(ctx)
+        #bpy.ops.text.run_script(ctx)
         #bpy.data.texts.remove(addon)
 
     def _draw_errors(self):

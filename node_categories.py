@@ -84,6 +84,8 @@ node_categories = [
 
     SN_ScriptingNodesCategory('OPERATORS', "Operators", items=[
         
+        NodeItem("SN_OperatorNode", settings={
+        }),
         NodeItem("SN_FunctionNode", settings={
         }),
         NodeItem("SN_FunctionEndNode", settings={
