@@ -59,6 +59,9 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
         row = col.row()
         row.prop(context.space_data.node_tree, "addon_version", text="")
 
+        layout.separator()
+        layout.prop(context.space_data.node_tree,"compile_on_start")
+
 class SN_PT_ErrorLogPanel(bpy.types.Panel):
     """Creates a panel for displaying error messages in the node editors sidebar"""
     bl_label = "Errors"

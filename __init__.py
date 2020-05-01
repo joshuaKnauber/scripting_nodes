@@ -28,15 +28,25 @@ from . import auto_load
 from .node_categories import get_node_categories
 from .interface import node_tree_header
 import nodeitems_utils
+from bpy.app.handlers import persistent
 
 auto_load.init()
+
+@persistent
+def load_handler(scene):
+    for tree in bpy.data.node_groups:
+        if tree.bl_idname == "ScriptingNodesTree":
+            if tree.compile_on_start:
+                pass#tree.compiler.recompile()
 
 def register():
     auto_load.register()
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
     bpy.types.NODE_HT_header.append(node_tree_header)
+    bpy.app.handlers.load_post.append(load_handler)
 
 def unregister():
     auto_load.unregister()
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
     bpy.types.NODE_HT_header.remove(node_tree_header)
+    bpy.app.handlers.load_post.remove(load_handler)

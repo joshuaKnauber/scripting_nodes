@@ -23,6 +23,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     addon_blender: bpy.props.IntVectorProperty(default=bpy.app.version,min=0,name="Version",description="Required blender version for your addon",update=update_info)
     addon_version: bpy.props.IntVectorProperty(default=(1, 0, 0),min=0,name="Version",description="Version of your addon",update=update_info)
 
+    compile_on_start: bpy.props.BoolProperty(default=True,name="Reload on start",description="Reload this node tree when this file is opened")
+
     compiler = ScriptingNodesCompiler()
 
     def update(self):
