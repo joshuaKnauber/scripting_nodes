@@ -14,6 +14,9 @@ class SN_ScriptingBaseNode:
     def update(self):
         pass
 
+    def layout_type(self):
+        return None
+
 
 #Example Node
 """

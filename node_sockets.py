@@ -29,7 +29,7 @@ class SN_StringSocket(bpy.types.NodeSocket):
 
 
 class SN_NumberSocket(bpy.types.NodeSocket):
-    '''Number Socket for handeling integers'''
+    '''Number Socket for handeling numbers'''
     bl_idname = 'SN_NumberSocket'
     bl_label = "Number"
 
@@ -47,6 +47,32 @@ class SN_NumberSocket(bpy.types.NodeSocket):
             layout.label(text=text)
         else:
             layout.prop(self, "value", text=text)
+
+    def draw_color(self, context, node):
+        return socket_colors["NUMBER"]
+
+
+class SN_FactorSocket(bpy.types.NodeSocket):
+    '''Number Socket for handeling factors'''
+    bl_idname = 'SN_FactorSocket'
+    bl_label = "Factor"
+
+    is_data_socket = True
+
+    value: bpy.props.FloatProperty(
+        name="Factor",
+        description="Socket for a number value",
+        default=0,
+        update=update_socket_autocompile,
+        soft_min = 0,
+        soft_max = 1
+    )
+
+    def draw(self, context, layout, node, text):
+        if self.is_output or self.is_linked:
+            layout.label(text=text)
+        else:
+            layout.prop(self, "value", text=text,slider=True)
 
     def draw_color(self, context, node):
         return socket_colors["NUMBER"]

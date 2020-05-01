@@ -68,11 +68,15 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 "_INDENT__INDENT_layout = self.layout\n"]
 
         code = []
+        errors = []
         for inp in self.inputs:
             if inp.bl_idname == "SN_LayoutSocket" and inp.is_linked:
-                code += [inp.links[0].from_socket,"\n"]
+                if inp.bl_idname == "SN_LayoutSocket":
+                    code += [inp.links[0].from_socket,"\n"]
+                else:
+                    errors.append("wrong_socket")
         
-        return {"code":header+code}
+        return {"code":header+code,"error":errors}
 
     def update(self):
         register_dynamic_input(self, "SN_LayoutSocket", "Layout")

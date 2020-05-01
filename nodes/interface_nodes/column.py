@@ -33,11 +33,15 @@ class SN_UiColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
         header = ["_INDENT__INDENT_col = ",self.outputs[0].links[0].to_node.layout_type(),".column()\n"]
 
         code = []
+        errors = []
         for inp in self.inputs:
             if inp.bl_idname == "SN_LayoutSocket" and inp.is_linked:
-                code += [inp.links[0].from_socket,"\n"]
+                if inp.links[0].from_socket.bl_idname == "SN_LayoutSocket": 
+                    code += [inp.links[0].from_socket,"\n"]
+                else:
+                    errors.append("wrong_socket")
 
-        return {"code":header+code}
+        return {"code":header+code,"error":errors}
 
     def update(self):
         register_dynamic_input(self, "SN_LayoutSocket", "Layout")
