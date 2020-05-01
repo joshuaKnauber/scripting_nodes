@@ -1,4 +1,5 @@
 import bpy
+from ...compile.operators import SN_OT_EmptyOperator
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 from ...node_sockets import update_socket_autocompile
@@ -20,7 +21,7 @@ class SN_UiButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         return operator_nodes
 
     operatorName: bpy.props.EnumProperty(items=items_fetch, name="Operator", description="Operator Name", default=None, update=update_socket_autocompile, get=None, set=None)
-
+    buttonName: bpy.props.StringProperty(name="Button Name", description="Text displayed on the button", update=update_socket_autocompile)
 
     def init(self, context):
         self.use_custom_color = True
@@ -35,8 +36,18 @@ class SN_UiButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# called when node is removed
 
     def draw_buttons(self, context, layout):
+        layout.prop(self,"buttonName")
         layout.prop(self,"operatorName")
 
     def evaluate(self,output):
-        idname_lower = self.operatorName.lower().replace(" ","_")
-        return {"code": ["_INDENT__INDENT_", self.outputs[0].links[0].to_node.layout_type(), ".operator('sn.", idname_lower, "')\n"]}
+        errors = []
+
+        if self.operatorName == "":
+            errors.append("no_operator")
+            idname_lower = 'scripting_nodes.empty'
+        else:
+            idname_lower = self.operatorName.lower().replace(" ","_")
+        if self.buttonName != "":
+            return {"code": ["_INDENT__INDENT_", self.outputs[0].links[0].to_node.layout_type(), ".operator('sn.", idname_lower, "', text='", self.buttonName, "')\n"], "error": errors}
+        else:
+            return {"code": ["_INDENT__INDENT_", self.outputs[0].links[0].to_node.layout_type(), ".operator('sn.", idname_lower, "')\n"], "error": errors}

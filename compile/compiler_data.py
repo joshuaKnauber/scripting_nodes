@@ -56,7 +56,12 @@ error_logs = {
     },
     "no_available": {
         "title": "No variable available",
-        "message": "With your current connections there is no variable availble to use",
+        "message": "With your current connections there is no variable available to use",
+        "fatal": True
+    },
+    "no_operator": {
+        "title": "No operator available",
+        "message": "There is no operator available to use",
         "fatal": True
     },
     "same_name_function": {
