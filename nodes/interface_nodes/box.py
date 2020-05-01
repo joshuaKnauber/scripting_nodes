@@ -1,7 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
-from ..node_utility import register_dynamic_input
+from ..node_utility import register_dynamic_input, get_input_value
 
 
 class SN_UiBoxNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -13,6 +13,9 @@ class SN_UiBoxNode(bpy.types.Node, SN_ScriptingBaseNode):
     def init(self, context):
         self.use_custom_color = True
         self.color = node_colors["INTERFACE"]
+
+        self.inputs.new('SN_BooleanSocket', "Enabled").value = True
+        self.inputs.new('SN_BooleanSocket', "Alert")
 
         self.outputs.new('SN_LayoutSocket', "Layout")
 
@@ -30,10 +33,19 @@ class SN_UiBoxNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, output):
 
+        errors = []
+
+        enabled, error = get_input_value(self,"Enabled","SN_BooleanSocket")
+        errors += error
+
+        alert, error = get_input_value(self,"Alert","SN_BooleanSocket")
+        errors += error
+
         header = ["_INDENT__INDENT_box = ",self.outputs[0].links[0].to_node.layout_type(),".box()\n"]
+        header += ["_INDENT__INDENT_box.enabled = ",enabled,"\n"]
+        header += ["_INDENT__INDENT_box.alert = ",alert,"\n"]
 
         code = []
-        errors = []
         for inp in self.inputs:
             if inp.bl_idname == "SN_LayoutSocket" and inp.is_linked:
                 if inp.links[0].from_socket.bl_idname == "SN_LayoutSocket":

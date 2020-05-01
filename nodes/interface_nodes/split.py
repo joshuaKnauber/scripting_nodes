@@ -1,7 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
-from ..node_utility import register_dynamic_input
+from ..node_utility import register_dynamic_input, get_input_value
 
 
 class SN_UiSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -14,8 +14,12 @@ class SN_UiSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.use_custom_color = True
         self.color = node_colors["INTERFACE"]
 
-        inp = self.inputs.new('SN_FactorSocket', "Factor [0-1]")
+        inp = self.inputs.new('SN_FactorSocket', "Factor")
         inp.value = 0.5
+
+        self.inputs.new('SN_BooleanSocket', "Align")
+        self.inputs.new('SN_BooleanSocket', "Enabled").value = True
+        self.inputs.new('SN_BooleanSocket', "Alert")
 
         self.inputs.new('SN_LayoutSocket', "Layout")
         self.inputs.new('SN_LayoutSocket', "Layout")
@@ -44,7 +48,18 @@ class SN_UiSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 errors.append("wrong_socket")
 
-        header = ["_INDENT__INDENT_split = ",self.outputs[0].links[0].to_node.layout_type(),".split(factor=",factor,")\n"]
+        align, error = get_input_value(self,"Align","SN_BooleanSocket")
+        errors += error
+
+        enabled, error = get_input_value(self,"Enabled","SN_BooleanSocket")
+        errors += error
+
+        alert, error = get_input_value(self,"Alert","SN_BooleanSocket")
+        errors += error
+
+        header = ["_INDENT__INDENT_split = ",self.outputs[0].links[0].to_node.layout_type(),".split(factor=",factor,",align=",align,")\n"]
+        header += ["_INDENT__INDENT_split.enabled = ",enabled,"\n"]
+        header += ["_INDENT__INDENT_split.alert = ",alert,"\n"]
 
         code = []
         for inp in self.inputs:
