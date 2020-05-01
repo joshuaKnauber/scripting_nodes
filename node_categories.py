@@ -73,10 +73,10 @@ node_categories = [
         }),
         NodeItem("SN_UiBoxNode", settings={
         }),
-        NodeItem("SN_IfNode", settings={
+        NodeItem("SN_IfNode", label="If - Layout",settings={
             "is_layout": repr(True),
         }),
-        NodeItem("SN_RepeatNode", settings={
+        NodeItem("SN_RepeatNode", label="Repeat - Layout", settings={
             "is_layout": repr(True),
         }),
 
@@ -99,13 +99,13 @@ node_categories = [
 
     ]),
 
-    SN_ScriptingNodesCategory('FUNCTIONS', "Functions", items=[
+    SN_ScriptingNodesCategory('PROGRAM', "Program", items=[
       
         NodeItem("SN_PrintNode", settings={
         }),
-        NodeItem("SN_IfNode", settings={
+        NodeItem("SN_IfNode", label="If - Program", settings={
         }),
-        NodeItem("SN_RepeatNode", settings={
+        NodeItem("SN_RepeatNode", label="Repeat - Program", settings={
         }),
         NodeItem("SN_VariableChangeNode", settings={
         }),

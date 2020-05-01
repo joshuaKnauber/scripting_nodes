@@ -6,7 +6,7 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Repeat node for repeating a task'''
     bl_idname = 'SN_RepeatNode'
     bl_label = "Repeat"
-    bl_icon = node_icons["FUNCTION"]
+    bl_icon = node_icons["PROGRAM"]
 
     def register_sockets(self,context):
         for inp in self.inputs:
@@ -38,7 +38,7 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["FUNCTION"]
+        self.color = node_colors["PROGRAM"]
 
         self.register_sockets(context)
 

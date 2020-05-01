@@ -7,11 +7,11 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node for printing a value'''
     bl_idname = 'SN_PrintNode'
     bl_label = "Print"
-    bl_icon = node_icons["FUNCTION"]
+    bl_icon = node_icons["PROGRAM"]
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["FUNCTION"]
+        self.color = node_colors["PROGRAM"]
 
         #Node Inputs
         inp = self.inputs.new('SN_ProgramSocket', "Program")
