@@ -100,11 +100,23 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self,output):
         errors = []
+
+        context = bpy.context
+
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname == "SN_UiPanelNode":
+                if self.name != node.name:
+                    if self.panel_name == node.panel_name:
+                        errors.append("same_name_panel")
+
         pollValue, error = get_input_value(self, "Should display", "SN_BooleanSocket")
         errors+=error
+
         orderValue, error = get_input_value(self, "Order", "SN_NumberSocket")
         errors+=error
+
         options = self.options()
+
         idname = "SN_PT_" + self.panel_name.title().replace(" ","")
         header = ["class " + idname + "(bpy.types.Panel):\n",
                 "_INDENT_bl_label = '"+self.panel_name+"'\n",
