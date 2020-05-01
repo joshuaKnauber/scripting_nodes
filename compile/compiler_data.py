@@ -69,6 +69,11 @@ error_logs = {
         "message": "Two panels have the same name",
         "fatal": True
     },
+    "same_name_operator": {
+        "title": "Same name",
+        "message": "Two operators have the same name",
+        "fatal": True
+    },
 }
 
 
