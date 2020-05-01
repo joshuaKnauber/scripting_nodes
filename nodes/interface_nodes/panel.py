@@ -3,6 +3,7 @@ from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 from ..node_utility import register_dynamic_input
 
+# https://docs.blender.org/api/current/bpy.types.Panel.html
 
 # bl_category
 # bl_context
