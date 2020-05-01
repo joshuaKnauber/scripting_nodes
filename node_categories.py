@@ -92,6 +92,8 @@ node_categories = [
         }),
         NodeItem("SN_VariableSetNode", settings={
         }),
+        NodeItem("SN_ScriptLineNode", settings={
+        }),
 
     ]),
 
