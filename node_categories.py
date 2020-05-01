@@ -63,7 +63,11 @@ node_categories = [
         }),
         NodeItem("SN_UiLabelNode", settings={
         }),
+        NodeItem("SN_UiSeparatorNode", settings={
+        }),
         NodeItem("SN_UiRowNode", settings={
+        }),
+        NodeItem("SN_UiColumnNode", settings={
         }),
         NodeItem("SN_UiBoxNode", settings={
         }),
