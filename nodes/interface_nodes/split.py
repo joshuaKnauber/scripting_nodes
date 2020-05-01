@@ -20,6 +20,8 @@ class SN_UiSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.inputs.new('SN_BooleanSocket', "Align")
         self.inputs.new('SN_BooleanSocket', "Enabled").value = True
         self.inputs.new('SN_BooleanSocket', "Alert")
+        self.inputs.new('SN_NumberSocket', "Scale X").value = 1
+        self.inputs.new('SN_NumberSocket', "Scale Y").value = 1
 
         self.inputs.new('SN_LayoutSocket', "Layout")
         self.inputs.new('SN_LayoutSocket', "Layout")
@@ -57,9 +59,17 @@ class SN_UiSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
         alert, error = get_input_value(self,"Alert","SN_BooleanSocket")
         errors += error
 
+        scale_x, error = get_input_value(self,"Scale X","SN_BooleanSocket")
+        errors += error
+
+        scale_y, error = get_input_value(self,"Scale Y","SN_NumberSocket")
+        errors += error
+
         header = ["_INDENT__INDENT_split = ",self.outputs[0].links[0].to_node.layout_type(),".split(factor=",factor,",align=",align,")\n"]
         header += ["_INDENT__INDENT_split.enabled = ",enabled,"\n"]
         header += ["_INDENT__INDENT_split.alert = ",alert,"\n"]
+        header += ["_INDENT__INDENT_row.scale_x = ",scale_x,"\n"]
+        header += ["_INDENT__INDENT_row.scale_y = ",scale_y,"\n"]
 
         code = []
         for inp in self.inputs:

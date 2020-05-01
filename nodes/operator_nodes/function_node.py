@@ -47,7 +47,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             if node.bl_idname == "SN_FunctionNode":
                 if self.name != node.name:
                     if self.functionName == node.functionName:
-                        error.append("same_name")
+                        error.append("same_name_function")
 
         next_node = None
         if len(self.outputs[0].links) > 0:

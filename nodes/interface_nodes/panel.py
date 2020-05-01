@@ -8,8 +8,7 @@ from ...node_sockets import update_socket_autocompile
 # https://docs.blender.org/api/current/bpy.types.Panel.html
 
 # bl_context
-# bl_region_type
-# bl_category
+# bl_order
 
 # draw_header(context):
 #    draw a header for the panel
@@ -61,6 +60,7 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                                ("TOOL_HEADER", "Tool Header", "")], 
                                         name="Region Type", description="The region where the panel is going to be used in", update=update_socket_autocompile)
 
+    category: bpy.props.StringProperty(name="Category", description="The name of category", update=update_socket_autocompile)
 
     def init(self, context):
         self.use_custom_color = True
@@ -80,6 +80,7 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"panel_name",text="Name")
         layout.prop(self,"space_type_name")
         layout.prop(self,"region_type_name")
+        layout.prop(self,"category")
         layout.prop(self, "default_closed")
         layout.prop(self, "hide_header")        
 
@@ -99,11 +100,23 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self,output):
         errors = []
+
+        context = bpy.context
+
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname == "SN_UiPanelNode":
+                if self.name != node.name:
+                    if self.panel_name == node.panel_name:
+                        errors.append("same_name_panel")
+
         pollValue, error = get_input_value(self, "Should display", "SN_BooleanSocket")
         errors+=error
+
         orderValue, error = get_input_value(self, "Order", "SN_NumberSocket")
         errors+=error
+
         options = self.options()
+
         idname = "SN_PT_" + self.panel_name.title().replace(" ","")
         header = ["class " + idname + "(bpy.types.Panel):\n",
                 "_INDENT_bl_label = '"+self.panel_name+"'\n",

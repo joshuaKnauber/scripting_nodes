@@ -59,9 +59,14 @@ error_logs = {
         "message": "With your current connections there is no variable availble to use",
         "fatal": True
     },
-    "same_name": {
+    "same_name_function": {
         "title": "Same name",
         "message": "Two functions have the same name",
+        "fatal": True
+    },
+    "same_name_panel": {
+        "title": "Same name",
+        "message": "Two panels have the same name",
         "fatal": True
     },
 }
