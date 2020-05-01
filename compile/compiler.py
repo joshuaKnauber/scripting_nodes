@@ -47,17 +47,40 @@ class ScriptingNodesCompiler():
                     line.pop(i)
                     line_part1 = line[:i]
                     line_part2 = line[i:]
+
                     function_value = snippet.node.evaluate(snippet)
+
                     if "error" in function_value:
                         for error in function_value["error"]:
                             self._errors.append([error,snippet.node])
-                    line = line_part1 + function_value["code"] + line_part2
+                    
+                    code_block = function_value["code"]
+
+                    #handle additional functions in operators
+                    function_result = self._compile_subfunctions(function_value)
+                    code_block += [function_result]
+
+                    line = line_part1 + code_block + line_part2
                     break
 
         #add indents if in line
         for i, snippet in enumerate(line):
             line[i] = snippet.replace("_INDENT_"," "*self._indents)
         return line
+
+    def _compile_subfunctions(self,function_value):
+        function_results = ""
+        if "functions" in function_value:
+            for func in function_value["functions"]:
+                function_result = ""
+                if func["socket"]:
+                    function_result += self._compile_tree_branch(func["socket"].node,self._indents*2,True,func["socket"].bl_idname == "SN_LayoutSocket")
+
+                line = ("").join(self._compile_script_line(func["followup"]))
+                function_result += line
+
+            function_results += function_result
+        return function_results
 
     def _compile_tree_branch(self, function_node, indents, evaluate_start_node, only_evaluate_start_node):
         code_blocks = ""
@@ -80,18 +103,16 @@ class ScriptingNodesCompiler():
                     self._errors.append([error,function_node])
 
             #handle additional functions in operators
-            if "functions" in function_value:
-                for func in function_value["functions"]:
-                    function_result = ""
-                    if func["socket"]:
-                        function_result += self._compile_tree_branch(func["socket"].node,self._indents*2,True,False)
-                    function_result += " "*self._indents*2 + func["followup"]
-                    code_block += [function_result]
+            function_result = self._compile_subfunctions(function_value)
+            code_block += [function_result]
 
             #add function nodes code to the entire code
             code_block = self._compile_script_line(code_block)
+            while "" in code_block:
+                code_block.remove("")
             if len(code_block) > 0:
-                code_blocks += " "*indents + ("").join(code_block)
+                if not code_block[0][0] == " ":
+                    code_blocks += " "*indents + ("").join(code_block)
 
             #get the code for all the indented code blocks
             if "indented_blocks" in function_value:
@@ -103,7 +124,7 @@ class ScriptingNodesCompiler():
 
                     #compile the connected tree and add it to the entire code
                     if block["function_node"]:
-                        code_block = self._compile_tree_branch(block["function_node"],indents+self._indents, True, False)
+                        code_block = self._compile_tree_branch(block["function_node"],indents+self._indents, True, False)####
                     else:
                         self._errors.append(["no_connection",function_node])
                         code_block = " "*(indents+self._indents) + "pass\n"

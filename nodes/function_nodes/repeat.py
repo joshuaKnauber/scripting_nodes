@@ -54,22 +54,44 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         pass
 
+    def layout_type(self):
+        return self.outputs[0].links[0].to_node.layout_type()
+
     def evaluate(self,output):
         value = str(self.inputs[1].value)
 
         if self.inputs[1].is_linked:
             value = self.inputs[1].links[0].from_socket
 
-        repeat_next_node = None
-        if self.outputs[1].is_linked:
-            repeat_next_node = self.outputs[1].links[0].to_node
+        if not self.is_layout:
+            repeat_next_node = None
+            if self.outputs[1].is_linked:
+                repeat_next_node = self.outputs[1].links[0].to_node
 
-        return {
-                "code": [],
-                "indented_blocks": [
-                    {
-                        "code": ["for i in range(abs(int(", value, "))):\n"],
-                        "function_node": repeat_next_node
+            return {
+                    "code": [],
+                    "indented_blocks": [
+                        {
+                            "code": ["for i in range(abs(int(", value, "))):\n"],
+                            "function_node": repeat_next_node
+                        }
+                    ]
                     }
-                ]
+
+        else:
+            repeat = None
+            if self.inputs[0].is_linked:
+                repeat = self.inputs[0].links[0].from_socket
+
+            layout = ["pass\n"]
+            if self.inputs[2].is_linked:
+                layout = [self.inputs[2].links[0].from_socket]
+
+            functions = [
+                {
+                    "socket": repeat,
+                    "followup": layout
                 }
+            ]
+
+            return {"code":["for i in range(abs(int(", value, "))):\n"], "functions":functions}
