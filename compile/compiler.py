@@ -174,7 +174,7 @@ class ScriptingNodesCompiler():
         text.write("\nclasses = [\n")
         for interface in self._interface:
             idname = interface.split(":")[0].split("(")[0].split(" ")[-1]
-            text.write(" "*self._indents + idname + "\n")
+            text.write(" "*self._indents + idname + ",\n")
         text.write("]\n\n")
 
         #register function
