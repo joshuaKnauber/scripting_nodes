@@ -56,7 +56,12 @@ error_logs = {
     },
     "no_available": {
         "title": "No variable available",
-        "message": "With your current connections there is no variable availble to use",
+        "message": "With your current connections there is no variable available to use",
+        "fatal": True
+    },
+    "no_operator": {
+        "title": "No operator available",
+        "message": "There is no operator available to use",
         "fatal": True
     },
     "same_name_function": {
@@ -67,6 +72,11 @@ error_logs = {
     "same_name_panel": {
         "title": "Same name",
         "message": "Two panels have the same name",
+        "fatal": True
+    },
+    "same_name_operator": {
+        "title": "Same name",
+        "message": "Two operators have the same name",
         "fatal": True
     },
 }

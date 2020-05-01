@@ -1,6 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
+from ...node_sockets import update_socket_autocompile
 
 
 class SN_FunctionRunNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -18,7 +19,7 @@ class SN_FunctionRunNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         return function_nodes
 
-    functionName: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Function Name", default=None, update=None, get=None, set=None)
+    functionName: bpy.props.EnumProperty(items=items_fetch, name="Name", description="Function Name", default=None, update=update_socket_autocompile, get=None, set=None)
 
 
     def init(self, context):

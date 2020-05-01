@@ -1,5 +1,15 @@
 import bpy
 
+class SN_OT_EmptyOperator(bpy.types.Operator):
+    bl_idname = "scripting_nodes.empty"
+    bl_label = "Empty Operator"
+    bl_description = "This is an empty operator"
+    bl_options = {"REGISTER","INTERNAL"}
+
+    def execute(self, context):        
+        return {"FINISHED"}
+
+
 class SN_OT_ReloadButton(bpy.types.Operator):
     bl_idname = "scripting_nodes.compile"
     bl_label = "Reload"

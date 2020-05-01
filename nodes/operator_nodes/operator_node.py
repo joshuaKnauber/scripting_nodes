@@ -35,6 +35,15 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self,output):
         errors = []
+
+        context = bpy.context
+
+        for node in context.space_data.node_tree.nodes:
+            if node.bl_idname == "SN_OperatorNode":
+                if self.name != node.name:
+                    if self.operator_name == node.operator_name:
+                        errors.append("same_name_operator")
+
         pollValue, error = get_input_value(self, "Should run", "SN_BooleanSocket")
         errors+=error
 
