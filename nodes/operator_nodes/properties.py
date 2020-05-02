@@ -20,6 +20,7 @@ class SN_PropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = 'SN_PropertiesNode'
     bl_label = "Property"
     bl_icon = node_icons["OPERATOR"]
+    bl_width_default = 300
 
     propName: bpy.props.StringProperty(name="Name", description="Name of the property", default="My Property", update=update_socket_autocompile)
     propDescription: bpy.props.StringProperty(name="Description", description="Description of the property", default="My Description", update=update_socket_autocompile)
@@ -48,7 +49,10 @@ class SN_PropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.use_custom_color = True
         self.color = node_colors["OPERATOR"]
 
-        out = self.inputs.new('SN_ProgramSocket', "Program")
+        pIn = self.inputs.new('SN_ProgramSocket', "Program")
+        pIn.display_shape = "DIAMOND"
+
+        out = self.outputs.new('SN_ProgramSocket', "Program")
         out.display_shape = "DIAMOND"
 
     def copy(self, node):
