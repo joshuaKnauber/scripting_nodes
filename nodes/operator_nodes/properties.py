@@ -1,19 +1,9 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
-from ..node_utility import register_dynamic_input, get_input_value
+from ..node_utility import register_dynamic_input, get_input_value, get_types
 from ...node_sockets import update_socket_autocompile
 
-# boolean
-# string
-# float
-# int
-# enum
-
-#   choose thing
-# give name (name=)
-# give description
-#   assign to type
 
 class SN_PropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to create a properties'''
@@ -22,12 +12,8 @@ class SN_PropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = node_icons["OPERATOR"]
     bl_width_default = 300
 
-    propName: bpy.props.StringProperty(name="Name", description="Name of the property", default="My Property", update=update_socket_autocompile)
-    propDescription: bpy.props.StringProperty(name="Description", description="Description of the property", default="My Description", update=update_socket_autocompile)
-    propType: bpy.props.EnumProperty(items=[("BoolProperty", "Boolean", "A boolean input"), ("EnumProperty", "List", "A dropdown list that can be converted to display all values"), ("FloatProperty", "Numbers", "A input for all numbers"), ("IntProperty", "Whole Numbers", "A input for whole numbers"), ("StringProperty", "Text", "A text input")], name="Type", description="", default=None, update=update_socket_autocompile, get=None, set=None)
-    
     def getTypes(self, context):
-        types = ["Scene", "Object", "Material"]
+        types = get_types()
 
         newTypes = []
         for typeName in types:
@@ -35,6 +21,10 @@ class SN_PropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         return newTypes
     
+
+    propName: bpy.props.StringProperty(name="Name", description="Name of the property", default="My Property", update=update_socket_autocompile)
+    propDescription: bpy.props.StringProperty(name="Description", description="Description of the property", default="My Description", update=update_socket_autocompile)
+    propType: bpy.props.EnumProperty(items=[("BoolProperty", "Boolean", "A boolean input"), ("EnumProperty", "List", "A dropdown list that can be converted to display all values"), ("FloatProperty", "Numbers", "A input for all numbers"), ("IntProperty", "Whole Numbers", "A input for whole numbers"), ("StringProperty", "Text", "A text input")], name="Type", description="", default=None, update=update_socket_autocompile, get=None, set=None)
     propLocation: bpy.props.EnumProperty(items=getTypes, name="Location", description="", default=None, update=update_socket_autocompile, get=None, set=None)
 
 
@@ -48,12 +38,6 @@ class SN_PropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     def init(self, context):
         self.use_custom_color = True
         self.color = node_colors["OPERATOR"]
-
-        pIn = self.inputs.new('SN_ProgramSocket', "Program")
-        pIn.display_shape = "DIAMOND"
-
-        out = self.outputs.new('SN_ProgramSocket', "Program")
-        out.display_shape = "DIAMOND"
 
     def copy(self, node):
         pass# called when node is copied
@@ -132,5 +116,4 @@ class SN_PropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             code.append(str(newItems))
             code.append(")")
 
-        code.append("\n")
         return {"code": code, "error":errors}

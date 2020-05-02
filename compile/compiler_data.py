@@ -85,10 +85,14 @@ error_logs = {
 import_texts = """import bpy"""
 
 
-def register_text(indents,unregister):
+def register_text(indents,unregister, property_nodes):
+    fullPropertyString = ""
+    for propertyName in property_nodes:
+        fullPropertyString+="    " + propertyName + "\n"
+
     if not unregister:
-        text = "def register():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if not hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.register_class(cls)"
+        text = "def register():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if not hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.register_class(cls)\n" + fullPropertyString
     else:
-        text = "def unregister():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.unregister_class(cls)"
+        text = "def unregister():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.unregister_class(cls)\n" + fullPropertyString
 
     return text

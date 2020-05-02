@@ -28,3 +28,7 @@ def get_input_value(self,name,socket_type):
         else:
             errors.append("wrong_socket")
     return value, errors
+
+def get_types():
+    types = ["Scene", "Object", "Material"]
+    return types
