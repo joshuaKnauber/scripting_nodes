@@ -79,13 +79,13 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
                     }
 
         else:
-            repeat = None
+            layout = None
             if self.inputs[0].is_linked:
-                repeat = self.inputs[0].links[0].from_socket
+                layout = [self.inputs[0].links[0].from_socket]
 
-            layout = ["pass\n"]
+            repeat = "_INDENT__INDENT_pass\n"
             if self.inputs[2].is_linked:
-                layout = [self.inputs[2].links[0].from_socket]
+                repeat = self.inputs[2].links[0].from_socket
 
             functions = [
                 {

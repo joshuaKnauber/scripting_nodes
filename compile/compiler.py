@@ -153,10 +153,17 @@ class ScriptingNodesCompiler():
         function_value = node.evaluate(None)
         code_block = function_value["code"]
 
-        #handle errors in the function node
+        #handle errors in the interface node
         if "error" in function_value:
             for error in function_value["error"]:
                 self._errors.append([error,node])
+
+        #handle functions in interface nodes
+        if "functions" in function_value:
+            for func in function_value["functions"]:
+                code_block += [" "*self._indents, func["socket"]]
+                if func["followup"]:
+                    code_block += func["followup"]
 
         while not self._only_string(code_block):
             for i, snippet in enumerate(code_block):
@@ -165,7 +172,11 @@ class ScriptingNodesCompiler():
                     code_block.pop(i)
                     f_value_1 = code_block[:i]
                     f_value_2 = code_block[i:]
-                    code_block = f_value_1 + self._compile_interface_branch(snippet.node) + f_value_2
+
+                    if snippet:
+                        code_block = f_value_1 + self._compile_interface_branch(snippet.node) + f_value_2
+                    else:
+                        code_block = f_value_1 + "pass\n" + f_value_2
                 
                     code_block = self._flatten_list(code_block)
                     break
