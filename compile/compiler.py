@@ -150,21 +150,27 @@ class ScriptingNodesCompiler():
         return flat_list
 
     def _compile_interface_branch(self, node):
-        function_value = node.evaluate(None)["code"]
+        function_value = node.evaluate(None)
+        code_block = function_value["code"]
 
-        while not self._only_string(function_value):
-            for i, snippet in enumerate(function_value):
+        #handle errors in the function node
+        if "error" in function_value:
+            for error in function_value["error"]:
+                self._errors.append([error,node])
+
+        while not self._only_string(code_block):
+            for i, snippet in enumerate(code_block):
                 if type(snippet) != str:
 
-                    function_value.pop(i)
-                    f_value_1 = function_value[:i]
-                    f_value_2 = function_value[i:]
-                    function_value = f_value_1 + self._compile_interface_branch(snippet.node) + f_value_2
+                    code_block.pop(i)
+                    f_value_1 = code_block[:i]
+                    f_value_2 = code_block[i:]
+                    code_block = f_value_1 + self._compile_interface_branch(snippet.node) + f_value_2
                 
-                    function_value = self._flatten_list(function_value)
+                    code_block = self._flatten_list(code_block)
                     break
 
-        return function_value
+        return code_block
 
     def _decode_interface_code(self, code):
         for i, snippet in enumerate(code):
