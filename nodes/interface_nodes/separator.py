@@ -30,4 +30,4 @@ class SN_UiSeparatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         errors = []
 
         return {"code":["_INDENT__INDENT_",self.outputs[0].links[0].to_node.layout_type(),
-                        ".separator()"], "error":errors}
+                        ".separator()\n"], "error":errors}

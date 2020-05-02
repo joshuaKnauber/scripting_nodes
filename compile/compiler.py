@@ -76,7 +76,7 @@ class ScriptingNodesCompiler():
                 if func["socket"]:
                     function_result += self._compile_tree_branch(func["socket"].node,self._indents*2,True,func["socket"].bl_idname == "SN_LayoutSocket")
 
-                line = ("").join(self._compile_script_line(func["followup"]))
+                line = " "*self._indents*2 + ("").join(self._compile_script_line(func["followup"]))
                 function_result += line
 
             function_results += function_result
@@ -140,6 +140,39 @@ class ScriptingNodesCompiler():
         
         return code_blocks
 
+    def _flatten_list(self,raw):
+        flat_list = []
+        for value in raw:
+            if type(value) == list:
+                flat_list += value
+            else:
+                flat_list.append(value)
+        return flat_list
+
+    def _compile_interface_branch(self, node):
+        function_value = node.evaluate(None)["code"]
+        print(function_value)
+
+        while not self._only_string(function_value):
+            for i, snippet in enumerate(function_value):
+                if type(snippet) != str:
+
+                    function_value.pop(i)
+                    f_value_1 = function_value[:i]
+                    f_value_2 = function_value[i:]
+                    function_value = f_value_1 + self._compile_interface_branch(snippet.node) + f_value_2
+                
+                    function_value = self._flatten_list(function_value)
+                    break
+
+        return function_value
+
+    def _decode_interface_code(self, code):
+        for i, snippet in enumerate(code):
+            code[i] = snippet.replace("_INDENT_"," "*self._indents)
+        code = ("").join(code)
+        return code
+
     def _compile_functions(self, tree):
         #compiles all functions in the node tree
         function_nodes = []
@@ -177,7 +210,8 @@ class ScriptingNodesCompiler():
                 panel_nodes.append(node)
 
         for panel in panel_nodes:
-            panel = self._compile_tree_branch(panel,0,True,True)
+            panel = self._compile_interface_branch(panel)
+            panel = self._decode_interface_code(panel)
             self._interface.append(panel)
 
     def _create_file(self, tree):

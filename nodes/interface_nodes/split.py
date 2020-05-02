@@ -75,7 +75,7 @@ class SN_UiSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
         for inp in self.inputs:
             if inp.bl_idname == "SN_LayoutSocket" and inp.is_linked:
                 if inp.links[0].from_socket.bl_idname == "SN_LayoutSocket":
-                    code += [inp.links[0].from_socket,"\n"]
+                    code += [inp.links[0].from_socket]
                 else:
                     errors.append("wrong_socket")
 

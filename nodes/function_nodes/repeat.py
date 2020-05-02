@@ -94,4 +94,4 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
                 }
             ]
 
-            return {"code":["for i in range(abs(int(", value, "))):\n"], "functions":functions}
+            return {"code":["_INDENT__INDENT_for i in range(abs(int(", value, "))):\n"], "functions":functions}

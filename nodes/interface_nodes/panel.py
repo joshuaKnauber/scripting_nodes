@@ -101,8 +101,6 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self,output):
         errors = []
 
-        context = bpy.context
-
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname == "SN_UiPanelNode":
                 if self.name != node.name:
@@ -133,10 +131,10 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 "_INDENT__INDENT_layout = self.layout\n"]
 
         code = []
-        for inp in self.inputs:
+        for inp in self.inputs: 
             if inp.bl_idname == "SN_LayoutSocket" and inp.is_linked:
                 if inp.bl_idname == "SN_LayoutSocket":
-                    code += [inp.links[0].from_socket,"\n"]
+                    code += [inp.links[0].from_socket]
                 else:
                     errors.append("wrong_socket")
         
