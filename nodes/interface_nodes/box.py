@@ -42,8 +42,8 @@ class SN_UiBoxNode(bpy.types.Node, SN_ScriptingBaseNode):
         errors += error
 
         header = ["_INDENT__INDENT_box = ",self.outputs[0].links[0].to_node.layout_type(),".box()\n"]
-        header += ["_INDENT__INDENT_box.enabled = ",enabled,"\n"]
-        header += ["_INDENT__INDENT_box.alert = ",alert,"\n"]
+        header += ["_MATCH_PREV_box.enabled = ",enabled,"\n"]
+        header += ["_MATCH_PREV_box.alert = ",alert,"\n"]
 
         code = []
         for inp in self.inputs:
