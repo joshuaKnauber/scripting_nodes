@@ -68,7 +68,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         functions = [
             {
                 "socket": execute,
-                "followup": "return {'FINISHED'}\n"
+                "followup": ["return {'FINISHED'}\n"]
             }
         ]
         
