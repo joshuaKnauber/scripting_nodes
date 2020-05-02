@@ -88,6 +88,8 @@ node_categories = [
         
         NodeItem("SN_OperatorNode", settings={
         }),
+        NodeItem("SN_PropertiesNode", settings={
+        }),
         NodeItem("SN_FunctionNode", settings={
         }),
         NodeItem("SN_FunctionEndNode", settings={
