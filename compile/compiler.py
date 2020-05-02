@@ -149,9 +149,10 @@ class ScriptingNodesCompiler():
                 flat_list.append(value)
         return flat_list
 
-    def _compile_interface_branch(self, node):
+    def _compile_interface_branch(self, node, indents):
         function_value = node.evaluate(None)
         code_block = function_value["code"]
+        code_block.insert(0, " "*indents)
 
         #handle errors in the interface node
         if "error" in function_value:
@@ -161,7 +162,10 @@ class ScriptingNodesCompiler():
         #handle functions in interface nodes
         if "functions" in function_value:
             for func in function_value["functions"]:
-                code_block += [" "*self._indents, func["socket"]]
+                if type(func["socket"]) == str:
+                    code_block += [" "*self._indents, func["socket"]]
+                else:
+                    code_block += self._compile_interface_branch(func["socket"].node, indents+self._indents)
                 if func["followup"]:
                     code_block += func["followup"]
 
@@ -174,9 +178,9 @@ class ScriptingNodesCompiler():
                     f_value_2 = code_block[i:]
 
                     if snippet:
-                        code_block = f_value_1 + self._compile_interface_branch(snippet.node) + f_value_2
+                        code_block = f_value_1+ self._compile_interface_branch(snippet.node,indents) + f_value_2
                     else:
-                        code_block = f_value_1 + "pass\n" + f_value_2
+                        code_block = f_value_1 + "placeholder\n" + f_value_2
                 
                     code_block = self._flatten_list(code_block)
                     break
@@ -236,7 +240,7 @@ class ScriptingNodesCompiler():
                 panel_nodes.append(node)
 
         for panel in panel_nodes:
-            panel = self._compile_interface_branch(panel)
+            panel = self._compile_interface_branch(panel,0)
             panel = self._decode_interface_code(panel)
             self._interface.append(panel)
 
