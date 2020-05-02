@@ -1,3 +1,4 @@
+import bpy
 
 def register_dynamic_input(self, socket_idname, socket_name):
     all_sockets = []
@@ -28,3 +29,7 @@ def get_input_value(self,name,socket_type):
         else:
             errors.append("wrong_socket")
     return value, errors
+
+
+def icon_list():
+    return bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items.keys()
