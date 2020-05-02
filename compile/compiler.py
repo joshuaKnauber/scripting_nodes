@@ -187,6 +187,16 @@ class ScriptingNodesCompiler():
         for i, snippet in enumerate(code):
             code[i] = snippet.replace("_INDENT_"," "*self._indents)
         code = ("").join(code)
+        code = code.split("\n")
+
+        amount = 0
+        for i, snippet in enumerate(code):
+            if "_MATCH_PREV_" in snippet:
+                code[i] = snippet.lstrip().replace("_MATCH_PREV_"," "*amount)
+            else:
+                amount = len(snippet) - len(snippet.lstrip(" "))
+
+        code = ("\n").join(code)
         return code
 
     def _compile_functions(self, tree):

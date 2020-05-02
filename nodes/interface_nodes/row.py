@@ -53,10 +53,10 @@ class SN_UiRowNode(bpy.types.Node, SN_ScriptingBaseNode):
         errors += error
 
         header = ["_INDENT__INDENT_row = ",self.outputs[0].links[0].to_node.layout_type(),".row(align = ",align,")\n"]
-        header += ["_INDENT__INDENT_row.enabled = ",enabled,"\n"]
-        header += ["_INDENT__INDENT_row.alert = ",alert,"\n"]
-        header += ["_INDENT__INDENT_row.scale_x = ",scale_x,"\n"]
-        header += ["_INDENT__INDENT_row.scale_y = ",scale_y,"\n"]
+        header += ["_MATCH_PREV_row.enabled = ",enabled,"\n"]
+        header += ["_MATCH_PREV_row.alert = ",alert,"\n"]
+        header += ["_MATCH_PREV_row.scale_x = ",scale_x,"\n"]
+        header += ["_MATCH_PREV_row.scale_y = ",scale_y,"\n"]
 
         code = []
         for inp in self.inputs:
