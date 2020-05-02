@@ -74,7 +74,7 @@ class ScriptingNodesCompiler():
             for func in function_value["functions"]:
                 function_result = ""
                 if func["socket"]:
-                    function_result += self._compile_tree_branch(func["socket"].node,self._indents*2,True,func["socket"].bl_idname == "SN_LayoutSocket")
+                    function_result += self._compile_tree_branch(func["socket"].node,self._indents*2,True,False)
 
                 line = " "*self._indents*2 + ("").join(self._compile_script_line(func["followup"]))
                 function_result += line
@@ -151,7 +151,6 @@ class ScriptingNodesCompiler():
 
     def _compile_interface_branch(self, node):
         function_value = node.evaluate(None)["code"]
-        print(function_value)
 
         while not self._only_string(function_value):
             for i, snippet in enumerate(function_value):
