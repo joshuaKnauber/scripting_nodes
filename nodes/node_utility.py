@@ -30,6 +30,9 @@ def get_input_value(self,name,socket_type):
             errors.append("wrong_socket")
     return value, errors
 
-
 def icon_list():
     return bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items.keys()
+
+def get_types():
+    types = ["Scene", "Object", "Material"]
+    return types

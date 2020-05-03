@@ -131,6 +131,8 @@ node_categories = [
 
     SN_ScriptingNodesCategory('INPUT', "Input", items=[
 
+        NodeItem("SN_GetPropertiesNode", settings={
+        }),
         NodeItem("SN_VariableNode", settings={
         }),        
         NodeItem("SN_NumberNode", settings={

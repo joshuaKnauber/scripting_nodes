@@ -9,6 +9,7 @@ class ScriptingNodesCompiler():
         self._errors = []
         self._functions = []
         self._operators = []
+        self._properties = []
         self._interface = []
 
     def _is_scripting_tree(self):
@@ -30,6 +31,7 @@ class ScriptingNodesCompiler():
         self._functions.clear()
         self._interface.clear()
         self._operators.clear()
+        self._properties.clear()
 
     def _only_string(self, value_list):
         #returns if the given list contains only strings
@@ -235,6 +237,22 @@ class ScriptingNodesCompiler():
             operator = self._compile_tree_branch(operator,0,True,True)
             self._operators.append(operator)
 
+    def _compile_properties(self, tree):
+        #compiles all properties in the node tree
+        property_nodes = []
+
+        #finds all property nodes in the node tree
+        for node in tree.nodes:
+            if node.bl_idname == "SN_PropertiesNode":
+                property_nodes.append(node)
+
+        for propertyNode in property_nodes:
+            propertyNode = propertyNode.evaluate(None)
+            propertyString = ""
+            for ob in propertyNode["code"]:
+                propertyString+=ob
+            self._properties.append(propertyString)
+
     def _compile_interface(self, tree):
         #compiles all interface nodes in the node tree
         panel_nodes = []
@@ -290,11 +308,11 @@ class ScriptingNodesCompiler():
         text.write("]\n\n")
 
         #register function
-        text.write(register_text(self._indents,False))
+        text.write(register_text(self._indents,False, self._properties))
         text.write("\n\n")
 
         #unregister function
-        text.write(register_text(self._indents,True))
+        text.write(register_text(self._indents,True, self._properties))
 
         #call register
         text.write("\n\n")
@@ -334,6 +352,8 @@ class ScriptingNodesCompiler():
             self._compile_operators(tree)
 
             self._compile_interface(tree)
+
+            self._compile_properties(tree)
 
             self._draw_errors()
 
