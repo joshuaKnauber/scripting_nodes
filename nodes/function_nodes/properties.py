@@ -51,9 +51,11 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.use_custom_color = True
         self.color = node_colors["OPERATOR"]
 
-        self.inputs.new('SN_ProgramSocket', "Program")
+        pIn = self.inputs.new('SN_ProgramSocket', "Program")
+        pIn.display_shape = "DIAMOND"
         self.inputs.new('SN_DataSocket', "Value")
-        self.outputs.new('SN_ProgramSocket', "Program")
+        pOut = self.outputs.new('SN_ProgramSocket', "Program")
+        pOut.display_shape = "DIAMOND"
 
     def copy(self, node):
         pass# called when node is copied
