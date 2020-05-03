@@ -86,13 +86,17 @@ import_texts = """import bpy"""
 
 
 def register_text(indents,unregister, property_nodes):
-    fullPropertyString = ""
+    regPropertyString = ""
     for propertyName in property_nodes:
-        fullPropertyString+="    " + propertyName + "\n"
+        regPropertyString+="    " + propertyName + "\n"
+    unregPropertyString = ""
+    for propertyName in property_nodes:
+        propertyName = propertyName.split(" ")
+        unregPropertyString+="    del " + propertyName[0] + "\n"
 
     if not unregister:
-        text = "def register():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if not hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.register_class(cls)\n" + fullPropertyString
+        text = "def register():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if not hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.register_class(cls)\n" + regPropertyString
     else:
-        text = "def unregister():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.unregister_class(cls)\n" + fullPropertyString
+        text = "def unregister():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.unregister_class(cls)\n" + unregPropertyString
 
     return text
