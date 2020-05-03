@@ -31,10 +31,16 @@ class SN_IfNode(bpy.types.Node, SN_ScriptingBaseNode):
         out = self.outputs.new(socket_type, socket_name)
         out.display_shape = socket_shape
 
-        do = self.outputs.new(socket_type, "Do")
-        do.display_shape = socket_shape
-        els = self.outputs.new(socket_type, "Else")
-        els.display_shape = socket_shape
+        if not self.is_layout:
+            do = self.outputs.new(socket_type, "Do")
+            do.display_shape = socket_shape
+            els = self.outputs.new(socket_type, "Else")
+            els.display_shape = socket_shape
+        else:
+            do = self.inputs.new(socket_type, "Do")
+            do.display_shape = socket_shape
+            els = self.inputs.new(socket_type, "Else")
+            els.display_shape = socket_shape
 
     is_layout: bpy.props.BoolProperty(default=False,update=register_sockets)
 
@@ -53,29 +59,59 @@ class SN_IfNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         pass#layout.prop(self,"is_layout",text="Layout Node")
 
+    def layout_type(self):
+        return self.outputs[0].links[0].to_node.layout_type()
+
     def evaluate(self,output):
         value = str(self.inputs[1].value)
 
         if self.inputs[1].is_linked:
             value = self.inputs[1].links[0].from_socket
 
-        do_next_node = None
-        if self.outputs[1].is_linked:
-            do_next_node = self.outputs[1].links[0].to_node
-        else_next_node = None
-        if self.outputs[2].is_linked:
-            else_next_node = self.outputs[2].links[0].to_node
+        if not self.is_layout:
 
-        return {
-                "code": [],
-                "indented_blocks": [
-                    {
-                        "code": ["if ", value, ":\n"],
-                        "function_node": do_next_node
-                    },
-                    {
-                        "code": ["else:\n"],
-                        "function_node": else_next_node
+            do_next_node = None
+            if self.outputs[1].is_linked:
+                do_next_node = self.outputs[1].links[0].to_node
+            else_next_node = None
+            if self.outputs[2].is_linked:
+                else_next_node = self.outputs[2].links[0].to_node
+
+            return {
+                    "code": [],
+                    "indented_blocks": [
+                        {
+                            "code": ["if ", value, ":\n"],
+                            "function_node": do_next_node
+                        },
+                        {
+                            "code": ["else:\n"],
+                            "function_node": else_next_node
+                        }
+                    ]
                     }
-                ]
+
+        else:
+            do_next_node = "_MATCH_PREV__INDENT_pass\n"
+            if self.inputs[2].is_linked:
+                do_next_node = self.inputs[2].links[0].from_socket
+            else_next_node = "_MATCH_PREV__INDENT_pass\n"
+            if self.inputs[3].is_linked:
+                else_next_node = self.inputs[3].links[0].from_socket
+
+            layout = None
+            if self.inputs[0].is_linked:
+                layout = [self.inputs[0].links[0].from_socket]
+
+            functions = [
+                {
+                    "socket": do_next_node,
+                    "followup": ["_KEEP_else:\n"]
+                },
+                {
+                    "socket": else_next_node,
+                    "followup": layout
                 }
+            ]
+
+            return {"code":["_REMEMBER__INDENT__INDENT_if ",value,":\n"],"functions":functions}

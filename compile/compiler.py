@@ -177,10 +177,7 @@ class ScriptingNodesCompiler():
                     f_value_1 = code_block[:i]
                     f_value_2 = code_block[i:]
 
-                    if snippet:
-                        code_block = f_value_1+ self._compile_interface_branch(snippet.node,indents) + f_value_2
-                    else:
-                        code_block = f_value_1 + "placeholder\n" + f_value_2
+                    code_block = f_value_1+ self._compile_interface_branch(snippet.node,indents) + f_value_2
                 
                     code_block = self._flatten_list(code_block)
                     break
@@ -194,11 +191,19 @@ class ScriptingNodesCompiler():
         code = code.split("\n")
 
         amount = 0
+        remember_amount = 0
         for i, snippet in enumerate(code):
-            if "_MATCH_PREV_" in snippet:
+            if "_KEEP_" in snippet:
+                code[i] = snippet.lstrip().replace("_KEEP_"," "*remember_amount)
+            elif "_MATCH_PREV_" in snippet:
                 code[i] = snippet.lstrip().replace("_MATCH_PREV_"," "*amount)
             else:
                 amount = len(snippet) - len(snippet.lstrip(" "))
+
+            if "_REMEMBER_" in snippet:
+                code[i] = snippet.replace("_REMEMBER_","")
+                remember_amount = len(code[i]) - len(code[i].lstrip(" "))
+                print(snippet,remember_amount)
 
         code = ("\n").join(code)
         return code
