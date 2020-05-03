@@ -5,10 +5,10 @@ from ..node_utility import register_dynamic_input, get_input_value, get_types
 from ...node_sockets import update_socket_autocompile
 
 
-class SN_GetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to get the value of a properties'''
-    bl_idname = 'SN_GetPropertiesNode'
-    bl_label = "Use Property"
+    bl_idname = 'SN_SetPropertiesNode'
+    bl_label = "Change Property"
     bl_icon = node_icons["OPERATOR"]
 
     def getTypes(self, context):
@@ -51,7 +51,9 @@ class SN_GetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.use_custom_color = True
         self.color = node_colors["OPERATOR"]
 
-        self.outputs.new('SN_DataSocket', "Output")
+        self.inputs.new('SN_ProgramSocket', "Program")
+        self.inputs.new('SN_DataSocket', "Value")
+        self.outputs.new('SN_ProgramSocket', "Program")
 
     def copy(self, node):
         pass# called when node is copied
@@ -70,7 +72,12 @@ class SN_GetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         code.append("bpy.data.materials")
         code.append("[0].")
         #code.append(self.propLocation)
-        code.append(self.propName)
-
-        return {"code": code, "error":errors}
-
+        code.append(str(self.propName))
+        code.append(" = ")
+        if not self.inputs[1].is_linked:
+            errors.append("no_connection")
+            code.append("False")
+            code.append("\n")
+            return {"code": code, "error": errors}
+        else:
+            return {"code": [code, self.inputs[1].links[0].from_socket, "\n"]}

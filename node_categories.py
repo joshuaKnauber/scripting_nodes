@@ -113,6 +113,8 @@ node_categories = [
         }),
         NodeItem("SN_VariableChangeNode", settings={
         }),
+        NodeItem("SN_SetPropertiesNode", settings={
+        }),
 
     ]),
 
