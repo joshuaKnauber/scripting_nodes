@@ -95,8 +95,8 @@ def register_text(indents,unregister, property_nodes):
         unregPropertyString+="    del " + propertyName[0] + "\n"
 
     if not unregister:
-        text = "def register():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if not hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.register_class(cls)\n" + regPropertyString
+        text = regPropertyString + "def register():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if not hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.register_class(cls)\n"
     else:
-        text = "def unregister():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.unregister_class(cls)\n" + unregPropertyString
+        text = unregPropertyString + "def unregister():\n"+(" "*indents*1)+"for cls in classes:\n"+(" "*indents*2)+"if hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.unregister_class(cls)\n"
 
     return text

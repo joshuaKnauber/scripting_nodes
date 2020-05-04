@@ -50,3 +50,24 @@ class SN_OT_FindErrorNode(bpy.types.Operator):
         if not found:
             self.report({"INFO"},message ="Couldn't find the corresponding node. Try to reload the node tree.")
         return {"FINISHED"}
+
+
+class SN_OT_RemoveButton(bpy.types.Operator):
+    bl_idname = "scripting_nodes.remove_nodetree"
+    bl_label = "Delete"
+    bl_description = "Delete the active Nodetree"
+    bl_options = {"REGISTER","INTERNAL", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        treeName = context.space_data.node_tree.name
+        bpy.data.node_groups.remove(bpy.data.node_groups[treeName])
+        if len(bpy.data.node_groups) > 0:
+            context.space_data.node_tree = bpy.data.node_groups[0]
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_confirm(self, event)
