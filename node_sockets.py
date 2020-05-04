@@ -28,6 +28,34 @@ class SN_StringSocket(bpy.types.NodeSocket):
         return socket_colors["STRING"]
 
 
+class SN_EnumSocket(bpy.types.NodeSocket):
+    '''Enum Socket for handling enums'''
+    bl_idname = 'SN_EnumSocket'
+    bl_label = "Enum"
+
+    is_data_socket = True
+
+    def get_items(self,context):
+        return self.node.get_socket_items(self)
+
+    value: bpy.props.EnumProperty(
+        name="String",
+        description="Socket for a string value",
+        update=update_socket_autocompile,
+        items = get_items,
+        default=None
+    )
+
+    def draw(self, context, layout, node, text):
+        if self.is_output or self.is_linked:
+            layout.label(text=text)
+        else:
+            layout.prop(self, "value", text=text)
+
+    def draw_color(self, context, node):
+        return socket_colors["STRING"]
+
+
 class SN_NumberSocket(bpy.types.NodeSocket):
     '''Number Socket for handeling numbers'''
     bl_idname = 'SN_NumberSocket'
