@@ -93,7 +93,7 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
                     elif prop.rna_type.identifier == "BoolProperty":
                         socket_type = "SN_BooleanSocket"
 
-                    inp = self.inputs.new(socket_type,prop.name)
+                    inp = self.inputs.new(socket_type,prop.identifier.replace("_"," ").title())
                     if socket_type == "SN_EnumSocket":
                         for item in prop.enum_items:
                             prop_item = self.socket_list.add()

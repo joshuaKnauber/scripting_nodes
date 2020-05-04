@@ -14,6 +14,9 @@ class SN_OperatorRunNode(bpy.types.Node, SN_UseOperatorNode):
         self.use_custom_color = True
         self.color = node_colors["OPERATOR"]
 
+        inp = self.inputs.new('SN_ProgramSocket', "Program")
+        inp.display_shape = "DIAMOND"
+
         out = self.outputs.new('SN_ProgramSocket', "Program")
         out.display_shape = "DIAMOND"
 
