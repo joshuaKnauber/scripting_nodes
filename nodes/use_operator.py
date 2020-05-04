@@ -65,9 +65,6 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
             if not inp.bl_idname == "SN_ProgramSocket":
                 self.inputs.remove(inp)
 
-        pIn = self.inputs.new('SN_ProgramSocket', "Program")
-        pIn.display_shape = "DIAMOND"
-
         opType = self.opType.lower().replace(" ","_")
         opRun = self.opRun.lower().replace(" ","_")
 
