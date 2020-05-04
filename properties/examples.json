@@ -1,0 +1,51 @@
+{
+    "add_monkey": {
+        "name": "Add Monkey",
+        "addon": [
+            "Add Monkey",
+            "",
+            "Lets you add a monkey with a button",
+            "",
+            "",
+            "",
+            "General"
+        ],
+        "nodes": [
+            ["SN_UiPanelNode", 0, 200],
+            ["SN_UiButtonNode", -250, 10]
+        ],
+        "sockets": [
+            [[], [], [1, 0]]
+        ],
+        "values": [
+            {
+                "panel_name": "Monkey Panel",
+                "space_type_name": "PROPERTIES",
+                "default_closed": "False"
+            },
+            {
+                "buttonName": "Add Monkey"
+            }
+        ]
+    },
+    "add_monkey_size": {
+        "name": "Add Monkey with chooseable size",
+        "nodes": [
+            ["SN_UiPanelNode", 0, 200],
+            ["SN_UiButtonNode", -250, 10]
+        ],
+        "sockets": [
+            [[], [], [1, 0]]
+        ],
+        "values": [
+            {
+                "panel_name": "Monkey Panel",
+                "space_type_name": "PROPERTIES",
+                "default_closed": "False"
+            },
+            {
+                "buttonName": "Add Monkey"
+            }
+        ]
+    }
+}

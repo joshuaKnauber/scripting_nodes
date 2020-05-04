@@ -1,12 +1,14 @@
 import bpy
-
+from .examples import handle
 
 class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     def update_autocompile(self, context):
         context.space_data.node_tree.compiler.autocompile()
 
-    def udpate_examples(self, context):
+    def update_examples(self, context):
+        handle(context, self.examples)
+
         if not self.examples == "None":
             self.examples = "None"
 
@@ -18,7 +20,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                ("add_monkey_size", "Monkey adder choose size", "Creates a button that makes a monkey with chooseble size")],
         name="Examples",
         description="Example Node Trees",
-        update = udpate_examples
+        update = update_examples
     )
 
 

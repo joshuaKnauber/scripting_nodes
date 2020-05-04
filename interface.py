@@ -2,17 +2,18 @@ import bpy
 from .properties.property_utils import sn_props, error_props
 
 def node_tree_header(self, context):
-    if context.space_data.tree_type == 'ScriptingNodesTree' and context.space_data.node_tree != None:
+    if context.space_data.tree_type == 'ScriptingNodesTree':
         layout = self.layout
         row = layout.row(align=True)
         row.scale_x = 1.3
-
-        
-        row.separator()
-        row.operator("scripting_nodes.compile", icon='FILE_REFRESH')
-        row.separator()
-        row.prop(sn_props(),"auto_compile")
+        if context.space_data.node_tree != None:
+            row.operator("scripting_nodes.remove_nodetree", icon='TRASH', text="")
+            row.separator()
+            row.operator("scripting_nodes.compile", icon='FILE_REFRESH')
+            row.separator()
+            row.prop(sn_props(),"auto_compile")
         row.prop(sn_props(), "examples", icon='LINENUMBERS_ON', text="")
+        
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
     """Creates a panel that lets you edit the Addon Info for the current NodeTree"""
