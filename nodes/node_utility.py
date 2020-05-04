@@ -34,5 +34,5 @@ def icon_list():
     return bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items.keys()
 
 def get_types():
-    types = ["Scene", "Object", "Material"]
+    types = ["Scene", "Object"]
     return types

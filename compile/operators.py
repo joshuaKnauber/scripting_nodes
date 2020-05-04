@@ -64,6 +64,7 @@ class SN_OT_RemoveButton(bpy.types.Operator):
 
     def execute(self, context):
         treeName = context.space_data.node_tree.name
+        c#TODO unregister tree
         bpy.data.node_groups.remove(bpy.data.node_groups[treeName])
         if len(bpy.data.node_groups) > 0:
             context.space_data.node_tree = bpy.data.node_groups[0]
