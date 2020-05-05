@@ -31,19 +31,27 @@ class SN_OperatorRunNode(bpy.types.Node, SN_UseOperatorNode):
     def evaluate(self,output):
         opType = self.opType.lower().replace(" ","_")
         opRun = self.opRun.lower().replace(" ","_")
-        props = ""
+        props = []
         for inp in self.inputs:
             if not inp.bl_idname == "SN_ProgramSocket":
-                value = inp.value
-                if type(value) == str:
-                    value = "'" + value + "'"
-                elif inp.bl_idname == "SN_VectorSocket":
-                    tuple_value = value
-                    value = "("
-                    for entry in tuple_value:
-                        value += str(entry) + ","
-                    value += ")"
+                if not inp.is_linked:
+                    value = inp.value
+                    if type(value) == str:
+                        value = "'" + value + "'"
+                    elif inp.bl_idname == "SN_VectorSocket":
+                        tuple_value = value
+                        value = "("
+                        for entry in tuple_value:
+                            value += str(entry) + ","
+                        value += ")"
+                    else:
+                        value = str(value)
+                    props.append([inp.name.lower().replace(" ","_") + "=" + value + ", "])
                 else:
-                    value = str(value)
-                props += inp.name.lower().replace(" ","_") + "=" + value + ", "
-        return {"code": ["bpy.ops."+opType+"."+opRun+"("+props+")\n"]}
+                    props.append([inp.name.lower().replace(" ","_") + "=", inp.links[0].from_socket, ", "])
+        
+        allProps = []
+        for prop in props:
+            allProps+=prop
+        
+        return {"code": ["bpy.ops.", opType, ".", opRun, "("] + allProps +[")\n"]}

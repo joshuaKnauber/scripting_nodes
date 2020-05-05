@@ -61,6 +61,7 @@ class SN_UiButtonNode(bpy.types.Node, SN_UseOperatorNode):
             else:
                 newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = ", inp.links[0].from_socket, "\n"]
                 props.append(newProps)
+        
         allProps = []
         for prop in props:
             allProps+=prop
