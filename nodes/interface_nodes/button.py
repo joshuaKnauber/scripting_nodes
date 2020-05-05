@@ -32,12 +32,10 @@ class SN_UiButtonNode(bpy.types.Node, SN_UseOperatorNode):
     def draw_buttons(self, context, layout):
         layout.prop(self,"buttonName")
         layout.prop_search(self,"opType",context.scene,"sn_op_type_properties",text="")
-        if self.opType != "":
-            layout.prop_search(self,"opRun",context.scene,"sn_op_run_properties",text="")
+        layout.label(text=self.opDescription)
 
     def evaluate(self,output):
-        opType = self.opType.lower().replace(" ","_")
-        opRun = self.opRun.lower().replace(" ","_")
+        opType = self.get_identifier().replace("bpy.ops.","")
         props = []
 
         for inp in self.inputs:
@@ -66,5 +64,5 @@ class SN_UiButtonNode(bpy.types.Node, SN_UseOperatorNode):
         for prop in props:
             allProps+=prop
 
-        return {"code": ["_INDENT__INDENT_operator = ", self.outputs[0].links[0].to_node.layout_type(), ".operator('", opType, ".", opRun, "', ", "text='", self.buttonName, "')\n"] + allProps}
+        return {"code": ["_INDENT__INDENT_operator = ", self.outputs[0].links[0].to_node.layout_type(), ".operator('", opType, "', ", "text='", self.buttonName, "')\n"] + allProps}
 
