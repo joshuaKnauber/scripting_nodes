@@ -67,7 +67,7 @@ class SN_GetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         errors = []
         code = []
 
-        code.append("bpy.data.materials")
+        code.append("bpy.data.scenes")
         code.append("[0].")
         #code.append(self.propLocation)
         code.append(self.propName)

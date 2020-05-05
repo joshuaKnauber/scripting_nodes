@@ -33,10 +33,6 @@ def handle(context, example):
                 if not example["sockets"][node][socket] == []:
                     sockets.append([node, socket, example["sockets"][node][socket][0], example["sockets"][node][socket][1]])
 
-
-        for socket in sockets:
-            tree.links.new(all_nodes[socket[0]].inputs[socket[1]], all_nodes[socket[2]].outputs[socket[3]])
-
         for node in range(len(example["values"])):
             for attribute in example["values"][node]:
                 if example["values"][node][attribute] == "True" or example["values"][node][attribute] == "False":
@@ -44,4 +40,7 @@ def handle(context, example):
                 else:
                     value = example["values"][node][attribute]
                 all_nodes[node].__setattr__(attribute, value)
+
+        for socket in sockets:
+            tree.links.new(all_nodes[socket[0]].inputs[socket[1]], all_nodes[socket[2]].outputs[socket[3]])
 

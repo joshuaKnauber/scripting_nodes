@@ -1,33 +1,27 @@
 import bpy
+from ..use_operator import SN_UseOperatorNode
 from ...compile.operators import SN_OT_EmptyOperator
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 from ...node_sockets import update_socket_autocompile
 
 
-class SN_UiButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_UiButtonNode(bpy.types.Node, SN_UseOperatorNode):
     '''Node for making a Button'''
     bl_idname = 'SN_UiButtonNode'
     bl_label = "Button"
     bl_icon = node_icons["INTERFACE"]
 
-    def items_fetch(self, context):
-        operator_nodes = []
-        
-        for node in context.space_data.node_tree.nodes:
-            if node.bl_idname == "SN_OperatorNode":
-                operator_nodes.append((str(node.operator_name), str(node.operator_name), ""))
-
-        return operator_nodes
-
-    operatorName: bpy.props.EnumProperty(items=items_fetch, name="Operator", description="Operator Name", default=None, update=update_socket_autocompile, get=None, set=None)
-    buttonName: bpy.props.StringProperty(name="Button Name", description="Text displayed on the button", update=update_socket_autocompile)
+    buttonName: bpy.props.StringProperty(name="Name", description="The text displayed on the button")
 
     def init(self, context):
         self.use_custom_color = True
         self.color = node_colors["INTERFACE"]
 
         self.outputs.new('SN_LayoutSocket', "Layout")
+
+        self.generate_sockets()
+        self.op_items()
 
     def copy(self, node):
         pass# called when node is copied
@@ -37,17 +31,39 @@ class SN_UiButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         layout.prop(self,"buttonName")
-        layout.prop(self,"operatorName")
+        layout.prop_search(self,"opType",context.scene,"sn_op_type_properties",text="")
+        if self.opType != "":
+            layout.prop_search(self,"opRun",context.scene,"sn_op_run_properties",text="")
 
     def evaluate(self,output):
-        errors = []
+        opType = self.opType.lower().replace(" ","_")
+        opRun = self.opRun.lower().replace(" ","_")
+        props = []
 
-        if self.operatorName == "":
-            errors.append("no_operator")
-            idname_lower = 'scripting_nodes.empty'
-        else:
-            idname_lower = self.operatorName.lower().replace(" ","_")
-        if self.buttonName != "":
-            return {"code": ["_INDENT__INDENT_", self.outputs[0].links[0].to_node.layout_type(), ".operator('sn.", idname_lower, "', text='", self.buttonName, "')\n"], "error": errors}
-        else:
-            return {"code": ["_INDENT__INDENT_", self.outputs[0].links[0].to_node.layout_type(), ".operator('sn.", idname_lower, "')\n"], "error": errors}
+        for inp in self.inputs:
+            if not inp.is_linked:
+                value = inp.value
+                if type(value) == str:
+                    newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = '", value, "'\n"]
+                    props.append(newProps)
+                elif inp.bl_idname == "SN_VectorSocket":
+                    tuple_value = value
+                    value = "("
+                    for entry in tuple_value:
+                        value += str(entry) + ","
+                    value += ")"
+                    newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = ", value, "\n"]
+                    props.append(newProps)
+                else:
+                    value = str(value)
+                    newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = ", value, "\n"]
+                    props.append(newProps)
+            else:
+                newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = ", inp.links[0].from_socket, "\n"]
+                props.append(newProps)
+        allProps = []
+        for prop in props:
+            allProps+=prop
+
+        return {"code": ["_INDENT__INDENT_operator = ", self.outputs[0].links[0].to_node.layout_type(), ".operator('", opType, ".", opRun, "', ", "text='", self.buttonName, "')\n"] + allProps}
+

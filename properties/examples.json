@@ -11,11 +11,13 @@
             "General"
         ],
         "nodes": [
-            ["SN_UiPanelNode", 0, 200],
-            ["SN_UiButtonNode", -250, 10]
+            ["SN_UiPanelNode", 100, 200],
+            ["SN_UiButtonNode", -150, 100],
+            ["SN_NumberNode", -400, -5]
         ],
         "sockets": [
-            [[], [], [1, 0]]
+            [[], [], [1, 0]],
+            [[2, 0]]
         ],
         "values": [
             {
@@ -24,27 +26,62 @@
                 "default_closed": "False"
             },
             {
-                "buttonName": "Add Monkey"
+                "buttonName": "Add Monkey",
+                "opType": "Mesh",
+                "opRun": "Primitive Monkey Add"
+            },
+            {
+                "number": 1.0
             }
         ]
     },
     "add_monkey_size": {
-        "name": "Add Monkey with chooseable size",
+        "name": "Add Monkey with size",
+        "addon": [
+            "Add Monkey with size",
+            "",
+            "Lets you add a monkey with a button and changeble size",
+            "",
+            "",
+            "",
+            "General"
+        ],
         "nodes": [
-            ["SN_UiPanelNode", 0, 200],
-            ["SN_UiButtonNode", -250, 10]
+            ["SN_UiPanelNode", 165, 215],
+            ["SN_UiButtonNode", -250, 100],
+            ["SN_PropertiesNode", -175, 320],
+            ["SN_GetPropertiesNode", -500, -5],
+            ["SN_UiPropertiesNode", -35, -35]
         ],
         "sockets": [
-            [[], [], [1, 0]]
+            [[], [], [1, 0], [4, 0]],
+            [[3, 0]]
         ],
         "values": [
             {
-                "panel_name": "Monkey Panel",
+                "panel_name": "Monkey Size Panel",
                 "space_type_name": "PROPERTIES",
                 "default_closed": "False"
             },
             {
-                "buttonName": "Add Monkey"
+                "buttonName": "Add Monkey",
+                "opType": "Mesh",
+                "opRun": "Primitive Monkey Add"
+            },
+            {
+                "propType": "FloatProperty",
+                "propLocation": "Scene",
+                "propName": "Monkey Size",
+                "propDescription": "Controls the size of the monkey",
+                "propFloat": 1
+            },
+            {
+                "propLocation": "Scene",
+                "propName": "monkey_size"
+            },
+            {
+                "propLocation": "Scene",
+                "propName": "monkey_size"
             }
         ]
     }
