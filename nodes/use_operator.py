@@ -15,47 +15,46 @@ class SN_EnumItemPropertyGroup(bpy.types.PropertyGroup):
 class SN_UseOperatorNode(SN_ScriptingBaseNode):
     '''Node for using an existing operator'''
 
+    bl_width_default = 220
+
     socket_list: bpy.props.CollectionProperty(type=SN_EnumItemPropertyGroup)
 
     def op_items(self):
-        bpy.context.scene.sn_op_type_properties.clear()
-        for prop in dir(bpy.ops):
-            item = bpy.context.scene.sn_op_type_properties.add()
-            item.name = prop.replace("_"," ").title()
-
-    def run_items(self):
-        bpy.context.scene.sn_op_run_properties.clear()
-        opType = self.opType.lower().replace(" ","_")
-        if opType == "":
-            opType = "empty_op"
-        for prop in dir(eval("bpy.ops."+opType)):
-            item = bpy.context.scene.sn_op_run_properties.add()
-            item.name = prop.replace("_"," ").title()
+        if len(bpy.context.scene.sn_op_type_properties) == 0:
+            bpy.context.scene.sn_op_type_properties.clear()
+            for prop in dir(bpy.ops):
+                for op in dir(eval("bpy.ops."+prop)):
+                    name = eval("bpy.ops."+prop+"."+op+".get_rna_type().name")
+                    found = False
+                    for item in bpy.context.scene.sn_op_type_properties:
+                        if item.name == name:
+                            found = True
+                    if not found and name != "" and name.replace("-","").lstrip() != "":
+                        item = bpy.context.scene.sn_op_type_properties.add()
+                        item.identifier = "bpy.ops."+prop+"."+op
+                        item.description = eval("bpy.ops."+prop+"."+op+".get_rna_type().description")
+                        item.name = name
 
     def update_type(self,context):
-        self.update_items(context)
-        opType = self.opType.lower().replace(" ","_")
-        if opType == "":
-            opType = "empty_op"
-        opRun = self.opRun.lower().replace(" ","_")
-        if opRun == "":
-            opRun = "empty_op"
-        if len(dir(eval("bpy.ops."+opType+"."+opRun))) == 0:
-            self.opRun = ""
-
-    def update_run(self,context):
-        self.update_items(context)
-        self.generate_sockets()
-
-    def update_items(self,context):
         update_socket_autocompile(self, context)
-
         self.op_items()
-        self.run_items()
+
+        if not self.opType == "":
+            self.generate_sockets()
+            for item in bpy.context.scene.sn_op_type_properties:
+                if item.name == self.opType:
+                    self.opDescription = item.description
+        else:
+            self.opDescription = ""
+
+    def get_identifier(self):
+        for item in bpy.context.scene.sn_op_type_properties:
+            if item.name == self.opType:
+                return item.identifier
+        
 
     opType: bpy.props.StringProperty(name="Operator", description="Operator Type", update=update_type)
-
-    opRun: bpy.props.StringProperty(name="Operator", description="Operator", update=update_run)
+    opDescription: bpy.props.StringProperty(name="Description",description="Operator description")
 
 
     def generate_sockets(self):
@@ -65,19 +64,11 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
             if not inp.bl_idname == "SN_ProgramSocket":
                 self.inputs.remove(inp)
 
-        opType = self.opType.lower().replace(" ","_")
-        opRun = self.opRun.lower().replace(" ","_")
-
-        if opType == "":
-            opType = "empty_op"
-        opRun = self.opRun.lower().replace(" ","_")
-        if opRun == "":
-            opRun = "empty_op"
-
         ignore_attr = ["RNA"]
 
-        if len(dir(eval("bpy.ops."+opType))) != 0:
-            for prop in eval("bpy.ops."+opType+"."+opRun+".get_rna_type().properties"):
+        if self.opType != "":
+            opType = self.get_identifier()
+            for prop in eval(opType+".get_rna_type().properties"):
                 if not prop.name in ignore_attr:
 
                     socket_type = "SN_DataSocket"

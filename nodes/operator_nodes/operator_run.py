@@ -25,12 +25,10 @@ class SN_OperatorRunNode(bpy.types.Node, SN_UseOperatorNode):
 
     def draw_buttons(self, context, layout):
         layout.prop_search(self,"opType",context.scene,"sn_op_type_properties",text="")
-        if self.opType != "":
-            layout.prop_search(self,"opRun",context.scene,"sn_op_run_properties",text="")
+        layout.label(text=self.opDescription)
 
     def evaluate(self,output):
-        opType = self.opType.lower().replace(" ","_")
-        opRun = self.opRun.lower().replace(" ","_")
+        opType = self.get_identifier()
         props = []
         for inp in self.inputs:
             if not inp.bl_idname == "SN_ProgramSocket":
@@ -54,4 +52,4 @@ class SN_OperatorRunNode(bpy.types.Node, SN_UseOperatorNode):
         for prop in props:
             allProps+=prop
         
-        return {"code": ["bpy.ops.", opType, ".", opRun, "("] + allProps +[")\n"]}
+        return {"code": [opType, "("] + allProps + [")\n"]}
