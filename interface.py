@@ -32,9 +32,17 @@ class SN_PT_ExportPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         box = layout.box()
-        box.label(text="Export Options:")
-        col = box.column(align=True)
-        col.operator("scripting_nodes.export_addon", text="Addon File")
+        tree = context.space_data.node_tree
+        name = tree.addon_name.lower().replace(" ","_") + ".py"
+        text = True
+        try:
+            bpy.data.texts[name]
+        except:
+            text = False
+        if text:
+            box.operator("scripting_nodes.export_addon", text="Addon File")
+        else:
+            box.label(text="Press reload before exporting")
 
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
