@@ -4,8 +4,8 @@
         "addon": [
             "Add Monkey",
             "",
-            "Lets you add a monkey with a button",
-            "",
+            "Creates a panel in the scene context of the properties",
+            "Properties",
             "",
             "",
             "General"
@@ -23,6 +23,7 @@
             {
                 "panel_name": "Monkey Panel",
                 "space_type_name": "PROPERTIES",
+                "context": "scene",
                 "default_closed": "False"
             },
             {
@@ -39,8 +40,8 @@
         "addon": [
             "Add Monkey with size",
             "",
-            "Lets you add a monkey with a button and changeble size",
-            "",
+            "Creates a panel in the scene context of the properties",
+            "Properties",
             "",
             "",
             "General"
@@ -60,6 +61,7 @@
             {
                 "panel_name": "Monkey Size Panel",
                 "space_type_name": "PROPERTIES",
+                "context": "scene",
                 "default_closed": "False"
             },
             {

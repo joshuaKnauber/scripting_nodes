@@ -61,6 +61,7 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                         name="Region Type", description="The region where the panel is going to be used in", update=update_socket_autocompile)
 
     category: bpy.props.StringProperty(name="Category", description="The name of category", update=update_socket_autocompile)
+    context: bpy.props.StringProperty(name="Context", description="The context at which your panel shows up", update=update_socket_autocompile)
 
     def init(self, context):
         self.use_custom_color = True
@@ -81,8 +82,9 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"space_type_name")
         layout.prop(self,"region_type_name")
         layout.prop(self,"category")
+        layout.prop(self,"context")
         layout.prop(self, "default_closed")
-        layout.prop(self, "hide_header")        
+        layout.prop(self, "hide_header")
 
     def layout_type(self):
         return "layout"
@@ -115,6 +117,11 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         options = self.options()
 
+        if self.context != "":
+            panelContext = "_INDENT_bl_context = '" + self.context + "'\n\n"
+        else:
+            panelContext = "\n\n"
+
         idname = "SN_PT_" + self.panel_name.title().replace(" ","")
         header = ["class " + idname + "(bpy.types.Panel):\n",
                 "_INDENT_bl_label = '"+self.panel_name+"'\n",
@@ -123,7 +130,7 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 "_INDENT_bl_order = int(", orderValue, ")\n",
                 "_INDENT_bl_space_type = '", self.space_type_name, "'\n",
                 "_INDENT_bl_region_type = '", self.region_type_name, "'\n",
-                "_INDENT_bl_context = 'scene'\n\n",
+                panelContext,
                 "_INDENT_@classmethod\n",
                 "_INDENT_def poll(self, context):\n",
                 "_INDENT__INDENT_return ", pollValue ,"\n\n",
