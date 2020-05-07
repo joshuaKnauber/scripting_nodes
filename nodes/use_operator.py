@@ -51,7 +51,7 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
         for item in bpy.context.scene.sn_op_type_properties:
             if item.name == self.opType:
                 return item.identifier
-        
+    
 
     opType: bpy.props.StringProperty(name="Operator", description="Operator Type", update=update_type)
     opDescription: bpy.props.StringProperty(name="Description",description="Operator description")
@@ -99,3 +99,4 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
             if item.socket == socket.identifier:
                 items.append((item.identifier,item.name,item.description))
         return items
+

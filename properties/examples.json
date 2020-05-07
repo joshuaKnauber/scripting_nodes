@@ -27,8 +27,7 @@
             },
             {
                 "buttonName": "Add Monkey",
-                "opType": "Mesh",
-                "opRun": "Primitive Monkey Add"
+                "opType": "Add Monkey"
             },
             {
                 "number": 1.0
@@ -48,7 +47,7 @@
         ],
         "nodes": [
             ["SN_UiPanelNode", 165, 215],
-            ["SN_UiButtonNode", -250, 100],
+            ["SN_UiButtonNode", -300, 100],
             ["SN_PropertiesNode", -175, 320],
             ["SN_GetPropertiesNode", -500, -5],
             ["SN_UiPropertiesNode", -35, -35]
@@ -65,8 +64,7 @@
             },
             {
                 "buttonName": "Add Monkey",
-                "opType": "Mesh",
-                "opRun": "Primitive Monkey Add"
+                "opType": "Add Monkey"
             },
             {
                 "propType": "FloatProperty",

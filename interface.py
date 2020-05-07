@@ -22,6 +22,7 @@ class SN_PT_ExportPanel(bpy.types.Panel):
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Visual Scripting"
+    bl_options = {'DEFAULT_CLOSED'}
 
     @classmethod
     def poll(cls, context):
@@ -33,7 +34,7 @@ class SN_PT_ExportPanel(bpy.types.Panel):
         box = layout.box()
         box.label(text="Export Options:")
         col = box.column(align=True)
-        col.operator("scripting_nodes.export_addon", text="Node Tree")
+        col.operator("scripting_nodes.export_addon", text="Addon File")
 
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
