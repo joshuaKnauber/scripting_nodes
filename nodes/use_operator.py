@@ -20,20 +20,28 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
     socket_list: bpy.props.CollectionProperty(type=SN_EnumItemPropertyGroup)
 
     def op_items(self):
-        if len(bpy.context.scene.sn_op_type_properties) == 0:
-            bpy.context.scene.sn_op_type_properties.clear()
-            for prop in dir(bpy.ops):
-                for op in dir(eval("bpy.ops."+prop)):
-                    name = eval("bpy.ops."+prop+"."+op+".get_rna_type().name")
-                    found = False
-                    for item in bpy.context.scene.sn_op_type_properties:
-                        if item.name == name:
-                            found = True
-                    if not found and name != "" and name.replace("-","").lstrip() != "":
-                        item = bpy.context.scene.sn_op_type_properties.add()
-                        item.identifier = "bpy.ops."+prop+"."+op
-                        item.description = eval("bpy.ops."+prop+"."+op+".get_rna_type().description")
-                        item.name = name
+        bpy.context.scene.sn_op_type_properties.clear()
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname == "SN_OperatorNode":
+                item = bpy.context.scene.sn_op_type_properties.add()
+
+                name = node.operator_name.lower().replace(" ","_")
+                item.identifier = "bpy.ops.sn." + name
+                item.description = ""
+                item.name = node.operator_name
+        
+        for prop in dir(bpy.ops):
+            for op in dir(eval("bpy.ops."+prop)):
+                name = eval("bpy.ops."+prop+"."+op+".get_rna_type().name")
+                found = False
+                for item in bpy.context.scene.sn_op_type_properties:
+                    if item.name == name:
+                        found = True
+                if not found and name != "" and name.replace("-","").lstrip() != "":
+                    item = bpy.context.scene.sn_op_type_properties.add()
+                    item.identifier = "bpy.ops."+prop+"."+op
+                    item.description = eval("bpy.ops."+prop+"."+op+".get_rna_type().description")
+                    item.name = name
 
     def update_type(self,context):
         update_socket_autocompile(self, context)
