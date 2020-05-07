@@ -19,7 +19,10 @@ def add_error_prop(error_type, error_message, fatal, node):
     prop.error_type = error_type
     prop.error_message = error_message
     prop.fatal_error = fatal
-    prop.node = node
+    if node != None:
+        prop.node = node
+    else:
+        prop.node = ""
     return prop
 
 def remove_error_prop(error_property):

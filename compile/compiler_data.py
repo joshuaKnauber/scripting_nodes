@@ -39,6 +39,11 @@ def addon_info(tree):
 
 
 error_logs = {
+    "same_name_addon": {
+        "title": "Same name",
+        "message": "The addons name exists and it was not compiled",
+        "fatal": True
+    },
     "wrong_socket": {
         "title": "Wrong connection",
         "message": "At least one of the inputs of this node has an incorrect output connected",
