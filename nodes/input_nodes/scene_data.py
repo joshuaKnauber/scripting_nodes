@@ -27,6 +27,11 @@ class SN_SceneDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     active_types = ["objects","materials"]
 
     def generate_sockets(self):
+        to_connect = None
+        if len(self.outputs) > 0:
+            if self.outputs[0].is_linked:
+                to_connect = self.outputs[0].links[0].to_socket
+
         for socket in self.outputs:
             self.outputs.remove(socket)
 
@@ -37,6 +42,10 @@ class SN_SceneDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.data_type in self.active_types:
             out = self.outputs.new('SN_SceneDataSocket', "Active "+self.data_type.title()[:-1])
             out.display_shape = "SQUARE"
+
+        if to_connect:
+            if self.outputs[0].bl_idname == to_connect.bl_idname:
+                bpy.context.space_data.node_tree.links.new(self.outputs[0],to_connect)
 
     def init(self, context):
         self.use_custom_color = True
