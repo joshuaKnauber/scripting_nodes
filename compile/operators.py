@@ -1,4 +1,8 @@
+from .compiler_data import gpl_block, addon_info, error_logs, import_texts
+from bpy_extras.io_utils import ExportHelper
 import bpy
+import os
+
 
 class SN_OT_EmptyOperator(bpy.types.Operator):
     bl_idname = "scripting_nodes.empty"
@@ -72,3 +76,51 @@ class SN_OT_RemoveButton(bpy.types.Operator):
 
     def invoke(self, context, event):
         return context.window_manager.invoke_confirm(self, event)
+
+
+class SN_OT_ExportAddonButton(bpy.types.Operator, ExportHelper):
+    bl_idname = "scripting_nodes.export_addon"
+    bl_label = "Export Addon"
+    bl_description = "Export the addon file"
+    bl_options = {"REGISTER","INTERNAL"}
+
+    filepath: bpy.props.StringProperty(name="File Path", description="Filepath used for exporting the file", maxlen=1024, subtype='FILE_PATH')
+
+    filename_ext = ".py"
+    filter_glob: bpy.props.StringProperty(default='*.py', options={'HIDDEN'})
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def invoke(self, context, event):
+        path = bpy.utils.user_resource('SCRIPTS', "addons") + "//"
+        tree = bpy.context.space_data.node_tree
+        name = tree.addon_name.lower().replace(" ","_")
+        path+= name
+        self.filepath = path
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+    def execute(self, context):
+        filepath = self.filepath
+        if filepath.split(".")[-1] != "py":
+            return {"CANCELLED"}
+        else:
+            tree = context.space_data.node_tree
+            name = tree.addon_name.lower().replace(" ","_") + ".py"
+            text = bpy.data.texts[name]
+            text = text.lines[:-2]
+
+            basedir = os.path.dirname(filepath)
+            if not os.path.exists(basedir):
+                os.makedirs(basedir)
+
+            newFile = open(filepath, "w")
+            newFile.truncate(0)
+            for line in text:
+                newFile.write(line.body)
+                newFile.write("\n")
+
+            return {"FINISHED"}
+

@@ -20,6 +20,11 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
     socket_list: bpy.props.CollectionProperty(type=SN_EnumItemPropertyGroup)
 
     def op_items(self):
+        for item in bpy.context.scene.sn_op_type_properties:
+            if item.isCustom:
+                bpy.context.scene.sn_op_type_properties.remove(bpy.context.scene.sn_op_type_properties.find(item.name))
+        
+
         if len(bpy.context.scene.sn_op_type_properties) == 0:
             bpy.context.scene.sn_op_type_properties.clear()
             for prop in dir(bpy.ops):
@@ -34,6 +39,17 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
                         item.identifier = "bpy.ops."+prop+"."+op
                         item.description = eval("bpy.ops."+prop+"."+op+".get_rna_type().description")
                         item.name = name
+
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname == "SN_OperatorNode":
+                item = bpy.context.scene.sn_op_type_properties.add()
+
+                name = node.operator_name.lower().replace(" ","_")
+                item.identifier = "bpy.ops.sn." + name
+                item.description = ""
+                item.name = node.operator_name
+                item.isCustom = True
+        
 
     def update_type(self,context):
         update_socket_autocompile(self, context)
@@ -51,7 +67,7 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
         for item in bpy.context.scene.sn_op_type_properties:
             if item.name == self.opType:
                 return item.identifier
-        
+    
 
     opType: bpy.props.StringProperty(name="Operator", description="Operator Type", update=update_type)
     opDescription: bpy.props.StringProperty(name="Description",description="Operator description")
@@ -68,30 +84,36 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
 
         if self.opType != "":
             opType = self.get_identifier()
-            for prop in eval(opType+".get_rna_type().properties"):
-                if not prop.name in ignore_attr:
+            isCustom = False
+            try:
+                eval(opType+".get_rna_type()")
+            except:
+                isCustom = True
+            if not isCustom:
+                for prop in eval(opType+".get_rna_type().properties"):
+                    if not prop.name in ignore_attr:
 
-                    socket_type = "SN_DataSocket"
-                    if prop.rna_type.identifier == "StringProperty":
-                        socket_type = "SN_StringSocket"
-                    elif prop.rna_type.identifier == "EnumProperty":
-                        socket_type = "SN_EnumSocket"
-                    elif prop.rna_type.identifier == "FloatProperty" or prop.rna_type.identifier == "IntProperty":
-                        if prop.is_array:
-                            socket_type = "SN_VectorSocket"
-                        else:
-                            socket_type = "SN_NumberSocket"
-                    elif prop.rna_type.identifier == "BoolProperty":
-                        socket_type = "SN_BooleanSocket"
+                        socket_type = "SN_DataSocket"
+                        if prop.rna_type.identifier == "StringProperty":
+                            socket_type = "SN_StringSocket"
+                        elif prop.rna_type.identifier == "EnumProperty":
+                            socket_type = "SN_EnumSocket"
+                        elif prop.rna_type.identifier == "FloatProperty" or prop.rna_type.identifier == "IntProperty":
+                            if prop.is_array:
+                                socket_type = "SN_VectorSocket"
+                            else:
+                                socket_type = "SN_NumberSocket"
+                        elif prop.rna_type.identifier == "BoolProperty":
+                            socket_type = "SN_BooleanSocket"
 
-                    inp = self.inputs.new(socket_type,prop.identifier.replace("_"," ").title())
-                    if socket_type == "SN_EnumSocket":
-                        for item in prop.enum_items:
-                            prop_item = self.socket_list.add()
-                            prop_item.socket = prop.name
-                            prop_item.identifier = item.identifier
-                            prop_item.name = item.name
-                            prop_item.description = item.description
+                        inp = self.inputs.new(socket_type,prop.identifier.replace("_"," ").title())
+                        if socket_type == "SN_EnumSocket":
+                            for item in prop.enum_items:
+                                prop_item = self.socket_list.add()
+                                prop_item.socket = prop.name
+                                prop_item.identifier = item.identifier
+                                prop_item.name = item.name
+                                prop_item.description = item.description
 
     def get_socket_items(self,socket):
         items = []
@@ -99,3 +121,4 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
             if item.socket == socket.identifier:
                 items.append((item.identifier,item.name,item.description))
         return items
+

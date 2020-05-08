@@ -1,4 +1,5 @@
 import bpy
+import addon_utils
 from .compiler_data import gpl_block, addon_info, error_logs, import_texts, register_text
 from ..properties.property_utils import clear_error_props, add_error_prop, sn_props
 
@@ -267,6 +268,13 @@ class ScriptingNodesCompiler():
             panel = self._decode_interface_code(panel)
             self._interface.append(panel)
 
+    def _addonExists(self,tree):
+        for addon in addon_utils.modules():
+            if addon.bl_info.get('name') == tree.addon_name:
+                self._errors.append(["same_name_addon", None])
+                return True
+        return False
+
     def _create_file(self, tree):
         name = tree.addon_name.lower().replace(" ","_") + ".py"
 
@@ -332,7 +340,10 @@ class ScriptingNodesCompiler():
         #adds all the errors from the error list to the props
         for error in self._errors:
             log = error_logs[error[0]]
-            add_error_prop(log["title"],log["message"],log["fatal"],error[1].name)
+            if error[1] != None:
+                add_error_prop(log["title"],log["message"],log["fatal"],error[1].name)
+            else:
+                add_error_prop(log["title"],log["message"],log["fatal"], error[1])
 
     def autocompile(self):
         #checks if autocompile is on and runs compile
@@ -355,10 +366,12 @@ class ScriptingNodesCompiler():
 
             self._compile_properties(tree)
 
+            if not self._addonExists(tree):
+
+                addon = self._create_file(tree)
+
+                self._register_file(addon)
+
             self._draw_errors()
-
-            addon = self._create_file(tree)
-
-            self._register_file(addon)
 
             bpy.context.area.tag_redraw()

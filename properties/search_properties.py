@@ -6,6 +6,7 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
     name: bpy.props.StringProperty(name="Name", default="")
     identifier: bpy.props.StringProperty(name="Identifier",default="")
     description: bpy.props.StringProperty(name="Description",default="")
+    isCustom: bpy.props.BoolProperty(name="Operator is custom",default=False)
 
 
 bpy.utils.register_class(SN_SearchPropertyGroup)

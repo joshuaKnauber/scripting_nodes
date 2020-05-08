@@ -13,12 +13,42 @@ def node_tree_header(self, context):
             row.separator()
             row.prop(sn_props(),"auto_compile")
         row.prop(sn_props(), "examples", icon='LINENUMBERS_ON', text="")
-        
+
+class SN_PT_ExportPanel(bpy.types.Panel):
+    """Creates a panel that lets you export the addon and the current NodeTree"""
+    bl_label = "Export"
+    bl_order = 0
+    bl_idname = "SN_PT_ExportPanel"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Visual Scripting"
+    bl_options = {'DEFAULT_CLOSED'}
+
+    @classmethod
+    def poll(cls, context):
+        if context.space_data.tree_type == 'ScriptingNodesTree':
+            return context.space_data.node_tree != None
+
+    def draw(self, context):
+        layout = self.layout
+        box = layout.box()
+        tree = context.space_data.node_tree
+        name = tree.addon_name.lower().replace(" ","_") + ".py"
+        text = True
+        try:
+            bpy.data.texts[name]
+        except:
+            text = False
+        if text:
+            box.operator("scripting_nodes.export_addon", text="Addon File")
+        else:
+            box.label(text="Press reload before exporting")
+
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
     """Creates a panel that lets you edit the Addon Info for the current NodeTree"""
     bl_label = "Addon Info"
-    bl_order = 0
+    bl_order = 1
     bl_idname = "SN_PT_AddonInfoPanel"
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
@@ -66,7 +96,7 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
 class SN_PT_ErrorLogPanel(bpy.types.Panel):
     """Creates a panel for displaying error messages in the node editors sidebar"""
     bl_label = "Errors"
-    bl_order = 1
+    bl_order = 2
     bl_idname = "SN_PT_ErrorLogPanel"
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
