@@ -142,7 +142,6 @@ class SN_VectorSocket(bpy.types.NodeSocket):
     value: bpy.props.FloatVectorProperty(
         name="Vector",
         description="Socket for a vector value",
-        default=(0,0,0),
         update=update_socket_autocompile
     )
 
@@ -169,6 +168,20 @@ class SN_LayoutSocket(bpy.types.NodeSocket):
 
     def draw_color(self, context, node):
         return socket_colors["LAYOUT"]
+
+
+class SN_SceneDataSocket(bpy.types.NodeSocket):
+    '''Scene Data Socket for data from the scene'''
+    bl_idname = 'SN_SceneDataSocket'
+    bl_label = "Scene Data"
+
+    is_data_socket = False
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+    def draw_color(self, context, node):
+        return socket_colors["SCENE"]
 
 
 class SN_ProgramSocket(bpy.types.NodeSocket):

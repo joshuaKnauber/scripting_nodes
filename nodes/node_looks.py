@@ -13,7 +13,8 @@ socket_colors = {
     "BOOLEAN": to_percentage("2A5CFF",True),
     "VECTOR": to_percentage("6363C7",True),
     "PROGRAM": to_percentage("F81033",True),
-    "DATA": to_percentage("696969",True)
+    "DATA": to_percentage("696969",True),
+    "SCENE": to_percentage("FFFFFF",True)
 }
 
 
@@ -22,7 +23,8 @@ node_colors = {
     "LOGIC": to_percentage("4D4D4D",False),
     "INPUT": to_percentage("ACACAC",False),
     "OPERATOR": to_percentage("A13546",False),
-    "PROGRAM": to_percentage("3D141B",False)
+    "PROGRAM": to_percentage("3D141B",False),
+    "SCENE": to_percentage("FFFFFF",False)
 }
 
 
@@ -31,5 +33,6 @@ node_icons = {
     "LOGIC": "CONSOLE",
     "INPUT": "DRIVER_TRANSFORM",
     "PROGRAM": "SCRIPT",
-    "OPERATOR": "FILE_SCRIPT"
+    "OPERATOR": "FILE_SCRIPT",
+    "SCENE": "SCENE_DATA"
 }
