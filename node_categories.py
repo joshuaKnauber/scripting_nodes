@@ -139,6 +139,10 @@ node_categories = [
 
     SN_ScriptingNodesCategory('INPUT', "Input", items=[
 
+        NodeItem("SN_SceneDataNode", settings={
+        }),
+        NodeItem("SN_DataPropertiesNode", settings={
+        }),
         NodeItem("SN_GetPropertiesNode", settings={
         }),
         NodeItem("SN_VariableNode", settings={
