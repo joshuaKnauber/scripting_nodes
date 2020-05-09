@@ -12,6 +12,7 @@ class ScriptingNodesCompiler():
         self._operators = []
         self._properties = []
         self._interface = []
+        self._existingInterface = []
 
     def _is_scripting_tree(self):
         #returns if the current tree is a scripting tree
@@ -31,6 +32,7 @@ class ScriptingNodesCompiler():
         self._errors.clear()
         self._functions.clear()
         self._interface.clear()
+        self._existingInterface.clear()
         self._operators.clear()
         self._properties.clear()
 
@@ -195,7 +197,9 @@ class ScriptingNodesCompiler():
 
         amount = 0
         remember_amount = 0
+
         for i, snippet in enumerate(code):
+
             if "_KEEP_" in snippet:
                 code[i] = snippet.lstrip().replace("_KEEP_"," "*remember_amount)
             elif "_MATCH_PREV_" in snippet:
@@ -207,6 +211,12 @@ class ScriptingNodesCompiler():
                 code[i] = snippet.replace("_REMEMBER_","")
                 remember_amount = len(code[i]) - len(code[i].lstrip(" "))
                 print(snippet,remember_amount)
+
+        for i, snippet in enumerate(code):
+            if "_REMOVE_" in snippet:
+                code[i] = snippet.replace("_REMOVE_", "")
+                for j, line in enumerate(code[1:]):
+                    code[j+1] = line[self._indents:]
 
         code = ("\n").join(code)
         return code
@@ -260,13 +270,21 @@ class ScriptingNodesCompiler():
         
         #finds all function nodes
         for node in tree.nodes:
-            if node.bl_idname == "SN_UiPanelNode":
+            if node.bl_idname == "SN_UiPanelNode" or node.bl_idname == "SN_UiExistingPanelNode":
                 panel_nodes.append(node)
 
         for panel in panel_nodes:
-            panel = self._compile_interface_branch(panel,0)
-            panel = self._decode_interface_code(panel)
-            self._interface.append(panel)
+            if panel.bl_idname == "SN_UiPanelNode":
+                panel = self._compile_interface_branch(panel,0)
+                panel = self._decode_interface_code(panel)
+                self._existingInterface.append("")
+                self._interface.append(panel)
+            elif panel.bl_idname == "SN_UiExistingPanelNode":
+                name = panel.panel_name
+                panel = self._compile_interface_branch(panel,0)
+                panel = self._decode_interface_code(panel)
+                self._existingInterface.append("bpy.types."+ name.replace(" ","_") + ".(" + "append_panel_" + name.replace(" ","_") + ")")
+                self._interface.append(panel)
 
     def _addonExists(self,tree):
         for addon in addon_utils.modules():
@@ -304,23 +322,24 @@ class ScriptingNodesCompiler():
             text.write(operator)
 
         #writes all interfaces in the text file
-        for interface in self._interface:
+        for i, interface in enumerate(self._interface):
             text.write("\n")
             text.write(interface)
 
         #write classes
         text.write("\nclasses = [\n")
         for register in self._interface + self._operators:
-            idname = register.split(":")[0].split("(")[0].split(" ")[-1]
-            text.write(" "*self._indents + idname + ",\n")
+            if not "append_panel_" in register:
+                idname = register.split(":")[0].split("(")[0].split(" ")[-1]
+                text.write(" "*self._indents + idname + ",\n")
         text.write("]\n\n")
 
         #register function
-        text.write(register_text(self._indents,False, self._properties))
+        text.write(register_text(self._indents,False, self._properties, self._existingInterface))
         text.write("\n\n")
 
         #unregister function
-        text.write(register_text(self._indents,True, self._properties))
+        text.write(register_text(self._indents,True, self._properties, self._existingInterface))
 
         #call register
         text.write("\n\n")
@@ -333,7 +352,7 @@ class ScriptingNodesCompiler():
         #registers the addon in the blend file
         ctx = bpy.context.copy()
         ctx["edit_text"] = addon
-        bpy.ops.text.run_script(ctx)
+        #bpy.ops.text.run_script(ctx)
         #bpy.data.texts.remove(addon)
 
     def _draw_errors(self):

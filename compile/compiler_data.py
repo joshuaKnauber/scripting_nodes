@@ -90,7 +90,17 @@ error_logs = {
 import_texts = """import bpy"""
 
 
-def register_text(indents,unregister, property_nodes):
+def register_text(indents,unregister, property_nodes, existing_interface):
+
+    interfaceString = ""
+    for interface in existing_interface:
+        if "bpy.types" in interface:
+            interface = interface.split("(")
+            if not unregister:
+                interfaceString += " "*indents + interface[0] + "append(" + interface[1] + " \n"
+            else:
+                interfaceString += " "*indents + interface[0] + "remove(" + interface[1] + " \n"
+
     regPropertyString = ""
     for propertyName in property_nodes:
         regPropertyString+="    " + propertyName + "\n"
@@ -103,5 +113,7 @@ def register_text(indents,unregister, property_nodes):
         text = "def register():\n"+ regPropertyString + " "*indents + "for cls in classes:\n"+(" "*indents*2)+"if not hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.register_class(cls)\n"
     else:
         text = "def unregister():\n"+unregPropertyString + " "*indents + "for cls in classes:\n"+(" "*indents*2)+"if hasattr(bpy.types,cls.bl_idname):\n"+(" "*indents*3)+"bpy.utils.unregister_class(cls)\n"
+        
+    text += interfaceString
 
     return text

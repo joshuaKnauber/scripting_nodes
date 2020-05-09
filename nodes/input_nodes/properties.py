@@ -9,7 +9,7 @@ class SN_GetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to get the value of a properties'''
     bl_idname = 'SN_GetPropertiesNode'
     bl_label = "Use Property"
-    bl_icon = node_icons["OPERATOR"]
+    bl_icon = node_icons["INPUT"]
 
     def getTypes(self, context):
         types = get_types()
@@ -49,7 +49,7 @@ class SN_GetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["OPERATOR"]
+        self.color = node_colors["INPUT"]
 
         self.outputs.new('SN_DataSocket', "Output")
 

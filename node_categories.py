@@ -61,6 +61,8 @@ node_categories = [
 
         NodeItem("SN_UiPanelNode", settings={
         }),
+        NodeItem("SN_UiExistingPanelNode", settings={
+        }),
         NodeItem("SN_UiButtonNode", settings={
         }),
         NodeItem("SN_UiLabelNode", settings={
