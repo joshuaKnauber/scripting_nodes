@@ -215,8 +215,8 @@ class ScriptingNodesCompiler():
         for i, snippet in enumerate(code):
             if "_REMOVE_" in snippet:
                 code[i] = snippet.replace("_REMOVE_", "")
-                for j, line in enumerate(code[1:]):
-                    code[j+1] = line[self._indents:]
+                for j, line in enumerate(code[i+1:]):
+                    code[j+i+1] = line[self._indents:]
 
         code = ("\n").join(code)
         return code

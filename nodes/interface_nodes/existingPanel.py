@@ -58,7 +58,8 @@ class SN_UiExistingPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self,output):
         type_name = self.panel_name
 
-        header = ["_REMOVE_", "def append_panel_", type_name.replace(" ","_"), "(self, context):\n"]
+        header = ["_REMOVE_", "def append_panel_", type_name.replace(" ","_"), "(self, context):\n",
+                  "_INDENT__INDENT_", "layout = self.layout \n"]
 
         errors = []
         code = []
