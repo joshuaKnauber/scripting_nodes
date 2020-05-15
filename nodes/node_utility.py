@@ -34,5 +34,11 @@ def icon_list():
     return bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items.keys()
 
 def get_types():
-    types = ["Scene", "Object"]
+    types = {}
+    for data in dir(bpy.data):
+        if eval("type(bpy.data."+data+")") == type(bpy.data.objects):
+            try:
+                types[eval("bpy.data."+data+".bl_rna.name.replace('Main ','')[:-1]")] = data
+            except AttributeError:
+                pass
     return types
