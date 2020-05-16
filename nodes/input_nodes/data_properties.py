@@ -2,7 +2,8 @@ import bpy
 from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
-from .scene_nodes_utils import add_data_output
+from .scene_nodes_utils import add_data_output, get_active_types
+from ..node_utility import get_types
 
 
 class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -22,33 +23,33 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     previous_connection: bpy.props.StringProperty(default="")
 
     def generate_sockets(self):
-        if self.inputs[0].is_linked:
+        if len(self.inputs[0].links) > 0:
             if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
 
                 if self.previous_connection != self.inputs[0].links[0].from_socket.name:
+
                     self.previous_connection = self.inputs[0].links[0].from_socket.name
                     for socket in self.outputs:
                         self.outputs.remove(socket)
 
                     code = ("").join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"])
-                    data_block = None
-                    if len(eval(code)) == 0:
-                        data_block = eval(code+".new(name='sn_temp_data_block')")
 
-                    ignore_props = ["RNA","Full Name","Is Evaluated","Original ID","Embedded Data","Tag",
-                                    "Is Indirect","Library","Library Override","Preview","Data","Bounding Box",
-                                    "Parent Vertices","Proxy","Proxy Collection","Delta Location",
-                                    "Delta Rotation (Euler)","Delta Rotation (Quaternion)","Delta Scale",
-                                    "Matrix World","Local Matrix","Input Matrix","Parent Inverse Matrix",
-                                    "Image User","Empty Image Depth","Display in Perspective Mode",
-                                    "Display in Orthographic Mode","Display Only Axis Aligned","Empty Image Side",
-                                    ]
-                    for prop in eval(code+"[0]"+".bl_rna.properties"):
-                        if not prop.name in ignore_props:
-                            add_data_output(self,prop,prop.name)
+                    ignore_props = ["RNA"]
 
-                    if data_block:
-                        eval(code+".remove("+code+"[0])")
+                    types = get_types()
+                    data = code.split(".")[-1]
+
+                    if data.split("_")[0] == "active":
+                        active_types = get_active_types()
+                        for date in active_types:
+                            if active_types[date] == data.split("_")[-1]:
+                                data = date
+
+                    for data_type in types:
+                        if types[data_type] == data:
+                            for prop in eval("bpy.types."+data_type+".bl_rna.properties"):
+                                if not prop.name in ignore_props:
+                                    add_data_output(self,prop,prop.name)
         else:
             for socket in self.outputs:
                 self.outputs.remove(socket)

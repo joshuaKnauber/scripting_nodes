@@ -10,6 +10,12 @@ def add_data_output(self,prop,label):
     elif type(prop) in [int,float] or type(prop) in [bpy.types.FloatProperty,bpy.types.IntProperty]:
         out = self.outputs.new('SN_NumberSocket', label)
     else:
-        print(type(prop))
         out = self.outputs.new('SN_SceneDataSocket', label)
         out.display_shape = "SQUARE"
+
+
+def get_active_types():
+    return {
+        "objects": "object",
+        "materials": "material"
+    }

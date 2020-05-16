@@ -2,7 +2,7 @@ import bpy
 from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
-from .scene_nodes_utils import add_data_output
+from .scene_nodes_utils import add_data_output, get_active_types
 
 
 class SN_SceneDataNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -24,8 +24,6 @@ class SN_SceneDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     data_type: bpy.props.EnumProperty(items=data_type_items,update=update_data_type)
 
-    active_types = ["objects","materials"]
-
     def generate_sockets(self):
         to_connect = None
         if len(self.outputs) > 0:
@@ -39,7 +37,7 @@ class SN_SceneDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         label = self.data_type.replace("_"," ").title()
         add_data_output(self, result, label)
 
-        if self.data_type in self.active_types:
+        if self.data_type in get_active_types():
             out = self.outputs.new('SN_SceneDataSocket', "Active "+self.data_type.title()[:-1])
             out.display_shape = "SQUARE"
 
