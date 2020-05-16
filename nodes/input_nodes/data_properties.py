@@ -95,7 +95,7 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if identifier:
                     code.append(self.inputs[0].links[0].from_socket)
                     code.append(".")
-                    code.append(identifier)
+                    code.append(identifier)# add for loop for multiple data blocks
             else:
                 errors.append("wrong_socket")
         return {"code": code, "error":errors}
