@@ -21,6 +21,15 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     hide_unused: bpy.props.BoolProperty(default=False,name="Hide Unused",description="Hides the unused outputs",update=update_hide)
     previous_connection: bpy.props.StringProperty(default="")
+    current_data_type: bpy.props.StringProperty(default="")
+
+    def get_data_name(self,name):
+        if name.split("_")[0] == "active":
+            active_types = get_active_types()
+            for date in active_types:
+                if active_types[date] == name.split("_")[-1]:
+                    name = date
+        return name
 
     def generate_sockets(self):
         if len(self.inputs[0].links) > 0:
@@ -37,22 +46,23 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ignore_props = ["RNA"]
 
                     types = get_types()
-                    data = code.split(".")[-1]
-
-                    if data.split("_")[0] == "active":
-                        active_types = get_active_types()
-                        for date in active_types:
-                            if active_types[date] == data.split("_")[-1]:
-                                data = date
+                    data = self.get_data_name(code.split(".")[-1])
 
                     for data_type in types:
                         if types[data_type] == data:
+                            self.current_data_type = data_type
                             for prop in eval("bpy.types."+data_type+".bl_rna.properties"):
                                 if not prop.name in ignore_props:
                                     add_data_output(self,prop,prop.name)
         else:
             for socket in self.outputs:
                 self.outputs.remove(socket)
+
+    def get_prop_identifier(self,name):
+        for prop in eval("bpy.types."+self.current_data_type+".bl_rna.properties"):
+            if prop.name == name:
+                return prop.identifier
+        return None
 
     def init(self, context):
         self.use_custom_color = True
@@ -76,6 +86,18 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"hide_unused",toggle=True)
 
     def evaluate(self, output):
-        return {"code": []}
+        code = []
+        errors = []
+
+        if self.inputs[0].is_linked:
+            if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+                identifier = self.get_prop_identifier(output.name)
+                if identifier:
+                    code.append(self.inputs[0].links[0].from_socket)
+                    code.append(".")
+                    code.append(identifier)
+            else:
+                errors.append("wrong_socket")
+        return {"code": code, "error":errors}
         
         
