@@ -38,7 +38,7 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                         self.outputs.remove(socket)
                     self.search_properties.clear()
 
-                    code = ("").join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"])
+                    code = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
 
                     ignore_props = ["RNA","Display Name","Full Name"]
 
@@ -111,9 +111,26 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if identifier:
                     code.append(self.inputs[0].links[0].from_socket)
                     code.append(".")
-                    code.append(identifier)# add for loop for multiple data blocks
+                    code.append(identifier)
             else:
                 errors.append("wrong_socket")
         return {"code": code, "error":errors}
+
+
+    def all_string(self,code):
+        for part in code:
+            if type(part) != str:
+                return False
+        return True
         
         
+    def internal_evaluate(self, output):
+        code = self.evaluate(output)["code"]
+        while not self.all_string(code):
+            for i, part in enumerate(code):
+                if not type(part) == str:
+                    part = part.node.internal_evaluate(part)["code"]
+                    code.pop(i)
+                    code = code[:i] + part + code[i:]
+                    break
+        return {"code": code}

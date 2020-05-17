@@ -69,4 +69,6 @@ class SN_SceneDataNode(bpy.types.Node, SN_ScriptingBaseNode):
             code += ["bpy.context.","active_",self.data_type[:-1]]
         return {"code": code}
         
+    def internal_evaluate(self, output):
+        return self.evaluate(output)
         
