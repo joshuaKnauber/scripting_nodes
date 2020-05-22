@@ -22,7 +22,7 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_use_index(self,context):
         update_socket_autocompile(self, context)
-        
+
         self.inputs["Index"].hide = not self.use_index
         self.inputs["Name"].hide = self.use_index
 
@@ -115,6 +115,9 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def copy(self, node):
         self.search_value = ""
+        self.previous_connection = ""
+        self.current_data_type = ""
+        self.search_properties.clear()
         self.has_collection_input = False
         self.generate_sockets()
 
