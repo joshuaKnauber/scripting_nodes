@@ -53,7 +53,7 @@ class SN_ScriptingNodesCategory(NodeCategory):
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == 'ScriptingNodesTree'
-
+ 
 
 node_categories = [
 
