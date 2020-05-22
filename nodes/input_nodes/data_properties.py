@@ -39,20 +39,24 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.search_properties.clear()
 
                     code = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
+                    
+                    if str(eval("type("+code+")")) == "<class 'bpy_prop_collection'>":
+                        pass
 
-                    ignore_props = ["RNA","Display Name","Full Name"]
+                    else:
+                        ignore_props = ["RNA","Display Name","Full Name"]
 
-                    types = get_types()
-                    data = self.get_data_name(code.split(".")[-1])
+                        types = get_types()
+                        data = self.get_data_name(code.split(".")[-1])
 
-                    for data_type in types:
-                        if types[data_type] == data:
-                            self.current_data_type = data_type
-                            for prop in eval("bpy.types."+data_type+".bl_rna.properties"):
-                                if not prop.name in ignore_props:
-                                    item = self.search_properties.add()
-                                    item.name = prop.name
-                                    item.propType = str(type(prop))
+                        for data_type in types:
+                            if types[data_type] == data:
+                                self.current_data_type = data_type
+                                for prop in eval("bpy.types."+data_type+".bl_rna.properties"):
+                                    if not prop.name in ignore_props:
+                                        item = self.search_properties.add()
+                                        item.name = prop.name
+                                        item.propType = str(type(prop))
         else:
             for socket in self.outputs:
                 self.outputs.remove(socket)

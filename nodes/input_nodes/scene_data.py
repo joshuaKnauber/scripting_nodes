@@ -38,8 +38,12 @@ class SN_SceneDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         add_data_output(self, result, label)
 
         if self.data_type in get_active_types():
-            out = self.outputs.new('SN_SceneDataSocket', "Active "+self.data_type.title()[:-1])
-            out.display_shape = "SQUARE"
+            try:
+                eval("bpy.context.active_"+get_active_types()[self.data_type])
+                out = self.outputs.new('SN_SceneDataSocket', "Active "+self.data_type.title()[:-1])
+                out.display_shape = "SQUARE"
+            except:
+                pass
 
         if to_connect:
             if self.outputs[0].bl_idname == to_connect.bl_idname:
