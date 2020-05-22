@@ -14,12 +14,15 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = node_icons["SCENE"]
 
     previous_connection: bpy.props.StringProperty(default="")
+    current_data_type: bpy.props.StringProperty(default="")
     search_value: bpy.props.StringProperty(default="")
 
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
     has_collection_input: bpy.props.BoolProperty(default=False)
 
     def update_use_index(self,context):
+        update_socket_autocompile(self, context)
+        
         self.inputs["Index"].hide = not self.use_index
         self.inputs["Name"].hide = self.use_index
 
@@ -48,7 +51,14 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                     code = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
                     
-                    if str(eval("type("+code+")")) == "<class 'bpy_prop_collection'>":
+                    is_collection = False
+                    try:
+                        if str(eval("type("+code+")")) == "<class 'bpy_prop_collection'>":
+                            is_collection = True
+                    except KeyError:
+                        pass
+
+                    if is_collection:
                         self.has_collection_input = True
 
                         out = self.outputs.new('SN_SceneDataSocket', "Element")
@@ -63,11 +73,18 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                         self.has_collection_input = False
 
                         ignore_props = ["RNA","Display Name","Full Name"]
-                        for prop in eval(code + ".bl_rna.properties"):
-                            if not prop.name in ignore_props:
-                                item = self.search_properties.add()
-                                item.name = prop.name
-                                item.propType = str(type(prop))
+
+                        types = get_types()
+                        data = self.get_data_name(code.split(".")[-1].split("[")[0])
+
+                        for data_type in types:
+                            if types[data_type] == data:
+                                self.current_data_type = data_type
+                                for prop in eval("bpy.types."+data_type+".bl_rna.properties"):
+                                    if not prop.name in ignore_props:
+                                        item = self.search_properties.add()
+                                        item.name = prop.name
+                                        item.propType = str(type(prop))
         else:
             self.outputs.clear()
             for socket in self.inputs:
@@ -77,9 +94,7 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def get_prop_identifier(self,name):
-        code = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
-
-        for prop in eval(code + ".bl_rna.properties"):
+        for prop in eval("bpy.types."+self.current_data_type+".bl_rna.properties"):
             if prop.name == name:
                 return prop.identifier
         return None
@@ -134,16 +149,15 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.has_collection_input:
             if self.inputs[0].is_linked:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                    line = self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"]
                     if output.name == "Amount":
-                        code += ["len("] + line + [")"]
+                        code += [self.inputs[0].links[0].from_socket,"len("] + line + [")"]
                     elif output.name == "Element":
                         if self.use_index:
                             value, error = get_input_value(self,"Index",["SN_IntSocket","SN_NumberSocket"])
-                            code += line + ["[",value,"]"]
+                            code += [self.inputs[0].links[0].from_socket,"[",value,"]"]
                         else:
                             value, error = get_input_value(self,"Name",["SN_TextSocket"])
-                            code += line + ["['",value,"']"]
+                            code += [self.inputs[0].links[0].from_socket,"['",value,"']"]
                         errors += error
                 else:
                     errors.append("wrong_socket")
