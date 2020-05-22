@@ -18,6 +18,7 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     search_value: bpy.props.StringProperty(default="")
 
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
+    has_collection_input: bpy.props.BoolProperty(default=False)
 
     def get_data_name(self,name):
         if name.split("_")[0] == "active":
@@ -41,9 +42,21 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     code = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
                     
                     if str(eval("type("+code+")")) == "<class 'bpy_prop_collection'>":
-                        pass
+                        self.has_collection_input = True
+
+                        if len(eval(code)) > 0:
+                            out = self.outputs.new('SN_SceneDataSocket', "First element")
+                            out.display_shape = "SQUARE"
+                            out = self.outputs.new('SN_SceneDataSocket', "Last element")
+                            out.display_shape = "SQUARE"
+
+                        for elem in eval(code):
+                            out = self.outputs.new('SN_SceneDataSocket', elem.name)
+                            out.display_shape = "SQUARE"
 
                     else:
+                        self.has_collection_input = False
+
                         ignore_props = ["RNA","Display Name","Full Name"]
 
                         types = get_types()
@@ -88,22 +101,23 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# called when node is removed
 
     def draw_buttons(self, context, layout):
-        row = layout.row(align=True)
-        row.prop_search(self,"search_value",self,"search_properties",text="")
+        if not self.has_collection_input:
+            row = layout.row(align=True)
+            row.prop_search(self,"search_value",self,"search_properties",text="")
 
-        has_output = False
-        for out in self.outputs:
-            if out.name == self.search_value:
-                has_output = True
+            has_output = False
+            for out in self.outputs:
+                if out.name == self.search_value:
+                    has_output = True
 
-        if not has_output and not self.search_value == "":
-            op = row.operator("scripting_nodes.add_scene_data_socket",text="",icon="ADD")
-            op.node_name = self.name
-            op.socket_name = self.search_value
-        if has_output:
-            op = row.operator("scripting_nodes.remove_scene_data_socket",text="",icon="REMOVE")
-            op.node_name = self.name
-            op.socket_name = self.search_value
+            if not has_output and not self.search_value == "":
+                op = row.operator("scripting_nodes.add_scene_data_socket",text="",icon="ADD")
+                op.node_name = self.name
+                op.socket_name = self.search_value
+            if has_output:
+                op = row.operator("scripting_nodes.remove_scene_data_socket",text="",icon="REMOVE")
+                op.node_name = self.name
+                op.socket_name = self.search_value
 
     def evaluate(self, output):
         code = []
