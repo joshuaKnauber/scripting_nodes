@@ -14,7 +14,6 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = node_icons["SCENE"]
 
     previous_connection: bpy.props.StringProperty(default="")
-    current_data_type: bpy.props.StringProperty(default="")
     search_value: bpy.props.StringProperty(default="")
 
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
@@ -58,28 +57,25 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                         self.has_collection_input = False
 
                         ignore_props = ["RNA","Display Name","Full Name"]
-
-                        types = get_types()
-                        data = self.get_data_name(code.split(".")[-1])
-
-                        for data_type in types:
-                            if types[data_type] == data:
-                                self.current_data_type = data_type
-                                for prop in eval("bpy.types."+data_type+".bl_rna.properties"):
-                                    if not prop.name in ignore_props:
-                                        item = self.search_properties.add()
-                                        item.name = prop.name
-                                        item.propType = str(type(prop))
+                        for prop in eval(code + ".bl_rna.properties"):
+                            if not prop.name in ignore_props:
+                                item = self.search_properties.add()
+                                item.name = prop.name
+                                item.propType = str(type(prop))
         else:
             for socket in self.outputs:
                 self.outputs.remove(socket)
             self.search_properties.clear()
 
+
     def get_prop_identifier(self,name):
-        for prop in eval("bpy.types."+self.current_data_type+".bl_rna.properties"):
+        code = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
+
+        for prop in eval(code + ".bl_rna.properties"):
             if prop.name == name:
                 return prop.identifier
         return None
+
 
     def init(self, context):
         self.use_custom_color = True
@@ -123,15 +119,27 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         code = []
         errors = []
 
-        if self.inputs[0].is_linked:
-            if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                identifier = self.get_prop_identifier(output.name)
-                if identifier:
-                    code.append(self.inputs[0].links[0].from_socket)
-                    code.append(".")
-                    code.append(identifier)
-            else:
-                errors.append("wrong_socket")
+        if self.has_collection_input:
+            if self.inputs[0].is_linked:
+                if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+                    line = self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"]
+                    if output.name == "First element":
+                        line += ["[0]"]
+                    code += line
+                else:
+                    errors.append("wrong_socket")
+
+        else:
+            if self.inputs[0].is_linked:
+                if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+                    identifier = self.get_prop_identifier(output.name)
+                    if identifier:
+                        code.append(self.inputs[0].links[0].from_socket)
+                        code.append(".")
+                        code.append(identifier)
+                else:
+                    errors.append("wrong_socket")
+
         return {"code": code, "error":errors}
 
 
@@ -144,6 +152,7 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def internal_evaluate(self, output):
         code = self.evaluate(output)["code"]
+        print(code)
         while not self.all_string(code):
             for i, part in enumerate(code):
                 if not type(part) == str:
