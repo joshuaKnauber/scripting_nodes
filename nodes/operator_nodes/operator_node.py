@@ -44,7 +44,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if self.operator_name == node.operator_name:
                         errors.append("same_name_operator")
 
-        pollValue, error = get_input_value(self, "Should run", "SN_BooleanSocket")
+        pollValue, error = get_input_value(self, "Should run", ["SN_BooleanSocket"])
         errors+=error
 
         options = ""

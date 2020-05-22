@@ -109,10 +109,10 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if self.panel_name == node.panel_name:
                         errors.append("same_name_panel")
 
-        pollValue, error = get_input_value(self, "Should display", "SN_BooleanSocket")
+        pollValue, error = get_input_value(self, "Should display", ["SN_BooleanSocket"])
         errors+=error
 
-        orderValue, error = get_input_value(self, "Order", "SN_NumberSocket")
+        orderValue, error = get_input_value(self, "Order", ["SN_NumberSocket"])
         errors+=error
 
         options = self.options()

@@ -3,7 +3,7 @@ from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 from .scene_nodes_utils import add_data_output, get_active_types
-from ..node_utility import get_types
+from ..node_utility import get_types, get_input_value
 from ...properties.search_properties import SN_SearchPropertyGroup
 
 
@@ -40,8 +40,7 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if self.previous_connection != self.inputs[0].links[0].from_socket.name:
 
                     self.previous_connection = self.inputs[0].links[0].from_socket.name
-                    for socket in self.outputs:
-                        self.outputs.remove(socket)
+                    self.outputs.clear()
                     for socket in self.inputs:
                         if not socket.bl_idname == "SN_SceneDataSocket":
                             self.inputs.remove(socket)
@@ -70,8 +69,7 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 item.name = prop.name
                                 item.propType = str(type(prop))
         else:
-            for socket in self.outputs:
-                self.outputs.remove(socket)
+            self.outputs.clear()
             for socket in self.inputs:
                 if not socket.bl_idname == "SN_SceneDataSocket":
                     self.inputs.remove(socket)
@@ -98,10 +96,10 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update(self):
         self.search_value = ""
-        self.has_collection_input = False
         self.generate_sockets()
 
     def copy(self, node):
+        self.search_value = ""
         self.has_collection_input = False
         self.generate_sockets()
 
@@ -137,13 +135,16 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.inputs[0].is_linked:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
                     line = self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"]
-                    if output.name == "First element":
-                        line += ["[0]"]
-                    elif output.name == "Last element":
-                        line += ["[-1]"]
-                    else:
-                        line += ["['",output.name,"']"]
-                    code += line
+                    if output.name == "Amount":
+                        code += ["len("] + line + [")"]
+                    elif output.name == "Element":
+                        if self.use_index:
+                            value, error = get_input_value(self,"Index",["SN_IntSocket","SN_NumberSocket"])
+                            code += line + ["[",value,"]"]
+                        else:
+                            value, error = get_input_value(self,"Name",["SN_TextSocket"])
+                            code += line + ["['",value,"']"]
+                        errors += error
                 else:
                     errors.append("wrong_socket")
 
@@ -170,7 +171,6 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def internal_evaluate(self, output):
         code = self.evaluate(output)["code"]
-        print(code)
         while not self.all_string(code):
             for i, part in enumerate(code):
                 if not type(part) == str:

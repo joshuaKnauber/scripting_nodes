@@ -50,19 +50,19 @@ class SN_UiSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 errors.append("wrong_socket")
 
-        align, error = get_input_value(self,"Align","SN_BooleanSocket")
+        align, error = get_input_value(self,"Align",["SN_BooleanSocket"])
         errors += error
 
-        enabled, error = get_input_value(self,"Enabled","SN_BooleanSocket")
+        enabled, error = get_input_value(self,"Enabled",["SN_BooleanSocket"])
         errors += error
 
-        alert, error = get_input_value(self,"Alert","SN_BooleanSocket")
+        alert, error = get_input_value(self,"Alert",["SN_BooleanSocket"])
         errors += error
 
-        scale_x, error = get_input_value(self,"Scale X","SN_BooleanSocket")
+        scale_x, error = get_input_value(self,"Scale X",["SN_BooleanSocket"])
         errors += error
 
-        scale_y, error = get_input_value(self,"Scale Y","SN_NumberSocket")
+        scale_y, error = get_input_value(self,"Scale Y",["SN_NumberSocket"])
         errors += error
 
         header = ["_INDENT__INDENT_split = ",self.outputs[0].links[0].to_node.layout_type(),".split(factor=",factor,",align=",align,")\n"]

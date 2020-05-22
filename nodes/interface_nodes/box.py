@@ -35,10 +35,10 @@ class SN_UiBoxNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         errors = []
 
-        enabled, error = get_input_value(self,"Enabled","SN_BooleanSocket")
+        enabled, error = get_input_value(self,"Enabled",["SN_BooleanSocket"])
         errors += error
 
-        alert, error = get_input_value(self,"Alert","SN_BooleanSocket")
+        alert, error = get_input_value(self,"Alert",["SN_BooleanSocket"])
         errors += error
 
         header = ["_INDENT__INDENT_box = ",self.outputs[0].links[0].to_node.layout_type(),".box()\n"]

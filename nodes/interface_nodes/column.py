@@ -37,19 +37,19 @@ class SN_UiColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, output):
         errors = []
 
-        align, error = get_input_value(self,"Align","SN_BooleanSocket")
+        align, error = get_input_value(self,"Align",["SN_BooleanSocket"])
         errors += error
 
-        enabled, error = get_input_value(self,"Enabled","SN_BooleanSocket")
+        enabled, error = get_input_value(self,"Enabled",["SN_BooleanSocket"])
         errors += error
 
-        alert, error = get_input_value(self,"Alert","SN_BooleanSocket")
+        alert, error = get_input_value(self,"Alert",["SN_BooleanSocket"])
         errors += error
 
-        scale_x, error = get_input_value(self,"Scale X","SN_BooleanSocket")
+        scale_x, error = get_input_value(self,"Scale X",["SN_BooleanSocket"])
         errors += error
 
-        scale_y, error = get_input_value(self,"Scale Y","SN_NumberSocket")
+        scale_y, error = get_input_value(self,"Scale Y",["SN_NumberSocket"])
         errors += error
 
         header = ["_INDENT__INDENT_col = ",self.outputs[0].links[0].to_node.layout_type(),".column(align = ",align,")\n"]
