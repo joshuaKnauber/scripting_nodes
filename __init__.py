@@ -30,7 +30,7 @@ from .interface import node_tree_header
 import nodeitems_utils
 from bpy.app.handlers import persistent
 
-auto_load.init() 
+auto_load.init()
 
 @persistent
 def load_handler(scene):
