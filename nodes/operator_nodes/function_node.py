@@ -37,6 +37,9 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         layout.prop(self,"functionName",text="Name")
+        row = layout.row()
+        row.scale_y = 1.5
+        row.operator("scripting_nodes.run_function_node",text="Run Function",icon="PLAY").node_name = self.name
 
     def evaluate(self,output):  
         error = []

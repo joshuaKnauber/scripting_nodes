@@ -235,6 +235,12 @@ class ScriptingNodesCompiler():
             function = self._compile_tree_branch(function_node,0,True,True)
             self._functions.append(function)
 
+    def get_function_code(self, node):
+        #returns the executable code for a single function for a given function node
+        function = "import bpy\n" + self._compile_tree_branch(node,0,True,True)
+        function += node.functionName+"()"
+        return function
+
     def _compile_operators(self, tree):
         #compiles all operators in the node tree
         operator_nodes = []
