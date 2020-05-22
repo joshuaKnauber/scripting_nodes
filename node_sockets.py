@@ -80,6 +80,30 @@ class SN_NumberSocket(bpy.types.NodeSocket):
         return socket_colors["NUMBER"]
 
 
+class SN_IntSocket(bpy.types.NodeSocket):
+    '''Number Socket for handeling intagers'''
+    bl_idname = 'SN_IntSocket'
+    bl_label = "Integer"
+
+    is_data_socket = True
+
+    value: bpy.props.IntProperty(
+        name="Number",
+        description="Socket for a number value",
+        default=0,
+        update=update_socket_autocompile
+    )
+
+    def draw(self, context, layout, node, text):
+        if self.is_output or self.is_linked:
+            layout.label(text=text)
+        else:
+            layout.prop(self, "value", text=text)
+
+    def draw_color(self, context, node):
+        return socket_colors["NUMBER"]
+
+
 class SN_FactorSocket(bpy.types.NodeSocket):
     '''Number Socket for handeling factors'''
     bl_idname = 'SN_FactorSocket'

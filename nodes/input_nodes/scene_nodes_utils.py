@@ -5,7 +5,7 @@ def add_data_output(self,prop,label,prop_type=""):
         prop_type = str(type(prop))
     if prop_type == str(str) or prop_type in [str(bpy.types.StringProperty),str(bpy.types.EnumProperty)]:
         out = self.outputs.new('SN_StringSocket', label)
-    elif prop_type == str(bool) or prop_type == bpy.types.BoolProperty:
+    elif prop_type == str(bool) or prop_type == str(bpy.types.BoolProperty):
         out = self.outputs.new('SN_BooleanSocket', label)
     elif prop_type == str(tuple):# or prop_type in [str(bpy.types.FloatVectorProperty)]:
         out = self.outputs.new('SN_VectorSocket', label)

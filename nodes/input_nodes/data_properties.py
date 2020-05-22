@@ -19,6 +19,12 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
     has_collection_input: bpy.props.BoolProperty(default=False)
 
+    def update_use_index(self,context):
+        self.inputs["Index"].hide = not self.use_index
+        self.inputs["Name"].hide = self.use_index
+
+    use_index: bpy.props.BoolProperty(default=False,name="Use index",description="Use an index instead of a name to get the element",update=update_use_index)
+
     def get_data_name(self,name):
         if name.split("_")[0] == "active":
             active_types = get_active_types()
@@ -36,6 +42,9 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.previous_connection = self.inputs[0].links[0].from_socket.name
                     for socket in self.outputs:
                         self.outputs.remove(socket)
+                    for socket in self.inputs:
+                        if not socket.bl_idname == "SN_SceneDataSocket":
+                            self.inputs.remove(socket)
                     self.search_properties.clear()
 
                     code = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
@@ -43,15 +52,13 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if str(eval("type("+code+")")) == "<class 'bpy_prop_collection'>":
                         self.has_collection_input = True
 
-                        if len(eval(code)) > 0:
-                            out = self.outputs.new('SN_SceneDataSocket', "First element")
-                            out.display_shape = "SQUARE"
-                            out = self.outputs.new('SN_SceneDataSocket', "Last element")
-                            out.display_shape = "SQUARE"
+                        out = self.outputs.new('SN_SceneDataSocket', "Element")
+                        out.display_shape = "SQUARE"
 
-                        for elem in eval(code):
-                            out = self.outputs.new('SN_SceneDataSocket', elem.name)
-                            out.display_shape = "SQUARE"
+                        self.outputs.new('SN_IntSocket', "Amount")
+
+                        self.inputs.new('SN_IntSocket', "Index").hide = True
+                        self.inputs.new('SN_StringSocket', "Name")
 
                     else:
                         self.has_collection_input = False
@@ -65,6 +72,9 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             for socket in self.outputs:
                 self.outputs.remove(socket)
+            for socket in self.inputs:
+                if not socket.bl_idname == "SN_SceneDataSocket":
+                    self.inputs.remove(socket)
             self.search_properties.clear()
 
 
@@ -88,10 +98,12 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update(self):
         self.search_value = ""
+        self.has_collection_input = False
         self.generate_sockets()
 
     def copy(self, node):
-        pass# called when node is copied
+        self.has_collection_input = False
+        self.generate_sockets()
 
     def free(self):
         pass# called when node is removed
@@ -114,6 +126,8 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op = row.operator("scripting_nodes.remove_scene_data_socket",text="",icon="REMOVE")
                 op.node_name = self.name
                 op.socket_name = self.search_value
+        else:
+            layout.prop(self,"use_index")
 
     def evaluate(self, output):
         code = []
