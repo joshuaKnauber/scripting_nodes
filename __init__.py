@@ -13,7 +13,7 @@
   
 bl_info = {
     "name" : "Visual Scripting",
-    "author" : "Joshua Knauber, Finn Knauber",
+    "author" : "Joshua Knauber, Finn Knauber", 
     "description" : "Adds a new node editor for writing scripts and addons with nodes",
     "blender" : (2, 80, 0),
     "version" : (1, 0, 0),
