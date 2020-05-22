@@ -20,7 +20,7 @@ bl_info = {
     "location" : "Editors -> Scripting Nodes",
     "wiki_url": "",
     "warning" : "",
-    "category" : "Node"
+    "category" : "Node" 
 }
 
 import bpy
