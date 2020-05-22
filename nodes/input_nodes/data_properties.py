@@ -125,6 +125,10 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     line = self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"]
                     if output.name == "First element":
                         line += ["[0]"]
+                    elif output.name == "Last element":
+                        line += ["[-1]"]
+                    else:
+                        line += ["['",output.name,"']"]
                     code += line
                 else:
                     errors.append("wrong_socket")
