@@ -158,6 +158,13 @@ node_categories = [
 
     ]),
 
+    SN_ScriptingNodesCategory('LAYOUT', "Layout", items=[
+
+        NodeItem("NodeFrame", settings={
+        }),
+
+    ]),
+
 ]
 
 def get_node_categories():
