@@ -136,7 +136,7 @@ node_categories = [
         }),
 
     ]),
-
+ 
     SN_ScriptingNodesCategory('INPUT', "Input", items=[
 
         NodeItem("SN_SceneDataNode", settings={
