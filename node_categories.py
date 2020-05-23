@@ -117,6 +117,8 @@ node_categories = [
         }),
         NodeItem("SN_RepeatNode", label="Repeat - Program", settings={
         }),
+        NodeItem("SN_ForNode", label="For - Program", settings={
+        }),
         NodeItem("SN_VariableChangeNode", settings={
         }),
         NodeItem("SN_SetPropertiesNode", settings={
