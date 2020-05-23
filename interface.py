@@ -1,5 +1,6 @@
 import bpy
 from .properties.property_utils import sn_props, error_props
+from textwrap import wrap
 
 def node_tree_header(self, context):
     if context.space_data.tree_type == 'ScriptingNodesTree':
@@ -31,7 +32,6 @@ class SN_PT_ExportPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        box = layout.box()
         tree = context.space_data.node_tree
         name = tree.addon_name.lower().replace(" ","_") + ".py"
         text = True
@@ -40,9 +40,11 @@ class SN_PT_ExportPanel(bpy.types.Panel):
         except:
             text = False
         if text:
-            box.operator("scripting_nodes.export_addon", text="Addon File")
+            row = layout.row()
+            row.scale_y = 1.5
+            row.operator("scripting_nodes.export_addon", text="Export addon",icon="EXPORT")
         else:
-            box.label(text="Press reload before exporting")
+            layout.label(text="Reload the addon before exporting!")
 
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
@@ -107,9 +109,6 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
         if context.space_data.tree_type == 'ScriptingNodesTree':
             return context.space_data.node_tree != None
 
-    def get_line_length(self):
-        char_width = 15
-        return bpy.context.region.width // char_width
 
     def draw_error(self, layout, error_type, error_message, fatal, node):
         box = layout.box()
@@ -122,14 +121,22 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
         row.alert = fatal
         row.label(text=error_type)
 
-        line_length = self.get_line_length()
-        error_message = [error_message[i:i+line_length] for i in range(0, len(error_message), line_length)]
+        line_length = bpy.context.region.width // sn_props().line_width
+        error_message = wrap(error_message,line_length)
 
         for line in error_message:
             col.label(text=line)
 
+    def draw_header(self,context):
+        self.layout.prop(sn_props(),"show_line_width",text="",icon="PREFERENCES",emboss=False)
+
     def draw(self, context):
         layout = self.layout
+
+        if sn_props().show_line_width:
+            box = layout.box()
+            box.prop(sn_props(),"line_width",slider=True,text="Line breaks")
+
         column = layout.column(align=False)
 
         if len(error_props()) > 0:

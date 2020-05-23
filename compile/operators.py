@@ -2,6 +2,7 @@ from .compiler_data import gpl_block, addon_info, error_logs, import_texts
 from bpy_extras.io_utils import ExportHelper
 import bpy
 import os
+from ..properties.property_utils import sn_props
 
 
 class SN_OT_EmptyOperator(bpy.types.Operator):
@@ -123,4 +124,3 @@ class SN_OT_ExportAddonButton(bpy.types.Operator, ExportHelper):
                 newFile.write("\n")
 
             return {"FINISHED"}
-
