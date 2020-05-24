@@ -361,7 +361,7 @@ class ScriptingNodesCompiler():
         #registers the addon in the blend file
         ctx = bpy.context.copy()
         ctx["edit_text"] = addon
-        #bpy.ops.text.run_script(ctx)
+        bpy.ops.text.run_script(ctx)
         #bpy.data.texts.remove(addon)
 
     def _draw_errors(self):
