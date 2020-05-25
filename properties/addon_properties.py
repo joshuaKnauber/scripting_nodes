@@ -25,7 +25,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     show_line_width: bpy.props.BoolProperty(default=False,name="Show settings",description="Show settings for the error panel")
 
-    line_width: bpy.props.IntProperty(default=15,min=1,max=50,name="Error line breaks",description="How often the error message lines should break to the next line")
+    line_width: bpy.props.IntProperty(default=10,min=1,max=50,name="Error line breaks",description="How often the error message lines should break to the next line")
 
 
 bpy.utils.register_class(ScriptingNodesProperties)

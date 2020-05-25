@@ -54,6 +54,16 @@ error_logs = {
         "message": "At least one of the program outputs of this node has no connections",
         "fatal": False
     },
+    "incorrect_socket": {
+        "title": "Wrong connection",
+        "message": "The input of the scene data socket has a wrong connection",
+        "fatal": True
+    },
+    "no_connection_for": {
+        "title": "No Scene Data connection",
+        "message": "The for Node has no scene data inputs",
+        "fatal": True
+    },
     "no_name": {
         "title": "No name",
         "message": "The variable doesn't have a name",
