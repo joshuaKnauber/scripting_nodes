@@ -64,6 +64,21 @@ error_logs = {
         "message": "The for Node has no scene data inputs",
         "fatal": True
     },
+    "no_name_panel": {
+        "title": "No name",
+        "message": "The panel doesn't have a name",
+        "fatal": False
+    },
+    "no_location_panel": {
+        "title": "No location",
+        "message": "The panel doesn't have a proper location",
+        "fatal": True
+    },
+    "wrong_location_panel": {
+        "title": "Wrong location",
+        "message": "The panel has a wrong location",
+        "fatal": True
+    },
     "no_name": {
         "title": "No name",
         "message": "The variable doesn't have a name",
