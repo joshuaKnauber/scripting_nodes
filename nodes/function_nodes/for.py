@@ -54,19 +54,25 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
         errors = []
 
 
-        value = "[]"
+        value = ["[]"]
         if self.inputs[1].is_linked:
-            if self.inputs[1].links[0].from_node.bl_idname == "SN_DataPropertiesNode":
+            if self.inputs[1].links[0].from_node.bl_idname == "SN_DataPropertiesNode" and self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
                 code = ("").join(self.inputs[1].links[0].from_node.internal_evaluate(self.inputs[1].links[0].from_socket)["code"])
                 try:
-                    if str(eval("type("+code+")")) == "<class 'bpy_prop_collection'>":
-                        value = self.inputs[1].links[0].from_socket
+                    if str(type(eval(code))) == "<class 'bpy_prop_collection'>":
+                        value = [self.inputs[1].links[0].from_socket]
                     else:
-                        errors.append("incorrect_socket")
+                        value = ["[", self.inputs[1].links[0].from_socket, "]"]
                 except KeyError:
-                    errors.append("incorrect_socket")
-            elif self.inputs[1].links[0].from_node.bl_idname == "SN_SceneDataNode":
-                value = self.inputs[1].links[0].from_socket
+                    errors.append("wrong_socket")
+            elif self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+                try:
+                    if str(type(eval(code))) == "<class 'bpy_prop_collection'>":
+                        value = [self.inputs[1].links[0].from_socket]
+                    else:
+                        value = ["[", self.inputs[1].links[0].from_socket, "]"]
+                except KeyError:
+                    errors.append("wrong_socket")
             else:
                 errors.append("wrong_socket")
         else:
@@ -82,7 +88,7 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
                 "code": [defVar],
                 "indented_blocks": [
                     {
-                        "code": ["for ", self.var_name + " in ", value, ":\n"],
+                        "code": ["for " + self.var_name + " in "] + value + [":\n"],
                         "function_node": do_next_node
                     }
                 ],
