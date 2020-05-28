@@ -5,11 +5,11 @@ from ..node_utility import register_dynamic_input, get_input_value, get_types
 from ...node_sockets import update_socket_autocompile
 
 
-class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
-    '''Node to use a property in a panel'''
-    bl_idname = 'SN_UiPropertiesNode'
-    bl_label = "Property"
-    bl_icon = node_icons["INTERFACE"]
+class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
+    '''Node to get the value of a properties'''
+    bl_idname = 'SN_SetPropertiesNode'
+    bl_label = "Change Property"
+    bl_icon = node_icons["OPERATOR"]
 
     def getTypes(self, context):
         types = get_types()
@@ -49,9 +49,13 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["INTERFACE"]
+        self.color = node_colors["OPERATOR"]
 
-        self.outputs.new('SN_LayoutSocket', "Layout")
+        pIn = self.inputs.new('SN_ProgramSocket', "Program")
+        pIn.display_shape = "DIAMOND"
+        self.inputs.new('SN_DataSocket', "Value")
+        pOut = self.outputs.new('SN_ProgramSocket', "Program")
+        pOut.display_shape = "DIAMOND"
 
     def copy(self, node):
         pass# called when node is copied
@@ -67,11 +71,14 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         errors = []
         code = ""
 
-        code+="bpy.context."
-        code+=self.propLocation.lower()
-        code+=", '"
-        code+=self.propName
-
-        return {"code":["_INDENT__INDENT_", self.outputs[0].links[0].to_node.layout_type(),
-                        ".prop(", code, "')\n"], "error":errors}
-
+        code+="bpy.data."
+        code+=self.propLocation
+        code+="[0]."
+        code+=str(self.propName)
+        code+=" = "
+        if not self.inputs[1].is_linked:
+            errors.append("no_connection")
+            code="\n"
+            return {"code": code, "error": errors}
+        else:
+            return {"code": [code, self.inputs[1].links[0].from_socket, "\n"]}

@@ -5,11 +5,11 @@ from ..node_utility import register_dynamic_input, get_input_value, get_types
 from ...node_sockets import update_socket_autocompile
 
 
-class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
-    '''Node to get the value of a properties'''
-    bl_idname = 'SN_SetPropertiesNode'
-    bl_label = "Change Property"
-    bl_icon = node_icons["OPERATOR"]
+class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
+    '''Node to use a property in a panel'''
+    bl_idname = 'SN_UiPropertiesNode'
+    bl_label = "Layout Property"
+    bl_icon = node_icons["INTERFACE"]
 
     def getTypes(self, context):
         types = get_types()
@@ -49,13 +49,9 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["OPERATOR"]
+        self.color = node_colors["INTERFACE"]
 
-        pIn = self.inputs.new('SN_ProgramSocket', "Program")
-        pIn.display_shape = "DIAMOND"
-        self.inputs.new('SN_DataSocket', "Value")
-        pOut = self.outputs.new('SN_ProgramSocket', "Program")
-        pOut.display_shape = "DIAMOND"
+        self.outputs.new('SN_LayoutSocket', "Layout")
 
     def copy(self, node):
         pass# called when node is copied
@@ -69,17 +65,13 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self,output):
         errors = []
-        code = []
+        code = ""
 
-        code.append("bpy.data.materials")
-        code.append("[0].")
-        #code.append(self.propLocation)
-        code.append(str(self.propName))
-        code.append(" = ")
-        if not self.inputs[1].is_linked:
-            errors.append("no_connection")
-            code.append("False")
-            code.append("\n")
-            return {"code": code, "error": errors}
-        else:
-            return {"code": [code, self.inputs[1].links[0].from_socket, "\n"]}
+        code+="bpy.context."
+        code+=self.propLocation.lower()
+        code+=", '"
+        code+=self.propName
+
+        return {"code":["_INDENT__INDENT_", self.outputs[0].links[0].to_node.layout_type(),
+                        ".prop(", code, "')\n"], "error":errors}
+
