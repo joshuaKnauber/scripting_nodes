@@ -40,9 +40,20 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                     for prop in dir(eval(value)):
                         if prop[0] != "_":
-                            item = self.sn_change_property_properties.add()
-                            item.identifier = prop
-                            item.name = prop.replace("_", " ").title()
+                            code = ("").join(self.inputs[2].links[0].from_node.internal_evaluate(self.inputs[2].links[0].from_socket)["code"])
+                            codeType = code + "." + prop
+                            code+=".is_property_readonly('"
+                            code+=prop
+                            code+="')"
+
+                            if not eval("type(" + codeType + ")") == bpy.types.bpy_func:
+                                try:
+                                    if not eval(code):
+                                        item = self.sn_change_property_properties.add()
+                                        item.identifier = prop
+                                        item.name = prop.replace("_", " ").title()
+                                except TypeError:
+                                    pass
 
     def copy(self, node):
         pass# called when node is copied
@@ -66,4 +77,4 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             code=["\n"]
             return {"code": code, "error": errors}
         else:
-            return {"code": code+ [self.inputs[1].links[0].from_socket, "\n"]}
+            return {"code": code + [self.inputs[1].links[0].from_socket, "\n"]}
