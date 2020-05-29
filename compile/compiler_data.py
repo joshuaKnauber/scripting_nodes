@@ -79,6 +79,11 @@ error_logs = {
         "message": "The variable doesn't have a name",
         "fatal": True
     },
+    "invalid_prop": {
+        "title": "Invalid property",
+        "message": "The property does not exist",
+        "fatal": False
+    },
     "no_available": {
         "title": "No variable available",
         "message": "With your current connections there is no variable available to use",

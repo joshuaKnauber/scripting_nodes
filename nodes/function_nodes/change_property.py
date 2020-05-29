@@ -5,47 +5,19 @@ from ..node_utility import register_dynamic_input, get_input_value, get_types
 from ...node_sockets import update_socket_autocompile
 
 
+class SN_ChangeSearchPropertyGroup(bpy.types.PropertyGroup):
+
+    name: bpy.props.StringProperty(name="Name", default="")
+    identifier: bpy.props.StringProperty(name="Identifier",default="")
+
 class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to get the value of a properties'''
     bl_idname = 'SN_SetPropertiesNode'
     bl_label = "Change Property"
     bl_icon = node_icons["OPERATOR"]
 
-    def getTypes(self, context):
-        types = get_types()
-
-        newTypes = []
-        for typeName in types:
-            newTypes.append((typeName, typeName, ""))
-        
-        return newTypes
-
-    def getNames(self, context):
-        names = []
-        location = self.propLocation
-
-        dontDisplay = ["sn_properties", "sn_error_properties", "RNA"]
-        for node in context.space_data.node_tree.nodes:
-            if node.bl_idname == "SN_PropertiesNode":
-                if node.propLocation == location:
-                    dontDisplay.append(node.propName)
-                    newName = node.propName
-                    newName = newName.lower()
-                    newName = newName.replace(" ", "_")
-                    names.append((newName, node.propName, ""))
-
-        for prop in eval("bpy.types." + location + ".bl_rna.properties"):
-            if not prop.name in dontDisplay:
-                newName = prop.name
-                newName = newName.lower()
-                newName = newName.replace(" ", "_")
-                names.append((newName, prop.name, ""))
-
-        return names
-
-
-    propLocation: bpy.props.EnumProperty(items=getTypes, name="Location", description="", default=None, update=update_socket_autocompile, get=None, set=None)
-    propName: bpy.props.EnumProperty(items=getNames, name="Name", description="", default=None, update=update_socket_autocompile)
+    sn_change_property_properties: bpy.props.CollectionProperty(type=SN_ChangeSearchPropertyGroup)
+    propName: bpy.props.StringProperty(name="Name", description="Compile to see your custom properties", default="", update=update_socket_autocompile)
 
     def init(self, context):
         self.use_custom_color = True
@@ -54,8 +26,23 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         pIn = self.inputs.new('SN_ProgramSocket', "Program")
         pIn.display_shape = "DIAMOND"
         self.inputs.new('SN_DataSocket', "Value")
+        inp = self.inputs.new('SN_SceneDataSocket', "Scene Data")
+        inp.display_shape = "SQUARE"
         pOut = self.outputs.new('SN_ProgramSocket', "Program")
         pOut.display_shape = "DIAMOND"
+
+    def update(self):
+        if len(self.inputs) > 0:
+            self.sn_change_property_properties.clear()
+            if len(self.inputs[2].links) == 1:
+                if self.inputs[2].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+                    value = ("").join(self.inputs[2].links[0].from_node.internal_evaluate(self.inputs[2].links[0].from_socket)["code"])
+
+                    for prop in dir(eval(value)):
+                        if prop[0] != "_":
+                            item = self.sn_change_property_properties.add()
+                            item.identifier = prop
+                            item.name = prop.replace("_", " ").title()
 
     def copy(self, node):
         pass# called when node is copied
@@ -64,21 +51,19 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# called when node is removed
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "propLocation")
-        layout.prop(self, "propName")
+        layout.prop_search(self, "propName", self, "sn_change_property_properties", text="")
 
     def evaluate(self,output):
         errors = []
-        code = ""
+        code = []
 
-        code+="bpy.data."
-        code+=self.propLocation
-        code+="[0]."
-        code+=str(self.propName)
-        code+=" = "
+        code.append(self.inputs[2].links[0].from_socket)
+        code.append(".")
+        code.append(self.sn_change_property_properties[self.propName].identifier)
+        code.append(" = ")
         if not self.inputs[1].is_linked:
             errors.append("no_connection")
-            code="\n"
+            code=["\n"]
             return {"code": code, "error": errors}
         else:
-            return {"code": [code, self.inputs[1].links[0].from_socket, "\n"]}
+            return {"code": code+ [self.inputs[1].links[0].from_socket, "\n"]}

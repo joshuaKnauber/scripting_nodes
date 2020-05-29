@@ -14,7 +14,6 @@ class SN_UiExistingPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def get_panels(self):
-
         if len(bpy.context.scene.sn_panel_properties) == 0:
             for type_name in dir(bpy.types):
                 type_class = eval("bpy.types." + type_name)

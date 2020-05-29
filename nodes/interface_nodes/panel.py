@@ -5,6 +5,12 @@ from ..node_utility import register_dynamic_input, get_input_value
 from ...node_sockets import update_socket_autocompile
 
 
+class SN_PanelSearchPropertyGroup(bpy.types.PropertyGroup):
+
+    name: bpy.props.StringProperty(name="Name", default="")
+    identifier: bpy.props.StringProperty(name="Identifier",default="")
+
+
 class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to create a panel in the user interface'''
     bl_idname = 'SN_UiPanelNode'
@@ -27,7 +33,7 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def getRegion(self, context):
-        bpy.context.scene.sn_region_properties.clear()
+        self.sn_region_properties.clear()
         for type_name in dir(bpy.types):
             type_name = eval("bpy.types."+type_name)
             if bpy.types.Panel in type_name.__bases__:
@@ -35,45 +41,49 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                     name = type_name.bl_region_type.replace("_", " ")
                     name = name.title()
                     identifier = type_name.bl_region_type
-                    if not name in bpy.context.scene.sn_region_properties:
-                        item = bpy.context.scene.sn_region_properties.add()
+                    if not name in self.sn_region_properties:
+                        item = self.sn_region_properties.add()
                         item.identifier = identifier
                         item.name = name
 
     def getContext(self, context):
         self.getCategory(context)
-        bpy.context.scene.sn_context_properties.clear()
+        self.sn_context_properties.clear()
         for type_name in dir(bpy.types):
             type_name = eval("bpy.types."+type_name)
             if bpy.types.Panel in type_name.__bases__:
-                if type_name.bl_region_type == bpy.context.scene.sn_region_properties[self.region_type_name].identifier:
+                if type_name.bl_region_type == self.sn_region_properties[self.region_type_name].identifier:
                     try:
                         name = type_name.bl_context
                     except AttributeError:
                         name = ""
                     if name != "":
-                        if not name.title() in bpy.context.scene.sn_context_properties:
-                            item = bpy.context.scene.sn_context_properties.add()
+                        if not name.title() in self.sn_context_properties:
+                            item = self.sn_context_properties.add()
                             item.identifier = name
                             item.name = name.title()
     
 
     def getCategory(self, context):
-        bpy.context.scene.sn_category_properties.clear()
+        self.sn_category_properties.clear()
         for type_name in dir(bpy.types):
             type_name = eval("bpy.types."+type_name)
             if bpy.types.Panel in type_name.__bases__:
-                if type_name.bl_region_type == bpy.context.scene.sn_region_properties[self.region_type_name].identifier:
+                if type_name.bl_region_type == self.sn_region_properties[self.region_type_name].identifier:
                     try:
                         name = type_name.bl_category
                     except AttributeError:
                         name = ""
                     if name != "":
-                        if not name.title() in bpy.context.scene.sn_category_properties:
-                            item = bpy.context.scene.sn_category_properties.add()
+                        if not name.title() in self.sn_category_properties:
+                            item = self.sn_category_properties.add()
                             item.identifier = name
                             item.name = name.title()
-                        
+
+
+    sn_region_properties: bpy.props.CollectionProperty(type=SN_PanelSearchPropertyGroup)
+    sn_context_properties: bpy.props.CollectionProperty(type=SN_PanelSearchPropertyGroup)
+    sn_category_properties: bpy.props.CollectionProperty(type=SN_PanelSearchPropertyGroup)
 
     panel_name: bpy.props.StringProperty(default="New Panel",name="Panel name",description="Name of the panel", update=update_socket_autocompile)
     default_closed: bpy.props.BoolProperty(default=True,name="Default Closed",description="Panel is closed by default", update=update_socket_autocompile)
@@ -103,13 +113,13 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self,"panel_name",text="Name")
         layout.prop_search(self,"space_type_name", context.scene,"sn_space_properties",text="Space")
-        layout.prop_search(self,"region_type_name", context.scene,"sn_region_properties",text="Region")
-        layout.prop_search(self,"context_name", context.scene,"sn_context_properties",text="Context")
+        layout.prop_search(self,"region_type_name", self,"sn_region_properties",text="Region")
+        layout.prop_search(self,"context_name", self,"sn_context_properties",text="Context")
         layout.prop(self, "custom")
         if self.custom:
             layout.prop(self, "category_name", text="Category")
         else:
-            layout.prop_search(self,"category_name", context.scene,"sn_category_properties",text="Category")
+            layout.prop_search(self,"category_name", self,"sn_category_properties",text="Category")
         layout.prop(self, "default_closed")
         layout.prop(self, "hide_header")
 
@@ -134,11 +144,11 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         region_type = "HEADER"
         if self.space_type_name == "" or self.region_type_name == "":
             errors.append("no_location_panel")
-        elif not self.region_type_name in bpy.context.scene.sn_region_properties:
+        elif not self.region_type_name in self.sn_region_properties:
             errors.append("wrong_location_panel")
         else:
             space_type = bpy.context.scene.sn_space_properties[self.space_type_name].identifier
-            region_type = bpy.context.scene.sn_region_properties[self.region_type_name].identifier
+            region_type = self.sn_region_properties[self.region_type_name].identifier
 
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname == "SN_UiPanelNode":
@@ -160,16 +170,16 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.category_name != "":
             if self.custom:
                 panelCategory = "_INDENT_bl_category = '" + self.category_name + "'\n"
-            elif not self.category_name in bpy.context.scene.sn_category_properties:
+            elif not self.category_name in self.sn_category_properties:
                 panelCategory = ""
                 errors.append("wrong_location_panel")
             else:
-                panelCategory = "_INDENT_bl_category = '" + bpy.context.scene.sn_category_properties[self.category_name].identifier + "'\n"
+                panelCategory = "_INDENT_bl_category = '" + self.sn_category_properties[self.category_name].identifier + "'\n"
         else:
             panelCategory = ""
 
         if self.context_name != "":
-            panelContext = "_INDENT_bl_context = '" + bpy.context.scene.sn_context_properties[self.context_name].identifier + "'\n\n"
+            panelContext = "_INDENT_bl_context = '" + self.sn_context_properties[self.context_name].identifier + "'\n\n"
         else:
             panelContext = "\n\n"
 
