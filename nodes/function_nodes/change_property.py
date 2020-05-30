@@ -67,14 +67,19 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self,output):
         errors = []
         code = []
-
-        code.append(self.inputs[2].links[0].from_socket)
-        code.append(".")
-        code.append(self.sn_change_property_properties[self.propName].identifier)
-        code.append(" = ")
-        if not self.inputs[1].is_linked:
+        if self.inputs[2].is_linked:
+            if self.inputs[2].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+                code.append(self.inputs[2].links[0].from_socket)
+                code.append(".")
+                code.append(self.sn_change_property_properties[self.propName].identifier)
+                code.append(" = ")
+            else:
+                errors.append("wrong_socket")
+        else:
+            errors.append("no_connection")
+        if not self.inputs[1].is_linked or not self.inputs[2].is_linked:
             errors.append("no_connection")
             code=["\n"]
             return {"code": code, "error": errors}
         else:
-            return {"code": code + [self.inputs[1].links[0].from_socket, "\n"]}
+            return {"code": code + [self.inputs[1].links[0].from_socket, "\n"], "error": errors}
