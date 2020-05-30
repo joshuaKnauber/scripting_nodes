@@ -361,8 +361,16 @@ class ScriptingNodesCompiler():
         #registers the addon in the blend file
         ctx = bpy.context.copy()
         ctx["edit_text"] = addon
-        bpy.ops.text.run_script(ctx)
-        #bpy.data.texts.remove(addon)
+
+        fatal = False
+        for error in self._errors:
+            log = error_logs[error[0]]
+            if log["fatal"] == True:
+                fatal = True
+        
+        if not fatal:
+            bpy.ops.text.run_script(ctx)
+            #bpy.data.texts.remove(addon)
 
     def _draw_errors(self):
         #adds all the errors from the error list to the props
