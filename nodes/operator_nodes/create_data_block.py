@@ -172,4 +172,4 @@ class SN_CreateDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {"code": code, "error":errors}
 
     def internal_evaluate(self, output):
-        return {"code": "bpy.data."+self.propLocation}
+        return {"code": "bpy.data."+self.propLocation+"['name']"}
