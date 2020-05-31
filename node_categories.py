@@ -96,6 +96,8 @@ node_categories = [
         }),
         NodeItem("SN_PropertiesNode", settings={
         }),
+        NodeItem("SN_CreateDataNode", settings={
+        }),
         NodeItem("SN_FunctionNode", settings={
         }),
         NodeItem("SN_FunctionEndNode", settings={
