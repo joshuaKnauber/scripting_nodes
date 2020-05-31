@@ -64,6 +64,16 @@ error_logs = {
         "message": "The panel doesn't have a name",
         "fatal": False
     },
+    "no_name_data": {
+        "title": "No name",
+        "message": "The data block doesn't have a name",
+        "fatal": True
+    },
+    "no_name": {
+        "title": "No name",
+        "message": "The String input is empty",
+        "fatal": True
+    },
     "no_location_panel": {
         "title": "No location",
         "message": "The panel doesn't have a proper location",
@@ -74,7 +84,7 @@ error_logs = {
         "message": "The panel has a wrong location",
         "fatal": True
     },
-    "no_name": {
+    "no_name_var": {
         "title": "No name",
         "message": "The variable doesn't have a name",
         "fatal": True
