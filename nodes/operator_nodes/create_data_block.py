@@ -68,7 +68,8 @@ class SN_CreateDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         pOut = self.outputs.new('SN_ProgramSocket', "Program")
         pOut.display_shape = "DIAMOND"
 
-        self.outputs.new('SN_DataSocket', "Output")
+        out = self.outputs.new('SN_SceneDataSocket', "Scene Data")
+        out.display_shape = "SQUARE"
 
     def copy(self, node):
         self.var_name = self.get_var_name()
@@ -169,3 +170,12 @@ class SN_CreateDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         
         return {"code": code, "error":errors}
+
+    def internal_evaluate(self, output):
+        if self.inputs[1].is_linked:
+            name, error = get_input_value(self, "Name", "SN_StringSocket")
+            errors+=(error)
+        else:
+            name = "'" + self.inputs[1].value + "'"
+
+        return {"code": "bpy.data."+self.propLocation+"["+name+"]"}
