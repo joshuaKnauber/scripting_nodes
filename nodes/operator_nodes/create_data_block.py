@@ -44,8 +44,18 @@ class SN_CreateDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         return items
 
     propLocation: bpy.props.EnumProperty(items=getItems, name="Location", description="Location of the data", update=updateLoc)
+    var_name: bpy.props.StringProperty(default="data_var_0")
+
+    def get_var_name(self):
+        highest_var_name = 0
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname == self.bl_idname:
+                number = int(node.var_name.split("_")[-1])
+                highest_var_name = max(number,highest_var_name)
+        return "data_var_"+str(highest_var_name + 1)
 
     def init(self, context):
+        self.var_name = self.get_var_name()
         pIn = self.inputs.new('SN_ProgramSocket', "Program")
         pIn.display_shape = "DIAMOND"
         self.inputs.new('SN_StringSocket', "Name")
@@ -57,8 +67,11 @@ class SN_CreateDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         pOut = self.outputs.new('SN_ProgramSocket', "Program")
         pOut.display_shape = "DIAMOND"
 
+        out = self.outputs.new('SN_SceneDataSocket', "Output")
+        out.display_shape = "SQUARE"
+
     def copy(self, node):
-        pass# called when node is copied
+        self.var_name = self.get_var_name()
 
     def free(self):
         pass# called when node is removed
@@ -76,7 +89,8 @@ class SN_CreateDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             name = "'" + self.inputs[1].value + "'"
 
-        code.append("bpy.data.")
+        code.append(self.var_name)
+        code.append(" = bpy.data.")
         code.append(self.propLocation)
         code.append(".new(")
         if name != "''":
