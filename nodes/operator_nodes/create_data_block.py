@@ -39,7 +39,8 @@ class SN_CreateDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         for obj in dir(bpy.data):
             if "new" in eval("dir(bpy.data."+obj+")"):
-                items.append((obj, obj.replace("_", " ").title(), ""))
+                if obj != "objects":
+                    items.append((obj, obj.replace("_", " ").title(), ""))
 
         return items
 
@@ -67,8 +68,7 @@ class SN_CreateDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         pOut = self.outputs.new('SN_ProgramSocket', "Program")
         pOut.display_shape = "DIAMOND"
 
-        out = self.outputs.new('SN_SceneDataSocket', "Output")
-        out.display_shape = "SQUARE"
+        self.outputs.new('SN_DataSocket', "Output")
 
     def copy(self, node):
         self.var_name = self.get_var_name()
@@ -80,6 +80,9 @@ class SN_CreateDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"propLocation")
 
     def evaluate(self,output):
+        if output == self.outputs[-1]:
+            return {"code":[self.var_name]}
+        
         errors = []
         code = []
 

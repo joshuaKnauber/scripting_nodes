@@ -63,7 +63,6 @@ def get_data_blocks():
         "meshes": [["SN_StringSocket", "Name"]],
         "metaballs": [["SN_StringSocket", "Name"]],
         "node_groups": [["SN_StringSocket", "Name"], ["SN_EnumSocket", "Type", [('ShaderNodeTree', "Shader", ""), ('CompositorNodeTree', "Compositor", ""), ('TextureNodeTree', "Texture", "")]]],
-        #"objects": [["SN_StringSocket", "Name"]],
         "palettes": [["SN_StringSocket", "Name"]],
         "particles": [["SN_StringSocket", "Name"]],
         "scenes": [["SN_StringSocket", "Name"]],
