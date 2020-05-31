@@ -114,12 +114,14 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"panel_name",text="Name")
         layout.prop_search(self,"space_type_name", context.scene,"sn_space_properties",text="Space")
         layout.prop_search(self,"region_type_name", self,"sn_region_properties",text="Region")
-        layout.prop_search(self,"context_name", self,"sn_context_properties",text="Context")
-        layout.prop(self, "custom")
-        if self.custom:
-            layout.prop(self, "category_name", text="Category")
-        else:
-            layout.prop_search(self,"category_name", self,"sn_category_properties",text="Category")
+        if len(self.sn_context_properties) > 0:
+            layout.prop_search(self,"context_name", self,"sn_context_properties",text="Context")
+        if len(self.sn_category_properties) > 0:
+            layout.prop(self, "custom")
+            if self.custom:
+                layout.prop(self, "category_name", text="Category")
+            else:
+                layout.prop_search(self,"category_name", self,"sn_category_properties",text="Category")
         layout.prop(self, "default_closed")
         layout.prop(self, "hide_header")
 
