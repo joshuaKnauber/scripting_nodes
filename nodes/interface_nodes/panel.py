@@ -52,16 +52,17 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         for type_name in dir(bpy.types):
             type_name = eval("bpy.types."+type_name)
             if bpy.types.Panel in type_name.__bases__:
-                if type_name.bl_region_type == self.sn_region_properties[self.region_type_name].identifier:
+                if type_name.bl_region_type == self.sn_region_properties[self.region_type_name].identifier and type_name.bl_space_type == bpy.context.scene.sn_space_properties[self.space_type_name].identifier:
                     try:
-                        name = type_name.bl_context
+                        identifier = type_name.bl_context
                     except AttributeError:
-                        name = ""
-                    if name != "":
-                        if not name.title() in self.sn_context_properties:
+                        identifier = ""
+                    if identifier != "" and identifier[0] != ".":
+                        name = identifier.replace("_", " ").title()
+                        if not name in self.sn_context_properties:
                             item = self.sn_context_properties.add()
-                            item.identifier = name
-                            item.name = name.title()
+                            item.identifier = identifier
+                            item.name = name
     
 
     def getCategory(self, context):
@@ -69,16 +70,17 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         for type_name in dir(bpy.types):
             type_name = eval("bpy.types."+type_name)
             if bpy.types.Panel in type_name.__bases__:
-                if type_name.bl_region_type == self.sn_region_properties[self.region_type_name].identifier:
+                if type_name.bl_region_type == self.sn_region_properties[self.region_type_name].identifier and type_name.bl_space_type == bpy.context.scene.sn_space_properties[self.space_type_name].identifier:
                     try:
-                        name = type_name.bl_category
+                        identifier = type_name.bl_category
                     except AttributeError:
-                        name = ""
-                    if name != "":
-                        if not name.title() in self.sn_category_properties:
+                        identifier = ""
+                    if identifier != "" and identifier[0] != ".":
+                        name = identifier.replace("_", " ").title()
+                        if not name in self.sn_category_properties:
                             item = self.sn_category_properties.add()
-                            item.identifier = name
-                            item.name = name.title()
+                            item.identifier = identifier
+                            item.name = name
 
 
     sn_region_properties: bpy.props.CollectionProperty(type=SN_PanelSearchPropertyGroup)
