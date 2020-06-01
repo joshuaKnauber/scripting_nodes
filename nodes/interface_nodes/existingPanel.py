@@ -81,8 +81,9 @@ class SN_UiExistingPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 else:
                     errors.append("wrong_socket")
 
-        header = [""]
-        code = ["\n"]
+        if self.panel_name == "":
+            header = [""]
+            code = ["\n"]
         
         return {"code":header+code,"error":errors}
 
