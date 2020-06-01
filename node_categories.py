@@ -138,6 +138,8 @@ node_categories = [
         }),
         NodeItem("SN_ToStringNode", settings={
         }),
+        NodeItem("SN_CombineTextNode", settings={
+        }),
 
     ]),
  
