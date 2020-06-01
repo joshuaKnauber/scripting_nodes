@@ -32,28 +32,29 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         pOut.display_shape = "DIAMOND"
 
     def update(self):
-        if len(self.inputs) > 0:
+        if len(self.inputs) == 3:
             self.sn_change_property_properties.clear()
-            if len(self.inputs[2].links) == 1:
-                if self.inputs[2].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                    value = ("").join(self.inputs[2].links[0].from_node.internal_evaluate(self.inputs[2].links[0].from_socket)["code"])
+            if self.inputs[2].is_linked:
+                if len(self.inputs[2].links) == 1:
+                    if self.inputs[2].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+                        value = ("").join(self.inputs[2].links[0].from_node.internal_evaluate(self.inputs[2].links[0].from_socket)["code"])
 
-                    for prop in dir(eval(value)):
-                        if prop[0] != "_":
-                            code = ("").join(self.inputs[2].links[0].from_node.internal_evaluate(self.inputs[2].links[0].from_socket)["code"])
-                            codeType = code + "." + prop
-                            code+=".is_property_readonly('"
-                            code+=prop
-                            code+="')"
+                        for prop in dir(eval(value)):
+                            if prop[0] != "_":
+                                code = ("").join(self.inputs[2].links[0].from_node.internal_evaluate(self.inputs[2].links[0].from_socket)["code"])
+                                codeType = code + "." + prop
+                                code+=".is_property_readonly('"
+                                code+=prop
+                                code+="')"
 
-                            if not eval("type(" + codeType + ")") == bpy.types.bpy_func:
-                                try:
-                                    if not eval(code):
-                                        item = self.sn_change_property_properties.add()
-                                        item.identifier = prop
-                                        item.name = prop.replace("_", " ").title()
-                                except TypeError:
-                                    pass
+                                if not eval("type(" + codeType + ")") == bpy.types.bpy_func:
+                                    try:
+                                        if not eval(code):
+                                            item = self.sn_change_property_properties.add()
+                                            item.identifier = prop
+                                            item.name = prop.replace("_", " ").title()
+                                    except TypeError:
+                                        pass
 
     def copy(self, node):
         pass# called when node is copied

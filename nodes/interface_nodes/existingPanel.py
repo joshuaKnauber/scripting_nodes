@@ -60,22 +60,29 @@ class SN_UiExistingPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         return options
 
     def evaluate(self,output):
-        for item in bpy.context.scene.sn_panel_properties:
-            if item.name == self.panel_name:
-                type_name = item.identifier
+        errors = []
+        code = []
+        if self.panel_name != "":
+            for item in bpy.context.scene.sn_panel_properties:
+                if item.name == self.panel_name:
+                    type_name = item.identifier
+        else:
+            errors.append("no_name")
+            type_name = "test"
 
 
         header = ["_REMOVE_", "def append_panel_", type_name.replace(" ","_"), "(self, context):\n",
                   "_INDENT__INDENT_", "layout = self.layout \n"]
 
-        errors = []
-        code = []
         for inp in self.inputs:
             if inp.bl_idname == "SN_LayoutSocket" and inp.is_linked:
                 if inp.bl_idname == "SN_LayoutSocket":
                     code += [inp.links[0].from_socket]
                 else:
                     errors.append("wrong_socket")
+
+        header = [""]
+        code = ["\n"]
         
         return {"code":header+code,"error":errors}
 

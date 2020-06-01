@@ -286,9 +286,12 @@ class ScriptingNodesCompiler():
                 self._existingInterface.append("")
                 self._interface.append(panel)
             elif panel.bl_idname == "SN_UiExistingPanelNode":
-                for item in bpy.context.scene.sn_panel_properties:
-                    if item.name == panel.panel_name:
-                        name = item.identifier
+                if panel.panel_name != "":
+                    for item in bpy.context.scene.sn_panel_properties:
+                        if item.name == panel.panel_name:
+                            name = item.identifier
+                else:
+                    name = ""
 
                 panel = self._compile_interface_branch(panel,0)
                 panel = self._decode_interface_code(panel)

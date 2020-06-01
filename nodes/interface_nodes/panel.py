@@ -16,7 +16,7 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = 'SN_UiPanelNode'
     bl_label = "Panel"
     bl_icon = node_icons["INTERFACE"]
-    bl_width_default = 310
+    bl_width_default = 250
 
     def getSpace(self):
         if len(bpy.context.scene.sn_space_properties) == 0:
