@@ -54,10 +54,45 @@ error_logs = {
         "message": "At least one of the program outputs of this node has no connections",
         "fatal": False
     },
+    "no_connection_for": {
+        "title": "No Scene Data connection",
+        "message": "The for Node has no scene data inputs",
+        "fatal": True
+    },
+    "no_name_panel": {
+        "title": "No name",
+        "message": "The panel doesn't have a name",
+        "fatal": False
+    },
+    "no_name_data": {
+        "title": "No name",
+        "message": "The data block doesn't have a name",
+        "fatal": True
+    },
     "no_name": {
+        "title": "No name",
+        "message": "The String input is empty",
+        "fatal": True
+    },
+    "no_location_panel": {
+        "title": "No location",
+        "message": "The panel doesn't have a proper location",
+        "fatal": True
+    },
+    "wrong_location_panel": {
+        "title": "Wrong location",
+        "message": "The panel has a wrong location",
+        "fatal": True
+    },
+    "no_name_var": {
         "title": "No name",
         "message": "The variable doesn't have a name",
         "fatal": True
+    },
+    "invalid_prop": {
+        "title": "Invalid property",
+        "message": "The property does not exist",
+        "fatal": False
     },
     "no_available": {
         "title": "No variable available",

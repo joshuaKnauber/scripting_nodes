@@ -23,6 +23,10 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
         update = update_examples
     )
 
+    show_line_width: bpy.props.BoolProperty(default=False,name="Show settings",description="Show settings for the error panel")
+
+    line_width: bpy.props.IntProperty(default=10,min=1,max=50,name="Error line breaks",description="How often the error message lines should break to the next line")
+
 
 bpy.utils.register_class(ScriptingNodesProperties)
 bpy.types.Scene.sn_properties = bpy.props.PointerProperty(type=ScriptingNodesProperties)

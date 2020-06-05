@@ -153,7 +153,7 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.inputs[0].is_linked:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
                     if output.name == "Amount":
-                        code += [self.inputs[0].links[0].from_socket,"len("] + line + [")"]
+                        code += ["len(", self.inputs[0].links[0].from_socket, ")"]
                     elif output.name == "Element":
                         if self.use_index:
                             value, error = get_input_value(self,"Index",["SN_IntSocket","SN_NumberSocket"])

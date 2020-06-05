@@ -96,6 +96,8 @@ node_categories = [
         }),
         NodeItem("SN_PropertiesNode", settings={
         }),
+        NodeItem("SN_CreateDataNode", settings={
+        }),
         NodeItem("SN_FunctionNode", settings={
         }),
         NodeItem("SN_FunctionEndNode", settings={
@@ -117,6 +119,8 @@ node_categories = [
         }),
         NodeItem("SN_RepeatNode", label="Repeat - Program", settings={
         }),
+        NodeItem("SN_ForNode", label="For - Program", settings={
+        }),
         NodeItem("SN_VariableChangeNode", settings={
         }),
         NodeItem("SN_SetPropertiesNode", settings={
@@ -134,9 +138,11 @@ node_categories = [
         }),
         NodeItem("SN_ToStringNode", settings={
         }),
+        NodeItem("SN_CombineTextNode", settings={
+        }),
 
     ]),
-
+ 
     SN_ScriptingNodesCategory('INPUT', "Input", items=[
 
         NodeItem("SN_SceneDataNode", settings={
@@ -154,6 +160,13 @@ node_categories = [
         NodeItem("SN_TextNode", settings={
         }),
         NodeItem("SN_VectorNode", settings={
+        }),
+
+    ]),
+
+    SN_ScriptingNodesCategory('LAYOUT', "Layout", items=[
+
+        NodeItem("NodeFrame", settings={
         }),
 
     ]),

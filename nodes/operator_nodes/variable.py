@@ -37,7 +37,7 @@ class SN_VariableSetNode(bpy.types.Node, SN_ScriptingBaseNode):
         errors = []
 
         if self.variable_name == "":
-            errors.append("no_name")
+            errors.append("no_name_var")
 
         if not self.inputs[1].is_linked:
             errors.append("no_connection")

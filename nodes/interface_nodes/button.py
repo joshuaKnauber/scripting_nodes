@@ -1,5 +1,5 @@
 import bpy
-from ..use_operator import SN_UseOperatorNode
+from ..function_nodes.use_operator import SN_UseOperatorNode
 from ...compile.operators import SN_OT_EmptyOperator
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
