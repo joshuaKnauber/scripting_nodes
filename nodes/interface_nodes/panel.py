@@ -171,7 +171,7 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         options = self.options()
 
-        if self.category_name != "":
+        if len(self.sn_category_properties) > 0:
             if self.custom:
                 panelCategory = "_INDENT_bl_category = '" + self.category_name + "'\n"
             elif not self.category_name in self.sn_category_properties:
@@ -182,7 +182,7 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             panelCategory = ""
 
-        if self.context_name != "":
+        if len(self.sn_context_properties) > 0:
             panelContext = "_INDENT_bl_context = '" + self.sn_context_properties[self.context_name].identifier + "'\n\n"
         else:
             panelContext = "\n\n"
