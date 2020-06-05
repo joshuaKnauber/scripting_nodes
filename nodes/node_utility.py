@@ -41,6 +41,14 @@ def get_types():
                 types[eval("bpy.data."+data+".bl_rna.name.replace('Main ','')[:-1]")] = data
             except AttributeError:
                 pass
+    for type_name in dir(bpy.types):
+        type_name = eval("bpy.types."+type_name).bl_rna.name
+        type_name = type_name.replace("Main ","")
+        if type_name[-1:] == "s":
+            type_name = type_name[:-1]
+        if not type_name in types:
+            if not "OT_" in type_name and not "PT_" in type_name and not "MT_" in type_name:
+                types[type_name] = type_name.lower().replace(" ","_")
     return types
 
 
