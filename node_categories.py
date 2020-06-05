@@ -88,7 +88,7 @@ node_categories = [
 
     ]),
 
-    SN_ScriptingNodesCategory('OPERATORS', "Operators", items=[
+    SN_ScriptingNodesCategory('FUNCTIONS', "Functions", items=[
         
         NodeItem("SN_OperatorNode", settings={
         }),
@@ -100,11 +100,7 @@ node_categories = [
         #}),
         NodeItem("SN_FunctionRunNode", settings={
         }),
-        NodeItem("SN_PropertiesNode", settings={
-        }),
         NodeItem("SN_CreateDataNode", settings={
-        }),
-        NodeItem("SN_VariableSetNode", settings={
         }),
         NodeItem("SN_ScriptLineNode", settings={
         }),
@@ -113,13 +109,24 @@ node_categories = [
 
     SN_ScriptingNodesCategory('PROGRAM', "Program", items=[
       
-        NodeItem("SN_IfNode", label="If - Program", settings={
-        }),
-        NodeItem("SN_RepeatNode", label="Repeat - Program", settings={
-        }),
-        NodeItem("SN_ForNode", label="For - Program", settings={
-        }),
         NodeItem("SN_PrintNode", settings={
+        }),
+        NodeItem("SN_IfNode", label="If Program", settings={
+        }),
+        NodeItem("SN_RepeatNode", label="Repeat Program", settings={
+        }),
+        NodeItem("SN_ForNode", label="For Program", settings={
+        }),
+
+    ]),
+
+    SN_ScriptingNodesCategory('VARIABLES', "Variables", items=[
+        
+        NodeItem("SN_PropertiesNode", settings={
+        }),
+        NodeItem("SN_VariableSetNode", settings={
+        }),
+        NodeItem("SN_ScriptLineNode", settings={
         }),
         NodeItem("SN_VariableChangeNode", settings={
         }),
