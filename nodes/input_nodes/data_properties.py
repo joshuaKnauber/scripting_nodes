@@ -85,7 +85,7 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                         item = self.search_properties.add()
                                         item.name = prop.name
                                         item.propType = str(type(prop))
-        else:
+        else:              
             self.outputs.clear()
             for socket in self.inputs:
                 if not socket.bl_idname == "SN_SceneDataSocket":
