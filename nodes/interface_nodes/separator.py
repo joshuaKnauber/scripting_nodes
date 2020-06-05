@@ -6,7 +6,7 @@ from ..node_looks import node_colors, node_icons
 class SN_UiSeparatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to create a separator in the user interface'''
     bl_idname = 'SN_UiSeparatorNode'
-    bl_label = "Separator"
+    bl_label = "Separator Layout"
     bl_icon = node_icons["INTERFACE"]
 
     def init(self, context):

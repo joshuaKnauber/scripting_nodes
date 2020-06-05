@@ -7,7 +7,7 @@ from ..node_utility import register_dynamic_input, get_input_value
 class SN_UiColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to create a column in the user interface'''
     bl_idname = 'SN_UiColumnNode'
-    bl_label = "Column"
+    bl_label = "Column Layout"
     bl_icon = node_icons["INTERFACE"]
 
     def init(self, context):

@@ -8,7 +8,7 @@ from ...node_sockets import update_socket_autocompile
 class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to create an operator'''
     bl_idname = 'SN_OperatorNode'
-    bl_label = "Operator"
+    bl_label = "Create Operator"
     bl_icon = node_icons["OPERATOR"]
     bl_width_default = 200
 

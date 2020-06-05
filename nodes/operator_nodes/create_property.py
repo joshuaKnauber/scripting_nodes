@@ -8,7 +8,7 @@ from ...node_sockets import update_socket_autocompile
 class SN_PropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to create a properties'''
     bl_idname = 'SN_PropertiesNode'
-    bl_label = "Property"
+    bl_label = "Create Property"
     bl_icon = node_icons["OPERATOR"]
     bl_width_default = 300
 

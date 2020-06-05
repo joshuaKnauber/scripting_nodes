@@ -14,7 +14,7 @@ class SN_PanelSearchPropertyGroup(bpy.types.PropertyGroup):
 class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to create a panel in the user interface'''
     bl_idname = 'SN_UiPanelNode'
-    bl_label = "Panel"
+    bl_label = "Create Panel"
     bl_icon = node_icons["INTERFACE"]
     bl_width_default = 250
 

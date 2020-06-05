@@ -5,9 +5,9 @@ from ...node_sockets import update_socket_autocompile
 
 
 class SN_VariableNode(bpy.types.Node, SN_ScriptingBaseNode):
-    '''Node for using and changing a variable'''
+    '''Node for using a variable'''
     bl_idname = 'SN_VariableNode'
-    bl_label = "Variable"
+    bl_label = "Get Variable"
     bl_icon = node_icons["OPERATOR"]
 
     def connected_nodes(self, node):

@@ -7,7 +7,7 @@ from ..node_utility import register_dynamic_input, get_input_value
 class SN_UiSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to create a split in the user interface'''
     bl_idname = 'SN_UiSplitNode'
-    bl_label = "Split"
+    bl_label = "Split Layout"
     bl_icon = node_icons["INTERFACE"]
 
     def init(self, context):

@@ -7,7 +7,7 @@ from ...node_sockets import update_socket_autocompile
 class SN_VariableChangeNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node for changing a variable'''
     bl_idname = 'SN_VariableChangeNode'
-    bl_label = "Change Variable"
+    bl_label = "Set Variable"
     bl_icon = node_icons["OPERATOR"]
 
     def connected_nodes(self, node):

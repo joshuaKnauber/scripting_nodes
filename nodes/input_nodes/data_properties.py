@@ -10,7 +10,7 @@ from ...properties.search_properties import SN_SearchPropertyGroup
 class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Scene Data Properties Node for outputting the properties of scene data'''
     bl_idname = 'SN_DataPropertiesNode'
-    bl_label = "Data Properties"
+    bl_label = "Scene Data Properties"
     bl_icon = node_icons["SCENE"]
 
     previous_connection: bpy.props.StringProperty(default="")

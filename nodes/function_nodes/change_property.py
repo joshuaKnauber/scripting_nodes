@@ -13,7 +13,7 @@ class SN_ChangeSearchPropertyGroup(bpy.types.PropertyGroup):
 class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to get the value of a properties'''
     bl_idname = 'SN_SetPropertiesNode'
-    bl_label = "Change Property"
+    bl_label = "Set Property"
     bl_icon = node_icons["OPERATOR"]
 
     sn_change_property_properties: bpy.props.CollectionProperty(type=SN_ChangeSearchPropertyGroup)

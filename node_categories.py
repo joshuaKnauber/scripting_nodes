@@ -65,11 +65,9 @@ node_categories = [
         }),
         NodeItem("SN_UiButtonNode", settings={
         }),
-        NodeItem("SN_UiLabelNode", settings={
-        }),
         NodeItem("SN_UiPropertiesNode", settings={
         }),
-        NodeItem("SN_UiSeparatorNode", settings={
+        NodeItem("SN_UiLabelNode", settings={
         }),
         NodeItem("SN_UiRowNode", settings={
         }),
@@ -79,10 +77,12 @@ node_categories = [
         }),
         NodeItem("SN_UiBoxNode", settings={
         }),
-        NodeItem("SN_IfNode", label="If - Layout",settings={
+        NodeItem("SN_UiSeparatorNode", settings={
+        }),
+        NodeItem("SN_IfNode", label="If Layout",settings={
             "is_layout": repr(True),
         }),
-        NodeItem("SN_RepeatNode", label="Repeat - Layout", settings={
+        NodeItem("SN_RepeatNode", label="Repeat Layout", settings={
             "is_layout": repr(True),
         }),
 
@@ -94,15 +94,15 @@ node_categories = [
         }),
         NodeItem("SN_OperatorRunNode", settings={
         }),
+        NodeItem("SN_FunctionNode", settings={
+        }),
+        #NodeItem("SN_FunctionEndNode", settings={
+        #}),
+        NodeItem("SN_FunctionRunNode", settings={
+        }),
         NodeItem("SN_PropertiesNode", settings={
         }),
         NodeItem("SN_CreateDataNode", settings={
-        }),
-        NodeItem("SN_FunctionNode", settings={
-        }),
-        NodeItem("SN_FunctionEndNode", settings={
-        }),
-        NodeItem("SN_FunctionRunNode", settings={
         }),
         NodeItem("SN_VariableSetNode", settings={
         }),
@@ -113,13 +113,13 @@ node_categories = [
 
     SN_ScriptingNodesCategory('PROGRAM', "Program", items=[
       
-        NodeItem("SN_PrintNode", settings={
-        }),
         NodeItem("SN_IfNode", label="If - Program", settings={
         }),
         NodeItem("SN_RepeatNode", label="Repeat - Program", settings={
         }),
         NodeItem("SN_ForNode", label="For - Program", settings={
+        }),
+        NodeItem("SN_PrintNode", settings={
         }),
         NodeItem("SN_VariableChangeNode", settings={
         }),

@@ -8,7 +8,7 @@ from ...node_sockets import update_socket_autocompile
 class SN_UiExistingPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to add to an existing panel in the user interface'''
     bl_idname = 'SN_UiExistingPanelNode'
-    bl_label = "Add to Panel"
+    bl_label = "Append Panel"
     bl_icon = node_icons["INTERFACE"]
     bl_width_default = 200
 

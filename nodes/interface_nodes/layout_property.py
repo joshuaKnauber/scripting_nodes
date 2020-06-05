@@ -13,7 +13,7 @@ class SN_LayoutSearchPropertyGroup(bpy.types.PropertyGroup):
 class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to use a property in a panel'''
     bl_idname = 'SN_UiPropertiesNode'
-    bl_label = "Layout Property"
+    bl_label = "Property Layout"
     bl_icon = node_icons["INTERFACE"]
 
     sn_layout_property_properties: bpy.props.CollectionProperty(type=SN_LayoutSearchPropertyGroup)

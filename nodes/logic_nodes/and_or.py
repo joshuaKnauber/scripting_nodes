@@ -6,7 +6,7 @@ from ..node_looks import node_colors, node_icons
 class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node for and or comparison'''
     bl_idname = 'SN_AndOrNode'
-    bl_label = "And/Or"
+    bl_label = "And / Or"
     bl_icon = node_icons["LOGIC"]
 
     operation: bpy.props.EnumProperty(

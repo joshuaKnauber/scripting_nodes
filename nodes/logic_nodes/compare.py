@@ -6,7 +6,7 @@ from ..node_looks import node_colors, node_icons
 class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node for comparing two values'''
     bl_idname = 'SN_CompareNode'
-    bl_label = "Compare"
+    bl_label = "Compare Data"
     bl_icon = node_icons["LOGIC"]
 
     operation: bpy.props.EnumProperty(

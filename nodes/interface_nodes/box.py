@@ -7,7 +7,7 @@ from ..node_utility import register_dynamic_input, get_input_value
 class SN_UiBoxNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to create a box in the user interface'''
     bl_idname = 'SN_UiBoxNode'
-    bl_label = "Box"
+    bl_label = "Box Layout"
     bl_icon = node_icons["INTERFACE"]
 
     def init(self, context):

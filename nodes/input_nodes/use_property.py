@@ -13,7 +13,7 @@ class SN_UseSearchPropertyGroup(bpy.types.PropertyGroup):
 class SN_GetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to get the value of a properties'''
     bl_idname = 'SN_GetPropertiesNode'
-    bl_label = "Use Property"
+    bl_label = "Get Property"
     bl_icon = node_icons["INPUT"]
 
     sn_use_property_properties: bpy.props.CollectionProperty(type=SN_UseSearchPropertyGroup)
