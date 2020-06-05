@@ -106,7 +106,7 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
                         elif prop.rna_type.identifier == "BoolProperty":
                             socket_type = "SN_BooleanSocket"
 
-                        inp = self.inputs.new(socket_type,prop.identifier.replace("_"," ").title())
+                        inp = self.inputs.new(socket_type, prop.identifier.replace("_"," ").title())
                         if socket_type == "SN_EnumSocket":
                             for item in prop.enum_items:
                                 prop_item = self.socket_list.add()
@@ -114,6 +114,11 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
                                 prop_item.identifier = item.identifier
                                 prop_item.name = item.name
                                 prop_item.description = item.description
+
+                        if socket_type != "SN_VectorSocket":
+                            inp.value = prop.default
+                        else:
+                            inp.value = (prop.default, prop.default, prop.default)
 
     def get_socket_items(self,socket):
         items = []
