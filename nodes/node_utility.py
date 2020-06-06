@@ -42,13 +42,10 @@ def get_types():
             except AttributeError:
                 pass
     for type_name in dir(bpy.types):
-        type_name = eval("bpy.types."+type_name).bl_rna.name
-        type_name = type_name.replace("Main ","")
-        if type_name[-1:] == "s":
-            type_name = type_name[:-1]
-        if not type_name in types:
-            if not "OT_" in type_name and not "PT_" in type_name and not "MT_" in type_name:
-                types[type_name] = type_name.lower().replace(" ","_")
+        type_id = eval("bpy.types."+type_name+".bl_rna.identifier")
+        type_name = eval("bpy.types."+type_name+".bl_rna.name").lower().replace(" ","_")
+        if not "_ot_" in type_name and not "_pt_" in type_name and not "_mt_" in type_name:
+            types[type_id] = type_name
     return types
 
 

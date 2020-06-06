@@ -76,7 +76,6 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                         types = get_types()
                         data = self.get_data_name(code.split(".")[-1].split("[")[0])
-
                         for data_type in types:
                             if types[data_type] == data:
                                 self.current_data_type = data_type
