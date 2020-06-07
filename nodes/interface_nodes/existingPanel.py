@@ -84,6 +84,14 @@ class SN_UiExistingPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.panel_name == "":
             header = [""]
             code = ["\n"]
+
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname == "SN_UiExistingPanelNode":
+                if self.name != node.name:
+                    if self.panel_name == node.panel_name:
+                        header = [""]
+                        code = ["\n"]
+                        errors.append("exPanel_exists")
         
         return {"code":header+code,"error":errors}
 

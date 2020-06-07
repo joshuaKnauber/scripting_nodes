@@ -89,6 +89,11 @@ error_logs = {
         "message": "The variable doesn't have a name",
         "fatal": True
     },
+    "exPanel_exists": {
+        "title": "Same name",
+        "message": "The Append Panel node already exists at this location",
+        "fatal": True
+    },
     "invalid_prop": {
         "title": "Invalid property",
         "message": "The property does not exist",
