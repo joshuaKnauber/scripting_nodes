@@ -35,11 +35,15 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
                     value = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
 
-                    for prop in dir(eval(value)):
-                        if prop[0] != "_":
-                            item = self.sn_layout_property_properties.add()
-                            item.identifier = prop
-                            item.name = prop.replace("_", " ").title()
+                    ignore_props = ["RNA","Display Name","Full Name"]
+
+                    for prop in eval(value+".bl_rna.properties"):
+                        if not prop.name in ignore_props:
+                            if not "bl_" in prop.name:
+                                item = self.sn_layout_property_properties.add()
+                                item.identifier = prop.identifier
+                                item.name = prop.name
+
 
     def copy(self, node):
         pass# called when node is copied
@@ -57,7 +61,7 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         if len(self.inputs) > 0:
             if len(self.inputs[0].links) == 1:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                    code.append(("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"]))
+                    code.append(("").join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"]))
                 else:
                     errors.append("wrong_socket")
             else:
