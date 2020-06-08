@@ -2,7 +2,7 @@ import bpy
 from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
-from .scene_nodes_utils import add_data_output, get_active_types
+from .scene_nodes_utils import add_data_output, get_active_types, get_bpy_types
 from ..node_utility import get_types, get_input_value
 from ...properties.search_properties import SN_SearchPropertyGroup
 
@@ -13,8 +13,6 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Scene Data Properties"
     bl_icon = node_icons["SCENE"]
 
-    previous_connection: bpy.props.StringProperty(default="")
-    current_data_type: bpy.props.StringProperty(default="")
     search_value: bpy.props.StringProperty(default="")
 
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
@@ -23,81 +21,60 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_use_index(self,context):
         update_socket_autocompile(self, context)
 
-        self.inputs["Index"].hide = not self.use_index
         self.inputs["Name"].hide = self.use_index
+        self.inputs["Index"].hide = not self.use_index
 
     use_index: bpy.props.BoolProperty(default=False,name="Use index",description="Use an index instead of a name to get the element",update=update_use_index)
-
-    def get_data_name(self,name):
-        if name.split("_")[0] == "active":
-            active_types = get_active_types()
-            for date in active_types:
-                if active_types[date] == name.split("_")[-1]:
-                    name = date
-        return name
 
     def generate_sockets(self):
         if len(self.inputs[0].links) > 0:
             if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
 
-                if self.previous_connection != self.inputs[0].links[0].from_socket.name:
+                self.search_properties.clear()
 
-                    self.previous_connection = self.inputs[0].links[0].from_socket.name
-                    self.outputs.clear()
-                    for socket in self.inputs:
-                        if not socket.bl_idname == "SN_SceneDataSocket":
-                            self.inputs.remove(socket)
-                    self.search_properties.clear()
+                code = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
 
-                    code = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
-                    
-                    is_collection = False
+                if code != "":
+                    self.has_collection_input = False
                     try:
-                        if str(eval("type("+code+")")) == "<class 'bpy_prop_collection'>":
-                            is_collection = True
+                        if str(eval("type("+code+")")) == "<class 'bpy_prop_collection'>" or str(eval("type("+code+")")) == "<class 'bpy.types.CollectionProperty'>":
+                            self.has_collection_input = True
                     except KeyError:
                         pass
 
-                    if is_collection:
-                        self.has_collection_input = True
 
-                        out = self.outputs.new('SN_SceneDataSocket', "Element")
-                        out.display_shape = "SQUARE"
+                    if self.has_collection_input:
+                        if len(self.outputs) != 2:
+                            self.outputs.clear()
+                            out = self.outputs.new('SN_SceneDataSocket', "Element")
+                            out.display_shape = "SQUARE"
 
-                        self.outputs.new('SN_IntSocket', "Amount")
+                            self.outputs.new('SN_IntSocket', "Amount")
 
-                        self.inputs.new('SN_IntSocket', "Index").hide = True
-                        self.inputs.new('SN_StringSocket', "Name")
+                        self.inputs["Name"].hide = self.use_index
+                        self.inputs["Index"].hide = not self.use_index
 
                     else:
-                        self.has_collection_input = False
-
+                        for out in self.outputs:
+                            if out.name == "Element" or out.name == "Amount":
+                                self.outputs.remove(out)
+                        self.inputs["Name"].hide = True
+                        self.inputs["Index"].hide = True
                         ignore_props = ["RNA","Display Name","Full Name"]
 
-                        types = get_types()
-                        data = self.get_data_name(code.split(".")[-1].split("[")[0])
-                        for data_type in types:
-                            if types[data_type] == data:
-                                self.current_data_type = data_type
-                                for prop in eval("bpy.types."+data_type+".bl_rna.properties"):
-                                    if not prop.name in ignore_props:
-                                        item = self.search_properties.add()
-                                        item.name = prop.name
-                                        item.propType = str(type(prop))
-        else:              
+                        for prop in eval(code+".bl_rna.properties"):
+                            if not prop.name in ignore_props:
+                                if not "bl_" in prop.name:
+                                    item = self.search_properties.add()
+                                    item.name = prop.name
+                                    item.propType = str(type(prop))
+        else:
+            self.has_collection_input = False   
             self.outputs.clear()
-            for socket in self.inputs:
-                if not socket.bl_idname == "SN_SceneDataSocket":
-                    self.inputs.remove(socket)
+            if len(self.inputs)  == 3:
+                self.inputs["Name"].hide = True
+                self.inputs["Index"].hide = True
             self.search_properties.clear()
-
-
-    def get_prop_identifier(self,name):
-        for prop in eval("bpy.types."+self.current_data_type+".bl_rna.properties"):
-            if prop.name == name:
-                return prop.identifier
-        return None
-
 
     def init(self, context):
         self.use_custom_color = True
@@ -105,6 +82,9 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         inp = self.inputs.new('SN_SceneDataSocket', "Scene Data")
         inp.display_shape = "SQUARE"
+
+        self.inputs.new("SN_IntSocket", "Index").hide = True
+        self.inputs.new("SN_StringSocket", "Name").hide = True
 
         self.generate_sockets()
 
@@ -114,8 +94,6 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def copy(self, node):
         self.search_value = ""
-        self.previous_connection = ""
-        self.current_data_type = ""
         self.search_properties.clear()
         self.has_collection_input = False
         self.generate_sockets()
@@ -176,22 +154,33 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     errors.append("wrong_socket")
 
         return {"code": code, "error":errors}
-
-
-    def all_string(self,code):
-        for part in code:
-            if type(part) != str:
-                return False
-        return True
-        
         
     def internal_evaluate(self, output):
-        code = self.evaluate(output)["code"]
-        while not self.all_string(code):
-            for i, part in enumerate(code):
-                if not type(part) == str:
-                    part = part.node.internal_evaluate(part)["code"]
-                    code.pop(i)
-                    code = code[:i] + part + code[i:]
-                    break
-        return {"code": code}
+
+        if self.has_collection_input:
+            if output == self.outputs[0]:
+                code = self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"]
+                if "bl_rna.properties" in code[0]:
+                    code = eval("type("+code[0]+".fixed_type)").bl_rna.identifier
+                    code = "bpy.types." + code
+                    return {"code": code}
+                else:
+                    types = get_bpy_types()[code[-1]]
+                    return {"code": ["bpy.types." + types]}
+        else:
+            code = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
+            for prop in eval(code+".bl_rna.properties"):
+                if prop.name == output.name:
+                    isCollection = False
+                    try:
+                        if str(eval("type("+code+".bl_rna.properties['"+prop.identifier+"'])")) == "<class 'bpy.types.CollectionProperty'>":
+                            isCollection = True
+                    except KeyError:
+                        pass
+
+                    if isCollection:
+                        code+=".bl_rna.properties['"+prop.identifier+"']"
+                    else:
+                        code = eval("type("+code+".bl_rna.properties['" + prop.identifier + "'].fixed_type)").bl_rna.identifier
+                        code = "bpy.types." + code
+                    return{"code": [code]}

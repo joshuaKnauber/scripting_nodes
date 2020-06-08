@@ -15,6 +15,45 @@ def add_data_output(self,prop,label,prop_type=""):
         out = self.outputs.new('SN_SceneDataSocket', label)
         out.display_shape = "SQUARE"
 
+def get_bpy_types():
+    return {
+        "cameras": "Camera",
+        "scenes": "Scene",
+        "objects": "Object",
+        "materials": "Material",
+        "node_groups": "NodeGroup",
+        "meshes": "Mesh",
+        "lights": "Light",
+        "libraries": "Library",
+        "screens": "Screen",
+        "window_managers": "WindowManager",
+        "images": "Image",
+        "lattices": "Lattice",
+        "curves": "Curve",
+        "metaballs": "MetaBall",
+        "fonts": "Font",
+        "textures": "Texture",
+        "brushes": "Brush",
+        "worlds": "World",
+        "collections": "Collection",
+        "shape_keys": "ShapeKey",
+        "texts": "Text",
+        "speakers": "Speaker",
+        "sounds": "Sound",
+        "armatures": "Armatures",
+        "actions": "Action",
+        "particles": "Particle",
+        "palettes": "Palette",
+        "grease_pencils": "GreasePencil",
+        "movieclips": "MovieClip",
+        "masks": "Mask",
+        #"linestyles": "BlendDataLineStyles",
+        "cache_files": "CacheFile",
+        "paint_curves": "PaintCurve",
+        "workspaces": "WorkSpace",
+        "lightprobes": "LightProbe",
+        "volumes": "Volume",
+    }
 
 def get_active_types():
     return {

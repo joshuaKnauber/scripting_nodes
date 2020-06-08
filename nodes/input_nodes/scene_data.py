@@ -2,7 +2,7 @@ import bpy
 from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
-from .scene_nodes_utils import add_data_output, get_active_types
+from .scene_nodes_utils import add_data_output, get_active_types, get_bpy_types
 
 
 class SN_SceneDataNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -72,7 +72,14 @@ class SN_SceneDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             code += ["bpy.context.","active_",self.data_type[:-1]]
         return {"code": code}
-        
+
     def internal_evaluate(self, output):
-        return self.evaluate(output)
-        
+        if output.bl_idname == "SN_SceneDataSocket":
+            if output == self.outputs[0]:
+                return {"code": ["bpy.data.",self.data_type]}
+            else:
+                types = get_bpy_types()[self.data_type]
+                return {"code": ["bpy.types." + types]}
+
+        else:
+            return [""]
