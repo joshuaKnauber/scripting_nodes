@@ -123,37 +123,43 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.prop(self,"use_index")
 
     def evaluate(self, output):
-        code = []
         errors = []
 
         if self.has_collection_input:
-            if self.inputs[0].is_linked:
+            if output == self.outputs[0]:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                    if output.name == "Amount":
-                        code += ["len(", self.inputs[0].links[0].from_socket, ")"]
-                    elif output.name == "Element":
-                        if self.use_index:
-                            value, error = get_input_value(self,"Index",["SN_IntSocket","SN_NumberSocket"])
-                            code += [self.inputs[0].links[0].from_socket,"[",value,"]"]
-                        else:
-                            value, error = get_input_value(self,"Name",["SN_TextSocket"])
-                            code += [self.inputs[0].links[0].from_socket,"['",value,"']"]
-                        errors += error
+                    code = self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"]
                 else:
+                    code = ""
                     errors.append("wrong_socket")
-
+                if "bl_rna.properties" in code[0]:
+                    code = eval("type("+code[0]+".fixed_type)").bl_rna.identifier
+                    code = "bpy.types." + code
+                    return {"code": code}
+                else:
+                    types = get_bpy_types()[code[-1]]
+                    return {"code": ["bpy.types." + types], "error": errors}
         else:
-            if self.inputs[0].is_linked:
-                if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                    identifier = self.get_prop_identifier(output.name)
-                    if identifier:
-                        code.append(self.inputs[0].links[0].from_socket)
-                        code.append(".")
-                        code.append(identifier)
-                else:
-                    errors.append("wrong_socket")
+            if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+                code = self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"]
+            else:
+                code = ""
+                errors.append("wrong_socket")
+            for prop in eval(code+".bl_rna.properties"):
+                if prop.name == output.name:
+                    isCollection = False
+                    try:
+                        if str(eval("type("+code+".bl_rna.properties['"+prop.identifier+"'])")) == "<class 'bpy.types.CollectionProperty'>":
+                            isCollection = True
+                    except KeyError:
+                        pass
 
-        return {"code": code, "error":errors}
+                    if isCollection:
+                        code+=".bl_rna.properties['"+prop.identifier+"']"
+                    else:
+                        code = eval("type("+code+".bl_rna.properties['" + prop.identifier + "'].fixed_type)").bl_rna.identifier
+                        code = "bpy.types." + code
+                    return{"code": [code], "error": errors}
         
     def internal_evaluate(self, output):
 
