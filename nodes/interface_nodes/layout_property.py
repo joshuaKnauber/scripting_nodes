@@ -25,11 +25,12 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         inp = self.inputs.new('SN_SceneDataSocket', "Scene Data")
         inp.display_shape = "SQUARE"
+        self.inputs.new('SN_StringSocket', "Name")
         self.outputs.new('SN_LayoutSocket', "Layout")
 
 
     def update(self):
-        if len(self.inputs) > 0:
+        if len(self.inputs) == 2:
             self.sn_layout_property_properties.clear()
             if len(self.inputs[0].links) == 1:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
@@ -58,7 +59,7 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         errors = []
         code = []
 
-        if len(self.inputs) > 0:
+        if len(self.inputs) == 2:
             if len(self.inputs[0].links) == 1:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
                     code.append(("").join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"]))
@@ -67,11 +68,14 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 errors.append("no_connection")
         if len(errors) == 0:
+            value, error = get_input_value(self, "Name", ["SN_StringSocket"])
+            errors+=error
+
             if self.propName in self.sn_layout_property_properties:
                 code.append(", '")
                 code.append(self.sn_layout_property_properties[self.propName].identifier)
                 code = ["_INDENT__INDENT_", self.outputs[0].links[0].to_node.layout_type(),
-                        ".prop("] + code + ["')\n"]
+                        ".prop("] + code + ["', text='"] + [value] + ["')\n"]
             else:
                 errors.append("invalid_prop")
         else:
