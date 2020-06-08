@@ -9,13 +9,25 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Compare Data"
     bl_icon = node_icons["LOGIC"]
 
+    def update_operation(self, context):
+        if self.operation == "None":
+            self.inputs.clear()
+            self.inputs.new('SN_SceneDataSocket', "Scene Data")
+        else:
+            self.inputs.clear()
+            self.inputs.new('SN_DataSocket', "Data")
+            self.inputs.new('SN_DataSocket', "Data")
+
+        update_socket_autocompile(self, context)
+
     operation: bpy.props.EnumProperty(
         items=[("==", "=", "Equal to"), ("!=", "≠", "Not equal to"),
                 (">", ">", "Bigger than"), ("<", "<", "Smaller than"),
-                (">=", "≥", "Bigger or equal to"), ("<=", "≤", "Smaller or equal to")],
+                (">=", "≥", "Bigger or equal to"), ("<=", "≤", "Smaller or equal to"),
+                ("None", "Existing", "Check if Data exists")],
         name="Operation",
         description="Compare operation for this node",
-        update = update_socket_autocompile
+        update = update_operation
     )
 
     def init(self, context):
@@ -41,15 +53,24 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         errors = []
 
-        if self.inputs[0].is_linked:
-            if self.inputs[0].links[0].from_socket.is_data_socket:
-                value1 = self.inputs[0].links[0].from_socket
-            else:
-                errors.append("wrong_socket")
-        if self.inputs[1].is_linked:
-            if self.inputs[1].links[0].from_socket.is_data_socket:
-                value2 = self.inputs[1].links[0].from_socket
-            else:
-                errors.append("wrong_socket")
+        if self.operation != "None":
+            if self.inputs[0].is_linked:
+                if self.inputs[0].links[0].from_socket.is_data_socket:
+                    value1 = self.inputs[0].links[0].from_socket
+                else:
+                    errors.append("wrong_socket")
+            if self.inputs[1].is_linked:
+                if self.inputs[1].links[0].from_socket.is_data_socket:
+                    value2 = self.inputs[1].links[0].from_socket
+                else:
+                    errors.append("wrong_socket")
 
-        return {"code": [value1," ",self.operation," ",value2],"error":errors}
+            return {"code": [value1," ",self.operation," ",value2],"error":errors}
+        else:
+            if self.inputs[0].is_linked:
+                if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+                    value1 = self.inputs[0].links[0].from_socket
+                else:
+                    errors.append("wrong_socket")
+            
+            return {"code": [value1," != ",self.operation],"error":errors}

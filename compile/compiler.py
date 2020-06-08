@@ -210,7 +210,6 @@ class ScriptingNodesCompiler():
             if "_REMEMBER_" in snippet:
                 code[i] = snippet.replace("_REMEMBER_","")
                 remember_amount = len(code[i]) - len(code[i].lstrip(" "))
-                print(snippet,remember_amount)
 
         for i, snippet in enumerate(code):
             if "_REMOVE_" in snippet:
