@@ -12,7 +12,8 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_operation(self, context):
         if self.operation == "None":
             self.inputs.clear()
-            self.inputs.new('SN_SceneDataSocket', "Scene Data")
+            inp = self.inputs.new('SN_SceneDataSocket', "Scene Data")
+            inp.display_shape = "SQUARE"
         else:
             self.inputs.clear()
             self.inputs.new('SN_DataSocket', "Data")
