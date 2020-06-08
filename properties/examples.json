@@ -12,29 +12,27 @@
         ],
         "nodes": [
             ["SN_UiPanelNode", 100, 200],
-            ["SN_UiButtonNode", -150, 100],
-            ["SN_NumberNode", -400, -5]
+            ["SN_UiButtonNode", -150, 100]
         ],
         "sockets": [
-            [[], [], [1, 0]],
-            [[2, 0]]
+            [[], [], [1, 0]]
         ],
         "values": [
             {
                 "panel_name": "Monkey Panel",
-                "space_type_name": "PROPERTIES",
-                "context": "scene",
+                "space_type_name": "Properties",
+                "region_type_name": "Window",
+                "context_name": "Scene",
                 "default_closed": "False"
             },
             {
                 "buttonName": "Add Monkey",
                 "opType": "Add Monkey"
-            },
-            {
-                "number": 1.0
             }
         ]
     },
+
+
     "add_monkey_size": {
         "name": "Add Monkey with size",
         "addon": [
@@ -47,21 +45,35 @@
             "General"
         ],
         "nodes": [
-            ["SN_UiPanelNode", 165, 215],
-            ["SN_UiButtonNode", -300, 100],
-            ["SN_PropertiesNode", -175, 320],
-            ["SN_GetPropertiesNode", -500, -5],
-            ["SN_UiPropertiesNode", -35, -35]
+            ["SN_UiPanelNode", 100, 200],
+            ["SN_UiButtonNode", -200, 400],
+            ["SN_IfNode", -125, -50],
+            ["SN_CompareNode", -350, -50],
+            ["SN_SceneDataNode", -550, -100],
+            ["SN_UiColumnNode", -350, -200],
+            ["SN_UiPropertiesNode", -550, -300],
+            ["SN_SceneDataNode", -750, -300],
+            ["SN_UiLabelNode", -350, -425],
+            ["SN_TextNode", -750, -450],
+            ["SN_TextNode", -550, -450]
         ],
         "sockets": [
-            [[], [], [1, 0], [4, 0]],
-            [[3, 0]]
+            [[], [], [1, 0], [2, 0]],
+            [],
+            [[], [3,0], [5, 0], [8, 0]],
+            [[4, 1]],
+            [],
+            [[], [], [], [], [], [6, 0]],
+            [[7, 1], [9, 0]],
+            [],
+            [[10, 0]]
         ],
         "values": [
             {
-                "panel_name": "Monkey Size Panel",
-                "space_type_name": "PROPERTIES",
-                "context": "scene",
+                "panel_name": "Monkey Panel",
+                "space_type_name": "Properties",
+                "region_type_name": "Window",
+                "context_name": "Scene",
                 "default_closed": "False"
             },
             {
@@ -69,19 +81,29 @@
                 "opType": "Add Monkey"
             },
             {
-                "propType": "FloatProperty",
-                "propLocation": "Scene",
-                "propName": "Monkey Size",
-                "propDescription": "Controls the size of the monkey",
-                "propFloat": 1
+                "is_layout": "True"
             },
             {
-                "propLocation": "Scene",
-                "propName": "monkey_size"
+                "operation": "None"
             },
             {
-                "propLocation": "Scene",
-                "propName": "monkey_size"
+                "data_type": "objects"
+            },
+            {
+            },
+            {
+                "propName": "Scale"
+            },
+            {
+                "data_type": "objects"
+            },
+            {
+            },
+            {
+                "text": "Size"
+            },
+            {
+                "text": "Select an object to change it's size"
             }
         ]
     }
