@@ -69,13 +69,15 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 errors.append("no_connection")
         if len(errors) == 0:
             value, error = get_input_value(self, "Name", ["SN_StringSocket"])
+            if type(value) == str:
+                value = "'" + value + "'"
             errors+=error
 
             if self.propName in self.sn_layout_property_properties:
                 code.append(", '")
                 code.append(self.sn_layout_property_properties[self.propName].identifier)
                 code = ["_INDENT__INDENT_", self.outputs[0].links[0].to_node.layout_type(),
-                        ".prop("] + code + ["', text='"] + [value] + ["')\n"]
+                        ".prop("] + code + ["', text="] + [value] + [")\n"]
             else:
                 errors.append("invalid_prop")
         else:
