@@ -25,7 +25,7 @@ bl_info = {
 
 import bpy
 from . import auto_load
-from .node_categories import get_node_categories
+from .node_categories import get_node_categories, compiler
 from .interface import node_tree_header
 import nodeitems_utils
 from bpy.app.handlers import persistent
@@ -34,10 +34,7 @@ auto_load.init()
 
 @persistent
 def load_handler(scene):
-    for tree in bpy.data.node_groups:
-        if tree.bl_idname == "ScriptingNodesTree":
-            if tree.compile_on_start:
-                pass#tree.compiler.recompile()
+    compiler().reset_file()
 
 def register():
     auto_load.register()

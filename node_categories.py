@@ -4,6 +4,13 @@ from nodeitems_utils import NodeCategory, NodeItem
 from .compile.compiler import ScriptingNodesCompiler
 
 
+global_compiler = ScriptingNodesCompiler()
+print("created compiler")
+def compiler():
+    global global_compiler
+    return global_compiler
+
+
 class ScriptingNodesTree(bpy.types.NodeTree):
     '''Scripting Nodes node tree'''
     bl_idname = 'ScriptingNodesTree'
@@ -25,8 +32,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     compile_on_start: bpy.props.BoolProperty(default=True,name="Reload on start",description="Reload this node tree when this file is opened")
 
-    compiler = ScriptingNodesCompiler()
-
     def update(self):
         links_to_remove = []
         
@@ -46,7 +51,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         for link in links_to_remove:
             self.links.remove(link)
 
-        self.compiler.autocompile()
+        compiler().autocompile()
 
 
 class SN_ScriptingNodesCategory(NodeCategory):

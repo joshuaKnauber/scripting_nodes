@@ -1,8 +1,9 @@
 import bpy
 from .nodes.node_looks import socket_colors
+from .node_categories import compiler
 
 def update_socket_autocompile(self,context):
-    context.space_data.node_tree.compiler.autocompile()
+    compiler().autocompile()
 
 class SN_StringSocket(bpy.types.NodeSocket):
     '''String Socket for handling text'''

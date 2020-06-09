@@ -1,10 +1,11 @@
 import bpy
 from .examples import handle
+from ..node_categories import compiler
 
 class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     def update_autocompile(self, context):
-        context.space_data.node_tree.compiler.autocompile()
+        compiler().autocompile()
 
     def update_examples(self, context):
         handle(context, self.examples)

@@ -3,6 +3,7 @@ from bpy_extras.io_utils import ExportHelper
 import bpy
 import os
 from ..properties.property_utils import sn_props
+from ..node_categories import compiler
 
 
 class SN_OT_EmptyOperator(bpy.types.Operator):
@@ -26,7 +27,7 @@ class SN_OT_ReloadButton(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        context.space_data.node_tree.compiler.recompile()
+        compiler().recompile()
         return {"FINISHED"}
 
 

@@ -1,4 +1,5 @@
 import bpy
+from ...node_categories import compiler
 
 
 class SN_OT_RunFunctionNode(bpy.types.Operator):
@@ -13,7 +14,7 @@ class SN_OT_RunFunctionNode(bpy.types.Operator):
         tree = context.space_data.node_tree
         for node in tree.nodes:
             if node.name == self.node_name:
-                function = tree.compiler.get_function_code(node)
+                function = compiler().get_function_code(node)
 
                 exec(function)
         return {"FINISHED"}

@@ -389,6 +389,10 @@ class ScriptingNodesCompiler():
         if sn_props().auto_compile:
             self.recompile()
 
+    def reset_file(self):
+        #resets the file when a new one is loaded
+        self._reset()
+
     def recompile(self):
         #compiles the node tree to code and registers the file
         tree = bpy.context.space_data.node_tree
