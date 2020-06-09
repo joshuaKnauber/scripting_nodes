@@ -131,8 +131,6 @@ node_categories = [
         }),
         NodeItem("SN_VariableSetNode", settings={
         }),
-        NodeItem("SN_ScriptLineNode", settings={
-        }),
         NodeItem("SN_VariableChangeNode", settings={
         }),
         NodeItem("SN_SetPropertiesNode", settings={
