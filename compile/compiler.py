@@ -342,7 +342,8 @@ class ScriptingNodesCompiler():
         for register in self._interface + self._operators:
             if not "append_panel_" in register:
                 idname = register.split(":")[0].split("(")[0].split(" ")[-1]
-                text.write(" "*self._indents + idname + ",\n")
+                if idname != "":
+                    text.write(" "*self._indents + idname + ",\n")
         text.write("]\n\n")
 
         #register function

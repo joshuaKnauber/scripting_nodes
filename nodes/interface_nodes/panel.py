@@ -33,54 +33,57 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def getRegion(self, context):
-        self.sn_region_properties.clear()
-        for type_name in dir(bpy.types):
-            type_name = eval("bpy.types."+type_name)
-            if bpy.types.Panel in type_name.__bases__:
-                if type_name.bl_space_type == bpy.context.scene.sn_space_properties[self.space_type_name].identifier:
-                    name = type_name.bl_region_type.replace("_", " ")
-                    name = name.title()
-                    identifier = type_name.bl_region_type
-                    if not name in self.sn_region_properties:
-                        item = self.sn_region_properties.add()
-                        item.identifier = identifier
-                        item.name = name
-
-    def getContext(self, context):
-        self.getCategory(context)
-        self.sn_context_properties.clear()
-        for type_name in dir(bpy.types):
-            type_name = eval("bpy.types."+type_name)
-            if bpy.types.Panel in type_name.__bases__:
-                if type_name.bl_region_type == self.sn_region_properties[self.region_type_name].identifier and type_name.bl_space_type == bpy.context.scene.sn_space_properties[self.space_type_name].identifier:
-                    try:
-                        identifier = type_name.bl_context
-                    except AttributeError:
-                        identifier = ""
-                    if identifier != "" and identifier[0] != ".":
-                        name = identifier.replace("_", " ").title()
-                        if not name in self.sn_context_properties:
-                            item = self.sn_context_properties.add()
+        if self.space_type_name != "":
+            self.sn_region_properties.clear()
+            for type_name in dir(bpy.types):
+                type_name = eval("bpy.types."+type_name)
+                if bpy.types.Panel in type_name.__bases__:
+                    if type_name.bl_space_type == bpy.context.scene.sn_space_properties[self.space_type_name].identifier:
+                        name = type_name.bl_region_type.replace("_", " ")
+                        name = name.title()
+                        identifier = type_name.bl_region_type
+                        if not name in self.sn_region_properties:
+                            item = self.sn_region_properties.add()
                             item.identifier = identifier
                             item.name = name
+
+    def getContext(self, context):
+        if self.region_type_name != "":
+            self.getCategory(context)
+            self.sn_context_properties.clear()
+            for type_name in dir(bpy.types):
+                type_name = eval("bpy.types."+type_name)
+                if bpy.types.Panel in type_name.__bases__:
+                    if type_name.bl_region_type == self.sn_region_properties[self.region_type_name].identifier and type_name.bl_space_type == bpy.context.scene.sn_space_properties[self.space_type_name].identifier:
+                        try:
+                            identifier = type_name.bl_context
+                        except AttributeError:
+                            identifier = ""
+                        if identifier != "" and identifier[0] != ".":
+                            name = identifier.replace("_", " ").title()
+                            if not name in self.sn_context_properties:
+                                item = self.sn_context_properties.add()
+                                item.identifier = identifier
+                                item.name = name
     
 
     def getCategory(self, context):
-        self.sn_category_properties.clear()
-        for type_name in dir(bpy.types):
-            type_name = eval("bpy.types."+type_name)
-            if bpy.types.Panel in type_name.__bases__:
-                if type_name.bl_region_type == self.sn_region_properties[self.region_type_name].identifier and type_name.bl_space_type == bpy.context.scene.sn_space_properties[self.space_type_name].identifier:
-                    try:
-                        identifier = type_name.bl_category
-                    except AttributeError:
-                        identifier = ""
-                    if identifier != "" and identifier[0] != ".":
-                        name = identifier.replace("_", " ").title()
-                        if not name in self.sn_category_properties:
-                            item = self.sn_category_properties.add()
-                            item.identifier = identifier
-                            item.name = name
+        if self.region_type_name != "":
+            self.sn_category_properties.clear()
+            for type_name in dir(bpy.types):
+                type_name = eval("bpy.types."+type_name)
+                if bpy.types.Panel in type_name.__bases__:
+                    if type_name.bl_region_type == self.sn_region_properties[self.region_type_name].identifier and type_name.bl_space_type == bpy.context.scene.sn_space_properties[self.space_type_name].identifier:
+                        try:
+                            identifier = type_name.bl_category
+                        except AttributeError:
+                            identifier = ""
+                        if identifier != "" and identifier[0] != ".":
+                            name = identifier.replace("_", " ").title()
+                            if not name in self.sn_category_properties:
+                                item = self.sn_category_properties.add()
+                                item.identifier = identifier
+                                item.name = name
 
 
     sn_region_properties: bpy.props.CollectionProperty(type=SN_PanelSearchPropertyGroup)
@@ -142,76 +145,83 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         return options
 
     def evaluate(self,output):
-        errors = []
+        if len(self.inputs) >= 3:
+            errors = []
 
-        space_type = "VIEW_3D"
-        region_type = "HEADER"
-        if self.space_type_name == "" or self.region_type_name == "":
-            errors.append("no_location_panel")
-        elif not self.region_type_name in self.sn_region_properties:
-            errors.append("wrong_location_panel")
-        else:
-            space_type = bpy.context.scene.sn_space_properties[self.space_type_name].identifier
-            region_type = self.sn_region_properties[self.region_type_name].identifier
-
-        for node in bpy.context.space_data.node_tree.nodes:
-            if node.bl_idname == "SN_UiPanelNode":
-                if self.name != node.name:
-                    if self.panel_name == node.panel_name:
-                        errors.append("same_name_panel")
-
-        if self.panel_name == "":
-            errors.append("no_name_panel")
-
-        pollValue, error = get_input_value(self, "Should display", ["SN_BooleanSocket"])
-        errors+=error
-
-        orderValue, error = get_input_value(self, "Order", ["SN_NumberSocket", "SN_IntSocket"])
-        errors+=error
-
-        options = self.options()
-
-        if len(self.sn_category_properties) > 0:
-            if self.custom:
-                panelCategory = "_INDENT_bl_category = '" + self.category_name + "'\n"
-            elif not self.category_name in self.sn_category_properties:
-                panelCategory = ""
+            space_type = "VIEW_3D"
+            region_type = "HEADER"
+            if self.space_type_name == "" or self.region_type_name == "":
+                errors.append("no_location_panel")
+            elif not self.region_type_name in self.sn_region_properties:
                 errors.append("wrong_location_panel")
-            else:
-                panelCategory = "_INDENT_bl_category = '" + self.sn_category_properties[self.category_name].identifier + "'\n"
-        else:
-            panelCategory = ""
+            elif self.space_type_name != "" and self.region_type_name != "":
+                space_type = bpy.context.scene.sn_space_properties[self.space_type_name].identifier
+                region_type = self.sn_region_properties[self.region_type_name].identifier
 
-        if len(self.sn_context_properties) > 0:
-            panelContext = "_INDENT_bl_context = '" + self.sn_context_properties[self.context_name].identifier + "'\n\n"
-        else:
-            panelContext = "\n\n"
+            for node in bpy.context.space_data.node_tree.nodes:
+                if node.bl_idname == "SN_UiPanelNode":
+                    if self.name != node.name:
+                        if self.panel_name == node.panel_name:
+                            errors.append("same_name_panel")
 
-        idname = "SN_PT_" + self.panel_name.title().replace(" ","")
-        header = ["class " + idname + "(bpy.types.Panel):\n",
-                "_INDENT_bl_label = '"+self.panel_name+"'\n",
-                "_INDENT_bl_idname = '" + idname + "'\n",
-                options,
-                "_INDENT_bl_order = int(", orderValue, ")\n",
-                "_INDENT_bl_space_type = '", space_type, "'\n",
-                "_INDENT_bl_region_type = '", region_type, "'\n",
-                panelCategory,
-                panelContext,
-                "_INDENT_@classmethod\n",
-                "_INDENT_def poll(self, context):\n",
-                "_INDENT__INDENT_return ", pollValue ,"\n\n",
-                "_INDENT_def draw(self, context):\n",
-                "_INDENT__INDENT_layout = self.layout\n"]
+            if self.panel_name == "":
+                errors.append("no_name_panel")
 
-        code = []
-        for inp in self.inputs: 
-            if inp.bl_idname == "SN_LayoutSocket" and inp.is_linked:
-                if inp.bl_idname == "SN_LayoutSocket":
-                    code += [inp.links[0].from_socket]
+            pollValue, error = get_input_value(self, "Should display", ["SN_BooleanSocket"])
+            errors+=error
+
+            orderValue, error = get_input_value(self, "Order", ["SN_NumberSocket", "SN_IntSocket"])
+            errors+=error
+
+            options = self.options()
+
+            if len(self.sn_category_properties) > 0:
+                if self.custom:
+                    panelCategory = "_INDENT_bl_category = '" + self.category_name + "'\n"
+                elif not self.category_name in self.sn_category_properties:
+                    panelCategory = ""
+                    errors.append("wrong_location_panel")
+                elif self.category_name != "":
+                    panelCategory = "_INDENT_bl_category = '" + self.sn_category_properties[self.category_name].identifier + "'\n"
                 else:
-                    errors.append("wrong_socket")
-        
-        return {"code":header+code,"error":errors}
+                    panelCategory = ""
+            else:
+                panelCategory = ""
+
+            if len(self.sn_context_properties) > 0 and self.context_name != "":
+                panelContext = "_INDENT_bl_context = '" + self.sn_context_properties[self.context_name].identifier + "'\n\n"
+            else:
+                panelContext = "\n\n"
+
+            idname = "SN_PT_" + self.panel_name.title().replace(" ","")
+            header = ["class " + idname + "(bpy.types.Panel):\n",
+                    "_INDENT_bl_label = '"+self.panel_name+"'\n",
+                    "_INDENT_bl_idname = '" + idname + "'\n",
+                    options,
+                    "_INDENT_bl_order = int(", orderValue, ")\n",
+                    "_INDENT_bl_space_type = '", space_type, "'\n",
+                    "_INDENT_bl_region_type = '", region_type, "'\n",
+                    panelCategory,
+                    panelContext,
+                    "_INDENT_@classmethod\n",
+                    "_INDENT_def poll(self, context):\n",
+                    "_INDENT__INDENT_return ", pollValue ,"\n\n",
+                    "_INDENT_def draw(self, context):\n",
+                    "_INDENT__INDENT_layout = self.layout\n"]
+
+            code = []
+            for inp in self.inputs: 
+                if inp.bl_idname == "SN_LayoutSocket" and inp.is_linked:
+                    if inp.bl_idname == "SN_LayoutSocket":
+                        code += [inp.links[0].from_socket]
+                    else:
+                        errors.append("wrong_socket")
+            if panelCategory != "" and panelContext != "":
+                return {"code":header+code, "error":errors}
+            else:
+                return {"code":[], "error":errors}
+        else:
+            return {"code":[]}
 
     def update(self):
         register_dynamic_input(self, "SN_LayoutSocket", "Layout")
