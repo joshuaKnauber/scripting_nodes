@@ -216,10 +216,8 @@ class SN_UiPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         code += [inp.links[0].from_socket]
                     else:
                         errors.append("wrong_socket")
-            if panelCategory != "" and panelContext != "":
-                return {"code":header+code, "error":errors}
-            else:
-                return {"code":[], "error":errors}
+            
+            return {"code":header+code, "error":errors}
         else:
             return {"code":[]}
 
