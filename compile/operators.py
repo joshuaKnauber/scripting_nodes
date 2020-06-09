@@ -20,7 +20,7 @@ class SN_OT_ReloadButton(bpy.types.Operator):
     bl_idname = "scripting_nodes.compile"
     bl_label = "Reload"
     bl_description = "Compiles the Nodetree"
-    bl_options = {"REGISTER","INTERNAL"}
+    bl_options = {"REGISTER","INTERNAL", "UNDO"}
 
     @classmethod
     def poll(cls, context):
@@ -28,6 +28,21 @@ class SN_OT_ReloadButton(bpy.types.Operator):
 
     def execute(self, context):
         compiler().recompile()
+        return {"FINISHED"}
+
+
+class SN_OT_UnregisterButton(bpy.types.Operator):
+    bl_idname = "scripting_nodes.unregister"
+    bl_label = "Unregister"
+    bl_description = "Unregister the Nodetree"
+    bl_options = {"REGISTER","INTERNAL", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        return compiler().is_registered()
+
+    def execute(self, context):
+        compiler().reset_file()
         return {"FINISHED"}
 
 
@@ -70,7 +85,7 @@ class SN_OT_RemoveButton(bpy.types.Operator):
 
     def execute(self, context):
         treeName = context.space_data.node_tree.name
-        #TODO unregister tree
+        compiler().reset_file()
         bpy.data.node_groups.remove(bpy.data.node_groups[treeName])
         if len(bpy.data.node_groups) > 0:
             context.space_data.node_tree = bpy.data.node_groups[0]

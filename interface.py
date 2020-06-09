@@ -11,6 +11,7 @@ def node_tree_header(self, context):
             row.operator("scripting_nodes.remove_nodetree", icon='TRASH', text="")
             row.separator()
             row.operator("scripting_nodes.compile", icon='FILE_REFRESH')
+            row.operator("scripting_nodes.unregister", icon='UNLINKED', text="")
             row.separator()
             row.prop(sn_props(),"auto_compile")
         row.prop(sn_props(), "examples", icon='LINENUMBERS_ON', text="")

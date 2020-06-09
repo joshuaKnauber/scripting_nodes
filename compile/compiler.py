@@ -393,6 +393,22 @@ class ScriptingNodesCompiler():
         #resets the file when a new one is loaded
         self._reset()
 
+    def is_registered(self):
+        # checks if the current tree is registered
+        if len(self._functions) > 0:
+            return True
+        elif len(self._operators) > 0:
+            return True
+        elif len(self._properties) > 0:
+            return True
+        elif len(self._interface) > 0:
+            return True
+        elif len(self._existingInterface) > 0:
+            return True
+        else:
+            return False
+
+
     def recompile(self):
         #compiles the node tree to code and registers the file
         tree = bpy.context.space_data.node_tree
