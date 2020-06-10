@@ -17,7 +17,7 @@ class SN_SceneDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         for d_type in bpy.data.rna_type.properties:
             if not d_type.name in ignore_data:
                 items.append((d_type.identifier,d_type.name,d_type.description))
-        return items
+        return sorted(items)
 
     def update_data_type(self,context):
         self.generate_sockets()
