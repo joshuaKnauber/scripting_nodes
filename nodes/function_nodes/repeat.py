@@ -10,10 +10,8 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = node_icons["PROGRAM"]
 
     def register_sockets(self,context):
-        for inp in self.inputs:
-            self.inputs.remove(inp)
-        for out in self.outputs:
-            self.outputs.remove(out)
+        self.inputs.clear()
+        self.outputs.clear()
 
         if self.is_layout:
             socket_type = "SN_LayoutSocket"
@@ -27,8 +25,7 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp = self.inputs.new(socket_type, socket_name)
         inp.display_shape = socket_shape
 
-        if not self.is_layout:
-            self.inputs.new('SN_IntSocket', "Value").value = 2
+        self.inputs.new('SN_IntSocket', "Value").value = 2
 
         out = self.outputs.new(socket_type, socket_name)
         out.display_shape = socket_shape
