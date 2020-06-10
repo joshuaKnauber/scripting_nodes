@@ -5,7 +5,6 @@ from .compile.compiler import ScriptingNodesCompiler
 
 
 global_compiler = ScriptingNodesCompiler()
-print("created compiler")
 def compiler():
     global global_compiler
     return global_compiler
@@ -156,6 +155,8 @@ node_categories = [
     SN_ScriptingNodesCategory('INPUT', "Input", items=[
 
         NodeItem("SN_SceneDataNode", settings={
+        }),
+        NodeItem("SN_ContextDataNode", settings={
         }),
         NodeItem("SN_DataPropertiesNode", settings={
         }),
