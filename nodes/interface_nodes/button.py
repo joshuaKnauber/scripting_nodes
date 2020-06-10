@@ -35,34 +35,37 @@ class SN_UiButtonNode(bpy.types.Node, SN_UseOperatorNode):
         layout.label(text=self.opDescription)
 
     def evaluate(self,output):
-        opType = self.get_identifier().replace("bpy.ops.","")
-        props = []
+        if self.get_identifier() != None:
+            opType = self.get_identifier().replace("bpy.ops.","")
+            props = []
 
-        for inp in self.inputs:
-            if not inp.is_linked:
-                value = inp.value
-                if type(value) == str:
-                    newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = '", value, "'\n"]
-                    props.append(newProps)
-                elif inp.bl_idname == "SN_VectorSocket":
-                    tuple_value = value
-                    value = "("
-                    for entry in tuple_value:
-                        value += str(entry) + ","
-                    value += ")"
-                    newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = ", value, "\n"]
-                    props.append(newProps)
+            for inp in self.inputs:
+                if not inp.is_linked:
+                    value = inp.value
+                    if type(value) == str:
+                        newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = '", value, "'\n"]
+                        props.append(newProps)
+                    elif inp.bl_idname == "SN_VectorSocket":
+                        tuple_value = value
+                        value = "("
+                        for entry in tuple_value:
+                            value += str(entry) + ","
+                        value += ")"
+                        newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = ", value, "\n"]
+                        props.append(newProps)
+                    else:
+                        value = str(value)
+                        newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = ", value, "\n"]
+                        props.append(newProps)
                 else:
-                    value = str(value)
-                    newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = ", value, "\n"]
+                    newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = ", inp.links[0].from_socket, "\n"]
                     props.append(newProps)
-            else:
-                newProps = ["_INDENT__INDENT_operator.", inp.name.lower().replace(" ","_"), " = ", inp.links[0].from_socket, "\n"]
-                props.append(newProps)
-        
-        allProps = []
-        for prop in props:
-            allProps+=prop
+            
+            allProps = []
+            for prop in props:
+                allProps+=prop
 
-        return {"code": ["_INDENT__INDENT_operator = ", self.outputs[0].links[0].to_node.layout_type(), ".operator('", opType, "', ", "text='", self.buttonName, "')\n"] + allProps}
+            return {"code": ["_INDENT__INDENT_operator = ", self.outputs[0].links[0].to_node.layout_type(), ".operator('", opType, "', ", "text='", self.buttonName, "')\n"] + allProps}
 
+        else:
+            return {"code": [], "error": ["no_location_button"]}

@@ -79,6 +79,11 @@ error_logs = {
         "message": "The panel doesn't have a proper location",
         "fatal": True
     },
+    "no_location_button": {
+        "title": "No location",
+        "message": "The button doesn't have a proper location",
+        "fatal": True
+    },
     "wrong_location_panel": {
         "title": "Wrong location",
         "message": "The panel has a wrong location",
