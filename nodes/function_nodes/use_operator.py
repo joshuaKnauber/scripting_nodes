@@ -110,7 +110,7 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
                         if socket_type == "SN_EnumSocket":
                             for item in prop.enum_items:
                                 prop_item = self.socket_list.add()
-                                prop_item.socket = prop.name
+                                prop_item.socket = prop.identifier.replace("_"," ").title()
                                 prop_item.identifier = item.identifier
                                 prop_item.name = item.name
                                 prop_item.description = item.description
