@@ -15,3 +15,4 @@ bpy.types.Scene.sn_op_type_properties = bpy.props.CollectionProperty(type=SN_Sea
 bpy.types.Scene.sn_op_run_properties = bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
 bpy.types.Scene.sn_space_properties = bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
 bpy.types.Scene.sn_panel_properties = bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
+bpy.types.Scene.sn_context_properties = bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
