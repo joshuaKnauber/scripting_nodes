@@ -24,7 +24,7 @@ class SN_UiLabelNode(bpy.types.Node, SN_ScriptingBaseNode):
         pass# called when node is removed
 
     def draw_buttons(self, context, layout):
-        pass# draws extra buttons on node
+        pass
 
     def evaluate(self, output):
         value = "'" + self.inputs[0].value + "'"

@@ -4,6 +4,7 @@ import bpy
 import os
 from ..properties.property_utils import sn_props
 from ..node_categories import compiler
+from ..nodes.node_utility import icon_list
 
 
 class SN_OT_EmptyOperator(bpy.types.Operator):
@@ -140,3 +141,46 @@ class SN_OT_ExportAddonButton(bpy.types.Operator, ExportHelper):
                 newFile.write("\n")
 
             return {"FINISHED"}
+
+# class SN_IconPropertyGroup(bpy.types.PropertyGroup):
+#     def update_selection(self, context):
+#         if self.selected:
+#             for icon in context.scene.sn_icons:
+#                 if icon.selected and not icon == self:
+#                     icon.selected = False
+
+#     selected: bpy.props.BoolProperty(name="", default=False, update=update_selection)
+#     name: bpy.props.StringProperty(name="", default="")
+
+# bpy.utils.register_class(SN_IconPropertyGroup)
+# bpy.types.Scene.sn_icons = bpy.props.CollectionProperty(type=SN_IconPropertyGroup)
+
+# class SN_OT_IconViewer(bpy.types.Operator):
+#     bl_idname = "scripting_nodes.icon_viewer"
+#     bl_label = "Icons"
+#     bl_description = "View all icons"
+#     bl_options = {"REGISTER","INTERNAL"}
+
+#     @classmethod
+#     def poll(cls, context):
+#         return True
+
+#     def invoke(self, context, event):
+#         context.scene.sn_icons.clear()
+#         for icon in icon_list():
+#             item = context.scene.sn_icons.add()
+#             item.name = icon
+#         return context.window_manager.invoke_props_dialog(self, width=800)
+    
+#     def draw(self, context):
+#         grid = self.layout.grid_flow()
+
+#         for icon in context.scene.sn_icons:
+#             grid.prop(icon, "selected", text="", icon=icon.name, toggle=True, emboss=False)
+        
+#         for icon in context.scene.sn_icons:
+#             if icon.selected:
+#                 self.layout.prop(icon, "selected", text="Selected Icon", icon=icon.name, toggle=True)
+
+#     def execute(self, context):
+#         return {"FINISHED"}
