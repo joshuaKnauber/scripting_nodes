@@ -98,6 +98,8 @@ node_categories = [
         }),
         NodeItem("SN_OperatorRunNode", settings={
         }),
+        NodeItem("SN_AppendNode", settings={
+        }),
         NodeItem("SN_FunctionNode", settings={
         }),
         #NodeItem("SN_FunctionEndNode", settings={

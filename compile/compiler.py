@@ -236,7 +236,7 @@ class ScriptingNodesCompiler():
 
     def get_function_code(self, node):
         #returns the executable code for a single function for a given function node
-        function = "import bpy\n" + self._compile_tree_branch(node,0,True,True)
+        function = self._compile_tree_branch(node,0,True,True)
         function += node.functionName+"()"
         return function
 

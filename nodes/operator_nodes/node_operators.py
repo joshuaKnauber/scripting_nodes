@@ -1,4 +1,5 @@
 import bpy
+import os
 from ...node_categories import compiler
 
 
