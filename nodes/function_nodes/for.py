@@ -57,7 +57,7 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
         value = ["[]"]
         if self.inputs[1].is_linked:
             if self.inputs[1].links[0].from_node.bl_idname == "SN_DataPropertiesNode" and self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                code = ("").join(self.inputs[1].links[0].from_node.internal_evaluate(self.inputs[1].links[0].from_socket)["code"])
+                code = ("").join(self.inputs[1].links[0].from_node.evaluate(self.inputs[1].links[0].from_socket)["code"])
                 try:
                     if str(type(eval(code))) == "<class 'bpy_prop_collection'>":
                         value = [self.inputs[1].links[0].from_socket]
@@ -66,7 +66,7 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
                 except KeyError:
                     errors.append("wrong_socket")
             elif self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                code = ("").join(self.inputs[1].links[0].from_node.internal_evaluate(self.inputs[1].links[0].from_socket)["code"])
+                code = ("").join(self.inputs[1].links[0].from_node.evaluate(self.inputs[1].links[0].from_socket)["code"])
                 try:
                     if str(type(eval(code))) == "<class 'bpy_prop_collection'>":
                         value = [self.inputs[1].links[0].from_socket]
