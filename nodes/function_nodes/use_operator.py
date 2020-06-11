@@ -91,7 +91,7 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
                 isCustom = True
             if not isCustom:
                 for prop in eval(opType+".get_rna_type().properties"):
-                    if not prop.name in ignore_attr:
+                    if not prop.name in ignore_attr and prop.rna_type.identifier != "CollectionProperty":
 
                         socket_type = "SN_DataSocket"
                         if prop.rna_type.identifier == "StringProperty":
@@ -115,9 +115,9 @@ class SN_UseOperatorNode(SN_ScriptingBaseNode):
                                 prop_item.name = item.name
                                 prop_item.description = item.description
 
-                        if socket_type != "SN_VectorSocket":
+                        if socket_type != "SN_VectorSocket" and socket_type != "SN_DataSocket":
                             inp.value = prop.default
-                        else:
+                        elif socket_type == "SN_VectorSocket":
                             inp.value = (prop.default, prop.default, prop.default)
 
     def get_socket_items(self,socket):

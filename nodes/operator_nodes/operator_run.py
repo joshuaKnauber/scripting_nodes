@@ -31,7 +31,7 @@ class SN_OperatorRunNode(bpy.types.Node, SN_UseOperatorNode):
         opType = self.get_identifier()
         props = []
         for inp in self.inputs:
-            if not inp.bl_idname == "SN_ProgramSocket":
+            if inp.bl_idname != "SN_ProgramSocket" and inp.bl_idname != "SN_DataSocket":
                 if not inp.is_linked:
                     value = inp.value
                     if type(value) == str:
@@ -46,10 +46,11 @@ class SN_OperatorRunNode(bpy.types.Node, SN_UseOperatorNode):
                         value = str(value)
                     props.append([inp.name.lower().replace(" ","_") + "=" + value + ", "])
                 else:
-                    props.append([inp.name.lower().replace(" ","_") + "=", inp.links[0].from_socket, ", "])
+                    if inp.is_linked:
+                        props.append([inp.name.lower().replace(" ","_") + "=", inp.links[0].from_socket, ", "])
         
         allProps = []
         for prop in props:
             allProps+=prop
-        
+
         return {"code": [opType, "("] + allProps + [")\n"]}
