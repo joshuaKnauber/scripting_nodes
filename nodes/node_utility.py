@@ -1,4 +1,5 @@
 import bpy
+from .input_nodes.scene_nodes_utils import get_bpy_types
 
 def register_dynamic_input(self, socket_idname, socket_name):
     all_sockets = []
@@ -36,11 +37,18 @@ def icon_list():
 def get_types():
     types = []
     for data in dir(bpy.data):
-        if eval("type(bpy.data."+data+")") == type(bpy.data.objects):
+        if data != "linestyles":
+            has_new = False
             try:
-                types.append((data, eval("bpy.data."+data+".bl_rna.name.replace('Main ','')"), ""))
+                eval("bpy.data."+data+".new")
+                has_new = True
             except AttributeError:
-                pass
+                    pass
+            if has_new:
+                types.append(data)
+
+    for i, type_name in enumerate(types):
+        types[i] = (get_bpy_types()[type_name], get_bpy_types()[type_name], "")
 
     return types
 
