@@ -29,6 +29,12 @@
                 "buttonName": "Add Monkey",
                 "opType": "Add Monkey"
             }
+        ],
+        "value": [
+            {},
+            {
+                "0": 3
+            }
         ]
     },
 
@@ -53,9 +59,7 @@
             ["SN_UiColumnNode", -350, -200],
             ["SN_UiPropertiesNode", -550, -300],
             ["SN_SceneDataNode", -750, -300],
-            ["SN_UiLabelNode", -350, -425],
-            ["SN_TextNode", -750, -450],
-            ["SN_TextNode", -550, -450]
+            ["SN_UiLabelNode", -350, -425]
         ],
         "sockets": [
             [[], [], [1, 0], [2, 0]],
@@ -64,9 +68,8 @@
             [[4, 1]],
             [],
             [[], [], [], [], [], [6, 0]],
-            [[7, 1], [9, 0]],
-            [],
-            [[10, 0]]
+            [[7, 1]],
+            []
         ],
         "values": [
             {
@@ -98,12 +101,21 @@
                 "data_type": "objects"
             },
             {
-            },
+            }
+        ],
+        "value": [
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
             {
-                "text": "Size"
+                "1": "Size"
             },
+            {},
             {
-                "text": "Select an object to change its size"
+                "0": "Select an object to change its size"
             }
         ]
     }

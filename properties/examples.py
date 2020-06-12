@@ -41,6 +41,13 @@ def handle(context, example):
                     value = example["values"][node][attribute]
                 all_nodes[node].__setattr__(attribute, value)
 
+        for node in range(len(example["value"])):
+            for input_index in example["value"][node]:
+                if example["value"][node][str(input_index)] == "True" or example["value"][node][str(input_index)] == "False":
+                    all_nodes[node].inputs[eval(input_index)].value = eval(example["value"][node][str(input_index)])
+                else:
+                    all_nodes[node].inputs[eval(input_index)].value = example["value"][node][str(input_index)]
+
         for socket in sockets:
             tree.links.new(all_nodes[socket[0]].inputs[socket[1]], all_nodes[socket[2]].outputs[socket[3]])
 
