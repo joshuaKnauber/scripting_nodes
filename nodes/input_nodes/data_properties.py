@@ -158,9 +158,10 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.has_collection_input:
             if output == self.outputs[0]:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                    code = "".join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"])
+                    code = "".join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
                     for prop in eval(code+".bl_rna.properties"):
                         if prop.name == output.name:
+                            code = "".join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"])
                             code+="." + prop.identifier
 
                 else:
@@ -170,9 +171,10 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 return {"code": [code], "error": errors}
             else:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                    code = "".join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"])
+                    code = "".join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
                     for prop in eval(code+".bl_rna.properties"):
                         if prop.name == output.name:
+                            code = "".join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"])
                             code+="." + prop.identifier
                 else:
                     code = ""
@@ -183,9 +185,10 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         else:
             if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                code = "".join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"])
+                code = "".join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
                 for prop in eval(code+".bl_rna.properties"):
                     if prop.name == output.name:
+                        code = "".join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"])
                         code+="." + prop.identifier
 
             else:
