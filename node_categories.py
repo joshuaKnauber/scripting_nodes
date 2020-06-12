@@ -162,8 +162,6 @@ node_categories = [
         }),
         NodeItem("SN_DataPropertiesNode", settings={
         }),
-        NodeItem("SN_GetPropertiesNode", settings={
-        }),
         NodeItem("SN_VariableNode", settings={
         }),        
         NodeItem("SN_NumberNode", settings={

@@ -75,7 +75,7 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.inputs[2].is_linked:
             if self.inputs[2].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
                 value = self.inputs[2].links[0].from_node.evaluate(self.inputs[2].links[0].from_socket)["code"]
-                code.append(value)
+                code+=value
                 code.append(".")
                 code.append(self.sn_change_property_properties[self.propName].identifier)
                 code.append(" = ")

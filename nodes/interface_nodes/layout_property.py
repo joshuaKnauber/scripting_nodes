@@ -70,7 +70,7 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         if len(self.inputs) == 2:
             if len(self.inputs[0].links) == 1:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                    code.append(("").join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"]))
+                    code+=self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"]
                 else:
                     errors.append("wrong_socket")
             else:
@@ -89,7 +89,8 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 errors.append("invalid_prop")
         else:
-            code.append("''")
-
+            code = ["''"]
+        for test in code:
+            print(test)
         return {"code":code, "error":errors}
 
