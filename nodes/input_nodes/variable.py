@@ -65,4 +65,4 @@ class SN_VariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.variable_name == "":
             error.append("no_available")
 
-        return {"code": [self.variable_name], "error": error}
+        return {"code": [self.variable_name.lower().replace(" ", "_")], "error": error}
