@@ -36,15 +36,23 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
                     value = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
 
-                    ignore_props = ["RNA","Display Name","Full Name"]
+                    if value != "":
+                        is_collection = False
+                        try:
+                            if str(eval("type("+value+")")) == "<class 'bpy_prop_collection'>" or str(eval("type("+value+")")) == "<class 'bpy.types.CollectionProperty'>":
+                                is_collection = True
+                        except KeyError:
+                            pass
 
-                    for prop in eval(value+".bl_rna.properties"):
-                        if not prop.name in ignore_props:
-                            if not "bl_" in prop.name:
-                                item = self.sn_layout_property_properties.add()
-                                item.identifier = prop.identifier
-                                item.name = prop.name
+                        if not is_collection:
+                            ignore_props = ["RNA","Display Name","Full Name"]
 
+                            for prop in eval(value+".bl_rna.properties"):
+                                if not prop.name in ignore_props:
+                                    if not "bl_" in prop.name:
+                                        item = self.sn_layout_property_properties.add()
+                                        item.name = prop.name
+                                        item.identifier = prop.identifier
 
     def copy(self, node):
         pass# called when node is copied

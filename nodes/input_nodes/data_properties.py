@@ -158,24 +158,39 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.has_collection_input:
             if output == self.outputs[0]:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                    code = "".join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
-                    for prop in eval(code+".bl_rna.properties"):
-                        if prop.name == output.name:
-                            code = "".join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"])
-                            code+="." + prop.identifier
+                    code = self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"]
+                    code.append("[")
+                    if self.use_index:
+                        if self.inputs['Index'].is_linked:
+                            if self.inputs['Index'].links[0].from_socket.bl_idname == "SN_IntSocket":
+                                code.append(self.inputs['Index'].links[0].from_socket)
+                            else:
+                                errors.append("wrong_socket")
+                        else:
+                            code.append(str(self.inputs['Index'].value))
+
+                    else:
+                        if self.inputs['Name'].is_linked:
+                            if self.inputs['Name'].links[0].from_socket.bl_idname == "SN_StringSocket":
+                                code.append(self.inputs['Name'].links[0].from_socket)
+                            else:
+                                errors.append("wrong_socket")
+                        else:
+                            code.append("'" + self.inputs['Name'].value + "'")
+                    code.append("]")
 
                 else:
-                    code = ""
+                    code = []
                     errors.append("wrong_socket")
                 
-                return {"code": [code], "error": errors}
+                return {"code": code, "error": errors}
             else:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
                     code = "".join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
                     for prop in eval(code+".bl_rna.properties"):
                         if prop.name == output.name:
-                            code = "".join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"])
-                            code+="." + prop.identifier
+                            code = self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"]
+                            code.append("." + prop.identifier)
                 else:
                     code = ""
                     errors.append("wrong_socket")
@@ -188,12 +203,13 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 code = "".join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
                 for prop in eval(code+".bl_rna.properties"):
                     if prop.name == output.name:
-                        code = "".join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"])
-                        code+="." + prop.identifier
+                        code = self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"]
+                        code.append("." + prop.identifier)
 
             else:
-                code = ""
+                code = [""]
                 errors.append("wrong_socket")
             
-            return {"code": [code], "error": errors}
+
+            return {"code": code, "error": errors}
 

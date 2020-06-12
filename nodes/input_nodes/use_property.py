@@ -34,11 +34,23 @@ class SN_GetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
                     value = ("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"])
 
-                    for prop in dir(eval(value)):
-                        if prop[0] != "_":
-                            item = self.sn_use_property_properties.add()
-                            item.identifier = prop
-                            item.name = prop.replace("_", " ").title()
+                    if value != "":
+                        is_collection = False
+                        try:
+                            if str(eval("type("+value+")")) == "<class 'bpy_prop_collection'>" or str(eval("type("+value+")")) == "<class 'bpy.types.CollectionProperty'>":
+                                is_collection = True
+                        except KeyError:
+                            pass
+
+                        if not is_collection:
+                            ignore_props = ["RNA","Display Name","Full Name"]
+
+                            for prop in eval(value+".bl_rna.properties"):
+                                if not prop.name in ignore_props:
+                                    if not "bl_" in prop.name:
+                                        item = self.sn_use_property_properties.add()
+                                        item.name = prop.name
+                                        item.identifier = prop.identifier
 
 
     def copy(self, node):
@@ -57,7 +69,7 @@ class SN_GetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         if len(self.inputs) > 0:
             if len(self.inputs[0].links) == 1:
                 if self.inputs[0].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                    code.append(("").join(self.inputs[0].links[0].from_node.internal_evaluate(self.inputs[0].links[0].from_socket)["code"]))
+                    code.append(("").join(self.inputs[0].links[0].from_node.evaluate(self.inputs[0].links[0].from_socket)["code"]))
                 else:
                     errors.append("wrong_socket")
             else:

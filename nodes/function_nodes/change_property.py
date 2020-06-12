@@ -39,22 +39,26 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if self.inputs[2].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
                         value = ("").join(self.inputs[2].links[0].from_node.internal_evaluate(self.inputs[2].links[0].from_socket)["code"])
 
-                        for prop in dir(eval(value)):
-                            if prop[0] != "_":
-                                code = ("").join(self.inputs[2].links[0].from_node.internal_evaluate(self.inputs[2].links[0].from_socket)["code"])
-                                codeType = code + "." + prop
-                                code+=".is_property_readonly('"
-                                code+=prop
-                                code+="')"
+                        if value != "":
+                            is_collection = False
+                            try:
+                                if str(eval("type("+value+")")) == "<class 'bpy_prop_collection'>" or str(eval("type("+value+")")) == "<class 'bpy.types.CollectionProperty'>":
+                                    is_collection = True
+                            except KeyError:
+                                pass
 
-                                if not eval("type(" + codeType + ")") == bpy.types.bpy_func:
-                                    try:
-                                        if not eval(code):
-                                            item = self.sn_change_property_properties.add()
-                                            item.identifier = prop
-                                            item.name = prop.replace("_", " ").title()
-                                    except TypeError:
-                                        pass
+                            if not is_collection:
+                                ignore_props = ["RNA","Display Name","Full Name"]
+
+                                for prop in eval(value+".bl_rna.properties"):
+                                    if not prop.name in ignore_props:
+                                        if not "bl_" in prop.name:
+                                            if eval(value + ".bl_rna.properties['" + prop.identifier + "'].is_readonly") == False:
+                                                item = self.sn_change_property_properties.add()
+                                                item.name = prop.name
+                                                item.identifier = prop.identifier
+
+
 
     def copy(self, node):
         pass# called when node is copied
@@ -70,7 +74,8 @@ class SN_SetPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         code = []
         if self.inputs[2].is_linked:
             if self.inputs[2].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                code.append(self.inputs[2].links[0].from_socket)
+                value = self.inputs[2].links[0].from_node.evaluate(self.inputs[2].links[0].from_socket)["code"]
+                code.append(value)
                 code.append(".")
                 code.append(self.sn_change_property_properties[self.propName].identifier)
                 code.append(" = ")
