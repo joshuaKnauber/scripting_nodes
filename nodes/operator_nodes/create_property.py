@@ -13,13 +13,7 @@ class SN_PropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 300
 
     def getTypes(self, context):
-        types = get_types()
-
-        newTypes = []
-        for typeName in types:
-            newTypes.append((typeName, typeName, ""))
-        
-        return newTypes
+        return get_types()
     
 
     propName: bpy.props.StringProperty(name="Name", description="Name of the property", default="My Property", update=update_socket_autocompile)

@@ -34,18 +34,14 @@ def icon_list():
     return bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items.keys()
 
 def get_types():
-    types = {}
+    types = []
     for data in dir(bpy.data):
         if eval("type(bpy.data."+data+")") == type(bpy.data.objects):
             try:
-                types[eval("bpy.data."+data+".bl_rna.name.replace('Main ','')[:-1]")] = data
+                types.append((data, eval("bpy.data."+data+".bl_rna.name.replace('Main ','')"), ""))
             except AttributeError:
                 pass
-    for type_name in dir(bpy.types):
-        type_id = eval("bpy.types."+type_name+".bl_rna.identifier")
-        type_name = eval("bpy.types."+type_name+".bl_rna.name").lower().replace(" ","_")
-        if not "_ot_" in type_name and not "_pt_" in type_name and not "_mt_" in type_name:
-            types[type_id] = type_name
+
     return types
 
 

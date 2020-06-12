@@ -3,7 +3,7 @@ from ...node_sockets import update_socket_autocompile
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 from .scene_nodes_utils import add_data_output, get_active_types, get_bpy_types
-from ..node_utility import get_types, get_input_value
+from ..node_utility import get_input_value
 from ...properties.search_properties import SN_SearchPropertyGroup
 
 

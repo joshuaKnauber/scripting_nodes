@@ -1,7 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
-from ..node_utility import register_dynamic_input, get_input_value, get_types, get_data_blocks
+from ..node_utility import register_dynamic_input, get_input_value, get_data_blocks
 from ...node_sockets import update_socket_autocompile
 
 
