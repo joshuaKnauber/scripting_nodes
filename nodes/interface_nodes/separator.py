@@ -13,8 +13,6 @@ class SN_UiSeparatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.use_custom_color = True
         self.color = node_colors["INTERFACE"]
 
-        self.inputs.new('SN_LayoutSocket', "Layout")
-
         self.outputs.new('SN_LayoutSocket', "Layout")
 
     def copy(self, node):
