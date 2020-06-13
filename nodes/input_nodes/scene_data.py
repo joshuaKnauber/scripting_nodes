@@ -82,4 +82,4 @@ class SN_SceneDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                 return {"code": ["bpy.types." + types]}
 
         else:
-            return [""]
+            return {"code": [""]}

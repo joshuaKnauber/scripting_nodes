@@ -33,7 +33,7 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
         out2 = self.outputs.new('SN_ProgramSocket', "Repeat")
         out2.display_shape = "DIAMOND"
 
-        self.outputs.new('SN_DataSocket', "Element")
+        self.outputs.new('SN_SceneDataSocket', "Element")
 
         inp = self.inputs.new('SN_SceneDataSocket', "Scene Data")
         inp.display_shape = "SQUARE"
@@ -46,6 +46,15 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         pass
+
+    def internal_evaluate( self, output ):
+        if self.inputs[1].is_linked:
+            if self.inputs[1].bl_idname == "SN_SceneDataSocket":
+                return self.inputs[1].links[0].from_node.internal_evaluate( self.inputs[1].links[0].from_socket )
+            else:
+                return {"code": [""]}
+        else:
+            return {"code": [""]}
 
     def evaluate(self, output):
         if output == self.outputs[-1]:
