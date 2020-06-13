@@ -40,7 +40,7 @@ def get_bpy_types():
         "texts": "Text",
         "speakers": "Speaker",
         "sounds": "Sound",
-        "armatures": "Armatures",
+        "armatures": "Armature",
         "actions": "Action",
         "particles": "Particle",
         "palettes": "Palette",

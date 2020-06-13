@@ -2,6 +2,7 @@ import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..node_looks import node_colors, node_icons
 from ..node_utility import get_input_value
+from ..input_nodes.scene_nodes_utils import get_bpy_types
 
 class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''For Node for running functions for every element'''
@@ -30,10 +31,11 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
         out = self.outputs.new('SN_ProgramSocket', "Program")
         out.display_shape = "DIAMOND"
 
-        out2 = self.outputs.new('SN_ProgramSocket', "Repeat")
-        out2.display_shape = "DIAMOND"
+        out = self.outputs.new('SN_ProgramSocket', "Repeat")
+        out.display_shape = "DIAMOND"
 
-        self.outputs.new('SN_SceneDataSocket', "Element")
+        out = self.outputs.new('SN_SceneDataSocket', "Element")
+        out.display_shape = "SQUARE"
 
         inp = self.inputs.new('SN_SceneDataSocket', "Scene Data")
         inp.display_shape = "SQUARE"
@@ -50,11 +52,55 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
     def internal_evaluate( self, output ):
         if self.inputs[1].is_linked:
             if self.inputs[1].bl_idname == "SN_SceneDataSocket":
-                return self.inputs[1].links[0].from_node.internal_evaluate( self.inputs[1].links[0].from_socket )
+                if output == self.outputs[2]:
+                    _, code = self.test_for_collection(False)
+                    if code != []:
+                        if "bl_rna.properties" in code[0]:
+                            code = eval("type("+code[0]+".fixed_type)").bl_rna.identifier
+                            code = "bpy.types." + code
+                            return {"code": code}
+                        else:
+                            code = code[0].split(".")
+                            types = get_bpy_types()[code[-1]]
+                            return {"code": ["bpy.types." + types]}
+                    else:
+                        return {"code": [""]}
+                else:
+                    return {"code": [""]}
             else:
                 return {"code": [""]}
         else:
             return {"code": [""]}
+
+
+    def test_for_collection( self, use_evaluate ):
+        errors = []
+        value = []
+        if self.inputs[1].links[0].from_node.bl_idname == "SN_DataPropertiesNode" and self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+            if use_evaluate:
+                code = ("").join(self.inputs[1].links[0].from_node.evaluate(self.inputs[1].links[0].from_socket)["code"])
+            else:
+                code = ("").join(self.inputs[1].links[0].from_node.internal_evaluate(self.inputs[1].links[0].from_socket)["code"])
+                try:
+                    if str(type(eval(code))) == "<class 'bpy_prop_collection'>":
+                        value = [code]
+                except KeyError:
+                    errors.append("wrong_socket")
+
+
+        elif self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+            if use_evaluate:
+                value = [("").join(self.inputs[1].links[0].from_node.evaluate(self.inputs[1].links[0].from_socket)["code"])]
+            else:
+                code = ("").join(self.inputs[1].links[0].from_node.internal_evaluate(self.inputs[1].links[0].from_socket)["code"])
+                try:
+                    if str(type(eval(code))) == "<class 'bpy_prop_collection'>":
+                        value = [code]
+                except KeyError:
+                    errors.append("wrong_socket")
+        else:
+            errors.append("wrong_socket")
+        return errors, value
 
     def evaluate(self, output):
         if output == self.outputs[-1]:
@@ -62,28 +108,11 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         errors = []
 
-
         value = ["[]"]
         if self.inputs[1].is_linked:
-            if self.inputs[1].links[0].from_node.bl_idname == "SN_DataPropertiesNode" and self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                code = ("").join(self.inputs[1].links[0].from_node.evaluate(self.inputs[1].links[0].from_socket)["code"])
-                try:
-                    if str(type(eval(code))) == "<class 'bpy_prop_collection'>":
-                        value = [self.inputs[1].links[0].from_socket]
-                    else:
-                        value = ["[", self.inputs[1].links[0].from_socket, "]"]
-                except KeyError:
-                    errors.append("wrong_socket")
-            elif self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-                code = ("").join(self.inputs[1].links[0].from_node.evaluate(self.inputs[1].links[0].from_socket)["code"])
-                try:
-                    if str(type(eval(code))) == "<class 'bpy_prop_collection'>":
-                        value = [self.inputs[1].links[0].from_socket]
-                    else:
-                        value = ["[", self.inputs[1].links[0].from_socket, "]"]
-                except KeyError:
-                    errors.append("wrong_socket")
-            else:
+            error, value = self.test_for_collection(True)
+            errors += error
+            if value == []:
                 errors.append("wrong_socket")
         else:
             errors.append("no_connection_for")
