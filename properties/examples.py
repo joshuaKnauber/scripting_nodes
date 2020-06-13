@@ -56,8 +56,12 @@ def handle(context, example):
         for node in range(len(example["values"])):
             for attribute in example["values"][node]:
                 if attribute == "search_value":
-                    bpy.ops.scripting_nodes.add_scene_data_socket(node_name=all_nodes[node].name, socket_name=example["values"][node][attribute])
-        
+                    if all_nodes[node].inputs[0].is_linked:
+                        bpy.ops.scripting_nodes.add_scene_data_socket(node_name=all_nodes[node].name, socket_name=example["values"][node][attribute])
+                    else:
+                        tree.links.new(all_nodes[node].inputs[0], all_nodes[example["sockets"][node][0][0]].outputs[example["sockets"][node][0][1]])
+                        bpy.ops.scripting_nodes.add_scene_data_socket(node_name=all_nodes[node].name, socket_name=example["values"][node][attribute])
+
         for socket in sockets:
             if example["nodes"][socket[2]][0] == "SN_DataPropertiesNode":
                 tree.links.new(all_nodes[socket[0]].inputs[socket[1]], all_nodes[socket[2]].outputs[socket[3]])

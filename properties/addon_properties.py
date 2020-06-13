@@ -21,7 +21,9 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                ("add_monkey_size", "Monkey adder choose size", "Creates a button that makes a monkey with chooseble size"),
                ("layout", "Layout Example", "Example for presenting layout nodes"),
                ("operator_func", "Operator/Function Example", "Example for presenting operatator and function nodes"),
-               ("scene_data", "Scene Data Example", "Example for presenting Scene Data nodes")],
+               ("scene_data", "Scene Data Example", "Example for presenting Scene Data nodes"),
+               ("property", "Properties Example", "Example for presenting property nodes"),
+               ("variable", "Variable Example", "Example for presenting variable nodes")],
         name="Examples",
         description="Example Node Trees",
         update = update_examples

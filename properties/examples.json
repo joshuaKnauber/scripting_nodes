@@ -325,5 +325,163 @@
         ],
         "value": [
         ]
+    },
+    "property": {
+        "name": "Property Example",
+        "addon": [
+            "Property Example",
+            "",
+            "Example for presenting property nodes",
+            "",
+            "",
+            "",
+            "General"
+        ],
+        "nodes": [
+            ["SN_PropertiesNode", -600, 400],
+            ["SN_SceneDataNode", -470, 200],
+            ["SN_FunctionNode", -270, 400],
+            ["SN_TextNode", -270, 270],
+            ["SN_DataPropertiesNode", -270, 170],
+            ["SN_SetPropertiesNode", -70, 400],
+            ["SN_SceneDataNode", -70, 220],
+            ["SN_DataPropertiesNode", 130, 220],
+            ["SN_DataPropertiesNode", 330, 250],
+            ["SN_PrintNode", 530, 400],
+
+            ["SN_SceneDataNode", -380, -150],
+            ["SN_DataPropertiesNode", -180, -120],
+            ["SN_UiPropertiesNode", 20, -150],
+            ["SN_UiPanelNode", 220, -50]
+        ],
+        "sockets": [
+            [],
+            [],
+            [],
+            [],
+            [[1, 0]],
+            [[2, 0], [3, 0], [4, 0]],
+            [],
+            [[6, 0]], 
+            [[7, 0]],
+            [[5, 0], [8, 0]],
+            [],
+            [[10, 0]],
+            [[11, 0]],
+            [[], [], [12, 0]]
+        ],
+        "values": [
+            {
+                "propLocation": "Object"
+            },
+            {
+                "data_type": "objects"
+            },
+            {
+                "functionName": "property"
+            },
+            {
+                "text": "Cool Name"
+            },
+            {
+                "use_index": "True"
+            },
+            {
+                "propName": "Name"
+            },
+            {
+                "data_type":"objects"
+            },
+            {
+                "use_index": "True"
+            },
+            {
+                "search_value": "Name"
+            },
+            {},
+            {
+                "data_type":"objects"
+            },
+            {
+                "use_index": "True"
+            },
+            {
+                "propName": "My Property"
+            },
+            {
+                "panel_name": "Property",
+                "space_type_name": "Properties",
+                "region_type_name": "Window",
+                "context_name": "Scene",
+                "default_closed": "False"
+            }
+        ],
+        "value": [
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {
+                "1": "My custom Property"
+            }
+        ]
+    },
+    "variable": {
+        "name": "Variable Example",
+        "addon": [
+            "Variable Example",
+            "",
+            "Example for presenting variable nodes",
+            "",
+            "",
+            "",
+            "General"
+        ],
+        "nodes": [
+            ["SN_FunctionNode", -570, 200],
+            ["SN_TextNode", -570, 70],
+            ["SN_VariableSetNode", -370, 200],
+            ["SN_VariableNode", -370, 50],
+            ["SN_PrintNode", -180, 200],
+            ["SN_NumberNode", -180, 70],
+            ["SN_VariableChangeNode", 30, 200],
+            ["SN_VariableNode", 30, 50],
+            ["SN_PrintNode", 230, 200]
+        ],
+        "sockets": [
+            [],
+            [],
+            [[0, 0], [1, 0]],
+            [],
+            [[2, 0], [3, 0]],
+            [],
+            [[4, 0], [5, 0]],
+            [], 
+            [[6, 0], [7, 0]]
+        ],
+        "values": [
+            {},
+            {
+                "text": "First Value"
+            }, 
+            {
+                "variable_name": "My Thing"
+            }, 
+            {},
+            {},
+            {
+                "number": 2
+            }
+        ],
+        "value": [
+        ]
     }
 }

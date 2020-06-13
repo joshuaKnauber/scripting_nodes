@@ -90,7 +90,5 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 errors.append("invalid_prop")
         else:
             code = ["''"]
-        for test in code:
-            print(test)
         return {"code":code, "error":errors}
 
