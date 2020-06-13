@@ -51,6 +51,6 @@ class SN_UiMathNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 errors.append("wrong_socket")
 
-        return {"code": [["("] + value1," ",self.operation," ",value2 + [")"]],"error":errors}
+        return {"code": ["(", value1," ",self.operation," ",value2, ")"],"error":errors}
         
         
