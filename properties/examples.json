@@ -118,5 +118,212 @@
                 "0": "Select an object to change its size"
             }
         ]
+    },
+
+
+    "operator_func": {
+        "name": "Operator/Function Example",
+        "addon": [
+            "Operator/Function Example",
+            "",
+            "Example for presenting operatator and function nodes",
+            "",
+            "",
+            "",
+            "General"
+        ],
+        "nodes": [
+            ["SN_UiPanelNode", 100, 200],
+            ["SN_OperatorNode", -250, -120],
+            ["SN_UiButtonNode", -250, 85],
+            ["SN_FunctionRunNode", 0, -120],
+            ["SN_PrintNode", 250, -120],
+            ["SN_TextNode", 0, -250],
+            ["SN_FunctionNode", -300, -350],
+            ["SN_PrintNode", -100, -400],
+            ["SN_PrintNode", 100, -400],
+            ["SN_PrintNode", 300, -400],
+            ["SN_TextNode", -300, -500],
+            ["SN_TextNode", -100, -530],
+            ["SN_NumberNode", -100, -630],
+            ["SN_UiMathNode", 100, -530]
+        ],
+        "sockets": [
+            [[], [], [2, 0]],
+            [],
+            [],
+            [[1, 0]],
+            [[3, 0], [5, 0]],
+            [],
+            [],
+            [[6, 0], [10, 0]],
+            [[7, 0], [11, 0]],
+            [[8, 0], [13, 0]],
+            [],
+            [],
+            [],
+            [[], [12, 0]]
+        ],
+        "values": [
+            {
+                "panel_name": "Operator",
+                "space_type_name": "Properties",
+                "region_type_name": "Window",
+                "context_name": "Scene",
+                "default_closed": "False"
+            },
+            {
+                "operator_name": "Thing"
+            },
+            {
+                "buttonName": "Do something",
+                "opType": "Thing"
+            },
+            {
+            },
+            {},
+            {
+                "text": "I did something"
+            },
+            {},
+            {},
+            {},
+            {},
+            {
+                "text":"I am doing something"
+            },
+            {
+                "text":"5 and 3 equals"
+            },
+            {
+                "number": 3
+            }
+        ],
+        "value": [
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {},
+            {
+                "0": 5
+            }
+        ]
+    },
+
+
+    "layout": {
+        "name": "Layout Example",
+        "addon": [
+            "Layout Example",
+            "",
+            "Example for presenting layout nodes",
+            "",
+            "",
+            "",
+            "General"
+        ],
+        "nodes": [
+            ["SN_UiPanelNode", 100, 200],
+            ["SN_UiRowNode", -150, 100],
+            ["SN_UiButtonNode", -450, 150],
+            ["SN_UiLabelNode", -150, -120]
+        ],
+        "sockets": [
+            [[], [], [1, 0], [3, 0]],
+            [[], [], [], [], [], [2, 0]]
+        ],
+        "values": [
+            {
+                "panel_name": "Layout",
+                "space_type_name": "Properties",
+                "region_type_name": "Window",
+                "context_name": "Scene",
+                "default_closed": "False"
+            },
+            {},
+            {
+                "buttonName": "Add Monkey",
+                "opType": "Add Monkey"
+            }
+        ],
+        "value": [
+            {},
+            {},
+            {},
+            {
+                "0": "Lorem ipsum dolor sit amet, cosetetur."
+            }
+        ]
+    },
+    "scene_data": {
+        "name": "Scene Data Example",
+        "addon": [
+            "Scene Data Example",
+            "",
+            "Example for presenting Scene Data nodes",
+            "",
+            "",
+            "",
+            "General"
+        ],
+        "nodes": [
+            ["SN_SceneDataNode", -400, -250],
+            ["SN_SceneDataNode", 0, -300],
+            ["SN_DataPropertiesNode", 200, -300],
+            ["SN_FunctionNode", -200, -50],
+            ["SN_IfNode", 0, 0],
+            ["SN_CompareNode", -200, -200],
+            ["SN_TextNode", 0, -200],
+            ["SN_TextNode", 200, -50],
+            ["SN_PrintNode", 400, 0],
+            ["SN_PrintNode", 400, -150],
+            ["SN_PrintNode", 200, -150]
+        ],
+        "sockets": [
+            [],
+            [],
+            [[1, 1]],
+            [],
+            [[3, 0], [5, 0]],
+            [[0, 1]],
+            [],
+            [],
+            [[4, 0], [7, 0]],
+            [[4, 1]],
+            [[4, 2], [6, 0]]
+        ],
+        "values": [
+            {
+                "data_type": "objects"
+            },
+            {
+                "data_type": "objects"
+            },
+            {
+                "search_value": "Name"
+            },
+            {},
+            {},
+            {
+                "operation": "None"
+            },
+            {
+                "text": "No active object"
+            },
+            {
+                "text": "Done"
+            }
+        ],
+        "value": [
+        ]
     }
 }

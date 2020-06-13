@@ -18,7 +18,10 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
     examples: bpy.props.EnumProperty(
         items=[("None", "Examples", "Examples"),
                ("add_monkey", "Monkey adder", "Creates a button that makes a monkey"),
-               ("add_monkey_size", "Monkey adder choose size", "Creates a button that makes a monkey with chooseble size")],
+               ("add_monkey_size", "Monkey adder choose size", "Creates a button that makes a monkey with chooseble size"),
+               ("layout", "Layout Example", "Example for presenting layout nodes"),
+               ("operator_func", "Operator/Function Example", "Example for presenting operatator and function nodes"),
+               ("scene_data", "Scene Data Example", "Example for presenting Scene Data nodes")],
         name="Examples",
         description="Example Node Trees",
         update = update_examples
