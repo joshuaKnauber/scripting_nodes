@@ -16,10 +16,31 @@ class SN_ScriptingBaseNode:
         pass
     
     def evaluate(self, output):
-        pass
+        return {
+            "blocks": [
+                {
+                    "lines": [ # lines is a list of lists, where the lists represent the different lines
+
+                    ],
+                    "indented": [ # indented is a list of lists, where the lists represent the different lines
+
+                    ]
+                }
+            ],
+            "errors": [
+                {
+                    "error": "",
+                    "node": self,
+                    "socket": None
+                }
+            ]
+        }
 
     def get_register_block(self):
-        pass
+        return ["pass"]
+
+    def get_unregister_block(self):
+        return ["pass"]
 
     def needed_imports(self):
         return ["bpy"]

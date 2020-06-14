@@ -20,7 +20,8 @@ node_categories = [
     ]),
 
     SN_ScriptingNodesCategory('PROGRAM', "Program", items=[
-
+        NodeItem("SN_IfProgramNode", settings={
+        }),
     ]),
 
     SN_ScriptingNodesCategory('VARIABLES', "Variables", items=[

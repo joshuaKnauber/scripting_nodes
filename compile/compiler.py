@@ -14,9 +14,56 @@ class ScriptingNodesCompiler():
         self._indents = 4 # the number of indents that should be used in the generated files
         self._modules = [] # the currently registered modules
 
-    def _get_register_node_blocks(self, tree):
+    def _only_string_in_line(self, line):
+        """ returns if there are only strings in the given line """
+        for snippet in line:
+            if type(snippet) != str:
+                return False
+        return True
+
+    def _compile_line(self,line):
+        """ compiles the given line and returns it as a string """
+        while not self._only_string_in_line(line):
+            for index, snippet in enumerate(line):
+                if not type(snippet) == str:
+                    node_data = snippet.node.evaluate(snippet)
+                    line[index] = self._compile_node_data(node_data)
+                    break
+        return ("").join(line)
+
+    def _compile_block_lines(self, lines, indents):
+        """ compiles the lines in a block code or indented """
+        node_code = ""
+        for line in lines:
+            node_code += " "*indents + self._compile_line(line) + "\n"
+        return node_code
+
+    def _compile_code_block(self,block,previous_indents):
+        """ compiles the given code block with the right amount of indents """
+        node_code = ""
+        node_code += self._compile_block_lines(block["lines"],previous_indents)
+        node_code += self._compile_block_lines(block["indented"],previous_indents + self._indents)
+        return node_code
+
+    def _compile_node_data(self, node_data):
+        """ returns the compiled node data """
+        node_code = ""
+        for block in node_data["blocks"]:
+            node_code += self._compile_code_block(block,0)
+        return node_code
+
+    def _get_node_block(self, node):
+        """ returns the code block for the given node """
+        node_data = node.evaluate(None)
+        return self._compile_node_data(node_data)
+
+    def _get_registerable_node_blocks(self, tree):
         """ returns the code for the nodes that need to be registered """
-        return []
+        code_blocks = []
+        for node in tree.nodes:
+            if node._should_be_registered:
+                code_blocks.append(self._get_node_block(node))
+        return code_blocks
 
     def _get_needed_imports(self, tree):
         """ returns the import block """
@@ -38,7 +85,8 @@ class ScriptingNodesCompiler():
         for node in tree.nodes:
             if node._should_be_registered:
                 has_registered_nodes = True
-                register_function += ""#PLACEHOLDER
+                for line in node.get_register_block():
+                    register_function += "\n" + " "*self._indents + line
 
         if not has_registered_nodes:
             register_function += "\n" + " "*self._indents + "pass"
@@ -52,7 +100,8 @@ class ScriptingNodesCompiler():
         for node in tree.nodes:
             if node._should_be_registered:
                 has_registered_nodes = True
-                unregister_function += ""#PLACEHOLDER
+                for line in node.get_unregister_block():
+                    unregister_function += "\n" + " "*self._indents + line
 
         if not has_registered_nodes:
             unregister_function += "\n" + " "*self._indents + "pass"
@@ -74,7 +123,7 @@ class ScriptingNodesCompiler():
         self._write_paragraphs(text,2)
         text.write(self._get_needed_imports(tree))
         self._write_paragraphs(text,2)
-        for block in self._get_register_node_blocks(tree):
+        for block in self._get_registerable_node_blocks(tree):
             text.write(block)
             self._write_paragraphs(text,2)
         text.write(self._get_register_function(tree))
@@ -88,7 +137,8 @@ class ScriptingNodesCompiler():
         module = {
             "node_tree": tree,
             "text": text,
-            "module": text.as_module()
+            "module": text.as_module(),
+            "errors": []
         }
         self._modules.append(module)
 
