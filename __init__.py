@@ -39,6 +39,10 @@ auto_load.init()
 def load_handler(dummy):
     """ function that is run after the file is loaded """
     compiler().unregister_existing()
+    for tree in bpy.data.node_groups:
+        if tree.bl_idname == "ScriptingNodesTree":
+            if tree.compile_on_start:
+                compiler().compile_tree(tree)
 
 def unload_handler(dummy=None):
     """ function that is run before blender is closed and when a new file is opened """

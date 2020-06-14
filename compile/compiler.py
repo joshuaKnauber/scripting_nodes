@@ -5,6 +5,7 @@ class ScriptingNodesCompiler():
 
     # CALLABLE FUNCTIONS
     # compile_active: takes the active node tree and compiles it after unregistering
+    # compile_tree: recompiles the given tree
     # autocompile_active: compiles the active node tree if autocompile is active
     # unregister_active: unregisters the active node tree
     # unregister_all: unregisters all registered node trees
@@ -177,11 +178,16 @@ class ScriptingNodesCompiler():
         self._create_module(tree)
         self._register_tree(tree)
 
-        bpy.context.area.tag_redraw()
+        if bpy.context.area:
+            bpy.context.area.tag_redraw()
 
     def compile_active(self):
         """ recompiles the active tree """
         self._recompile(bpy.context.space_data.node_tree)
+
+    def compile_tree(self, tree):
+        """ recompiles the given tree """
+        self._recompile(tree)
 
     def unregister_active(self):
         """ unregisters the active node trees module and removes it """
