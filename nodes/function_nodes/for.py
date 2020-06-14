@@ -76,25 +76,13 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
     def test_for_collection( self, use_evaluate ):
         errors = []
         value = []
-        if self.inputs[1].links[0].from_node.bl_idname == "SN_DataPropertiesNode" and self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
-            if use_evaluate:
-                code = ("").join(self.inputs[1].links[0].from_node.evaluate(self.inputs[1].links[0].from_socket)["code"])
-            else:
-                code = ("").join(self.inputs[1].links[0].from_node.internal_evaluate(self.inputs[1].links[0].from_socket)["code"])
-                try:
-                    if str(type(eval(code))) == "<class 'bpy_prop_collection'>":
-                        value = [code]
-                except KeyError:
-                    errors.append("wrong_socket")
-
-
-        elif self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
+        if (self.inputs[1].links[0].from_node.bl_idname == "SN_DataPropertiesNode" and self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket") or self.inputs[1].links[0].from_socket.bl_idname == "SN_SceneDataSocket":
             if use_evaluate:
                 value = [("").join(self.inputs[1].links[0].from_node.evaluate(self.inputs[1].links[0].from_socket)["code"])]
             else:
                 code = ("").join(self.inputs[1].links[0].from_node.internal_evaluate(self.inputs[1].links[0].from_socket)["code"])
                 try:
-                    if str(type(eval(code))) == "<class 'bpy_prop_collection'>":
+                    if str(type(eval(code))) == "<class 'bpy_prop_collection'>" or str(type(eval(code))) == "<class 'bpy.types.CollectionProperty'>":
                         value = [code]
                 except KeyError:
                     errors.append("wrong_socket")
