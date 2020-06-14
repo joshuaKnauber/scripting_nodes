@@ -18,14 +18,60 @@ class ScriptingNodesCompiler():
         for _ in range(amount):
             text.write("\n")
 
+    def _get_register_function(self, tree):
+        """ returns the register function for the given node tree """
+        register_function = CompilerData().register_block()
+
+        has_registered_nodes = False
+        for node in tree.nodes:
+            if node._should_be_registered:
+                has_registered_nodes = True
+                register_function += ""#PLACEHOLDER
+
+        if not has_registered_nodes:
+            register_function += "\n" + " "*self._indents + "pass"
+        return register_function
+
+    def _get_unregister_function(self, tree):
+        """ returns the unregister function for the given node tree """
+        unregister_function = CompilerData().unregister_block()
+
+        has_registered_nodes = False
+        for node in tree.nodes:
+            if node._should_be_registered:
+                has_registered_nodes = True
+                unregister_function += ""#PLACEHOLDER
+
+        if not has_registered_nodes:
+            unregister_function += "\n" + " "*self._indents + "pass"
+        return unregister_function
+
+    def _get_needed_imports(self, tree):
+        """ returns the import block """
+        imports = []
+        for node in tree.nodes:
+            for needed_import in node.needed_imports():
+                if not needed_import in imports:
+                    imports.append(needed_import)
+        import_block = ""
+        for needed_import in imports:
+            import_block += "\nimport " + needed_import
+        return import_block
+
     def _create_addon_text(self, tree):
         """ creates the text for the addon with the given tree """
-        text = bpy.data.texts.new(".test")
+        text = bpy.data.texts.new(tree.get_file_name())
         cd = CompilerData()
 
         text.write(cd.license_block())
         self._write_paragraphs(text, 2)
-        #text.write()
+        text.write(cd.scripting_nodes_block())
+        self._write_paragraphs(text,2)
+        text.write(self._get_needed_imports(tree))
+        self._write_paragraphs(text,2)
+        text.write(self._get_register_function(tree))
+        self._write_paragraphs(text,2)
+        text.write(self._get_unregister_function(tree))
         return text
 
     def _create_module(self, tree):

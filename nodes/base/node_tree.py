@@ -1,5 +1,6 @@
 import bpy
 from ...compile.compiler import compiler
+from random import randint
 
 
 class ScriptingNodesTree(bpy.types.NodeTree):
@@ -11,6 +12,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     def update_info(self,context):
         """ compiles the addon when the addon properties are changed """
         compiler().autocompile_active()
+
+    def get_file_name(self):
+        if self.addon_name:
+            return self.addon_name.lower().replace(" ","_") + ".py"
+        else:
+            return "sn_addon_" + str(randint(1000, 99999)) + ".py"
 
     # properties regarding the created addon
     addon_name: bpy.props.StringProperty(default="New Addon",name="Name",description="Name of your addon",update=update_info)
