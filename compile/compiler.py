@@ -41,10 +41,9 @@ class ScriptingNodesCompiler():
         code = ""
         for line in lines:
             if type(line) == list:
-                print("before:",line)
                 line = self._compile_line(line, indents)
-                print("line:",line)
-                code += line + "\n"
+                if line.rstrip():
+                    code += line + "\n"
             else:
                 code += self._compile_socket(line, indents)
         return code
