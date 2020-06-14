@@ -14,19 +14,19 @@
 bl_info = {
     "name" : "Visual Scripting",
     "author" : "Joshua Knauber, Finn Knauber", 
-    "description" : "Adds a new node editor for writing scripts and addons with nodes",
+    "description" : "Adds a node editor for writing scripts and addons with nodes",
     "blender" : (2, 80, 0),
     "version" : (1, 0, 0),
     "location" : "Editors -> Scripting Nodes",
     "wiki_url": "", 
-    "warning" : "",
+    "warning" : "This addon is still in early development",
     "category" : "Node" 
 }
 
 import bpy
 from . import auto_load
-from .node_categories import get_node_categories, compiler
-from .interface import node_tree_header
+from .nodes.base.node_categories import get_node_categories
+from .properties.groups.addon_properties import ScriptingNodesProperties
 import nodeitems_utils
 from bpy.app.handlers import persistent
 
@@ -34,16 +34,37 @@ auto_load.init()
 
 @persistent
 def load_handler(scene):
-    compiler().reset_file()
+    """ function that is run after the addon is loaded """
+    pass
 
 def register():
+    # register the classes of the addon
     auto_load.register()
+    
+    # register the node categories
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
-    bpy.types.NODE_HT_header.append(node_tree_header)
+
+    # append the node tree header
+    #bpy.types.NODE_HT_header.append(node_tree_header)
+
+    # add the load handler
     bpy.app.handlers.load_post.append(load_handler)
 
+    # register the addon properties
+    bpy.types.Scene.sn_properties = bpy.props.PointerProperty(type=ScriptingNodesProperties)
+
 def unregister():
+    # unregister the addon classes
     auto_load.unregister()
+
+    # unregister the node categories
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
-    bpy.types.NODE_HT_header.remove(node_tree_header)
+
+    # remove the function from the node tree header
+    #bpy.types.NODE_HT_header.remove(node_tree_header)
+
+    # remove the load handler
     bpy.app.handlers.load_post.remove(load_handler)
+
+    # remove the addon properties
+    del bpy.types.Scene.sn_properties
