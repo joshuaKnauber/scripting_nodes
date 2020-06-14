@@ -9,6 +9,7 @@ class SN_LayoutSearchPropertyGroup(bpy.types.PropertyGroup):
 
     name: bpy.props.StringProperty(name="Name", default="")
     identifier: bpy.props.StringProperty(name="Identifier",default="")
+    isEnum: bpy.props.BoolProperty(name="Is Enum", default=False)
 
 class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     '''Node to use a property in a panel'''
@@ -18,6 +19,7 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     sn_layout_property_properties: bpy.props.CollectionProperty(type=SN_LayoutSearchPropertyGroup)
     propName: bpy.props.StringProperty(name="Name", description="Compile to see your custom properties", default="", update=update_socket_autocompile)
+    propExpand: bpy.props.BoolProperty(name="Expand", description="The enum gets expanded", default=False, update=update_socket_autocompile)
 
     def init(self, context):
         self.use_custom_color = True
@@ -53,6 +55,8 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                         item = self.sn_layout_property_properties.add()
                                         item.name = prop.name
                                         item.identifier = prop.identifier
+                                        if str(eval("type("+value+".bl_rna.properties['"+prop.identifier+"']"+")")) == "<class 'bpy.types.EnumProperty'>":
+                                            item.isEnum = True
 
     def copy(self, node):
         pass# called when node is copied
@@ -62,6 +66,9 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         layout.prop_search(self, "propName", self, "sn_layout_property_properties", text="")
+        if self.propName != "":
+            if self.sn_layout_property_properties[self.propName].isEnum:
+                layout.prop(self, "propExpand")
 
     def evaluate(self,output):
         errors = []
@@ -82,10 +89,14 @@ class SN_UiPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             errors+=error
 
             if self.propName in self.sn_layout_property_properties:
+                expand = []
+                if self.sn_layout_property_properties[self.propName].isEnum:
+                    expand = [", expand="] + [str(self.propExpand)]
+
                 code.append(", '")
                 code.append(self.sn_layout_property_properties[self.propName].identifier)
                 code = ["_INDENT__INDENT_", self.outputs[0].links[0].to_node.layout_type(),
-                        ".prop("] + code + ["', text="] + [value] + [")\n"]
+                        ".prop("] + code + ["', text="] + [value] + expand + [")\n"]
             else:
                 errors.append("invalid_prop")
         else:

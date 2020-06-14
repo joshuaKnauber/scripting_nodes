@@ -14,7 +14,6 @@ class SN_PropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def getTypes(self, context):
         return get_types()
-    
 
     propName: bpy.props.StringProperty(name="Name", description="Name of the property", default="My Property", update=update_socket_autocompile)
     propDescription: bpy.props.StringProperty(name="Description", description="Description of the property", default="My Description", update=update_socket_autocompile)
@@ -104,9 +103,7 @@ class SN_PropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             newItems=[]
             for item in items:
                 item = item.strip()
-                newItemName = item.replace(" ","_")
-                newItemName = newItemName.lower()
-                newItems.append((newItemName, item, ""))
+                newItems.append((item, item, ""))
             code.append(str(newItems))
             code.append(")")
 
