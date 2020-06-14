@@ -9,11 +9,12 @@ class ScriptingNodesCompiler():
     # unregister_active: unregisters the active node tree
     # unregister_all: unregisters all registered node trees
     # is_active_compiled: returns if the active node tree is compiled and registered
+    # unregister_existing: tries to find registered addons in the file and removes them
 
     def __init__(self):
         self._indents = 4 # the number of indents that should be used in the generated files
         self._modules = [] # the currently registered modules
-        self._run_register = False # runs register on compile
+        self._run_register = True # runs register on compile
         self._hide_file = False # adds a dot in front of the file name to hide it
 
     def _only_string_in_line(self, line):
@@ -122,6 +123,7 @@ class ScriptingNodesCompiler():
             text = bpy.data.texts.new("." + tree.get_file_name())
         else:
             text = bpy.data.texts.new(tree.get_file_name())
+        text.is_sn_addon = True
         cd = CompilerData()
 
         text.write(cd.license_block())
@@ -201,6 +203,16 @@ class ScriptingNodesCompiler():
             if module["node_tree"] == bpy.context.space_data.node_tree:
                 return True
         return False
+
+    def unregister_existing(self):
+        """ tries to find registered files in the addon and removes them """
+        for text in bpy.data.texts:
+            if text.is_sn_addon:
+                try:
+                    text.as_module().unregister()
+                    bpy.data.texts.remove(text)
+                except:
+                    pass
 
 
 global_compiler = ScriptingNodesCompiler()

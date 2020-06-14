@@ -38,6 +38,7 @@ auto_load.init()
 @persistent
 def load_handler(dummy):
     """ function that is run after the file is loaded """
+    compiler().unregister_existing()
 
 def unload_handler(dummy=None):
     """ function that is run before blender is closed and when a new file is opened """
@@ -56,14 +57,14 @@ def register():
     # add the load handler
     bpy.app.handlers.load_post.append(load_handler)
 
-    # add the before load handler
-    bpy.app.handlers.load_pre.append(unload_handler)
-
     # add the unload handler
     atexit.register(unload_handler)
 
     # register the addon properties
     bpy.types.Scene.sn_properties = bpy.props.PointerProperty(type=ScriptingNodesProperties)
+
+    # register property for storing if the text is a sn file
+    bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False)
 
 def unregister():
     # unregister the addon classes
@@ -78,11 +79,11 @@ def unregister():
     # remove the load handler
     bpy.app.handlers.load_post.remove(load_handler)
 
-    # remove the before load handler
-    bpy.app.handlers.load_pre.remove(unload_handler)
-
     # remove the unload handler
     atexit.unregister(unload_handler)
 
     # remove the addon properties
     del bpy.types.Scene.sn_properties
+
+    # unregister property for storing if the text is a sn file
+    del bpy.types.Text.is_sn_addon
