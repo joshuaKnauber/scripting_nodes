@@ -8,6 +8,7 @@ class ScriptingNodesCompiler():
     # autocompile_active: compiles the active node tree if autocompile is active
     # unregister_active: unregisters the active node tree
     # unregister_all: unregisters all registered node trees
+    # is_active_compiled: returns if the active node tree is compiled and registered
 
     def __init__(self):
         self._indents = 4 # the number of indents that should be used in the generated files
@@ -131,6 +132,13 @@ class ScriptingNodesCompiler():
         """ runs compile if the auto comile is enabled """
         if bpy.context.scene.sn_properties.auto_compile:
             self.compile_active()
+
+    def is_active_compiled(self):
+        """ returns if the active node tree is compiled """
+        for module in self._modules:
+            if module["tree"] == bpy.context.space_data.node_tree:
+                return True
+        return False
 
 
 global_compiler = ScriptingNodesCompiler()
