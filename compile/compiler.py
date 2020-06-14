@@ -32,12 +32,19 @@ class ScriptingNodesCompiler():
                     break
         return " "*indents + ("").join(line)
 
+    def _compile_socket(self, socket, indents):
+        """ compiles the given socket """
+        return self._get_node_code(socket.node, socket, indents)
+
     def _compile_lines(self, lines, indents):
         """ compile the given lines """
         code = ""
         for line in lines:
-            line = self._compile_line(line, indents)
-            code += line + "\n"
+            if type(line) == list:
+                line = self._compile_line(line, indents)
+                code += line + "\n"
+            else:
+                code += self._compile_socket(line, indents)
         return code
 
     def _compile_code_block(self, block, indents):

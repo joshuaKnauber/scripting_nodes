@@ -50,7 +50,9 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 },
                 {
-                    "lines": followup,
+                    "lines": [
+                        followup
+                    ],
                     "indented": []
                 }
             ],
