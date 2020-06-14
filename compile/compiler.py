@@ -13,10 +13,21 @@ class ScriptingNodesCompiler():
         self._indents = 4 # the number of indents that should be used in the generated files
         self._modules = [] # the currently registered modules
 
-    def _write_paragraphs(self, text, amount):
-        """ writes the given amount of paragraphs to the given file """
-        for _ in range(amount):
-            text.write("\n")
+    def _get_register_node_blocks(self, tree):
+        """ returns the code for the nodes that need to be registered """
+        return []
+
+    def _get_needed_imports(self, tree):
+        """ returns the import block """
+        imports = []
+        for node in tree.nodes:
+            for needed_import in node.needed_imports():
+                if not needed_import in imports:
+                    imports.append(needed_import)
+        import_block = ""
+        for needed_import in imports:
+            import_block += "\nimport " + needed_import
+        return import_block
 
     def _get_register_function(self, tree):
         """ returns the register function for the given node tree """
@@ -46,17 +57,10 @@ class ScriptingNodesCompiler():
             unregister_function += "\n" + " "*self._indents + "pass"
         return unregister_function
 
-    def _get_needed_imports(self, tree):
-        """ returns the import block """
-        imports = []
-        for node in tree.nodes:
-            for needed_import in node.needed_imports():
-                if not needed_import in imports:
-                    imports.append(needed_import)
-        import_block = ""
-        for needed_import in imports:
-            import_block += "\nimport " + needed_import
-        return import_block
+    def _write_paragraphs(self, text, amount):
+        """ writes the given amount of paragraphs to the given file """
+        for _ in range(amount):
+            text.write("\n")
 
     def _create_addon_text(self, tree):
         """ creates the text for the addon with the given tree """
@@ -69,6 +73,9 @@ class ScriptingNodesCompiler():
         self._write_paragraphs(text,2)
         text.write(self._get_needed_imports(tree))
         self._write_paragraphs(text,2)
+        for block in self._get_register_node_blocks(tree):
+            text.write(block)
+            self._write_paragraphs(text,2)
         text.write(self._get_register_function(tree))
         self._write_paragraphs(text,2)
         text.write(self._get_unregister_function(tree))
