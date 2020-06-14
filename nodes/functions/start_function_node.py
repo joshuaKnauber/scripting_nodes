@@ -18,7 +18,7 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, output):
         function_code = ["pass"]
         if self.outputs[0].is_linked:
-            function_code = [self.outputs[0].links[0].to_socket]
+            function_code = self.outputs[0].links[0].to_socket
         return {
             "blocks": [
                 {

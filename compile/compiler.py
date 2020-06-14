@@ -14,7 +14,7 @@ class ScriptingNodesCompiler():
         self._indents = 4 # the number of indents that should be used in the generated files
         self._modules = [] # the currently registered modules
         self._run_register = False # runs register on compile
-        self._hide_file = False # adds a dot in fron of the file name to hide it
+        self._hide_file = False # adds a dot in front of the file name to hide it
 
     def _only_string_in_line(self, line):
         """ returns if there are only strings in the given line """
@@ -41,7 +41,9 @@ class ScriptingNodesCompiler():
         code = ""
         for line in lines:
             if type(line) == list:
+                print("before:",line)
                 line = self._compile_line(line, indents)
+                print("line:",line)
                 code += line + "\n"
             else:
                 code += self._compile_socket(line, indents)
