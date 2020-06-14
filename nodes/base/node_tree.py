@@ -10,7 +10,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def update_info(self,context):
         """ compiles the addon when the addon properties are changed """
-        compiler().autocompile()
+        compiler().autocompile_active()
 
     # properties regarding the created addon
     addon_name: bpy.props.StringProperty(default="New Addon",name="Name",description="Name of your addon",update=update_info)

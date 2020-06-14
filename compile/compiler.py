@@ -1,4 +1,5 @@
 import bpy
+from .compiler_data import CompilerData
 
 class ScriptingNodesCompiler():
 
@@ -12,9 +13,19 @@ class ScriptingNodesCompiler():
         self._indents = 4 # the number of indents that should be used in the generated files
         self._modules = [] # the currently registered modules
 
+    def _write_paragraphs(self, text, amount):
+        """ writes the given amount of paragraphs to the given file """
+        for _ in range(amount):
+            text.write("\n")
+
     def _create_addon_text(self, tree):
         """ creates the text for the addon with the given tree """
         text = bpy.data.texts.new(".test")
+        cd = CompilerData()
+
+        text.write(cd.license_block())
+        self._write_paragraphs(text, 2)
+        #text.write()
         return text
 
     def _create_module(self, tree):
@@ -30,7 +41,7 @@ class ScriptingNodesCompiler():
     def _register_tree(self, tree):
         """ finds the matching module and registers it """
         for module in self._modules:
-            if module["tree"] == tree:
+            if module["node_tree"] == tree:
                 module["module"].register()
 
     def _unregister_tree(self, tree):
@@ -61,7 +72,7 @@ class ScriptingNodesCompiler():
     def unregister_all(self):
         """ unregisters all registered node trees """
         for module in self._modules:
-            self._unregister_tree(module["tree"])
+            self._unregister_tree(module["node_tree"])
 
     def autocompile_active(self):
         """ runs compile if the auto comile is enabled """

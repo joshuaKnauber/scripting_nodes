@@ -24,11 +24,12 @@ bl_info = {
 }
 
 import bpy
+import nodeitems_utils
+from bpy.app.handlers import persistent
 from . import auto_load
 from .nodes.base.node_categories import get_node_categories
 from .properties.groups.addon_properties import ScriptingNodesProperties
-import nodeitems_utils
-from bpy.app.handlers import persistent
+from .interface.node_header import node_header
 
 auto_load.init()
 
@@ -45,7 +46,7 @@ def register():
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
 
     # append the node tree header
-    #bpy.types.NODE_HT_header.append(node_tree_header)
+    bpy.types.NODE_HT_header.append(node_header)
 
     # add the load handler
     bpy.app.handlers.load_post.append(load_handler)
@@ -61,7 +62,7 @@ def unregister():
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
 
     # remove the function from the node tree header
-    #bpy.types.NODE_HT_header.remove(node_tree_header)
+    bpy.types.NODE_HT_header.remove(node_header)
 
     # remove the load handler
     bpy.app.handlers.load_post.remove(load_handler)
