@@ -21,9 +21,11 @@ class SN_OT_InstallPackage(bpy.types.Operator, ImportHelper):
     def _install_package(self,filepath):
         """ installs the given filepath """
         node_directory = os.path.join(os.path.dirname(os.path.dirname(__file__)),"nodes")
+        names = []
         with zipfile.ZipFile(filepath, 'r') as zip_ref:
             zip_ref.extractall(node_directory)
-        reregister_node_categories()
+            names = zip_ref.namelist()
+        reregister_node_categories(names)
 
     def execute(self, context):
         for file_element in self.files:
