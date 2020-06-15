@@ -102,11 +102,7 @@ class SocketHandler():
     def _get_data(self, socket):
         """ gets the code of a data socket """
         
-        errors = []
-        if socket.is_linked:
-            value, errors = self._handle_socket_connection(self, socket, ["SN_DataSocket", "SN_StringSocket", "SN_IntSocket", "SN_FloatSocket", "SN_BoolSocket", "SN_VectorSocket"])
-        else:
-            value = [socket.value]
+        value, errors = self._handle_socket_connection(self, socket, ["SN_DataSocket", "SN_StringSocket", "SN_IntSocket", "SN_FloatSocket", "SN_BoolSocket", "SN_VectorSocket"])
 
         return value, errors
 

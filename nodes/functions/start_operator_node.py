@@ -16,7 +16,7 @@ class SN_StartOperator(bpy.types.Node, SN_ScriptingBaseNode):
         self.outputs.new("SN_ProgramSocket", "execute")
     
     def evaluate(self, output):
-        execute_code = ["pass"]
+        execute_code = []
         if self.outputs[0].is_linked:
             execute_code = self.outputs[0].links[0].to_socket
         return {

@@ -2,9 +2,6 @@ import bpy
 from ..base.base_node import SN_ScriptingBaseNode
 
 
-import bpy
-
-
 class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_IfProgramNode"
