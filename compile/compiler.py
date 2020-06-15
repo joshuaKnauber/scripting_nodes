@@ -205,7 +205,7 @@ class ScriptingNodesCompiler():
             self._unregister_tree(module["node_tree"])
 
     def autocompile_active(self):
-        """ runs compile if the auto comile is enabled """
+        """ runs compile if the auto compile is enabled """
         if bpy.context.scene.sn_properties.auto_compile:
             self.compile_active()
 

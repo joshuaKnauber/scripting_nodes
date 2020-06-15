@@ -1,6 +1,6 @@
 import bpy
 from .node_looks import socket_colors
-from ...compile.compiler import autocompile_active
+from ...compile.compiler import compiler
 
 class SN_StringSocket(bpy.types.NodeSocket):
     '''String Socket for handling text'''
@@ -11,7 +11,7 @@ class SN_StringSocket(bpy.types.NodeSocket):
         name="String",
         description="Socket for a string value",
         default="",
-        update=autocompile_active
+        update=compiler().autocompile_active
     )
 
     def draw(self, context, layout, node, text):
@@ -33,7 +33,7 @@ class SN_FloatSocket(bpy.types.NodeSocket):
         name="Float",
         description="Socket for a float value",
         default=0,
-        update=autocompile_active
+        update=compiler().autocompile_active
     )
 
     def draw(self, context, layout, node, text):
@@ -57,7 +57,7 @@ class SN_IntSocket(bpy.types.NodeSocket):
         name="Int",
         description="Socket for an integer value",
         default=0,
-        update=autocompile_active
+        update=compiler().autocompile_active
     )
 
     def draw(self, context, layout, node, text):
@@ -79,7 +79,7 @@ class SN_BooleanSocket(bpy.types.NodeSocket):
             name="Boolean",
             description="Socket for a boolean value",
             default=False,
-            update=update_socket_autocompile
+            update=compiler().autocompile_active
         )
 
         def draw(self, context, layout, node, text):
@@ -114,7 +114,7 @@ class SN_VectorSocket(bpy.types.NodeSocket):
     value: bpy.props.FloatVectorProperty(
         name="Vector",
         description="Socket for a vector value",
-        update=update_socket_autocompile
+        update=compiler().autocompile_active
     )
 
     def draw(self, context, layout, node, text):
@@ -139,7 +139,7 @@ class SN_EnumSocket(bpy.types.NodeSocket):
     value: bpy.props.EnumProperty(
         name="String",
         description="Socket for a string value",
-        update=update_socket_autocompile,
+        update=compiler().autocompile_active,
         items = get_items,
         default=None
     )
