@@ -2,6 +2,9 @@ import bpy
 from .node_looks import socket_colors
 from ...compile.compiler import compiler
 
+def socket_update(self, context):
+    compiler().socket_update(context)
+
 class SN_StringSocket(bpy.types.NodeSocket):
     '''String Socket for handling text'''
     bl_idname = 'SN_StringSocket'
@@ -11,7 +14,7 @@ class SN_StringSocket(bpy.types.NodeSocket):
         name="String",
         description="Socket for a string value",
         default="",
-        update=compiler().autocompile_active
+        update=socket_update
     )
 
     def draw(self, context, layout, node, text):
@@ -32,8 +35,8 @@ class SN_FloatSocket(bpy.types.NodeSocket):
     value: bpy.props.FloatProperty(
         name="Float",
         description="Socket for a float value",
-        default=0,
-        update=compiler().autocompile_active
+        default=0.0,
+        update=socket_update
     )
 
     def draw(self, context, layout, node, text):
@@ -51,13 +54,11 @@ class SN_IntSocket(bpy.types.NodeSocket):
     bl_idname = 'SN_IntSocket'
     bl_label = "Integer"
 
-    is_data_socket = True
-
     value: bpy.props.IntProperty(
         name="Int",
         description="Socket for an integer value",
         default=0,
-        update=compiler().autocompile_active
+        update=socket_update
     )
 
     def draw(self, context, layout, node, text):
@@ -79,7 +80,7 @@ class SN_BooleanSocket(bpy.types.NodeSocket):
             name="Boolean",
             description="Socket for a boolean value",
             default=False,
-            update=compiler().autocompile_active
+            update=socket_update
         )
 
         def draw(self, context, layout, node, text):
@@ -114,7 +115,7 @@ class SN_VectorSocket(bpy.types.NodeSocket):
     value: bpy.props.FloatVectorProperty(
         name="Vector",
         description="Socket for a vector value",
-        update=compiler().autocompile_active
+        update=socket_update
     )
 
     def draw(self, context, layout, node, text):
@@ -139,7 +140,7 @@ class SN_EnumSocket(bpy.types.NodeSocket):
     value: bpy.props.EnumProperty(
         name="String",
         description="Socket for a string value",
-        update=compiler().autocompile_active,
+        update=socket_update,
         items = get_items,
         default=None
     )
