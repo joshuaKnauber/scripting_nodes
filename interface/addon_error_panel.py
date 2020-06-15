@@ -1,5 +1,5 @@
 import bpy
-
+from ..compile.compiler import compiler
 
 
 class SN_PT_ErrorLogPanel(bpy.types.Panel):
@@ -13,9 +13,7 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        if context.space_data.tree_type == 'ScriptingNodesTree':
-            return context.space_data.node_tree != None
-
+        return bool(compiler().get_active_addons_errors())
 
     def draw_error(self, layout, error_type, error_message, fatal, node):
         box = layout.box()
@@ -35,10 +33,13 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
             col.label(text=line)
 
     def draw_header(self,context):
-        self.layout.prop(sn_props(),"show_line_width",text="",icon="PREFERENCES",emboss=False)
+        pass#self.layout.prop(sn_props(),"show_line_width",text="",icon="PREFERENCES",emboss=False)
 
     def draw(self, context):
         layout = self.layout
+        errors = compiler().get_active_addons_errors()
+        for error in errors:
+            layout.label(text=error["error"])
         """
         if sn_props().show_line_width:
             box = layout.box()

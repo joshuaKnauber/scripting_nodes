@@ -58,9 +58,8 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
             ],
             "errors": [
                 {
-                    "error": "",
-                    "node": self,
-                    "socket": None
+                    "error": "test_error",
+                    "node": self
                 }
             ]
         }

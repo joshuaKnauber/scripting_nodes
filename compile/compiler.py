@@ -62,9 +62,17 @@ class ScriptingNodesCompiler():
     def _get_node_code(self, node, output, indents):
         """ returns the code block for the given node """
         node_code = ""
-        for block in node.evaluate(output)["blocks"]:
+        node_data = node.evaluate(output)
+        for block in node_data["blocks"]:
             node_code += self._compile_code_block(block, indents)
+        self._add_errors_to_active(node_data["errors"])
         return node_code
+
+    def _add_errors_to_active(self, errors):
+        """ adds the given errors to the active modules error list """
+        for module in self._modules:
+            if module["node_tree"] == bpy.context.space_data.node_tree:
+                module["errors"] += errors
 
     def _get_registerable_node_blocks(self, tree):
         """ returns the code for the nodes that need to be registered """
@@ -149,17 +157,20 @@ class ScriptingNodesCompiler():
 
     def _create_module(self, tree):
         """ generates the code from the node tree and adds it as a module """
+        module = {
+            "node_tree": tree,
+            "text": None,
+            "module": None,
+            "errors": []
+        }
+        self._modules.append(module)
+
         text = self._create_addon_text( tree )
         module = None
         if self._run_register:
             module = text.as_module()
-        module = {
-            "node_tree": tree,
-            "text": text,
-            "module": module,
-            "errors": []
-        }
-        self._modules.append(module)
+        self._modules[-1]["text"] = text
+        self._modules[-1]["module"] = module
 
     def _register_tree(self, tree):
         """ finds the matching module and registers it """
@@ -229,6 +240,13 @@ class ScriptingNodesCompiler():
     def get_export_file(self):
         """ returns the text for exporting the active node tree """
         return self._create_addon_text(bpy.context.space_data.node_tree, True)
+
+    def get_active_addons_errors(self):
+        """ returns the list of errors from the active node tree """
+        for module in self._modules:
+            if module["node_tree"] == bpy.context.space_data.node_tree:
+                return module["errors"]
+        return []
 
 
 global_compiler = ScriptingNodesCompiler()
