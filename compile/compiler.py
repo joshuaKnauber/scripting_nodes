@@ -70,9 +70,10 @@ class ScriptingNodesCompiler():
 
     def _add_errors_to_active(self, errors):
         """ adds the given errors to the active modules error list """
-        for module in self._modules:
-            if module["node_tree"] == bpy.context.space_data.node_tree:
-                module["errors"] += errors
+        if bpy.context.space_data:
+            for module in self._modules:
+                if module["node_tree"] == bpy.context.space_data.node_tree:
+                    module["errors"] += errors
 
     def _get_registerable_node_blocks(self, tree):
         """ returns the code for the nodes that need to be registered """
@@ -247,9 +248,10 @@ class ScriptingNodesCompiler():
 
     def get_active_addons_errors(self):
         """ returns the list of errors from the active node tree """
-        for module in self._modules:
-            if module["node_tree"] == bpy.context.space_data.node_tree:
-                return module["errors"]
+        if bpy.context.space_data:
+            for module in self._modules:
+                if module["node_tree"] == bpy.context.space_data.node_tree:
+                    return module["errors"]
         return []
 
 
