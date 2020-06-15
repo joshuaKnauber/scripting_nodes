@@ -155,7 +155,7 @@ class SocketHandler():
 
         return value, errors
 
-    def socket_value(socket,as_list=False):
+    def socket_value(self, socket,as_list=False):
         """ returns the code and errors for that socket """
         socket_type = socket.bl_idname
         

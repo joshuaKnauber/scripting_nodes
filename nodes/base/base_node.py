@@ -1,4 +1,6 @@
 import bpy
+from ...compile.compiler import compiler
+from...handler.error_handling import ErrorHandler
 
 
 class SN_ScriptingBaseNode:
@@ -7,6 +9,11 @@ class SN_ScriptingBaseNode:
     bl_width_max = 5000
 
     _should_be_registered = False
+
+    ErrorHandler = ErrorHandler()
+
+    def socket_update(self, context):
+        compiler().socket_update(context)
 
     @classmethod
     def poll(cls, ntree):

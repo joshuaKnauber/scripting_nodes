@@ -5,7 +5,7 @@ class ErrorHandler():
     # CALLABLE FUNCTIONS
     # handle_text: takes in text and returns the updated text to use in the file
 
-    def handle_text(text):
+    def handle_text(self, text):
         """ returns the updated text without errors """
         
         invalid_texts = ["and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif", "else", "except", "False", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "None", "nonlocal", "not", "or", "pass", "raise", "return", "True", "try", "while", "with", "yield"]
