@@ -1,6 +1,7 @@
 import bpy
 from ...compile.compiler import compiler
-from...handler.error_handling import ErrorHandler
+from ...handler.error_handling import ErrorHandler
+from ...handler.get_socket_value import SocketHandler
 
 
 class SN_ScriptingBaseNode:
@@ -11,6 +12,7 @@ class SN_ScriptingBaseNode:
     _should_be_registered = False
 
     ErrorHandler = ErrorHandler()
+    SocketHandler = SocketHandler()
 
     def socket_update(self, context):
         compiler().socket_update(context)

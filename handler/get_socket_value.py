@@ -14,14 +14,14 @@ class SocketHandler():
             if socket.links[0].from_socket.bl_idname in socket_types:
                 value = [socket.links[0].from_socket]
             else:
-                errors.append("wrong_socket")
+                errors.append({"error": "wrong_socket_inp", "node": socket.node})
         else:
             current_socket = socket.links[0]
             while current_socket.from_node.bl_idname == "NodeReroute":
                 if len(current_socket.from_node.links) > 1:
                     current_socket = current_socket.links[0]
                 else:
-                    errors.append("no_connection")
+                    errors.append({"error": "no_connection_inp", "node": socket.node})
             value = [current_socket.from_socket]
         return value, errors
 
@@ -34,14 +34,14 @@ class SocketHandler():
             if socket.links[0].to_socket.bl_idname in socket_types:
                 value = [socket.links[0].to_socket]
             else:
-                errors.append("wrong_socket")
+                errors.append({"error": "wrong_socket_out", "node": socket.node})
         else:
             current_socket = socket.links[0]
             while current_socket.to_node.bl_idname == "NodeReroute":
                 if len(current_socket.to_node.links) > 1:
                     current_socket = current_socket.links[0]
                 else:
-                    errors.append("no_connection")
+                    errors.append({"error": "no_connection_out", "node": socket.node})
             value = [current_socket.to_socket]
         return value, errors
 
@@ -51,13 +51,17 @@ class SocketHandler():
         errors = []
 
         if socket.is_linked:
-            if socket in socket.node.inputs:
+            is_input = False
+            for inp in socket.node.inputs:
+                if inp == socket:
+                    is_input = True
+            if is_input:
                 value, errors = self._handle_input_socket(socket, socket_types)
             else:
                 value, errors = self._handle_output_socket(socket, socket_types)
         else:
             value = []
-            errors.append("no_connection")
+            errors.append({"error": "no_connection", "node": socket.node})
 
         return value, errors
 
@@ -67,7 +71,7 @@ class SocketHandler():
         
         errors = []
         if socket.is_linked:
-            value, errors = self._handle_socket_connection(self, socket, ["SN_StringSocket"])
+            value, errors = self._handle_socket_connection(socket, ["SN_StringSocket"])
         else:
             value = [socket.value]
             if '"' in value[0]:
@@ -80,7 +84,7 @@ class SocketHandler():
         
         errors = []
         if socket.is_linked:
-            value, errors = self._handle_socket_connection(self, socket, ["SN_IntSocket", "SN_FloatSocket"])
+            value, errors = self._handle_socket_connection(socket, ["SN_IntSocket", "SN_FloatSocket"])
             if socket.bl_idname == "SN_IntSocket" and value.bl_idname == "SN_FloatSocket":
                 value = ["int(", value, ")"]
         else:
@@ -93,7 +97,7 @@ class SocketHandler():
         
         errors = []
         if socket.is_linked:
-            value, errors = self._handle_socket_connection(self, socket, ["SN_BoolSocket"])
+            value, errors = self._handle_socket_connection(socket, ["SN_BoolSocket"])
         else:
             value = [socket.value]
 
@@ -102,7 +106,7 @@ class SocketHandler():
     def _get_data(self, socket):
         """ gets the code of a data socket """
         
-        value, errors = self._handle_socket_connection(self, socket, ["SN_DataSocket", "SN_StringSocket", "SN_IntSocket", "SN_FloatSocket", "SN_BoolSocket", "SN_VectorSocket"])
+        value, errors = self._handle_socket_connection(socket, ["SN_DataSocket", "SN_StringSocket", "SN_IntSocket", "SN_FloatSocket", "SN_BoolSocket", "SN_VectorSocket"])
 
         return value, errors
 
@@ -111,7 +115,7 @@ class SocketHandler():
 
         errors = []
         if socket.is_linked:
-            value, errors = self._handle_socket_connection(self, socket, ["SN_VectorSocket"])
+            value, errors = self._handle_socket_connection(socket, ["SN_VectorSocket"])
         else:
             value = [socket.value]
 
@@ -122,7 +126,7 @@ class SocketHandler():
         
         errors = []
         if socket.is_linked:
-            value, errors = self._handle_socket_connection(self, socket, ["SN_EnumSocket"])
+            value, errors = self._handle_socket_connection(socket, ["SN_EnumSocket"])
         else:
             value = [socket.value]
 
@@ -131,7 +135,7 @@ class SocketHandler():
     def _get_layout(self, socket, as_list):
         """ gets the code of a layout socket """
         
-        value, errors = self._handle_socket_connection(self, socket, ["SN_LayoutSocket"])
+        value, errors = self._handle_socket_connection(socket, ["SN_LayoutSocket"])
 
         if as_list or not value:
             return value, errors
@@ -141,7 +145,7 @@ class SocketHandler():
     def _get_program(self, socket, as_list):
         """ gets the code of a program socket """
         
-        value, errors = self._handle_socket_connection(self, socket, ["SN_ProgramSocket"])
+        value, errors = self._handle_socket_connection(socket, ["SN_ProgramSocket"])
 
         if as_list or not value:
             return value, errors
@@ -151,7 +155,7 @@ class SocketHandler():
     def _get_scene_data(self, socket):
         """ gets the code of a scene data socket """
     
-        value, errors = self._handle_socket_connection(self, socket, ["SN_SceneDataSocket"])
+        value, errors = self._handle_socket_connection(socket, ["SN_SceneDataSocket"])
 
         return value, errors
 

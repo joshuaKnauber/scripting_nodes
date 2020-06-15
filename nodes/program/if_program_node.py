@@ -54,10 +54,6 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                 }
             ],
             "errors": [
-                {
-                    "error": "test_error",
-                    "node": self
-                }
             ]
         }
 

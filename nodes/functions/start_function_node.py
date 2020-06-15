@@ -1,5 +1,6 @@
 import bpy
 from ..base.base_node import SN_ScriptingBaseNode
+from ...compile.compiler import compiler
 
 
 class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
@@ -8,37 +9,47 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Start Function"
     _should_be_registered = True
 
+
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == 'ScriptingNodesTree'
 
+    def socket_update(self, context):
+        compiler().socket_update(context)
+
+    funcName: bpy.props.StringProperty(name="Name", description="The name of the function", default="")
+
     def init(self, context):
-        self.outputs.new("SN_ProgramSocket", "program")
-    
+        self.outputs.new("SN_ProgramSocket", "Program").display_shape = "DIAMOND"
+
+    def draw_buttons(self, context, layout):
+        layout.prop(self,"funcName")
+
     def evaluate(self, output):
         function_code = ["pass"]
-        if self.outputs[0].is_linked:
-            function_code = self.outputs[0].links[0].to_socket
+        function_code, errors = self.SocketHandler.socket_value(self.outputs[0], as_list=False)
+        if function_code == []:
+            function_code = ["pass"]
+        if self.funcName != "":
+            name = self.ErrorHandler.handle_text(self.funcName)
+            name = name.replace(" ", "_")
+        else:
+            errors.append({"error": "no_name_func", "node": self})
+            name = "placeholder_funcName"
+
         return {
             "blocks": [
                 {
                     "lines": [
-                        ["def test():"]
+                        ["def " + name + "():"]
                     ],
                     "indented": [
                         function_code
                     ]
                 }
             ],
-            "errors": [
-            ]
+            "errors": errors
         }
-
-    def get_register_block(self):
-        return []
-
-    def get_unregister_block(self):
-        return []
 
     def needed_imports(self):
         return []
