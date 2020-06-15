@@ -18,6 +18,8 @@ node_categories = [
     SN_ScriptingNodesCategory('FUNCTIONS', "Functions", items=[
         NodeItem("SN_StartFunction", settings={
         }),
+        NodeItem("SN_StartOperator", settings={
+        }),
     ]),
 
     SN_ScriptingNodesCategory('PROGRAM', "Program", items=[
