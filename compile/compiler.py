@@ -11,6 +11,7 @@ class ScriptingNodesCompiler():
     # unregister_all: unregisters all registered node trees
     # is_active_compiled: returns if the active node tree is compiled and registered
     # unregister_existing: tries to find registered addons in the file and removes them
+    # get_export_file: returns a file for exporting the addon
 
     def __init__(self):
         self._indents = 4 # the number of indents that should be used in the generated files
@@ -120,12 +121,15 @@ class ScriptingNodesCompiler():
         for _ in range(amount):
             text.write("\n")
 
-    def _create_addon_text(self, tree):
+    def _create_addon_text(self, tree, is_export=False):
         """ creates the text for the addon with the given tree """
-        if self._hide_file:
+        if self._hide_file and not is_export:
             text = bpy.data.texts.new("." + tree.get_file_name())
         else:
-            text = bpy.data.texts.new(tree.get_file_name())
+            if is_export:
+                text = bpy.data.texts.new("sn_"+tree.get_file_name())
+            else:
+                text = bpy.data.texts.new(tree.get_file_name())
         text.is_sn_addon = True
         cd = CompilerData()
 
@@ -221,6 +225,10 @@ class ScriptingNodesCompiler():
                     bpy.data.texts.remove(text)
                 except:
                     pass
+
+    def get_export_file(self):
+        """ returns the text for exporting the active node tree """
+        return self._create_addon_text(bpy.context.space_data.node_tree, True)
 
 
 global_compiler = ScriptingNodesCompiler()

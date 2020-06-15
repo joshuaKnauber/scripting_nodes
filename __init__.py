@@ -27,6 +27,7 @@ import bpy
 import nodeitems_utils
 from bpy.app.handlers import persistent
 import atexit
+import os
 from . import auto_load
 from .nodes.base.node_categories import get_node_categories
 from .properties.groups.addon_properties import ScriptingNodesProperties
@@ -48,11 +49,11 @@ def unload_handler(dummy=None):
     """ function that is run before blender is closed and when a new file is opened """
     compiler().unregister_all()
 
-def reregister_node_categories():
+def reregister_node_categories(names):
     """ reregisters the node categories """
+    #TODO: Refresh blender here to reload the nodes
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
-    auto_load.register()
 
 def register():
     # register the classes of the addon
