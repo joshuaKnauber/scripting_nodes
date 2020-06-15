@@ -26,17 +26,33 @@ bl_info = {
 import bpy
 import nodeitems_utils
 from bpy.app.handlers import persistent
+import atexit
 from . import auto_load
 from .nodes.base.node_categories import get_node_categories
 from .properties.groups.addon_properties import ScriptingNodesProperties
 from .interface.node_header import node_header
+from .compile.compiler import compiler
 
 auto_load.init()
 
 @persistent
-def load_handler(scene):
-    """ function that is run after the addon is loaded """
-    pass
+def load_handler(dummy):
+    """ function that is run after the file is loaded """
+    compiler().unregister_existing()
+    for tree in bpy.data.node_groups:
+        if tree.bl_idname == "ScriptingNodesTree":
+            if tree.compile_on_start:
+                compiler().compile_tree(tree)
+
+def unload_handler(dummy=None):
+    """ function that is run before blender is closed and when a new file is opened """
+    compiler().unregister_all()
+
+def reregister_node_categories():
+    """ reregisters the node categories """
+    nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
+    nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
+    auto_load.register()
 
 def register():
     # register the classes of the addon
@@ -51,8 +67,14 @@ def register():
     # add the load handler
     bpy.app.handlers.load_post.append(load_handler)
 
+    # add the unload handler
+    atexit.register(unload_handler)
+
     # register the addon properties
     bpy.types.Scene.sn_properties = bpy.props.PointerProperty(type=ScriptingNodesProperties)
+
+    # register property for storing if the text is a sn file
+    bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False)
 
 def unregister():
     # unregister the addon classes
@@ -67,5 +89,11 @@ def unregister():
     # remove the load handler
     bpy.app.handlers.load_post.remove(load_handler)
 
+    # remove the unload handler
+    atexit.unregister(unload_handler)
+
     # remove the addon properties
     del bpy.types.Scene.sn_properties
+
+    # unregister property for storing if the text is a sn file
+    del bpy.types.Text.is_sn_addon

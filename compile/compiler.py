@@ -5,14 +5,18 @@ class ScriptingNodesCompiler():
 
     # CALLABLE FUNCTIONS
     # compile_active: takes the active node tree and compiles it after unregistering
+    # compile_tree: recompiles the given tree
     # autocompile_active: compiles the active node tree if autocompile is active
     # unregister_active: unregisters the active node tree
     # unregister_all: unregisters all registered node trees
     # is_active_compiled: returns if the active node tree is compiled and registered
+    # unregister_existing: tries to find registered addons in the file and removes them
 
     def __init__(self):
         self._indents = 4 # the number of indents that should be used in the generated files
         self._modules = [] # the currently registered modules
+        self._run_register = True # runs register on compile
+        self._hide_file = False # adds a dot in front of the file name to hide it
 
     def _only_string_in_line(self, line):
         """ returns if there are only strings in the given line """
@@ -21,48 +25,52 @@ class ScriptingNodesCompiler():
                 return False
         return True
 
-    def _compile_line(self,line):
+    def _compile_line(self, line, indents):
         """ compiles the given line and returns it as a string """
         while not self._only_string_in_line(line):
             for index, snippet in enumerate(line):
                 if not type(snippet) == str:
-                    node_data = snippet.node.evaluate(snippet)
-                    line[index] = self._compile_node_data(node_data)
+                    line[index] = self._get_node_code(snippet.node, snippet, indents)
                     break
-        return ("").join(line)
+        return " "*indents + ("").join(line)
 
-    def _compile_block_lines(self, lines, indents):
-        """ compiles the lines in a block code or indented """
-        node_code = ""
+    def _compile_socket(self, socket, indents):
+        """ compiles the given socket """
+        return self._get_node_code(socket.node, socket, indents)
+
+    def _compile_lines(self, lines, indents):
+        """ compile the given lines """
+        code = ""
         for line in lines:
-            node_code += " "*indents + self._compile_line(line) + "\n"
-        return node_code
+            if type(line) == list:
+                if line:
+                    line = self._compile_line(line, indents)
+                    code += line + "\n"
+            elif type(line) == dict:
+                code += self._compile_code_block(line, indents)
+            else:
+                code += self._compile_socket(line, indents)
+        return code
 
-    def _compile_code_block(self,block,previous_indents):
-        """ compiles the given code block with the right amount of indents """
-        node_code = ""
-        node_code += self._compile_block_lines(block["lines"],previous_indents)
-        node_code += self._compile_block_lines(block["indented"],previous_indents + self._indents)
-        return node_code
+    def _compile_code_block(self, block, indents):
+        """ compiles the given code block """
+        lines = self._compile_lines(block["lines"], indents)
+        indented = self._compile_lines(block["indented"], indents + self._indents)
+        return lines + indented
 
-    def _compile_node_data(self, node_data):
-        """ returns the compiled node data """
-        node_code = ""
-        for block in node_data["blocks"]:
-            node_code += self._compile_code_block(block,0)
-        return node_code
-
-    def _get_node_block(self, node):
+    def _get_node_code(self, node, output, indents):
         """ returns the code block for the given node """
-        node_data = node.evaluate(None)
-        return self._compile_node_data(node_data)
+        node_code = ""
+        for block in node.evaluate(output)["blocks"]:
+            node_code += self._compile_code_block(block, indents)
+        return node_code
 
     def _get_registerable_node_blocks(self, tree):
         """ returns the code for the nodes that need to be registered """
         code_blocks = []
         for node in tree.nodes:
             if node._should_be_registered:
-                code_blocks.append(self._get_node_block(node))
+                code_blocks.append(self._get_node_code(node, None, 0))
         return code_blocks
 
     def _get_needed_imports(self, tree):
@@ -84,8 +92,8 @@ class ScriptingNodesCompiler():
         has_registered_nodes = False
         for node in tree.nodes:
             if node._should_be_registered:
-                has_registered_nodes = True
                 for line in node.get_register_block():
+                    has_registered_nodes = True
                     register_function += "\n" + " "*self._indents + line
 
         if not has_registered_nodes:
@@ -99,8 +107,8 @@ class ScriptingNodesCompiler():
         has_registered_nodes = False
         for node in tree.nodes:
             if node._should_be_registered:
-                has_registered_nodes = True
                 for line in node.get_unregister_block():
+                    has_registered_nodes = True
                     unregister_function += "\n" + " "*self._indents + line
 
         if not has_registered_nodes:
@@ -114,7 +122,11 @@ class ScriptingNodesCompiler():
 
     def _create_addon_text(self, tree):
         """ creates the text for the addon with the given tree """
-        text = bpy.data.texts.new(tree.get_file_name())
+        if self._hide_file:
+            text = bpy.data.texts.new("." + tree.get_file_name())
+        else:
+            text = bpy.data.texts.new(tree.get_file_name())
+        text.is_sn_addon = True
         cd = CompilerData()
 
         text.write(cd.license_block())
@@ -134,10 +146,13 @@ class ScriptingNodesCompiler():
     def _create_module(self, tree):
         """ generates the code from the node tree and adds it as a module """
         text = self._create_addon_text( tree )
+        module = None
+        if self._run_register:
+            module = text.as_module()
         module = {
             "node_tree": tree,
             "text": text,
-            "module": text.as_module(),
+            "module": module,
             "errors": []
         }
         self._modules.append(module)
@@ -146,13 +161,15 @@ class ScriptingNodesCompiler():
         """ finds the matching module and registers it """
         for module in self._modules:
             if module["node_tree"] == tree:
-                module["module"].register()
+                if self._run_register:
+                    module["module"].register()
 
     def _unregister_tree(self, tree):
         """ unregisters the module if already registered and removes it """
         for module in self._modules:
             if module[ "node_tree" ] == tree:
-                module[ "module" ].unregister()
+                if self._run_register:
+                    module[ "module" ].unregister()
                 bpy.data.texts.remove(module["text"])
                 self._modules.remove(module)
                 break
@@ -163,11 +180,16 @@ class ScriptingNodesCompiler():
         self._create_module(tree)
         self._register_tree(tree)
 
-        bpy.context.area.tag_redraw()
+        if bpy.context.area:
+            bpy.context.area.tag_redraw()
 
     def compile_active(self):
         """ recompiles the active tree """
         self._recompile(bpy.context.space_data.node_tree)
+
+    def compile_tree(self, tree):
+        """ recompiles the given tree """
+        self._recompile(tree)
 
     def unregister_active(self):
         """ unregisters the active node trees module and removes it """
@@ -186,9 +208,19 @@ class ScriptingNodesCompiler():
     def is_active_compiled(self):
         """ returns if the active node tree is compiled """
         for module in self._modules:
-            if module["tree"] == bpy.context.space_data.node_tree:
+            if module["node_tree"] == bpy.context.space_data.node_tree:
                 return True
         return False
+
+    def unregister_existing(self):
+        """ tries to find registered files in the addon and removes them """
+        for text in bpy.data.texts:
+            if text.is_sn_addon:
+                try:
+                    text.as_module().unregister()
+                    bpy.data.texts.remove(text)
+                except:
+                    pass
 
 
 global_compiler = ScriptingNodesCompiler()
