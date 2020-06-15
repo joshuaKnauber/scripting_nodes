@@ -1,6 +1,7 @@
 import bpy
 from bpy_extras.io_utils import ImportHelper
 import os
+import zipfile
 from ..__init__ import reregister_node_categories
 
 
@@ -19,6 +20,10 @@ class SN_OT_InstallPackage(bpy.types.Operator, ImportHelper):
 
     def _install_package(self,filepath):
         """ installs the given filepath """
+        node_directory = os.path.join(os.path.dirname(os.path.dirname(__file__)),"nodes")
+        with zipfile.ZipFile(filepath, 'r') as zip_ref:
+            zip_ref.extractall(node_directory)
+        reregister_node_categories()
 
     def execute(self, context):
         for file_element in self.files:
