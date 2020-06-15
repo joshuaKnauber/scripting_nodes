@@ -1,5 +1,6 @@
 import bpy
 from .node_looks import socket_colors
+from ...compile.compiler import autocompile_active
 
 class SN_StringSocket(bpy.types.NodeSocket):
     '''String Socket for handling text'''
