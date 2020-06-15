@@ -48,6 +48,11 @@ def unload_handler(dummy=None):
     """ function that is run before blender is closed and when a new file is opened """
     compiler().unregister_all()
 
+def reregister_node_categories():
+    """ reregisters the node categories """
+    nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
+    nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
+
 def register():
     # register the classes of the addon
     auto_load.register()
