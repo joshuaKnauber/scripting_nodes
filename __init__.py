@@ -40,6 +40,7 @@ auto_load.init()
 def load_handler(dummy):
     """ function that is run after the file is loaded """
     bpy.context.scene.sn_properties.package_installed_without_reload = False
+    bpy.context.scene.sn_properties.package_uninstalled_without_reload = False
     compiler().unregister_existing()
     for tree in bpy.data.node_groups:
         if tree.bl_idname == "ScriptingNodesTree":
