@@ -48,6 +48,9 @@ class SN_ScriptingBaseNode:
     def layout_type(self):
         return ""
 
+    def data_type(self):
+        return None
+
     def get_register_block(self):
         return ["pass"]
 
