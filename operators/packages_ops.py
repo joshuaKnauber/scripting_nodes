@@ -2,6 +2,7 @@ import bpy
 from bpy_extras.io_utils import ImportHelper
 import os
 import zipfile
+import json
 from ..__init__ import reregister_node_categories
 
 
@@ -18,6 +19,24 @@ class SN_OT_InstallPackage(bpy.types.Operator, ImportHelper):
     def poll(cls, context):
         return True
 
+    def _add_package_to_json(self, files):
+        """ adds the package name and the corresponding files to the json file """
+        addon_folder = os.path.dirname(os.path.dirname(__file__))
+
+        for filename in files:
+            if filename == "package_info.json":
+                with open(os.path.join(addon_folder,"nodes",filename)) as package_data:
+                    package_data = json.load(package_data)
+                    if "name" in package_data and "description" in package_data and "nodes" in package_data:
+
+                        with open(os.path.join(addon_folder,"installed_packages.json"),"r+") as packages:
+                            packages_content = json.load(packages)
+                            packages_content["packages"].append(package_data)
+                            packages.seek(0)
+                            packages.write(json.dumps(packages_content,indent=4))
+                            packages.truncate()
+                os.remove(os.path.join(addon_folder,"nodes",filename))
+
     def _install_package(self,filepath):
         """ installs the given filepath """
         node_directory = os.path.join(os.path.dirname(os.path.dirname(__file__)),"nodes")
@@ -26,6 +45,8 @@ class SN_OT_InstallPackage(bpy.types.Operator, ImportHelper):
             zip_ref.extractall(node_directory)
             names = zip_ref.namelist()
             
+        self._add_package_to_json(names)
+
         bpy.context.scene.sn_properties.package_installed_without_reload = True
         reregister_node_categories(names)
         self.report({"INFO"},message="Package succesfully installed")

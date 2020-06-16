@@ -53,6 +53,3 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
 
     def needed_imports(self):
         return []
-
-
-bpy.utils.register_class(SN_StartFunction)

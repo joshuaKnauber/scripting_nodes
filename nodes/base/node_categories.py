@@ -29,5 +29,6 @@ def get_node_categories():
                     if "bl_idname" in line:
                         category_items.append(NodeItem(line.split("\"")[1]))
                         break
-        node_categories.append(SN_ScriptingNodesCategory(category.upper(), category.replace("_"," ").title(), items=category_items))
+        if category_items:
+            node_categories.append(SN_ScriptingNodesCategory(category.upper(), category.replace("_"," ").title(), items=category_items))
     return node_categories
