@@ -196,6 +196,8 @@ class ScriptingNodesCompiler():
         self._create_module(tree)
         self._register_tree(tree)
 
+        tree.use_fake_user = True
+
         if bpy.context.area:
             bpy.context.area.tag_redraw()
 
