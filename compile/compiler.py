@@ -223,7 +223,7 @@ class ScriptingNodesCompiler():
         if bpy.context.scene.sn_properties.auto_compile:
             self.compile_active()
 
-    def socket_update(self, context):
+    def socket_update(self):
         """ runs autocompile for a socket update """
         self.autocompile_active()
 

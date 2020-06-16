@@ -15,7 +15,7 @@ class SN_ScriptingBaseNode:
     SocketHandler = SocketHandler()
 
     def socket_update(self, context):
-        compiler().socket_update(context)
+        compiler().socket_update()
 
     @classmethod
     def poll(cls, ntree):

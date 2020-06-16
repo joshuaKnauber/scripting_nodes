@@ -8,7 +8,7 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_StartFunction"
     bl_label = "Start Function"
-    bl_icon = node_icons["SCENE"]
+    bl_icon = node_icons["PROGRAM"]
     _should_be_registered = True
 
     @classmethod
@@ -16,9 +16,9 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
         return ntree.bl_idname == 'ScriptingNodesTree'
 
     def socket_update(self, context):
-        compiler().socket_update(context)
+        compiler().socket_update()
 
-    funcName: bpy.props.StringProperty(name="Name", description="The name of the function", default="")
+    funcName: bpy.props.StringProperty(name="Name", description="The name of the function", default="", update=socket_update)
 
     def init(self, context):
         self.use_custom_color = True
