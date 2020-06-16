@@ -43,7 +43,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
                 box.label(text="Restart blender to reload the packages!")
             box = layout.box()
             column = box.column(align=True)
-            column.label(text="Base Nodes")
+            column.label(text="Visual Scripting Basics")
             row = column.row()
             row.enabled = False
             row.label(text="The basic nodes to create addons")
