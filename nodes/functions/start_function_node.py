@@ -1,14 +1,15 @@
 import bpy
 from ..base.base_node import SN_ScriptingBaseNode
 from ...compile.compiler import compiler
+from ..base.node_looks import node_colors, node_icons
 
 
 class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_StartFunction"
     bl_label = "Start Function"
+    bl_icon = node_icons["SCENE"]
     _should_be_registered = True
-
 
     @classmethod
     def poll(cls, ntree):
@@ -20,6 +21,8 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
     funcName: bpy.props.StringProperty(name="Name", description="The name of the function", default="")
 
     def init(self, context):
+        self.use_custom_color = True
+        self.color = node_colors["PROGRAM"]
         self.outputs.new("SN_ProgramSocket", "Program").display_shape = "DIAMOND"
 
     def draw_buttons(self, context, layout):
