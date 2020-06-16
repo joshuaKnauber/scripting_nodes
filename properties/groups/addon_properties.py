@@ -13,3 +13,9 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     # the width of a line in the errors panel
     line_width: bpy.props.IntProperty(default=10,min=1,max=50,name="Error line breaks",description="How often the error message lines should break to the next line")
+
+    # this is true when a package has been installed and blender hasn't been restarted yet
+    package_installed_without_reload: bpy.props.BoolProperty(default=False)
+
+    # this is true when a package has been uninstalled and blender hasn't been restarted yet
+    package_uninstalled_without_reload: bpy.props.BoolProperty(default=False)

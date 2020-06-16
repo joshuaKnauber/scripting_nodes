@@ -39,6 +39,8 @@ auto_load.init()
 @persistent
 def load_handler(dummy):
     """ function that is run after the file is loaded """
+    bpy.context.scene.sn_properties.package_installed_without_reload = False
+    bpy.context.scene.sn_properties.package_uninstalled_without_reload = False
     compiler().unregister_existing()
     for tree in bpy.data.node_groups:
         if tree.bl_idname == "ScriptingNodesTree":
@@ -49,7 +51,7 @@ def unload_handler(dummy=None):
     """ function that is run before blender is closed and when a new file is opened """
     compiler().unregister_all()
 
-def reregister_node_categories(names):
+def reregister_node_categories(names=[]):
     """ reregisters the node categories """
     #TODO: Refresh blender here to reload the nodes
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
