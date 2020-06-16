@@ -21,11 +21,12 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         split = row.split(factor=0.925)
         column = split.column(align=True)
         column.label(text=package_data["name"])
+        column.label(text="By " + package_data["author"])
         row = column.row()
         row.enabled = False
         row.label(text=package_data["description"])
         row = split.row()
-        row.scale_y = 2
+        row.scale_y = 3
         row.operator("scripting_nodes.uninstall_package",text="",icon="TRASH",emboss=False).package_index = index
 
     def _draw_installed_packages(self):
