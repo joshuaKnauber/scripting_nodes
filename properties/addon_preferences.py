@@ -16,14 +16,19 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
     def draw(self, context):
         layout = self.layout
         layout.label(text="Installed packages:")
-        box = layout.box()
-        column = box.column(align=True)
-        column.label(text="Base Nodes")
-        row = column.row()
-        row.enabled = False
-        row.label(text="The basic nodes to create addons")
+        if context.scene.sn_properties.package_installed_without_reload:
+            box = layout.box()
+            box.alert = True
+            box.label(text="Restart blender to reload the packages!")
+        else:
+            box = layout.box()
+            column = box.column(align=True)
+            column.label(text="Base Nodes")
+            row = column.row()
+            row.enabled = False
+            row.label(text="The basic nodes to create addons")
 
-        self._draw_install_package(layout)
+            self._draw_install_package(layout)
 
 
 """

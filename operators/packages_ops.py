@@ -25,7 +25,10 @@ class SN_OT_InstallPackage(bpy.types.Operator, ImportHelper):
         with zipfile.ZipFile(filepath, 'r') as zip_ref:
             zip_ref.extractall(node_directory)
             names = zip_ref.namelist()
+            
+        bpy.context.scene.sn_properties.package_installed_without_reload = True
         reregister_node_categories(names)
+        self.report({"INFO"},message="Package succesfully installed")
 
     def execute(self, context):
         for file_element in self.files:
