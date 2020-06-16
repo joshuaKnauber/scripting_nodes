@@ -32,7 +32,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         """ draws the list of installed packages """
         layout = self.layout
         layout.label(text="Installed packages:")
-        if False:#bpy.context.scene.sn_properties.package_installed_without_reload:
+        if bpy.context.scene.sn_properties.package_installed_without_reload:
             box = layout.box()
             box.alert = True
             box.label(text="Restart blender to reload the packages!")
