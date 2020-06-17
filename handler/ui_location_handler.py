@@ -41,6 +41,13 @@ class UiLocationHandler():
             self.region_cache[space_type] = items
             return items
 
+    def region_type_names(self, space_type):
+        """ return a list of the names of the region types for the space type """
+        items = []
+        for name in self.region_type_items(space_type):
+            items.append(name[0])
+        return items
+
     def space_region_has_categories(self, space_type, region_type):
         """ returns if the given space region has categories """
         if space_type + "-" + region_type in self.space_region_cache:

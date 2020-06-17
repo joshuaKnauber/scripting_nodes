@@ -57,6 +57,8 @@ class SN_Panel(bpy.types.Node, SN_ScriptingBaseNode):
         self.inputs.new("SN_LayoutSocket","Layout")
 
     def draw_buttons(self, context, layout):
+        layout.operator("scripting_nodes.panel_picker",icon="EYEDROPPER").node_name = self.name
+
         layout.prop(self,"space_type")
         layout.prop(self,"region_type")
         
