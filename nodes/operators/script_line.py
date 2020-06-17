@@ -4,12 +4,11 @@ from ...compile.compiler import compiler
 from ..base.node_looks import node_colors, node_icons
 
 
-class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_ScriptLine(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_StartFunction"
-    bl_label = "Start Function"
+    bl_idname = "SN_ScriptLine"
+    bl_label = "Script Line"
     bl_icon = node_icons["OPERATOR"]
-    _should_be_registered = True
 
     @classmethod
     def poll(cls, ntree):
@@ -18,39 +17,34 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
     def socket_update(self, context):
         compiler().socket_update()
 
-    funcName: bpy.props.StringProperty(name="Name", description="The name of the function", default="", update=socket_update)
+    line: bpy.props.StringProperty(name="Name", description="The name of the function", default="", update=socket_update)
 
     def init(self, context):
         self.use_custom_color = True
         self.color = node_colors["OPERATOR"]
+        self.inputs.new("SN_ProgramSocket", "Program").display_shape = "DIAMOND"
         self.outputs.new("SN_ProgramSocket", "Program").display_shape = "DIAMOND"
 
     def draw_buttons(self, context, layout):
-        layout.prop(self,"funcName")
-
-        row = layout.row()
-        row.scale_y = 1.5
-        row.operator("scripting_nodes.run_function",text="Run Function",icon="PLAY").funcName = self.funcName
+        layout.prop(self,"line")
 
     def evaluate(self, output):
-        function_code, errors = self.SocketHandler.socket_value(self.outputs[0], as_list=False)
-        if function_code == []:
-            function_code = ["pass"]
-        if self.funcName != "":
-            name = self.ErrorHandler.handle_text(self.funcName)
-            name = name.replace(" ", "_")
-        else:
-            errors.append({"error": "no_name_func", "node": self})
-            name = "placeholder_funcName"
+        function_code, errors = self.SocketHandler.socket_value(self.outputs[0])
 
         return {
             "blocks": [
                 {
                     "lines": [
-                        ["def " + name + "():"]
+                        [self.line]
                     ],
                     "indented": [
+                    ]
+                },
+                {
+                    "lines": [
                         function_code
+                    ],
+                    "indented": [
                     ]
                 }
             ],
