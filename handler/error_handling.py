@@ -15,7 +15,7 @@ class ErrorHandler():
         if text.replace(" ", "") in invalid_texts:
             text = text.replace(" ", "")+"_"
 
-        invalid_caracters = ["(", ")", "#"]
+        invalid_caracters = ["(", ")", "#", ".", "/", "%", "$", "§"]
 
         for caracter in invalid_caracters:
             if caracter in text:

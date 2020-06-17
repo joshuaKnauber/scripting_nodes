@@ -30,3 +30,20 @@ class SN_OT_UnregisterActive(bpy.types.Operator):
     def execute(self, context):
         compiler().unregister_active()
         return {"FINISHED"}
+
+class SN_OT_RunFunction(bpy.types.Operator):
+    bl_idname = "scripting_nodes.run_function"
+    bl_label = "Run Function"
+    bl_description = "Runs a function"
+    bl_options = {"REGISTER","INTERNAL"}
+
+    funcName: bpy.props.StringProperty(name="Name", description="The name of the function")
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        if self.funcName != "":
+            compiler().run_function(self.funcName)
+        return {"FINISHED"}

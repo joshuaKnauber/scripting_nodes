@@ -28,6 +28,10 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self,"funcName")
 
+        row = layout.row()
+        row.scale_y = 1.5
+        row.operator("scripting_nodes.run_function",text="Run Function",icon="PLAY").funcName = self.funcName
+
     def evaluate(self, output):
         function_code = ["pass"]
         function_code, errors = self.SocketHandler.socket_value(self.outputs[0], as_list=False)
