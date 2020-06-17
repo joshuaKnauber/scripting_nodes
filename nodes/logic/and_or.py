@@ -32,6 +32,9 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.inputs.new('SN_BooleanSocket', "Value")
         self.outputs.new('SN_BooleanSocket', "Output")
 
+    def draw_buttons(self, context, layout):
+        layout.prop(self,"operation",text="")
+
     def evaluate(self, output):
         value1, errors = self.SocketHandler.socket_value(self.inputs[0])
         value2, error = self.SocketHandler.socket_value(self.inputs[1])
@@ -48,8 +51,7 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": [
-            ]
+            "errors": errors
         }
 
     def needed_imports(self):
