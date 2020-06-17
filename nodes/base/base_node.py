@@ -32,7 +32,7 @@ class SN_ScriptingBaseNode:
         self.inputs.new("SN_LayoutSocket","Layout")
 
     def update(self):
-        compiler().socket_update(bpy.context)
+        compiler().socket_update()
         if self._dynamic_layout_sockets:
             self._update_layout_sockets()
     
