@@ -24,7 +24,7 @@ class SN_SceneData(bpy.types.Node, SN_ScriptingBaseNode):
                 items.append((d_type.identifier,d_type.name,d_type.description))
         return sorted(items)
 
-    data_type: bpy.props.EnumProperty(items=get_data_type, name="Data", description="The scene data type", update=socket_update)
+    data_type_enum: bpy.props.EnumProperty(items=get_data_type, name="Data", description="The scene data type", update=socket_update)
 
     def init(self, context):
         self.use_custom_color = True
@@ -33,24 +33,24 @@ class SN_SceneData(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         layout.label(text="Data type:")
-        layout.prop(self,"data_type", text="")
+        layout.prop(self,"data_type_enum", text="")
 
     def evaluate(self, output):
         return {
             "blocks": [
                 {
                     "lines": [
-                        ["bpy.data." + self.data_type]
+                        ["bpy.data." + self.data_type_enum]
                     ],
                     "indented": [
                     ]
                 }
             ],
-            "errors": errors
+            "errors": []
         }
 
-    def data_type(self):
-        return eval("bpy.data." + self.data_type)
+    def data_type(self, output):
+        return "bpy.data." + self.data_type_enum
 
     def needed_imports(self):
-        return []
+        return ["bpy"]

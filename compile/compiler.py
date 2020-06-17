@@ -31,7 +31,7 @@ class ScriptingNodesCompiler():
         while not self._only_string_in_line(line):
             for index, snippet in enumerate(line):
                 if not type(snippet) == str:
-                    line[index] = self._get_node_code(snippet.node, snippet, indents)
+                    line[index] = self._get_node_code(snippet.node, snippet, 0).rstrip()
                     break
         return " "*indents + ("").join(line)
 

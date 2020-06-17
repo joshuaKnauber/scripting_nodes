@@ -88,7 +88,7 @@ class SocketHandler():
             if socket.bl_idname == "SN_IntSocket" and value.bl_idname == "SN_FloatSocket":
                 value = ["int(", value, ")"]
         else:
-            value = [socket.value]
+            value = [str(socket.value)]
 
         return value, errors
 
