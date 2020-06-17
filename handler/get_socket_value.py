@@ -76,6 +76,7 @@ class SocketHandler():
             value = [socket.value]
             if '"' in value[0]:
                 value = [value[0].replace('"', '\"')]
+            value = ["\""] + value + ["\""]
 
         return value, errors
     
@@ -97,16 +98,16 @@ class SocketHandler():
         
         errors = []
         if socket.is_linked:
-            value, errors = self._handle_socket_connection(socket, ["SN_BoolSocket"])
+            value, errors = self._handle_socket_connection(socket, ["SN_BooleanSocket"])
         else:
-            value = [socket.value]
+            value = [str(socket.value)]
 
         return value, errors
 
     def _get_data(self, socket):
         """ gets the code of a data socket """
         
-        value, errors = self._handle_socket_connection(socket, ["SN_DataSocket", "SN_StringSocket", "SN_IntSocket", "SN_FloatSocket", "SN_BoolSocket", "SN_VectorSocket"])
+        value, errors = self._handle_socket_connection(socket, ["SN_DataSocket", "SN_StringSocket", "SN_IntSocket", "SN_FloatSocket", "SN_BooleanSocket", "SN_VectorSocket"])
 
         return value, errors
 
@@ -117,7 +118,7 @@ class SocketHandler():
         if socket.is_linked:
             value, errors = self._handle_socket_connection(socket, ["SN_VectorSocket"])
         else:
-            value = [socket.value]
+            value = [str(socket.value)]
 
         return value, errors
 
@@ -128,7 +129,7 @@ class SocketHandler():
         if socket.is_linked:
             value, errors = self._handle_socket_connection(socket, ["SN_EnumSocket"])
         else:
-            value = [socket.value]
+            value = [str(socket.value)]
 
         return value, errors
 
@@ -169,7 +170,7 @@ class SocketHandler():
         elif socket_type in ["SN_IntSocket", "SN_FloatSocket"]:
             return self._get_number(socket)
         
-        elif socket_type == "SN_BoolSocket":
+        elif socket_type == "SN_BooleanSocket":
             return self._get_bool(socket)
         
         elif socket_type == "SN_DataSocket":
