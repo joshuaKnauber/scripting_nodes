@@ -8,7 +8,7 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_StartFunction"
     bl_label = "Start Function"
-    bl_icon = node_icons["PROGRAM"]
+    bl_icon = node_icons["OPERATOR"]
     _should_be_registered = True
 
     @classmethod
@@ -22,7 +22,7 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["PROGRAM"]
+        self.color = node_colors["OPERATOR"]
         self.outputs.new("SN_ProgramSocket", "Program").display_shape = "DIAMOND"
 
     def draw_buttons(self, context, layout):

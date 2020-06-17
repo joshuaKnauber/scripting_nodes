@@ -86,8 +86,8 @@ class SocketHandler():
         errors = []
         if socket.is_linked:
             value, errors = self._handle_socket_connection(socket, ["SN_IntSocket", "SN_FloatSocket"])
-            if socket.bl_idname == "SN_IntSocket" and value.bl_idname == "SN_FloatSocket":
-                value = ["int(", value, ")"]
+            if socket.bl_idname == "SN_IntSocket" and value[0].bl_idname == "SN_FloatSocket":
+                value = ["int(", value[0], ")"]
         else:
             value = [str(socket.value)]
 
