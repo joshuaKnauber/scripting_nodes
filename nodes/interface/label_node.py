@@ -39,7 +39,6 @@ class SN_Label(bpy.types.Node, SN_ScriptingBaseNode):
 
         text_input, errors = self.SocketHandler.socket_value(self.inputs[0])
         error_list += errors
-        layout_type = "layout"
 
         return {
             "blocks": [
