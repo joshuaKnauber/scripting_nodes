@@ -5,6 +5,7 @@ class SocketHandler():
 
     # CALLABLE FUNCTIONS
     # socket_value: takes a socket and returns the code and errors for that socket
+    # get_layout_type: returns the layout type for the given sockets connected node
 
     def _handle_input_socket(self, socket, socket_types):
         """ returns the connected socket as well as errors """
