@@ -34,17 +34,18 @@ class SN_Label(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, output):
         error_list = []
 
-        layout_type, errors = self.SocketHandler.socket_value(self.outputs[0])
+        layout_type, errors = self.SocketHandler.get_layout_type(self.outputs[0])
         error_list += errors
 
         text_input, errors = self.SocketHandler.socket_value(self.inputs[0])
         error_list += errors
+        layout_type = "layout"
 
         return {
             "blocks": [
                 {
                     "lines": [
-                        [layout_type,".label(text=\"",text_input,"\")"]
+                        [layout_type,".label(text="] + text_input + [")"]
                     ],
                     "indented": []
                 }

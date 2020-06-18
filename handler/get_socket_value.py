@@ -165,7 +165,20 @@ class SocketHandler():
 
         return value, errors
 
-    def socket_value(self, socket,as_list=False):
+    def get_layout_type(self, socket):
+        """ returns the layout type for the given socket """
+        layout_type = "layout"
+        errors = []
+        if socket.is_linked:
+            if socket.links[0].to_socket.bl_idname == "SN_LayoutSocket":
+                layout_type =  socket.links[0].to_node.layout_type()
+            else:
+                errors.append({"error": "wrong_socket_out", "node": socket.node})
+        else:
+            errors.append({"error": "no_connection", "node": socket.node})
+        return layout_type, errors
+
+    def socket_value(self, socket,as_list=True):
         """ returns the code and errors for that socket """
         socket_type = socket.bl_idname
         

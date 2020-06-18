@@ -32,7 +32,10 @@ class SN_OT_PanelPicker(bpy.types.Operator):
         if context_type:
             node.panel_context = context_type
         elif node.UiLocationHandler.context_items(space_type,region_type):
-            node.panel_context = node.panel_context
+            try:
+                node.panel_context = node.panel_context
+            except:
+                pass
 
     def _get_panel_location(self,context,event):
         """ returns the panel location """
