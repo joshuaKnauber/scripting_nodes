@@ -64,6 +64,8 @@ class ScriptingNodesCompiler():
         """ returns the code block for the given node """
         node_code = ""
         node_data = node.evaluate(output)
+        if node._debug_node:
+            print(node_data)
         for block in node_data["blocks"]:
             node_code += self._compile_code_block(block, indents)
         self._add_errors_to_active(node_data["errors"])
@@ -134,12 +136,12 @@ class ScriptingNodesCompiler():
     def _create_addon_text(self, tree, is_export=False):
         """ creates the text for the addon with the given tree """
         if self._hide_file and not is_export:
-            text = bpy.data.texts.new("." + tree.get_file_name())
+            text = bpy.data.texts.new("." + tree.name + " - " + tree.get_file_name())
         else:
             if is_export:
                 text = bpy.data.texts.new("sn_"+tree.get_file_name())
             else:
-                text = bpy.data.texts.new(tree.get_file_name())
+                text = bpy.data.texts.new(tree.name + " - " + tree.get_file_name())
         text.is_sn_addon = True
         cd = CompilerData()
 
@@ -241,9 +243,9 @@ class ScriptingNodesCompiler():
             if text.is_sn_addon:
                 try:
                     text.as_module().unregister()
-                    bpy.data.texts.remove(text)
                 except:
                     pass
+                bpy.data.texts.remove(text)
 
     def get_export_file(self):
         """ returns the text for exporting the active node tree """
