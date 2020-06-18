@@ -8,7 +8,7 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_StartFunction"
     bl_label = "Start Function"
-    bl_icon = node_icons["SCENE"]
+    bl_icon = node_icons["OPERATOR"]
     _should_be_registered = True
 
     @classmethod
@@ -16,26 +16,28 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
         return ntree.bl_idname == 'ScriptingNodesTree'
 
     def socket_update(self, context):
-        compiler().socket_update(context)
+        compiler().socket_update()
 
-    funcName: bpy.props.StringProperty(name="Name", description="The name of the function", default="")
+    funcName: bpy.props.StringProperty(name="Name", description="The name of the function", default="", update=socket_update)
 
     def init(self, context):
         self.use_custom_color = True
-        self.color = node_colors["PROGRAM"]
+        self.color = node_colors["OPERATOR"]
         self.outputs.new("SN_ProgramSocket", "Program").display_shape = "DIAMOND"
 
     def draw_buttons(self, context, layout):
         layout.prop(self,"funcName")
 
+        row = layout.row()
+        row.scale_y = 1.5
+        row.operator("scripting_nodes.run_function",text="Run Function",icon="PLAY").funcName = self.funcName
+
     def evaluate(self, output):
-        function_code = ["pass"]
         function_code, errors = self.SocketHandler.socket_value(self.outputs[0], as_list=False)
         if function_code == []:
             function_code = ["pass"]
         if self.funcName != "":
             name = self.ErrorHandler.handle_text(self.funcName)
-            name = name.replace(" ", "_")
         else:
             errors.append({"error": "no_name_func", "node": self})
             name = "placeholder_funcName"

@@ -12,6 +12,7 @@ class ScriptingNodesCompiler():
     # is_active_compiled: returns if the active node tree is compiled and registered
     # unregister_existing: tries to find registered addons in the file and removes them
     # get_export_file: returns a file for exporting the addon
+    # run_fuction: runs a function
 
     def __init__(self):
         self._indents = 4 # the number of indents that should be used in the generated files
@@ -31,7 +32,7 @@ class ScriptingNodesCompiler():
         while not self._only_string_in_line(line):
             for index, snippet in enumerate(line):
                 if not type(snippet) == str:
-                    line[index] = self._get_node_code(snippet.node, snippet, indents)
+                    line[index] = self._get_node_code(snippet.node, snippet, 0).rstrip()
                     break
         return " "*indents + ("").join(line)
 
@@ -223,7 +224,7 @@ class ScriptingNodesCompiler():
         if bpy.context.scene.sn_properties.auto_compile:
             self.compile_active()
 
-    def socket_update(self, context):
+    def socket_update(self):
         """ runs autocompile for a socket update """
         self.autocompile_active()
 
@@ -256,6 +257,11 @@ class ScriptingNodesCompiler():
                     return module["errors"]
         return []
 
+    def run_function(self, function_name):
+        self.compile_active()
+        for module in self._modules:
+            if module[ "node_tree" ] == bpy.context.space_data.node_tree:
+                eval("module[ 'module' ]." + function_name + "()")
 
 global_compiler = ScriptingNodesCompiler()
 def compiler():

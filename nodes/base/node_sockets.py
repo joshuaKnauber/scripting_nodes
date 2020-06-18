@@ -3,7 +3,7 @@ from .node_looks import socket_colors
 from ...compile.compiler import compiler
 
 def socket_update(self, context):
-    compiler().socket_update(context)
+    compiler().socket_update()
 
 class SN_StringSocket(bpy.types.NodeSocket):
     '''String Socket for handling text'''

@@ -21,6 +21,13 @@ class SN_OT_PanelPicker(bpy.types.Operator):
     def _set_panel_location(self,context,space_type,region_type):
         """ sets the panel location """
         node = context.space_data.node_tree.nodes[self.node_name]
+        node.space_type = space_type
+        
+        if region_type in node.UiLocationHandler.region_type_names(space_type):
+            node.region_type = region_type
+        else:
+            node.region_type = node.region_type
+            self.report({"WARNING"},message="You can't create a panel here.")
 
     def _get_panel_location(self,context,event):
         """ returns the panel location """
@@ -42,7 +49,7 @@ class SN_OT_PanelPicker(bpy.types.Operator):
         context.window.cursor_set("EYEDROPPER")
         
         if event.type == "LEFTMOUSE":
-            self._get_panel(context,event)
+            self._get_panel_location(context,event)
             context.window.cursor_set("DEFAULT")
             return {"FINISHED"}
         

@@ -18,7 +18,7 @@ class SN_ScriptingBaseNode:
     UiLocationHandler = UiLocationHandler()
 
     def socket_update(self, context):
-        compiler().socket_update(context)
+        compiler().socket_update()
 
     @classmethod
     def poll(cls, ntree):
@@ -32,7 +32,7 @@ class SN_ScriptingBaseNode:
         self.inputs.new("SN_LayoutSocket","Layout")
 
     def update(self):
-        compiler().socket_update(bpy.context)
+        compiler().socket_update()
         if self._dynamic_layout_sockets:
             self._update_layout_sockets()
     
@@ -60,7 +60,7 @@ class SN_ScriptingBaseNode:
     def layout_type(self):
         return ""
 
-    def data_type(self):
+    def data_type(self, output):
         return None
 
     def get_register_block(self):
