@@ -3,6 +3,7 @@ from ...compile.compiler import compiler
 from ...handler.error_handling import ErrorHandler
 from ...handler.get_socket_value import SocketHandler
 from ...handler.ui_location_handler import UiLocationHandler
+from ...handler.operator_handler import OperatorHandler
 
 class SN_ScriptingBaseNode:
     bl_width_min = 40
@@ -18,6 +19,7 @@ class SN_ScriptingBaseNode:
     ErrorHandler = ErrorHandler()
     SocketHandler = SocketHandler()
     UiLocationHandler = UiLocationHandler()
+    OperatorHandler = OperatorHandler()
 
     icon: bpy.props.StringProperty(default="")
 

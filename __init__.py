@@ -33,6 +33,7 @@ from .nodes.base.node_categories import get_node_categories
 from .properties.groups.addon_properties import ScriptingNodesProperties
 from .interface.node_header import node_header
 from .compile.compiler import compiler
+from .handler.operator_handler import OperatorHandler, SN_OperatorProperties
 
 auto_load.init()
 
@@ -41,6 +42,9 @@ def load_handler(dummy):
     """ function that is run after the file is loaded """
     bpy.context.scene.sn_properties.package_installed_without_reload = False
     bpy.context.scene.sn_properties.package_uninstalled_without_reload = False
+
+    OperatorHandler().set_scene_operators()
+    
     compiler().unregister_existing()
     for tree in bpy.data.node_groups:
         if tree.bl_idname == "ScriptingNodesTree":
@@ -76,6 +80,9 @@ def register():
     # register the addon properties
     bpy.types.Scene.sn_properties = bpy.props.PointerProperty(type=ScriptingNodesProperties)
 
+    # register the operator property
+    bpy.types.Scene.sn_operators = bpy.props.CollectionProperty(type=SN_OperatorProperties)
+
     # register property for storing if the text is a sn file
     bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False)
 
@@ -97,6 +104,9 @@ def unregister():
 
     # remove the addon properties
     del bpy.types.Scene.sn_properties
+
+    # remove the operator property
+    del bpy.types.Scene.sn_operators
 
     # unregister property for storing if the text is a sn file
     del bpy.types.Text.is_sn_addon
