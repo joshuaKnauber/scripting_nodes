@@ -50,6 +50,11 @@ class ErrorMessageHandler():
             "name": "No Variable available",
             "message": "There is no variable available",
             "fatal": True
+        },
+        "no_prop_selected": {
+            "name": "No Property selected",
+            "message": "There is no property selected",
+            "fatal": True
         }
     }
 

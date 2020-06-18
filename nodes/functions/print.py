@@ -8,6 +8,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Print"
     bl_icon = node_icons["PROGRAM"]
     _should_be_registered = False
+    _debug_node = True
 
     @classmethod
     def poll(cls, ntree):
