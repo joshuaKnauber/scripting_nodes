@@ -19,8 +19,6 @@ class SN_Label(bpy.types.Node, SN_ScriptingBaseNode):
         compiler().socket_update()
 
     def init(self, context):
-        self.panel_uid = str(randint(1111,9999))
-
         self.use_custom_color = True
         self.color = node_colors["INTERFACE"]
 
@@ -52,16 +50,5 @@ class SN_Label(bpy.types.Node, SN_ScriptingBaseNode):
             "errors": error_list
         }
 
-    def layout_type(self):
-        return "layout"
-
     def needed_imports(self):
         return ["bpy"]
-
-    def get_register_block(self):
-        idname, _ = self._get_panel_name()
-        return ["bpy.utils.register_class("+idname+")"]
-
-    def get_unregister_block(self):
-        idname, _ = self._get_panel_name()
-        return ["bpy.utils.unregister_class("+idname+")"]

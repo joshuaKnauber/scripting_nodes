@@ -84,6 +84,8 @@ class SocketHandler():
                 value = [value[0].replace('"', '\"')]
             value = ["\""] + value + ["\""]
 
+        if not value:
+            value = [""]
         return value, errors
     
     def _get_number(self, socket):
@@ -97,6 +99,8 @@ class SocketHandler():
         else:
             value = [str(socket.value)]
 
+        if not value:
+            value = ["0"]
         return value, errors
 
     def _get_bool(self, socket):
@@ -108,6 +112,8 @@ class SocketHandler():
         else:
             value = [str(socket.value)]
 
+        if not value:
+            value = ["True"]
         return value, errors
 
     def _get_data(self, socket):
