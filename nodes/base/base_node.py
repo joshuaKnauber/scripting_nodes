@@ -37,6 +37,17 @@ class SN_ScriptingBaseNode:
         compiler().socket_update()
         if self._dynamic_layout_sockets:
             self._update_layout_sockets()
+
+    def draw_icon_chooser(self,layout):
+        """ draws the options for choosing an icon """
+        box = layout.box()
+        box.operator("scripting_nodes.choose_icon",text="Select icon" , icon="PRESET").node_name = self.name
+        if self.icon:
+            row = box.row()
+            row.label(text=self.icon,icon=self.icon)
+            row.operator("scripting_nodes.clear_icon",text="",icon="PANEL_CLOSE",emboss=False).node_name = self.name
+        else:
+            box.label(text="No icon selected")
     
     def evaluate(self, output):
         return {

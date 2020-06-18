@@ -26,8 +26,10 @@ class SN_Label(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.outputs.new("SN_LayoutSocket", "Layout")
 
+    icon: bpy.props.StringProperty(default="")
+
     def draw_buttons(self, context, layout):
-        pass
+        self.draw_icon_chooser(layout)
 
     def evaluate(self, output):
         error_list = []
@@ -38,11 +40,15 @@ class SN_Label(bpy.types.Node, SN_ScriptingBaseNode):
         text_input, errors = self.SocketHandler.socket_value(self.inputs[0])
         error_list += errors
 
+        icon = []
+        if self.icon:
+            icon = [",icon=\""+self.icon+"\""]
+
         return {
             "blocks": [
                 {
                     "lines": [
-                        [layout_type,".label(text="] + text_input + [")"]
+                        [layout_type,".label(text="] + text_input + icon + [")"]
                     ],
                     "indented": []
                 }
