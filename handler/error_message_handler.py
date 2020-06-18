@@ -40,6 +40,11 @@ class ErrorMessageHandler():
             "name": "No name function",
             "message": "The function doesn't have a name",
             "fatal": True
+        },
+        "no_name_panel": {
+            "name": "No name panel",
+            "message": "The panel doesn't have a name",
+            "fatal": True
         }
     }
 

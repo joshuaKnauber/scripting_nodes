@@ -2,6 +2,7 @@ import bpy
 from ..base.base_node import SN_ScriptingBaseNode
 from ...compile.compiler import compiler
 from ..base.node_looks import node_colors, node_icons
+from random import randint
 
 
 class SN_Panel(bpy.types.Node, SN_ScriptingBaseNode):
@@ -34,6 +35,8 @@ class SN_Panel(bpy.types.Node, SN_ScriptingBaseNode):
         return self.UiLocationHandler.context_items(self.space_type,self.region_type)
     panel_context: bpy.props.EnumProperty(name="Context",description="Context the panel should go in",items=get_contexts)
 
+    panel_name: bpy.props.StringProperty(default="New Panel",name="Name",description="Name of the panel")
+
     def socket_update(self, context):
         compiler().socket_update(context)
 
@@ -54,9 +57,8 @@ class SN_Panel(bpy.types.Node, SN_ScriptingBaseNode):
         #bl_order
         self.inputs.new("SN_IntSocket", "Order Index").value = 0
 
-        self.inputs.new("SN_LayoutSocket","Layout")
-
     def draw_buttons(self, context, layout):
+        layout.prop(self,"panel_name")
         layout.prop(self,"space_type")
         layout.prop(self,"region_type")
         
@@ -64,30 +66,61 @@ class SN_Panel(bpy.types.Node, SN_ScriptingBaseNode):
             layout.prop(self,"panel_context")
 
     def evaluate(self, output):
-        function_code = ["pass"]
-        function_code, errors = self.SocketHandler.socket_value(self.outputs[0], as_list=False)
-        if function_code == []:
-            function_code = ["pass"]
-        if self.funcName != "":
-            name = self.ErrorHandler.handle_text(self.funcName)
-            name = name.replace(" ", "_")
+        error_list = []
+
+        panel_idname = "SN_PT_NewPanel" + str(randint(1111,9999))
+        if self.panel_name:
+            panel_idname = self.ErrorHandler.handle_text(self.panel_name)
+            panel_idname = "SN_PT_" + panel_idname.replace(" ", "_").upper() + str(randint(1111,9999))
         else:
-            errors.append({"error": "no_name_func", "node": self})
-            name = "placeholder_funcName"
+            error_list.append({"error": "no_name_panel", "node": self})
+
+        panel_name = self.ErrorHandler.handle_text(self.panel_name)
+        if not panel_name:
+            panel_name = "Scripting Nodes Panel"
+
+        category = []
+        if self.UiLocationHandler.space_region_has_categories(self.space_type,self.region_type):
+            category, errors = self.SocketHandler.socket_value(self.inputs["Category"], as_list=True)
+            error_list += errors
+            if not category:
+                category = "Misc"
+            category = ["bl_category = \""] + category + ["\""]
+
+        context = []
+        if self.UiLocationHandler.context_items(self.space_type,self.region_type):
+            context = ["bl_context = \"", self.panel_context, "\""]
+
+        order, errors = self.SocketHandler.socket_value(self.inputs["Order Index"], as_list=True)
+        error_list += errors
 
         return {
             "blocks": [
                 {
                     "lines": [
-                        ["def " + name + "():"]
+                        ["class ",panel_idname,"(bpy.types.Panel):"]
                     ],
                     "indented": [
-                        function_code
+                        {
+                            ["bl_label = \"",panel_name,"\""],
+                            ["bl_order = "] + order,
+                            []
+                        }
                     ]
                 }
             ],
-            "errors": errors
+            "errors": error_list
         }
 
     def needed_imports(self):
-        return []
+        return ["bpy"]
+
+"""
+class SN_PT_ErrorLogPanel(bpy.types.Panel):
+    bl_label = "Errors"
+    bl_order = 2
+    bl_idname = "SN_PT_ErrorLogPanel"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Visual Scripting"
+"""
