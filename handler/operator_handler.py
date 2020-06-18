@@ -52,6 +52,9 @@ class OperatorHandler():
         for category in self.get_operator_categories():
             self.set_operator_items(category[0],bpy.context.scene.sn_operators)
 
+    def socket_idname_from_property_type(self, property_type):
+        """ returns the  """
+
     def get_operator_properties(self,name):
         """ returns a list of properties for the given operator """
         operator = eval(self.get_ops_string(name))
@@ -61,4 +64,5 @@ class OperatorHandler():
         for operator_property in operator.get_rna_type().properties:
             if not operator_property.name in ignore_properties:
                 properties.append((operator_property.name))
+                print(operator_property.type)
         return properties
