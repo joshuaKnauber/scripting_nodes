@@ -19,6 +19,8 @@ class SN_ScriptingBaseNode:
     SocketHandler = SocketHandler()
     UiLocationHandler = UiLocationHandler()
 
+    icon: bpy.props.StringProperty(default="")
+
     def socket_update(self, context):
         compiler().socket_update()
 
@@ -41,13 +43,11 @@ class SN_ScriptingBaseNode:
     def draw_icon_chooser(self,layout):
         """ draws the options for choosing an icon """
         box = layout.box()
-        box.operator("scripting_nodes.choose_icon",text="Select icon" , icon="PRESET").node_name = self.name
+        row = box.row()
+        row.operator("scripting_nodes.choose_icon",text="Icons" , icon="PRESET").node_name = self.name
         if self.icon:
-            row = box.row()
-            row.label(text=self.icon,icon=self.icon)
+            row.label(icon=self.icon,text="")
             row.operator("scripting_nodes.clear_icon",text="",icon="PANEL_CLOSE",emboss=False).node_name = self.name
-        else:
-            box.label(text="No icon selected")
     
     def evaluate(self, output):
         return {

@@ -26,8 +26,6 @@ class SN_Label(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.outputs.new("SN_LayoutSocket", "Layout")
 
-    icon: bpy.props.StringProperty(default="")
-
     def draw_buttons(self, context, layout):
         self.draw_icon_chooser(layout)
 
