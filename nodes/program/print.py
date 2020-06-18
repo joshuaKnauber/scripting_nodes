@@ -23,11 +23,20 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def evaluate(self, output):
         value, errors = self.SocketHandler.socket_value(self.inputs[1])
+        continue_code, error = self.SocketHandler.socket_value(self.outputs[0])
+        errors+=error
         return {
             "blocks": [
                 {
                     "lines": [
                         ["print("] + value + [")"]
+                    ],
+                    "indented": [
+                    ]
+                },
+                {
+                    "lines": [
+                        continue_code
                     ],
                     "indented": [
                     ]
