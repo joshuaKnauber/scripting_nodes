@@ -45,6 +45,11 @@ class ErrorMessageHandler():
             "name": "No name Variable",
             "message": "The variable doesn't have a name",
             "fatal": True
+        },
+        "no_var_available": {
+            "name": "No Variable available",
+            "message": "There is no variable available",
+            "fatal": True
         }
     }
 

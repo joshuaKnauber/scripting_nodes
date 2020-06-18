@@ -22,7 +22,12 @@ class SocketHandler():
                     current_socket = current_socket.links[0]
                 else:
                     errors.append({"error": "no_connection_inp", "node": socket.node})
-            value = [current_socket.from_socket]
+
+            if current_socket.from_socket.bl_idname in socket_types:
+                value = [current_socket.from_socket]
+            else:
+                errors.append({"error": "wrong_socket_inp", "node": socket.node})
+
         return value, errors
 
 
