@@ -38,7 +38,6 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
             function_code = ["pass"]
         if self.funcName != "":
             name = self.ErrorHandler.handle_text(self.funcName)
-            name = name.replace(" ", "_")
         else:
             errors.append({"error": "no_name_func", "node": self})
             name = "placeholder_funcName"

@@ -9,11 +9,13 @@ class ErrorHandler():
         """ returns the updated text without errors """
 
         text = text.replace('"', "\"")
+
+        text = text.replace(" ", "_")
         
         invalid_texts = ["and", "as", "assert", "async", "await", "break", "class", "continue", "def", "del", "elif", "else", "except", "False", "finally", "for", "from", "global", "if", "import", "in", "is", "lambda", "None", "nonlocal", "not", "or", "pass", "raise", "return", "True", "try", "while", "with", "yield"]
 
-        if text.replace(" ", "") in invalid_texts:
-            text = text.replace(" ", "")+"_"
+        if text.lstrip() in invalid_texts:
+            text = text.lstrip()+"_"
 
         invalid_caracters = ["(", ")", "#", ".", "/", "%", "$", "§"]
 
@@ -21,4 +23,7 @@ class ErrorHandler():
             if caracter in text:
                 text = text.replace(caracter, "")
 
-        return text
+        if text != "":
+            return text
+        else:
+            return "placeholder"

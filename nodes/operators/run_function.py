@@ -19,10 +19,13 @@ class SN_RunFunction(bpy.types.Node, SN_ScriptingBaseNode):
 
     def items_fetch(self, context):
         function_nodes = []
+
+        if context.space_data != None:
         
-        for node in context.space_data.node_tree.nodes:
-            if node.bl_idname == "SN_StartFunction":
-                function_nodes.append((str(node.funcName), str(node.funcName), ""))
+            for node in context.space_data.node_tree.nodes:
+                if node.bl_idname == "SN_StartFunction":
+                    function_identifier = self.ErrorHandler.handle_text(str(node.funcName))
+                    function_nodes.append((function_identifier, str(node.funcName), ""))
 
         return function_nodes
 
