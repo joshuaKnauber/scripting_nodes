@@ -13,6 +13,8 @@ class SN_ScriptingBaseNode:
 
     _dynamic_layout_sockets = False
 
+    _debug_node = False
+
     ErrorHandler = ErrorHandler()
     SocketHandler = SocketHandler()
     UiLocationHandler = UiLocationHandler()
