@@ -18,7 +18,7 @@ class SN_OT_PanelPicker(bpy.types.Operator):
         context.window_manager.modal_handler_add(self)
         return {"RUNNING_MODAL"}
 
-    def _set_panel_location(self,context,space_type,region_type):
+    def _set_panel_location(self,context,space_type,region_type,context_type):
         """ sets the panel location """
         node = context.space_data.node_tree.nodes[self.node_name]
         node.space_type = space_type
@@ -28,6 +28,11 @@ class SN_OT_PanelPicker(bpy.types.Operator):
         else:
             node.region_type = node.region_type
             self.report({"WARNING"},message="You can't create a panel here.")
+
+        if context_type:
+            node.panel_context = context_type
+        elif node.UiLocationHandler.context_items(space_type,region_type):
+            node.panel_context = node.panel_context
 
     def _get_panel_location(self,context,event):
         """ returns the panel location """
@@ -43,7 +48,11 @@ class SN_OT_PanelPicker(bpy.types.Operator):
                                 region_type[2] = region.y + region.height - event.mouse_y
                 region_type = region_type[0]
                 if region_type:
-                    self._set_panel_location(context,area.type,region_type)
+                    try:
+                        context_type = area.spaces[0].context.lower()
+                    except:
+                        context_type = None
+                    self._set_panel_location(context,area.type,region_type,context_type)
 
     def modal(self, context, event):
         context.window.cursor_set("EYEDROPPER")

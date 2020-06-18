@@ -38,7 +38,7 @@ class SN_Panel(bpy.types.Node, SN_ScriptingBaseNode):
     panel_name: bpy.props.StringProperty(default="New Panel",name="Name",description="Name of the panel")
 
     def socket_update(self, context):
-        compiler().socket_update(context)
+        compiler().socket_update()
 
     def init(self, context):
         self.use_custom_color = True
