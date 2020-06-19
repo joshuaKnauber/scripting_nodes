@@ -55,6 +55,11 @@ class ErrorMessageHandler():
             "name": "No Property selected",
             "message": "There is no property selected",
             "fatal": True
+        },
+        "wrong_prop": {
+            "name": "Wrong Property",
+            "message": "There is a wrong property selected",
+            "fatal": True
         }
     }
 
