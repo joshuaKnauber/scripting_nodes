@@ -52,19 +52,32 @@ class SN_Button(bpy.types.Node, SN_ScriptingBaseNode):
         layout_type, errors = self.SocketHandler.get_layout_type(self.outputs[0])
         error_list += errors
 
-        text_input, errors = self.SocketHandler.socket_value(self.inputs[0])
+        button_label, errors = self.SocketHandler.socket_value(self.inputs[0])
         error_list += errors
 
         icon = []
         if self.icon:
             icon = [",icon=\""+self.icon+"\""]
 
+        op_props = []
+        for input_socket in self.inputs:
+            if not input_socket == self.inputs[0]:
+                socket_value, errors = self.SocketHandler.socket_value(input_socket)
+                error_list += errors
+                op_props.append(["op.",self.OperatorHandler.get_property_identifier(self.operator,input_socket.name)," = "] + socket_value)
+
+        identifier = self.OperatorHandler.get_ops_string(self.operator).replace("bpy.ops.","")
+
         return {
             "blocks": [
                 {
                     "lines": [
-                        [layout_type,".label(text="] + text_input + icon + [")"]
+                        ["op = ",layout_type,".operator(\"",identifier,"\",text="] + button_label + icon + [")"]
                     ],
+                    "indented": []
+                },
+                {
+                    "lines": op_props,
                     "indented": []
                 }
             ],

@@ -106,3 +106,10 @@ class OperatorHandler():
             return []
         else:
             return self.enum_item_cache[key]
+
+    def get_property_identifier(self, op_name, prop_name):
+        """ returns the identifier of the given property """
+        for op_prop in self.get_operator_properties(op_name):
+            if op_prop[0] == prop_name:
+                return op_prop[2].identifier
+        return ""
