@@ -27,9 +27,18 @@ class SN_Button(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.outputs.new("SN_LayoutSocket", "Layout")
 
+    def get_socket_items(self, socket):
+        """ returns the enum items for the given socket """
+        return self.OperatorHandler.get_enum_items(self.operator, socket.name)
+
     def update_operator(self, context):
         """ update function for the operator type """
-        print(self.OperatorHandler.get_operator_properties(self.operator))
+        properties = self.OperatorHandler.get_operator_properties(self.operator)
+        for input_socket in self.inputs:
+            if not input_socket == self.inputs[0]:
+                self.inputs.remove(input_socket)
+        for op_prop in properties:
+            self.inputs.new(op_prop[1],op_prop[0])
 
     operator: bpy.props.StringProperty(name="Operator",description="The operator for the given button",update=update_operator)
 
