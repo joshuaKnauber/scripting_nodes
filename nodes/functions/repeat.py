@@ -65,9 +65,9 @@ class SN_RepeatNode(bpy.types.Node, SN_ScriptingBaseNode):
             }
         else:
             value, errors = self.SocketHandler.socket_value(self.inputs[1])
-            continue_code, error = self.SocketHandler.socket_value(self.outputs[0])
+            continue_code, error = self.SocketHandler.socket_value(self.outputs[0], False)
             errors+=error
-            repeat_code, error = self.SocketHandler.socket_value(self.outputs[1])
+            repeat_code, error = self.SocketHandler.socket_value(self.outputs[1], False)
             errors+=error
             if repeat_code == []:
                 repeat_code = ["pass"]

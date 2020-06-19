@@ -88,7 +88,7 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
             }
         
         elif output == self.outputs[0]:
-            continue_code, errors = self.SocketHandler.socket_value(self.outputs[0])
+            continue_code, errors = self.SocketHandler.socket_value(self.outputs[0], False)
             return {
                 "blocks": [
                     {
@@ -106,9 +106,9 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
             for_code, errors = self.SocketHandler.socket_value(self.inputs[1])
             if self.is_collection == False:
                 for_code = ["["] + for_code + ["]"]
-            repeat_code, error = self.SocketHandler.socket_value(self.outputs[1])
+            repeat_code, error = self.SocketHandler.socket_value(self.outputs[1], False)
             errors+=error
-            continue_code, error = self.SocketHandler.socket_value(self.outputs[0])
+            continue_code, error = self.SocketHandler.socket_value(self.outputs[0], False)
             errors+=error
             if repeat_code == []:
                 repeat_code = ["pass"]

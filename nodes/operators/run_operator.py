@@ -48,7 +48,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, output):
         error_list = []
 
-        continue_code, errors = self.SocketHandler.socket_value(self.outputs[0])
+        continue_code, errors = self.SocketHandler.socket_value(self.outputs[0], False)
         error_list += errors
 
         op_props = []

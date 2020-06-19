@@ -69,7 +69,7 @@ class SN_ChangeVariable(bpy.types.Node, SN_ScriptingBaseNode):
 
         value, error = self.SocketHandler.socket_value(self.inputs[1])
         errors+=error
-        continue_code, error = self.SocketHandler.socket_value(self.outputs[0])
+        continue_code, error = self.SocketHandler.socket_value(self.outputs[0], False)
         errors+=error
         return {
             "blocks": [

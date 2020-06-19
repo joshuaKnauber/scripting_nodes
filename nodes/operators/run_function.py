@@ -44,7 +44,7 @@ class SN_RunFunction(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"functionName",text="Name")
 
     def evaluate(self, output):
-        continue_code, errors = self.SocketHandler.socket_value(self.outputs[0])
+        continue_code, errors = self.SocketHandler.socket_value(self.outputs[0], False)
         return {
             "blocks": [
                 {

@@ -42,7 +42,7 @@ class SN_CreateVariable(bpy.types.Node, SN_ScriptingBaseNode):
             name = "placeholder_variable_name"
 
         value, errors = self.SocketHandler.socket_value(self.inputs[1])
-        continue_code, error = self.SocketHandler.socket_value(self.outputs[0])
+        continue_code, error = self.SocketHandler.socket_value(self.outputs[0], False)
         errors+=error
 
         return {

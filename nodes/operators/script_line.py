@@ -29,7 +29,7 @@ class SN_ScriptLine(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"line")
 
     def evaluate(self, output):
-        function_code, errors = self.SocketHandler.socket_value(self.outputs[0])
+        function_code, errors = self.SocketHandler.socket_value(self.outputs[0], False)
 
         return {
             "blocks": [

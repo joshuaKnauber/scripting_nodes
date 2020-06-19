@@ -34,7 +34,7 @@ class SN_StartOperator(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"opDesciption")
     
     def evaluate(self, output):
-        execute_code, errors = self.SocketHandler.socket_value(self.outputs[0])
+        execute_code, errors = self.SocketHandler.socket_value(self.outputs[0], False)
         if execute_code == []:
             execute_code = ["pass"]
 

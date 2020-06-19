@@ -118,7 +118,7 @@ class SN_ChangeProperty(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             propName = self.sn_change_property_properties[self.propName].identifier
 
-        continue_code, error = self.SocketHandler.socket_value(self.outputs[0])
+        continue_code, error = self.SocketHandler.socket_value(self.outputs[0], False)
         errors+=error
         
         return {
