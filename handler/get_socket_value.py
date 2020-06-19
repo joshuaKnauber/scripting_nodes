@@ -138,8 +138,8 @@ class SocketHandler():
         """ gets the code of a enum socket """
         
         errors = []
-        if socket.is_linked:
-            value, errors = self._handle_socket_connection(socket, ["SN_EnumSocket"])
+        if False:#socket.is_linked:
+            value, errors = self._handle_socket_connection(socket, ["SN_EnumSocket","SN_StringSocket"])
         else:
             value = ["\"" + socket.value + "\""]
 
@@ -216,3 +216,16 @@ class SocketHandler():
         elif socket_type == "SN_SceneDataSocket":
             return self._get_scene_data(socket)
 
+
+    def get_layout_values(self, node):
+        """ returns the layout socket values for the given node """
+        errors = []
+        layouts = []
+        for input_socket in node.inputs:
+            if input_socket.bl_idname == "SN_LayoutSocket":
+                if input_socket.is_linked:
+                    if input_socket.links[0].from_socket.bl_idname == "SN_LayoutSocket":
+                        layouts.append(input_socket.links[0].from_socket)
+                    else:
+                        errors.append({"error": "wrong_socket_inp", "node": node})
+        return layouts, errors

@@ -121,11 +121,8 @@ class SN_Panel(bpy.types.Node, SN_ScriptingBaseNode):
         elif self.hide_header:
             options = ["bl_options = {\"HIDE_HEADER\"}"]
 
-        layouts = []
-        for input_socket in self.inputs:
-            if input_socket.bl_idname == "SN_LayoutSocket":
-                if input_socket.is_linked:
-                    layouts.append(input_socket.links[0].from_socket)
+        layouts, errors = self.SocketHandler.get_layout_values(self)
+        error_list += errors
 
         return {
             "blocks": [

@@ -37,12 +37,12 @@ class SN_IfNode(bpy.types.Node, SN_ScriptingBaseNode):
         out.display_shape = "DIAMOND"
 
     def evaluate(self, output):
-        continue_code, errors = self.SocketHandler.socket_value(self.outputs[0])
+        continue_code, errors = self.SocketHandler.socket_value(self.outputs[0],False)
         value, error = self.SocketHandler.socket_value(self.inputs[1])
         errors+=error
-        do_code, error = self.SocketHandler.socket_value(self.outputs[1])
+        do_code, error = self.SocketHandler.socket_value(self.outputs[1],False)
         errors+=error
-        else_code, error = self.SocketHandler.socket_value(self.outputs[2])
+        else_code, error = self.SocketHandler.socket_value(self.outputs[2],False)
         errors+=error
         if do_code == []:
             do_code = ["pass"]

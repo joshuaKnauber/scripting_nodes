@@ -152,7 +152,7 @@ class SN_EnumSocket(bpy.types.NodeSocket):
             layout.prop(self, "value", text=text, expand=len(self.node.get_socket_items(self)) <= 3)
 
     def draw_color(self, context, node):
-        return socket_colors["STRING"]
+        return (0,0,0,0)
 
 
 class SN_LayoutSocket(bpy.types.NodeSocket):

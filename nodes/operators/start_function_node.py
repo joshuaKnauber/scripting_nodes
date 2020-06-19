@@ -58,3 +58,9 @@ class SN_StartFunction(bpy.types.Node, SN_ScriptingBaseNode):
 
     def needed_imports(self):
         return []
+
+    def get_register_block(self):
+        return []
+    
+    def get_unregister_block(self):
+        return []
