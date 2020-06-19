@@ -9,8 +9,10 @@ def add_data_output(self,prop,label,prop_type=""):
         out = self.outputs.new('SN_BooleanSocket', label)
     elif prop_type == str(tuple):# or prop_type in [str(bpy.types.FloatVectorProperty)]:
         out = self.outputs.new('SN_VectorSocket', label)
-    elif prop_type in [str(int),str(float)] or prop_type in [str(bpy.types.FloatProperty),str(bpy.types.IntProperty)]:
-        out = self.outputs.new('SN_NumberSocket', label)
+    elif prop_type == str(int) or prop_type == str(bpy.types.IntProperty):
+        out = self.outputs.new('SN_IntSocket', label)
+    elif prop_type == str(float) or prop_type == str(bpy.types.FloatProperty):
+        out = self.outputs.new('SN_FloatSocket', label)
     else:
         out = self.outputs.new('SN_SceneDataSocket', label)
         out.display_shape = "SQUARE"
