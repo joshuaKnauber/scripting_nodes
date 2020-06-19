@@ -130,7 +130,7 @@ class SocketHandler():
         if socket.is_linked:
             value, errors = self._handle_socket_connection(socket, ["SN_VectorSocket"])
         else:
-            value = [str(socket.value)]
+            value = [str((socket.value[0], socket.value[1], socket.value[2]))]
 
         return value, errors
 
@@ -141,7 +141,7 @@ class SocketHandler():
         if socket.is_linked:
             value, errors = self._handle_socket_connection(socket, ["SN_EnumSocket"])
         else:
-            value = [str(socket.value)]
+            value = ["\"" + socket.value + "\""]
 
         return value, errors
 
