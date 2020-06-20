@@ -62,7 +62,7 @@ class SN_Panel(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         layout.label(text="Location:")
-        layout.operator("scripting_nodes.panel_picker",icon="EYEDROPPER").node_name = self.name
+        layout.operator("scripting_nodes.panel_picker",icon="EYEDROPPER", text="Panel Location").node_name = self.name
 
         layout.prop(self,"space_type")
         layout.prop(self,"region_type")
@@ -104,7 +104,7 @@ class SN_Panel(bpy.types.Node, SN_ScriptingBaseNode):
             error_list += errors
             if not category:
                 category = "Misc"
-            category = ["bl_category = \""] + category + ["\""]
+            category = ["bl_category = "] + category
 
         context = []
         if self.UiLocationHandler.context_items(self.space_type,self.region_type):
