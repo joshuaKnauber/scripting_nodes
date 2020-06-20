@@ -9,6 +9,8 @@ class SN_LayoutSearchPropertyGroup(bpy.types.PropertyGroup):
     name: bpy.props.StringProperty(default="")
     identifier: bpy.props.StringProperty(default="")
     isEnum: bpy.props.BoolProperty(default=False)
+    isBool: bpy.props.BoolProperty(default=False)
+
 
 class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
 
@@ -39,6 +41,8 @@ class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
                                 is_collection = True
                     else:
                         is_collection = False
+                else:
+                    is_collection = True
                 
                 if not is_collection:
                     if code != "":
@@ -49,13 +53,17 @@ class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
                                 item = self.sn_layout_property_properties.add()
                                 item.name = prop.name
                                 item.identifier = prop.identifier
-                                if eval(code+".bl_rna.properties['"+prop.identifier+"'].type") == "COLLECTION":
+                                if eval(code+".bl_rna.properties['"+prop.identifier+"'].type") == "ENUM":
                                     item.isEnum = True
+                                elif eval(code+".bl_rna.properties['"+prop.identifier+"'].type") == "BOOLEAN":
+                                    item.isBool = True
 
 
     sn_layout_property_properties: bpy.props.CollectionProperty(type=SN_LayoutSearchPropertyGroup)
     propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=socket_update)
+    propEmboss: bpy.props.BoolProperty(name="Emboss", description="The property gets embossed", default=False, update=socket_update)
     propExpand: bpy.props.BoolProperty(name="Expand", description="The enum gets expanded", default=False, update=socket_update)
+    propToggle: bpy.props.BoolProperty(name="Toggle", description="The boolean gets expanded", default=False, update=socket_update)
 
     def init(self, context):
         self.use_custom_color = True
@@ -68,9 +76,12 @@ class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         self.draw_icon_chooser(layout)
         layout.prop_search(self, "propName", self, "sn_layout_property_properties", text="")
-        if self.propName != "":
+        if self.propName in self.sn_layout_property_properties:
+            layout.prop(self, "propEmboss")
             if self.sn_layout_property_properties[self.propName].isEnum:
                 layout.prop(self, "propExpand")
+            elif self.sn_layout_property_properties[self.propName].isBool:
+                layout.prop(self, "propToggle")
 
     def evaluate(self, output):
         if self.propName in self.sn_layout_property_properties:
@@ -89,15 +100,21 @@ class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
             if self.icon:
                 icon = [", icon=\""+self.icon+"\""]
 
+            emboss = [", emboss="] + [str(self.propEmboss)]
+
             expand = []
             if self.sn_layout_property_properties[self.propName].isEnum:
                 expand = [", expand="] + [str(self.propExpand)]
+            
+            toggle = []
+            if self.sn_layout_property_properties[self.propName].isBool:
+                toggle = [", toggle="] + [str(self.propToggle)]
 
             return {
                 "blocks": [
                     {
                         "lines": [
-                            [layout_type,".prop("] + scene_data + [", \"" + self.sn_layout_property_properties[self.propName].identifier + "\", text="] + text_input + expand + icon + [")"]
+                            [layout_type,".prop("] + scene_data + [", \"" + self.sn_layout_property_properties[self.propName].identifier + "\", text="] + text_input + expand + toggle + emboss + icon + [")"]
                         ],
                         "indented": []
                     }
