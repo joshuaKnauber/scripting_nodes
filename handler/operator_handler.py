@@ -88,7 +88,7 @@ class OperatorHandler():
                     array = False
                     if operator_property.type in ["INT","FLOAT"]:
                         array = operator_property.array_length > 1
-                    properties.append((operator_property.name, self.socket_idname_from_property_type(operator_property.type, array), operator_property))
+                    properties.append([operator_property.name, self.socket_idname_from_property_type(operator_property.type, array), operator_property, operator_property.default])
         return properties
 
     def get_enum_items(self, op_name, prop_name):
