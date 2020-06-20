@@ -30,6 +30,13 @@ for node in bpy.data.node_groups[NODE_TREE_NAME].nodes:
                         value.append(element)
                 properties.append([prop, value])
     node_dict["properties"] = properties
+    input_values = []
+    for index, input_socket in enumerate(node.inputs):
+        try:
+            input_values.append([index, input_socket.value])
+        except:
+            pass
+    node_dict["input_values"] = input_values
     nodes.append(node_dict)
 
 for node in bpy.data.node_groups[NODE_TREE_NAME].nodes:
@@ -45,7 +52,7 @@ for node in bpy.data.node_groups[NODE_TREE_NAME].nodes:
                 if input_socket == out_socket.links[0].to_socket:
                     link_dict["out_index"] = index
             links.append(link_dict)
-            
+
 example = {
     "nodes": nodes,
     "links": links
