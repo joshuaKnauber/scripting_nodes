@@ -103,7 +103,11 @@ class SN_AppendPanel(bpy.types.Node, SN_ScriptingBaseNode):
         return ["bpy"]
 
     def get_register_block(self):
-        return []#return ["bpy.types.RENDER_PT_render.append("+"append_panel_"+self.panel_uid+")"]
+        if self.panel_name:
+            return ["bpy.types."+self.panels[self.panel_name].idname+".append("+"append_panel_"+self.panel_uid+")"]
+        return []
 
     def get_unregister_block(self):
-        return []#return ["bpy.types.RENDER_PT_render.remove("+"append_panel_"+self.panel_uid+")"]
+        if self.panel_name:
+            return ["bpy.types."+self.panels[self.panel_name].idname+".remove("+"append_panel_"+self.panel_uid+")"]
+        return []

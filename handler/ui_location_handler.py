@@ -86,6 +86,16 @@ class UiLocationHandler():
             self.context_cache[space_type + "-" + region_type] = items
             return items
 
+    def _get_unique_panel_name(self, panel_name, panels):
+        """ looks for panels with the same name and adds a unique number if necessarry """
+        existing = 0
+        for panel in panels:
+            if ("-").join(panel[0].split("-")[:-1]).rstrip() == panel_name or panel[0] == panel_name:
+                existing += 1
+        if existing:
+            panel_name += " - " + str(existing)
+        return panel_name
+
     def get_panels(self, space_type, region_type):
         """ returns all panels for the space region """
         panels = []
@@ -96,14 +106,16 @@ class UiLocationHandler():
                 if panel.bl_space_type == space_type:
                     if panel.bl_region_type == region_type:
                         panel_name = panel.bl_label
-                        try:
-                            panel_name += " - " + panel.bl_context.title()
-                        except:
-                            pass
-                        try:
-                            panel_name += " - " + panel.bl_category
-                        except:
-                            pass
                         if panel_name:
+                            try:
+                                panel_name += " - " + panel.bl_context.title()
+                            except:
+                                pass
+                            try:
+                                panel_name += " - " + panel.bl_category
+                            except:
+                                pass
+                            panel_name = self._get_unique_panel_name(panel_name,panels)
                             panels.append((panel_name,idname))
+
         return panels
