@@ -38,7 +38,10 @@ class SN_Button(bpy.types.Node, SN_ScriptingBaseNode):
             if not input_socket == self.inputs[0]:
                 self.inputs.remove(input_socket)
         for op_prop in properties:
-            self.inputs.new(op_prop[1],op_prop[0])
+            if op_prop[1] != "SN_VectorSocket":
+                self.inputs.new(op_prop[1],op_prop[0]).value = op_prop[3]
+            else:
+                self.inputs.new(op_prop[1],op_prop[0]).value = (op_prop[3], op_prop[3], op_prop[3])
 
     operator: bpy.props.StringProperty(name="Operator",description="The operator for the given button",update=update_operator)
 
