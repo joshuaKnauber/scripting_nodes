@@ -88,9 +88,12 @@ class SN_AppendPanel(bpy.types.Node, SN_ScriptingBaseNode):
                         ["def append_panel_"+self.panel_uid+"(self, context):"]
                     ],
                     "indented": [
-                        ["layout = self.layout"],
-                        layouts
+                        ["layout = self.layout"]
                     ]
+                },
+                {
+                    "lines": [],
+                    "indented": layouts
                 }
             ],
             "errors": error_list
