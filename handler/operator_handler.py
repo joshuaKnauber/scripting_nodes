@@ -46,7 +46,7 @@ class OperatorHandler():
                     item.category = category
                     added_names.append(operator)
 
-    def _set_custom_operators(self, operator_property):
+    def set_custom_operators(self, operator_property):
         for item in operator_property:
             if item.is_custom:
                 operator_property.remove(operator_property.find(item.name))
@@ -59,6 +59,7 @@ class OperatorHandler():
                     item.description = node.opDescription
                     item.identifier = name
                     item.category = "scripting_nodes"
+                    item.is_custom = True
 
 
     def get_ops_string(self,name):
@@ -70,22 +71,19 @@ class OperatorHandler():
                     if eval("bpy.ops."+category+"."+operator).get_rna_type().name + " - " + category.replace("_"," ").title() == name:
                         return "bpy.ops."+category+"."+operator
         else:
-            if bpy.context.space_data != None:
-                for node in bpy.context.space_data.node_tree.nodes:
-                    if node.bl_idname == "SN_StartOperator":
-                        if node.opName + " - Scripting Nodes" == name:
-                            name = self.ErrorHandler.handle_text(node.opName)
-                            return "bpy.ops.scripting_nodes." + name
+            for item in bpy.context.scene.sn_operators:
+                if item.name == name:
+                    return "bpy.ops.scripting_nodes." + item.identifier
     
         return "bpy.ops.mesh.primitive_monkey_add"
-    
+
 
     def set_scene_operators(self):
         """ adds all operators to the scene collection """
         bpy.context.scene.sn_operators.clear()
         for category in self.get_operator_categories():
             self.set_operator_items(category[0], bpy.context.scene.sn_operators)
-        self._set_custom_operators(bpy.context.scene.sn_operators)
+        self.set_custom_operators(bpy.context.scene.sn_operators)
 
     def socket_idname_from_property_type(self, property_type, array):
         """ returns the socket id name from the property type """
@@ -113,15 +111,16 @@ class OperatorHandler():
         operator = self.get_ops_string(name)
         properties = []
         if operator:
-            operator = eval(operator)
-            
-            ignore_properties = ["RNA"]
-            for operator_property in operator.get_rna_type().properties:
-                if not operator_property.name in ignore_properties:
-                    array = False
-                    if operator_property.type in ["INT","FLOAT"]:
-                        array = operator_property.array_length > 1
-                    properties.append([operator_property.name, self.socket_idname_from_property_type(operator_property.type, array), operator_property, operator_property.default])
+            if not " - Scripting Nodes" in name:
+                operator = eval(operator)
+                
+                ignore_properties = ["RNA"]
+                for operator_property in operator.get_rna_type().properties:
+                    if not operator_property.name in ignore_properties:
+                        array = False
+                        if operator_property.type in ["INT","FLOAT"]:
+                            array = operator_property.array_length > 1
+                        properties.append([operator_property.name, self.socket_idname_from_property_type(operator_property.type, array), operator_property, operator_property.default])
         return properties
 
     def get_enum_items(self, op_name, prop_name):

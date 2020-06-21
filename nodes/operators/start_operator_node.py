@@ -20,7 +20,7 @@ class SN_StartOperator(bpy.types.Node, SN_ScriptingBaseNode):
         compiler().socket_update()
 
     def update_name(self, context):
-        self.OperatorHandler.set_scene_operators()
+        self.OperatorHandler.set_custom_operators(bpy.context.scene.sn_operators)
         self.socket_update(context)
 
     opName: bpy.props.StringProperty(name="Name", description="The name of the operator", default="", update=update_name)
@@ -38,13 +38,11 @@ class SN_StartOperator(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"opDescription")
 
     def free(self):
-        self.OperatorHandler.set_scene_operators()
+        self.OperatorHandler.set_custom_operators(bpy.context.scene.sn_operators)
         self.socket_update("context")
     
     def evaluate(self, output):
         execute_code, errors = self.SocketHandler.socket_value(self.outputs[0], False)
-        if execute_code == []:
-            execute_code = ["pass"]
 
         name = self.ErrorHandler.handle_text(self.opName)
         poll, error = self.SocketHandler.socket_value(self.inputs[0])
