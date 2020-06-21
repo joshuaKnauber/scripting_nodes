@@ -36,6 +36,11 @@ class ErrorMessageHandler():
             "message": "One of the sockets of this node has no connection",
             "fatal": True
         },
+        "no_layout_connection": {
+            "name": "No layout connection",
+            "message": "One of the layout sockets of this node has no connection",
+            "fatal": False
+        },
         "no_name_func": {
             "name": "No name function",
             "message": "The function doesn't have a name",

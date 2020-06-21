@@ -38,16 +38,20 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, output):
         continue_code, errors = self.SocketHandler.socket_value(self.inputs["Layout"],False)
-        value, error = self.SocketHandler.socket_value(self.inputs["Value"])
-        errors+=error
+
         do_code, error = self.SocketHandler.socket_value(self.inputs["Do"],False)
         errors+=error
+
         else_code, error = self.SocketHandler.socket_value(self.inputs["Else"],False)
         errors+=error
+
         if do_code == []:
             do_code = ["pass"]
         if else_code == []:
             else_code = ["pass"]
+
+        value, error = self.SocketHandler.socket_value(self.inputs["Value"])
+        errors+=error
 
         return {
             "blocks": [

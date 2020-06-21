@@ -25,6 +25,10 @@ class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
     def socket_update(self, context):
         compiler().socket_update()
 
+    def update_prop_name(self, context):
+        self.socket_update(context)
+        self.inputs["Name"].value = self.propName
+
     def update(self):
         if len(self.inputs) == 2:
             self.sn_layout_property_properties.clear()
@@ -60,7 +64,7 @@ class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     sn_layout_property_properties: bpy.props.CollectionProperty(type=SN_LayoutSearchPropertyGroup)
-    propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=socket_update)
+    propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_prop_name)
     propEmboss: bpy.props.BoolProperty(name="Emboss", description="The property gets embossed", default=True, update=socket_update)
     propExpand: bpy.props.BoolProperty(name="Expand", description="The enum gets expanded", default=False, update=socket_update)
     propToggle: bpy.props.BoolProperty(name="Toggle", description="The boolean gets expanded", default=False, update=socket_update)

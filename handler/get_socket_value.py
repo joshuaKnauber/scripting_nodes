@@ -67,7 +67,10 @@ class SocketHandler():
                 value, errors = self._handle_output_socket(socket, socket_types)
         else:
             value = []
-            errors.append({"error": "no_connection", "node": socket.node})
+            if socket.bl_idname != "SN_LayoutSocket":
+                errors.append({"error": "no_connection", "node": socket.node})
+            else:
+                errors.append({"error": "no_layout_connection", "node": socket.node})
 
         return value, errors
 
@@ -182,7 +185,7 @@ class SocketHandler():
             else:
                 errors.append({"error": "wrong_socket_out", "node": socket.node})
         else:
-            errors.append({"error": "no_connection", "node": socket.node})
+            errors.append({"error": "no_layout_connection", "node": socket.node})
         return layout_type, errors
 
     def socket_value(self, socket,as_list=True):
