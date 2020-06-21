@@ -1,4 +1,5 @@
 import bpy
+from .error_handling import ErrorHandler
 
 class SN_OperatorProperties(bpy.types.PropertyGroup):
 
@@ -14,17 +15,22 @@ class SN_OperatorProperties(bpy.types.PropertyGroup):
     # category of the operator
     category: bpy.props.StringProperty(default="", name="Category", description="Category of the operator")
 
+    is_custom: bpy.props.BoolProperty(default=False)
+
 
 class OperatorHandler():
+
+    ErrorHandler = ErrorHandler()
 
     enum_item_cache = {}
 
     def get_operator_categories(self):
         """ returns a list with all operator categories as items """
         items = []
-        for categorie in dir(bpy.ops):
-            name = categorie.replace("_"," ").title()
-            items.append((categorie,name,name + " operators"))
+        for category in dir(bpy.ops):
+            if category != "scripting_nodes":
+                name = category.replace("_"," ").title()
+                items.append((category,name,name + " operators"))
         return items
 
     def set_operator_items(self,category,operator_property):
@@ -40,19 +46,46 @@ class OperatorHandler():
                     item.category = category
                     added_names.append(operator)
 
+    def _set_custom_operators(self, operator_property):
+        for item in operator_property:
+            if item.is_custom:
+                operator_property.remove(operator_property.find(item.name))
+        if bpy.context.space_data != None:
+            for node in bpy.context.space_data.node_tree.nodes:
+                if node.bl_idname == "SN_StartOperator":
+                    item = operator_property.add()
+                    name = self.ErrorHandler.handle_text(node.opName)
+                    item.name = node.opName + " - Scripting Nodes"
+                    item.description = node.opDescription
+                    item.identifier = name
+                    item.category = "scripting_nodes"
+
+
     def get_ops_string(self,name):
         """ returns the operator string for the given operator name """
-        for category in self.get_operator_categories():
-            category = category[0]
-            for operator in dir(eval("bpy.ops."+category)):
-                if eval("bpy.ops."+category+"."+operator).get_rna_type().name + " - " + category.replace("_"," ").title() == name:
-                    return "bpy.ops."+category+"."+operator
+        if not " - Scripting Nodes" in name:
+            for category in self.get_operator_categories():
+                category = category[0]
+                for operator in dir(eval("bpy.ops."+category)):
+                    if eval("bpy.ops."+category+"."+operator).get_rna_type().name + " - " + category.replace("_"," ").title() == name:
+                        return "bpy.ops."+category+"."+operator
+        else:
+            if bpy.context.space_data != None:
+                for node in bpy.context.space_data.node_tree.nodes:
+                    if node.bl_idname == "SN_StartOperator":
+                        if node.opName + " - Scripting Nodes" == name:
+                            name = self.ErrorHandler.handle_text(node.opName)
+                            return "bpy.ops.scripting_nodes." + name
+    
+        return "bpy.ops.mesh.primitive_monkey_add"
+    
 
     def set_scene_operators(self):
         """ adds all operators to the scene collection """
         bpy.context.scene.sn_operators.clear()
         for category in self.get_operator_categories():
-            self.set_operator_items(category[0],bpy.context.scene.sn_operators)
+            self.set_operator_items(category[0], bpy.context.scene.sn_operators)
+        self._set_custom_operators(bpy.context.scene.sn_operators)
 
     def socket_idname_from_property_type(self, property_type, array):
         """ returns the socket id name from the property type """

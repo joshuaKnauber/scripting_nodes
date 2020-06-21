@@ -19,8 +19,12 @@ class SN_StartOperator(bpy.types.Node, SN_ScriptingBaseNode):
     def socket_update(self, context):
         compiler().socket_update()
 
-    opName: bpy.props.StringProperty(name="Name", description="The name of the operator", default="", update=socket_update)
-    opDesciption: bpy.props.StringProperty(name="Description", description="The description of the operator", default="", update=socket_update)
+    def update_name(self, context):
+        self.OperatorHandler.set_scene_operators()
+        self.socket_update(context)
+
+    opName: bpy.props.StringProperty(name="Name", description="The name of the operator", default="", update=update_name)
+    opDescription: bpy.props.StringProperty(name="Description", description="The description of the operator", default="", update=socket_update)
 
     def init(self, context):
         self.use_custom_color = True
@@ -31,7 +35,11 @@ class SN_StartOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         layout.prop(self,"opName")
-        layout.prop(self,"opDesciption")
+        layout.prop(self,"opDescription")
+
+    def free(self):
+        self.OperatorHandler.set_scene_operators()
+        self.socket_update("context")
     
     def evaluate(self, output):
         execute_code, errors = self.SocketHandler.socket_value(self.outputs[0], False)
@@ -49,9 +57,9 @@ class SN_StartOperator(bpy.types.Node, SN_ScriptingBaseNode):
                         ["class SN_OT_" + name + "(bpy.types.Operator):"]
                     ],
                     "indented": [
-                        ["bl_idname = \"scripring_nodes." + name.lower() + "\""],
+                        ["bl_idname = \"scripting_nodes." + name.lower() + "\""],
                         ["bl_label = \"" + self.opName +"\""],
-                        ["bl_description = \"" + self.opDesciption + "\""],
+                        ["bl_description = \"" + self.opDescription + "\""],
                         ["bl_options = {\"REGISTER\"}"],
                         [""],
                         {

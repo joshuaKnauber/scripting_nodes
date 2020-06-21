@@ -60,8 +60,10 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                 socket_value, errors = self.SocketHandler.socket_value(input_socket)
                 error_list += errors
                 op_props+=[self.OperatorHandler.get_property_identifier(self.operator,input_socket.name),"="] + socket_value + [", "]
-
-        identifier = self.OperatorHandler.get_ops_string(self.operator)
+        if self.operator != "":
+            identifier = self.OperatorHandler.get_ops_string(self.operator)
+        else:
+            identifier = "bpy.ops.mesh.primitive_monkey_add"
 
         return {
             "blocks": [
