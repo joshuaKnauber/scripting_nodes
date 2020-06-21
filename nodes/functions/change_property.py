@@ -33,6 +33,7 @@ class SN_ChangeProperty(bpy.types.Node, SN_ScriptingBaseNode):
             if code != "":
                 if "bl_rna.properties" in code:
                     code+=".fixed_type"
+                    code="bpy.types." + eval("type("+code+").bl_rna.identifier")
                 prop = eval(code + ".bl_rna.properties['" + self.sn_change_property_properties[self.propName].identifier + "']")
                 if prop.type == "STRING":
                     self.inputs.new("SN_StringSocket", self.propName)

@@ -44,6 +44,7 @@ class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
                     if code != "":
                         if "bl_rna.properties" in code:
                             code+=".fixed_type"
+                            code="bpy.types." + eval("type("+code+").bl_rna.identifier")
                         for prop in eval(code).bl_rna.properties:
                             if prop.name != "RNA" and not "bl_" in prop.name:
                                 item = self.sn_layout_property_properties.add()
@@ -68,7 +69,7 @@ class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         self.draw_icon_chooser(layout)
         layout.prop_search(self, "propName", self, "sn_layout_property_properties", text="")
-        if self.propName != "":
+        if self.propName in self.sn_layout_property_properties:
             if self.sn_layout_property_properties[self.propName].isEnum:
                 layout.prop(self, "propExpand")
 

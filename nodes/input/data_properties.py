@@ -55,6 +55,7 @@ class SN_DataProperties(bpy.types.Node, SN_ScriptingBaseNode):
                     if code != "":
                         if "bl_rna.properties" in code:
                             code+=".fixed_type"
+                            code="bpy.types." + eval("type("+code+").bl_rna.identifier")
                         for prop in eval(code).bl_rna.properties:
                             if prop.name != "RNA" and not "bl_" in prop.name:
                                 item = self.search_properties.add()
