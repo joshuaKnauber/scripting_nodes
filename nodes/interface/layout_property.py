@@ -61,7 +61,7 @@ class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
 
     sn_layout_property_properties: bpy.props.CollectionProperty(type=SN_LayoutSearchPropertyGroup)
     propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=socket_update)
-    propEmboss: bpy.props.BoolProperty(name="Emboss", description="The property gets embossed", default=False, update=socket_update)
+    propEmboss: bpy.props.BoolProperty(name="Emboss", description="The property gets embossed", default=True, update=socket_update)
     propExpand: bpy.props.BoolProperty(name="Expand", description="The enum gets expanded", default=False, update=socket_update)
     propToggle: bpy.props.BoolProperty(name="Toggle", description="The boolean gets expanded", default=False, update=socket_update)
 
