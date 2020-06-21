@@ -1,6 +1,7 @@
 import bpy
 import os
 import json
+from ...handler.example_functions import import_example
 
 class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
@@ -10,7 +11,9 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
     def update_examples(self, context):
         """ updates the examples """
         if self.examples != "NONE":
-
+            with open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.json")) as examples:
+                examples = json.load(examples)
+                import_example(examples[self.examples],self.examples)
             self.examples = "NONE"
 
     example_cache = []
