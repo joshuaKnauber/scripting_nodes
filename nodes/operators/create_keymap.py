@@ -4,6 +4,13 @@ from ...compile.compiler import compiler
 from ..base.node_looks import node_colors, node_icons
 
 
+class SN_KeymapItem(bpy.types.PropertyGroup):
+    test: bpy.props.StringProperty()
+
+
+bpy.utils.register_class(SN_KeymapItem)
+
+
 class SN_CreateKeymap(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_CreateKeymap"
@@ -32,6 +39,8 @@ class SN_CreateKeymap(bpy.types.Node, SN_ScriptingBaseNode):
 
     space_type: bpy.props.EnumProperty(name="Space",description="Space the keymap should work in",items=space_items,update=socket_update)
 
+    keymap_items: bpy.props.CollectionProperty(type=SN_KeymapItem)
+
     def init(self, context):
         self.use_custom_color = True
         self.color = node_colors["OPERATOR"]
@@ -41,6 +50,18 @@ class SN_CreateKeymap(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"mode",text="")
         layout.label(text="Space:")
         layout.prop(self,"space_type",text="")
+        layout.separator()
+
+        row = layout.row()
+        row.scale_y = 1.25
+        row.operator("scripting_nodes.add_keymap_item",icon="ADD").node_name = self.name
+        for index, item in enumerate(self.keymap_items):
+            box = layout.box()
+            row = box.row()
+            row.prop(item, "test", text="")
+            op = row.operator("scripting_nodes.remove_keymap_item",icon="PANEL_CLOSE",text="",emboss=False)
+            op.node_name = self.name
+            op.index = index
 
     def evaluate(self, output):
         error_list = []
