@@ -17,7 +17,7 @@ bl_info = {
     "description" : "Adds a node editor for writing scripts and addons with nodes",
     "blender" : (2, 80, 0),
     "version" : (1, 0, 0),
-    "location" : "Editors -> Scripting Nodes",
+    "location" : "Editors -> Visual Scripting",
     "wiki_url": "", 
     "warning" : "This addon is still in early development",
     "category" : "Node" 
