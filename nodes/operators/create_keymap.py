@@ -5,7 +5,7 @@ from ..base.node_looks import node_colors, node_icons
 
 
 class SN_KeymapItem(bpy.types.PropertyGroup):
-    test: bpy.props.StringProperty()
+    pass
 
 
 bpy.utils.register_class(SN_KeymapItem)
@@ -58,31 +58,20 @@ class SN_CreateKeymap(bpy.types.Node, SN_ScriptingBaseNode):
         for index, item in enumerate(self.keymap_items):
             box = layout.box()
             row = box.row()
-            row.prop(item, "test", text="")
             op = row.operator("scripting_nodes.remove_keymap_item",icon="PANEL_CLOSE",text="",emboss=False)
             op.node_name = self.name
             op.index = index
 
     def evaluate(self, output):
-        error_list = []
-
-        return {
-            "blocks": [
-                {
-                    "lines": [
-                    ],
-                    "indented": [
-                    ]
-                }
-            ],
-            "errors": error_list
-        }
+        return {"blocks": [],"errors": []}
 
     def needed_imports(self):
         return ["bpy"]
 
     def get_register_block(self):
         keys = []
+        for item in self.keymap_items:
+            key = []
         return ["km = bpy.context.window_manager.keyconfigs.addon.keymaps.new(name=\""+self.mode+"\", space_type=\""+self.space_type+"\")"] + keys + ["addon_keymaps.append(km)"]
 
     def get_unregister_block(self):
