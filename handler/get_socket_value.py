@@ -67,7 +67,10 @@ class SocketHandler():
                 value, errors = self._handle_output_socket(socket, socket_types)
         else:
             value = []
-            errors.append({"error": "no_connection", "node": socket.node})
+            if socket.bl_idname != "SN_LayoutSocket":
+                errors.append({"error": "no_connection", "node": socket.node})
+            else:
+                errors.append({"error": "no_layout_connection", "node": socket.node})
 
         return value, errors
 
@@ -77,7 +80,7 @@ class SocketHandler():
         
         errors = []
         if socket.is_linked:
-            value, errors = self._handle_socket_connection(socket, ["SN_StringSocket"])
+            value, errors = self._handle_socket_connection(socket, ["SN_StringSocket", "SN_DataSocket"])
         else:
             value = [socket.value]
             if '"' in value[0]:
@@ -93,7 +96,7 @@ class SocketHandler():
         
         errors = []
         if socket.is_linked:
-            value, errors = self._handle_socket_connection(socket, ["SN_IntSocket", "SN_FloatSocket"])
+            value, errors = self._handle_socket_connection(socket, ["SN_IntSocket", "SN_FloatSocket", "SN_DataSocket"])
             if socket.bl_idname == "SN_IntSocket" and value[0].bl_idname == "SN_FloatSocket":
                 value = ["int(", value[0], ")"]
         else:
@@ -108,7 +111,7 @@ class SocketHandler():
         
         errors = []
         if socket.is_linked:
-            value, errors = self._handle_socket_connection(socket, ["SN_BooleanSocket"])
+            value, errors = self._handle_socket_connection(socket, ["SN_BooleanSocket", "SN_DataSocket"])
         else:
             value = [str(socket.value)]
 
@@ -128,7 +131,7 @@ class SocketHandler():
 
         errors = []
         if socket.is_linked:
-            value, errors = self._handle_socket_connection(socket, ["SN_VectorSocket"])
+            value, errors = self._handle_socket_connection(socket, ["SN_VectorSocket", "SN_DataSocket"])
         else:
             value = [str((socket.value[0], socket.value[1], socket.value[2]))]
 
@@ -182,7 +185,7 @@ class SocketHandler():
             else:
                 errors.append({"error": "wrong_socket_out", "node": socket.node})
         else:
-            errors.append({"error": "no_connection", "node": socket.node})
+            errors.append({"error": "no_layout_connection", "node": socket.node})
         return layout_type, errors
 
     def socket_value(self, socket,as_list=True):

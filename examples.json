@@ -1,0 +1,243 @@
+{
+    "Add monkey": {
+        "nodes": [
+            {
+                "bl_idname": "SN_Panel",
+                "name": "Panel",
+                "location": [
+                    "v",
+                    -85.72999572753906,
+                    162.47412109375
+                ],
+                "properties": [
+                    [
+                        "_dynamic_layout_sockets",
+                        true
+                    ],
+                    [
+                        "_should_be_registered",
+                        true
+                    ],
+                    [
+                        "closed_by_default",
+                        false
+                    ],
+                    [
+                        "height",
+                        100.0
+                    ],
+                    [
+                        "hide",
+                        false
+                    ],
+                    [
+                        "hide_header",
+                        false
+                    ],
+                    [
+                        "icon",
+                        ""
+                    ],
+                    [
+                        "label",
+                        ""
+                    ],
+                    [
+                        "mute",
+                        false
+                    ],
+                    [
+                        "name",
+                        "Panel"
+                    ],
+                    [
+                        "panel_context",
+                        "scene"
+                    ],
+                    [
+                        "panel_name",
+                        "Monkey Panel"
+                    ],
+                    [
+                        "panel_uid",
+                        "6576"
+                    ],
+                    [
+                        "region_type",
+                        "WINDOW"
+                    ],
+                    [
+                        "select",
+                        false
+                    ],
+                    [
+                        "show_options",
+                        true
+                    ],
+                    [
+                        "show_preview",
+                        false
+                    ],
+                    [
+                        "show_texture",
+                        false
+                    ],
+                    [
+                        "space_type",
+                        "PROPERTIES"
+                    ],
+                    [
+                        "type",
+                        "CUSTOM"
+                    ],
+                    [
+                        "use_custom_color",
+                        true
+                    ],
+                    [
+                        "width",
+                        230.0
+                    ],
+                    [
+                        "width_hidden",
+                        42.0
+                    ]
+                ],
+                "input_values": [
+                    [
+                        0,
+                        "Misc"
+                    ],
+                    [
+                        1,
+                        false
+                    ],
+                    [
+                        2,
+                        0
+                    ]
+                ]
+            },
+            {
+                "bl_idname": "SN_Button",
+                "name": "Button",
+                "location": [
+                    "v",
+                    -535.4443359375,
+                    7.653656005859375
+                ],
+                "properties": [
+                    [
+                        "height",
+                        100.0
+                    ],
+                    [
+                        "hide",
+                        false
+                    ],
+                    [
+                        "icon",
+                        "MONKEY"
+                    ],
+                    [
+                        "label",
+                        ""
+                    ],
+                    [
+                        "mute",
+                        false
+                    ],
+                    [
+                        "name",
+                        "Button"
+                    ],
+                    [
+                        "operator",
+                        "Add Monkey - Mesh"
+                    ],
+                    [
+                        "select",
+                        true
+                    ],
+                    [
+                        "show_options",
+                        true
+                    ],
+                    [
+                        "show_preview",
+                        false
+                    ],
+                    [
+                        "show_texture",
+                        false
+                    ],
+                    [
+                        "type",
+                        "CUSTOM"
+                    ],
+                    [
+                        "use_custom_color",
+                        true
+                    ],
+                    [
+                        "width",
+                        300.0
+                    ],
+                    [
+                        "width_hidden",
+                        42.0
+                    ]
+                ],
+                "input_values": [
+                    [
+                        0,
+                        "Add monkey"
+                    ],
+                    [
+                        1,
+                        2.0
+                    ],
+                    [
+                        2,
+                        true
+                    ],
+                    [
+                        3,
+                        false
+                    ],
+                    [
+                        4,
+                        "WORLD"
+                    ],
+                    [
+                        5,
+                        [
+                            "v",
+                            1.0,
+                            1.0,
+                            1.0
+                        ]
+                    ],
+                    [
+                        6,
+                        [
+                            "v",
+                            0.0,
+                            0.0,
+                            0.0
+                        ]
+                    ]
+                ]
+            }
+        ],
+        "links": [
+            {
+                "out_name": "Button",
+                "in_name": "Panel",
+                "out_index": 0,
+                "in_index": 3
+            }
+        ],
+        "icon": "MONKEY"
+    }
+}

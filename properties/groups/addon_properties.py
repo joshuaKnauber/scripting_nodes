@@ -1,9 +1,36 @@
 import bpy
+import os
+import json
+from ...handler.example_functions import import_example
 
 class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     def update_auto_compile(self,context):
         """ function for updating the auto compile property """
+
+    def update_examples(self, context):
+        """ updates the examples """
+        if self.examples != "NONE":
+            with open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.json")) as examples:
+                examples = json.load(examples)
+                import_example(examples[self.examples],self.examples)
+            self.examples = "NONE"
+
+    example_cache = []
+
+    def example_items(self, context):
+        """ returns the example items """
+        if self.example_cache:
+            return self.example_cache
+        else:
+            items = [("NONE","Choose an example","Choose an example addon","PRESET",0)]
+            with open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.json")) as examples:
+                examples = json.load(examples)
+                for index, key in enumerate(examples):
+                    example = examples[key]
+                    items.append((key,key,key,example["icon"],index+1))
+            self.example_cache = items
+            return items
 
     # if true the node tree gets recompiled on changes
     auto_compile: bpy.props.BoolProperty(default=False, name="Auto Reload", description="Automatically reloads the addon when changes are made", update=update_auto_compile)
@@ -19,3 +46,6 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     # this is true when a package has been uninstalled and blender hasn't been restarted yet
     package_uninstalled_without_reload: bpy.props.BoolProperty(default=False)
+
+    # examples dropdown
+    examples: bpy.props.EnumProperty(name="Examples",description="Example node trees for the addon",update=update_examples,items=example_items)
