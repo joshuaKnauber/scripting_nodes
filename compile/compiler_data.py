@@ -20,6 +20,9 @@ class CompilerData():
 # You can find the addon under PLACEHOLDER.COM
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #"""
 
+    def keymap_block(self):
+        return "addon_keymaps = []"
+
     def register_block(self):
         return "def register():"
 
