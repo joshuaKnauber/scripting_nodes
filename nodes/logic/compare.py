@@ -69,12 +69,14 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
             }
         else:
             value, errors = self.SocketHandler.socket_value(self.inputs[0])
+            if not value:
+                value = ["\" \""]
 
             return {
                 "blocks": [
                     {
                         "lines": [
-                            value + [" " + "!= None"]
+                            value + [" != None"]
                         ],
                         "indented": [
                         ]

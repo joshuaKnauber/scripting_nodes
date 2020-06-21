@@ -154,6 +154,8 @@ class ScriptingNodesCompiler():
         for block in self._get_registerable_node_blocks(tree):
             text.write(block)
             self._write_paragraphs(text,2)
+        text.write(cd.keymap_block())
+        self._write_paragraphs(text,2)
         text.write(self._get_register_function(tree))
         self._write_paragraphs(text,2)
         text.write(self._get_unregister_function(tree))

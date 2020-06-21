@@ -6,8 +6,8 @@ from random import randint
 class ScriptingNodesTree(bpy.types.NodeTree):
     '''Scripting Nodes node tree'''
     bl_idname = 'ScriptingNodesTree'
-    bl_label = "Scripting Nodes"
-    bl_icon = 'SCRIPT'
+    bl_label = "Visual Scripting"
+    bl_icon = 'FILE_SCRIPT'
 
     def update_info(self,context):
         """ compiles the addon when the addon properties are changed """

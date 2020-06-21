@@ -45,17 +45,18 @@ def create_example():
         nodes.append(node_dict)
 
     for node in bpy.data.node_groups[NODE_TREE_NAME].nodes:
-        for index, out_socket in enumerate(node.outputs):
-            if out_socket.is_linked:
+        for in_index, in_socket in enumerate(node.inputs):
+            for link in in_socket.links:
                 link_dict = {
-                    "out_name": node.name,
-                    "in_name": out_socket.links[0].to_node.name,
-                    "out_index": index,
-                    "in_index": 0
+                    "out_name": link.from_node.name,
+                    "in_name": node.name,
+                    "out_index": 0,
+                    "in_index": in_index
                 }
-                for index, input_socket in enumerate(out_socket.links[0].to_node.inputs):
-                    if input_socket == out_socket.links[0].to_socket:
-                        link_dict["in_index"] = index
+                for out_index, output_socket in enumerate(link.from_node.outputs):
+                    if output_socket == link.from_socket:
+                        link_dict["out_index"] = out_index
+                        break
                 links.append(link_dict)
 
     example = {
@@ -81,7 +82,7 @@ def import_example(example,name):
         new_node.name = node["name"]
         new_node.location = tuple(node["location"][1:])
 
-        for _ in range(20):
+        for _ in range(10):
             for prop in node["properties"]:
                 try:
                     if type(prop[1]) == list:
