@@ -41,7 +41,6 @@ class SN_AppendPanel(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_region_type(self,context):
         """ called when the region type is updated """
-        self.inputs[0].hide = not self.UiLocationHandler.space_region_has_categories(self.space_type,self.region_type)
         self._update_panel_items()
         self.socket_update(context)
 
