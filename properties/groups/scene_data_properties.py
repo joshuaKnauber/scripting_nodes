@@ -7,3 +7,4 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
     identifier: bpy.props.StringProperty(name="Identifier",default="")
     description: bpy.props.StringProperty(name="Description",default="")
     type: bpy.props.StringProperty(name="Type",default="")
+    isCustom: bpy.props.BoolProperty(default=False)

@@ -3,6 +3,7 @@ from ..base.base_node import SN_ScriptingBaseNode
 from ...compile.compiler import compiler
 from ..base.node_looks import node_colors, node_icons
 from ...properties.groups.scene_data_properties import SN_SearchPropertyGroup
+from ...handler.custom_properties import CustomProperties
 
 
 class SN_DataProperties(bpy.types.Node, SN_ScriptingBaseNode):
@@ -64,6 +65,8 @@ class SN_DataProperties(bpy.types.Node, SN_ScriptingBaseNode):
                                 item.description = prop.description
                                 item.type = str(type(prop))
 
+                        self.CustomProperties.handle_data_properties(self, code.split(".")[-1])
+
             else:
                 self.is_collection = False
                 self.inputs["Name"].hide = True
@@ -76,6 +79,7 @@ class SN_DataProperties(bpy.types.Node, SN_ScriptingBaseNode):
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
     use_index: bpy.props.BoolProperty(default=True, name="Use index", description="Use an index instead of a name to get the element", update=update_use_index)
     is_collection: bpy.props.BoolProperty(default=False)
+    CustomProperties = CustomProperties()
 
     def init(self, context):
         self.use_custom_color = True
