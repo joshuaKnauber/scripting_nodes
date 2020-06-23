@@ -1,4 +1,4 @@
-import bpy
+"""import bpy
 from ..base.base_node import SN_ScriptingBaseNode
 from ...compile.compiler import compiler
 from ..base.node_looks import node_colors, node_icons
@@ -133,4 +133,4 @@ class SN_CreateKeymap(bpy.types.Node, SN_ScriptingBaseNode):
             "for km in addon_keymaps:",
             "    bpy.context.window_manager.keyconfigs.addon.keymaps.remove(km)",
             "addon_keymaps.clear()"
-        ]
+        ]"""
