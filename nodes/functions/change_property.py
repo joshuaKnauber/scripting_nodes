@@ -2,12 +2,15 @@ import bpy
 from ..base.base_node import SN_ScriptingBaseNode
 from ...compile.compiler import compiler
 from ..base.node_looks import node_colors, node_icons
+from ...handler.custom_properties import CustomProperties
 
 
 class SN_ChangePropertySearchGroup(bpy.types.PropertyGroup):
 
     name: bpy.props.StringProperty(name="Name", default="")
     identifier: bpy.props.StringProperty(name="Identifier",default="")
+    isCustom: bpy.props.BoolProperty(default=False)
+    prop_type: bpy.props.StringProperty(default="")
 
 
 class SN_ChangeProperty(bpy.types.Node, SN_ScriptingBaseNode):
@@ -15,6 +18,8 @@ class SN_ChangeProperty(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_ChangeProperty"
     bl_label = "Change Property"
     bl_icon = node_icons["PROGRAM"]
+
+    CustomProperties = CustomProperties()
 
     @classmethod
     def poll(cls, ntree):
@@ -29,30 +34,33 @@ class SN_ChangeProperty(bpy.types.Node, SN_ScriptingBaseNode):
                 self.inputs.remove(inp)
         
         if len(self.sn_change_property_properties) > 0 and self.propName != "":
-            code = self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket)
-            if code != "":
-                if "bl_rna.properties" in code:
-                    code+=".fixed_type"
-                    code="bpy.types." + eval("type("+code+").bl_rna.identifier")
-                prop = eval(code + ".bl_rna.properties['" + self.sn_change_property_properties[self.propName].identifier + "']")
-                if prop.type == "STRING":
-                    self.inputs.new("SN_StringSocket", self.propName)
-                elif prop.type == "FLOAT":
-                    if prop.array_length > 0:
-                        self.inputs.new("SN_VectorSocket", self.propName)
-                    else:
-                        self.inputs.new("SN_FloatSocket", self.propName)
-                elif prop.type == "INT":
-                    if prop.array_length > 0:
-                        self.inputs.new("SN_VectorSocket", self.propName)
-                    else:
-                        self.inputs.new("SN_IntSocket", self.propName)
-                elif prop.type == "BOOLEAN":
-                    self.inputs.new("SN_BooleanSocket", self.propName)
-                elif prop.type == "ENUM":
-                    self.inputs.new("SN_EnumSocket", self.propName)
-                elif prop.type != "POINTER":
-                    self.inputs.new("SN_DataSocket", self.propName)
+            if self.sn_change_property_properties[self.propName].isCustom:
+                self.inputs.new(self.sn_change_property_properties[self.propName].prop_type, self.propName)
+            else:
+                code = self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket)
+                if code != "":
+                    if "bl_rna.properties" in code:
+                        code+=".fixed_type"
+                        code="bpy.types." + eval("type("+code+").bl_rna.identifier")
+                    prop = eval(code + ".bl_rna.properties['" + self.sn_change_property_properties[self.propName].identifier + "']")
+                    if prop.type == "STRING":
+                        self.inputs.new("SN_StringSocket", self.propName)
+                    elif prop.type == "FLOAT":
+                        if prop.array_length > 0:
+                            self.inputs.new("SN_VectorSocket", self.propName)
+                        else:
+                            self.inputs.new("SN_FloatSocket", self.propName)
+                    elif prop.type == "INT":
+                        if prop.array_length > 0:
+                            self.inputs.new("SN_VectorSocket", self.propName)
+                        else:
+                            self.inputs.new("SN_IntSocket", self.propName)
+                    elif prop.type == "BOOLEAN":
+                        self.inputs.new("SN_BooleanSocket", self.propName)
+                    elif prop.type == "ENUM":
+                        self.inputs.new("SN_StringSocket", self.propName)
+                    elif prop.type != "POINTER":
+                        self.inputs.new("SN_DataSocket", self.propName)
 
         self.socket_update(context)
 
@@ -98,7 +106,8 @@ class SN_ChangeProperty(bpy.types.Node, SN_ScriptingBaseNode):
                                         item = self.sn_change_property_properties.add()
                                         item.name = prop.name
                                         item.identifier = prop.identifier
-
+                            
+                            self.CustomProperties.handle_change_property(self, code.split(".")[-1])
 
 
     def evaluate(self, output):

@@ -112,6 +112,19 @@ class SN_CreateProperty(bpy.types.Node, SN_ScriptingBaseNode):
             code+=")"
 
         return [code]
-    
+
     def get_unregister_block(self):
-        return []
+        name = self.ErrorHandler.handle_text(self.propName)
+        return ["del bpy.types." + self.propLocation + "." + name]
+
+    def evaluate(self, output):
+        return {
+            "blocks": [
+                {
+                    "lines": [],
+                    "indented": []
+                }
+            ],
+            "errors": []
+        }
+    
