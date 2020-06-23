@@ -2,6 +2,7 @@ import bpy
 from ..base.base_node import SN_ScriptingBaseNode
 from ...compile.compiler import compiler
 from ..base.node_looks import node_colors, node_icons
+from ...handler.custom_properties import CustomProperties
 
 
 class SN_LayoutSearchPropertyGroup(bpy.types.PropertyGroup):
@@ -10,6 +11,7 @@ class SN_LayoutSearchPropertyGroup(bpy.types.PropertyGroup):
     identifier: bpy.props.StringProperty(default="")
     isEnum: bpy.props.BoolProperty(default=False)
     isBool: bpy.props.BoolProperty(default=False)
+    isCustom: bpy.props.BoolProperty(default=False)
 
 
 class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
@@ -17,6 +19,8 @@ class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_LayoutProperty"
     bl_label = "Layout Property"
     bl_icon = node_icons["INTERFACE"]
+
+    CustomProperties = CustomProperties()
 
     @classmethod
     def poll(cls, ntree):
@@ -62,7 +66,8 @@ class SN_LayoutProperty(bpy.types.Node, SN_ScriptingBaseNode):
                                     item.isEnum = True
                                 elif eval(code+".bl_rna.properties['"+prop.identifier+"'].type") == "BOOLEAN":
                                     item.isBool = True
-
+                        
+                        self.CustomProperties.handle_layout_property(self, code.split(".")[-1])
 
     sn_layout_property_properties: bpy.props.CollectionProperty(type=SN_LayoutSearchPropertyGroup)
     propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_prop_name)
