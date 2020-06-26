@@ -28,7 +28,7 @@ class OperatorHandler():
         """ returns a list with all operator categories as items """
         items = []
         for category in dir(bpy.ops):
-            if category != "scripting_nodes" and category != "3dview":
+            if category != "scripting_nodes" and not category[0].isnumeric():
                 name = category.replace("_"," ").title()
                 items.append((category,name,name + " operators"))
         return items
