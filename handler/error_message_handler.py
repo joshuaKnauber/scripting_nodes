@@ -6,35 +6,30 @@ class ErrorMessageHandler():
     # handle_text: takes in text and returns the updated text to use in the file
 
     errors = {
-        "test_error": {
-            "name": "Test error",
-            "message": "this is the errors description",
-            "fatal": True
-        },
         "wrong_socket_inp": {
             "name": "Wrong socket",
             "message": "One of the inputs of this node has an incorrect output connected",
-            "fatal": True
+            "fatal": False
         },
         "no_connection_inp": {
             "name": "No connection",
             "message": "One of the inputs of this node has no output connected",
-            "fatal": True
+            "fatal": False
         },
         "wrong_socket_out": {
             "name": "Wrong socket",
             "message": "One of the outputs of this node has an incorrect input connected",
-            "fatal": True
+            "fatal": False
         },
         "no_connection_out": {
             "name": "No connection",
             "message": "One of the outputs of this node has no input connected",
-            "fatal": True
+            "fatal": False
         },
         "no_connection": {
             "name": "No connection",
             "message": "One of the sockets of this node has no connection",
-            "fatal": True
+            "fatal": False
         },
         "no_layout_connection": {
             "name": "No layout connection",
