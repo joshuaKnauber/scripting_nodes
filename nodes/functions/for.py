@@ -142,7 +142,6 @@ class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
             if "bpy.data" in code:
                 code = code.split(".")[-1]
                 code = "bpy.data.bl_rna.properties['" + code + "']"
-                print("bpy.types." + eval("type(" + code + ".fixed_type)").bl_rna.identifier)
             return "bpy.types." + eval("type(" + code + ".fixed_type)").bl_rna.identifier
         else:
             return ""
