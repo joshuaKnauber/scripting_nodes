@@ -7,7 +7,7 @@ from ..base.node_looks import node_colors, node_icons
 class SN_ForNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_ForNode"
-    bl_label = "For"
+    bl_label = "For (Program)"
     bl_icon = node_icons["PROGRAM"]
     _should_be_registered = False
 
