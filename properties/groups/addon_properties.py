@@ -3,6 +3,10 @@ import os
 import json
 from ...handler.example_functions import import_example
 
+
+class PrintProperties(bpy.types.PropertyGroup):
+    text: bpy.props.StringProperty()
+
 class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     def update_auto_compile(self,context):
@@ -49,3 +53,6 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     # examples dropdown
     examples: bpy.props.EnumProperty(name="Examples",description="Example node trees for the addon",update=update_examples,items=example_items)
+
+    # print texts
+    print_texts: bpy.props.CollectionProperty(type=PrintProperties)

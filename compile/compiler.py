@@ -187,6 +187,8 @@ class ScriptingNodesCompiler():
 
     def _unregister_tree(self, tree):
         """ unregisters the module if already registered and removes it """
+        bpy.context.scene.sn_properties.print_texts.clear()
+
         for module in self._modules:
             if module[ "node_tree" ] == tree:
                 if self._run_register:

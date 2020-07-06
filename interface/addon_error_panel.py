@@ -7,7 +7,7 @@ from ..handler.error_message_handler import ErrorMessageHandler
 class SN_PT_ErrorLogPanel(bpy.types.Panel):
     """Creates a panel for displaying error messages in the node editors sidebar"""
     bl_label = "Errors"
-    bl_order = 2
+    bl_order = 3
     bl_idname = "SN_PT_ErrorLogPanel"
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'

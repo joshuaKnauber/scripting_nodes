@@ -20,7 +20,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.inputs.new("SN_ProgramSocket", "Program").display_shape = "DIAMOND"
         self.inputs.new("SN_DataSocket", "Value")
         self.outputs.new("SN_ProgramSocket", "Program").display_shape = "DIAMOND"
-    
+
     def evaluate(self, output):
         value, errors = self.SocketHandler.socket_value(self.inputs[1])
         continue_code, error = self.SocketHandler.socket_value(self.outputs[0], False)
@@ -29,7 +29,9 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [
-                        ["print("] + value + [")"]
+                        ["print("] + value + [")"],
+                        ["try: bpy.context.scene.sn_properties.print_texts.add().text = str("] + value + [")"],
+                        ["except: pass"]
                     ],
                     "indented": [
                     ]
