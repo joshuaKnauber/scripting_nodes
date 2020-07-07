@@ -20,6 +20,23 @@ class CustomProperties():
         
         return property_nodes
 
+    def handle_enum_property(self, node, bpy_type):
+        """ generates the custom properties for the enum selector node """
+
+        for item in node.sn_enum_property_properties:
+            if item.isCustom:
+                node.sn_enum_property_properties.remove(node.sn_enum_property_properties.find(item))
+
+        for prop_node in self._get_nodes():
+            if prop_node[3] == bpy_type:
+                identifier = self.ErrorHandler.handle_text(prop_node[0])
+                if not prop_node[0] in node.sn_enum_property_properties:
+                    if prop_node[2] == "EnumProperty":
+                        item = node.sn_enum_property_properties.add()
+                        item.isCustom = True
+                        item.name = prop_node[0]
+                        item.identifier = identifier
+
     def handle_layout_property(self, node, bpy_type):
         """ generates the custom properties for the layout property node """
 
