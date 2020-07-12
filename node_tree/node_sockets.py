@@ -71,7 +71,7 @@ class SN_StringSocket(bpy.types.NodeSocket, SN_Socket):
 
 
 class SN_BoolSocket(bpy.types.NodeSocket, SN_Socket):
-    '''Bool Socket for handling text'''
+    '''Bool Socket for handling booleans'''
     bl_idname = 'SN_BoolSocket'
     bl_label = "Boolean"
     _is_data_socket = True
@@ -95,6 +95,102 @@ class SN_BoolSocket(bpy.types.NodeSocket, SN_Socket):
             layout.label(text=text)
         else:
             layout.prop(self, "socket_value", text=text, toggle=self.show_toggle)
+
+
+
+
+class SN_IntSocket(bpy.types.NodeSocket, SN_Socket):
+    '''Int Socket for handling integers'''
+    bl_idname = 'SN_IntSocket'
+    bl_label = "Integer"
+    _is_data_socket = True
+
+    socket_value: bpy.props.IntProperty(
+        name="Integer",
+        description="Socket for an integer value",
+        default=1
+    )
+
+    positive_value: bpy.props.IntProperty(
+        name="Integer",
+        description="Socket for an integer value",
+        default=1,
+        min=0
+    )
+
+    only_positive: bpy.props.BoolProperty(default=False)
+
+    def get_value(self):
+        if self.only_positive:
+            return self.positive_value
+        else:
+            return self.socket_value
+
+    def set_value(self,value):
+        self.socket_value = value
+        if value >= 0:
+            self.positive_value = value
+        else:
+            self.positive_value = 0
+
+    def draw(self, context, layout, node, text):
+        if self.is_output or self.is_linked:
+            layout.label(text=text)
+        else:
+            if self.only_positive:
+                layout.prop(self, "positive_value", text=text)
+            else:
+                layout.prop(self, "socket_value", text=text)
+
+
+
+
+class SN_FloatSocket(bpy.types.NodeSocket, SN_Socket):
+    '''Float Socket for handling floats'''
+    bl_idname = 'SN_FloatSocket'
+    bl_label = "Float"
+    _is_data_socket = True
+
+    socket_value: bpy.props.FloatProperty(
+        name="Float",
+        description="Socket for a float value",
+        default=1
+    )
+
+    factor_value: bpy.props.FloatProperty(
+        name="Float",
+        description="Socket for a float value",
+        default=0.5,
+        min=0,
+        max=1
+    )
+
+    use_factor: bpy.props.BoolProperty(default=False)
+
+    def get_value(self):
+        if self.use_factor:
+            return self.factor_value
+        else:
+            return self.socket_value
+
+    def set_value(self,value):
+        self.socket_value = value
+        if value >= 0:
+            if value <= 1:
+                self.factor_value = value
+            else:
+                value = 1
+        else:
+            self.positive_value = 0
+
+    def draw(self, context, layout, node, text):
+        if self.is_output or self.is_linked:
+            layout.label(text=text)
+        else:
+            if self.use_factor:
+                layout.prop(self, "factor_value", text=text, slider=True)
+            else:
+                layout.prop(self, "socket_value", text=text)
 
 
 

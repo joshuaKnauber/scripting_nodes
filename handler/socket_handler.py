@@ -9,8 +9,18 @@ class SocketHandler():
                 "shape": "CIRCLE",
                 "color": (0.85,0.1,0.75,1)
             },
-            "BOOL": {
+            "BOOLEAN": {
                 "idname": "SN_BoolSocket",
+                "shape": "CIRCLE",
+                "color": (0.65,0,0,1)
+            },
+            "INTEGER": {
+                "idname": "SN_IntSocket",
+                "shape": "CIRCLE",
+                "color": (0.65,0,0,1)
+            },
+            "FLOAT": {
+                "idname": "SN_FloatSocket",
                 "shape": "CIRCLE",
                 "color": (0.65,0,0,1)
             },
