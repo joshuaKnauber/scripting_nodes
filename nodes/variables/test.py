@@ -9,12 +9,14 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0,1,1)
 
     def inititialize(self, context):
-        self.sockets.create_input("STRING","normal",False)
-        socket = self.sockets.create_input("STRING","python",False)
+        self.sockets.create_input(self,"EXECUTE","exec",False)
+        self.sockets.create_input(self,"STRING","normal",False)
+        socket = self.sockets.create_input(self,"STRING","python",False)
         socket.is_python_name = True
         
-        self.sockets.create_output("STRING","dynamic",True)
-        self.sockets.create_output("STRING","output",False)
+        self.sockets.create_output(self,"EXECUTE","exec",False)
+        self.sockets.create_output(self,"STRING","dynamic",True)
+        self.sockets.create_output(self,"STRING","output",False)
 
     def evaluate(self, socket, input_data):
         blocks = [

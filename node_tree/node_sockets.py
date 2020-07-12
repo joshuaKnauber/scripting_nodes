@@ -65,3 +65,14 @@ class SN_StringSocket(bpy.types.NodeSocket, SN_Socket):
         else:
             layout.prop(self, "socket_value", text=text)
 
+
+
+
+class SN_ExecuteSocket(bpy.types.NodeSocket, SN_Socket):
+    '''Execute Socket for handling text'''
+    bl_idname = 'SN_ExecuteSocket'
+    bl_label = "Execute"
+    _is_data_socket = False
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)

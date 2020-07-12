@@ -17,8 +17,6 @@ class SN_ScriptingBaseNode:
         pass
 
     def init(self,context):
-        self.sockets._node = self
-
         self.use_custom_color = True
         self.color = self.node_color
 
@@ -34,15 +32,20 @@ class SN_ScriptingBaseNode:
 
     def add_dynamic_socket(self,inputs,socket,index,parent):
         if inputs:
-            socket = self.sockets.create_input(socket.socket_type,socket.name,True)
+            socket = self.sockets.create_input(self,socket.socket_type,socket.name,True)
             self.inputs.move(len(self.inputs)-1,index+1)
         else:
-            socket = self.sockets.create_output(socket.socket_type,socket.name,True)
+            socket = self.sockets.create_output(self,socket.socket_type,socket.name,True)
             self.outputs.move(len(self.outputs)-1,index+1)
         socket.dynamic_parent = parent
         return socket
 
-    def update_dynamic(self,sockets,inputs):
+    def update_dynamic(self,inputs):
+        if inputs:
+            sockets = self.inputs
+        else:
+            sockets = self.outputs
+
         for socket in sockets:
             if socket.dynamic and socket.dynamic_parent:
                 if not socket.is_linked:
@@ -82,19 +85,28 @@ class SN_ScriptingBaseNode:
                     if link.from_socket._is_data_socket and link.to_socket._is_data_socket:
                         self.cast_link(link)
                     else:
+                        from_socket = link.from_socket
+                        to_socket = link.to_socket
                         bpy.context.space_data.node_tree.links.remove(link)
+                        
+                        #if from_socket.dynamic and from_socket.dynamic_parent:
+                        #    from_socket.node.outputs.remove(from_socket)
+                        #elif not "_DOT" in from_socket.display_shape:
+                        #    from_socket.display_shape += "_DOT"
+                        if not "_DOT" in to_socket.display_shape:
+                            to_socket.display_shape += "_DOT"
 
     def update(self):
-        self.update_socket_connections()
-
         self.update_shapes(self.inputs)
         self.update_shapes(self.outputs)
 
-        self.update_dynamic(self.inputs,True)
-        self.update_dynamic(self.outputs,False)
+        self.update_dynamic(True)
+        self.update_dynamic(False)
         for input_socket in self.inputs:
             for link in input_socket.links:
                 link.from_node.update()
+                
+        self.update_socket_connections()
 
     def evaluate(self, socket, input_data):
         return {
