@@ -9,6 +9,11 @@ class SocketHandler():
                 "shape": "CIRCLE",
                 "color": (0.85,0.1,0.75,1)
             },
+            "BOOL": {
+                "idname": "SN_BoolSocket",
+                "shape": "CIRCLE",
+                "color": (0.65,0,0,1)
+            },
             "EXECUTE": {
                 "idname": "SN_ExecuteSocket",
                 "shape": "DIAMOND",

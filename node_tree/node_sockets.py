@@ -12,6 +12,8 @@ class SN_Socket:
         return self.socket_color
 
 
+
+
 class SN_StringSocket(bpy.types.NodeSocket, SN_Socket):
     '''String Socket for handling text'''
     bl_idname = 'SN_StringSocket'
@@ -68,6 +70,35 @@ class SN_StringSocket(bpy.types.NodeSocket, SN_Socket):
 
 
 
+class SN_BoolSocket(bpy.types.NodeSocket, SN_Socket):
+    '''Bool Socket for handling text'''
+    bl_idname = 'SN_BoolSocket'
+    bl_label = "Boolean"
+    _is_data_socket = True
+
+    socket_value: bpy.props.BoolProperty(
+        name="Boolean",
+        description="Socket for a boolean value",
+        default=True
+    )
+
+    show_toggle: bpy.props.BoolProperty(default=True)
+
+    def get_value(self):
+        return self.socket_value
+
+    def set_value(self,value):
+        self.socket_value = value
+
+    def draw(self, context, layout, node, text):
+        if self.is_output or self.is_linked:
+            layout.label(text=text)
+        else:
+            layout.prop(self, "socket_value", text=text, toggle=self.show_toggle)
+
+
+
+
 class SN_ExecuteSocket(bpy.types.NodeSocket, SN_Socket):
     '''Execute Socket for running the program'''
     bl_idname = 'SN_ExecuteSocket'
@@ -76,6 +107,7 @@ class SN_ExecuteSocket(bpy.types.NodeSocket, SN_Socket):
 
     def draw(self, context, layout, node, text):
         layout.label(text=text)
+
 
 
 
