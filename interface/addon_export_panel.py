@@ -24,4 +24,4 @@ class SN_PT_ExportPanel(bpy.types.Panel):
             row.scale_y = 1.5
             row.operator("scripting_nodes.export_addon", text="Export addon",icon="EXPORT")
         else:
-            layout.label(text="Reload the addon before exporting!")
+            layout.label(text="Compile the addon before exporting!")

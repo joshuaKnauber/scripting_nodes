@@ -1,5 +1,4 @@
 import bpy
-from ...compile.compiler import compiler
 from random import randint
 
 
@@ -11,7 +10,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def update_info(self,context):
         """ compiles the addon when the addon properties are changed """
-        compiler().autocompile_active()
 
     def get_file_name(self):
         if self.addon_name:
@@ -31,4 +29,4 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     addon_version: bpy.props.IntVectorProperty(default=(1, 0, 0),min=0,name="Version",description="Version of your addon",update=update_info)
 
     # if true, the addon is loaded when the file is opened
-    compile_on_start: bpy.props.BoolProperty(default=True,name="Reload on start",description="Reload this node tree when this file is opened")
+    compile_on_start: bpy.props.BoolProperty(default=True,name="Compile on start",description="Compiles this node tree when this file is opened")

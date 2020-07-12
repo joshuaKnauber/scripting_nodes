@@ -12,8 +12,8 @@ class SN_ScriptingNodesCategory(NodeCategory):
 def get_node_categories():
     node_categories_list = {}
     container = os.path.dirname(os.path.dirname(__file__))
-    for base, dirs, files in os.walk(container):
-        if not os.path.basename(base) in ["base","__pycache__","nodes"]:
+    for base, _, files in os.walk(container):
+        if not os.path.basename(base) in ["__pycache__","nodes"]:
             if not os.path.basename(base) in node_categories_list:
                 node_categories_list[os.path.basename(base)] = []
             for node_file in files:
@@ -26,7 +26,7 @@ def get_node_categories():
         for node in node_categories_list[category]:
             with open(node) as node_file:
                 for line in node_file.readlines():
-                    if "bl_idname" in line:
+                    if "bl_idname" in line and len(line.split("\"")) > 1:
                         category_items.append(NodeItem(line.split("\"")[1]))
                         break
         if category_items:

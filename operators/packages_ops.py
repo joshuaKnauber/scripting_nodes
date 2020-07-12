@@ -53,7 +53,7 @@ class SN_OT_InstallPackage(bpy.types.Operator, ImportHelper):
 
         self._add_package_to_json(names)
 
-        bpy.context.scene.sn_properties.package_installed_without_reload = True
+        bpy.context.scene.sn_properties.package_installed_without_compile = True
         reregister_node_categories(names)
         self.report({"INFO"},message="Package succesfully installed")
 
@@ -119,7 +119,7 @@ class SN_OT_UninstallPackage(bpy.types.Operator):
         self._remove_empty_folders()
         self._remove_package_from_json()
         self.report({"INFO"},message="Uninstalled package successfully!")
-        context.scene.sn_properties.package_uninstalled_without_reload = True
+        context.scene.sn_properties.package_uninstalled_without_compile = True
         return {"FINISHED"}
 
     def invoke(self, context, event):

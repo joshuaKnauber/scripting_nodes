@@ -1,12 +1,11 @@
 import bpy
 from ..compile.compiler import compiler
-from ..handler.error_handling import ErrorHandler
 
 
 class SN_OT_CompileActive(bpy.types.Operator):
     bl_idname = "scripting_nodes.compile_active"
-    bl_label = "Reload Addon"
-    bl_description = "Reloads the active node trees addon"
+    bl_label = "Compile Addon"
+    bl_description = "Compiles the active node trees addon"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
 
     @classmethod
@@ -38,7 +37,6 @@ class SN_OT_RunFunction(bpy.types.Operator):
     bl_description = "Runs a function"
     bl_options = {"REGISTER","INTERNAL"}
 
-    ErrorHandler = ErrorHandler()
     funcName: bpy.props.StringProperty(name="Name", description="The name of the function")
 
     @classmethod
@@ -47,6 +45,5 @@ class SN_OT_RunFunction(bpy.types.Operator):
 
     def execute(self, context):
         if self.funcName != "":
-            name = self.ErrorHandler.handle_text(self.funcName)
-            compiler().run_function(name)
+            compiler().run_function(self.funcName)
         return {"FINISHED"}

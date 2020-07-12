@@ -24,5 +24,5 @@ class SN_OT_FindErrorNode(bpy.types.Operator):
                 else:
                     node.select = False
         if not found:
-            self.report({"INFO"},message ="Couldn't find the corresponding node. Try to reload the node tree.")
+            self.report({"INFO"},message ="Couldn't find the corresponding node. Try to compile the node tree.")
         return {"FINISHED"}

@@ -6,7 +6,6 @@ class ScriptingNodesCompiler():
     # CALLABLE FUNCTIONS
     # compile_active: takes the active node tree and compiles it after unregistering
     # compile_tree: recompiles the given tree
-    # autocompile_active: compiles the active node tree if autocompile is active
     # unregister_active: unregisters the active node tree
     # unregister_all: unregisters all registered node trees
     # is_active_compiled: returns if the active node tree is compiled and registered
@@ -222,15 +221,6 @@ class ScriptingNodesCompiler():
         """ unregisters all registered node trees """
         for module in self._modules:
             self._unregister_tree(module["node_tree"])
-
-    def autocompile_active(self):
-        """ runs compile if the auto compile is enabled """
-        if bpy.context.scene.sn_properties.auto_compile:
-            self.compile_active()
-
-    def socket_update(self):
-        """ runs autocompile for a socket update """
-        self.autocompile_active()
 
     def is_active_compiled(self):
         """ returns if the active node tree is compiled """
