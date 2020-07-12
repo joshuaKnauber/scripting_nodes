@@ -1,3 +1,5 @@
+from random import randint
+
 class SocketHandler():
 
     def __init__(self):
@@ -18,7 +20,10 @@ class SocketHandler():
             socket_types = socket_types[:-1]
         return socket_types
 
-    def _setup_socket(self,socket,data):
+    def _setup_socket(self,socket,socket_type,data,dynamic):
+        socket.uid = str(randint(0,9999))
+        socket.dynamic = dynamic
+        socket.socket_type = socket_type
         socket.socket_color = data["color"]
         socket.display_shape = data["shape"]
 
@@ -32,7 +37,7 @@ class SocketHandler():
                 socket = self._node.inputs.new(socket_data["idname"],label)
             else:
                 socket = self._node.outputs.new(socket_data["idname"],label)
-            self._setup_socket(socket,socket_data)
+            self._setup_socket(socket,socket_type,socket_data,dynamic)
             return socket
 
     def create_input(self,socket_type,label,dynamic=False):

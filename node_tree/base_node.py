@@ -32,9 +32,55 @@ class SN_ScriptingBaseNode:
                 if not "_DOT" in socket.display_shape:
                     socket.display_shape += "_DOT"
 
+    def add_dynamic_socket(self,inputs,socket,index,parent):
+        if inputs:
+            socket = self.sockets.create_input(socket.socket_type,socket.name,True)
+            self.inputs.move(len(self.inputs)-1,index+1)
+        else:
+            socket = self.sockets.create_output(socket.socket_type,socket.name,True)
+            self.outputs.move(len(self.outputs)-1,index+1)
+        socket.dynamic_parent = parent
+        return socket
+
+    def update_dynamic(self,sockets,inputs):
+        for socket in sockets:
+            if socket.dynamic and socket.dynamic_parent:
+                if not socket.is_linked:
+                    if inputs:
+                        self.inputs.remove(socket)
+                    else:
+                        self.outputs.remove(socket)
+
+        last_parent = "null"
+        created_sockets = []
+        for index, socket in enumerate(sockets):
+            if not socket in created_sockets:
+                if socket.dynamic and not socket.dynamic_parent:
+                    last_parent = socket.uid
+
+                if socket.dynamic and not socket.dynamic_parent and socket.is_linked:
+                    if not len(sockets) == index+1:
+                        if sockets[index+1].dynamic_parent != socket.uid:
+                            created_sockets.append(self.add_dynamic_socket(inputs,socket,index,socket.uid))
+                    else:
+                        created_sockets.append(self.add_dynamic_socket(inputs,socket,index,socket.uid))
+                        
+                elif socket.dynamic and socket.dynamic_parent == last_parent:
+                    if not len(sockets) == index+1:
+                        if sockets[index+1].dynamic_parent != last_parent:
+                            created_sockets.append(self.add_dynamic_socket(inputs,socket,index,last_parent))
+                    else:
+                        created_sockets.append(self.add_dynamic_socket(inputs,socket,index,last_parent))
+
     def update(self):
         self.update_shapes(self.inputs)
         self.update_shapes(self.outputs)
+
+        self.update_dynamic(self.inputs,True)
+        self.update_dynamic(self.outputs,False)
+        for input_socket in self.inputs:
+            for link in input_socket.links:
+                link.from_node.update()
 
     def evaluate(self, socket, input_data):
         return {

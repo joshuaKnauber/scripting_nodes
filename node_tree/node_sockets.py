@@ -1,10 +1,20 @@
 import bpy
 
-class SN_StringSocket(bpy.types.NodeSocket):
+class SN_Socket:
+    socket_color: bpy.props.FloatVectorProperty(size=4)
+    socket_type: bpy.props.StringProperty()
+    uid: bpy.props.StringProperty(default="")
+    dynamic: bpy.props.BoolProperty(default=False)
+    dynamic_parent: bpy.props.StringProperty(default="")
+
+    def draw_color(self, context, node):
+        return self.socket_color
+
+
+class SN_StringSocket(bpy.types.NodeSocket, SN_Socket):
     '''String Socket for handling text'''
     bl_idname = 'SN_StringSocket'
     bl_label = "String"
-    socket_color: bpy.props.FloatVectorProperty(size=4) # set in socket handler
 
     _invalid_chars = [" ","\\","-","?",".",",","<",">","*","+","-","#","'","~","@","€","|","\"","²",
                     "³","§","$","%","&","/","(","[","]",")","=","}","{","´","´","^","°",":",";"]
@@ -52,7 +62,4 @@ class SN_StringSocket(bpy.types.NodeSocket):
             layout.label(text=text)
         else:
             layout.prop(self, "socket_value", text=text)
-
-    def draw_color(self, context, node):
-        return self.socket_color
 
