@@ -3,7 +3,6 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
 class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
-
     bl_idname = "SN_BooleanNode"
     bl_label = "Boolean"
     bl_icon = "MONKEY"
@@ -11,22 +10,22 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def inititialize(self, context):
         self.sockets.create_input("STRING","test",False)
+        socket = self.sockets.create_input("STRING","test",False)
+        socket.is_python_name = True
         self.sockets.create_output("STRING","test",False)
 
     def evaluate(self, socket, input_data):
-        return {
-            "blocks": [
-                {
-                    "lines": [
-                        
-                    ],
-                    "indented": [
-                        
-                    ]
-                }
-            ],
-            "errors": []
-        }
+        blocks = [
+                    {
+                        "lines": [
+                            
+                        ],
+                        "indented": [
+                            
+                        ]
+                    }
+                ]
 
-    def required_imports(self):
-        return []
+        errors = []
+
+        return {"blocks": blocks, "errors": errors}

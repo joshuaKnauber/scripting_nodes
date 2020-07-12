@@ -65,3 +65,6 @@ class SN_ScriptingBaseNode:
 
     def required_imports(self):
         return []
+
+    def layout_type(self):
+        return "layout"
