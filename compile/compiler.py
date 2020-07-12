@@ -64,8 +64,6 @@ class ScriptingNodesCompiler():
         """ returns the code block for the given node """
         node_code = ""
         node_data = node.evaluate(output)
-        if node._debug_node:
-            print(node_data)
         for block in node_data["blocks"]:
             node_code += self._compile_code_block(block, indents)
         self._add_errors_to_active(node_data["errors"])
