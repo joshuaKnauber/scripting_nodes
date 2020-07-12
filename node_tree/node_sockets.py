@@ -1,6 +1,7 @@
 import bpy
 
 class SN_Socket:
+    _is_data_socket = False
     socket_color: bpy.props.FloatVectorProperty(size=4)
     socket_type: bpy.props.StringProperty()
     uid: bpy.props.StringProperty(default="")
@@ -15,6 +16,7 @@ class SN_StringSocket(bpy.types.NodeSocket, SN_Socket):
     '''String Socket for handling text'''
     bl_idname = 'SN_StringSocket'
     bl_label = "String"
+    _is_data_socket = True
 
     _invalid_chars = [" ","\\","-","?",".",",","<",">","*","+","-","#","'","~","@","€","|","\"","²",
                     "³","§","$","%","&","/","(","[","]",")","=","}","{","´","´","^","°",":",";"]

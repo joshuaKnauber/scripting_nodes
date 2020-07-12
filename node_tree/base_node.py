@@ -72,7 +72,21 @@ class SN_ScriptingBaseNode:
                     else:
                         created_sockets.append(self.add_dynamic_socket(inputs,socket,index,last_parent))
 
+    def cast_link(self,link):
+        pass#TODO: add a cast node to the link
+
+    def update_socket_connections(self):
+        for input_socket in self.inputs:
+            for link in input_socket.links:
+                if link.from_socket.bl_idname != link.to_socket.bl_idname:
+                    if link.from_socket._is_data_socket and link.to_socket._is_data_socket:
+                        self.cast_link(link)
+                    else:
+                        bpy.context.space_data.node_tree.links.remove(link)
+
     def update(self):
+        self.update_socket_connections()
+
         self.update_shapes(self.inputs)
         self.update_shapes(self.outputs)
 
