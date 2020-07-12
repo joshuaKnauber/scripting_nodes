@@ -13,6 +13,11 @@ class SocketHandler():
                 "idname": "SN_ExecuteSocket",
                 "shape": "DIAMOND",
                 "color": (1,1,1,1)
+            },
+            "LAYOUT": {
+                "idname": "SN_LayoutSocket",
+                "shape": "DIAMOND",
+                "color": (0.89,0.5,0,1)
             }
         }
 
