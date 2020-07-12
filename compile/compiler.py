@@ -87,7 +87,7 @@ class ScriptingNodesCompiler():
         """ returns the import block """
         imports = []
         for node in tree.nodes:
-            for needed_import in node.needed_imports():
+            for needed_import in node.required_imports():
                 if not needed_import in imports:
                     imports.append(needed_import)
         import_block = ""
