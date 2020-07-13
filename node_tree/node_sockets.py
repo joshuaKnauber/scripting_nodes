@@ -14,37 +14,37 @@ class SN_Socket:
 
 
 
+_invalid_chars = [" ","\\","-","?",".",",","<",">","*","+","-","#","'","~","@","€","|","\"","²",
+                    "³","§","$","%","&","/","(","[","]",")","=","}","{","´","´","^","°",":",";"]
+
+def is_valid_python(value,is_python_name):#TODO: first char can't be a number
+    if value:
+        if not is_python_name:
+            return True
+        else:
+            for char in _invalid_chars:
+                if char in value:
+                    return False
+            return True
+    return False
+
+def make_valid_python(value,is_python_name):
+    if is_python_name:
+        for char in _invalid_chars:
+            value = value.replace(char,"")
+        if not value:
+            value = "name"
+    return value
+
 class SN_StringSocket(bpy.types.NodeSocket, SN_Socket):
     '''String Socket for handling text'''
     bl_idname = 'SN_StringSocket'
     bl_label = "String"
     _is_data_socket = True
 
-    _invalid_chars = [" ","\\","-","?",".",",","<",">","*","+","-","#","'","~","@","€","|","\"","²",
-                    "³","§","$","%","&","/","(","[","]",")","=","}","{","´","´","^","°",":",";"]
-
-    def is_valid(self,value):
-        if value:
-            if not self.is_python_name:
-                return True
-            else:
-                for char in self._invalid_chars:
-                    if char in value:
-                        return False
-                return True
-        return False
-
-    def make_valid(self,value):
-        if self.is_python_name:
-            for char in self._invalid_chars:
-                value = value.replace(char,"")
-            if not value:
-                value = "name"
-        return value
-
     def update_socket_value(self,context):
-        if not self.is_valid(self.socket_value):
-            self.socket_value = self.make_valid(self.socket_value)
+        if not is_valid_python(self.socket_value,self.is_python_name):
+            self.socket_value = make_valid_python(self.socket_value,self.is_python_name)
 
     socket_value: bpy.props.StringProperty(
         name="String",

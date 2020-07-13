@@ -156,6 +156,9 @@ class SN_ScriptingBaseNode:
                 
         self.update_socket_connections()
 
+    def draw_buttons(self,context,layout):
+        pass
+
     def evaluate(self, socket, input_data, errors):
         return {
             "blocks": [
