@@ -25,10 +25,13 @@ def get_node_categories():
         category_items = []
         for node in node_categories_list[category]:
             with open(node) as node_file:
+                first_lines = True
                 for line in node_file.readlines():
-                    if "bl_idname" in line:
-                        category_items.append(NodeItem(line.split("\"")[1]))
-                        break
+                    if first_lines:
+                        if line[0] == "#":
+                            category_items.append(NodeItem(line.replace("#","").rstrip()))
+                        else:
+                            first_lines = False
         if category_items:
             node_categories.append(SN_ScriptingNodesCategory(category.upper(), category.replace("_"," ").title(), items=category_items))
     return node_categories

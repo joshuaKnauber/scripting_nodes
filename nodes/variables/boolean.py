@@ -1,6 +1,39 @@
+#SN_BooleanVariableNode
+
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 from ...node_tree.node_sockets import is_valid_python, make_valid_python
+
+
+class SN_AddBooleanArrayElement(bpy.types.Operator):
+    bl_idname = "scripting_nodes.add_boolean_array_element"
+    bl_label = "Add Element"
+    bl_description = "Adds a element to this array"
+    bl_options = {"REGISTER","INTERNAL","UNDO"}
+
+    node_name: bpy.props.StringProperty()
+
+    def execute(self, context):
+        context.space_data.node_tree.nodes[self.node_name].array_elements.add()
+        return {"FINISHED"}
+
+class SN_RemoveBooleanArrayElement(bpy.types.Operator):
+    bl_idname = "scripting_nodes.remove_boolean_array_element"
+    bl_label = "Remove Element"
+    bl_description = "Removes this element from this array"
+    bl_options = {"REGISTER","INTERNAL","UNDO"}
+
+    node_name: bpy.props.StringProperty()
+    element_index: bpy.props.IntProperty()
+
+    def execute(self, context):
+        context.space_data.node_tree.nodes[self.node_name].array_elements.remove(self.element_index)
+        return {"FINISHED"}
+
+
+class SN_BooleanArray(bpy.types.PropertyGroup):
+    value: bpy.props.BoolProperty(default=True,name="Value",description="Value of this variable")
+bpy.utils.register_class(SN_BooleanArray)
 
 
 class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -13,12 +46,16 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     value: bpy.props.BoolProperty(default=True,name="Value",description="Value of this variable")
 
     def update_socket_value(self,context):
-        if not is_valid_python(self.name,True):
-            self.name = make_valid_python(self.name,True)
+        if not is_valid_python(self.var_name,True):
+            self.var_name = make_valid_python(self.var_name,True)
     
-    name: bpy.props.StringProperty(name="Name",description="Name of this variable",update=update_socket_value)
+    var_name: bpy.props.StringProperty(name="Name",description="Name of this variable",update=update_socket_value)
     
     description: bpy.props.StringProperty(name="Description",description="Description of this variable")
+
+    is_array: bpy.props.BoolProperty(default=False,name="Make Array",description="Allows you to add multiple elements of the same type to this variable")
+
+    array_elements: bpy.props.CollectionProperty(type=SN_BooleanArray)
 
     def inititialize(self, context):
         self.update_socket_value(context)
@@ -26,13 +63,28 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self,context,layout):
         col = layout.column(align=True)
         col.label(text="Name:")
-        col.prop(self,"name",text="")
+        col.prop(self,"var_name",text="")
         col = layout.column(align=True)
         col.label(text="Description:")
         col.prop(self,"description",text="")
-        col = layout.column(align=True)
-        col.label(text="Default Value:")
-        col.prop(self,"value",toggle=True,text=str(self.value))
+        
+        if not self.is_array:
+            col = layout.column(align=True)
+            col.label(text="Default Value:")
+            col.prop(self,"value",toggle=True,text=str(self.value))
+
+        layout.prop(self,"is_array")
+
+        if self.is_array:
+
+            for array_index, array_element in enumerate(self.array_elements):
+                row = layout.row()
+                row.prop(array_element,"value",toggle=True,text=str(array_element.value))
+                op = row.operator("scripting_nodes.remove_boolean_array_element",text="",icon="PANEL_CLOSE",emboss=False)
+                op.node_name = self.name
+                op.element_index = array_index
+            
+            layout.operator("scripting_nodes.add_boolean_array_element",icon="ADD").node_name = self.name
 
     def evaluate(self, socket, input_data, errors):
         return {"blocks": [], "errors": errors}
