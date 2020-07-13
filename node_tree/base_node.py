@@ -8,6 +8,7 @@ class SN_ScriptingBaseNode:
     node_color = (0.5,0.5,0.5)
 
     sockets = SocketHandler()
+    should_be_registered = False
 
     @classmethod
     def poll(cls, ntree):

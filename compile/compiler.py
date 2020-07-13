@@ -45,12 +45,13 @@ class ScriptingNodesCompiler():
         for line in lines:
             if type(line) == list:
                 if line:
-                    line = self._compile_line(line, indents)
-                    code += line + "\n"
+                    if len(line) == 1 and type(line[0]) != str:
+                        code += self._compile_line(line[0], indents)
+                    else:
+                        code += self._compile_line(line, indents) + "\n"
+                        
             elif type(line) == dict:
                 code += self._compile_code_block(line, indents)
-            else:
-                code += self._compile_socket(line, indents)
         return code
 
     def _compile_code_block(self, block, indents):
@@ -79,7 +80,7 @@ class ScriptingNodesCompiler():
         """ returns the code for the nodes that need to be registered """
         code_blocks = []
         for node in tree.nodes:
-            if node._should_be_registered:
+            if node.should_be_registered:
                 code_blocks.append(self._get_node_code(node, None, 0))
         return code_blocks
 
@@ -101,7 +102,7 @@ class ScriptingNodesCompiler():
 
         has_registered_nodes = False
         for node in tree.nodes:
-            if node._should_be_registered:
+            if node.should_be_registered:
                 for line in node.get_register_block():
                     has_registered_nodes = True
                     register_function += "\n" + " "*self._indents + line
@@ -116,7 +117,7 @@ class ScriptingNodesCompiler():
 
         has_registered_nodes = False
         for node in tree.nodes:
-            if node._should_be_registered:
+            if node.should_be_registered:
                 for line in node.get_unregister_block():
                     has_registered_nodes = True
                     unregister_function += "\n" + " "*self._indents + line

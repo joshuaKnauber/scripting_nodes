@@ -15,7 +15,7 @@
                         true
                     ],
                     [
-                        "_should_be_registered",
+                        "should_be_registered",
                         true
                     ],
                     [
@@ -256,7 +256,7 @@
                         true
                     ],
                     [
-                        "_should_be_registered",
+                        "should_be_registered",
                         true
                     ],
                     [
@@ -459,7 +459,7 @@
                 ],
                 "properties": [
                     [
-                        "_should_be_registered",
+                        "should_be_registered",
                         false
                     ],
                     [
@@ -535,7 +535,7 @@
                 ],
                 "properties": [
                     [
-                        "_should_be_registered",
+                        "should_be_registered",
                         false
                     ],
                     [
@@ -701,7 +701,7 @@
                 ],
                 "properties": [
                     [
-                        "_should_be_registered",
+                        "should_be_registered",
                         false
                     ],
                     [
