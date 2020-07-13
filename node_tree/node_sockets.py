@@ -17,11 +17,13 @@ class SN_Socket:
 _invalid_chars = [" ","\\","-","?",".",",","<",">","*","+","-","#","'","~","@","€","|","\"","²",
                     "³","§","$","%","&","/","(","[","]",")","=","}","{","´","´","^","°",":",";"]
 
-def is_valid_python(value,is_python_name):#TODO: first char can't be a number
+def is_valid_python(value,is_python_name):
     if value:
         if not is_python_name:
             return True
         else:
+            if value[0].isdigit():
+                return False
             for char in _invalid_chars:
                 if char in value:
                     return False
@@ -30,6 +32,8 @@ def is_valid_python(value,is_python_name):#TODO: first char can't be a number
 
 def make_valid_python(value,is_python_name):
     if is_python_name:
+        while value and value[0].isdigit():
+            value = value[1:]
         for char in _invalid_chars:
             value = value.replace(char,"")
         if not value:

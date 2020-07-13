@@ -17,13 +17,22 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.name = make_valid_python(self.name,True)
     
     name: bpy.props.StringProperty(name="Name",description="Name of this variable",update=update_socket_value)
+    
+    description: bpy.props.StringProperty(name="Description",description="Description of this variable")
 
     def inititialize(self, context):
         self.update_socket_value(context)
 
     def draw_buttons(self,context,layout):
-        layout.prop(self,"name",text="")
-        layout.prop(self,"value",toggle=True,text=str(self.value))
+        col = layout.column(align=True)
+        col.label(text="Name:")
+        col.prop(self,"name",text="")
+        col = layout.column(align=True)
+        col.label(text="Description:")
+        col.prop(self,"description",text="")
+        col = layout.column(align=True)
+        col.label(text="Default Value:")
+        col.prop(self,"value",toggle=True,text=str(self.value))
 
     def evaluate(self, socket, input_data, errors):
         return {"blocks": [], "errors": errors}
