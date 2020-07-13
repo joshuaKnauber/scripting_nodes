@@ -42,6 +42,7 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0.65,0,0)
     register_in_properties = True
+    should_be_registered = True
 
     value: bpy.props.BoolProperty(default=True,name="Value",description="Value of this variable")
 
@@ -87,7 +88,29 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.operator("scripting_nodes.add_boolean_array_element",icon="ADD").node_name = self.name
 
     def evaluate(self, socket, input_data, errors):
-        return {"blocks": [], "errors": errors}
+        blocks = []
+        if self.is_array:
+            blocks = [{
+                "lines": [["class "+self.var_name+"Collection(bpy.types.PropertyGroup):"]],
+                "indented": [[self.property_line()]]
+            }]
+        return {"blocks": blocks, "errors": errors}
+
+    def property_line(self):
+        return self.var_name + ": bpy.props.BoolProperty(name=\""+""+"\",description=\""+self.description+"\",default="+str(self.value)+")"
 
     def property_block(self):
-        return self.var_name + ": bpy.props.BoolProperty(name=\""+""+"\",description=\""+self.description+"\",default="+str(self.value)+")"
+        if not self.is_array:
+            return self.property_line()
+        else:
+            return self.var_name + ": bpy.props.CollectionProperty(type="+self.var_name+"Collection)"
+
+    def get_register_block(self):
+        if self.is_array:
+            return ["bpy.utils.register_class("+self.var_name+"Collection)"]
+        return []
+
+    def get_unregister_block(self):
+        if self.is_array:
+            return ["bpy.utils.unregister_class("+self.var_name+"Collection)"]
+        return []

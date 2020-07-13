@@ -118,13 +118,13 @@ class ScriptingNodesCompiler():
         """ returns the register function for the given node tree """
         register_function = CompilerData().register_block()
 
-        register_function += "\n" + " "*self._indents + "bpy.utils.register_class(" + tree._prop_group_name() + ")"
-        register_function += "\n" + " "*self._indents + "bpy.types.Scene." + tree._prop_identifier() + " = " + "bpy.props.PointerProperty(type=" + tree._prop_group_name() + ")"
-
         for node in tree.nodes:
             if node.should_be_registered:
                 for line in node.get_register_block():
                     register_function += "\n" + " "*self._indents + line
+
+        register_function += "\n" + " "*self._indents + "bpy.utils.register_class(" + tree._prop_group_name() + ")"
+        register_function += "\n" + " "*self._indents + "bpy.types.Scene." + tree._prop_identifier() + " = " + "bpy.props.PointerProperty(type=" + tree._prop_group_name() + ")"
 
         return register_function
 
@@ -132,13 +132,13 @@ class ScriptingNodesCompiler():
         """ returns the unregister function for the given node tree """
         unregister_function = CompilerData().unregister_block()
 
-        unregister_function += "\n" + " "*self._indents + "del bpy.types.Scene." + tree._prop_identifier()
-        unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(" + tree._prop_group_name() + ")"
-
         for node in tree.nodes:
             if node.should_be_registered:
                 for line in node.get_unregister_block():
                     unregister_function += "\n" + " "*self._indents + line
+
+        unregister_function += "\n" + " "*self._indents + "del bpy.types.Scene." + tree._prop_identifier()
+        unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(" + tree._prop_group_name() + ")"
 
         return unregister_function
 
