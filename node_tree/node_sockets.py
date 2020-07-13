@@ -339,5 +339,11 @@ class SN_DataSocket(bpy.types.NodeSocket, SN_Socket):
     bl_label = "Data"
     _is_data_socket = True
 
+    def get_value(self):
+        return None
+
+    def set_value(self,value):
+        pass
+
     def draw(self, context, layout, node, text):
         layout.label(text=text)

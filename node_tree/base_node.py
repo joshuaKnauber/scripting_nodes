@@ -25,8 +25,50 @@ class SN_ScriptingBaseNode:
 
     def get_input_data(self):
         errors = []
-        input_data = []
-        return input_data, errors
+        node_input_data = []
+        for input_socket in self.inputs:
+            input_data = {
+                "socket": input_socket,
+                "name": input_socket.name,
+                "value": None,
+                "connected": None,
+                "code": None
+            }
+
+            # data socket
+            if input_socket._is_data_socket:
+                input_data["value"] = input_socket.get_value()
+                input_data["code"] = input_data["value"]
+
+                if input_socket.is_linked:
+                    if input_socket.links[0].from_socket._is_data_socket:
+                        input_data["connected"] = input_socket.links[0].from_socket
+                        input_data["code"] = input_data["connected"]
+
+                    else:
+                        errors.append({
+                            "title": "Wrong connection",
+                            "message": "One of the inputs of this node has a wrong output type connected",
+                            "node": self,
+                            "fatal": True
+                        })
+
+            # layout, execute or object socket
+            elif input_socket.bl_idname in ["SN_LayoutSocket","SN_ExecuteSocket","SN_ObjectSocket"]:
+                if input_socket.is_linked:
+                    if input_socket.links[0].from_socket.bl_idname == input_socket.links[0].to_socket.bl_idname:
+                        input_data["connected"] = input_socket.links[0].from_socket
+                        input_data["code"] = input_socket.links[0].from_socket
+
+                    else:
+                        errors.append({
+                            "title": "Wrong connection",
+                            "message": "One of the inputs of this node has a wrong output type connected",
+                            "node": self,
+                            "fatal": True
+                        })
+
+        return node_input_data, errors
 
     def update_shapes(self,sockets):
         for socket in sockets:
@@ -119,19 +161,12 @@ class SN_ScriptingBaseNode:
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
-
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
-
                     ]
                 }
             ],
-            "errors": [
-                {
-                    "error": "",
-                    "node": self
-                }
-            ]
+            "errors": []
         }
 
     def get_register_block(self):
@@ -144,4 +179,4 @@ class SN_ScriptingBaseNode:
         return []
 
     def layout_type(self):
-        return "layout"
+        return ""

@@ -24,14 +24,14 @@ class SN_PT_ErrorLogPanel(bpy.types.Panel):
         if error["node"]:
             row.operator("scripting_nodes.find_error_node",text="",emboss=False,icon="NODE").node_name = error["node"].name
 
-        #row.alert = self.error_message_handler.error_fatal(error["error"])
-        #row.label(text=self.error_message_handler.error_name(error["error"]))
+        row.alert = error["fatal"]
+        row.label(text=error["title"])
 
-        #line_length = bpy.context.region.width // bpy.context.scene.sn_properties.line_width
-        #error_message = wrap(self.error_message_handler.error_message(error["error"]),line_length)
+        line_length = bpy.context.region.width // bpy.context.scene.sn_properties.line_width
+        error_message = wrap(error["message"],line_length)
 
-        #for line in error_message:
-        #    col.label(text=line)
+        for line in error_message:
+            col.label(text=line)
 
     def draw_header(self,context):
         self.layout.prop(context.scene.sn_properties,"show_line_width",text="",icon="PREFERENCES",emboss=False)
