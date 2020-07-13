@@ -195,6 +195,92 @@ class SN_FloatSocket(bpy.types.NodeSocket, SN_Socket):
 
 
 
+class SN_VectorSocket(bpy.types.NodeSocket, SN_Socket):
+    '''Vector Socket for handling vectors'''
+    bl_idname = 'SN_VectorSocket'
+    bl_label = "Vector"
+    _is_data_socket = True
+
+    socket_value: bpy.props.FloatVectorProperty(
+        name="Vector",
+        description="Socket for a vector value",
+        default=(0,0,0),
+        size=3
+    )
+
+    socket_value_quad: bpy.props.FloatVectorProperty(
+        name="Vector",
+        description="Socket for a vector value",
+        default=(0,0,0,0),
+        size=4
+    )
+
+    color_value: bpy.props.FloatVectorProperty(
+        name="Color",
+        description="Socket for a color value",
+        default=(1,1,1),
+        size=3,
+        min=0,
+        max=1,
+        subtype="COLOR"
+    )
+
+    color_alpha_value: bpy.props.FloatVectorProperty(
+        name="Color",
+        description="Socket for a color value",
+        default=(1,1,1,1),
+        size=4,
+        min=0,
+        max=1,
+        subtype="COLOR"
+    )
+
+    is_color: bpy.props.BoolProperty(default=False)
+
+    use_four_digits: bpy.props.BoolProperty(default=False)
+
+    def get_value(self):
+        if self.is_color:
+            if self.use_four_digits:
+                return self.color_alpha_value
+            else:
+                return self.color_value
+        else:
+            if self.use_four_digits:
+                return self.socket_value_quad
+            else:
+                return self.socket_value
+
+    def clamp(self,digit):
+        return max(0, min(digit, 1))
+
+    def set_value(self,value):
+        self.socket_value = value
+        self.socket_value_quad = value
+        if self.is_color:
+            if self.use_four_digits:
+                self.color_alpha_value = (self.clamp(value[0]),self.clamp(value[1]),self.clamp(value[2]),self.clamp(value[3]))
+            else:
+                self.color_value = (self.clamp(value[0]),self.clamp(value[1]),self.clamp(value[2]))
+
+    def draw(self, context, layout, node, text):
+        if self.is_output or self.is_linked:
+            layout.label(text=text)
+        else:
+            if self.is_color:
+                if self.use_four_digits:
+                    layout.prop(self, "color_alpha_value", text=text)
+                else:
+                    layout.prop(self, "color_value", text=text)
+            else:
+                layout = layout.column()
+                if self.use_four_digits:
+                    layout.prop(self, "socket_value_quad", text=text)
+                else:
+                    layout.prop(self, "socket_value", text=text)
+
+
+
 class SN_ExecuteSocket(bpy.types.NodeSocket, SN_Socket):
     '''Execute Socket for running the program'''
     bl_idname = 'SN_ExecuteSocket'
@@ -211,6 +297,18 @@ class SN_LayoutSocket(bpy.types.NodeSocket, SN_Socket):
     '''Layout Socket for laying out ui'''
     bl_idname = 'SN_LayoutSocket'
     bl_label = "Layout"
+    _is_data_socket = False
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+
+
+
+class SN_SeparatorSocket(bpy.types.NodeSocket, SN_Socket):
+    '''Separator Socket for separating inputs of a node'''
+    bl_idname = 'SN_SeparatorSocket'
+    bl_label = "Separator"
     _is_data_socket = False
 
     def draw(self, context, layout, node, text):

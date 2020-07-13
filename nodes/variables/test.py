@@ -9,8 +9,11 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0,1,1)
 
     def inititialize(self, context):
-        socket = self.sockets.create_input(self,"FLOAT","float",False)
-        socket.use_factor = True
+        socket = self.sockets.create_input(self,"VECTOR","vector",False)
+        socket.is_color = True
+        socket = self.sockets.create_input(self,"SEPARATOR","",False)
+        socket = self.sockets.create_input(self,"VECTOR","vector",False)
+        socket.is_color = True
 
     def evaluate(self, socket, input_data):
         blocks = [

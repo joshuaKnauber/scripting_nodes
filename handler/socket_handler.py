@@ -24,6 +24,11 @@ class SocketHandler():
                 "shape": "CIRCLE",
                 "color": (0.65,0,0,1)
             },
+            "VECTOR": {
+                "idname": "SN_VectorSocket",
+                "shape": "CIRCLE",
+                "color": (0.65,0,0,1)
+            },
             "EXECUTE": {
                 "idname": "SN_ExecuteSocket",
                 "shape": "DIAMOND",
@@ -33,6 +38,11 @@ class SocketHandler():
                 "idname": "SN_LayoutSocket",
                 "shape": "DIAMOND",
                 "color": (0.89,0.5,0,1)
+            },
+            "SEPARATOR": {
+                "idname": "SN_SeparatorSocket",
+                "shape": "SQUARE",
+                "color": (1,1,1,0)
             }
         }
 
@@ -51,7 +61,7 @@ class SocketHandler():
         socket.socket_color = data["color"]
         socket.display_shape = data["shape"]
 
-    def create_socket(self,node,is_input,socket_type,label,dynamic):
+    def _create_socket(self,node,is_input,socket_type,label,dynamic):
         if not socket_type in self._lookup:
             message = "Socket type '" + socket_type + "' not in " + self._socket_types() + ""
             raise ValueError(message) 
@@ -65,7 +75,13 @@ class SocketHandler():
             return socket
 
     def create_input(self,node,socket_type,label,dynamic=False):
-        return self.create_socket(node,True,socket_type,label,dynamic)
+        return self._create_socket(node,True,socket_type,label,dynamic)
 
     def create_output(self,node,socket_type,label,dynamic=False):
-        return self.create_socket(node,False,socket_type,label,dynamic)
+        return self._create_socket(node,False,socket_type,label,dynamic)
+
+    def remove_input(self,node,input_socket):
+        node.inputs.remove(input_socket)
+
+    def remove_output(self,node,output_socket):
+        node.outputs.remove(output_socket)
