@@ -41,7 +41,7 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Boolean Variable"
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0.65,0,0)
-    should_be_registered = True
+    register_in_properties = True
 
     value: bpy.props.BoolProperty(default=True,name="Value",description="Value of this variable")
 
@@ -89,8 +89,5 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, socket, input_data, errors):
         return {"blocks": [], "errors": errors}
 
-    def get_register_block(self):
-        return ["pass #test"]
-
-    def get_unregister_block(self):
-        return ["pass #test"]
+    def property_block(self):
+        return self.var_name + ": bpy.props.BoolProperty(name=\""+""+"\",description=\""+self.description+"\",default="+str(self.value)+")"

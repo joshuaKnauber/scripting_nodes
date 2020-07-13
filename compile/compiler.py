@@ -1,5 +1,8 @@
 import bpy
 from .compiler_data import CompilerData
+from ..node_tree.node_sockets import make_valid_python
+from random import choice
+from string import ascii_uppercase, ascii_lowercase
 
 class ScriptingNodesCompiler():
 
@@ -87,7 +90,7 @@ class ScriptingNodesCompiler():
 
     def _get_needed_imports(self, tree):
         """ returns the import block """
-        imports = []
+        imports = ["bpy"]
         for node in tree.nodes:
             for needed_import in node.required_imports():
                 if not needed_import in imports:
@@ -97,34 +100,57 @@ class ScriptingNodesCompiler():
             import_block += "\nimport " + needed_import
         return import_block
 
+    def _prop_group_name(self,tree):
+        group_name = tree.addon_name.title().replace(" ","")
+        group_name = make_valid_python(group_name,True)
+        if group_name == "name":
+            group_name = tree.uid
+        return group_name + "Properties"
+
+    def _prop_identifier(self,tree):
+        return "sn_test"
+
+    def _get_property_group(self, tree):
+        """ returns the addons code for the property group """
+        property_group = "class "+self._prop_group_name(tree)+"(bpy.types.PropertyGroup):"
+
+        has_property_nodes = False
+        for node in tree.nodes:
+            if node.register_in_properties:
+                has_property_nodes = True
+                property_group += "\n" + " "*self._indents + node.property_block()
+        
+        if not has_property_nodes:
+            property_group += "\n" + " "*self._indents + "pass"
+
+        return property_group
+
     def _get_register_function(self, tree):
         """ returns the register function for the given node tree """
         register_function = CompilerData().register_block()
 
-        has_registered_nodes = False
+        register_function += "\n" + " "*self._indents + "bpy.utils.register_class(" + self._prop_group_name(tree) + ")"
+        register_function += "\n" + " "*self._indents + "bpy.types.Scene." + self._prop_identifier(tree) + " = " + "bpy.props.PointerProperty(type=" + self._prop_group_name(tree) + ")"
+
         for node in tree.nodes:
             if node.should_be_registered:
                 for line in node.get_register_block():
-                    has_registered_nodes = True
                     register_function += "\n" + " "*self._indents + line
 
-        if not has_registered_nodes:
-            register_function += "\n" + " "*self._indents + "pass"
         return register_function
 
     def _get_unregister_function(self, tree):
         """ returns the unregister function for the given node tree """
         unregister_function = CompilerData().unregister_block()
 
-        has_registered_nodes = False
+        unregister_function += "\n" + " "*self._indents + "del bpy.types.Scene." + self._prop_identifier(tree)
+        unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(" + self._prop_group_name(tree) + ")"
+
         for node in tree.nodes:
             if node.should_be_registered:
                 for line in node.get_unregister_block():
-                    has_registered_nodes = True
                     unregister_function += "\n" + " "*self._indents + line
 
-        if not has_registered_nodes:
-            unregister_function += "\n" + " "*self._indents + "pass"
         return unregister_function
 
     def _write_paragraphs(self, text, amount):
@@ -154,6 +180,8 @@ class ScriptingNodesCompiler():
             text.write(block)
             self._write_paragraphs(text,2)
         text.write(cd.keymap_block())
+        self._write_paragraphs(text,2)
+        text.write(self._get_property_group(tree))
         self._write_paragraphs(text,2)
         text.write(self._get_register_function(tree))
         self._write_paragraphs(text,2)
@@ -198,6 +226,10 @@ class ScriptingNodesCompiler():
 
     def _recompile(self, tree):
         """ compiles the active node tree """
+        tree.uid = choice(ascii_uppercase)
+        for _ in range(7):
+            tree.uid += choice(ascii_lowercase)
+
         self._unregister_tree(tree)
         self._create_module(tree)
         self._register_tree(tree)

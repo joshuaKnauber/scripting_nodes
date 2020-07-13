@@ -9,6 +9,7 @@ class SN_ScriptingBaseNode:
 
     sockets = SocketHandler()
     should_be_registered = False
+    register_in_properties = False
 
     @classmethod
     def poll(cls, ntree):
@@ -22,6 +23,9 @@ class SN_ScriptingBaseNode:
         self.color = self.node_color
 
         self.inititialize(context)
+
+    def addon_properties(self):
+        return "sn_test"
 
     def get_input_data(self):
         errors = []
@@ -180,6 +184,9 @@ class SN_ScriptingBaseNode:
 
     def required_imports(self):
         return []
+
+    def property_block(self):
+        return ""
 
     def layout_type(self):
         return ""
