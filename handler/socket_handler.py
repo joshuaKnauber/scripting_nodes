@@ -7,7 +7,7 @@ class SocketHandler():
             "STRING": {
                 "idname": "SN_StringSocket",
                 "shape": "CIRCLE",
-                "color": (0.85,0.1,0.75,1)
+                "color": (0,0.75,0,1)
             },
             "BOOLEAN": {
                 "idname": "SN_BoolSocket",
@@ -17,17 +17,17 @@ class SocketHandler():
             "INTEGER": {
                 "idname": "SN_IntSocket",
                 "shape": "CIRCLE",
-                "color": (0.65,0,0,1)
+                "color": (0.2,0.4,0.75,1)
             },
             "FLOAT": {
                 "idname": "SN_FloatSocket",
                 "shape": "CIRCLE",
-                "color": (0.65,0,0,1)
+                "color": (0.23,0.65,0.75,1)
             },
             "VECTOR": {
                 "idname": "SN_VectorSocket",
                 "shape": "CIRCLE",
-                "color": (0.65,0,0,1)
+                "color": (0.6,0.2,0.8,1)
             },
             "EXECUTE": {
                 "idname": "SN_ExecuteSocket",
@@ -37,7 +37,17 @@ class SocketHandler():
             "LAYOUT": {
                 "idname": "SN_LayoutSocket",
                 "shape": "DIAMOND",
-                "color": (0.89,0.5,0,1)
+                "color": (0.89,0.6,0,1)
+            },
+            "OBJECT": {
+                "idname": "SN_ObjectSocket",
+                "shape": "SQUARE",
+                "color": (0,0,0,1)
+            },
+            "DATA": {
+                "idname": "SN_DataSocket",
+                "shape": "CIRCLE",
+                "color": (0.35,0.35,0.35,1)
             },
             "SEPARATOR": {
                 "idname": "SN_SeparatorSocket",

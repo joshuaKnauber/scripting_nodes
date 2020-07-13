@@ -84,6 +84,8 @@ class SN_BoolSocket(bpy.types.NodeSocket, SN_Socket):
 
     show_toggle: bpy.props.BoolProperty(default=True)
 
+    display_boolean_text: bpy.props.BoolProperty(default=False)
+
     def get_value(self):
         return self.socket_value
 
@@ -91,6 +93,8 @@ class SN_BoolSocket(bpy.types.NodeSocket, SN_Socket):
         self.socket_value = value
 
     def draw(self, context, layout, node, text):
+        if self.display_boolean_text:
+            text = str(self.socket_value)
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:
@@ -310,6 +314,30 @@ class SN_SeparatorSocket(bpy.types.NodeSocket, SN_Socket):
     bl_idname = 'SN_SeparatorSocket'
     bl_label = "Separator"
     _is_data_socket = False
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+
+
+
+class SN_ObjectSocket(bpy.types.NodeSocket, SN_Socket):
+    '''Object Socket for passing collections'''
+    bl_idname = 'SN_ObjectSocket'
+    bl_label = "Object"
+    _is_data_socket = False
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
+
+
+
+
+class SN_DataSocket(bpy.types.NodeSocket, SN_Socket):
+    '''Data Socket for handling any type of data socket'''
+    bl_idname = 'SN_DataSocket'
+    bl_label = "Data"
+    _is_data_socket = True
 
     def draw(self, context, layout, node, text):
         layout.label(text=text)
