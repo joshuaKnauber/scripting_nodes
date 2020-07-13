@@ -23,6 +23,11 @@ class SN_ScriptingBaseNode:
 
         self.inititialize(context)
 
+    def get_input_data(self):
+        errors = []
+        input_data = []
+        return input_data, errors
+
     def update_shapes(self,sockets):
         for socket in sockets:
             if socket.is_linked:
@@ -109,7 +114,7 @@ class SN_ScriptingBaseNode:
                 
         self.update_socket_connections()
 
-    def evaluate(self, socket, input_data):
+    def evaluate(self, socket, input_data, errors):
         return {
             "blocks": [
                 {
@@ -124,8 +129,7 @@ class SN_ScriptingBaseNode:
             "errors": [
                 {
                     "error": "",
-                    "node": self,
-                    "socket": None
+                    "node": self
                 }
             ]
         }

@@ -21,7 +21,7 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_input(self,"DATA","Data",False)
         self.sockets.create_input(self,"SEPARATOR","",False)
 
-    def evaluate(self, socket, input_data):
+    def evaluate(self, socket, input_data, errors):
         blocks = [
                     {
                         "lines": [
@@ -32,7 +32,5 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
                         ]
                     }
                 ]
-
-        errors = []
 
         return {"blocks": blocks, "errors": errors}
