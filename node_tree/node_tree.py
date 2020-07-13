@@ -1,6 +1,6 @@
 import bpy
 from random import randint
-
+from ..node_tree.node_sockets import make_valid_python
 
 class ScriptingNodesTree(bpy.types.NodeTree):
     '''Scripting Nodes node tree'''
@@ -30,3 +30,17 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     # uid which gets reloaded on compile
     uid: bpy.props.StringProperty()
+
+    def _prop_group_name(self):
+        group_name = self.addon_name.title().replace(" ","")
+        group_name = make_valid_python(group_name,True)
+        if group_name == "name":
+            group_name = self.uid
+        return group_name + "Properties"
+
+    def _prop_identifier(self):
+        identifier = self.addon_name.lower().replace(" ","_")
+        identifier = make_valid_python(identifier,True)
+        if identifier == "name":
+            identifier = self.uid
+        return identifier + "_properties"

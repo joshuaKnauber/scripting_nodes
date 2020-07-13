@@ -1,6 +1,5 @@
 import bpy
 from .compiler_data import CompilerData
-from ..node_tree.node_sockets import make_valid_python
 from random import choice
 from string import ascii_uppercase, ascii_lowercase
 
@@ -100,19 +99,9 @@ class ScriptingNodesCompiler():
             import_block += "\nimport " + needed_import
         return import_block
 
-    def _prop_group_name(self,tree):
-        group_name = tree.addon_name.title().replace(" ","")
-        group_name = make_valid_python(group_name,True)
-        if group_name == "name":
-            group_name = tree.uid
-        return group_name + "Properties"
-
-    def _prop_identifier(self,tree):
-        return "sn_test"
-
     def _get_property_group(self, tree):
         """ returns the addons code for the property group """
-        property_group = "class "+self._prop_group_name(tree)+"(bpy.types.PropertyGroup):"
+        property_group = "class " + tree._prop_group_name() + "(bpy.types.PropertyGroup):"
 
         has_property_nodes = False
         for node in tree.nodes:
@@ -129,8 +118,8 @@ class ScriptingNodesCompiler():
         """ returns the register function for the given node tree """
         register_function = CompilerData().register_block()
 
-        register_function += "\n" + " "*self._indents + "bpy.utils.register_class(" + self._prop_group_name(tree) + ")"
-        register_function += "\n" + " "*self._indents + "bpy.types.Scene." + self._prop_identifier(tree) + " = " + "bpy.props.PointerProperty(type=" + self._prop_group_name(tree) + ")"
+        register_function += "\n" + " "*self._indents + "bpy.utils.register_class(" + tree._prop_group_name() + ")"
+        register_function += "\n" + " "*self._indents + "bpy.types.Scene." + tree._prop_identifier() + " = " + "bpy.props.PointerProperty(type=" + tree._prop_group_name() + ")"
 
         for node in tree.nodes:
             if node.should_be_registered:
@@ -143,8 +132,8 @@ class ScriptingNodesCompiler():
         """ returns the unregister function for the given node tree """
         unregister_function = CompilerData().unregister_block()
 
-        unregister_function += "\n" + " "*self._indents + "del bpy.types.Scene." + self._prop_identifier(tree)
-        unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(" + self._prop_group_name(tree) + ")"
+        unregister_function += "\n" + " "*self._indents + "del bpy.types.Scene." + tree._prop_identifier()
+        unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(" + tree._prop_group_name() + ")"
 
         for node in tree.nodes:
             if node.should_be_registered:
