@@ -16,6 +16,15 @@ class SN_OT_CompileActive(bpy.types.Operator):
         compiler().compile_active()
         return {"FINISHED"}
 
+    def draw(self,context):
+        self.layout.label(text="You haven't changed your addons name yet:")
+        self.layout.prop(context.space_data.node_tree, "addon_name", text="")
+
+    def invoke(self,context,event):
+        if context.space_data.node_tree.addon_name == "New Addon":
+            return context.window_manager.invoke_props_dialog(self)
+        return {"FINISHED"}
+
 
 class SN_OT_UnregisterActive(bpy.types.Operator):
     bl_idname = "scripting_nodes.unregister_active"
