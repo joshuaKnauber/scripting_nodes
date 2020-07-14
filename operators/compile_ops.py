@@ -23,7 +23,7 @@ class SN_OT_CompileActive(bpy.types.Operator):
     def invoke(self,context,event):
         if context.space_data.node_tree.addon_name == "New Addon":
             return context.window_manager.invoke_props_dialog(self)
-        return {"FINISHED"}
+        return self.execute(context)
 
 
 class SN_OT_UnregisterActive(bpy.types.Operator):

@@ -14,7 +14,7 @@ class SN_AddBooleanArrayElement(bpy.types.Operator):
     node_name: bpy.props.StringProperty()
 
     def execute(self, context):
-        context.space_data.node_tree.nodes[self.node_name].array_elements.add()
+        context.space_data.node_tree.nodes[self.node_name].array_items.add()
         return {"FINISHED"}
 
 class SN_RemoveBooleanArrayElement(bpy.types.Operator):
@@ -27,12 +27,17 @@ class SN_RemoveBooleanArrayElement(bpy.types.Operator):
     element_index: bpy.props.IntProperty()
 
     def execute(self, context):
-        context.space_data.node_tree.nodes[self.node_name].array_elements.remove(self.element_index)
+        context.space_data.node_tree.nodes[self.node_name].array_items.remove(self.element_index)
         return {"FINISHED"}
 
 
 class SN_BooleanArray(bpy.types.PropertyGroup):
+
+    def get_python_value(self):
+        return str(self.value)
+
     value: bpy.props.BoolProperty(default=True,name="Value",description="Value of this variable")
+    
 bpy.utils.register_class(SN_BooleanArray)
 
 
@@ -56,7 +61,7 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     is_array: bpy.props.BoolProperty(default=False,name="Make Array",description="Allows you to add multiple elements of the same type to this variable")
 
-    array_elements: bpy.props.CollectionProperty(type=SN_BooleanArray)
+    array_items: bpy.props.CollectionProperty(type=SN_BooleanArray)
 
     def inititialize(self, context):
         self.update_socket_value(context)
@@ -78,7 +83,7 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         if self.is_array:
 
-            for array_index, array_element in enumerate(self.array_elements):
+            for array_index, array_element in enumerate(self.array_items):
                 row = layout.row()
                 split = row.split(factor=0.2)
                 split.label(text=str(array_index))

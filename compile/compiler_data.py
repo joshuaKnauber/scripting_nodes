@@ -28,3 +28,10 @@ class CompilerData():
 
     def unregister_block(self):
         return "def unregister():"
+
+    def comment_block(self,name):
+        return f"""
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# {name}
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+"""
