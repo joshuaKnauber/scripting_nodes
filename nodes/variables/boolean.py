@@ -80,6 +80,9 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             for array_index, array_element in enumerate(self.array_elements):
                 row = layout.row()
+                split = row.split(factor=0.2)
+                split.label(text=str(array_index))
+                row = split.row()
                 row.prop(array_element,"value",toggle=True,text=str(array_element.value))
                 op = row.operator("scripting_nodes.remove_boolean_array_element",text="",icon="PANEL_CLOSE",emboss=False)
                 op.node_name = self.name
