@@ -110,8 +110,9 @@ class ScriptingNodesCompiler():
         for node in tree.nodes:
             if node.register_in_properties:
                 if hasattr(node,"is_array"):
-                    for item in node.array_items:
-                        handler += "\n" + " "*self._indents*2 + "bpy.context.scene."+tree._prop_identifier()+"."+node.var_name+".add()."+node.var_name+" = "+item.get_python_value()
+                    if node.is_array:
+                        for item in node.array_items:
+                            handler += "\n" + " "*self._indents*2 + "bpy.context.scene."+tree._prop_identifier()+"."+node.var_name+".add()."+node.var_name+" = "+item.get_python_value()
 
         return handler
 

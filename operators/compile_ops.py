@@ -19,9 +19,10 @@ class SN_OT_CompileActive(bpy.types.Operator):
     def draw(self,context):
         self.layout.label(text="You haven't changed your addons name yet:")
         self.layout.prop(context.space_data.node_tree, "addon_name", text="")
+        self.layout.prop(context.space_data.node_tree, "ignore_name", text="Ignore Name")
 
     def invoke(self,context,event):
-        if context.space_data.node_tree.addon_name == "New Addon":
+        if context.space_data.node_tree.addon_name == "New Addon" and not context.space_data.node_tree.ignore_name:
             return context.window_manager.invoke_props_dialog(self)
         return self.execute(context)
 

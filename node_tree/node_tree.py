@@ -31,6 +31,9 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     # uid which gets reloaded on compile
     uid: bpy.props.StringProperty()
 
+    # ignore unchanged name
+    ignore_name: bpy.props.BoolProperty(name="Ignore Unchanged Name", description="Ignore that the name has not been changed",default=False)
+
     def _prop_group_name(self):
         group_name = self.addon_name.title().replace(" ","")
         group_name = make_valid_python(group_name,True)
