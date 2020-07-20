@@ -99,47 +99,19 @@ class ScriptingNodesCompiler():
             import_block += "\nimport " + needed_import
         return import_block
 
-    def _get_post_load_handler(self, tree):
-        """ returns the code for the post load app handler """
-        handler = "from bpy.app.handlers import persistent"
-        handler += "\n@persistent"
-        handler += "\ndef load_handler(dummy):"
-        handler += "\n" + " "*self._indents + "if not bpy.context.scene."+tree._prop_identifier()+".sn_defaults_set:"
-        handler += "\n" + " "*self._indents*2 + "bpy.context.scene."+tree._prop_identifier()+".sn_defaults_set = True"
-
-        for node in tree.nodes:
-            if node.register_in_properties:
-                if hasattr(node,"is_array"):
-                    if node.is_array:
-                        for item in node.array_items:
-                            handler += "\n" + " "*self._indents*2 + "bpy.context.scene."+tree._prop_identifier()+"."+node.var_name+".add()."+node.var_name+" = "+item.get_python_value()
-
-        return handler
-
-    def _get_property_group(self, tree):
-        """ returns the addons code for the property group """
-        property_group = "class " + tree._prop_group_name() + "(bpy.types.PropertyGroup):"
-        property_group += "\n" + " "*self._indents + "sn_defaults_set: bpy.props.BoolProperty(default=False)"
-
-        for node in tree.nodes:
-            if node.register_in_properties:
-                property_group += "\n" + " "*self._indents + node.property_block()
-
-        return property_group
-
     def _get_register_function(self, tree):
         """ returns the register function for the given node tree """
         register_function = CompilerData().register_block()
 
-        register_function += "\n" + " "*self._indents + "bpy.app.handlers.load_post.append(load_handler)"
-
+        has_nodes = False
         for node in tree.nodes:
             if node.should_be_registered:
                 for line in node.get_register_block():
                     register_function += "\n" + " "*self._indents + line
-
-        register_function += "\n" + " "*self._indents + "bpy.utils.register_class(" + tree._prop_group_name() + ")"
-        register_function += "\n" + " "*self._indents + "bpy.types.Scene." + tree._prop_identifier() + " = " + "bpy.props.PointerProperty(type=" + tree._prop_group_name() + ")"
+                    has_nodes = True
+        
+        if not has_nodes:
+            register_function += " "*self._indents + "pass"
 
         return register_function
 
@@ -147,15 +119,15 @@ class ScriptingNodesCompiler():
         """ returns the unregister function for the given node tree """
         unregister_function = CompilerData().unregister_block()
 
-        unregister_function += "\n" + " "*self._indents + "bpy.app.handlers.load_post.remove(load_handler)"
-
+        has_nodes = False
         for node in tree.nodes:
             if node.should_be_registered:
                 for line in node.get_unregister_block():
                     unregister_function += "\n" + " "*self._indents + line
-
-        unregister_function += "\n" + " "*self._indents + "del bpy.types.Scene." + tree._prop_identifier()
-        unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(" + tree._prop_group_name() + ")"
+                    has_nodes = True
+        
+        if not has_nodes:
+            unregister_function += " "*self._indents + "pass"
 
         return unregister_function
 
@@ -199,11 +171,6 @@ class ScriptingNodesCompiler():
         text.write(cd.keymap_block())
         self._write_paragraphs(text,2)
 
-        text.write(self._get_property_group(tree))
-        self._write_paragraphs(text,2)
-        text.write(self._get_post_load_handler(tree))
-        self._write_paragraphs(text,2)
-
         text.write(cd.comment_block("REGISTER"))
 
         text.write(self._get_register_function(tree))
@@ -234,7 +201,6 @@ class ScriptingNodesCompiler():
             if module["node_tree"] == tree:
                 if self._run_register:
                     module["module"].register()
-                    module["module"].load_handler(None)
 
     def _unregister_tree(self, tree):
         """ unregisters the module if already registered and removes it """
