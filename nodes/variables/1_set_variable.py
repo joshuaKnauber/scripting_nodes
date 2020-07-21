@@ -8,7 +8,7 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_SetVariableNode"
     bl_label = "Set Variable"
     bl_icon = "DRIVER_TRANSFORM"
-    node_color = (0.75,0.75,70.75)
+    node_color = (0.75,0.75,0.75)
     should_be_registered = False
 
     def inititialize(self, context):

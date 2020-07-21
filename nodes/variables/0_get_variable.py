@@ -8,12 +8,29 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_GetVariableNode"
     bl_label = "Get Variable"
     bl_icon = "DRIVER_TRANSFORM"
-    node_color = (0.75,0.75,70.75)
+    node_color = (0.75,0.75,0.75)
     should_be_registered = False
 
-    def inititialize(self, context):
-        self.sockets.create_input(self,"STRING","String")
-        self.sockets.create_output(self,"BOOLEAN","Boolean")
+    def get_variables(self,context):
+        items = []
+        identifiers = [
+            "SN_BooleanVariableNode",
+            "SN_FloatVariableNode",
+            "SN_IntegerVariableNode",
+            "SN_StringVariableNode",
+            "SN_VectorVariableNode",
+        ]
+        for node in context.space_data.node_tree.nodes:
+            if node.bl_idname in identifiers:
+                items.append((node.name,node.var_name,node.description))
+        return items
+
+    variables: bpy.props.EnumProperty(items=get_variables,name="Variable",description="The variable you want to get the value from")
+
+    def draw_buttons(self, context, layout):
+        row = layout.row()
+        row.scale_y = 1.25
+        row.prop(self,"variables",text="")
 
     def evaluate(self, socket, input_data, errors):
         blocks = []

@@ -23,9 +23,6 @@ class SN_ScriptingBaseNode:
 
         self.inititialize(context)
 
-    def addon_properties(self):
-        return "sn_test"
-
     def get_input_data(self):
         errors = []
         node_input_data = []
@@ -200,9 +197,6 @@ class SN_ScriptingBaseNode:
 
     def required_imports(self):
         return []
-
-    def property_block(self):
-        return ""
 
     def layout_type(self):
         return ""
