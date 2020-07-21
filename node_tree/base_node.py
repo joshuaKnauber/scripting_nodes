@@ -9,7 +9,6 @@ class SN_ScriptingBaseNode:
 
     sockets = SocketHandler()
     should_be_registered = False
-    register_in_properties = False
 
     @classmethod
     def poll(cls, ntree):

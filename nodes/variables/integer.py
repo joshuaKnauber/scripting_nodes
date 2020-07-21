@@ -20,7 +20,6 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Integer Variable"
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0.2,0.4,0.75)
-    register_in_properties = True
     should_be_registered = True
 
     value: bpy.props.IntProperty(default=0,name="Value",description="Value of this variable")

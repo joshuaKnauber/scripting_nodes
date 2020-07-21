@@ -21,7 +21,6 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Vector Variable"
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0.6,0.2,0.8)
-    register_in_properties = True
     should_be_registered = True
 
     value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable")
@@ -39,7 +38,7 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     array_items: bpy.props.CollectionProperty(type=SN_VectorArray)
 
-    use_four_digits: bpy.props.BoolProperty(default=False,name="Use Four Digits")
+    use_four_numbers: bpy.props.BoolProperty(default=False,name="Use Four Numbers")
 
     def inititialize(self, context):
         self.update_socket_value(context)
@@ -55,12 +54,12 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if not self.is_array:
             col = layout.column(align=True)
             col.label(text="Default Value:")
-            if self.use_four_digits:
+            if self.use_four_numbers:
                 col.prop(self,"four_value",text="")
             else:
                 col.prop(self,"value",text="")
 
-        layout.prop(self,"use_four_digits")
+        layout.prop(self,"use_four_numbers")
         layout.prop(self,"is_array")
 
         if self.is_array:
@@ -71,7 +70,7 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 split.label(text=str(array_index))
                 row = split.row()
                 col = row.column()
-                if self.use_four_digits:
+                if self.use_four_numbers:
                     col.prop(array_element,"four_value",text="")
                 else:
                     col.prop(array_element,"value",text="")

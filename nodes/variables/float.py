@@ -20,7 +20,6 @@ class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Float Variable"
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0.23,0.65,0.75)
-    register_in_properties = True
     should_be_registered = True
 
     value: bpy.props.FloatProperty(default=0,name="Value",description="Value of this variable")

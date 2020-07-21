@@ -20,7 +20,6 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "String Variable"
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0,0.75,0)
-    register_in_properties = True
     should_be_registered = True
 
     value: bpy.props.StringProperty(default="",name="Value",description="Value of this variable")

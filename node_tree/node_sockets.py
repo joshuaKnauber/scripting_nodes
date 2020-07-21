@@ -245,16 +245,16 @@ class SN_VectorSocket(bpy.types.NodeSocket, SN_Socket):
 
     is_color: bpy.props.BoolProperty(default=False)
 
-    use_four_digits: bpy.props.BoolProperty(default=False)
+    use_four_numbers: bpy.props.BoolProperty(default=False)
 
     def get_value(self):
         if self.is_color:
-            if self.use_four_digits:
+            if self.use_four_numbers:
                 return self.color_alpha_value
             else:
                 return self.color_value
         else:
-            if self.use_four_digits:
+            if self.use_four_numbers:
                 return self.socket_value_quad
             else:
                 return self.socket_value
@@ -266,7 +266,7 @@ class SN_VectorSocket(bpy.types.NodeSocket, SN_Socket):
         self.socket_value = value
         self.socket_value_quad = value
         if self.is_color:
-            if self.use_four_digits:
+            if self.use_four_numbers:
                 self.color_alpha_value = (self.clamp(value[0]),self.clamp(value[1]),self.clamp(value[2]),self.clamp(value[3]))
             else:
                 self.color_value = (self.clamp(value[0]),self.clamp(value[1]),self.clamp(value[2]))
@@ -276,13 +276,13 @@ class SN_VectorSocket(bpy.types.NodeSocket, SN_Socket):
             layout.label(text=text)
         else:
             if self.is_color:
-                if self.use_four_digits:
+                if self.use_four_numbers:
                     layout.prop(self, "color_alpha_value", text=text)
                 else:
                     layout.prop(self, "color_value", text=text)
             else:
                 layout = layout.column()
-                if self.use_four_digits:
+                if self.use_four_numbers:
                     layout.prop(self, "socket_value_quad", text=text)
                 else:
                     layout.prop(self, "socket_value", text=text)

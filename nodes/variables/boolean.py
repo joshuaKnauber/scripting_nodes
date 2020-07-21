@@ -46,7 +46,6 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Boolean Variable"
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0.65,0,0)
-    register_in_properties = True
     should_be_registered = True
 
     value: bpy.props.BoolProperty(default=True,name="Value",description="Value of this variable")
