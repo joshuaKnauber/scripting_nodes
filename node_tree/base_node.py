@@ -126,8 +126,25 @@ class SN_ScriptingBaseNode:
                     else:
                         created_sockets.append(self.add_dynamic_socket(inputs,socket,index,last_parent))
 
+    def _average_position(self,node1,node2,new_node):
+        x = (node1.location[0]+node1.width) + (node2.location[0]-node1.location[0]-node1.width)/2 - new_node.width/2
+        y = (node1.location[1]+node1.height) + (node2.location[1]-node1.location[1]-node1.height)/2 - new_node.height/2
+        return (x,y)
+
     def cast_link(self,link):
-        pass#TODO: add a cast node to the link
+        cast_nodes = {
+            "SN_StringSocket": "SN_CastStringNode",
+            "SN_BoolSocket": "SN_CastBooleanNode",
+            "SN_IntSocket": "SN_CastIntegerNode",
+            "SN_FloatSocket": "SN_CastFloatNode",
+            "SN_VectorSocket": "SN_CastVectorNode"
+        }
+        if link.to_socket.bl_idname in cast_nodes:
+            ntree = bpy.context.space_data.node_tree
+            cast = ntree.nodes.new(cast_nodes[link.to_socket.bl_idname])
+            cast.location = self._average_position(link.from_node,link.to_node,cast)
+            ntree.links.new(link.from_socket, cast.inputs[0])
+            ntree.links.new(cast.outputs[0], link.to_socket)
 
     def update_socket_connections(self):
         for input_socket in self.inputs:

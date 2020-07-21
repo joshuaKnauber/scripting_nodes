@@ -8,6 +8,7 @@ class SN_CastStringNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_CastStringNode"
     bl_label = "Cast To String"
     bl_icon = "DRIVER_TRANSFORM"
+    bl_width_default = 130
     node_color = (0,0.75,0)
     should_be_registered = False
 

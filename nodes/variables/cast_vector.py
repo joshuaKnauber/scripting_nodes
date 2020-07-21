@@ -8,6 +8,7 @@ class SN_CastVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_CastVectorNode"
     bl_label = "Cast To Vector"
     bl_icon = "DRIVER_TRANSFORM"
+    bl_width_default = 130
     node_color = (0.6,0.2,0.8)
     should_be_registered = False
 
