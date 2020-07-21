@@ -1,30 +1,28 @@
-#SN_VectorVariableNode
+#SN_IntegerVariableNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 from ...node_tree.node_sockets import is_valid_python, make_valid_python
 
 
-class SN_VectorArray(bpy.types.PropertyGroup):
+class SN_IntegerArray(bpy.types.PropertyGroup):
 
     def get_python_value(self):
-        return str(self.value)#TODO: return four_value if needed
+        return str(self.value)
 
-    value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable")
-    four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable")
+    value: bpy.props.IntProperty(default=0,name="Value",description="Value of this variable")
+    
+bpy.utils.register_class(SN_IntegerArray)
 
-bpy.utils.register_class(SN_VectorArray)
 
-
-class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
-    bl_idname = "SN_VectorVariableNode"
-    bl_label = "Vector Variable"
+class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
+    bl_idname = "SN_IntegerVariableNode"
+    bl_label = "Create Integer"
     bl_icon = "DRIVER_TRANSFORM"
-    node_color = (0.6,0.2,0.8)
+    node_color = (0.2,0.4,0.75)
     should_be_registered = True
 
-    value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable")
-    four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable")
+    value: bpy.props.IntProperty(default=0,name="Value",description="Value of this variable")
 
     def update_socket_value(self,context):
         if not is_valid_python(self.var_name,True):
@@ -36,9 +34,7 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     is_array: bpy.props.BoolProperty(default=False,name="Make Array",description="Allows you to add multiple elements of the same type to this variable")
 
-    array_items: bpy.props.CollectionProperty(type=SN_VectorArray)
-
-    use_four_numbers: bpy.props.BoolProperty(default=False,name="Use Four Numbers")
+    array_items: bpy.props.CollectionProperty(type=SN_IntegerArray)
 
     def inititialize(self, context):
         self.update_socket_value(context)
@@ -54,12 +50,8 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if not self.is_array:
             col = layout.column(align=True)
             col.label(text="Default Value:")
-            if self.use_four_numbers:
-                col.prop(self,"four_value",text="")
-            else:
-                col.prop(self,"value",text="")
+            col.prop(self,"value",text="")
 
-        layout.prop(self,"use_four_numbers")
         layout.prop(self,"is_array")
 
         if self.is_array:
@@ -69,11 +61,7 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 split = row.split(factor=0.2)
                 split.label(text=str(array_index))
                 row = split.row()
-                col = row.column()
-                if self.use_four_numbers:
-                    col.prop(array_element,"four_value",text="")
-                else:
-                    col.prop(array_element,"value",text="")
+                row.prop(array_element,"value",text="")
                 op = row.operator("scripting_nodes.remove_variable_array_element",text="",icon="PANEL_CLOSE",emboss=False)
                 op.node_name = self.name
                 op.element_index = array_index

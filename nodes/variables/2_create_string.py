@@ -17,7 +17,7 @@ bpy.utils.register_class(SN_StringArray)
 
 class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_StringVariableNode"
-    bl_label = "String Variable"
+    bl_label = "Create String"
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0,0.75,0)
     should_be_registered = True
