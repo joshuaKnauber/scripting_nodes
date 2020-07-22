@@ -29,6 +29,3 @@ class SN_SeperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             ],
             "errors": []
         }
-
-    def required_imports(self):
-        return []

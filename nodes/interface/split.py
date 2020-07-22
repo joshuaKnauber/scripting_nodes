@@ -33,8 +33,5 @@ class SN_SplitNode(bpy.types.Node, SN_ScriptingBaseNode):
             "errors": []
         }
 
-    def required_imports(self):
-        return []
-
     def layout_type(self):
         return "split"
