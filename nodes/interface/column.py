@@ -1,14 +1,14 @@
-#SN_RowNode
+#SN_ColumnNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
-class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_ColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_RowNode"
-    bl_label = "Row"
-    bl_icon = "DOWNARROW_HLT"
+    bl_idname = "SN_ColumnNode"
+    bl_label = "Column"
+    bl_icon = "RIGHTARROW"
     node_color = (0.89,0.6,0)
     should_be_registered = False
 
@@ -38,4 +38,4 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
         }
     
     def layout_type(self):
-        return "row"
+        return "column"
