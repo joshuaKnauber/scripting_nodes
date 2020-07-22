@@ -8,7 +8,7 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_MathNode"
     bl_label = "Math"
-    bl_icon = "CON_TRANSFORM"
+    bl_icon = "CON_TRANSLIKE"
     node_color = (0.65,0,0)
     should_be_registered = False
 

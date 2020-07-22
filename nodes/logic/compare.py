@@ -8,7 +8,7 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_CompareNode"
     bl_label = "Compare"
-    bl_icon = "CON_TRANSFORM"
+    bl_icon = "CON_SAMEVOL"
     node_color = (0.65,0,0)
     should_be_registered = False
 
