@@ -13,7 +13,7 @@ class SN_SeperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = False
 
     def inititialize(self,context):
-        self.sockets.create_output(self,"LAYOUT","Layout")
+        self.sockets.create_input(self,"LAYOUT","Layout")
         factor = self.sockets.create_input(self, "FLOAT", "Factor")
         factor.set_value(1)
 

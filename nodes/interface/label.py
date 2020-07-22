@@ -14,7 +14,7 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def inititialize(self,context):
         self.sockets.create_input(self,"STRING","String")
-        self.sockets.create_output(self,"LAYOUT","Layout")
+        self.sockets.create_input(self,"LAYOUT","Layout")
 
     def draw_buttons(self,context,layout):
         self.draw_icon_chooser(layout)
