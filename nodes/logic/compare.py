@@ -1,23 +1,23 @@
-#SN_MathNode
+#SN_CompareNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
-class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_MathNode"
-    bl_label = "Math"
+    bl_idname = "SN_CompareNode"
+    bl_label = "Compare"
     bl_icon = "CON_TRANSFORM"
     node_color = (0.65,0,0)
     should_be_registered = False
 
-    operation: bpy.props.EnumProperty(items=[("+", "Add", "Add two numbers"), ("-", "Subtract", "Subtract two numbers"), ("*", "Multiply", "Multiply two numbers"), ("/", "Divide", "Divide two numbers")],name="Operation", description="The operation you want to commence")
+    operation: bpy.props.EnumProperty(items=[("==", "=", "Equal"), ("!=", "≠", "Not equal"), ("<", "<", "Smaller than"), (">", ">", "Bigger than"), ("<=", "≤", "Smaller or equal to"), (">=", "≥", "Bigger or equal to")],name="Operation", description="The operation you want to commence")
 
     def inititialize(self,context):
         self.sockets.create_input(self,"FLOAT","Value")
         self.sockets.create_input(self,"FLOAT","Value")
-        self.sockets.create_output(self,"FLOAT","Output")
+        self.sockets.create_output(self,"BOOLEAN","Output")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "operation", text="")
