@@ -9,14 +9,13 @@ class SN_StringNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_StringNode"
     bl_label = "String"
     bl_icon = "CON_TRANSFORM"
-    node_color = (0.2,0.4,0.75)
-    bl_width_default = 160
+    node_color = (0,0.75,0)
     should_be_registered = False
 
     string_value: bpy.props.StringProperty(name="Value")
 
     def inititialize(self,context):
-        self.sockets.create_output(self,"STRING","Output")
+        self.sockets.create_output(self,"STRING","Value")
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "string_value", text="")

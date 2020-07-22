@@ -16,7 +16,7 @@ class SN_CastVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def inititialize(self, context):
         self.sockets.create_input(self,"DATA","Data")
-        self.sockets.create_output(self,"INTEGER","Integer")
+        self.sockets.create_output(self,"VECTOR","Vector")
 
     def draw_buttons(self,context,layout):
         layout.prop(self,"use_four_numbers")
