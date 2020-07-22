@@ -7,6 +7,8 @@ class SN_ScriptingBaseNode:
     bl_width_max = 5000
     node_color = (0.5,0.5,0.5)
 
+    icon: bpy.props.StringProperty(default="")
+
     sockets = SocketHandler()
     should_be_registered = False
 
@@ -160,6 +162,15 @@ class SN_ScriptingBaseNode:
                         #    from_socket.display_shape += "_DOT"
                         if not "_DOT" in to_socket.display_shape:
                             to_socket.display_shape += "_DOT"
+
+    def draw_icon_chooser(self,layout):
+        """ draws the options for choosing an icon """
+        box = layout.box()
+        row = box.row()
+        row.operator("scripting_nodes.choose_icon",text="Icons" , icon="PRESET").node_name = self.name
+        if self.icon:
+            row.label(icon=self.icon,text="")
+            row.operator("scripting_nodes.clear_icon",text="",icon="PANEL_CLOSE",emboss=False).node_name = self.name
 
     def update(self):
         self.update_shapes(self.inputs)

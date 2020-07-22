@@ -17,7 +17,7 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"LAYOUT","Layout")
 
     def draw_buttons(self,context,layout):
-        pass
+        self.draw_icon_chooser(layout)
 
     def evaluate(self, socket, input_data, errors):
         return {
