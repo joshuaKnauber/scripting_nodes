@@ -10,7 +10,7 @@ class SN_NegateNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Negate"
     bl_icon = "FORCE_CHARGE"
     node_color = (0.65,0,0)
-    bl_width_default = 110
+    bl_width_default = 100
     should_be_registered = False
 
     def inititialize(self,context):
