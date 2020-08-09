@@ -72,14 +72,6 @@ class SN_ScriptingBaseNode:
 
         return node_input_data, errors
 
-    def update_shapes(self,sockets):
-        for socket in sockets:
-            if socket.is_linked:
-                socket.display_shape = socket.display_shape.replace("_DOT","")
-            else:
-                if not "_DOT" in socket.display_shape:
-                    socket.display_shape += "_DOT"
-
     def add_dynamic_socket(self,inputs,socket,index,parent):
         if inputs:
             socket = self.sockets.create_input(self,socket.socket_type,socket.name,True)
@@ -155,13 +147,6 @@ class SN_ScriptingBaseNode:
                         from_socket = link.from_socket
                         to_socket = link.to_socket
                         bpy.context.space_data.node_tree.links.remove(link)
-                        
-                        #if from_socket.dynamic and from_socket.dynamic_parent:
-                        #    from_socket.node.outputs.remove(from_socket)
-                        #elif not "_DOT" in from_socket.display_shape:
-                        #    from_socket.display_shape += "_DOT"
-                        if not "_DOT" in to_socket.display_shape:
-                            to_socket.display_shape += "_DOT"
 
     def draw_icon_chooser(self,layout):
         """ draws the options for choosing an icon """
@@ -173,9 +158,6 @@ class SN_ScriptingBaseNode:
             row.operator("scripting_nodes.clear_icon",text="",icon="PANEL_CLOSE",emboss=False).node_name = self.name
 
     def update(self):
-        self.update_shapes(self.inputs)
-        self.update_shapes(self.outputs)
-
         self.update_dynamic(True)
         self.update_dynamic(False)
         for input_socket in self.inputs:

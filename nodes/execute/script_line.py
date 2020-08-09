@@ -1,15 +1,15 @@
-#SN_ScriptLineNode
+#SN_CodeBlockNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
-class SN_ScriptLineNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_CodeBlockNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_ScriptLineNode"
-    bl_label = "Script Line"
+    bl_idname = "SN_CodeBlockNode"
+    bl_label = "Code Block"
     bl_icon = "FILE_SCRIPT"
-    node_color = (1,1,1)
+    node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 
     line: bpy.props.StringProperty(name="Line", description="The line you want to write")
