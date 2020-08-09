@@ -326,7 +326,7 @@ class SN_SeparatorSocket(bpy.types.NodeSocket, SN_Socket):
 
 
 class SN_ObjectSocket(bpy.types.NodeSocket, SN_Socket):
-    '''Object Socket for passing collections'''
+    '''Object Socket for passing objects'''
     bl_idname = 'SN_ObjectSocket'
     bl_label = "Object"
     _is_data_socket = False
@@ -334,6 +334,14 @@ class SN_ObjectSocket(bpy.types.NodeSocket, SN_Socket):
     def draw(self, context, layout, node, text):
         layout.label(text=text)
 
+class SN_CollectionSocket(bpy.types.NodeSocket, SN_Socket):
+    '''Collection Socket for passing collections'''
+    bl_idname = 'SN_CollectionSocket'
+    bl_label = "Object"
+    _is_data_socket = False
+
+    def draw(self, context, layout, node, text):
+        layout.label(text=text)
 
 
 

@@ -41,6 +41,11 @@ class SocketHandler():
             },
             "OBJECT": {
                 "idname": "SN_ObjectSocket",
+                "shape": "CIRCLE",
+                "color": (0,0,0,1)
+            },
+            "COLLECTION": {
+                "idname": "SN_CollectionSocket",
                 "shape": "SQUARE",
                 "color": (0,0,0,1)
             },
