@@ -1,4 +1,5 @@
 from random import randint
+import bpy
 
 class SocketHandler():
 
@@ -100,3 +101,34 @@ class SocketHandler():
 
     def remove_output(self,node,output_socket):
         node.outputs.remove(output_socket)
+
+    def change_socket_type(self, node, socket, socket_type):
+        label = socket.name
+        index = 0
+        link = None
+
+        for socket_index, node_socket in enumerate(node.inputs):
+            if node_socket == socket:
+                index = socket_index
+                if node_socket.is_linked:
+                    link = node_socket.links[0].from_socket
+
+        for socket_index, node_socket in enumerate(node.outputs):
+            if node_socket == socket:
+                index = socket_index
+                if node_socket.is_linked:
+                    link = node_socket.links[0].to_socket
+
+        if node_socket.is_output:
+            node.outputs.remove(socket)
+            out = self.create_output(node, socket_type, label)
+            node.outputs.move(len(node.outputs)-1, index)
+            if link:
+                bpy.context.space_data.node_tree.links.new(link, out)
+
+        else:
+            node.inputs.remove(socket)
+            inp = self.create_input(node, socket_type, label)
+            node.inputs.move(len(node.inputs)-1, index)
+            if link:
+                bpy.context.space_data.node_tree.links.new(inp, link)
