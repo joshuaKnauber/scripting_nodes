@@ -32,6 +32,11 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
             self.example_cache = items
             return items
 
+    def update_filters(self, context):
+        for node in context.space_data.node_tree.nodes:
+            if node.bl_idname == "SN_DataPropertiesNode":
+                node.update()
+
     # show the line width property in the ui
     show_line_width: bpy.props.BoolProperty(default=False,name="Show settings",description="Show settings for the error panel")
 
@@ -49,3 +54,12 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     # print texts
     print_texts: bpy.props.CollectionProperty(type=PrintProperties)
+
+    # properties for filtering data property search
+    filter_string: bpy.props.BoolProperty(name="Show Strings in the search bar", default=True, update=update_filters)
+    filter_bool: bpy.props.BoolProperty(name="Show Booleans in the search bar", default=True, update=update_filters)
+    filter_int: bpy.props.BoolProperty(name="Show Integers in the search bar", default=True, update=update_filters)
+    filter_float: bpy.props.BoolProperty(name="Show Floats in the search bar", default=True, update=update_filters)
+    filter_vector: bpy.props.BoolProperty(name="Show Vectors in the search bar", default=True, update=update_filters)
+    filter_data_block_collection: bpy.props.BoolProperty(name="Show Data Block Collections in the search bar", default=True, update=update_filters)
+    filter_data_block: bpy.props.BoolProperty(name="Show Data Blocks in the search bar", default=True, update=update_filters)

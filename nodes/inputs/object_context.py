@@ -43,3 +43,27 @@ class SN_ObjectContextNode(bpy.types.Node, SN_ScriptingBaseNode):
             ],
             "errors": []
         }
+
+
+    def data_type(self, output):
+        context_type = {
+            "Active bone": "Bone",
+            "Active object": "Object",
+            "Active pose bone": "PoseBone",
+            "Area": "Area",
+            "Collection": "Collection",
+            "Pose Object": "Object",
+            "Region": "Region",
+            "Scene": "Scene",
+            "Screen": "Screen",
+            "View layer": "ViewLayer",
+            "Window manager": "WindowManager",
+            "Workspace": "WorkSpace",
+        }
+
+        context_type = context_type[output.name]
+
+        return "bpy.types." + context_type
+
+    def required_imports(self):
+        return ["bpy"]

@@ -193,3 +193,9 @@ class SN_ScriptingBaseNode:
 
     def layout_type(self):
         return ""
+
+    def data_type(self, output):
+        return ""
+
+    def reset_data_type(self, context):
+        pass
