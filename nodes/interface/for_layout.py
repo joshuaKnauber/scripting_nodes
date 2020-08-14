@@ -14,16 +14,15 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def reset_data_type(self, context):
         if self.inputs[1].links[0].from_socket.bl_idname in ["SN_CollectionSocket", "SN_ObjectSocket"]:
-            if self.outputs[2].is_linked:
-                if self.outputs[2].links[0].to_socket.bl_idname in ["SN_CollectionSocket", "SN_ObjectSocket"]:
-                    self.outputs[2].links[0].to_node.reset_data_type(None)
+            if self.outputs[1].is_linked:
+                if self.outputs[1].links[0].to_socket.bl_idname in ["SN_CollectionSocket", "SN_ObjectSocket"]:
+                    self.outputs[1].links[0].to_node.reset_data_type(None)
             else:
                 self.update()
 
     def inititialize(self,context):
         self.sockets.create_input(self,"LAYOUT","Layout")
         self.sockets.create_input(self,"COLLECTION","Input")
-        self.sockets.create_output(self,"LAYOUT","Layout")
         self.sockets.create_output(self,"LAYOUT","Repeat")
         self.sockets.create_output(self,"OBJECT","Element")
         self.sockets.create_output(self,"INTEGER","Index")
