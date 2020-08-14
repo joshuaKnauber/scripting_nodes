@@ -34,6 +34,7 @@ from .properties.groups.addon_properties import ScriptingNodesProperties
 from .interface.node_header import node_header
 from .compile.compiler import compiler
 from .handler.operator_handler import OperatorHandler, SN_OperatorProperties
+from .operators.panel_ops import remove_created_panels, remove_appended_panels
 
 auto_load.init()
 
@@ -54,6 +55,8 @@ def load_handler(dummy):
 def unload_handler(dummy=None):
     """ function that is run before blender is closed and when a new file is opened """
     compiler().unregister_all()
+    remove_created_panels()
+    remove_appended_panels()
 
 def reregister_node_categories(names=[]):
     """ reregisters the node categories """

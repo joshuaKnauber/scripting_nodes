@@ -82,7 +82,7 @@ def remove_created_panels():
 
 class SN_ChoosePanelLocation(bpy.types.Operator):
     bl_idname = "visual_scripting.choose_panel_location"
-    bl_label = "Choose Panel Location"
+    bl_label = "Choose This Location"
     bl_description = "Choose this as the location of your panel"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
 
@@ -106,4 +106,74 @@ class SN_CancelPanelLocation(bpy.types.Operator):
 
     def execute(self, context):
         remove_created_panels()
+        return {"FINISHED"}
+
+
+
+def prepend_panel(self, context, prepend=False):
+    row = self.layout.row()
+    row.scale_y = 1.2
+    row.alert = True
+    op = row.operator("visual_scripting.choose_existing_panel_location",icon="EYEDROPPER")
+    op.prepend = prepend
+    col = row.column()
+    col.alert = False
+    col.operator("visual_scripting.cancel_existing_panel_location",text="",emboss=False,icon="PANEL_CLOSE")
+
+def append_panel(self, context):
+    prepend_panel(self,context,True)
+
+class SN_CreateExistingPanelLocation(bpy.types.Operator):
+    bl_idname = "visual_scripting.create_existing_panel_location"
+    bl_label = "Create Existing Panel"
+    bl_description = "Create the possible panel locations"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def execute(self, context):
+        for panel in dir(bpy.types):
+            panel = eval("bpy.types."+panel)
+            if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type"):
+                panel.prepend(prepend_panel)
+                panel.append(append_panel)
+        return {"FINISHED"}
+
+
+def remove_appended_panels():
+    for panel in dir(bpy.types):
+        panel = eval("bpy.types."+panel)
+        if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type"):
+            panel.remove(prepend_panel)
+            panel.remove(append_panel)
+
+
+class SN_ChooseExistingPanelLocation(bpy.types.Operator):
+    bl_idname = "visual_scripting.choose_existing_panel_location"
+    bl_label = "Choose This Location"
+    bl_description = "Choose this panel as the location of your layout"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+
+    panel_name: bpy.props.StringProperty()
+    prepend: bpy.props.BoolProperty()
+
+    def execute(self, context):
+        for panel in dir(bpy.types):
+            if panel == self.panel_name:
+                panel = eval("bpy.types."+panel)
+                print(panel,self.prepend)
+        remove_appended_panels()
+        return {"FINISHED"}
+
+
+class SN_CancelExistingPanelLocation(bpy.types.Operator):
+    bl_idname = "visual_scripting.cancel_existing_panel_location"
+    bl_label = "Cancel Picking Panel"
+    bl_description = "Cancel the picking of a panel"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+
+    def execute(self, context):
+        remove_appended_panels()
         return {"FINISHED"}

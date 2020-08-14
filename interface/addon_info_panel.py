@@ -53,3 +53,4 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
 
 
         layout.operator("visual_scripting.create_panel_locations")
+        layout.operator("visual_scripting.create_existing_panel_location")
