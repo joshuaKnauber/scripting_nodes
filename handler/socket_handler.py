@@ -106,20 +106,23 @@ class SocketHandler():
         label = socket.name
         index = 0
         link = None
+        is_input = False
 
         for socket_index, node_socket in enumerate(node.inputs):
             if node_socket == socket:
+                is_input = True
                 index = socket_index
                 if node_socket.is_linked:
                     link = node_socket.links[0].from_socket
+        
+        if not is_input:
+            for socket_index, node_socket in enumerate(node.outputs):
+                if node_socket == socket:
+                    index = socket_index
+                    if node_socket.is_linked:
+                        link = node_socket.links[0].to_socket
 
-        for socket_index, node_socket in enumerate(node.outputs):
-            if node_socket == socket:
-                index = socket_index
-                if node_socket.is_linked:
-                    link = node_socket.links[0].to_socket
-
-        if node_socket.is_output:
+        if not is_input:
             node.outputs.remove(socket)
             out = self.create_output(node, socket_type, label)
             node.outputs.move(len(node.outputs)-1, index)

@@ -16,16 +16,22 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.use_float:
             self.color = (0.23,0.65,0.75)
             if self.outputs[0].bl_idname != "SN_FloatSocket":
+                self.sockets.change_socket_type(self, self.inputs[0], "FLOAT")
+                self.sockets.change_socket_type(self, self.inputs[1], "FLOAT")
                 self.sockets.change_socket_type(self, self.outputs[0], "FLOAT")
         else:
             self.color = (0.2,0.4,0.75)
             if self.outputs[0].bl_idname != "SN_IntSocket":
+                self.sockets.change_socket_type(self, self.inputs[0], "INTEGER")
+                self.sockets.change_socket_type(self, self.inputs[1], "INTEGER")
                 self.sockets.change_socket_type(self, self.outputs[0], "INTEGER")
 
     use_float: bpy.props.BoolProperty(name="Use float", description="Get a float node", update=update_socket, default=False)
 
     def inititialize(self,context):
         self.sockets.create_output(self,"INTEGER","Value")
+        self.sockets.create_input(self, "INTEGER", "From")
+        self.sockets.create_input(self, "INTEGER", "To")
 
     def draw_buttons(self, context, layout):
         if self.use_float:
