@@ -15,8 +15,8 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
     operation: bpy.props.EnumProperty(items=[("==", "=", "Equal"), ("!=", "≠", "Not equal"), ("<", "<", "Smaller than"), (">", ">", "Bigger than"), ("<=", "≤", "Smaller or equal to"), (">=", "≥", "Bigger or equal to")],name="Operation", description="The operation you want to commence")
 
     def inititialize(self,context):
-        self.sockets.create_input(self,"FLOAT","Value")
-        self.sockets.create_input(self,"FLOAT","Value")
+        self.sockets.create_input(self,"DATA","Value")
+        self.sockets.create_input(self,"DATA","Value")
         self.sockets.create_output(self,"BOOLEAN","Output")
 
     def draw_buttons(self, context, layout):
