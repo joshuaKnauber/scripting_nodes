@@ -39,7 +39,7 @@ class SN_ScriptingBaseNode:
 
             # data socket
             if input_socket._is_data_socket:
-                input_data["value"] = input_socket.get_value()
+                input_data["value"] = str(input_socket.get_value())
                 input_data["code"] = input_data["value"]
 
                 if input_socket.is_linked:
