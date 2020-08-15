@@ -13,9 +13,9 @@ def get_possible_panel_locations():
                 
                 location = {"space":panel.bl_space_type, "region":panel.bl_region_type, "category":"", "context":""}
                 if hasattr(panel,"bl_category"):
-                    location["category"] = "bl_category='"+panel.bl_category+"'"
-                if hasattr(panel,"context"):
-                    location["context"] = "bl_context='"+panel.bl_category+"'"
+                    location["category"] = panel.bl_category
+                if hasattr(panel,"bl_context"):
+                    location["context"] = panel.bl_context
 
                 if not location in possible_locations:
                     possible_locations.append(location)
@@ -23,11 +23,18 @@ def get_possible_panel_locations():
     return possible_locations[:]
 
 
+trigger_node = None
+def set_trigger_node(node):
+    global trigger_node
+    trigger_node = node
+
 class SN_CreatePanelLocations(bpy.types.Operator):
     bl_idname = "visual_scripting.create_panel_locations"
     bl_label = "Create Panel Locations"
     bl_description = "Creates panels in all possible locations for you to pick one"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
+
+    trigger_node: bpy.props.StringProperty()
 
     @classmethod
     def poll(cls, context):
@@ -39,14 +46,16 @@ class SN_CreatePanelLocations(bpy.types.Operator):
     def create_panels(self,locations):
         for location in locations:
             uid = uuid4().hex[:10]
+            context = "bl_context='"+location["context"]+"'" if location["context"] else ""
+            category = "bl_category='"+location["category"]+"'" if location["category"] else ""
             panel = f"""
 class SN_PT_LocationPickerPanel_{uid}(bpy.types.Panel):
     bl_label = " "
     bl_idname = "SN_PT_LocationPickerPanel_{uid}"
     bl_space_type = '{location["space"]}'
     bl_region_type = '{location["region"]}'
-    {location["context"]}
-    {location["category"]}
+    {context}
+    {category}
     bl_options = {{"HIDE_HEADER"}}
 
     def draw(self, context):
@@ -68,6 +77,9 @@ bpy.utils.register_class(SN_PT_LocationPickerPanel_{uid})"""
     def execute(self, context):
         possible_locations = get_possible_panel_locations()
         self.create_panels(possible_locations)
+
+        if self.trigger_node in context.space_data.node_tree.nodes:
+            set_trigger_node(context.space_data.node_tree.nodes[self.trigger_node])
         return {"FINISHED"}
 
 
@@ -92,7 +104,15 @@ class SN_ChoosePanelLocation(bpy.types.Operator):
     context: bpy.props.StringProperty()
 
     def execute(self, context):
-        print(self.space,self.region,self.category,self.category)
+        global trigger_node
+        if trigger_node:
+            trigger_node.space = self.space
+            trigger_node.region = self.region
+            if self.context:
+                trigger_node.context = self.context
+            else:
+                trigger_node.context = "NONE"
+            trigger_node = None
         remove_created_panels()
         return {"FINISHED"}
 
