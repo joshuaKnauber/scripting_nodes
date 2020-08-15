@@ -29,7 +29,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
-                        [self.outputs.links[0].to_socket]
+                        [self.outputs[0].links[0].to_socket]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]

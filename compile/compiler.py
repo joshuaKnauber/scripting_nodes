@@ -48,7 +48,7 @@ class ScriptingNodesCompiler():
             if type(line) == list:
                 if line:
                     if len(line) == 1 and type(line[0]) != str:
-                        code += self._compile_line(line[0], indents)
+                        code += self._compile_socket(line[0], indents)
                     else:
                         code += self._compile_line(line, indents) + "\n"
                         
@@ -111,7 +111,7 @@ class ScriptingNodesCompiler():
                     has_nodes = True
         
         if not has_nodes:
-            register_function += " "*self._indents + "pass"
+            register_function += "\n" + " "*self._indents + "pass"
 
         return register_function
 
@@ -127,7 +127,7 @@ class ScriptingNodesCompiler():
                     has_nodes = True
         
         if not has_nodes:
-            unregister_function += " "*self._indents + "pass"
+            unregister_function += "\n" + " "*self._indents + "pass"
 
         return unregister_function
 
