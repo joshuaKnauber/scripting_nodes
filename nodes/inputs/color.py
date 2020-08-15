@@ -29,10 +29,15 @@ class SN_ColorNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"use_four_numbers")
 
     def evaluate(self, socket, input_data, errors):
+        vector = (self.value[0], self.value[1], self.value[2])
+        if self.use_four_numbers:
+            vector = (self.four_value[0], self.four_value[1], self.four_value[2], self.four_value[3])
+
         return {
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
+                        [str(vector)]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
