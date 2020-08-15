@@ -19,7 +19,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, socket, input_data, errors):
         print_text = ""
-        if input_data[1]["code"]:
+        if input_data[1]["code"] != None:
             print_text = input_data[1]["code"]
 
         return {
