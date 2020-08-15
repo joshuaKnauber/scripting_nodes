@@ -56,7 +56,7 @@ class SN_ScriptingBaseNode:
                         })
 
             # layout, execute or object socket
-            elif input_socket.bl_idname in ["SN_LayoutSocket","SN_ExecuteSocket","SN_ObjectSocket"]:
+            elif input_socket.bl_idname in ["SN_LayoutSocket","SN_ExecuteSocket","SN_ObjectSocket", "SN_CollectionSocket"]:
                 if input_socket.is_linked:
                     if input_socket.links[0].from_socket.bl_idname == input_socket.links[0].to_socket.bl_idname:
                         input_data["connected"] = input_socket.links[0].from_socket

@@ -32,10 +32,27 @@ class SN_ObjectContextNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, socket, input_data, errors):
+        context_type = {
+            "Active bone": "active_bone",
+            "Active object": "active_object",
+            "Active pose bone": "active_pose_bone",
+            "Area": "area",
+            "Collection": "collection",
+            "Engine": "engine",
+            "Mode": "mode",
+            "Pose Object": "pose_object",
+            "Region": "region",
+            "Scene": "scene",
+            "Screen": "screen",
+            "View layer": "view_layer",
+            "Window manager": "window_manager",
+            "Workspace": "workspace",
+        }
         return {
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
+                        ["bpy.context." + context_type[socket.name]]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]

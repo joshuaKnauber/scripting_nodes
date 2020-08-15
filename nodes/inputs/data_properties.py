@@ -147,17 +147,46 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, socket, input_data, errors):
-        return {
-            "blocks": [
-                {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
+        if len(self.inputs[0].links) == 1:
+            if self.inputs[0].links[0].from_socket.bl_idname == "SN_CollectionSocket":
+                index = input_data[1]["code"]
+                return {
+                    "blocks": [
+                        {
+                            "lines": [ # lines is a list of lists, where the lists represent the different lines
+                                [input_data[0]["code"], "[", index, "]"]
+                            ],
+                            "indented": [ # indented is a list of lists, where the lists represent the different lines
+                            ]
+                        }
                     ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
-                    ]
+                    "errors": []
                 }
-            ],
-            "errors": []
-        }
+            elif self.inputs[0].links[0].from_socket.bl_idname == "SN_ObjectSocket":
+                return {
+                    "blocks": [
+                        {
+                            "lines": [ # lines is a list of lists, where the lists represent the different lines
+                                [input_data[0]["code"], "." + self.search_properties[socket.name].identifier]
+                            ],
+                            "indented": [ # indented is a list of lists, where the lists represent the different lines
+                            ]
+                        }
+                    ],
+                    "errors": []
+                }
+
+        return {
+                    "blocks": [
+                        {
+                            "lines": [ # lines is a list of lists, where the lists represent the different lines
+                            ],
+                            "indented": [ # indented is a list of lists, where the lists represent the different lines
+                            ]
+                        }
+                    ],
+                    "errors": []
+                }
 
     def data_type(self, output):
         if len(self.inputs[0].links) == 1:

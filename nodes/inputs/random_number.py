@@ -50,7 +50,7 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
-                        ["random." + randtype + "(min(" + from_to + "), max(" + from_to + "))"]
+                        ["random." + randtype + "(min(", from_to, "), max(", from_to, "))"]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]

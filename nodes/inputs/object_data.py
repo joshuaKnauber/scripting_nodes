@@ -16,8 +16,7 @@ class SN_ObjectDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         items = []
         for dataType in bpy.data.rna_type.properties:
             if dataType.type == "COLLECTION":
-                bpy_type = str(eval("bpy.data.bl_rna.properties['" + dataType.identifier + "'].fixed_type.identifier"))
-                items.append((bpy_type, dataType.name, dataType.description))
+                items.append((dataType.identifier, dataType.name, dataType.description))
         return sorted(items)
 
     def reset_data_type(self, context):
@@ -38,6 +37,7 @@ class SN_ObjectDataNode(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
+                        ["bpy.data." + self.data_type_enum]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
@@ -47,7 +47,8 @@ class SN_ObjectDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         }
 
     def data_type(self, output):
-        return "bpy.types." + self.data_type_enum
+        bpy_type = str(eval("bpy.data.bl_rna.properties['" + self.data_type_enum + "'].fixed_type.identifier"))
+        return "bpy.types." + bpy_type
 
     def required_imports(self):
         return ["bpy"]
