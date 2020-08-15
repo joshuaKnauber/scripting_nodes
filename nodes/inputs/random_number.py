@@ -41,11 +41,16 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "use_float", toggle=True, text=text)
 
     def evaluate(self, socket, input_data, errors):
-        print(input_data)
+        randtype = "randint"
+        if self.use_float:
+            randtype = "uniform"
+
+        from_to = input_data[0]["code"] + ", " + input_data[1]["code"]
         return {
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
+                        ["random." + randtype + "(min(" + from_to + "), max(" + from_to + "))"]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
