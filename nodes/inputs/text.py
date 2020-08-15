@@ -25,7 +25,7 @@ class SN_StringNode(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
-                        self.string_value
+                        [self.string_value]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
