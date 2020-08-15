@@ -27,6 +27,7 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
+                        [input_data[0]["code"], self.operation, input_data[1]["code"]]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
