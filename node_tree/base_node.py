@@ -69,6 +69,7 @@ class SN_ScriptingBaseNode:
                             "node": self,
                             "fatal": True
                         })
+            node_input_data.append(input_data)
 
         return node_input_data, errors
 
