@@ -22,6 +22,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
+                        ["print(",self.inputs[1].links[0].from_socket,")"]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
