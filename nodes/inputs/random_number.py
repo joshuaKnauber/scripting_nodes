@@ -30,8 +30,8 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def inititialize(self,context):
         self.sockets.create_output(self,"INTEGER","Value")
-        self.sockets.create_input(self, "INTEGER", "From")
-        self.sockets.create_input(self, "INTEGER", "To")
+        self.sockets.create_input(self, "INTEGER", "Min")
+        self.sockets.create_input(self, "INTEGER", "Max")
 
     def draw_buttons(self, context, layout):
         if self.use_float:
@@ -41,6 +41,7 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "use_float", toggle=True, text=text)
 
     def evaluate(self, socket, input_data, errors):
+        print(input_data)
         return {
             "blocks": [
                 {
@@ -52,3 +53,6 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
             ],
             "errors": []
         }
+
+    def required_imports(self):
+        return ["random"]
