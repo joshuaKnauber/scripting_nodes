@@ -12,7 +12,7 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.65,0,0)
     should_be_registered = False
 
-    andOr: bpy.props.EnumProperty(items=[("and", "And", "Both need to be true"), ("or", "Or", "At least one needs to be true")],name="Operation", description="The operation you want to commence")
+    andOr: bpy.props.EnumProperty(items=[(" and ", "And", "Both need to be true"), (" or ", "Or", "At least one needs to be true")],name="Operation", description="The operation you want to commence")
 
     def inititialize(self,context):
         self.sockets.create_input(self,"BOOLEAN","Value")
@@ -27,6 +27,7 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
+                        [input_data[0]["code"], self.andOr, input_data[1]["code"]]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
