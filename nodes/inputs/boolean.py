@@ -25,6 +25,7 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
+                        [str(self.bool_value)]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
