@@ -25,6 +25,7 @@ class SN_FloatNode(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
+                        [str(self.float_value)]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
