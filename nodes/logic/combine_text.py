@@ -18,11 +18,19 @@ class SN_CombineTextNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"STRING","Output")
 
     def evaluate(self, socket, input_data, errors):
+        text_one = input_data[0]["code"]
+        if type(text_one) == str:
+            text_one = "'" + input_data[0]["code"] + "'"
+
+        text_two = input_data[1]["code"]
+        if type(text_two) == str:
+            text_two = "'" + input_data[1]["code"] + "'"
+
         return {
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
-                        ["'", input_data[0]["code"], "' + '", input_data[1]["code"], "'"]
+                        [text_one, " + ", text_two]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
