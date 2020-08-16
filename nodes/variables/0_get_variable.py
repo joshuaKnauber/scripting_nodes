@@ -23,9 +23,40 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         for node in context.space_data.node_tree.nodes:
             if node.bl_idname in identifiers:
                 items.append((node.name,node.var_name,node.description))
+
         return items
 
-    variables: bpy.props.EnumProperty(items=get_variables,name="Variable",description="The variable you want to get the value from")
+    def update_socket_output(self, context):
+        identifiers = {
+            "SN_BooleanVariableNode": "BOOLEAN",
+            "SN_FloatVariableNode": "FLOAT",
+            "SN_IntegerVariableNode": "INTEGER",
+            "SN_StringVariableNode": "STRING",
+            "SN_VectorVariableNode": "VECTOR",
+        }
+
+        socket_identifiers = {
+            "SN_BooleanVariableNode": "SN_BoolSocket",
+            "SN_FloatVariableNode": "SN_FloatSocket",
+            "SN_IntegerVariableNode": "SN_IntSocket",
+            "SN_StringVariableNode": "SN_StringSocket",
+            "SN_VectorVariableNode": "SN_VectorSocket",
+        }
+
+        if self.variables != "":
+            if not len(self.outputs):     
+                for node in context.space_data.node_tree.nodes:
+                    if node.name == self.variables:
+                        self.sockets.create_output(self, identifiers[node.bl_idname], node.var_name)
+            else:
+                for node in context.space_data.node_tree.nodes:
+                    if node.name == self.variables:
+                        if socket_identifiers[node.bl_idname] != self.outputs[0].bl_idname or node.var_name != self.outputs[0].name:
+                            self.sockets.change_socket_type(self, self.outputs[0], identifiers[node.bl_idname], label=node.var_name)
+        else:
+            self.outputs.clear()
+
+    variables: bpy.props.EnumProperty(items=get_variables,name="Variable",description="The variable you want to get the value from", update=update_socket_output)
 
     def draw_buttons(self, context, layout):
         row = layout.row()

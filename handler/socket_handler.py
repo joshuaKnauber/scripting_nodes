@@ -102,8 +102,9 @@ class SocketHandler():
     def remove_output(self,node,output_socket):
         node.outputs.remove(output_socket)
 
-    def change_socket_type(self, node, socket, socket_type):
-        label = socket.name
+    def change_socket_type(self, node, socket, socket_type, label=""):
+        if label == "":
+            label = socket.name
         index = 0
         link = None
         is_input = False
