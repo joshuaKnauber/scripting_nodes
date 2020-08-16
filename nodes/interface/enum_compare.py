@@ -1,4 +1,4 @@
-#SN_EnumSelectorLayoutNode
+#SN_EnumCompareLayoutNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
@@ -10,10 +10,10 @@ class SN_EnumSearchPropertyGroup(bpy.types.PropertyGroup):
     identifier: bpy.props.StringProperty(default="")
     description: bpy.props.StringProperty(default="")
 
-class SN_EnumSelectorLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_EnumSelectorLayoutNode"
-    bl_label = "Enum Selector (Layout)"
+    bl_idname = "SN_EnumCompareLayoutNode"
+    bl_label = "Enum Compare (Layout)"
     bl_icon = "CON_ACTION"
     node_color = (0.89,0.6,0)
     should_be_registered = False

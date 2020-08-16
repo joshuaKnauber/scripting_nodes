@@ -18,8 +18,12 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"EXECUTE","Execute")
 
     def evaluate(self, socket, input_data, errors):
+        next_code = ""
+        if self.outputs[0].is_linked:
+            next_code = self.outputs[0].links[0].to_socket
+        
         print_text = ""
-        if input_data[1]["code"] != None:
+        if input_data[1]["code"] != "None":
             print_text = input_data[1]["code"]
 
         return {
@@ -27,6 +31,13 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
                 {
                     "lines": [
                         ["print(", print_text ,")"]
+                    ],
+                    "indented": [
+                    ]
+                },
+                {
+                    "lines": [
+                        [next_code]
                     ],
                     "indented": [
                     ]

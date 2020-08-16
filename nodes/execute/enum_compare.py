@@ -1,4 +1,4 @@
-#SN_EnumSelectorProgramNode
+#SN_EnumCompareProgramNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
@@ -10,10 +10,10 @@ class SN_EnumSearchPropertyGroup(bpy.types.PropertyGroup):
     identifier: bpy.props.StringProperty(default="")
     description: bpy.props.StringProperty(default="")
 
-class SN_EnumSelectorProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_EnumSelectorProgramNode"
-    bl_label = "Enum Selector (Program)"
+    bl_idname = "SN_EnumCompareProgramNode"
+    bl_label = "Enum Compare (Program)"
     bl_icon = "CON_ACTION"
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
@@ -69,15 +69,20 @@ class SN_EnumSelectorProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop_search(self,"propName",self,"sn_enum_property_properties",text="")
 
     def evaluate(self, socket, input_data, errors):
+        next_code = ""
+        if self.outputs[0].is_linked:
+            next_code = self.outputs[0].links[0].to_socket
+
+        if_block = []
+        for output in self.outputs:
+            if output.is_linked:
+                if output.name != "Execute":
+                    if self.propName in self.sn_enum_property_properties:
+                        if_block.append({"lines": [["if ", input_data[1]["code"], "." + self.sn_enum_property_properties[self.propName].identifier + " == '" + output.name + "':"]],"indented": [[output.links[0].to_socket]]})
+        
+        if_block.append({"lines": [[next_code]],"indented": []})
         return {
-            "blocks": [
-                {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
-                    ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
-                    ]
-                }
-            ],
+            "blocks": if_block,
             "errors": []
         }
 
