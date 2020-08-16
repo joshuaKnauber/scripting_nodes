@@ -21,12 +21,30 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.update()
 
     def inititialize(self,context):
+        self.var_name = self.get_var_name()
+        self.index_name = "for_execute_node_index_" + self.var_name.split("_")[-1]
+
         self.sockets.create_input(self,"EXECUTE","Execute")
         self.sockets.create_input(self,"COLLECTION","Input")
         self.sockets.create_output(self,"EXECUTE","Execute")
         self.sockets.create_output(self,"EXECUTE","Repeat")
         self.sockets.create_output(self,"OBJECT","Element")
         self.sockets.create_output(self,"INTEGER","Index")
+
+    def get_var_name(self):
+        highest_var_name = 0
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname == self.bl_idname:
+                number = int(node.var_name.split("_")[-1])
+                highest_var_name = max(number,highest_var_name)
+        return "for_execute_node_"+str(highest_var_name + 1)
+
+    var_name: bpy.props.StringProperty(default="for_execute_node_0")
+    index_name: bpy.props.StringProperty(default="for_execute_node_index_0")
+
+    def copy(self, node):
+        self.var_name = self.get_var_name()
+        self.index_name = "for_execute_node_index_" + self.var_name.split("_")[-1]
 
     def draw_buttons(self, context, layout):
         if len(self.inputs[1].links) == 1:
@@ -37,17 +55,45 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                     box.label(text=eval(data_type).bl_rna.name)
 
     def evaluate(self, socket, input_data, errors):
-        return {
-            "blocks": [
-                {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
-                    ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
-                    ]
-                }
-            ],
-            "errors": []
-        }
+        # return the name of the variable
+        if socket == self.outputs[2]:
+            return {"blocks": [{"lines": [[self.var_name]],"indented": []}],"errors": []}
+        if socket == self.outputs[3]:
+            return {"blocks": [{"lines": [[self.index_name]],"indented": []}],"errors": []}
+        # return the code block and next output
+        else:
+            next_code = ""
+            if self.outputs[0].is_linked:
+                next_code = self.outputs[0].links[0].to_socket
+
+            output = ""
+            if self.outputs[1].is_linked:
+                output = self.outputs[1].links[0].to_socket
+
+            if output == "":
+                output = "pass"
+            return {
+                "blocks": [
+                    {
+                        "lines": [ # lines is a list of lists, where the lists represent the different lines
+                            [self.var_name + " = 0"],
+                            [self.index_name + " = 0"],
+                            ["for " + self.index_name + ", " + self.var_name + " in enumerate(", input_data[1]["code"], "):"]
+                        ],
+                        "indented": [ # indented is a list of lists, where the lists represent the different lines
+                            [output]
+                        ]
+                    },
+                    {
+                        "lines": [ # lines is a list of lists, where the lists represent the different lines
+                            [next_code]
+                        ],
+                        "indented": [ # indented is a list of lists, where the lists represent the different lines
+                        ]
+                    }
+                ],
+                "errors": []
+            }
 
     def data_type(self, output):
         if len(self.inputs[1].links) == 1:
