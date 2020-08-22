@@ -17,5 +17,5 @@ class SN_CastStringNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"STRING","String")
 
     def evaluate(self, socket, input_data, errors):
-        blocks = []
+        blocks = [{"lines": [["str(", input_data[0]["code"], ")"]],"indented": []}]
         return {"blocks": blocks, "errors": errors}
