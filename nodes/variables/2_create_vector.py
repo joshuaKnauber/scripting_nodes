@@ -29,6 +29,14 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_socket_value(self,context):
         if not is_valid_python(self.var_name,True):
             self.var_name = make_valid_python(self.var_name,True)
+
+        indentifiers = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode"]
+
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in indentifiers:
+                if not node == self:
+                    if self.var_name == node.var_name:
+                        self.var_name = "new_" + self.var_name
     
     var_name: bpy.props.StringProperty(name="Name",description="Name of this variable",update=update_socket_value)
     
@@ -83,3 +91,23 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, socket, input_data, errors):
         blocks = []
         return {"blocks": blocks, "errors": errors}
+
+    def get_variable_line(self):
+        if not self.is_array:
+            if self.use_four_numbers:
+                return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.four_value[0])+", "+str(self.four_value[1])+", "+str(self.four_value[2])+", "+str(self.four_value[3])+ "), size=4)"
+            else:
+                return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.value[0])+", "+str(self.value[1])+", "+str(self.value[2])+ "))"
+        else:
+            return self.var_name.replace(" ", "_") + "_array: bpy.props.CollectionProperty(type=ArrayCollection_UID_)"
+
+    def get_array_line(self):
+        register_block = []
+        if self.is_array:
+            for element in self.array_items:
+                if self.use_four_numbers:
+                    register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().four_vector = (" + str(element.four_value[0])+", "+str(element.four_value[1])+", "+str(element.four_value[2])+", "+str(element.four_value[3]) + ")")
+                else:
+                    register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().vector = (" +str(element.value[0])+", "+str(element.value[1])+", "+str(element.value[2])+")")
+
+        return register_block

@@ -81,6 +81,3 @@ class SN_ObjectContextNode(bpy.types.Node, SN_ScriptingBaseNode):
         context_type = context_type[output.name]
 
         return "bpy.types." + context_type
-
-    def required_imports(self):
-        return ["bpy"]

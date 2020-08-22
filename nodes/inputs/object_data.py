@@ -49,6 +49,3 @@ class SN_ObjectDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def data_type(self, output):
         bpy_type = str(eval("bpy.data.bl_rna.properties['" + self.data_type_enum + "'].fixed_type.identifier"))
         return "bpy.types." + bpy_type
-
-    def required_imports(self):
-        return ["bpy"]

@@ -201,6 +201,3 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                             return "bpy.types." + eval(data_type).bl_rna.properties[prop.identifier].fixed_type.identifier
 
         return ""
-
-    def required_imports(self):
-        return ["bpy"]

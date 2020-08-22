@@ -103,6 +103,13 @@ class ScriptingNodesCompiler():
         """ returns the register function for the given node tree """
         register_function = CompilerData().register_block()
 
+        if self._get_variable_registers(tree):
+            register_function += "\n" + " "*self._indents + "# Register variables"
+            register_function += "\n" + " "*self._indents + "bpy.utils.register_class(ArrayCollection_UID_" + tree.uid + ")"
+            register_function += "\n" + " "*self._indents + "bpy.utils.register_class(GeneratedAddonProperties_UID_" + tree.uid + ")"
+            register_function += "\n" + " "*self._indents + "bpy.types.Scene.sn_generated_addon_properties_UID_" + tree.uid + " = bpy.props.PointerProperty(type=GeneratedAddonProperties_UID_" + tree.uid + ")"
+            register_function += "\n" + " "*self._indents + "bpy.app.handlers.load_post.append(check_variables)\n"
+
         has_nodes = False
         for node in tree.nodes:
             if node.should_be_registered:
@@ -110,14 +117,49 @@ class ScriptingNodesCompiler():
                     register_function += "\n" + " "*self._indents + line
                     has_nodes = True
         
-        if not has_nodes:
+        if not has_nodes and not "sn_generated_addon_properties" in register_function:
             register_function += "\n" + " "*self._indents + "pass"
 
+        return register_function
+
+    def _get_variable_registers(self, tree):
+        """ returns the variable registers for the given node tree """
+        variable_ids = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode"]
+        register_function = ""
+
+        for node in tree.nodes:
+            if node.bl_idname in variable_ids:
+                register_function += "\n" + " "*self._indents + node.get_variable_line().replace("type=ArrayCollection_UID_", "type=ArrayCollection_UID_"+tree.uid)
+
+        return register_function
+
+    def _get_array_registers(self, tree):
+        """ returns the variable registers for the given node tree """
+        variable_ids = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode"]
+        register_function = "# Set the addons array variables\ndef set_variables():"
+
+        has_nodes = False
+        for node in tree.nodes:
+            if node.bl_idname in variable_ids:
+                for line in node.get_array_line():
+                    register_function += "\n" + " "*self._indents + line.replace("sn_generated_addon_properties_UID_", "sn_generated_addon_properties_UID_"+tree.uid)
+                    has_nodes = True
+        
+        if not has_nodes:
+            register_function += "\n" + " "*self._indents + "pass"
+                    
         return register_function
 
     def _get_unregister_function(self, tree):
         """ returns the unregister function for the given node tree """
         unregister_function = CompilerData().unregister_block()
+
+        if self._get_variable_registers(tree):
+            unregister_function += "\n" + " "*self._indents + "# Unregister variables"
+            unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(ArrayCollection_UID_" + tree.uid + ")"
+            unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(GeneratedAddonProperties_UID_" + tree.uid + ")"
+            unregister_function += "\n" + " "*self._indents + "del bpy.types.Scene.sn_generated_addon_properties_UID_" + tree.uid
+            unregister_function += "\n" + " "*self._indents + "bpy.app.handlers.load_post.remove(check_variables)\n"
 
         has_nodes = False
         for node in tree.nodes:
@@ -126,7 +168,7 @@ class ScriptingNodesCompiler():
                     unregister_function += "\n" + " "*self._indents + line
                     has_nodes = True
         
-        if not has_nodes:
+        if not has_nodes and not "ArrayCollection" in unregister_function:
             unregister_function += "\n" + " "*self._indents + "pass"
 
         return unregister_function
@@ -154,24 +196,34 @@ class ScriptingNodesCompiler():
         self._write_paragraphs(text,2)
 
         text.write(cd.comment_block("IMPORTS"))
-
         text.write(self._get_needed_imports(tree))
+        text.write("\nfrom bpy.app.handlers import persistent")
         self._write_paragraphs(text,2)
 
-        text.write(cd.comment_block("CLASSES"))
-        self._write_paragraphs(text,1)
+        var_registers = self._get_variable_registers(tree)
+        if var_registers:
+            text.write(cd.comment_block("CLASSES"))
+            text.write("# Create Array Collection for use in PROPERTIES\nclass ArrayCollection_UID_" + tree.uid + "(bpy.types.PropertyGroup):\n"+ " "*self._indents +"string: bpy.props.StringProperty()\n"+ " "*self._indents +"bool: bpy.props.BoolProperty()\n"+ " "*self._indents +"int: bpy.props.IntProperty()\n"+ " "*self._indents +"float: bpy.props.FloatProperty()\n"+ " "*self._indents +"vector: bpy.props.FloatVectorProperty()\n"+ " "*self._indents +"four_vector: bpy.props.FloatVectorProperty(size=4)\n")
+            self._write_paragraphs(text,1)
+
+        text.write(cd.comment_block("CODE"))
 
         for block in self._get_registerable_node_blocks(tree):
             text.write(block)
-            self._write_paragraphs(text,2)
 
         text.write(cd.comment_block("PROPERTIES"))
-        self._write_paragraphs(text,1)
+        if var_registers:
+            text.write("# Store the addons variables\nclass GeneratedAddonProperties_UID_" + tree.uid + "(bpy.types.PropertyGroup):\n" + " "*self._indents + "set_default: bpy.props.BoolProperty(default=True)")
+            text.write(var_registers)
+            text.write("\n\n# Check and set if the variable default values\n@persistent\ndef check_variables(dummy):\n"+" "*self._indents+"if bpy.context.scene.sn_generated_addon_properties_UID_" + tree.uid + ".set_default:\n" + " "*self._indents*2 + "bpy.context.scene.sn_generated_addon_properties_UID_" + tree.uid + ".set_default = False\n" + " "*self._indents*2 + "set_variables()\n")
+            self._write_paragraphs(text,1)
+            text.write(self._get_array_registers(tree))
+            self._write_paragraphs(text,3)
 
         text.write(cd.keymap_block())
         self._write_paragraphs(text,2)
 
-        text.write(cd.comment_block("REGISTER"))
+        text.write(cd.comment_block("REGISTER / UNREGISTER"))
 
         text.write(self._get_register_function(tree))
         self._write_paragraphs(text,2)

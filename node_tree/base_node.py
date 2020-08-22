@@ -200,3 +200,9 @@ class SN_ScriptingBaseNode:
 
     def reset_data_type(self, context):
         pass
+
+    def get_variable_line(self):
+        return ""
+
+    def get_array_line(self):
+        return []

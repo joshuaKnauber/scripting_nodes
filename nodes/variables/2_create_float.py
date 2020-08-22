@@ -27,6 +27,14 @@ class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_socket_value(self,context):
         if not is_valid_python(self.var_name,True):
             self.var_name = make_valid_python(self.var_name,True)
+
+        indentifiers = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode"]
+
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in indentifiers:
+                if not node == self:
+                    if self.var_name == node.var_name:
+                        self.var_name = "new_" + self.var_name
     
     var_name: bpy.props.StringProperty(name="Name",description="Name of this variable",update=update_socket_value)
     
@@ -71,3 +79,17 @@ class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, socket, input_data, errors):
         blocks = []
         return {"blocks": blocks, "errors": errors}
+
+    def get_variable_line(self):
+        if not self.is_array:
+            return self.var_name.replace(" ", "_") + ": bpy.props.FloatProperty(name='" + self.var_name + "', description='" + self.description + "', default=" + str(self.value) + ")"
+        else:
+            return self.var_name.replace(" ", "_") + "_array: bpy.props.CollectionProperty(type=ArrayCollection_UID_)"
+
+    def get_array_line(self):
+        register_block = []
+        if self.is_array:
+            for element in self.array_items:
+                register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().float = " + str(element.value))
+
+        return register_block
