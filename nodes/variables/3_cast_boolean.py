@@ -17,5 +17,6 @@ class SN_CastBooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"BOOLEAN","Boolean")
 
     def evaluate(self, socket, input_data, errors):
-        blocks = []
+        blocks = [{"lines": [["bool(", input_data[0]["code"], ")"]],"indented": []}]
         return {"blocks": blocks, "errors": errors}
+
