@@ -173,6 +173,15 @@ class ScriptingNodesCompiler():
 
         return unregister_function
 
+    def _using_cast(self, tree):
+        identifiers = ["SN_CastFloatNode", "SN_CastVectorNode", "SN_CastStringNode", "SN_CastIntegerNode"]
+
+        for node in tree.nodes:
+            if node.bl_idname in identifiers:
+                return True
+        
+        return False
+
     def _write_paragraphs(self, text, amount):
         """ writes the given amount of paragraphs to the given file """
         for _ in range(amount):
@@ -200,9 +209,10 @@ class ScriptingNodesCompiler():
         text.write("\nfrom bpy.app.handlers import persistent")
         self._write_paragraphs(text,2)
 
-        text.write(cd.comment_block("UTILITY FUNCTIONS"))
-        text.write(cd.utility_block())
-        self._write_paragraphs(text,2)
+        if self._using_cast(tree):
+            text.write(cd.comment_block("UTILITY FUNCTIONS"))
+            text.write(cd.utility_block())
+            self._write_paragraphs(text,2)
 
         var_registers = self._get_variable_registers(tree)
         if var_registers:

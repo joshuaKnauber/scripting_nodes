@@ -54,7 +54,37 @@ def cast_float(cast):
     if float_string != "" and float_string != ".":
         float_string = float(float_string)
         return float_string
-    return 0"""
+    return 0
+    
+def cast_vector(cast):
+    if type(cast) == bool:
+        if cast:
+            return (1.0, 1.0, 1.0)
+        else:
+            return (0.0, 0.0, 0.0)
+    elif type(cast) == int:
+        return (float(cast), float(cast), float(cast))
+    elif type(cast) == float:
+        return (cast, cast, cast)
+    elif type(cast) == str:
+        cast = cast_float(cast)
+        return (cast, cast, cast)
+    return (0, 0, 0)
+
+def cast_four_vector(cast, four):
+    if type(cast) == bool:
+        if cast:
+            return (1.0, 1.0, 1.0, four)
+        else:
+            return (0.0, 0.0, 0.0, four)
+    elif type(cast) == int:
+        return (float(cast), float(cast), float(cast), four)
+    elif type(cast) == float:
+        return (cast, cast, cast, four)
+    elif type(cast) == str:
+        cast = cast_float(cast)
+        return (cast, cast, cast, four)
+    return (0, 0, 0)"""
 
     def comment_block(self,name):
         return f"""

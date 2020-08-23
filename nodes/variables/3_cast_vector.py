@@ -12,7 +12,13 @@ class SN_CastVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.6,0.2,0.8)
     should_be_registered = False
 
-    use_four_numbers: bpy.props.BoolProperty(default=False,name="Use Four Numbers", description="Outputs a vector with four numbers instead of three")
+    def update_inputs(self, context):
+        if self.use_four_numbers:
+            self.sockets.create_input(self, "FLOAT", "Fourth Number")
+        else:
+            self.inputs.remove(self.inputs[1])
+
+    use_four_numbers: bpy.props.BoolProperty(default=False,name="Use Four Numbers", description="Outputs a vector with four numbers instead of three", update=update_inputs)
 
     def inititialize(self, context):
         self.sockets.create_input(self,"DATA","Data")
@@ -22,5 +28,8 @@ class SN_CastVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"use_four_numbers")
 
     def evaluate(self, socket, input_data, errors):
-        blocks = []
+        if self.use_four_numbers:
+            blocks = [{"lines": [["cast_four_vector(", input_data[0]["code"], ", " + input_data[1]["code"] + ")"]],"indented": []}]
+        else:
+            blocks = [{"lines": [["cast_vector(", input_data[0]["code"], ")"]],"indented": []}]
         return {"blocks": blocks, "errors": errors}
