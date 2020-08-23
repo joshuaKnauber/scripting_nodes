@@ -28,7 +28,7 @@ class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if not is_valid_python(self.var_name,True):
             self.var_name = make_valid_python(self.var_name,True)
 
-        indentifiers = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode"]
+        indentifiers = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode", "SN_EnumVariableNode"]
 
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname in indentifiers:

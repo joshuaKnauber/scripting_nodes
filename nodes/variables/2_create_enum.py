@@ -51,9 +51,17 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_socket_value(self,context):
         if not is_valid_python(self.var_name,True):
             self.var_name = make_valid_python(self.var_name,True)
-    
+        
+        indentifiers = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode", "SN_EnumVariableNode"]
+
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in indentifiers:
+                if not node == self:
+                    if self.var_name == node.var_name:
+                        self.var_name = "new_" + self.var_name
+
     var_name: bpy.props.StringProperty(name="Name",description="Name of this enum",update=update_socket_value)
-    
+
     description: bpy.props.StringProperty(name="Description",description="Description of this enum")
 
     array_items: bpy.props.CollectionProperty(type=SN_StringArray)
@@ -84,3 +92,10 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, socket, input_data, errors):
         blocks = []
         return {"blocks": blocks, "errors": errors}
+
+    def get_variable_line(self):
+        items = []
+        for element in self.array_items:
+            items.append((element.name, element.name, element.description))
+        return self.var_name.replace(" ", "_") + ": bpy.props.EnumProperty(items=" + str(items) + ", name='" + self.var_name + "', description='" + self.description + "')"
+
