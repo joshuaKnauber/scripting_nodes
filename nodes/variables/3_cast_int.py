@@ -17,5 +17,12 @@ class SN_CastIntegerNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"INTEGER","Integer")
 
     def evaluate(self, socket, input_data, errors):
-        blocks = []
+        block = []
+        if self.inputs[0].is_linked:
+            if self.inputs[0].links[0].from_socket.bl_idname in ["SN_BoolSocket", "SN_FloatSocket", "SN_IntSocket"]:
+                blocks = [{"lines": [["int(", input_data[0]["code"], ")"]],"indented": []}]
+            elif self.inputs[0].links[0].from_socket.bl_idname in ["SN_VectorSocket", "SN_StringSocket"]:
+                blocks = [{"lines": [["cast_int(", input_data[0]["code"], ")"]],"indented": []}]
+
         return {"blocks": blocks, "errors": errors}
+

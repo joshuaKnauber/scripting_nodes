@@ -200,6 +200,10 @@ class ScriptingNodesCompiler():
         text.write("\nfrom bpy.app.handlers import persistent")
         self._write_paragraphs(text,2)
 
+        text.write(cd.comment_block("UTILITY FUNCTIONS"))
+        text.write(cd.utility_block())
+        self._write_paragraphs(text,2)
+
         var_registers = self._get_variable_registers(tree)
         if var_registers:
             text.write(cd.comment_block("CLASSES"))

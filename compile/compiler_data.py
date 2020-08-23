@@ -28,6 +28,33 @@ class CompilerData():
 
     def unregister_block(self):
         return "def unregister():"
+        
+    def utility_block(self):
+        return """def cast_int(cast):
+    int_string = ""
+    if type(cast) == str:
+        for char in cast:
+            if char.isnumeric():
+                int_string+=char
+    else:
+        return cast[0]
+    if int_string.isnumeric():
+        int_string = int(int_string)
+        return int_string
+    return 0
+
+def cast_float(cast):
+    float_string = ""
+    if type(cast) == str:
+        for char in cast:
+            if char.isnumeric() or char == ".":
+                float_string+=char
+    else:
+        return cast[0]
+    if float_string != "" and float_string != ".":
+        float_string = float(float_string)
+        return float_string
+    return 0"""
 
     def comment_block(self,name):
         return f"""
