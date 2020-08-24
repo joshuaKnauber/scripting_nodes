@@ -68,8 +68,9 @@ class OperatorHandler():
             for category in self.get_operator_categories():
                 category = category[0]
                 for operator in dir(eval("bpy.ops."+category)):
-                    if eval("bpy.ops."+category+"."+operator).get_rna_type().name + " - " + category.replace("_"," ").title() == name:
-                        return "bpy.ops."+category+"."+operator
+                    if not operator[0].isnumeric():
+                        if eval("bpy.ops."+category+"."+operator).get_rna_type().name + " - " + category.replace("_"," ").title() == name:
+                            return "bpy.ops."+category+"."+operator
         else:
             for item in bpy.context.scene.sn_operators:
                 if item.name == name:
