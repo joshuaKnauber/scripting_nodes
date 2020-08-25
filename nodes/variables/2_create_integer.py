@@ -47,6 +47,13 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def inititialize(self, context):
         self.update_socket_value(context)
 
+    def free(self):
+        identifiers = ["SN_GetVariableNode"]
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in identifiers:
+                if node.variables == self.var_name:
+                    node.variables = "None"
+
     def draw_buttons(self,context,layout):
         col = layout.column(align=True)
         col.label(text="Name:")

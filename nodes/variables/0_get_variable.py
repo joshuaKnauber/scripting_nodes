@@ -14,8 +14,8 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def inititialize(self, context):
         self.sockets.create_output(self, "DATA", "")
 
-    def get_variables(self,context):
-        items = []
+    def get_variables(self, context):
+        items = [("None", "No selection", "Please select or create a variable")]
         identifiers = [
             "SN_BooleanVariableNode",
             "SN_FloatVariableNode",
@@ -40,7 +40,7 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             "SN_VectorVariableNode": ["SN_VectorSocket", "VECTOR"]
         }
 
-        if self.variables != "":
+        if self.variables != "None":
             for node in bpy.context.space_data.node_tree.nodes:
                 if node.bl_idname in ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode"]:
                     if node.var_name == self.variables:

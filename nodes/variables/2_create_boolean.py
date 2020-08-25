@@ -102,6 +102,13 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             
             layout.operator("scripting_nodes.add_variable_array_element",icon="ADD").node_name = self.name
 
+    def free(self):
+        identifiers = ["SN_GetVariableNode"]
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in identifiers:
+                if node.variables == self.var_name:
+                    node.variables = "None"
+
     def evaluate(self, socket, input_data, errors):
         blocks = []
         return {"blocks": blocks, "errors": errors}
