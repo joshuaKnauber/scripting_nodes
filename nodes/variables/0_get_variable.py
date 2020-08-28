@@ -14,46 +14,35 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def inititialize(self, context):
         self.sockets.create_output(self, "DATA", "")
 
-    def get_variables(self, context):
-        items = [("None", "No selection", "Please select or create a variable")]
-        identifiers = [
-            "SN_BooleanVariableNode",
-            "SN_FloatVariableNode",
-            "SN_IntegerVariableNode",
-            "SN_StringVariableNode",
-            "SN_VectorVariableNode",
-        ]
-        for node in context.space_data.node_tree.nodes:
-            if node.bl_idname in identifiers:
-                items.append((node.var_name,node.var_name,node.description))
+    def update_outputs(self, context):
+        if self.search_value == "":
+            if self.outputs[0].bl_idname != "SN_DataSocket":
+                self.sockets.change_socket_type(self, self.outputs[0], "DATA", label=" ")
+        elif not self.search_value in bpy.context.scene.sn_properties.search_variables:
+            self.search_value = ""
+            if self.outputs[0].bl_idname != "SN_DataSocket":
+                self.sockets.change_socket_type(self, self.outputs[0], "DATA", label=" ")
+        else:
+            self.sockets.change_socket_type(self, self.outputs[0], bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, label=bpy.context.scene.sn_properties.search_variables[self.search_value].name)
 
-        return items
-
-    variables: bpy.props.EnumProperty(items=get_variables,name="Variable",description="The variable you want to get the value from")
+    search_value: bpy.props.StringProperty(name="Search Value", description="", update=update_outputs)
 
     def draw_buttons(self, context, layout):
-        socket_identifiers = {
-            "SN_BooleanVariableNode": ["SN_BoolSocket", "BOOLEAN"],
-            "SN_FloatVariableNode": ["SN_FloatSocket", "FLOAT"],
-            "SN_IntegerVariableNode": ["SN_IntSocket", "INTEGER"],
-            "SN_StringVariableNode": ["SN_StringSocket", "STRING"],
-            "SN_VectorVariableNode": ["SN_VectorSocket", "VECTOR"]
-        }
+        row = layout.row()
+        row.scale_y = 1.25
+        row.prop_search(self,"search_value", bpy.context.scene.sn_properties, "search_variables", text="")
 
-        if self.variables != "None":
-            for node in bpy.context.space_data.node_tree.nodes:
-                if node.bl_idname in ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode"]:
-                    if node.var_name == self.variables:
-                        if socket_identifiers[node.bl_idname][0] != self.outputs[0].bl_idname or node.var_name != self.outputs[0].name:
-                            self.sockets.change_socket_type(self, self.outputs[0], socket_identifiers[node.bl_idname][1], label=node.var_name)
-        else:
+        if not self.search_value in bpy.context.scene.sn_properties.search_variables:
             if self.outputs[0].bl_idname != "SN_DataSocket":
                 self.sockets.change_socket_type(self, self.outputs[0], "DATA", label=" ")
 
-        row = layout.row()
-        row.scale_y = 1.25
-        row.prop(self,"variables",text="")
-
     def evaluate(self, socket, input_data, errors):
-        blocks = []
+        if self.search_value in bpy.context.scene.sn_properties.search_variables:
+            if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
+                blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array"]],"indented": []}]
+            else:
+                blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name]],"indented": []}]
+        else:
+            blocks = [{"lines": [["None"]],"indented": []}]
         return {"blocks": blocks, "errors": errors}
+

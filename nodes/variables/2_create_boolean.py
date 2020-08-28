@@ -51,6 +51,7 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     value: bpy.props.BoolProperty(default=True,name="Value",description="Value of this variable")
 
     def update_socket_value(self,context):
+        global groupItem
         if not is_valid_python(self.var_name,True):
             self.var_name = make_valid_python(self.var_name,True)
 
@@ -62,15 +63,32 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if self.var_name == node.var_name:
                         self.var_name = "new_" + self.var_name
 
+        groupItem.name = self.var_name
+
+    def update_description(self, context):
+        global groupItem
+        groupItem.description = self.description
+
+    def update_array(self, context):
+        global groupItem
+        groupItem.is_array = self.is_array
+
     var_name: bpy.props.StringProperty(name="Name",description="Name of this variable",update=update_socket_value)
 
-    description: bpy.props.StringProperty(name="Description",description="Description of this variable")
+    description: bpy.props.StringProperty(name="Description",description="Description of this variable", update=update_description)
 
-    is_array: bpy.props.BoolProperty(default=False,name="Make Array",description="Allows you to add multiple elements of the same type to this variable")
+    groupItem = ""
+
+    is_array: bpy.props.BoolProperty(default=False,name="Make Array",description="Allows you to add multiple elements of the same type to this variable", update=update_array)
 
     array_items: bpy.props.CollectionProperty(type=SN_BooleanArray)
 
     def inititialize(self, context):
+        global groupItem
+        item = bpy.context.scene.sn_properties.search_variables.add()
+        groupItem = item
+        groupItem.type = "bool"
+        groupItem.socket_type = "BOOLEAN"
         self.update_socket_value(context)
 
     def draw_buttons(self,context,layout):
@@ -103,11 +121,8 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.operator("scripting_nodes.add_variable_array_element",icon="ADD").node_name = self.name
 
     def free(self):
-        identifiers = ["SN_GetVariableNode"]
-        for node in bpy.context.space_data.node_tree.nodes:
-            if node.bl_idname in identifiers:
-                if node.variables == self.var_name:
-                    node.variables = "None"
+        global groupItem
+        bpy.context.scene.sn_properties.search_variables.remove(bpy.context.scene.sn_properties.search_variables.find(groupItem.name))
 
     def evaluate(self, socket, input_data, errors):
         blocks = []

@@ -6,6 +6,13 @@ import json
 class PrintProperties(bpy.types.PropertyGroup):
     text: bpy.props.StringProperty()
 
+class SearchVariablesGroup(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty(default="")
+    description: bpy.props.StringProperty(default="")
+    type: bpy.props.StringProperty(default="")
+    socket_type: bpy.props.StringProperty(default="")
+    is_array: bpy.props.BoolProperty(default=False)
+
 class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     def update_examples(self, context):
@@ -63,3 +70,6 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
     filter_vector: bpy.props.BoolProperty(name="Show Vectors in the search bar", default=True, update=update_filters)
     filter_data_block_collection: bpy.props.BoolProperty(name="Show Data Block Collections in the search bar", default=True, update=update_filters)
     filter_data_block: bpy.props.BoolProperty(name="Show Data Blocks in the search bar", default=True, update=update_filters)
+
+    # variable search
+    search_variables: bpy.props.CollectionProperty(type=SearchVariablesGroup)

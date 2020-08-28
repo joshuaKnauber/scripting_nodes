@@ -107,7 +107,7 @@ class ScriptingNodesCompiler():
             register_function += "\n" + " "*self._indents + "# Register variables"
             register_function += "\n" + " "*self._indents + "bpy.utils.register_class(ArrayCollection_UID_" + tree.uid + ")"
             register_function += "\n" + " "*self._indents + "bpy.utils.register_class(GeneratedAddonProperties_UID_" + tree.uid + ")"
-            register_function += "\n" + " "*self._indents + "bpy.types.Scene.sn_generated_addon_properties_UID_" + tree.uid + " = bpy.props.PointerProperty(type=GeneratedAddonProperties_UID_" + tree.uid + ")"
+            register_function += "\n" + " "*self._indents + "bpy.types.Scene.sn_generated_addon_properties_UID_" + " = bpy.props.PointerProperty(type=GeneratedAddonProperties_UID_" + tree.uid + ")"
             register_function += "\n" + " "*self._indents + "bpy.app.handlers.load_post.append(check_variables)\n"
 
         has_nodes = False
@@ -129,7 +129,7 @@ class ScriptingNodesCompiler():
 
         for node in tree.nodes:
             if node.bl_idname in variable_ids:
-                register_function += "\n" + " "*self._indents + node.get_variable_line().replace("type=ArrayCollection_UID_", "type=ArrayCollection_UID_"+tree.uid)
+                register_function += "\n" + " "*self._indents + node.get_variable_line()
 
         return register_function
 
@@ -142,7 +142,7 @@ class ScriptingNodesCompiler():
         for node in tree.nodes:
             if node.bl_idname in variable_ids:
                 for line in node.get_array_line():
-                    register_function += "\n" + " "*self._indents + line.replace("sn_generated_addon_properties_UID_", "sn_generated_addon_properties_UID_"+tree.uid)
+                    register_function += "\n" + " "*self._indents + line
                     has_nodes = True
         
         if not has_nodes:
@@ -158,7 +158,7 @@ class ScriptingNodesCompiler():
             unregister_function += "\n" + " "*self._indents + "# Unregister variables"
             unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(ArrayCollection_UID_" + tree.uid + ")"
             unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(GeneratedAddonProperties_UID_" + tree.uid + ")"
-            unregister_function += "\n" + " "*self._indents + "del bpy.types.Scene.sn_generated_addon_properties_UID_" + tree.uid
+            unregister_function += "\n" + " "*self._indents + "del bpy.types.Scene.sn_generated_addon_properties_UID_"
             unregister_function += "\n" + " "*self._indents + "bpy.app.handlers.load_post.remove(check_variables)\n"
 
         has_nodes = False
@@ -229,7 +229,7 @@ class ScriptingNodesCompiler():
         if var_registers:
             text.write("# Store the addons variables\nclass GeneratedAddonProperties_UID_" + tree.uid + "(bpy.types.PropertyGroup):\n" + " "*self._indents + "set_default: bpy.props.BoolProperty(default=True)")
             text.write(var_registers)
-            text.write("\n\n# Check and set if the variable default values\n@persistent\ndef check_variables(dummy):\n"+" "*self._indents+"if bpy.context.scene.sn_generated_addon_properties_UID_" + tree.uid + ".set_default:\n" + " "*self._indents*2 + "bpy.context.scene.sn_generated_addon_properties_UID_" + tree.uid + ".set_default = False\n" + " "*self._indents*2 + "set_variables()\n")
+            text.write("\n\n# Check and set if the variable default values\n@persistent\ndef check_variables(dummy):\n"+" "*self._indents+"if bpy.context.scene.sn_generated_addon_properties_UID_" + ".set_default:\n" + " "*self._indents*2 + "bpy.context.scene.sn_generated_addon_properties_UID_" + ".set_default = False\n" + " "*self._indents*2 + "set_variables()\n")
             self._write_paragraphs(text,1)
             text.write(self._get_array_registers(tree))
             self._write_paragraphs(text,3)
@@ -242,6 +242,10 @@ class ScriptingNodesCompiler():
         text.write(self._get_register_function(tree))
         self._write_paragraphs(text,2)
         text.write(self._get_unregister_function(tree))
+        text_string = text.as_string().replace("sn_generated_addon_properties_UID_", "sn_generated_addon_properties_UID_"+tree.uid)
+        text.clear()
+        text.write(text_string)
+
         return text
 
     def _create_module(self, tree):
