@@ -77,6 +77,11 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 else:
                     item.type = "vector"
 
+        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode"]
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in identifiers:
+                node.update_outputs(None)
+
     groupItem: bpy.props.StringProperty(default="item_name_placeholder")
     
     var_name: bpy.props.StringProperty(name="Name",description="Name of this variable",update=update_socket_value)
