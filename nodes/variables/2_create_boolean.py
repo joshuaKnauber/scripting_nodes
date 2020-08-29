@@ -67,6 +67,11 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.groupItem = self.var_name
                 item.name = self.var_name
 
+        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode"]
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in identifiers:
+                node.update_outputs(None)
+
     def update_description(self, context):
         if not is_valid_python(self.description,True):
             self.description = make_valid_python(self.description,True)
@@ -74,7 +79,7 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         for item in bpy.context.scene.sn_properties.search_variables:
             if item.name == self.groupItem:
                 item.description = self.description
-        identifiers = ["SN_GetVariableNode"]
+        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode"]
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname in identifiers:
                 node.update_outputs(None)
@@ -83,7 +88,7 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         for item in bpy.context.scene.sn_properties.search_variables:
             if item.name == self.groupItem:
                 item.is_array = self.is_array
-        identifiers = ["SN_GetVariableNode"]
+        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode"]
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname in identifiers:
                 node.update_outputs(None)

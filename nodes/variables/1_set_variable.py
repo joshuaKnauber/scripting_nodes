@@ -10,41 +10,103 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0.75,0.75,0.75)
     should_be_registered = False
+    bl_width_default = 225
 
     def inititialize(self, context):
         self.sockets.create_input(self, "EXECUTE", "Execute")
-        self.sockets.create_input(self, "DATA", "")
         self.sockets.create_output(self, "EXECUTE", "Execute")
 
     def update_outputs(self, context):
-        if self.search_value == "":
-            if self.inputs[1].bl_idname != "SN_DataSocket":
-                self.sockets.change_socket_type(self, self.inputs[1], "DATA", label=" ")
-        elif not self.search_value in bpy.context.scene.sn_properties.search_variables:
-            self.search_value = ""
-            if self.inputs[1].bl_idname != "SN_DataSocket":
-                self.sockets.change_socket_type(self, self.inputs[1], "DATA", label=" ")
+        if not self.search_value in bpy.context.scene.sn_properties.search_variables:
+            for inp in range(len(self.inputs)-1):
+                self.inputs.remove(self.inputs[1])
+
+            if self.search_value != "":
+                self.search_value = ""
+
         else:
-            self.sockets.change_socket_type(self, self.inputs[1], bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, label=bpy.context.scene.sn_properties.search_variables[self.search_value].name)
+            if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
+                self.update_operation(None)
+                if len(self.inputs) == 2:
+                    if self.inputs[1].name == bpy.context.scene.sn_properties.search_variables[self.search_value].name:
+                        self.inputs.remove(self.inputs[1])
+            else:
+                if len(self.inputs) > 2:
+                    for inp in self.inputs:
+                        if inp.name != "Execute":
+                            try:
+                                self.inputs.remove(inp)
+                            except RuntimeError:
+                                pass
+                
+                if len(self.inputs) != 2:
+                    self.sockets.create_input(self, bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, bpy.context.scene.sn_properties.search_variables[self.search_value].name)
+
+                if bpy.context.scene.sn_properties.search_variables[self.search_value].name != self.inputs[1].name:
+                    self.sockets.change_socket_type(self, self.inputs[1], bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, label=bpy.context.scene.sn_properties.search_variables[self.search_value].name)
+
+    def update_operation(self, context):
+        identifiers = {"STRING": "SN_StringSocket", "BOOLEAN": "SN_BoolSocket", "INTEGER": "SN_IntSocket", "FLOAT": "SN_FloatSocket", "VECTOR": "SN_VectorSocket"}
+        if self.operation == "set_value":
+            for inp in self.inputs:
+                if inp.name != "Index" and inp.name != "Execute" and inp.name != "Value":
+                    try:
+                        self.inputs.remove(inp)
+                    except RuntimeError:
+                        pass
+
+            if len(self.inputs) != 3:
+                self.sockets.create_input(self, "INTEGER", "Index")
+                self.sockets.create_input(self, bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, "Value")
+            
+            if self.inputs[2].bl_idname != identifiers[bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type]:
+                self.sockets.change_socket_type(self, self.inputs[2], bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, label="Value")
+        else:
+            for inp in self.inputs:
+                if inp.name != "Item Value" and inp.name != "Execute":
+                    try:
+                        self.inputs.remove(inp)
+                    except RuntimeError:
+                        pass
+            if len(self.inputs) < 2:
+                self.sockets.create_input(self, bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, "Item Value", dynamic=True)
+            if self.inputs[1].bl_idname != identifiers[bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type]:
+                self.inputs.remove(self.inputs[1])
+                self.sockets.create_input(self, bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, "Item Value", dynamic=True)
 
     search_value: bpy.props.StringProperty(name="Search Value", description="", update=update_outputs)
+    operation: bpy.props.EnumProperty(items=[("clear", "Clear and Replace", "Clear the Array and set new values"), ("set_value", "Set Value", "Set a value using an index")], name="Operation", description="", update=update_operation)
 
     def draw_buttons(self, context, layout):
-        row = layout.row()
-        row.scale_y = 1.25
-        row.prop_search(self,"search_value", bpy.context.scene.sn_properties, "search_variables", text="")
+        col = layout.column()
+        col.scale_y = 1.25
+        col.prop_search(self,"search_value", bpy.context.scene.sn_properties, "search_variables", text="")
 
-        if not self.search_value in bpy.context.scene.sn_properties.search_variables:
-            if self.inputs[1].bl_idname != "SN_DataSocket":
-                self.sockets.change_socket_type(self, self.inputs[1], "DATA", label=" ")
+        if self.search_value in bpy.context.scene.sn_properties.search_variables:
+            if bpy.context.scene.sn_properties.search_variables[self.search_value].description != "":
+                box = col.box()
+                box.label(text=bpy.context.scene.sn_properties.search_variables[self.search_value].description)
+            if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
+                if len(self.inputs) == 2:
+                    if self.inputs[1].name == bpy.context.scene.sn_properties.search_variables[self.search_value].name:
+                        self.inputs.remove(self.inputs[1])
+                row = col.row()
+                row.prop(self, "operation", expand=True)
+            else:
+                if len(self.inputs) != 2:
+                    self.sockets.create_input(self, bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, bpy.context.scene.sn_properties.search_variables[self.search_value].name)
 
     def evaluate(self, socket, input_data, errors):
+        blocks = [{"lines": [["None"]],"indented": []}]
         if self.search_value in bpy.context.scene.sn_properties.search_variables:
             if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
-                blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array"]],"indented": []}]
+                if socket == self.outputs[0]:
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array[", input_data[0]["code"], "]." + bpy.context.scene.sn_properties.search_variables[self.search_value].type]],"indented": []}]
+                elif socket == self.outputs[1]:
+                    blocks = [{"lines": [["len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array)"]],"indented": []}]
+                elif socket == self.outputs[2]:
+                    blocks = [{"lines": [["len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array) == 0"]],"indented": []}]
             else:
                 blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name]],"indented": []}]
-        else:
-            blocks = [{"lines": [["None"]],"indented": []}]
         return {"blocks": blocks, "errors": errors}
 
