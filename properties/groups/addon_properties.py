@@ -7,7 +7,7 @@ class PrintProperties(bpy.types.PropertyGroup):
     text: bpy.props.StringProperty()
 
 class SearchVariablesGroup(bpy.types.PropertyGroup):
-    name: bpy.props.StringProperty(default="")
+    name: bpy.props.StringProperty(default="item_name_placeholder")
     description: bpy.props.StringProperty(default="")
     type: bpy.props.StringProperty(default="")
     socket_type: bpy.props.StringProperty(default="")

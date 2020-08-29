@@ -16,33 +16,69 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_outputs(self, context):
         if self.search_value == "":
+            if len(self.outputs) == 3:
+                self.outputs.remove(self.outputs[1])
+                self.outputs.remove(self.outputs[1])
+            if len(self.inputs) == 1:
+                self.inputs.remove(self.inputs[0])
             if self.outputs[0].bl_idname != "SN_DataSocket":
                 self.sockets.change_socket_type(self, self.outputs[0], "DATA", label=" ")
         elif not self.search_value in bpy.context.scene.sn_properties.search_variables:
+            if len(self.outputs) == 3:
+                self.outputs.remove(self.outputs[1])
+                self.outputs.remove(self.outputs[1])
+            if len(self.inputs) == 1:
+                self.inputs.remove(self.inputs[0])
+
             self.search_value = ""
             if self.outputs[0].bl_idname != "SN_DataSocket":
                 self.sockets.change_socket_type(self, self.outputs[0], "DATA", label=" ")
         else:
+            if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
+                if len(self.outputs) != 3:
+                    self.sockets.create_output(self, "INTEGER", "Length")
+                    self.sockets.create_output(self, "BOOLEAN", "Is empty")
+                if len(self.inputs) != 1:
+                    self.sockets.create_input(self, "INTEGER", "Index").set_value(0)
+            else:
+                if len(self.outputs) == 3:
+                    self.outputs.remove(self.outputs[1])
+                    self.outputs.remove(self.outputs[1])
+                if len(self.inputs) == 1:
+                    self.inputs.remove(self.inputs[0])
             self.sockets.change_socket_type(self, self.outputs[0], bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, label=bpy.context.scene.sn_properties.search_variables[self.search_value].name)
 
     search_value: bpy.props.StringProperty(name="Search Value", description="", update=update_outputs)
 
     def draw_buttons(self, context, layout):
-        row = layout.row()
-        row.scale_y = 1.25
-        row.prop_search(self,"search_value", bpy.context.scene.sn_properties, "search_variables", text="")
+        col = layout.column()
+        col.scale_y = 1.25
+        col.prop_search(self,"search_value", bpy.context.scene.sn_properties, "search_variables", text="")
 
         if not self.search_value in bpy.context.scene.sn_properties.search_variables:
+            if len(self.outputs) == 3:
+                self.outputs.remove(self.outputs[1])
+                self.outputs.remove(self.outputs[1])
+            if len(self.inputs) == 1:
+                self.inputs.remove(self.inputs[0])
             if self.outputs[0].bl_idname != "SN_DataSocket":
                 self.sockets.change_socket_type(self, self.outputs[0], "DATA", label=" ")
+        else:
+            if bpy.context.scene.sn_properties.search_variables[self.search_value].description != "":
+                box = col.box()
+                box.label(text=bpy.context.scene.sn_properties.search_variables[self.search_value].description)
 
     def evaluate(self, socket, input_data, errors):
+        blocks = [{"lines": [["None"]],"indented": []}]
         if self.search_value in bpy.context.scene.sn_properties.search_variables:
             if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
-                blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array"]],"indented": []}]
+                if socket == self.outputs[0]:
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array[", input_data[0]["code"], "]." + bpy.context.scene.sn_properties.search_variables[self.search_value].type]],"indented": []}]
+                elif socket == self.outputs[1]:
+                    blocks = [{"lines": [["len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array)"]],"indented": []}]
+                elif socket == self.outputs[2]:
+                    blocks = [{"lines": [["len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array) == 0"]],"indented": []}]
             else:
                 blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name]],"indented": []}]
-        else:
-            blocks = [{"lines": [["None"]],"indented": []}]
         return {"blocks": blocks, "errors": errors}
 

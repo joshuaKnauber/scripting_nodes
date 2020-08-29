@@ -37,26 +37,67 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if not node == self:
                     if self.var_name == node.var_name:
                         self.var_name = "new_" + self.var_name
+
+        for item in bpy.context.scene.sn_properties.search_variables:
+            if item.name == self.groupItem:
+                self.groupItem = self.var_name
+                item.name = self.var_name
+
+    def update_description(self, context):
+        if not is_valid_python(self.description,True):
+            self.description = make_valid_python(self.description,True)
     
-    var_name: bpy.props.StringProperty(name="Name",description="Name of this variable",update=update_socket_value)
-    
-    description: bpy.props.StringProperty(name="Description",description="Description of this variable")
-
-    is_array: bpy.props.BoolProperty(default=False,name="Make Array",description="Allows you to add multiple elements of the same type to this variable")
-
-    array_items: bpy.props.CollectionProperty(type=SN_VectorArray)
-
-    use_four_numbers: bpy.props.BoolProperty(default=False,name="Use Four Numbers")
-
-    def inititialize(self, context):
-        self.update_socket_value(context)
-
-    def free(self):
+        for item in bpy.context.scene.sn_properties.search_variables:
+            if item.name == self.groupItem:
+                item.description = self.description
         identifiers = ["SN_GetVariableNode"]
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname in identifiers:
-                if node.variables == self.var_name:
-                    node.variables = "None"
+                node.update_outputs(None)
+
+    def update_array(self, context):
+        for item in bpy.context.scene.sn_properties.search_variables:
+            if item.name == self.groupItem:
+                item.is_array = self.is_array
+        identifiers = ["SN_GetVariableNode"]
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in identifiers:
+                node.update_outputs(None)
+
+    def update_four(self, context):
+        for item in bpy.context.scene.sn_properties.search_variables:
+            if item.name == self.groupItem:
+                if self.use_four_numbers:
+                    item.type = "four_vector"
+                else:
+                    item.type = "vector"
+
+    groupItem: bpy.props.StringProperty(default="item_name_placeholder")
+    
+    var_name: bpy.props.StringProperty(name="Name",description="Name of this variable",update=update_socket_value)
+
+    description: bpy.props.StringProperty(name="Description",description="Description of this variable", update=update_description)
+
+    is_array: bpy.props.BoolProperty(default=False,name="Make Array",description="Allows you to add multiple elements of the same type to this variable", update=update_array)
+
+    array_items: bpy.props.CollectionProperty(type=SN_VectorArray)
+
+    use_four_numbers: bpy.props.BoolProperty(default=False,name="Use Four Numbers", update=update_four)
+
+    def inititialize(self, context):
+        global groupItem
+        item = bpy.context.scene.sn_properties.search_variables.add()
+        self.groupItem = item.name
+        for item in bpy.context.scene.sn_properties.search_variables:
+            if item.name == self.groupItem:
+                item.type = "vector"
+                item.socket_type = "VECTOR"
+        self.update_socket_value(context)
+
+    def free(self):
+        for x, item in enumerate(bpy.context.scene.sn_properties.search_variables):
+            if item.name == self.groupItem:
+                bpy.context.scene.sn_properties.search_variables.remove(x)
 
     def draw_buttons(self,context,layout):
         col = layout.column(align=True)
