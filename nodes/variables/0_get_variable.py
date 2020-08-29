@@ -47,7 +47,7 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if len(self.inputs) == 1:
                     self.inputs.remove(self.inputs[0])
             self.sockets.change_socket_type(self, self.outputs[0], bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, label=bpy.context.scene.sn_properties.search_variables[self.search_value].name)
-
+    
     search_value: bpy.props.StringProperty(name="Search Value", description="", update=update_outputs)
 
     def draw_buttons(self, context, layout):
