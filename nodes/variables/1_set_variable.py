@@ -97,16 +97,25 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.sockets.create_input(self, bpy.context.scene.sn_properties.search_variables[self.search_value].socket_type, bpy.context.scene.sn_properties.search_variables[self.search_value].name)
 
     def evaluate(self, socket, input_data, errors):
-        blocks = [{"lines": [["None"]],"indented": []}]
+        next_code = ""
+        if self.outputs[0].is_linked:
+            next_code = self.outputs[0].links[0].to_socket
+
+        blocks = [{"lines": [],"indented": []}]
         if self.search_value in bpy.context.scene.sn_properties.search_variables:
             if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
-                if socket == self.outputs[0]:
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array[", input_data[0]["code"], "]." + bpy.context.scene.sn_properties.search_variables[self.search_value].type]],"indented": []}]
-                elif socket == self.outputs[1]:
-                    blocks = [{"lines": [["len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array)"]],"indented": []}]
-                elif socket == self.outputs[2]:
-                    blocks = [{"lines": [["len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array) == 0"]],"indented": []}]
+                if self.operation == "set_value":
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array[", input_data[1]["code"], "]." + bpy.context.scene.sn_properties.search_variables[self.search_value].type, " = ", input_data[2]["code"]]],"indented": []}]
+
+                else:
+                    items = [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.clear()"]]
+                    for inp_index in range(len(self.inputs)-1):
+                        items.append(["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.add().", bpy.context.scene.sn_properties.search_variables[self.search_value].type, " = ", input_data[inp_index+1]["code"]])
+
+                    blocks = [{"lines": items,"indented": []}]
+
             else:
-                blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name]],"indented": []}]
-        return {"blocks": blocks, "errors": errors}
+                blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name, " = ", input_data[1]["code"]]],"indented": []}]
+
+        return {"blocks": blocks + [{"lines": [[next_code]],"indented": []}], "errors": errors}
 
