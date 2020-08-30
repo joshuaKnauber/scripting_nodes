@@ -26,7 +26,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     addon_version: bpy.props.IntVectorProperty(default=(1, 0, 0),min=0,name="Version",description="Version of your addon")
 
     # if true, the addon is loaded when the file is opened
-    compile_on_start: bpy.props.BoolProperty(default=True,name="Compile on start",description="Compiles this node tree when this file is opened")
+    compile_on_start: bpy.props.BoolProperty(default=False,name="Compile on start",description="Compiles this node tree when this file is opened")
 
     # uid which gets reloaded on compile
     uid: bpy.props.StringProperty()
