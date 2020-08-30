@@ -52,10 +52,10 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if not is_valid_python(self.var_name,True):
             self.var_name = make_valid_python(self.var_name,True)
         
-        indentifiers = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode", "SN_EnumVariableNode"]
+        identifiers = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode", "SN_EnumVariableNode"]
 
         for node in bpy.context.space_data.node_tree.nodes:
-            if node.bl_idname in indentifiers:
+            if node.bl_idname in identifiers:
                 if not node == self:
                     if self.var_name == node.var_name:
                         self.var_name = "new_" + self.var_name

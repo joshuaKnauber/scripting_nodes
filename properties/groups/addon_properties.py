@@ -73,6 +73,9 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     # variable search
     search_variables: bpy.props.CollectionProperty(type=SearchVariablesGroup)
+    
+    # enum search
+    sn_enum_property_properties: bpy.props.CollectionProperty(type=SearchVariablesGroup)
 
     # defines if the node info should be shown
     def update_node_info(self,context):
