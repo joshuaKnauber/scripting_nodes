@@ -57,16 +57,26 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                 for item in eval(data_type + ".bl_rna.properties['" + self.sn_enum_property_properties[self.propName].identifier + "'].enum_items"):
                     self.sockets.create_output(self,"EXECUTE", item.name)
 
+    def update_enum(self, context):
+        if self.search_prop == "internal":
+            self.sockets.create_input(self,"OBJECT","Input")
+        else:
+            self.inputs.remove(self.inputs[1])
+
     propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
     sn_enum_property_properties: bpy.props.CollectionProperty(type=SN_EnumSearchPropertyGroup)
+    search_prop: bpy.props.EnumProperty(items=[("internal", "Internal", "Blenders internal properties"), ("custom", "Custom", "Your custom enums")], name="Properties", description="Which properties to display", update=update_enum)
 
     def inititialize(self,context):
         self.sockets.create_input(self,"EXECUTE","Execute")
         self.sockets.create_input(self,"OBJECT","Input")
         self.sockets.create_output(self,"EXECUTE","Execute")
-
     def draw_buttons(self, context, layout):
-        layout.prop_search(self,"propName",self,"sn_enum_property_properties",text="")
+        layout.prop(self, "search_prop", expand=True)
+        if self.search_prop == "internal":
+            layout.prop_search(self,"propName",self,"sn_enum_property_properties",text="")
+        else:
+            layout.prop_search(self,"propName",bpy.context.scene.sn_properties,"sn_enum_property_properties",text="")
 
     def evaluate(self, socket, input_data, errors):
         next_code = ""

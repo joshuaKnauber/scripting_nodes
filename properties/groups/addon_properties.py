@@ -73,3 +73,6 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     # variable search
     search_variables: bpy.props.CollectionProperty(type=SearchVariablesGroup)
+    
+    # enum search
+    sn_enum_property_properties: bpy.props.CollectionProperty(type=SearchVariablesGroup)
