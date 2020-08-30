@@ -42,6 +42,8 @@ def load_handler(dummy):
     bpy.context.scene.sn_properties.package_installed_without_compile = False
     bpy.context.scene.sn_properties.package_uninstalled_without_compile = False
     
+    bpy.context.scene.sn_properties.show_node_info = False
+    
     compiler().unregister_existing()
     for tree in bpy.data.node_groups:
         if tree.bl_idname == "ScriptingNodesTree":

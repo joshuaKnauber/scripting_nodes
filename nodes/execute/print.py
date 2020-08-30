@@ -12,6 +12,13 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 
+    docs = {
+        "text": ["The print node prints [stuff](1,0,0)",
+                "pretty obvious wasn't it..."],
+        "python": ["print()","hello there"],
+        "image": None
+    }
+
     def inititialize(self,context):
         self.sockets.create_input(self,"EXECUTE","Execute")
         self.sockets.create_input(self,"DATA","Value")

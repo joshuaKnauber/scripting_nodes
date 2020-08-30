@@ -76,3 +76,9 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
     
     # enum search
     sn_enum_property_properties: bpy.props.CollectionProperty(type=SearchVariablesGroup)
+
+    # defines if the node info should be shown
+    def update_node_info(self,context):
+        if self.show_node_info:
+            bpy.ops.scripting_nodes.draw_tutorial("INVOKE_DEFAULT",show_node_info=True)
+    show_node_info: bpy.props.BoolProperty(default=False,update=update_node_info)

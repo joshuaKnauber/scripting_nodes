@@ -12,6 +12,16 @@ class SN_ScriptingBaseNode:
     sockets = SocketHandler()
     should_be_registered = False
 
+    docs = {
+        "text": ["Color: test text",
+                "tes [es [test also](0,1,1) multiline and color",
+                "",
+                "",
+                "[paragraphs](0,0,0) are cool too"],
+        "python": [],
+        "image": None
+    }
+
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == 'SN_ScriptingNodesTree'
