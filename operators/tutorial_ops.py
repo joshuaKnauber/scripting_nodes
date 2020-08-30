@@ -25,6 +25,7 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
 
     def modal(self, context, event):
         if event.type == "ESC" or not context.scene.sn_properties.show_node_info:
+            context.scene.sn_properties.show_node_info = False
             return self.close(context)
 
         if event.type == "LEFTMOUSE" and event.value == "RELEASE":
@@ -38,7 +39,8 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
                             bpy.ops.wm.url_open(url=button["url"])
                         if button["callback"]:
                             button["callback"]()
-                        context.scene.sn_properties.show_node_info = not button["close"]
+                        if button["close"]:
+                            context.scene.sn_properties.show_node_info = False
 
         return {'PASS_THROUGH'}
 
@@ -65,7 +67,7 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
             (0, 1), (1, 2), (2, 3), (3, 0)
         )
 
-        self.outline_batch = batch_for_shader(self.white_shader, 'LINES', {"pos": tuple(vertices)}, indices=tuple(indices))
+        self.outline_batch = batch_for_shader(self.white_shader, 'LINES', {"pos": vertices}, indices=indices)
 
     def create_close_button(self, context, size, padding):
         width, height = self.get_width_height(context)
@@ -78,7 +80,7 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
             (0, 1, 2), (0, 3, 2)
         )
 
-        self.close_batch = batch_for_shader(self.white_shader, 'TRIS', {"pos": tuple(vertices)}, indices=indices)
+        self.close_batch = batch_for_shader(self.white_shader, 'TRIS', {"pos": vertices}, indices=indices)
 
         return vertices
 
