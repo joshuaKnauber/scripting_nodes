@@ -124,17 +124,8 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
         return processed
 
 
-    def syntax_highlight_text(self,text):
-        processed = []
-
-        return processed
-
-
-    def draw_text(self,text,font_size,position,font_id,syntax_highlighting=False):
-        if not syntax_highlighting:
-            processed = self.process_text(text)
-        else:
-            processed = self.syntax_highlight_text(text)
+    def draw_text(self,text,font_size,position,font_id):
+        processed = self.process_text(text)
         x_offset = 0
         y_offset = 0
         for snippet in processed:
@@ -206,10 +197,10 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
                 # draw python text
                 if node.docs["python"]:
                     y_offset -= 50
-                    y_offset -= self.draw_text("PYTHON:",font_size_python,(padding+10,y_offset),0)
+                    y_offset -= self.draw_text("Python Equivalent:",font_size_python,(padding+10,y_offset),0)
                     y_offset -= 10
                     for index, line in enumerate(node.docs["python"]):
                         y_offset -= index*5
-                        y_offset -= self.draw_text(line,font_size_python,(padding+10, y_offset),0,True)
+                        y_offset -= self.draw_text(line,font_size_python,(padding+10, y_offset),0)
             else:
                 self.draw_text("[SERPENS](0,1,0.76) - Select a node to show infos",font_size_title,(padding+10,padding+10),0)
