@@ -128,7 +128,7 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
 
     def syntax_highlight_text(self,text):
         processed = []
-        
+
         return processed
 
 
@@ -153,11 +153,15 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
     def draw_callback(self, context):
         self.buttons.clear()
         if context.space_data.tree_type == "ScriptingNodesTree":
+            scale = context.scene.sn_properties.tutorial_scale
             width, height = self.get_width_height(context)
-            padding = 2
-            outline_width = 1.5
-            close_button_size = 20
-            close_cross_width = 5
+            padding = 2 * scale
+            outline_width = 1.5 * scale
+            close_button_size = 20 * scale
+            close_cross_width = 5 * scale
+            font_size_title = int(14 * scale)
+            font_size_text = int(13 * scale)
+            font_size_python = int(12 * scale)
 
             # draw outline
             self.white_shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
@@ -194,21 +198,21 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
             if self.show_node_info:
                 node = context.space_data.node_tree.nodes.active
                 if node:
-                    self.draw_text("SERPENS - Node Info: "+node.bl_label,14,(padding+10,padding+10),0)
+                    self.draw_text("SERPENS - Node Info: "+node.bl_label,font_size_title,(padding+10,padding+10),0)
 
                     # draw tutorial text
-                    y_offset = height - padding - 20
+                    y_offset = height - padding - font_size_text - 10
                     for index, line in enumerate(node.docs["text"]):
                         y_offset -= index*5
-                        y_offset -= self.draw_text(line,13,(padding+10, y_offset),0)
+                        y_offset -= self.draw_text(line,font_size_text,(padding+10, y_offset),0)
 
                     # draw python text
                     if node.docs["python"]:
                         y_offset -= 50
-                        y_offset -= self.draw_text("PYTHON:",12,(padding+10,y_offset),0)
+                        y_offset -= self.draw_text("PYTHON:",font_size_python,(padding+10,y_offset),0)
                         y_offset -= 10
                         for index, line in enumerate(node.docs["python"]):
                             y_offset -= index*5
-                            y_offset -= self.draw_text(line,12,(padding+10, y_offset),0,True)
+                            y_offset -= self.draw_text(line,font_size_python,(padding+10, y_offset),0,True)
                 else:
-                    self.draw_text("SERPENS - Select a node to show infos",14,(padding+10,padding+10),0)
+                    self.draw_text("SERPENS - Select a node to show infos",font_size_title,(padding+10,padding+10),0)
