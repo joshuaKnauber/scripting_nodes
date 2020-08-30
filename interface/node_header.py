@@ -1,9 +1,23 @@
+import bpy
+
+class SN_PT_TutorialSettingsPopover(bpy.types.Panel):
+    bl_idname = "SN_PT_TutorialSettingsPopover"
+    bl_label = "Display Settings"
+    bl_space_type = "NODE_EDITOR"
+    bl_region_type = "HEADER"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(context.scene.sn_properties,"tutorial_scale",text="Display Scale", slider=True)
+
+
 def node_header(self, context):
     if context.space_data.node_tree:
         if context.space_data.node_tree.bl_idname == "ScriptingNodesTree":
             if context.space_data.node_tree.nodes.active:
-                self.layout.prop(context.scene.sn_properties,"show_node_info",text="", icon="QUESTION", toggle=True)
-                self.layout.prop(context.scene.sn_properties,"tutorial_scale",text="Scale", slider=True)
+                row = self.layout.row(align=True)
+                row.prop(context.scene.sn_properties,"show_node_info",text="", icon="QUESTION", toggle=True)
+                row.popover("SN_PT_TutorialSettingsPopover",text="")
 
             row = self.layout.row(align=True)
             row.operator("scripting_nodes.compile_active", icon="FILE_REFRESH")

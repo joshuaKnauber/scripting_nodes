@@ -7,6 +7,8 @@ import re
 
 
 
+
+
 class SN_DrawTutorialFrame(bpy.types.Operator):
     bl_idname = "scripting_nodes.draw_tutorial"
     bl_label = "Draw Tutorial"
