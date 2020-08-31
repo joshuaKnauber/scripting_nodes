@@ -103,7 +103,7 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                             try:
                                 self.outputs.remove(out)
                             except RuntimeError:
-                                pass 
+                                pass
 
     def evaluate(self, socket, input_data, errors):
         next_code = ""
