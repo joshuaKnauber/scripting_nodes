@@ -83,10 +83,4 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
             bpy.ops.scripting_nodes.draw_tutorial("INVOKE_DEFAULT")
     show_node_info: bpy.props.BoolProperty(default=False,update=update_node_info)
 
-    # defines if the marketplace should be shown
-    def update_marketplace(self,context):
-        if self.show_marketplace:
-            bpy.ops.scripting_nodes.draw_marketplace("INVOKE_DEFAULT")
-    show_marketplace: bpy.props.BoolProperty(default=False,update=update_marketplace)
-
     tutorial_scale: bpy.props.FloatProperty(default=1,min=0.1, soft_max=5)

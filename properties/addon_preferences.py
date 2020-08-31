@@ -6,6 +6,9 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
     bl_idname = __name__.partition('.')[0]
 
+    navigation: bpy.props.EnumProperty(items=[("PACKAGES","Packages","The place to manage your packages","PACKAGE",0),
+                                            ("MARKETPLACE","Marketplace","The place to find new packages","IMAGE",1)])
+
     def _draw_install_package(self,layout):
         """ draws the button for installing packages """
         row = layout.row()
@@ -59,9 +62,31 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
             self._draw_install_package(layout)
 
-    def draw(self, context):
-        self._draw_installed_packages()
+    def draw_market_package(self,package):
+        box = self.layout.box()
+        box.label(text=package.title)
+        col = box.column(align=True)
+        col.enabled = False
+        for line in package.text.split(";;;"):
+            col.label(text=line)
+        row = box.row()
+        row.scale_y = 1.25
+        row.operator("wm.url_open",text=package.price).url = package.url
 
+    def draw(self, context):
+        row = self.layout.row(align=True)
+        row.scale_y = 1.25
+        row.prop(self,"navigation",text=" ",expand=True)
+        self.layout.separator()
+
+        if self.navigation == "PACKAGES":
+            self._draw_installed_packages()
+
+        elif self.navigation == "MARKETPLACE":
+
+            self.layout.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH")
+            for package in context.scene.sn_marketplace:
+                self.draw_market_package(package)
 
 """
 Access:

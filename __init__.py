@@ -31,6 +31,7 @@ import os
 from . import auto_load
 from .node_tree.node_categories import get_node_categories
 from .properties.groups.addon_properties import ScriptingNodesProperties
+from .properties.groups.package_marketplace import ScriptingNodesMarketplace
 from .interface.node_header import node_header
 from .compile.compiler import compiler
 
@@ -79,6 +80,9 @@ def register():
     # register the addon properties
     bpy.types.Scene.sn_properties = bpy.props.PointerProperty(type=ScriptingNodesProperties)
 
+    # register the marketplace list
+    bpy.types.Scene.sn_marketplace = bpy.props.CollectionProperty(type=ScriptingNodesMarketplace)
+
     # register property for storing if the text is a sn file
     bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False)
 
@@ -100,6 +104,9 @@ def unregister():
 
     # remove the addon properties
     del bpy.types.Scene.sn_properties
+
+    # remove the marketplace list
+    del bpy.types.Scene.sn_marketplace
 
     # remove the operator property
     del bpy.types.Scene.sn_operators

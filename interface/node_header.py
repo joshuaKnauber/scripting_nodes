@@ -16,12 +16,7 @@ def node_header(self, context):
         if context.space_data.node_tree.bl_idname == "ScriptingNodesTree":
             if context.space_data.node_tree.nodes.active:
                 row = self.layout.row(align=True)
-                col = row.column(align=True)
-                col.enabled = not context.scene.sn_properties.show_marketplace
-                col.prop(context.scene.sn_properties,"show_node_info",text="", icon="QUESTION", toggle=True)
-                col = row.column(align=True)
-                col.enabled = not context.scene.sn_properties.show_node_info
-                col.prop(context.scene.sn_properties,"show_marketplace",text="", icon="IMAGE", toggle=True)
+                row.prop(context.scene.sn_properties,"show_node_info",text="", icon="QUESTION", toggle=True)
                 row.popover("SN_PT_TutorialSettingsPopover",text="")
 
             row = self.layout.row(align=True)
