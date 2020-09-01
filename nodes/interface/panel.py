@@ -107,7 +107,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"hide_header")
         layout.prop(self,"default_closed")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         panel_uid = uuid4().hex[:10]
 
         idname = "SN_PT_"+panel_uid
@@ -143,7 +143,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             options = []
 
-        print(input_data)
+        print(node_data)
         
         return {
             "blocks": [
@@ -166,7 +166,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {
                             "lines": [],
                             "indented": [
-                                ["return ",input_data[0]["code"]],
+                                ["return ",node_data["input_data"][0]["code"]],
                             ]
                         },
                         
