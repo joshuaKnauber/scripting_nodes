@@ -32,6 +32,7 @@ class SN_OT_SelectIcon(bpy.types.Operator):
     def execute(self, context):
         context.space_data.node_tree.nodes[self.node_name].icon = self.icon
         self.report({"INFO"},message="Selected icon "+self.icon)
+        context.area.tag_redraw()
         return {"FINISHED"}
 
 

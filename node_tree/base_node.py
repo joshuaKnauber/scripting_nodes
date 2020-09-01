@@ -1,28 +1,29 @@
 import bpy
 from ..handler.socket_handler import SocketHandler
 
+
+
 class SN_ScriptingBaseNode:
-    bl_width_min = 40
-    bl_width_default = 160
-    bl_width_max = 5000
-    node_color = (0.5,0.5,0.5)
 
-    icon: bpy.props.StringProperty(default="")
+    bl_width_min = 40 # customizable
+    bl_width_default = 160 # customizable
+    bl_width_max = 5000 # customizable
+    node_color = (0.5,0.5,0.5) # customizable
 
-    sockets = SocketHandler()
-    should_be_registered = False
+    icon: bpy.props.StringProperty(default="") # customizable
 
-    docs = {
+    should_be_registered = False # customizable
+
+    docs = { # customizable
         "text": ["<orange>This node hasn't been documented yet.</>"],
         "python": []
     }
 
+    sockets = SocketHandler()
+
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == 'SN_ScriptingNodesTree'
-
-    def inititialize(self,context):
-        pass
 
     def init(self,context):
         self.use_custom_color = True
@@ -172,10 +173,35 @@ class SN_ScriptingBaseNode:
                 
         self.update_socket_connections()
 
+
+
+
+    
+    ##### CUSTOMIZABLE FUNCTIONS: #####
+
+
+    def inititialize(self,context):
+        """ This is the function called when the node is initialized. You should create the in/outputs here """
+        pass
+
     def draw_buttons(self,context,layout):
+        """ This is where you can draw additional UI elements on the node """
         pass
 
     def evaluate(self, socket, input_data, errors):
+        """ This is the function that gets called to convert the node into python code
+
+            socket: The socket of this node, another node has called this node from
+            input_data: Dict with content regarding the inputs
+            errors: a list of errors regarding the nodes inputs
+
+            return: Dict - 'blocks': List of Dicts containing the lists 'lines' and 'indented' which
+                                    themselves contain lists with strings and sockets that make up the lines.
+                                    Both lists can be contain more block dictionaries for nesting and further indenting.
+                            'errors': List of Dicts containing the strings 'title' and 'message' and also the parameter 'node' which
+                                    is the error causing node as well as the bool 'fatal'
+
+        """
         return {
             "blocks": [
                 {
@@ -189,25 +215,57 @@ class SN_ScriptingBaseNode:
         }
 
     def get_register_block(self):
+        """ Returns the register code for the node
+
+        return: List - ["bpy.utils.register_class(Test)",...]
+        """
         return []
 
     def get_unregister_block(self):
+        """ Returns the unregister code for the node
+
+        return: List - ["bpy.utils.unregister_class(Test)",...]
+        """
         return []
 
     def required_imports(self):
+        """ Returns a list of the required imports for this node
+            
+        return: List - ['bpy',...]
+        """
         return []
 
     def layout_type(self):
+        """ Returns the layout type of this node
+        
+        return: String - like 'layout', 'row', 'col', ...
+        """
         return ""
 
     def data_type(self, output):
+        """ Returns the data type of this node.
+        
+        return: String - ...
+        """
         return ""
 
     def reset_data_type(self, context):
+        """ 
+        
+        return: ...
+        """
         pass
 
     def get_variable_line(self):
+        """ 
+        
+        return: String - ...
+        """
         return ""
 
     def get_array_line(self):
+        """ 
+        
+        return: List - ...
+        """
         return []
