@@ -14,7 +14,8 @@ class SN_AddEnumItem(bpy.types.Operator):
     node_name: bpy.props.StringProperty()
 
     def execute(self, context):
-        context.space_data.node_tree.nodes[self.node_name].array_items.add()
+        item = context.space_data.node_tree.nodes[self.node_name].array_items.add()
+        item.name = "Item Name"
         return {"FINISHED"}
 
 class SN_RemoveEnumItem(bpy.types.Operator):
@@ -60,13 +61,22 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if self.var_name == node.var_name:
                         self.var_name = "new_" + self.var_name
 
+        for item in bpy.context.scene.sn_properties.sn_enum_property_properties:
+            if item.name == self.groupItem:
+                self.groupItem = self.var_name
+                item.name = self.var_name
+
     var_name: bpy.props.StringProperty(name="Name",description="Name of this enum",update=update_socket_value)
 
     description: bpy.props.StringProperty(name="Description",description="Description of this enum")
 
     array_items: bpy.props.CollectionProperty(type=SN_StringArray)
 
+    groupItem: bpy.props.StringProperty(default="item_name_placeholder")
+
     def inititialize(self, context):
+        item = bpy.context.scene.sn_properties.sn_enum_property_properties.add()
+        self.groupItem = item.name
         self.update_socket_value(context)
 
     def draw_buttons(self,context,layout):

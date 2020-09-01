@@ -105,7 +105,7 @@ class ScriptingNodesCompiler():
 
         if self._get_variable_registers(tree):
             register_function += "\n" + " "*self._indents + "# Register variables"
-            register_function += "\n" + " "*self._indents + "bpy.utils.register_class(ArrayCollection_UID_" + tree.uid + ")"
+            register_function += "\n" + " "*self._indents + "bpy.utils.register_class(ArrayCollection_UID_)"
             register_function += "\n" + " "*self._indents + "bpy.utils.register_class(GeneratedAddonProperties_UID_" + tree.uid + ")"
             register_function += "\n" + " "*self._indents + "bpy.types.Scene.sn_generated_addon_properties_UID_" + " = bpy.props.PointerProperty(type=GeneratedAddonProperties_UID_" + tree.uid + ")"
             register_function += "\n" + " "*self._indents + "bpy.app.handlers.load_post.append(check_variables)\n"
@@ -156,7 +156,7 @@ class ScriptingNodesCompiler():
 
         if self._get_variable_registers(tree):
             unregister_function += "\n" + " "*self._indents + "# Unregister variables"
-            unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(ArrayCollection_UID_" + tree.uid + ")"
+            unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(ArrayCollection_UID_)"
             unregister_function += "\n" + " "*self._indents + "bpy.utils.unregister_class(GeneratedAddonProperties_UID_" + tree.uid + ")"
             unregister_function += "\n" + " "*self._indents + "del bpy.types.Scene.sn_generated_addon_properties_UID_"
             unregister_function += "\n" + " "*self._indents + "bpy.app.handlers.load_post.remove(check_variables)\n"
@@ -217,7 +217,7 @@ class ScriptingNodesCompiler():
         var_registers = self._get_variable_registers(tree)
         if var_registers:
             text.write(cd.comment_block("CLASSES"))
-            text.write("# Create Array Collection for use in PROPERTIES\nclass ArrayCollection_UID_" + tree.uid + "(bpy.types.PropertyGroup):\n"+ " "*self._indents +"string: bpy.props.StringProperty()\n"+ " "*self._indents +"bool: bpy.props.BoolProperty()\n"+ " "*self._indents +"int: bpy.props.IntProperty()\n"+ " "*self._indents +"float: bpy.props.FloatProperty()\n"+ " "*self._indents +"vector: bpy.props.FloatVectorProperty()\n"+ " "*self._indents +"four_vector: bpy.props.FloatVectorProperty(size=4)\n")
+            text.write("# Create Array Collection for use in PROPERTIES\nclass ArrayCollection_UID_(bpy.types.PropertyGroup):\n"+ " "*self._indents +"string: bpy.props.StringProperty()\n"+ " "*self._indents +"bool: bpy.props.BoolProperty()\n"+ " "*self._indents +"int: bpy.props.IntProperty()\n"+ " "*self._indents +"float: bpy.props.FloatProperty()\n"+ " "*self._indents +"vector: bpy.props.FloatVectorProperty()\n"+ " "*self._indents +"four_vector: bpy.props.FloatVectorProperty(size=4)\n")
             self._write_paragraphs(text,1)
 
         text.write(cd.comment_block("CODE"))
@@ -243,6 +243,7 @@ class ScriptingNodesCompiler():
         self._write_paragraphs(text,2)
         text.write(self._get_unregister_function(tree))
         text_string = text.as_string().replace("sn_generated_addon_properties_UID_", "sn_generated_addon_properties_UID_"+tree.uid)
+        text_string = text_string.replace("ArrayCollection_UID_", "ArrayCollection_UID_"+tree.uid)
         text.clear()
         text.write(text_string)
 
