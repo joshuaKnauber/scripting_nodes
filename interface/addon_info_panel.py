@@ -48,7 +48,3 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
 
         layout.separator()
         layout.prop(context.space_data.node_tree,"compile_on_start")
-
-
-        layout.operator("visual_scripting.create_panel_locations")
-        layout.operator("visual_scripting.create_existing_panel_location")

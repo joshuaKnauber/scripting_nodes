@@ -81,7 +81,10 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     hide_header: bpy.props.BoolProperty(default=False,name="Hide Header", description="Hide the header of the panel")
     default_closed: bpy.props.BoolProperty(default=False,name="Default Closed", description="Close the panel by default")
 
+    panel_uid: bpy.props.StringProperty()
+
     def inititialize(self,context):
+        self.panel_uid = uuid4().hex[:10]
         self.sockets.create_input(self,"BOOLEAN","Show Panel")
         self.sockets.create_output(self,"LAYOUT","Header",True)
         self.sockets.create_output(self,"LAYOUT","Panel",True)
@@ -107,10 +110,19 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"hide_header")
         layout.prop(self,"default_closed")
 
-    def evaluate(self, socket, node_data, errors):
-        panel_uid = uuid4().hex[:10]
+    def layout_type(self):
+        return "layout"
 
-        idname = "SN_PT_"+panel_uid
+    def get_register_block(self):
+        idname = "SN_PT_"+self.panel_uid
+        return ["bpy.utils.register_class("+idname+")"]
+
+    def get_unregister_block(self):
+        idname = "SN_PT_"+self.panel_uid
+        return ["bpy.utils.unregister_class("+idname+")"]
+
+    def evaluate(self, socket, node_data, errors):
+        idname = "SN_PT_"+self.panel_uid
 
         context = []
         if len(self.context_items(context)) > 1:
@@ -143,7 +155,15 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             options = []
 
-        print(node_data)
+        header_layout = []
+        for output_data in node_data["output_data"]:
+            if output_data["name"] == "Header" and output_data["code"] != None:
+                header_layout.append([output_data["code"]])
+
+        panel_layout = []
+        for output_data in node_data["output_data"]:
+            if output_data["name"] == "Panel" and output_data["code"] != None:
+                panel_layout.append([output_data["code"]])
         
         return {
             "blocks": [
@@ -175,8 +195,17 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {
                             "lines": [],
                             "indented": [
-                                ["layout = self.layout"]
-                            ]
+                                ["layout = self.layout"],
+                            ] + header_layout
+                        },
+                        
+                        [""],
+                        ["def draw(self, context):"],
+                        {
+                            "lines": [],
+                            "indented": [
+                                ["layout = self.layout"],
+                            ] + panel_layout
                         },
                     ]
                 }
