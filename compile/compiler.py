@@ -187,6 +187,31 @@ class ScriptingNodesCompiler():
         for _ in range(amount):
             text.write("\n")
 
+    def write_addon_info(self,text,tree):
+        name = tree.addon_name
+        if not name:
+            name = "My Addon"
+        author = tree.addon_author
+        description = tree.addon_description
+        location = tree.addon_location
+        wiki = tree.addon_wiki
+        warning = tree.addon_warning
+        category = tree.addon_category
+        blender = "("+str(tree.addon_blender[0])+","+str(tree.addon_blender[1])+","+str(tree.addon_blender[2])+")"
+        version = "("+str(tree.addon_version[0])+","+str(tree.addon_version[1])+","+str(tree.addon_version[2])+")"
+        text.write("bl_info = {\n"+
+                    " "*self._indents + f"\"name\": \"{name}\",\n"+
+                    " "*self._indents + f"\"author\": \"{author}\",\n"+
+                    " "*self._indents + f"\"description\": \"{description}\",\n"+
+                    " "*self._indents + f"\"location\": \"{location}\",\n"+
+                    " "*self._indents + f"\"doc_url\": \"{wiki}\",\n"+
+                    " "*self._indents + f"\"warning\": \"{warning}\",\n"+
+                    " "*self._indents + f"\"category\": \"{category}\",\n"+
+                    " "*self._indents + f"\"blender\": {blender},\n"+
+                    " "*self._indents + f"\"version\": {version}\n"+
+                    "}")
+        self._write_paragraphs(text,2)
+
     def _create_addon_text(self, tree, is_export=False):
         """ creates the text for the addon with the given tree """
         if self._hide_file and not is_export:
@@ -203,6 +228,8 @@ class ScriptingNodesCompiler():
         self._write_paragraphs(text, 2)
         text.write(cd.scripting_nodes_block())
         self._write_paragraphs(text,2)
+
+        self.write_addon_info(text,tree)
 
         text.write(cd.comment_block("IMPORTS"))
         text.write(self._get_needed_imports(tree))
