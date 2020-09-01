@@ -3,6 +3,7 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 from ...operators.panel_ops import get_possible_panel_locations
+from uuid import uuid4
 
 
 class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -91,11 +92,11 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         row.scale_y = 1.5
         row.operator("visual_scripting.create_panel_locations",icon="EYEDROPPER").trigger_node = self.name
 
-        box.prop(self,"space")
-        box.prop(self,"region")
+        msg = self.space.replace("_"," ").title()+" -> "+self.region.replace("_"," ").title()
 
         if len(self.context_items(context)) > 1:
-            box.prop(self,"context")
+            msg += " -> "+self.context.replace("_"," ").title()
+        box.label(text=msg)
         if len(self.category_items(context)) > 1:
             col = box.column(align=True)
             col.prop(self,"category")
@@ -107,14 +108,78 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"default_closed")
 
     def evaluate(self, socket, input_data, errors):
+        panel_uid = uuid4().hex[:10]
+
+        idname = "SN_PT_"+panel_uid
+
+        context = []
+        if len(self.context_items(context)) > 1:
+            if not self.context == "NONE":
+                context = ["bl_context = \"",self.context,"\""]
+
+        category = []
+        if len(self.context_items(context)) > 1:
+            category = ["bl_category = \"",self.category,"\""]
+            if self.category == "CUSTOM":
+                if self.custom_category:
+                    category = ["bl_category = \"",self.custom_category,"\""]
+                else:
+                    errors.append({
+                        "title": "No category",
+                        "message": "Please enter a category name",
+                        "node": self,
+                        "fatal": True
+                    })
+        
+        options = ""
+        if self.default_closed:
+            options += "\"DEFAULT_CLOSED\""
+        if self.hide_header:
+            if options:
+                options += ","
+            options += "\"HIDE_HEADER\""
+        if options:
+            options = ["bl_options = {",options,"}"]
+        else:
+            options = []
+
+        print(input_data)
+        
         return {
             "blocks": [
                 {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
+                    "lines": [
+                        ["class ",idname,"(bpy.types.Panel):"]
                     ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
+                    "indented": [
+                        ["bl_label = \"",self.label,"\""],
+                        ["bl_idname = \"",idname,"\""],
+                        ["bl_space_type = \"",self.space,"\""],
+                        ["bl_region_type = \"",self.region,"\""],
+                        context,
+                        category,
+                        options,
+
+                        [""],
+                        ["@classmethod"],
+                        ["def poll(cls, context):"],
+                        {
+                            "lines": [],
+                            "indented": [
+                                ["return ",input_data[0]["code"]],
+                            ]
+                        },
+                        
+                        [""],
+                        ["def draw_header(self, context):"],
+                        {
+                            "lines": [],
+                            "indented": [
+                                ["layout = self.layout"]
+                            ]
+                        },
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }
