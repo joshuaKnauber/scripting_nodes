@@ -202,7 +202,7 @@ class SN_ScriptingBaseNode:
         """ This is where you can draw additional UI elements on the node """
         pass
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         """ This is the function that gets called to convert the node into python code
 
             socket: The socket of this node, another node has called this node from
@@ -225,7 +225,7 @@ class SN_ScriptingBaseNode:
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }
 
     def get_register_block(self):

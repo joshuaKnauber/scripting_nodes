@@ -25,7 +25,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_input(self,"DATA","Value")
         self.sockets.create_output(self,"EXECUTE","Execute")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         next_code = ""
         if self.outputs[0].is_linked:
             next_code = self.outputs[0].links[0].to_socket
