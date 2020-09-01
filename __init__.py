@@ -113,24 +113,3 @@ def unregister():
 
     # unregister property for storing if the text is a sn file
     del bpy.types.Text.is_sn_addon
-
-
-"""
-
-TODO:
-
-    Variables:
-    
-    - Finish create variable nodes:
-        - String
-        - Int
-        - Float
-        - Vector
-
-    - Add get variable node:
-        - Arrays
-
-    - Add set variable node:
-        - Arrays
-
-"""
