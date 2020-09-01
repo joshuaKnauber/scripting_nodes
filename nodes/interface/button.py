@@ -20,7 +20,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self,context,layout):
         self.draw_icon_chooser(layout)
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
@@ -30,5 +30,5 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }

@@ -24,7 +24,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"label")
         layout.prop(self,"description")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
@@ -35,5 +35,5 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }

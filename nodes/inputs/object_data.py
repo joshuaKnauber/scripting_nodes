@@ -32,7 +32,7 @@ class SN_ObjectDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "data_type_enum", text="")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
@@ -43,7 +43,7 @@ class SN_ObjectDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }
 
     def data_type(self, output):

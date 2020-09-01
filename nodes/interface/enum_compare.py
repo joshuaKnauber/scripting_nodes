@@ -106,7 +106,7 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 pass
         
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         if_block = []
         if self.search_prop == "internal":
             if self.inputs[1].is_linked:
@@ -119,7 +119,7 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 if self.propName in self.sn_enum_property_properties:
                                     for item in data_type:
                                         if item.name == output.name:
-                                            if_block.append({"lines": [["if ", input_data[1]["code"], "." + self.sn_enum_property_properties[self.propName].identifier + " == '" + item.identifier + "':"]],"indented": [[output.links[0].to_socket]]})
+                                            if_block.append({"lines": [["if ", node_data["input_data"][1]["code"], "." + self.sn_enum_property_properties[self.propName].identifier + " == '" + item.identifier + "':"]],"indented": [[output.links[0].to_socket]]})
         
         else:
             if self.propName in bpy.context.scene.sn_properties.sn_enum_property_properties:
@@ -130,6 +130,6 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         return {
             "blocks": if_block,
-            "errors": []
+            "errors": errors
         }
 

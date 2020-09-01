@@ -108,10 +108,10 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         return value
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         next_code = ""
-        if self.outputs[0].is_linked:
-            next_code = self.outputs[0].links[0].to_socket
+        if node_data["output_data"][0]["code"]:
+            next_code = node_data["output_data"][0]["code"]
 
         blocks = [{"lines": [],"indented": []}]
         if self.search_value in bpy.context.scene.sn_properties.search_variables:
@@ -120,14 +120,14 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if bpy.context.scene.sn_properties.search_variables[self.search_value].type == "vector" or bpy.context.scene.sn_properties.search_variables[self.search_value].type == "four_vector":
                         add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.add().", bpy.context.scene.sn_properties.search_variables[self.search_value].type, " = ", self.get_vector(self.inputs[2])]
                     else:
-                        add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.add().", bpy.context.scene.sn_properties.search_variables[self.search_value].type, " = ", input_data[2]["code"]]
+                        add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.add().", bpy.context.scene.sn_properties.search_variables[self.search_value].type, " = ", node_data["input_data"][2]["code"]]
 
-                    blocks = [{"lines": [add_text, ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.move(len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array)-1, ", input_data[1]["code"], ")"]], "indented": []}]
+                    blocks = [{"lines": [add_text, ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.move(len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array)-1, ", node_data["input_data"][1]["code"], ")"]], "indented": []}]
                 else:
                     if bpy.context.scene.sn_properties.search_variables[self.search_value].type == "vector" or bpy.context.scene.sn_properties.search_variables[self.search_value].type == "four_vector":
                         add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.add().", bpy.context.scene.sn_properties.search_variables[self.search_value].type, " = ", self.get_vector(self.inputs[1])]
                     else:
-                        add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.add().", bpy.context.scene.sn_properties.search_variables[self.search_value].type, " = ", input_data[1]["code"]]
+                        add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.add().", bpy.context.scene.sn_properties.search_variables[self.search_value].type, " = ", node_data["input_data"][1]["code"]]
 
                     if self.operation == "end":
                         blocks = [{"lines": [add_text], "indented": []}]

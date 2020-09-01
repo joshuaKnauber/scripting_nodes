@@ -20,7 +20,7 @@ class SN_StringNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "string_value", text="")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
@@ -31,5 +31,5 @@ class SN_StringNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }

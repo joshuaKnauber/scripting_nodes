@@ -68,12 +68,12 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 box = col.box()
                 box.label(text=bpy.context.scene.sn_properties.search_variables[self.search_value].description)
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         blocks = [{"lines": [["None"]],"indented": []}]
         if self.search_value in bpy.context.scene.sn_properties.search_variables:
             if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
                 if socket == self.outputs[0]:
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array[", input_data[0]["code"], "]." + bpy.context.scene.sn_properties.search_variables[self.search_value].type]],"indented": []}]
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array[", node_data["input_data"][0]["code"], "]." + bpy.context.scene.sn_properties.search_variables[self.search_value].type]],"indented": []}]
                 elif socket == self.outputs[1]:
                     blocks = [{"lines": [["len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array)"]],"indented": []}]
                 elif socket == self.outputs[2]:

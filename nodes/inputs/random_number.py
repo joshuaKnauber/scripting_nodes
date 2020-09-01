@@ -40,12 +40,12 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
             text = "Integer"
         layout.prop(self, "use_float", toggle=True, text=text)
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         randtype = "randint"
         if self.use_float:
             randtype = "uniform"
 
-        from_to = input_data[0]["code"] + ", " + input_data[1]["code"]
+        from_to = node_data["input_data"][0]["code"] + ", " + node_data["input_data"][1]["code"]
         return {
             "blocks": [
                 {
@@ -56,7 +56,7 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }
 
     def required_imports(self):

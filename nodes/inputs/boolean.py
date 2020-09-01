@@ -20,7 +20,7 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "bool_value", text=str(self.bool_value), toggle=True)
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
