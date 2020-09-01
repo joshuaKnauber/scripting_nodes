@@ -124,6 +124,10 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, socket, node_data, errors):
         idname = "SN_PT_"+self.panel_uid
 
+        label = self.label
+        if label == "":
+            label = " "
+
         context = []
         if len(self.context_items(context)) > 1:
             if not self.context == "NONE":
@@ -172,7 +176,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         ["class ",idname,"(bpy.types.Panel):"]
                     ],
                     "indented": [
-                        ["bl_label = \"",self.label,"\""],
+                        ["bl_label = \"",label,"\""],
                         ["bl_idname = \"",idname,"\""],
                         ["bl_space_type = \"",self.space,"\""],
                         ["bl_region_type = \"",self.region,"\""],

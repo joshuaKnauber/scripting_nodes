@@ -21,11 +21,14 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, socket, node_data, errors):
         layout_type = self.inputs[0].links[0].from_node.layout_type()
+        icon = self.icon
+        if icon:
+            icon = f", icon=\"{icon}\""
         return {
             "blocks": [
                 {
                     "lines": [
-                        [layout_type,".label(text=",node_data["input_data"][1]["code"],", icon=\"",self.icon,"\")"]
+                        [layout_type,".label(text=",node_data["input_data"][1]["code"],icon,")"]
                     ],
                     "indented": []
                 }
