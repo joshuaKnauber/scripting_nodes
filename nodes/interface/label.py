@@ -19,15 +19,19 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self,context,layout):
         self.draw_icon_chooser(layout)
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
+        layout_type = self.inputs[0].links[0].from_node.layout_type()
+        icon = self.icon
+        if icon:
+            icon = f", icon=\"{icon}\""
         return {
             "blocks": [
                 {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
+                    "lines": [
+                        [layout_type,".label(text=",node_data["input_data"][1]["code"],icon,")"]
                     ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
-                    ]
+                    "indented": []
                 }
             ],
-            "errors": []
+            "errors": errors
         }

@@ -31,53 +31,67 @@ class SN_ScriptingBaseNode:
 
         self.inititialize(context)
 
-    def get_input_data(self):
+    def get_socket_data(self, socket, connected_attr):
+        socket_data = {
+            "socket": socket,
+            "name": socket.name,
+            "value": None,
+            "connected": None,
+            "code": None
+        }
+        errors = []
+
+        # data socket
+        if socket._is_data_socket:
+            socket_data["value"] = str(socket.get_value())
+            socket_data["code"] = socket_data["value"]
+
+            if socket.is_linked:
+                if getattr(socket.links[0], connected_attr)._is_data_socket:
+                    socket_data["connected"] = getattr(socket.links[0], connected_attr)
+                    socket_data["code"] = socket_data["connected"]
+
+                else:
+                    errors.append({
+                        "title": "Wrong connection",
+                        "message": "One of the sockets of this node has a wrong socket type connected",
+                        "node": self,
+                        "fatal": True
+                    })
+
+        # layout, execute or object socket
+        elif socket.bl_idname in ["SN_LayoutSocket","SN_ExecuteSocket","SN_ObjectSocket", "SN_CollectionSocket"]:
+            if socket.is_linked:
+                if getattr(socket.links[0], connected_attr).bl_idname == socket.bl_idname:
+                    socket_data["connected"] = getattr(socket.links[0], connected_attr)
+                    socket_data["code"] = getattr(socket.links[0], connected_attr)
+
+                else:
+                    errors.append({
+                        "title": "Wrong connection",
+                        "message": "One of the sockets of this node has a wrong socket type connected",
+                        "node": self,
+                        "fatal": True
+                    })
+
+        return socket_data, errors
+
+    def get_node_data(self):
         errors = []
         node_input_data = []
+        node_output_data = []
+
         for input_socket in self.inputs:
-            input_data = {
-                "socket": input_socket,
-                "name": input_socket.name,
-                "value": None,
-                "connected": None,
-                "code": None
-            }
+            socket_data, socket_errors = self.get_socket_data(input_socket, "from_socket")
+            node_input_data.append(socket_data)
+            errors += socket_errors
 
-            # data socket
-            if input_socket._is_data_socket:
-                input_data["value"] = str(input_socket.get_value())
-                input_data["code"] = input_data["value"]
+        for output_socket in self.outputs:
+            socket_data, socket_errors = self.get_socket_data(output_socket, "to_socket")
+            node_output_data.append(socket_data)
+            errors += socket_errors
 
-                if input_socket.is_linked:
-                    if input_socket.links[0].from_socket._is_data_socket:
-                        input_data["connected"] = input_socket.links[0].from_socket
-                        input_data["code"] = input_data["connected"]
-
-                    else:
-                        errors.append({
-                            "title": "Wrong connection",
-                            "message": "One of the inputs of this node has a wrong output type connected",
-                            "node": self,
-                            "fatal": True
-                        })
-
-            # layout, execute or object socket
-            elif input_socket.bl_idname in ["SN_LayoutSocket","SN_ExecuteSocket","SN_ObjectSocket", "SN_CollectionSocket"]:
-                if input_socket.is_linked:
-                    if input_socket.links[0].from_socket.bl_idname == input_socket.links[0].to_socket.bl_idname:
-                        input_data["connected"] = input_socket.links[0].from_socket
-                        input_data["code"] = input_socket.links[0].from_socket
-
-                    else:
-                        errors.append({
-                            "title": "Wrong connection",
-                            "message": "One of the inputs of this node has a wrong output type connected",
-                            "node": self,
-                            "fatal": True
-                        })
-            node_input_data.append(input_data)
-
-        return node_input_data, errors
+        return {"input_data":node_input_data,"output_data":node_output_data}, errors
 
     def add_dynamic_socket(self,inputs,socket,index,parent):
         if inputs:
