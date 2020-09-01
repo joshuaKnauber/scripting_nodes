@@ -3,6 +3,7 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 import blf
 import bgl
+from ..handler.text_colors import TextColorHandler
 
 
 class SN_DrawTutorialFrame(bpy.types.Operator):
@@ -99,27 +100,29 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
 
     def process_text(self, text):
         processed = []
-        split_text = text.split("[")
-        
-        for index, part in enumerate(split_text):
+        split_text = text.split("</>")
 
+        for index, part in enumerate(split_text):
             is_valid = False
-            if len(part.split("](")) > 1:
-                colored_text = part.split("](")[0]
-                part = ("](").join(part.split("](")[1:])
-                if len(part.split(")")) > 1:
-                    color = part.split(")")[0]
-                    if len(color.split(",")) == 3 and color.replace(",","").replace(".","").replace(" ","").isdigit():
-                        white_text = (")").join(part.split(")")[1:])
-                        is_valid = True
+            part = part.split(">")
+
+            if len(part) > 1:
+                colored_text = part[-1]
+                if len(part[-2].split("<")) > 1:
+                    color = part[-2].split("<")[-1]
+                    white_text = ("<").join(part[-2].split("<")[:-1])
+                    is_valid = True
+                elif len(part[-2].split("<")) == 1:
+                    color = part[-2].split("<")[0]
+                    white_text = ""
+                    is_valid = True
+
             if not is_valid:
-                if not index == 0:
-                    part = "["+part
-                processed.append( (part, (1,1,1,1)) )
+                processed.append( ((">").join(part), (1,1,1,1)) )
             else:
-                real_color = ( float(color.split(",")[0]), float(color.split(",")[1]), float(color.split(",")[2]), 1 )
-                processed.append( (colored_text, real_color) )
+                color = TextColorHandler().color_by_name(color)
                 processed.append( (white_text, (1,1,1,1)) )
+                processed.append( (colored_text, color) )
 
         return processed
 
@@ -186,7 +189,7 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
             # draw tutorial title
             node = context.space_data.node_tree.nodes.active
             if node:
-                self.draw_text("[SERPENS](0,1,0.76) - Node Info: "+node.bl_label,font_size_title,(padding+10,padding+10),0)
+                self.draw_text("<serpens>SERPENS</> - Node Info: "+node.bl_label,font_size_title,(padding+10,padding+10),0)
 
                 # draw tutorial text
                 y_offset = height - padding - font_size_text - 10
@@ -203,4 +206,4 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
                         y_offset -= index*5
                         y_offset -= self.draw_text(line,font_size_python,(padding+10, y_offset),0)
             else:
-                self.draw_text("[SERPENS](0,1,0.76) - Select a node to show infos",font_size_title,(padding+10,padding+10),0)
+                self.draw_text("<serpens>SERPENS</> - Select a node to show infos",font_size_title,(padding+10,padding+10),0)

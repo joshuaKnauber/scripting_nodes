@@ -13,13 +13,8 @@ class SN_ScriptingBaseNode:
     should_be_registered = False
 
     docs = {
-        "text": ["Color: test text",
-                "tes [es [test also](0,1,1) multiline and color",
-                "",
-                "",
-                "[paragraphs](0,0,0) are cool too"],
-        "python": [],
-        "image": None
+        "text": ["<orange>This node hasn't been documented yet.</>"],
+        "python": []
     }
 
     @classmethod
