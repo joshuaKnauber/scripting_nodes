@@ -14,12 +14,12 @@
 bl_info = {
     "name" : "Visual Scripting",
     "author" : "Joshua Knauber, Finn Knauber", 
-    "description" : "Adds a node editor for writing scripts and addons with nodes",
+    "description" : "Adds a node editor for building addons with nodes",
     "blender" : (2, 80, 0),
     "version" : (1, 0, 0),
     "location" : "Editors -> Visual Scripting",
     "wiki_url": "", 
-    "warning" : "This addon is still in early development",
+    "warning" : "This addon is still in early development!",
     "category" : "Node" 
 }
 
@@ -61,6 +61,54 @@ def reregister_node_categories(names=[]):
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
 
+def add_basic_nodes(tree):
+    """ adds the basic nodes when adding a new node tree """
+    panel = tree.nodes.new("SN_PanelNode")
+    button = tree.nodes.new("SN_ButtonNode")
+    operator = tree.nodes.new("SN_CreateOperator")
+    print_ = tree.nodes.new("SN_PrintNode")
+    frame_ops = tree.nodes.new("NodeFrame")
+    frame_layout = tree.nodes.new("NodeFrame")
+
+    panel.space = "VIEW_3D"
+    panel.region = "UI"
+    button.inputs[1].set_value("My Addon")
+    button.icon = "FORWARD"
+    frame_ops.label = "Operator"
+    frame_layout.label = "Layout / UI"
+    frame_ops.use_custom_color = True
+    frame_ops.color = (0.3,0.3,0.3)
+    frame_layout.use_custom_color = True
+    frame_layout.color = (0.6,0.6,0.6)
+
+    tree.links.new(panel.outputs[1],button.inputs[0])
+    tree.links.new(operator.outputs[0],print_.inputs[0])
+
+    operator.location = (-150,300)
+    print_.location = (200,300)
+    panel.location = (-150,50)
+    button.location = (200,50)
+
+    panel.parent = frame_layout
+    button.parent = frame_layout
+    operator.parent = frame_ops
+    print_.parent = frame_ops
+
+    tree.added_basic_nodes = True
+
+@persistent
+def depsgraph_handler(dummy):
+    for area in bpy.context.screen.areas:
+        if area.type == "NODE_EDITOR":
+            if area.spaces[0].tree_type == "ScriptingNodesTree":
+                if area.spaces[0].node_tree:
+                    if not area.spaces[0].node_tree.added_basic_nodes:
+                        add_basic_nodes(area.spaces[0].node_tree)
+
+                        prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
+                        if not prefs.has_seen_tutorial and not prefs.has_seen_welcome_message:
+                            bpy.ops.scripting_nodes.welcome_message("INVOKE_DEFAULT")
+
 def register():
     # register the classes of the addon
     auto_load.register()
@@ -76,6 +124,9 @@ def register():
 
     # add the unload handler
     atexit.register(unload_handler)
+
+    # register the depsgraph handler
+    bpy.app.handlers.depsgraph_update_post.append(depsgraph_handler)
 
     # register the addon properties
     bpy.types.Scene.sn_properties = bpy.props.PointerProperty(type=ScriptingNodesProperties)
@@ -101,6 +152,9 @@ def unregister():
 
     # remove the unload handler
     atexit.unregister(unload_handler)
+
+    # unnregister the depsgraph handler
+    bpy.app.handlers.depsgraph_update_post.remove(depsgraph_handler)
 
     # remove the addon properties
     del bpy.types.Scene.sn_properties

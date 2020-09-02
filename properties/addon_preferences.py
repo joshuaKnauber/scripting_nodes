@@ -10,6 +10,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
                                             ("MARKETPLACE","Marketplace","The place to find new packages","IMAGE",1)])
 
     has_seen_tutorial: bpy.props.BoolProperty(default=False)
+    has_seen_welcome_message: bpy.props.BoolProperty(default=False)
 
     def _draw_install_package(self,layout):
         """ draws the button for installing packages """
