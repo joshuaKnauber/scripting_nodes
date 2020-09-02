@@ -32,7 +32,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     op_name: bpy.props.StringProperty(default="My Operator",name="Label",description="Label of the operator", update=update_op_name)
     description: bpy.props.StringProperty(default="My Operators description",name="Description",description="Description of the operator shown in tooltips", update=update_description)
-    confirm: bpy.props.BoolProperty(name="Confirm", description="Operator needs to be confirmed")
+    confirm_option: bpy.props.BoolProperty(name="Confirm", description="Operator needs to be confirmed")
 
     def inititialize(self,context):
         self.update_op_name(None)
@@ -42,15 +42,15 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self,"op_name")
         layout.prop(self,"description")
-        layout.prop(self,"confirm", toggle=True)
+        layout.prop(self,"confirm_option", toggle=True)
 
     def evaluate(self, socket, node_data, errors):
         execute = ""
         if node_data["output_data"][0]["code"]:
             execute = node_data["output_data"][0]["code"]
-        confirm = {"lines": [], "indented": []}
-        if self.confirm:
-            confirm = {"lines": [], "indented": []}
+        confirm_text = {"lines": [], "indented": []}
+        if self.confirm_option:
+            confirm_text = {"lines": [["def invoke(self, context, event):"]], "indented": [["return context.window_manager.invoke_confirm(self, event)"], [""]]}
 
         return {
             "blocks": [
@@ -70,22 +70,21 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                                 ["def poll(cls, context):"]
                             ],
                             "indented": [
-                                ["return ", node_data["input_data"][0]["code"]]
-                            ]
+                                ["return ", node_data["input_data"][0]["code"]],
+                                [""],
+                            ],
                         },
-                        [""],
                         {
                             "lines": [
                                 ["def execute(self, context):"]
                             ],
                             "indented": [
                                 [execute],
-                                ["return {\"FINISHED\"}"]
-                                [""]
+                                ["return {\"FINISHED\"}"],
                                 [""]
                             ]
                         },
-                        confirm
+                        confirm_text
                     ]
                 }
             ],
