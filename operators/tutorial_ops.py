@@ -6,6 +6,36 @@ import bgl
 from ..handler.text_colors import TextColorHandler
 
 
+
+tutorial_images = [
+    "Untitled",
+    "Untitled",
+    "Untitled"
+]
+
+def get_tut_images():
+    global tutorial_images
+    return tutorial_images
+
+
+
+class SN_OT_NextTutorial(bpy.types.Operator):
+    bl_idname = "scripting_nodes.next_tutorial"
+    bl_label = "Next Step"
+    bl_description = "Shows the next step in the tutorial"
+    bl_options = {"REGISTER","INTERNAL"}
+
+    previous: bpy.props.BoolProperty()
+
+    def execute(self, context):
+        if self.previous:
+            context.scene.sn_properties.tut_index -= 1
+        else:
+            context.scene.sn_properties.tut_index += 1
+        return {"FINISHED"}
+
+
+
 class SN_DrawTutorial(bpy.types.Operator):
     bl_idname = "scripting_nodes.draw_tutorial"
     bl_label = "Draw Tutorial"

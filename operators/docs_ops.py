@@ -25,24 +25,23 @@ class SN_DrawDocs(bpy.types.Operator):
         return {'FINISHED'}
 
     def modal(self, context, event):
-        if context.area.type == "SHADER_EDITOR":
-            if event.type == "ESC" or not context.scene.sn_properties.show_node_info:
-                context.scene.sn_properties.show_node_info = False
-                return self.close(context)
+        if event.type == "ESC" or not context.scene.sn_properties.show_node_info:
+            context.scene.sn_properties.show_node_info = False
+            return self.close(context)
 
-            if event.type == "LEFTMOUSE" and event.value == "RELEASE":
-                m_x = event.mouse_region_x
-                m_y = self.get_width_height(context)[1] + event.mouse_region_y
-                for button in self.buttons:
-                    if m_x >= button["minX"] and m_x <= button["maxX"]:
-                        if m_y >= button["minY"] and m_y <= button["maxY"]:
+        if event.type == "LEFTMOUSE" and event.value == "RELEASE":
+            m_x = event.mouse_region_x
+            m_y = self.get_width_height(context)[1] + event.mouse_region_y
+            for button in self.buttons:
+                if m_x >= button["minX"] and m_x <= button["maxX"]:
+                    if m_y >= button["minY"] and m_y <= button["maxY"]:
 
-                            if button["url"]:
-                                bpy.ops.wm.url_open(url=button["url"])
-                            if button["callback"]:
-                                button["callback"]()
-                            if button["close"]:
-                                context.scene.sn_properties.show_node_info = False
+                        if button["url"]:
+                            bpy.ops.wm.url_open(url=button["url"])
+                        if button["callback"]:
+                            button["callback"]()
+                        if button["close"]:
+                            context.scene.sn_properties.show_node_info = False
 
         return {'PASS_THROUGH'}
 
