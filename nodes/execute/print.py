@@ -13,32 +13,35 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = False
 
     docs = {
-        "text": ["The print node is used to <red>write things to the console</>.",
+        "text": ["The print node is used to <important>write things to the console</>.",
                 "",
-                "It will print what is connected to its <red>value input</>.",
-                "This can be any type of data like <data>numbers, strings, etc.</>"],
-        "python": ["<function>print</>(<data>  value  </>)"]
+                "Value Inputs: <subtext>What is connected here will be printed.",
+                "<subtext>                   This can be any type of data like </>numbers, strings, etc."],
+        "python": ["<function>print</>( <string>\"my example\"</>, <number>123</>, <string>\"test\"</> )"]
     }
 
     def inititialize(self,context):
         self.sockets.create_input(self,"EXECUTE","Execute")
-        self.sockets.create_input(self,"DATA","Value")
+        self.sockets.create_input(self,"DATA","Value",True)
         self.sockets.create_output(self,"EXECUTE","Execute")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         next_code = ""
-        if self.outputs[0].is_linked:
-            next_code = self.outputs[0].links[0].to_socket
+        if node_data["output_data"][0]["code"]:
+            next_code = node_data["output_data"][0]["code"]
         
-        print_text = ""
-        if input_data[1]["code"] != "None":
-            print_text = input_data[1]["code"]
+        print_text = []
+        for socket in node_data["input_data"]:
+            if socket["name"] == "Value" and socket["code"] != None and socket["code"] != "None":
+                print_text += [",", socket["code"]]
+        if print_text:
+            print_text = print_text[1:]
 
         return {
             "blocks": [
                 {
                     "lines": [
-                        ["print(", print_text ,")"]
+                        ["print("] + print_text + [")"]
                     ],
                     "indented": [
                     ]

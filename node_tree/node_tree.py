@@ -34,6 +34,9 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     # ignore unchanged name
     ignore_name: bpy.props.BoolProperty(name="Ignore Unchanged Name", description="Ignore that the name has not been changed",default=False)
 
+    # added basic nodes
+    added_basic_nodes: bpy.props.BoolProperty(default=False)
+
     def _prop_group_name(self):
         group_name = self.addon_name.title().replace(" ","")
         group_name = make_valid_python(group_name,True)

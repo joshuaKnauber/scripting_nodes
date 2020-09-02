@@ -146,7 +146,7 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             if item.name == self.groupItem:
                 bpy.context.scene.sn_properties.search_variables.remove(x)
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         blocks = []
         return {"blocks": blocks, "errors": errors}
 

@@ -17,16 +17,16 @@ class SN_NegateNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_input(self,"BOOLEAN","Value")
         self.sockets.create_output(self,"BOOLEAN","Output")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
-                        ["not ", input_data[0]["code"]]
+                        ["not ", node_data["input_data"][0]["code"]]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }

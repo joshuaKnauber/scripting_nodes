@@ -35,7 +35,7 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                     box = layout.box()
                     box.label(text=eval(data_type).bl_rna.name)
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
@@ -45,7 +45,7 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }
 
     def data_type(self, output):

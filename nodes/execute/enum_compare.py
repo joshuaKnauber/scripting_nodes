@@ -105,10 +105,10 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                             except RuntimeError:
                                 pass
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         next_code = ""
-        if self.outputs[0].is_linked:
-            next_code = self.outputs[0].links[0].to_socket
+        if node_data["output_data"][0]["code"]:
+            next_code = node_data["output_data"][0]["code"]
 
         if_block = []
         if self.search_prop == "internal":
@@ -134,6 +134,6 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
         if_block.append({"lines": [[next_code]],"indented": []})
         return {
             "blocks": if_block,
-            "errors": []
+            "errors": errors
         }
 

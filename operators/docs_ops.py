@@ -6,40 +6,10 @@ import bgl
 from ..handler.text_colors import TextColorHandler
 
 
-
-tutorial_images = [
-    "Untitled",
-    "Untitled",
-    "Untitled"
-]
-
-def get_tut_images():
-    global tutorial_images
-    return tutorial_images
-
-
-
-class SN_OT_NextTutorial(bpy.types.Operator):
-    bl_idname = "scripting_nodes.next_tutorial"
-    bl_label = "Next Step"
-    bl_description = "Shows the next step in the tutorial"
-    bl_options = {"REGISTER","INTERNAL"}
-
-    previous: bpy.props.BoolProperty()
-
-    def execute(self, context):
-        if self.previous:
-            context.scene.sn_properties.tut_index -= 1
-        else:
-            context.scene.sn_properties.tut_index += 1
-        return {"FINISHED"}
-
-
-
-class SN_DrawTutorial(bpy.types.Operator):
-    bl_idname = "scripting_nodes.draw_tutorial"
-    bl_label = "Draw Tutorial"
-    bl_description = "Draws the tutorial"
+class SN_DrawDocs(bpy.types.Operator):
+    bl_idname = "scripting_nodes.draw_docs"
+    bl_label = "Draw Docs"
+    bl_description = "Draws the docs"
     bl_options = {"REGISTER","INTERNAL"}
 
     def invoke(self, context, event):
@@ -55,8 +25,8 @@ class SN_DrawTutorial(bpy.types.Operator):
         return {'FINISHED'}
 
     def modal(self, context, event):
-        if event.type == "ESC" or not context.scene.sn_properties.show_tutorial:
-            context.scene.sn_properties.show_tutorial = False
+        if event.type == "ESC" or not context.scene.sn_properties.show_node_info:
+            context.scene.sn_properties.show_node_info = False
             return self.close(context)
 
         if event.type == "LEFTMOUSE" and event.value == "RELEASE":
@@ -71,7 +41,7 @@ class SN_DrawTutorial(bpy.types.Operator):
                         if button["callback"]:
                             button["callback"]()
                         if button["close"]:
-                            context.scene.sn_properties.show_tutorial = False
+                            context.scene.sn_properties.show_node_info = False
 
         return {'PASS_THROUGH'}
 
@@ -171,30 +141,6 @@ class SN_DrawTutorial(bpy.types.Operator):
             y_offset = max(y_offset,height)
         return y_offset
 
-    def load_image(self,context,IMAGE_NAME):
-        image = bpy.data.images[IMAGE_NAME]
-        width, height = self.get_width_height(context)
-        image_height = height - 100
-        image_width = image_height * 4/3
-
-        while image_width >= width - 100 and not image_width < 200:
-            image_height -= 10
-            image_width = image_height * 4/3
-
-        self.image_shader = gpu.shader.from_builtin('2D_IMAGE')
-        x = (width-image_width)/2
-        y = (height-image_height)/2
-        self.image_batch = batch_for_shader(
-            self.image_shader, 'TRI_FAN',
-            {
-                "pos": ( (x, y), (x+image_width, y), (x+image_width, y+image_height), (x, y+image_height) ),
-                "texCoord": ((0, 0), (1, 0), (1, 1), (0, 1)),
-            },
-        )
-
-        if image.gl_load():
-            raise Exception()
-        return image
 
     def draw_callback(self, context):
         self.buttons.clear()
@@ -241,14 +187,25 @@ class SN_DrawTutorial(bpy.types.Operator):
             self.close_cross_batch.draw(self.black_shader)
         
             # draw tutorial title
-            self.draw_text("<serpens>SERPENS</> - Tutorial",font_size_title,(padding+10,padding+10),0)
+            node = context.space_data.node_tree.nodes.active
+            if node:
+                self.draw_text("<serpens>SERPENS</> - Node Info: "+node.bl_label,font_size_title,(padding+10,padding+10),0)
 
+                # draw tutorial text
+                y_offset = height - padding - font_size_text - 10
+                for index, line in enumerate(node.docs["text"]):
+                    y_offset -= index*2
+                    if not line:
+                        y_offset -= font_size_text
+                    y_offset -= self.draw_text(line,font_size_text,(padding+10, y_offset),0)
 
-            # draw tutorial image
-            image = self.load_image(context,"Untitled")
-            bgl.glActiveTexture(bgl.GL_TEXTURE0)
-            bgl.glBindTexture(bgl.GL_TEXTURE_2D, image.bindcode)
-
-            self.image_shader.bind()
-            self.image_shader.uniform_int("image", 0)
-            self.image_batch.draw(self.image_shader)
+                # draw python text
+                if node.docs["python"] and context.scene.sn_properties.show_python_docs:
+                    y_offset -= 40
+                    y_offset -= self.draw_text("Python Example:",font_size_python,(padding+10,y_offset),0)
+                    y_offset -= 8
+                    for index, line in enumerate(node.docs["python"]):
+                        y_offset -= index*4
+                        y_offset -= self.draw_text(line,font_size_python,(padding+10, y_offset),0)
+            else:
+                self.draw_text("<serpens>SERPENS</> - Select a node to show infos",font_size_title,(padding+10,padding+10),0)

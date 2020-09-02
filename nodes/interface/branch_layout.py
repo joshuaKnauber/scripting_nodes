@@ -16,7 +16,7 @@ class SN_BranchNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_input(self,"LAYOUT","Layout")
         self.sockets.create_output(self,"LAYOUT","Layout", True)
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
@@ -26,5 +26,5 @@ class SN_BranchNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }

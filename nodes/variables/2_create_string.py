@@ -121,7 +121,7 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             
             layout.operator("scripting_nodes.add_variable_array_element",icon="ADD").node_name = self.name
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         blocks = []
         return {"blocks": blocks, "errors": errors}
 

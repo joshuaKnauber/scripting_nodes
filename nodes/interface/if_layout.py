@@ -18,7 +18,7 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"LAYOUT","Do")
         self.sockets.create_output(self,"LAYOUT","Else")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
@@ -28,5 +28,5 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }

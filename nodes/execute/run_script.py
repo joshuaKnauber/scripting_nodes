@@ -33,8 +33,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
                     "lines": [
                         [script]
                     ],
-                    "indented": [
-                    ]
+                    "indented": []
                 }
             ],
             "errors": errors

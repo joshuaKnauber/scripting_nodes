@@ -34,7 +34,7 @@ class SN_RepeatProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
     def copy(self, node):
         self.var_name = self.get_var_name()
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         # return the name of the variable
         if socket == self.outputs[2]:
             return {
@@ -52,21 +52,19 @@ class SN_RepeatProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
         # return the code block and next output
         else:
             next_code = ""
-            if self.outputs[0].is_linked:
-                next_code = self.outputs[0].links[0].to_socket
+            if node_data["output_data"][0]["code"]:
+                next_code = node_data["output_data"][0]["code"]
 
-            output = ""
-            if self.outputs[1].is_linked:
-                output = self.outputs[1].links[0].to_socket
+            output = "pass"
+            if node_data["output_data"][1]["code"]:
+                output = node_data["output_data"][1]["code"]
 
-            if output == "":
-                output = "pass"
             return {
                 "blocks": [
                     {
                         "lines": [ # lines is a list of lists, where the lists represent the different lines
                             [self.var_name + " = 0"],
-                            ["for " + self.var_name + " in range(", input_data[1]["code"], "):"]
+                            ["for " + self.var_name + " in range(", node_data["input_data"][1]["code"], "):"]
                         ],
                         "indented": [ # indented is a list of lists, where the lists represent the different lines
                             [output]
@@ -80,6 +78,6 @@ class SN_RepeatProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                         ]
                     }
                 ],
-                "errors": []
+                "errors": errors
             }
 

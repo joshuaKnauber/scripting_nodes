@@ -17,7 +17,7 @@ class SN_SeperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         factor = self.sockets.create_input(self, "FLOAT", "Factor")
         factor.set_value(1)
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
@@ -27,5 +27,5 @@ class SN_SeperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }

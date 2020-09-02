@@ -16,12 +16,12 @@ class SN_CastFloatNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_input(self,"DATA","Data")
         self.sockets.create_output(self,"FLOAT","Float")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         block = []
         if self.inputs[0].is_linked:
             if self.inputs[0].links[0].from_socket.bl_idname in ["SN_BoolSocket", "SN_FloatSocket", "SN_IntSocket"]:
-                blocks = [{"lines": [["float(", input_data[0]["code"], ")"]],"indented": []}]
+                blocks = [{"lines": [["float(", node_data["input_data"][0]["code"], ")"]],"indented": []}]
             elif self.inputs[0].links[0].from_socket.bl_idname in ["SN_VectorSocket", "SN_StringSocket"]:
-                blocks = [{"lines": [["cast_float(", input_data[0]["code"], ")"]],"indented": []}]
+                blocks = [{"lines": [["cast_float(", node_data["input_data"][0]["code"], ")"]],"indented": []}]
 
         return {"blocks": blocks, "errors": errors}

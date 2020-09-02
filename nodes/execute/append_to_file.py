@@ -51,21 +51,21 @@ class SN_AppendFromFileNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.fixed_path:
             layout.prop(self, "file_path")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         next_code = ""
-        if self.outputs[0].is_linked:
-            next_code = self.outputs[0].links[0].to_socket
+        if node_data["output_data"][0]["code"]:
+            next_code = node_data["output_data"][0]["code"]
         
         if self.fixed_path:
             filepath="r'" + self.file_path + "\\" + self.append_type + "'"
         else:
-            filepath="r" + input_data[3]["code"] + " + '\\" + self.append_type + "'"
+            filepath="r" + node_data["input_data"][3]["code"] + " + '\\" + self.append_type + "'"
 
         return {
             "blocks": [
                 {
                     "lines": [
-                        ["bpy.ops.wm.append(directory=", filepath, ", filename=", input_data[1]["code"], ", link=", input_data[2]["code"], ")"]
+                        ["bpy.ops.wm.append(directory=", filepath, ", filename=", node_data["input_data"][1]["code"], ", link=", node_data["input_data"][2]["code"], ")"]
                     ],
                     "indented": [
                     ]

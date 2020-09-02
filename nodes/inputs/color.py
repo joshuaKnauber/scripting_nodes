@@ -28,7 +28,7 @@ class SN_ColorNode(bpy.types.Node, SN_ScriptingBaseNode):
             col.prop(self,"value",text="")
         layout.prop(self,"use_four_numbers")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         vector = (self.value[0], self.value[1], self.value[2])
         if self.use_four_numbers:
             vector = (self.four_value[0], self.four_value[1], self.four_value[2], self.four_value[3])
@@ -43,5 +43,5 @@ class SN_ColorNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }

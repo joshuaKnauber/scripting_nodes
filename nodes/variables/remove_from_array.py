@@ -77,16 +77,16 @@ class SN_RemoveFromArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             box = col.box()
             box.label(text="Please select an array")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         next_code = ""
-        if self.outputs[0].is_linked:
-            next_code = self.outputs[0].links[0].to_socket
+        if node_data["output_data"][0]["code"]:
+            next_code = node_data["output_data"][0]["code"]
 
         blocks = [{"lines": [],"indented": []}]
         if self.search_value in bpy.context.scene.sn_properties.search_variables:
             if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
                 if self.operation == "index":
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.remove(", input_data[1]["code"], ")"]], "indented": []}]
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.remove(", node_data["input_data"][1]["code"], ")"]], "indented": []}]
                 elif self.operation == "start":
                     blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.remove(0)"]], "indented": []}]
                 elif self.operation == "end":

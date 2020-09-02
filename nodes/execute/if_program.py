@@ -19,28 +19,24 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"EXECUTE","Do")
         self.sockets.create_output(self,"EXECUTE","Else")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         next_code = ""
-        if self.outputs[0].is_linked:
-            next_code = self.outputs[0].links[0].to_socket
+        if node_data["output_data"][0]["code"]:
+            next_code = node_data["output_data"][0]["code"]
 
-        do_code = ""
-        if self.outputs[1].is_linked:
-            do_code = self.outputs[1].links[0].to_socket
-        if do_code == "":
-            do_code = "pass"
+        do_code = "pass"
+        if node_data["output_data"][1]["code"]:
+            do_code = node_data["output_data"][1]["code"]
 
-        else_code = ""
-        if self.outputs[2].is_linked:
-            else_code = self.outputs[2].links[0].to_socket
-        if else_code == "":
-            else_code = "pass"
+        else_code = "pass"
+        if node_data["output_data"][2]["code"]:
+            else_code = node_data["output_data"][2]["code"]
 
         return {
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
-                        ["if ", input_data[1]["code"], ":"]
+                        ["if ", node_data["input_data"][1]["code"], ":"]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                         [do_code]
@@ -62,5 +58,5 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }

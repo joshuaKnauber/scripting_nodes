@@ -20,7 +20,7 @@ class SN_SplitNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"LAYOUT","Layout")
         self.sockets.create_output(self,"LAYOUT","Layout")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
@@ -30,7 +30,7 @@ class SN_SplitNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }
 
     def layout_type(self):

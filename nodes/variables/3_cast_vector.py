@@ -27,9 +27,9 @@ class SN_CastVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self,context,layout):
         layout.prop(self,"use_four_numbers")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         if self.use_four_numbers:
-            blocks = [{"lines": [["cast_four_vector(", input_data[0]["code"], ", " + input_data[1]["code"] + ")"]],"indented": []}]
+            blocks = [{"lines": [["cast_four_vector(", node_data["input_data"][0]["code"], ", " + node_data["input_data"][1]["code"] + ")"]],"indented": []}]
         else:
-            blocks = [{"lines": [["cast_vector(", input_data[0]["code"], ")"]],"indented": []}]
+            blocks = [{"lines": [["cast_vector(", node_data["input_data"][0]["code"], ")"]],"indented": []}]
         return {"blocks": blocks, "errors": errors}

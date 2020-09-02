@@ -34,4 +34,6 @@ def get_node_categories():
                             first_lines = False
         if category_items:
             node_categories.append(SN_ScriptingNodesCategory(category.upper(), category.replace("_"," ").title(), items=category_items))
+
+    node_categories.append(SN_ScriptingNodesCategory("LAYOUT", "Layout", items=[NodeItem("NodeFrame")]))
     return node_categories

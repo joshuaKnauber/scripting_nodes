@@ -19,7 +19,7 @@ class SN_RepeatLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"LAYOUT","Repeat")
         self.sockets.create_output(self,"INTEGER","Step")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
@@ -29,6 +29,6 @@ class SN_RepeatLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }
 

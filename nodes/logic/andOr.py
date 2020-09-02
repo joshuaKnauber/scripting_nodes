@@ -22,12 +22,12 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "andOr", text="")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
-                        [input_data[0]["code"], self.andOr, input_data[1]["code"]]
+                        [node_data["input_data"][0]["code"], self.andOr, node_data["input_data"][1]["code"]]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]

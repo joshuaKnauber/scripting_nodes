@@ -31,7 +31,7 @@ class SN_ObjectContextNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"OBJECT", "Workspace")
 
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         context_type = {
             "Active bone": "active_bone",
             "Active object": "active_object",
@@ -58,7 +58,7 @@ class SN_ObjectContextNode(bpy.types.Node, SN_ScriptingBaseNode):
                     ]
                 }
             ],
-            "errors": []
+            "errors": errors
         }
 
 

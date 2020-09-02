@@ -54,7 +54,7 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                     box = layout.box()
                     box.label(text=eval(data_type).bl_rna.name)
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         # return the name of the variable
         if socket == self.outputs[2]:
             return {"blocks": [{"lines": [[self.var_name]],"indented": []}],"errors": []}
@@ -63,12 +63,12 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
         # return the code block and next output
         else:
             next_code = ""
-            if self.outputs[0].is_linked:
-                next_code = self.outputs[0].links[0].to_socket
+            if node_data["output_data"][0]["code"]:
+                next_code = node_data["output_data"][0]["code"]
 
             output = ""
-            if self.outputs[1].is_linked:
-                output = self.outputs[1].links[0].to_socket
+            if node_data["output_data"][1]["code"]:
+                output = node_data["output_data"][1]["code"]
 
             if output == "":
                 output = "pass"
@@ -78,7 +78,7 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                         "lines": [ # lines is a list of lists, where the lists represent the different lines
                             [self.var_name + " = 0"],
                             [self.index_name + " = 0"],
-                            ["for " + self.index_name + ", " + self.var_name + " in enumerate(", input_data[1]["code"], "):"]
+                            ["for " + self.index_name + ", " + self.var_name + " in enumerate(", node_data["input_data"][1]["code"], "):"]
                         ],
                         "indented": [ # indented is a list of lists, where the lists represent the different lines
                             [output]
@@ -92,7 +92,7 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                         ]
                     }
                 ],
-                "errors": []
+                "errors": errors
             }
 
     def data_type(self, output):
