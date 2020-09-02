@@ -3,20 +3,22 @@ class TextColorHandler:
     def __init__(self):
         self.colors = {
             "serpens": (0,1,0.76),
+            "subtext": (0.75,0.75,0.75),
+            "important": (1,0.6,0.1),
 
             "function": (0.95,0.55,0),
             "number": (0.2,0.4,0.75),
             "string": (0,0.75,0,1),
-            "data": (0.6,0.6,0.6),
+            "data": (0.7,0.7,0.7),
 
             "red": (1,0.4,0.4),
-            "blue": (0,0.1,1),
-            "green": (0.1,1,0),
+            "blue": (0,0.3,1),
+            "green": (0.05,1,0),
             "orange": (1,0.225,0),
             "yellow": (0.1,0.4,0),
-            "black": (0,0,0),
             "grey": (0.6,0.6,0.6),
-            "lightgrey": (0.8,0.8,0.8),
+            "lightgrey": (0.95,0.95,0.95),
+            "black": (0,0,0),
         }
 
     def color_by_name(self,name):

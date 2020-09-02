@@ -9,6 +9,7 @@ class SN_PT_TutorialSettingsPopover(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         layout.prop(context.scene.sn_properties,"tutorial_scale",text="Display Scale", slider=True)
+        layout.prop(context.scene.sn_properties,"show_python_docs")
 
 
 def node_header(self, context):

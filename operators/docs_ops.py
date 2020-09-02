@@ -6,10 +6,10 @@ import bgl
 from ..handler.text_colors import TextColorHandler
 
 
-class SN_DrawTutorialFrame(bpy.types.Operator):
-    bl_idname = "scripting_nodes.draw_tutorial"
-    bl_label = "Draw Tutorial"
-    bl_description = "Draws the tutorial"
+class SN_DrawDocs(bpy.types.Operator):
+    bl_idname = "scripting_nodes.draw_docs"
+    bl_label = "Draw Docs"
+    bl_description = "Draws the docs"
     bl_options = {"REGISTER","INTERNAL"}
 
     def invoke(self, context, event):
@@ -194,16 +194,18 @@ class SN_DrawTutorialFrame(bpy.types.Operator):
                 # draw tutorial text
                 y_offset = height - padding - font_size_text - 10
                 for index, line in enumerate(node.docs["text"]):
-                    y_offset -= index*5
+                    y_offset -= index*2
+                    if not line:
+                        y_offset -= font_size_text
                     y_offset -= self.draw_text(line,font_size_text,(padding+10, y_offset),0)
 
                 # draw python text
-                if node.docs["python"]:
-                    y_offset -= 50
+                if node.docs["python"] and context.scene.sn_properties.show_python_docs:
+                    y_offset -= 40
                     y_offset -= self.draw_text("Python Equivalent:",font_size_python,(padding+10,y_offset),0)
-                    y_offset -= 10
+                    y_offset -= 8
                     for index, line in enumerate(node.docs["python"]):
-                        y_offset -= index*5
+                        y_offset -= index*4
                         y_offset -= self.draw_text(line,font_size_python,(padding+10, y_offset),0)
             else:
                 self.draw_text("<serpens>SERPENS</> - Select a node to show infos",font_size_title,(padding+10,padding+10),0)

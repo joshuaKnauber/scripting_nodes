@@ -13,11 +13,11 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = False
 
     docs = {
-        "text": ["The print node is used to <red>write things to the console</>.",
+        "text": ["The print node is used to <important>write things to the console</>.",
                 "",
-                "It will print what is connected to its <red>value input</>.",
-                "This can be any type of data like <data>numbers, strings, etc.</>"],
-        "python": ["<function>print</>(<data>  value  </>)"]
+                "Value Input: <subtext>What is connected here will be printed.",
+                "<subtext>                   This can be any type of data like </>numbers, strings, etc."],
+        "python": ["<function>print</>(<data>  value  </>)","<function>print</>(<data>  value  </>)"]
     }
 
     def inititialize(self,context):
