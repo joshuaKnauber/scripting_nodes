@@ -26,7 +26,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"description")
         layout.prop(self,"confirm", toggle=True)
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [
                 {
@@ -36,7 +36,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                     "indented": [
                         ["bl_idname = 'scripting_nodes." + self.op_name.lower().replace(" ", "_") + "'"],
                         ["bl_label = '" + self.op_name +"'"],
-                        ["bl_description = '" + self.opDescription + "'"],
+                        ["bl_description = '" + self.description + "'"],
                         ["bl_options = {\"REGISTER\"}"],
                         [""],
                         {
@@ -45,7 +45,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                                 ["def poll(cls, context):"]
                             ],
                             "indented": [
-                                ["return " + node_data["input_data"][0]["code"]]
+                                ["return ", node_data["input_data"][0]["code"]]
                             ]
                         },
                         [""],
@@ -54,7 +54,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                                 ["def execute(self, context):"]
                             ],
                             "indented": [
-                                execute_code,
+                                [node_data["output_data"][0]["code"]],
                                 ["return {\"FINISHED\"}"]
                             ]
                         }
@@ -64,3 +64,9 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
             "errors": errors
         }
 
+
+    def get_register_block(self):
+        return ["bpy.utils.register_class(SN_OT_" + self.op_name.replace(" ", "_") + ")"]
+
+    def get_unregister_block(self):
+        return ["bpy.utils.unregister_class(SN_OT_" + self.op_name.replace(" ", "_") + ")"]
