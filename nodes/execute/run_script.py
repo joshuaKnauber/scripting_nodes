@@ -23,8 +23,8 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, socket, node_data, errors):
         next_code = ""
-            if node_data["output_data"][0]["code"]:
-                next_code = node_data["output_data"][0]["code"]
+        if node_data["output_data"][0]["code"]:
+            next_code = node_data["output_data"][0]["code"]
 
         script = ""
         if self.search_value.lstrip() in bpy.data.texts:
