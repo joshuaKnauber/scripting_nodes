@@ -80,8 +80,18 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
     # defines if the node info should be shown
     def update_node_info(self,context):
         if self.show_node_info:
+            self.show_tutorial = False
             bpy.ops.scripting_nodes.draw_docs("INVOKE_DEFAULT")
-    show_node_info: bpy.props.BoolProperty(default=False,update=update_node_info)
+
+    def update_tutorial_info(self,context):
+        if self.show_tutorial:
+            context.preferences.addons[__name__.partition('.')[0]].preferences.has_seen_tutorial = True
+            self.show_node_info = False
+            bpy.ops.scripting_nodes.draw_docs("INVOKE_DEFAULT")
+
+    show_node_info: bpy.props.BoolProperty(default=False,update=update_node_info, name="Show Node Docs", description="This will show the documentation for the nodes")
+
+    show_tutorial: bpy.props.BoolProperty(default=False,update=update_tutorial_info, name="Show Tutorial", description="This will show the tutorial")
 
     tutorial_scale: bpy.props.FloatProperty(default=1,min=0.1, soft_max=5, name="Docs Scale", description="The scale of the drawn UI elements")
     show_python_docs: bpy.props.BoolProperty(default=True,name="Show Python Docs",description="Shows the python code if the documentation is enabled")

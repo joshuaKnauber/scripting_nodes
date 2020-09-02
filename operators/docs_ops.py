@@ -202,7 +202,7 @@ class SN_DrawDocs(bpy.types.Operator):
                 # draw python text
                 if node.docs["python"] and context.scene.sn_properties.show_python_docs:
                     y_offset -= 40
-                    y_offset -= self.draw_text("Python Equivalent:",font_size_python,(padding+10,y_offset),0)
+                    y_offset -= self.draw_text("Python Example:",font_size_python,(padding+10,y_offset),0)
                     y_offset -= 8
                     for index, line in enumerate(node.docs["python"]):
                         y_offset -= index*4

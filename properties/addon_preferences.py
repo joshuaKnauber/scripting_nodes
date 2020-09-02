@@ -9,6 +9,8 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
     navigation: bpy.props.EnumProperty(items=[("PACKAGES","Packages","The place to manage your packages","PACKAGE",0),
                                             ("MARKETPLACE","Marketplace","The place to find new packages","IMAGE",1)])
 
+    has_seen_tutorial: bpy.props.BoolProperty(default=False)
+
     def _draw_install_package(self,layout):
         """ draws the button for installing packages """
         row = layout.row()
