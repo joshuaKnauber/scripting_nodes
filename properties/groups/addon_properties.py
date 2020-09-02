@@ -87,7 +87,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
         if self.show_tutorial:
             context.preferences.addons[__name__.partition('.')[0]].preferences.has_seen_tutorial = True
             self.show_node_info = False
-            bpy.ops.scripting_nodes.draw_docs("INVOKE_DEFAULT")
+            bpy.ops.scripting_nodes.draw_tutorial("INVOKE_DEFAULT")
 
     show_node_info: bpy.props.BoolProperty(default=False,update=update_node_info, name="Show Node Docs", description="This will show the documentation for the nodes")
 
