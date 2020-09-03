@@ -13,6 +13,9 @@ tutorial_images = [
     "tut3.jpg",
     "tut4.jpg",
     "tut5.jpg",
+    "tut6.jpg",
+    "tut7.jpg",
+    "final.jpg",
 ]
 
 def get_tut_images():
