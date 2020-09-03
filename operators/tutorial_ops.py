@@ -2,9 +2,7 @@ import bpy
 import os
 import gpu
 from gpu_extras.batch import batch_for_shader
-import blf
 import bgl
-from ..handler.text_colors import TextColorHandler
 from .drawing_ops import DrawingFuncs
 
 

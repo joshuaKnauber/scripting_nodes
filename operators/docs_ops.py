@@ -1,9 +1,4 @@
 import bpy
-import gpu
-from gpu_extras.batch import batch_for_shader
-import blf
-import bgl
-from ..handler.text_colors import TextColorHandler
 from .drawing_ops import DrawingFuncs
 
 
@@ -69,23 +64,26 @@ class SN_DrawDocs(DrawingFuncs, bpy.types.Operator):
             # draw tutorial title
             node = context.space_data.node_tree.nodes.active
             if node:
-                self.draw_text("<serpens>SERPENS</> - Node Info: "+node.bl_label,font_size_title,(padding+10,padding+10),0)
+                if hasattr(node,"docs"):
+                    self.draw_text("<serpens>SERPENS</> - Node Info: "+node.bl_label,font_size_title,(padding+10,padding+10),0)
 
-                # draw tutorial text
-                y_offset = height - padding - font_size_text - 10
-                for index, line in enumerate(node.docs["text"]):
-                    y_offset -= index*2
-                    if not line:
-                        y_offset -= font_size_text
-                    y_offset -= self.draw_text(line,font_size_text,(padding+10, y_offset),0)
+                    # draw tutorial text
+                    y_offset = height - padding - font_size_text - 10
+                    for index, line in enumerate(node.docs["text"]):
+                        y_offset -= index*2
+                        if not line:
+                            y_offset -= font_size_text
+                        y_offset -= self.draw_text(line,font_size_text,(padding+10, y_offset),0)
 
-                # draw python text
-                if node.docs["python"] and context.scene.sn_properties.show_python_docs:
-                    y_offset -= 40
-                    y_offset -= self.draw_text("Python Example:",font_size_python,(padding+10,y_offset),0)
-                    y_offset -= 8
-                    for index, line in enumerate(node.docs["python"]):
-                        y_offset -= index*4
-                        y_offset -= self.draw_text(line,font_size_python,(padding+10, y_offset),0)
+                    # draw python text
+                    if node.docs["python"] and context.scene.sn_properties.show_python_docs:
+                        y_offset -= 40
+                        y_offset -= self.draw_text("Python Example:",font_size_python,(padding+10,y_offset),0)
+                        y_offset -= 8
+                        for index, line in enumerate(node.docs["python"]):
+                            y_offset -= index*4
+                            y_offset -= self.draw_text(line,font_size_python,(padding+10, y_offset),0)
+                else:
+                    self.draw_text("<serpens>SERPENS</> - Select a node from the addon to show infos",font_size_title,(padding+10,padding+10),0)
             else:
                 self.draw_text("<serpens>SERPENS</> - Select a node to show infos",font_size_title,(padding+10,padding+10),0)
