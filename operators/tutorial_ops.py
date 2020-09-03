@@ -1,4 +1,5 @@
 import bpy
+import os
 import gpu
 from gpu_extras.batch import batch_for_shader
 import blf
@@ -8,9 +9,11 @@ from ..handler.text_colors import TextColorHandler
 
 
 tutorial_images = [
-    "Untitled",
-    "Untitled",
-    "Untitled"
+    "tut1.jpg",
+    "tut2.jpg",
+    "tut3.jpg",
+    "tut4.jpg",
+    "tut5.jpg",
 ]
 
 def get_tut_images():
@@ -51,6 +54,7 @@ class SN_DrawTutorial(bpy.types.Operator):
 
     def close(self, context):
         bpy.types.SpaceNodeEditor.draw_handler_remove(self.handler, 'WINDOW')
+        self.remove_imgs()
         context.area.tag_redraw()
         return {'FINISHED'}
 
@@ -171,8 +175,14 @@ class SN_DrawTutorial(bpy.types.Operator):
             y_offset = max(y_offset,height)
         return y_offset
 
+    def remove_imgs(self):
+        for img in get_tut_images():
+            if img in bpy.data.images:
+                bpy.data.images.remove(bpy.data.images[img])
+
     def load_image(self,context,IMAGE_NAME):
-        image = bpy.data.images[IMAGE_NAME]
+        self.remove_imgs()
+        image = bpy.data.images.load(os.path.join(os.path.dirname(__file__),"tut_imgs",IMAGE_NAME),check_existing=True)
         width, height = self.get_width_height(context)
         image_height = height - 100
         image_width = image_height * 4/3
@@ -245,7 +255,7 @@ class SN_DrawTutorial(bpy.types.Operator):
 
 
             # draw tutorial image
-            image = self.load_image(context,"Untitled")
+            image = self.load_image(context,get_tut_images()[context.scene.sn_properties.tut_index])
             bgl.glActiveTexture(bgl.GL_TEXTURE0)
             bgl.glBindTexture(bgl.GL_TEXTURE_2D, image.bindcode)
 
