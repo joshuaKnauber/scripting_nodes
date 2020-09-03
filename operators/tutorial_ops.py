@@ -95,7 +95,31 @@ class SN_DrawTutorial(DrawingFuncs, bpy.types.Operator):
             image_height -= 10
             image_width = image_height * 4/3
 
-        self.image_shader = gpu.shader.from_builtin('2D_IMAGE')
+        vertex_shader = '''
+            uniform mat4 ModelViewProjectionMatrix;
+            in vec2 texCoord;
+            in vec2 pos;
+            out vec2 texCoord_interp;
+            void main()
+            {
+            gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0f, 1.0f);
+            gl_Position.z = 1.0;
+            texCoord_interp = texCoord;
+            }
+        '''
+        fragment_shader = '''
+            in vec2 texCoord_interp;
+            out vec4 fragColor;
+            uniform float gamma;
+            uniform sampler2D image;
+            void main()
+            {
+            fragColor = pow(texture(image, texCoord_interp), vec4(gamma));
+            }
+        '''
+
+        self.image_shader = gpu.types.GPUShader(vertex_shader, fragment_shader)
+
         x = (width-image_width)/2
         y = (height-image_height)/2
         self.image_batch = batch_for_shader(
@@ -110,6 +134,20 @@ class SN_DrawTutorial(DrawingFuncs, bpy.types.Operator):
             raise Exception()
         return image
 
+    def create_backdrop(self, context, padding):
+        width, height = self.get_width_height(context)
+
+        vertices = (
+                (padding, padding), (width-padding, padding),
+                (width-padding, height-padding), (padding, height-padding))
+        indices = (
+            (0, 1, 2), (0, 3, 2)
+        )
+
+        self.backdrop_batch = batch_for_shader(self.black_shader, 'TRIS', {"pos": vertices}, indices=indices)
+
+        return vertices
+
     def draw_callback(self, context):
         self.buttons.clear()
         if context.space_data.tree_type == "ScriptingNodesTree":
@@ -121,7 +159,14 @@ class SN_DrawTutorial(DrawingFuncs, bpy.types.Operator):
             close_cross_width = 5 * scale
             font_size_title = int(14 * scale)
             font_size_text = int(13 * scale)
-            font_size_python = int(12 * scale)
+
+            # draw backdrop
+            self.black_shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+            self.black_shader.bind()
+            self.black_shader.uniform_float("color", (0, 0, 0, 1.0))
+
+            self.create_backdrop(context,padding)
+            self.backdrop_batch.draw(self.black_shader)
 
             # draw outline
             self.draw_outline(context,outline_width,padding)
@@ -139,5 +184,5 @@ class SN_DrawTutorial(DrawingFuncs, bpy.types.Operator):
                 bgl.glBindTexture(bgl.GL_TEXTURE_2D, image.bindcode)
 
                 self.image_shader.bind()
-                self.image_shader.uniform_int("image", 0)
+                self.image_shader.uniform_float("gamma", .454)
                 self.image_batch.draw(self.image_shader)
