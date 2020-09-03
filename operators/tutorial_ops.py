@@ -55,10 +55,18 @@ class SN_DrawTutorial(bpy.types.Operator):
     def close(self, context):
         bpy.types.SpaceNodeEditor.draw_handler_remove(self.handler, 'WINDOW')
         self.remove_imgs()
-        context.area.tag_redraw()
+        if context.area:
+            context.area.tag_redraw()
         return {'FINISHED'}
 
     def modal(self, context, event):
+        if not context.area or not context.area.type == "NODE_EDITOR":
+            context.scene.sn_properties.show_tutorial = False
+            return self.close(context)
+        elif context.area.type == "NODE_EDITOR" and not context.space_data.tree_type == "ScriptingNodesTree":
+            context.scene.sn_properties.show_tutorial = False
+            return self.close(context)
+
         if event.type == "ESC" or not context.scene.sn_properties.show_tutorial:
             context.scene.sn_properties.show_tutorial = False
             return self.close(context)
