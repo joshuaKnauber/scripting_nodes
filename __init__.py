@@ -94,6 +94,7 @@ def add_basic_nodes(tree):
     operator.parent = frame_ops
     print_.parent = frame_ops
 
+    tree.use_fake_user = True
     tree.added_basic_nodes = True
 
 @persistent
