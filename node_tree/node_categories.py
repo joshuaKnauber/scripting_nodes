@@ -35,5 +35,5 @@ def get_node_categories():
         if category_items:
             node_categories.append(SN_ScriptingNodesCategory(category.upper(), category.replace("_"," ").title(), items=category_items))
 
-    node_categories.append(SN_ScriptingNodesCategory("LAYOUT", "Layout", items=[NodeItem("NodeFrame")]))
+    node_categories.append(SN_ScriptingNodesCategory("ORGANIZE", "Organize", items=[NodeItem("NodeFrame")]))
     return node_categories
