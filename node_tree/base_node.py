@@ -257,29 +257,36 @@ class SN_ScriptingBaseNode:
         return ""
 
     def data_type(self, output):
-        """ Returns the data type of this node.
+        """ Returns the data type of this node. Has to be a bpy.types object or an empty string and never bpy.context.active_object or similar.
+            Collection recognition happens through COLLECTION and OBJECT sockets.
         
-        return: String - ...
+        return: String - like 'bpy.types.Object' or 'bpy.types.Bone'
         """
         return ""
 
     def reset_data_type(self, context):
-        """ 
+        """ Called when a connected COLLECTION OR OBJECT socket returns a different data_type (see above). 
+            Used for resetting CollectionProperties or outputs using data_type.
+            If called please check if there are more COLLECTION or OBJECT sockets connected and if so call reset_data_type on that node
         
-        return: ...
+        return: None
         """
         pass
 
     def get_variable_line(self):
-        """ 
+        """ Used to create properties in bpy.context.scene.sn_generated_addon_properties_UID_.
+            If you want global properties just return the definition here and access it using bpy.context.scene.sn_generated_addon_properties_UID_.<your_property_name>
+            Collection properties can also be created here using <your_property_name>: bpy.props.CollectionProperty(type=ArrayCollection_UID_)
+            If you want to use a different type of CollectionProperty please contact us directly.
         
-        return: String - ...
+        return: String - like 'prop_name: bpy.props.IntProperty(name"Name")', 'my_collection: bpy.props.CollectionProperty(type=ArrayCollection_UID_)'
         """
         return ""
 
     def get_array_line(self):
-        """ 
+        """ Used to set collection property values.
+            return a list of strings to be written in set_variables() <- Called on file start if addon is exported and enabled
         
-        return: List - ...
+        return: List - like ['bpy.context.scene.sn_generated_addon_properties_UID_.my_name.add().bool = True', 'bpy.context.scene.sn_generated_addon_properties_UID_.my_name.add().bool = False']
         """
         return []

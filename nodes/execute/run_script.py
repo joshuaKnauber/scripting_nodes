@@ -21,7 +21,11 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self,context,layout):
         layout.prop_search(self, "search_value", bpy.data, "texts", icon="TEXT", text="")
 
-    def evaluate(self, socket, input_data, errors):
+    def evaluate(self, socket, node_data, errors):
+        next_code = ""
+        if node_data["output_data"][0]["code"]:
+            next_code = node_data["output_data"][0]["code"]
+
         script = ""
         if self.search_value.lstrip() in bpy.data.texts:
             text = bpy.data.texts[self.search_value.lstrip()]
@@ -34,6 +38,13 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
                         [script]
                     ],
                     "indented": []
+                },
+                {
+                    "lines": [
+                        [next_code]
+                    ],
+                    "indented": [
+                    ]
                 }
             ],
             "errors": errors

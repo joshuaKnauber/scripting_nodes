@@ -99,6 +99,11 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         layout.operator("scripting_nodes.add_enum_item",icon="ADD").node_name = self.name
 
+    def free(self):
+        for x, item in enumerate(bpy.context.scene.sn_properties.sn_enum_property_properties):
+            if item.name == self.groupItem:
+                bpy.context.scene.sn_properties.sn_enum_property_properties.remove(x)
+
     def evaluate(self, socket, node_data, errors):
         blocks = []
         return {"blocks": blocks, "errors": errors}
