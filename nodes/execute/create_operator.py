@@ -17,6 +17,11 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
     def update_description(self, context):
         if not is_valid_python(self.description,True):
             self.description = make_valid_python(self.description,True)
+        
+        for item in bpy.context.space_data.node_tree.custom_operator_properties:
+            if item.name == self.group_item:
+                self.group_item = self.description
+                item.description = self.description
     
     def update_op_name(self, context):
         if self.op_name == "":
@@ -30,19 +35,34 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                     if self.op_name == node.op_name:
                         self.op_name = "New " + self.op_name
 
+        for item in bpy.context.space_data.node_tree.custom_operator_properties:
+            if item.name == self.group_item:
+                self.group_item = self.op_name
+                item.name = self.op_name
+
     op_name: bpy.props.StringProperty(default="My Operator",name="Label",description="Label of the operator", update=update_op_name)
     description: bpy.props.StringProperty(default="My Operators description",name="Description",description="Description of the operator shown in tooltips", update=update_description)
     confirm_option: bpy.props.BoolProperty(name="Confirm", description="Operator needs to be confirmed")
+    group_item: bpy.props.StringProperty()
 
     def inititialize(self,context):
         self.update_op_name(None)
         self.sockets.create_input(self,"BOOLEAN","Run Condition")
         self.sockets.create_output(self,"EXECUTE","Execute")
+        item = bpy.context.space_data.node_tree.custom_operator_properties.add()
+        item.name = self.op_name
+        item.description = self.description
+        self.group_item = item.name
 
     def draw_buttons(self, context, layout):
         layout.prop(self,"op_name")
         layout.prop(self,"description")
         layout.prop(self,"confirm_option", toggle=True)
+
+    def free(self):
+        for x, item in enumerate(bpy.context.space_data.node_tree.custom_operator_properties):
+            if item.name == self.group_item:
+                bpy.context.space_data.node_tree.custom_operator_properties.remove(x)
 
     def evaluate(self, socket, node_data, errors):
         execute = ""
@@ -56,7 +76,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [
-                        ["class SN_OT_" + self.op_name.replace(" ", "_") + "(bpy.types.Operator):"]
+                        ["class SN_OT_" + self.op_name.replace(" ", "_") + "_UID_(bpy.types.Operator):"]
                     ],
                     "indented": [
                         ["bl_idname = 'scripting_nodes." + self.op_name.lower().replace(" ", "_") + "'"],
@@ -93,8 +113,8 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def get_register_block(self):
-        return ["bpy.utils.register_class(SN_OT_" + self.op_name.replace(" ", "_") + ")"]
+        return ["bpy.utils.register_class(SN_OT_" + self.op_name.replace(" ", "_") + "_UID_)"]
 
     def get_unregister_block(self):
-        return ["bpy.utils.unregister_class(SN_OT_" + self.op_name.replace(" ", "_") + ")"]
+        return ["bpy.utils.unregister_class(SN_OT_" + self.op_name.replace(" ", "_") + "_UID_)"]
 

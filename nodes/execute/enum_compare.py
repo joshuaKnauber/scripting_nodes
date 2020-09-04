@@ -51,7 +51,7 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
             if not self.propName in self.sn_enum_property_properties:
                 self.propName = ""
         else:
-            if not self.propName in bpy.context.scene.sn_properties.sn_enum_property_properties:
+            if not self.propName in bpy.context.space_data.node_tree.sn_enum_property_properties:
                 self.propName = ""
 
     def generate_sockets(self):
@@ -63,7 +63,7 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                         self.sockets.create_output(self,"EXECUTE", item.name)
 
         else:
-            if self.propName in bpy.context.scene.sn_properties.sn_enum_property_properties:
+            if self.propName in bpy.context.space_data.node_tree.sn_enum_property_properties:
                 for node in bpy.context.space_data.node_tree.nodes:
                     if node.bl_idname == "SN_EnumVariableNode":
                         if node.var_name == self.propName:
@@ -90,12 +90,12 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.search_prop == "internal":
             layout.prop_search(self,"propName",self,"sn_enum_property_properties",text="")
         else:
-            layout.prop_search(self,"propName",bpy.context.scene.sn_properties,"sn_enum_property_properties",text="")
+            layout.prop_search(self,"propName",bpy.context.space_data.node_tree,"sn_enum_property_properties",text="")
 
-            if self.propName in bpy.context.scene.sn_properties.sn_enum_property_properties:
-                if bpy.context.scene.sn_properties.sn_enum_property_properties[self.propName].description != "":
+            if self.propName in bpy.context.space_data.node_tree.sn_enum_property_properties:
+                if bpy.context.space_data.node_tree.sn_enum_property_properties[self.propName].description != "":
                     box = col.box()
-                    box.label(text=bpy.context.scene.sn_properties.sn_enum_property_properties[self.propName].description)
+                    box.label(text=bpy.context.space_data.node_tree.sn_enum_property_properties[self.propName].description)
             else:
                 if len(self.outputs) > 1:
                     for out in self.outputs:
@@ -125,7 +125,7 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             if_block.append({"lines": [["if ", node_data["input_data"][1]["code"], "." + self.sn_enum_property_properties[self.propName].identifier + " == '" + item.identifier + "':"]],"indented": [[output.links[0].to_socket]]})
         
         else:
-            if self.propName in bpy.context.scene.sn_properties.sn_enum_property_properties:
+            if self.propName in bpy.context.space_data.node_tree.sn_enum_property_properties:
                 for output in self.outputs:
                     if output.is_linked:
                         if output.name != "Execute":

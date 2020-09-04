@@ -36,7 +36,7 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if self.var_name == node.var_name:
                         self.var_name = "new_" + self.var_name
 
-        for item in bpy.context.scene.sn_properties.search_variables:
+        for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:
                 self.groupItem = self.var_name
                 item.name = self.var_name
@@ -50,7 +50,7 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if not is_valid_python(self.description,True):
             self.description = make_valid_python(self.description,True)
     
-        for item in bpy.context.scene.sn_properties.search_variables:
+        for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:
                 item.description = self.description
         identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
@@ -59,7 +59,7 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 node.update_outputs(None)
 
     def update_array(self, context):
-        for item in bpy.context.scene.sn_properties.search_variables:
+        for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:
                 item.is_array = self.is_array
         identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
@@ -79,18 +79,18 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def inititialize(self, context):
         global groupItem
-        item = bpy.context.scene.sn_properties.search_variables.add()
+        item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
-        for item in bpy.context.scene.sn_properties.search_variables:
+        for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:
                 item.type = "int"
                 item.socket_type = "INTEGER"
         self.update_socket_value(context)
 
     def free(self):
-        for x, item in enumerate(bpy.context.scene.sn_properties.search_variables):
+        for x, item in enumerate(bpy.context.space_data.node_tree.search_variables):
             if item.name == self.groupItem:
-                bpy.context.scene.sn_properties.search_variables.remove(x)
+                bpy.context.space_data.node_tree.search_variables.remove(x)
 
     def draw_buttons(self,context,layout):
         col = layout.column(align=True)

@@ -16,7 +16,7 @@ class SN_RemoveFromArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self, "EXECUTE", "Execute")
 
     def update_outputs(self, context):
-        if not self.search_value in bpy.context.scene.sn_properties.search_variables:
+        if not self.search_value in bpy.context.space_data.node_tree.search_variables:
             for inp in range(len(self.inputs)-1):
                 self.inputs.remove(self.inputs[1])
 
@@ -24,7 +24,7 @@ class SN_RemoveFromArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.search_value = ""
 
         else:
-            if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
+            if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                 self.update_operation(None)
 
             else:
@@ -32,8 +32,8 @@ class SN_RemoveFromArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.inputs.remove(self.inputs[1])
 
     def update_operation(self, context):
-        if self.search_value in bpy.context.scene.sn_properties.search_variables:
-            if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
+        if self.search_value in bpy.context.space_data.node_tree.search_variables:
+            if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                 identifiers = {"STRING": "SN_StringSocket", "BOOLEAN": "SN_BoolSocket", "INTEGER": "SN_IntSocket", "FLOAT": "SN_FloatSocket", "VECTOR": "SN_VectorSocket"}
                 if self.operation == "index":
                     if len(self.inputs) != 2:
@@ -56,12 +56,12 @@ class SN_RemoveFromArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         col.scale_y = 1.25
         col.prop_search(self,"search_value", bpy.context.scene.sn_properties, "search_variables", text="")
 
-        if self.search_value in bpy.context.scene.sn_properties.search_variables:
-            if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
+        if self.search_value in bpy.context.space_data.node_tree.search_variables:
+            if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                 self.update_operation(None)
-                if bpy.context.scene.sn_properties.search_variables[self.search_value].description != "":
+                if bpy.context.space_data.node_tree.search_variables[self.search_value].description != "":
                     box = col.box()
-                    box.label(text=bpy.context.scene.sn_properties.search_variables[self.search_value].description)
+                    box.label(text=bpy.context.space_data.node_tree.search_variables[self.search_value].description)
 
                 row = col.row()
                 row.prop(self, "operation", expand=True)
@@ -83,16 +83,16 @@ class SN_RemoveFromArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             next_code = node_data["output_data"][0]["code"]
 
         blocks = [{"lines": [],"indented": []}]
-        if self.search_value in bpy.context.scene.sn_properties.search_variables:
-            if bpy.context.scene.sn_properties.search_variables[self.search_value].is_array:
+        if self.search_value in bpy.context.space_data.node_tree.search_variables:
+            if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                 if self.operation == "index":
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.remove(", node_data["input_data"][1]["code"], ")"]], "indented": []}]
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.remove(", node_data["input_data"][1]["code"], ")"]], "indented": []}]
                 elif self.operation == "start":
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.remove(0)"]], "indented": []}]
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.remove(0)"]], "indented": []}]
                 elif self.operation == "end":
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.remove(len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array)-1)"]], "indented": []}]
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.remove(len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array)-1)"]], "indented": []}]
                 else:
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.scene.sn_properties.search_variables[self.search_value].name + "_array.clear()"]], "indented": []}]
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.clear()"]], "indented": []}]
 
         return {"blocks": blocks + [{"lines": [[next_code]],"indented": []}], "errors": errors}
 

@@ -13,6 +13,7 @@ class SearchVariablesGroup(bpy.types.PropertyGroup):
     type: bpy.props.StringProperty(default="")
     socket_type: bpy.props.StringProperty(default="")
     is_array: bpy.props.BoolProperty(default=False)
+    identifier: bpy.props.StringProperty(default="")
 
 class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
@@ -72,11 +73,8 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
     filter_data_block_collection: bpy.props.BoolProperty(name="Show Data Block Collections in the search bar", default=True, update=update_filters)
     filter_data_block: bpy.props.BoolProperty(name="Show Data Blocks in the search bar", default=True, update=update_filters)
 
-    # variable search
-    search_variables: bpy.props.CollectionProperty(type=SearchVariablesGroup)
-    
-    # enum search
-    sn_enum_property_properties: bpy.props.CollectionProperty(type=SearchVariablesGroup)
+    # operator search
+    operator_properties: bpy.props.CollectionProperty(type=SearchVariablesGroup)
 
     # defines if the node info should be shown
     def update_node_info(self,context):

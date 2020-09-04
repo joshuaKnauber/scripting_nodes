@@ -1,6 +1,7 @@
 import bpy
 from random import randint
 from ..node_tree.node_sockets import make_valid_python
+from ..properties.groups.addon_properties import SearchVariablesGroup
 
 class ScriptingNodesTree(bpy.types.NodeTree):
     '''Scripting Nodes node tree'''
@@ -24,6 +25,15 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     addon_category: bpy.props.StringProperty(default="General",name="Category",description="Category of your addon")
     addon_blender: bpy.props.IntVectorProperty(default=bpy.app.version,min=0,name="Version",description="Required blender version for your addon")
     addon_version: bpy.props.IntVectorProperty(default=(1, 0, 0),min=0,name="Version",description="Version of your addon")
+
+    # variable search
+    search_variables: bpy.props.CollectionProperty(type=SearchVariablesGroup)
+    
+    # enum search
+    sn_enum_property_properties: bpy.props.CollectionProperty(type=SearchVariablesGroup)
+    
+    # custom operator search
+    custom_operator_properties: bpy.props.CollectionProperty(type=SearchVariablesGroup)
 
     # if true, the addon is loaded when the file is opened
     compile_on_start: bpy.props.BoolProperty(default=False,name="Compile on start",description="Compiles this node tree when this file is opened")
