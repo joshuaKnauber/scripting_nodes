@@ -18,12 +18,15 @@ class SN_SeperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         factor.set_value(1)
 
     def evaluate(self, socket, node_data, errors):
+        layout_type = self.inputs[0].links[0].from_node.layout_type()
+        
         return {
             "blocks": [
                 {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
+                    "lines": [
+                        [layout_type,".separator(factor=", node_data["input_data"][1]["code"], ")"],
                     ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
+                    "indented": [
                     ]
                 }
             ],
