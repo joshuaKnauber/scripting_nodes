@@ -98,7 +98,9 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         msg = self.space.replace("_"," ").title()+" -> "+self.region.replace("_"," ").title()
 
         if len(self.context_items(context)) > 1:
-            msg += " -> "+self.context.replace("_"," ").title()
+            if self.context != "NONE":
+                msg += " -> "+self.context.replace("_"," ").title()
+
         box.label(text=msg)
         if len(self.category_items(context)) > 1:
             col = box.column(align=True)
