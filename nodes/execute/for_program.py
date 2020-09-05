@@ -57,9 +57,9 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, socket, node_data, errors):
         # return the name of the variable
         if socket == self.outputs[2]:
-            return {"blocks": [{"lines": [[self.var_name]],"indented": []}],"errors": []}
+            return {"blocks": [{"lines": [[self.var_name]],"indented": []}],"errors": errors}
         if socket == self.outputs[3]:
-            return {"blocks": [{"lines": [[self.index_name]],"indented": []}],"errors": []}
+            return {"blocks": [{"lines": [[self.index_name]],"indented": []}],"errors": errors}
         # return the code block and next output
         else:
             next_code = ""

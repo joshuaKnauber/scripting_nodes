@@ -134,6 +134,12 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                         execute
                     ],
                     "indented": []
+                },
+                {
+                    "lines": [
+                        [next_code]
+                    ],
+                    "indented": []
                 }
             ],
             "errors": errors

@@ -47,7 +47,7 @@ class SN_RepeatProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                         ]
                     }
                 ],
-                "errors": []
+                "errors": errors
             }
         # return the code block and next output
         else:

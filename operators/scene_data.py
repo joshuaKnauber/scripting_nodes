@@ -1,24 +1,43 @@
 import bpy
 from ..handler.socket_handler import SocketHandler
 
-def add_data_output(node,label,prop_type=""):
+def add_data_output(node,label,is_output,prop_type=""):
     sockets = SocketHandler()
     if prop_type == "STRING" or prop_type == "ENUM":
-        sockets.create_output(node,"STRING",label)
+        if is_output:
+            sockets.create_output(node,"STRING",label)
+        else:
+            sockets.create_input(node,"STRING",label)
     elif prop_type == "BOOLEAN" or prop_type == str(bpy.types.BoolProperty):
-        sockets.create_output(node,"BOOLEAN",label)
+        if is_output:
+            sockets.create_output(node,"BOOLEAN",label)
+        else:
+            sockets.create_input(node,"BOOLEAN",label)
     elif prop_type == "VECTOR":
-        sockets.create_output(node,"VECTOR",label)
+        if is_output:
+            sockets.create_output(node,"VECTOR",label)
+        else:
+            sockets.create_input(node,"VECTOR",label)
     elif prop_type == "INT":
-        sockets.create_output(node,"INTEGER",label)
+        if is_output:
+            sockets.create_output(node,"INTEGER",label)
+        else:
+            sockets.create_input(node,"INTEGER",label)
     elif prop_type == "FLOAT":
-        sockets.create_output(node,"FLOAT",label)
-    elif prop_type == "POINTER":
-        sockets.create_output(node,"OBJECT",label)
+        if is_output:
+            sockets.create_output(node,"FLOAT",label)
+        else:
+            sockets.create_input(node,"FLOAT",label)
     elif prop_type == "COLLECTION":
-        sockets.create_output(node,"COLLECTION",label)
+        if is_output:
+            sockets.create_output(node,"COLLECTION",label)
+        else:
+            sockets.create_input(node,"COLLECTION",label)
     else:
-        sockets.create_output(node,"OBJECT",label)
+        if is_output:
+            sockets.create_output(node,"OBJECT",label)
+        else:
+            sockets.create_input(node,"OBJECT",label)
 
 
 class SN_OT_AddSceneDataSocket(bpy.types.Operator):
@@ -29,13 +48,14 @@ class SN_OT_AddSceneDataSocket(bpy.types.Operator):
 
     node_name: bpy.props.StringProperty()
     socket_name: bpy.props.StringProperty()
+    is_output: bpy.props.BoolProperty()
 
     def execute(self, context):
         for node in context.space_data.node_tree.nodes:
             if node.name == self.node_name:
                 for prop in node.search_properties:
                     if prop.name == self.socket_name:
-                        add_data_output(node,self.socket_name,prop.type)
+                        add_data_output(node,self.socket_name,self.is_output,prop.type)
         return {"FINISHED"}
 
 
@@ -54,4 +74,7 @@ class SN_OT_RemoveSceneDataSocket(bpy.types.Operator):
                 for output in node.outputs:
                     if output.name == self.socket_name:
                         node.outputs.remove(output)
+                for inp in node.inputs:
+                    if inp.name == self.socket_name:
+                        node.inputs.remove(inp)
         return {"FINISHED"}
