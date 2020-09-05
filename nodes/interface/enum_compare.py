@@ -141,3 +141,10 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
             "errors": errors
         }
 
+
+    def layout_type(self):
+        if self.inputs[0].is_linked:
+            if self.inputs[0].links[0].from_socket.bl_idname == self.inputs[0].bl_idname:
+                return self.inputs[0].links[0].from_socket.node.layout_type()
+        return "layout"
+

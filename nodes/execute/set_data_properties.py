@@ -71,25 +71,26 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         if len(self.inputs) >= 2:
             if len(self.inputs[1].links) == 1:
                 if self.inputs[1].links[0].from_socket.bl_idname == "SN_ObjectSocket":
-                    data_type = self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket)
-                    if data_type != "":
-                        self.search_properties.clear()
-                        for prop in eval(data_type).bl_rna.properties:
-                            if getattr(bpy.context.scene.sn_properties, filter_attr[prop.type]):
-                                if not prop.name == "RNA" and not prop.type in ["COLLECTION", "POINTER", "ENUM"]:
-                                    if not prop.is_readonly:
-                                        item = self.search_properties.add()
-                                        item.name = prop.name
-                                        item.identifier = prop.identifier
-                                        item.description = prop.description
-                                        if not prop.type in ["INT", "FLOAT"]:
-                                            item.type = prop.type
-                                        else:
-                                            if prop.is_array:
-                                                item.type = "VECTOR"
-                                                item.use_four_numbers = prop.array_length == 4
-                                            else:
+                    if self.inputs[1].links[0].from_socket.node.bl_idname != "SN_ForLayoutNode":
+                        data_type = self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket)
+                        if data_type != "":
+                            self.search_properties.clear()
+                            for prop in eval(data_type).bl_rna.properties:
+                                if getattr(bpy.context.scene.sn_properties, filter_attr[prop.type]):
+                                    if not prop.name == "RNA" and not prop.type in ["COLLECTION", "POINTER", "ENUM"]:
+                                        if not prop.is_readonly:
+                                            item = self.search_properties.add()
+                                            item.name = prop.name
+                                            item.identifier = prop.identifier
+                                            item.description = prop.description
+                                            if not prop.type in ["INT", "FLOAT"]:
                                                 item.type = prop.type
+                                            else:
+                                                if prop.is_array:
+                                                    item.type = "VECTOR"
+                                                    item.use_four_numbers = prop.array_length == 4
+                                                else:
+                                                    item.type = prop.type
                 else:
                     self.search_properties.clear()
                     for inp in self.inputs:

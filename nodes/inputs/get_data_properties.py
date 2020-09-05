@@ -81,8 +81,6 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         for input_socket in self.inputs:
             for link in input_socket.links:
                 link.from_node.update()
-                
-        self.update_socket_connections()
 
         if not self.search_value in self.search_properties:
             self.search_value = ""
@@ -131,6 +129,8 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             for inp in self.inputs:
                 if inp.bl_idname != "SN_CollectionSocket" and inp.bl_idname != "SN_ObjectSocket":
                     self.inputs.remove(inp)
+
+        self.update_socket_connections()
 
 
     def draw_buttons(self, context, layout):
