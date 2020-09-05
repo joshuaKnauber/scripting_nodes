@@ -5,7 +5,6 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
 class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
-
     bl_idname = "SN_ForLayoutNode"
     bl_label = "For (Layout)"
     bl_icon = "CON_ACTION"
@@ -21,11 +20,30 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.update()
 
     def inititialize(self,context):
+        self.var_name = self.get_var_name()
+        self.index_name = "for_execute_node_index_" + self.var_name.split("_")[-1]
+
         self.sockets.create_input(self,"LAYOUT","Layout")
         self.sockets.create_input(self,"COLLECTION","Input")
+
         self.sockets.create_output(self,"LAYOUT","Repeat")
         self.sockets.create_output(self,"OBJECT","Element")
         self.sockets.create_output(self,"INTEGER","Index")
+
+    def get_var_name(self):
+        highest_var_name = 0
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname == self.bl_idname:
+                number = int(node.var_name.split("_")[-1])
+                highest_var_name = max(number,highest_var_name)
+        return "for_layout_node_"+str(highest_var_name + 1)
+
+    var_name: bpy.props.StringProperty(default="for_layout_node_0")
+    index_name: bpy.props.StringProperty(default="for_layout_node_index_0")
+
+    def copy(self, node):
+        self.var_name = self.get_var_name()
+        self.index_name = "for_layout_node_index_" + self.var_name.split("_")[-1]
 
     def draw_buttons(self, context, layout):
         if len(self.inputs[1].links) == 1:
@@ -36,17 +54,32 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                     box.label(text=eval(data_type).bl_rna.name)
 
     def evaluate(self, socket, node_data, errors):
-        return {
-            "blocks": [
-                {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
-                    ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
-                    ]
-                }
-            ],
-            "errors": errors
-        }
+        # return the name of the variable
+        if socket == self.outputs[1]:
+            return {"blocks": [{"lines": [[self.var_name]],"indented": []}],"errors": errors}
+        if socket == self.outputs[2]:
+            return {"blocks": [{"lines": [[self.index_name]],"indented": []}],"errors": errors}
+        # return the code block and next output
+        else:
+            output = "pass"
+            if node_data["output_data"][0]["code"]:
+                output = node_data["output_data"][0]["code"]
+
+            return {
+                "blocks": [
+                    {
+                        "lines": [ # lines is a list of lists, where the lists represent the different lines
+                            [self.var_name + " = 0"],
+                            [self.index_name + " = 0"],
+                            ["for " + self.index_name + ", " + self.var_name + " in enumerate(", node_data["input_data"][1]["code"], "):"]
+                        ],
+                        "indented": [ # indented is a list of lists, where the lists represent the different lines
+                            [output]
+                        ]
+                    }
+                ],
+                "errors": errors
+            }
 
     def data_type(self, output):
         if len(self.inputs[1].links) == 1:
@@ -56,4 +89,10 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                     return data_type
 
         return ""
+
+    def layout_type(self):
+        if self.inputs[0].is_linked:
+            if self.inputs[0].links[0].from_socket.bl_idname == self.inputs[0].bl_idname:
+                return self.inputs[0].links[0].from_socket.node.layout_type()
+        return "layout"
 

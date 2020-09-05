@@ -5,7 +5,6 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
 class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
-
     bl_idname = "SN_ForProgramNode"
     bl_label = "For (Program)"
     bl_icon = "CON_ACTION"
@@ -26,6 +25,7 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.sockets.create_input(self,"EXECUTE","Execute")
         self.sockets.create_input(self,"COLLECTION","Input")
+
         self.sockets.create_output(self,"EXECUTE","Execute")
         self.sockets.create_output(self,"EXECUTE","Repeat")
         self.sockets.create_output(self,"OBJECT","Element")
