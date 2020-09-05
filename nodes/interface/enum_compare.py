@@ -32,6 +32,14 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.generate_sockets()
 
     def update(self):
+        self.update_dynamic(True)
+        self.update_dynamic(False)
+        for input_socket in self.inputs:
+            for link in input_socket.links:
+                link.from_node.update()
+                
+        self.update_socket_connections()
+
         self.sn_enum_property_properties.clear()
 
         if len(self.inputs) == 2:

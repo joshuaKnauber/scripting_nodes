@@ -250,14 +250,14 @@ class SN_VectorSocket(bpy.types.NodeSocket, SN_Socket):
     def get_value(self):
         if self.is_color:
             if self.use_four_numbers:
-                return self.color_alpha_value
+                return (self.color_alpha_value[0], self.color_alpha_value[1], self.color_alpha_value[2], self.color_alpha_value[3])
             else:
-                return self.color_value
+                return (self.color_value[0], self.color_value[1], self.color_value[2])
         else:
             if self.use_four_numbers:
-                return self.socket_value_quad
+                return (self.socket_value_quad[0], self.socket_value_quad[1], self.socket_value_quad[2], self.socket_value_quad[3])
             else:
-                return self.socket_value
+                return (self.socket_value[0], self.socket_value[1], self.socket_value[2])
 
     def clamp(self,digit):
         return max(0, min(digit, 1))

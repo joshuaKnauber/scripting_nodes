@@ -26,17 +26,17 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         if node_data["output_data"][0]["code"]:
             next_code = node_data["output_data"][0]["code"]
 
-        script = ""
+        script = []
         if self.search_value.lstrip() in bpy.data.texts:
             text = bpy.data.texts[self.search_value.lstrip()]
-            script = text.as_string()
+            script_text = text.as_string().split("\n")
+            for line in script_text:
+                script.append([line])
 
         return {
             "blocks": [
                 {
-                    "lines": [
-                        [script]
-                    ],
+                    "lines": script,
                     "indented": []
                 },
                 {

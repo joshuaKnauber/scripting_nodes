@@ -117,17 +117,10 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.search_value in bpy.context.space_data.node_tree.search_variables:
             if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                 if self.operation == "index":
-                    if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector":
-                        add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.add().", bpy.context.space_data.node_tree.search_variables[self.search_value].type, " = ", self.get_vector(self.inputs[2])]
-                    else:
-                        add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.add().", bpy.context.space_data.node_tree.search_variables[self.search_value].type, " = ", node_data["input_data"][2]["code"]]
-
+                    add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.add().", bpy.context.space_data.node_tree.search_variables[self.search_value].type, " = ", node_data["input_data"][2]["code"]]
                     blocks = [{"lines": [add_text, ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.move(len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array)-1, ", node_data["input_data"][1]["code"], ")"]], "indented": []}]
                 else:
-                    if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector":
-                        add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.add().", bpy.context.space_data.node_tree.search_variables[self.search_value].type, " = ", self.get_vector(self.inputs[1])]
-                    else:
-                        add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.add().", bpy.context.space_data.node_tree.search_variables[self.search_value].type, " = ", node_data["input_data"][1]["code"]]
+                    add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.add().", bpy.context.space_data.node_tree.search_variables[self.search_value].type, " = ", node_data["input_data"][1]["code"]]
 
                     if self.operation == "end":
                         blocks = [{"lines": [add_text], "indented": []}]

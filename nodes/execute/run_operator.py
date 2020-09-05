@@ -36,7 +36,6 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
             if not self.propName in bpy.context.scene.sn_properties.operator_properties and self.propName != "":
                 self.propName = ""
             elif self.propName in bpy.context.scene.sn_properties.operator_properties:
-                #TODO add all identifiers
                 identifiers = {"STRING": "STRING", "ENUM": "STRING","BOOLEAN": "BOOLEAN", "FLOAT": "FLOAT", "INT": "INTEGER"}
                 for prop in eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties"):
                     if prop.name != "RNA" and prop.type != "POINTER":
@@ -51,12 +50,13 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                                 self.sockets.create_input(self, "VECTOR", prop.name)
                                 self.inputs[-1].use_four_numbers = prop.array_length == 4
                             else:
-                                self.sockets.create_input(self, identifiers[prop.type], prop.name).set_value(prop.default)
-                                self.inputs[-1].value = prop.default
+                                if prop.type in identifiers:
+                                    self.sockets.create_input(self, identifiers[prop.type], prop.name).set_value(prop.default)
+                                    self.inputs[-1].value = prop.default
 
                         else:
-                            self.sockets.create_input(self, identifiers[prop.type], prop.name).set_value(prop.default)
-
+                            if prop.type in identifiers:
+                                self.sockets.create_input(self, identifiers[prop.type], prop.name).set_value(prop.default)
         else:
             if not self.propName in bpy.context.space_data.node_tree.custom_operator_properties and self.propName != "":
                 self.propName = ""
@@ -109,15 +109,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                     if inp.name != "Execute":
                         for prop in eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties"):
                             if prop.name == inp.name:
-                                value = node_data["input_data"][x]["code"]
-                                if inp.bl_idname == "SN_VectorSocket":
-                                    if not inp.is_linked:
-                                        if inp.use_four_numbers:
-                                            value = str((inp.socket_value_quad[0], inp.socket_value_quad[1], inp.socket_value_quad[2], inp.socket_value_quad[3]))
-                                        else:
-                                            value = str((inp.socket_value[0], inp.socket_value[1], inp.socket_value[2]))
-
-                                props+=[", " + prop.identifier + "=", value]
+                                props+=[", " + prop.identifier + "=", node_data["input_data"][x]["code"]]
 
                 for prop in self.enum_collection:
                     props+=[", " + prop.prop_identifier + "='", prop.enum + "'"]
@@ -127,21 +119,5 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
             if self.propName in bpy.context.space_data.node_tree.custom_operator_properties:
                 execute = ["bpy.ops.scripting_nodes." + bpy.context.space_data.node_tree.custom_operator_properties[self.propName].name.lower().replace(" ", "_") + "('INVOKE_DEFAULT')"]
 
-        return {
-            "blocks": [
-                {
-                    "lines": [
-                        execute
-                    ],
-                    "indented": []
-                },
-                {
-                    "lines": [
-                        [next_code]
-                    ],
-                    "indented": []
-                }
-            ],
-            "errors": errors
-        }
+        return {"blocks": [{"lines": [execute],"indented": []},{"lines": [[next_code]],"indented": []}],"errors": errors}
 

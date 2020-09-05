@@ -1,4 +1,4 @@
-#SN_DataPropertiesNode
+#SN_GetDataPropertiesNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
@@ -10,6 +10,7 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
     identifier: bpy.props.StringProperty(name="Identifier",default="")
     description: bpy.props.StringProperty(name="Description",default="")
     type: bpy.props.StringProperty(name="Type",default="")
+    use_four_numbers: bpy.props.BoolProperty()
 
 class SN_PT_FilterPanel(bpy.types.Panel):
     bl_space_type = 'NODE_EDITOR'
@@ -32,10 +33,10 @@ class SN_PT_FilterPanel(bpy.types.Panel):
         row.prop(context.scene.sn_properties, "filter_data_block_collection", icon="OUTLINER_OB_GROUP_INSTANCE", text="")
         row.prop(context.scene.sn_properties, "filter_data_block", icon="MESH_CUBE", text="")
 
-class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_DataPropertiesNode"
-    bl_label = "Object Data Properties"
+    bl_idname = "SN_GetDataPropertiesNode"
+    bl_label = "Get Object Data Properties"
     bl_icon = "MESH_CUBE"
     node_color = (0.53, 0.55, 0.53)
     bl_width_default = 180
@@ -67,23 +68,22 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 self.update()
 
-    def update_in_ouputs(self, context):
-        for inp in self.inputs:
-            if not inp.bl_idname == "SN_ObjectSocket":
-                self.inputs.remove(inp)
-        for out in self.outputs:
-            self.outputs.remove(out)
-        self.update()
-
     search_value: bpy.props.StringProperty(name="Search value", description="")
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
     use_index: bpy.props.BoolProperty(name="Use Index", description="Use Index instead of name", default=True, update=update_index)
-    in_outputs: bpy.props.EnumProperty(items=[("output", "OUTPUT", "Add output sockets"), ("input", "INPUT", "Add input sockets")], update=update_in_ouputs)
 
     def inititialize(self,context):
         self.sockets.create_input(self,"OBJECT","Data block")
 
     def update(self):
+        self.update_dynamic(True)
+        self.update_dynamic(False)
+        for input_socket in self.inputs:
+            for link in input_socket.links:
+                link.from_node.update()
+                
+        self.update_socket_connections()
+
         if not self.search_value in self.search_properties:
             self.search_value = ""
         filter_attr = {"ENUM": "filter_string", "STRING": "filter_string", "BOOLEAN": "filter_bool", "INT": "filter_int", "FLOAT": "filter_float", "VECTOR": "filter_vector", "COLLECTION": "filter_data_block_collection", "POINTER": "filter_data_block"}
@@ -98,20 +98,18 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     for prop in eval(data_type).bl_rna.properties:
                         if getattr(bpy.context.scene.sn_properties, filter_attr[prop.type]):
                             if not prop.name == "RNA":
-                                if self.in_outputs == "output":
-                                    item = self.search_properties.add()
-                                    item.name = prop.name
-                                    item.identifier = prop.identifier
-                                    item.description = prop.description
+                                item = self.search_properties.add()
+                                item.name = prop.name
+                                item.identifier = prop.identifier
+                                item.description = prop.description
+                                if not prop.type in ["INT", "FLOAT"]:
                                     item.type = prop.type
                                 else:
-                                    if not prop.is_readonly:
-                                        item = self.search_properties.add()
-                                        item.name = prop.name
-                                        item.identifier = prop.identifier
-                                        item.description = prop.description
+                                    if prop.is_array:
+                                        item.type = "VECTOR"
+                                    else:
                                         item.type = prop.type
-                
+
                 for out in self.outputs:
                     if not out.name in self.search_properties:
                         self.outputs.remove(out)
@@ -145,7 +143,6 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 layout.prop(self, "use_index")
 
             elif self.inputs[0].links[0].from_socket.bl_idname == "SN_ObjectSocket":
-                layout.prop(self, "in_outputs", expand=True)
                 row = layout.row(align=True)
                 row.prop_search(self,"search_value",self,"search_properties",text="")
                 row.popover("SN_PT_FilterPanel", text="", icon="FILTER")
@@ -162,7 +159,8 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     op = row.operator("scripting_nodes.add_scene_data_socket",text="",icon="ADD")
                     op.node_name = self.name
                     op.socket_name = self.search_value
-                    op.is_output = self.in_outputs == "output"
+                    op.is_output = True
+                    op.use_four_numbers = self.search_properties[self.search_value].use_four_numbers
                 if is_existing:
                     op = row.operator("scripting_nodes.remove_scene_data_socket",text="",icon="REMOVE")
                     op.node_name = self.name
@@ -186,17 +184,7 @@ class SN_DataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 else:
                     return {"blocks": [{"lines": [[node_data["input_data"][0]["code"], ".bl_rna.properties['" + self.search_properties[socket.name].identifier + "'].enum_items[", node_data["input_data"][0]["code"], "." + self.search_properties[socket.name].identifier + "].name"]],"indented": []}],"errors": errors}
 
-        return {
-                    "blocks": [
-                        {
-                            "lines": [ # lines is a list of lists, where the lists represent the different lines
-                            ],
-                            "indented": [ # indented is a list of lists, where the lists represent the different lines
-                            ]
-                        }
-                    ],
-                    "errors": errors
-                }
+        return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
 
     def data_type(self, output):
         if len(self.inputs[0].links) == 1:
