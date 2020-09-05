@@ -9,7 +9,7 @@ from uuid import uuid4
 class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_CreateOperator"
-    bl_label = "New Operator"
+    bl_label = "Create Operator"
     bl_icon = "CONSOLE"
     bl_width_default = 250
     node_color = (0.2, 0.2, 0.2)
@@ -50,7 +50,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
     def inititialize(self,context):
         self.operator_uid = uuid4().hex[:10]
         self.update_op_name(None)
-        self.sockets.create_input(self,"BOOLEAN","Run Condition")
+        self.sockets.create_input(self,"BOOLEAN","Should Run")
         self.sockets.create_output(self,"EXECUTE","Execute")
         item = bpy.context.space_data.node_tree.custom_operator_properties.add()
         item.name = self.op_name
