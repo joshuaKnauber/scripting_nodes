@@ -44,7 +44,7 @@ bpy.utils.register_class(SN_StringArray)
 
 class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_EnumVariableNode"
-    bl_label = "Create Enum"
+    bl_label = "Enum Variable"
     bl_icon = "COLLAPSEMENU"
     node_color = (0,0.75,0)
     should_be_registered = True

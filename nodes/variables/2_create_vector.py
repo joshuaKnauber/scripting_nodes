@@ -18,7 +18,7 @@ bpy.utils.register_class(SN_VectorArray)
 
 class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_VectorVariableNode"
-    bl_label = "Create Vector"
+    bl_label = "Vector Variable"
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0.6,0.2,0.8)
     should_be_registered = True

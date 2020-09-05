@@ -17,7 +17,7 @@ bpy.utils.register_class(SN_IntegerArray)
 
 class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_IntegerVariableNode"
-    bl_label = "Create Integer"
+    bl_label = "Integer Variable"
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0.2,0.4,0.75)
     should_be_registered = True

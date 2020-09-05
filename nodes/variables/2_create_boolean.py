@@ -43,7 +43,7 @@ bpy.utils.register_class(SN_BooleanArray)
 
 class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_BooleanVariableNode"
-    bl_label = "Create Boolean"
+    bl_label = "Boolean Variable"
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0.65,0,0)
     should_be_registered = True
