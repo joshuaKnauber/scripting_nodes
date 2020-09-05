@@ -25,13 +25,29 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"LAYOUT","Layout", True)
 
     def evaluate(self, socket, node_data, errors):
+        layout_type = self.inputs[0].links[0].from_node.layout_type()
+        
+        next_layout = []
+        for output_data in node_data["output_data"]:
+            if output_data["code"] != None:
+                next_layout.append([output_data["code"]])
+
         return {
             "blocks": [
                 {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
+                    "lines": [
+                        ["row = ",layout_type,".row(align=", node_data["input_data"][1]["code"], ")"],
+                        ["row.enabled = ", node_data["input_data"][2]["code"]],
+                        ["row.alert = ", node_data["input_data"][3]["code"]],
+                        ["row.scale_x = ", node_data["input_data"][4]["code"]],
+                        ["row.scale_y = ", node_data["input_data"][5]["code"]]
                     ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
+                    "indented": [
                     ]
+                },
+                {
+                    "lines": next_layout,
+                    "indented": []
                 }
             ],
             "errors": errors
@@ -39,3 +55,4 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def layout_type(self):
         return "row"
+
