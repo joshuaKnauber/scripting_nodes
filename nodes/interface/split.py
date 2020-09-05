@@ -17,17 +17,41 @@ class SN_SplitNode(bpy.types.Node, SN_ScriptingBaseNode):
         factor = self.sockets.create_input(self, "FLOAT", "Factor")
         factor.set_value(0.5)
         factor.use_factor = True
+
+        self.sockets.create_input(self,"BOOLEAN","Aligned").set_value(False)
+        self.sockets.create_input(self,"BOOLEAN","Enabled").set_value(True)
+        self.sockets.create_input(self,"BOOLEAN","Alert").set_value(False)
+
+        self.sockets.create_input(self,"FLOAT","Scale X").set_value(1)
+        self.sockets.create_input(self,"FLOAT","Scale Y").set_value(1)
+
         self.sockets.create_output(self,"LAYOUT","Layout")
         self.sockets.create_output(self,"LAYOUT","Layout")
 
     def evaluate(self, socket, node_data, errors):
+        layout_type = self.inputs[0].links[0].from_node.layout_type()
+        
+        next_layout = []
+        for output_data in node_data["output_data"]:
+            if output_data["code"] != None:
+                next_layout.append([output_data["code"]])
+
         return {
             "blocks": [
                 {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
+                    "lines": [
+                        ["split = ",layout_type,".split(align=", node_data["input_data"][2]["code"], ", factor=", node_data["input_data"][1]["code"], ")"],
+                        ["split.enabled = ", node_data["input_data"][3]["code"]],
+                        ["split.alert = ", node_data["input_data"][4]["code"]],
+                        ["split.scale_x = ", node_data["input_data"][5]["code"]],
+                        ["split.scale_y = ", node_data["input_data"][6]["code"]]
                     ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
+                    "indented": [
                     ]
+                },
+                {
+                    "lines": next_layout,
+                    "indented": []
                 }
             ],
             "errors": errors
