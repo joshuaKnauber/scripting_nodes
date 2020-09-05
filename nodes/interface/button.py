@@ -2,6 +2,7 @@
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
+from uuid import uuid4
 
 class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
@@ -9,11 +10,19 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Button"
     bl_icon = "SNAP_FACE"
     node_color = (0.89,0.6,0)
-    should_be_registered = False
+    should_be_registered = True
+
+    operator_uid: bpy.props.StringProperty()
 
     def inititialize(self,context):
+        self.operator_uid = uuid4().hex[:10]
         self.sockets.create_input(self,"LAYOUT","Layout")
         self.sockets.create_input(self,"STRING","Text")
+        self.sockets.create_input(self,"STRING","Description")
+        self.sockets.create_input(self,"BOOLEAN","Emboss")
+        self.sockets.create_input(self,"BOOLEAN","Depress").set_value(False)
+
+        self.sockets.create_output(self,"EXECUTE","Execute")
 
     search_value: bpy.props.StringProperty(name="Search value", description="")
 
@@ -21,14 +30,67 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.draw_icon_chooser(layout)
 
     def evaluate(self, socket, node_data, errors):
-        return {
-            "blocks": [
-                {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
-                    ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
-                    ]
-                }
-            ],
-            "errors": errors
-        }
+        idname = "SNA_OT_BTN_"+self.operator_uid
+        icon = ""
+        if self.icon:
+            icon = "icon=\""+self.icon+"\""
+
+        if not socket:
+            # return the code for the buttons operator
+            execute = ""
+            if node_data["output_data"][0]["code"]:
+                execute = node_data["output_data"][0]["code"]
+            return {
+                "blocks": [
+                    {
+                        "lines": [
+                            ["class " + idname + "(bpy.types.Operator):"]
+                        ],
+                        "indented": [
+                            ["bl_idname = 'scripting_nodes." + idname.lower() + "'"],
+                            ["bl_label = ",node_data["input_data"][1]["code"],""],
+                            ["bl_description = ",node_data["input_data"][2]["code"],""],
+                            ["bl_options = {\"REGISTER\",\"INTERNAL\"}"],
+                            [""],
+                            {
+                                "lines": [
+                                    ["def execute(self, context):"]
+                                ],
+                                "indented": [
+                                    [execute],
+                                    ["return {\"FINISHED\"}"],
+                                    [""]
+                                ]
+                            }
+                        ]
+                    }
+                ],
+                "errors": errors
+            }
+
+        else:
+            # return the code for the buttons layout
+            return {
+                "blocks": [
+                    {
+                        "lines": [
+                            [self.inputs[0].links[0].from_node.layout_type(),".operator(\"scripting_nodes.",idname.lower(),
+                                        "\",text=",node_data["input_data"][1]["code"],
+                                        ",emboss=",node_data["input_data"][3]["code"],
+                                        ",depress=",node_data["input_data"][4]["code"],
+                                        icon,")"]
+                        ],
+                        "indented": []
+                    }
+                ],
+                "errors": errors
+            }
+
+        return {"blocks": [{"lines": [],"indented": []}], "errors": errors}
+
+
+    def get_register_block(self):
+        return ["bpy.utils.register_class(SNA_OT_BTN_" + self.operator_uid + ")"]
+
+    def get_unregister_block(self):
+        return ["bpy.utils.unregister_class(SNA_OT_BTN_" + self.operator_uid + ")"]

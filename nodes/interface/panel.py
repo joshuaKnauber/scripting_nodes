@@ -116,15 +116,15 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         return "layout"
 
     def get_register_block(self):
-        idname = "SN_PT_"+self.panel_uid
+        idname = "SNA_PT_"+self.panel_uid
         return ["bpy.utils.register_class("+idname+")"]
 
     def get_unregister_block(self):
-        idname = "SN_PT_"+self.panel_uid
+        idname = "SNA_PT_"+self.panel_uid
         return ["bpy.utils.unregister_class("+idname+")"]
 
     def evaluate(self, socket, node_data, errors):
-        idname = "SN_PT_"+self.panel_uid
+        idname = "SNA_PT_"+self.panel_uid
 
         label = self.label
         if label == "":
@@ -213,6 +213,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 ["layout = self.layout"],
                             ] + panel_layout
                         },
+                        [""],
+                        [""],
                     ]
                 }
             ],
