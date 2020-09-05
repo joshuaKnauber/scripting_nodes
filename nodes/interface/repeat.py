@@ -23,9 +23,9 @@ class SN_RepeatLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "blocks": [
                 {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
+                    "lines": [
                     ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
+                    "indented": [
                     ]
                 }
             ],
