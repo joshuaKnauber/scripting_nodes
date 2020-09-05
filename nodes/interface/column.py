@@ -55,3 +55,4 @@ class SN_ColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def layout_type(self):
         return "column"
+

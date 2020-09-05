@@ -25,17 +25,34 @@ class SN_BoxNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"LAYOUT","Layout", True)
 
     def evaluate(self, socket, node_data, errors):
+        layout_type = self.inputs[0].links[0].from_node.layout_type()
+        
+        next_layout = []
+        for output_data in node_data["output_data"]:
+            if output_data["code"] != None:
+                next_layout.append([output_data["code"]])
+
         return {
             "blocks": [
                 {
-                    "lines": [ # lines is a list of lists, where the lists represent the different lines
+                    "lines": [
+                        ["box = ",layout_type,".box(align=", node_data["input_data"][1]["code"], ")"],
+                        ["box.enabled = ", node_data["input_data"][2]["code"]],
+                        ["box.alert = ", node_data["input_data"][3]["code"]],
+                        ["box.scale_x = ", node_data["input_data"][4]["code"]],
+                        ["box.scale_y = ", node_data["input_data"][5]["code"]]
                     ],
-                    "indented": [ # indented is a list of lists, where the lists represent the different lines
+                    "indented": [
                     ]
+                },
+                {
+                    "lines": next_layout,
+                    "indented": []
                 }
             ],
             "errors": errors
         }
-    
+        
     def layout_type(self):
         return "box"
+
