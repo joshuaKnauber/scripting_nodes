@@ -70,7 +70,7 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         col = layout.column()
         col.scale_y = 1.25
-        col.prop_search(self,"search_value", bpy.context.scene.sn_properties, "search_variables", text="")
+        col.prop_search(self,"search_value", bpy.context.space_data.node_tree, "search_variables", text="")
 
         if self.search_value in bpy.context.space_data.node_tree.search_variables:
             if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
