@@ -9,7 +9,7 @@ from uuid import uuid4
 class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_CreateOperator"
-    bl_label = "Create Operator"
+    bl_label = "New Operator"
     bl_icon = "CONSOLE"
     bl_width_default = 250
     node_color = (0.2, 0.2, 0.2)
@@ -80,13 +80,13 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [
-                        ["class SN_OT_Operator_" + self.operator_uid + "(bpy.types.Operator):"]
+                        ["class SNA_OT_Operator_" + self.operator_uid + "(bpy.types.Operator):"]
                     ],
                     "indented": [
-                        ["bl_idname = 'scripting_nodes.sn_ot_operator_" + self.operator_uid.lower() + "'"],
+                        ["bl_idname = 'scripting_nodes.sna_ot_operator_" + self.operator_uid.lower() + "'"],
                         ["bl_label = '" + self.op_name +"'"],
                         ["bl_description = '" + self.description + "'"],
-                        ["bl_options = {\"REGISTER\"}"],
+                        ["bl_options = {\"REGISTER\",\"UNDO\"}"],
                         [""],
                         {
                             "lines": [
@@ -117,8 +117,8 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def get_register_block(self):
-        return ["bpy.utils.register_class(SN_OT_Operator_" + self.operator_uid + ")"]
+        return ["bpy.utils.register_class(SNA_OT_Operator_" + self.operator_uid + ")"]
 
     def get_unregister_block(self):
-        return ["bpy.utils.unregister_class(SN_OT_Operator_" + self.operator_uid + ")"]
+        return ["bpy.utils.unregister_class(SNA_OT_Operator_" + self.operator_uid + ")"]
 

@@ -83,17 +83,19 @@ class ScriptingNodesCompiler():
         """ returns the code for the nodes that need to be registered """
         code_blocks = []
         for node in tree.nodes:
-            if node.should_be_registered:
-                code_blocks.append(self._get_node_code(node, None, 0))
+            if hasattr(node, "should_be_registered"):
+                if node.should_be_registered:
+                    code_blocks.append(self._get_node_code(node, None, 0))
         return code_blocks
 
     def _get_needed_imports(self, tree):
         """ returns the import block """
         imports = ["bpy"]
         for node in tree.nodes:
-            for needed_import in node.required_imports():
-                if not needed_import in imports:
-                    imports.append(needed_import)
+            if hasattr(node, "required_imports"):
+                for needed_import in node.required_imports():
+                    if not needed_import in imports:
+                        imports.append(needed_import)
         import_block = ""
         for needed_import in imports:
             import_block += "\nimport " + needed_import
@@ -112,10 +114,11 @@ class ScriptingNodesCompiler():
 
         has_nodes = False
         for node in tree.nodes:
-            if node.should_be_registered:
-                for line in node.get_register_block():
-                    register_function += "\n" + " "*self._indents + line
-                    has_nodes = True
+            if hasattr(node,"should_be_registered"):
+                if node.should_be_registered:
+                    for line in node.get_register_block():
+                        register_function += "\n" + " "*self._indents + line
+                        has_nodes = True
         
         if not has_nodes and not "sn_generated_addon_properties" in register_function:
             register_function += "\n" + " "*self._indents + "pass"
@@ -163,10 +166,11 @@ class ScriptingNodesCompiler():
 
         has_nodes = False
         for node in tree.nodes:
-            if node.should_be_registered:
-                for line in node.get_unregister_block():
-                    unregister_function += "\n" + " "*self._indents + line
-                    has_nodes = True
+            if hasattr(node,"should_be_registered"):
+                if node.should_be_registered:
+                    for line in node.get_unregister_block():
+                        unregister_function += "\n" + " "*self._indents + line
+                        has_nodes = True
         
         if not has_nodes and not "ArrayCollection" in unregister_function:
             unregister_function += "\n" + " "*self._indents + "pass"
