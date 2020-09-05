@@ -247,7 +247,7 @@ class SN_ScriptingBaseNode:
             
         return: List - ['bpy',...]
         """
-        return []
+        return ["bpy"]
 
     def layout_type(self):
         """ Returns the layout type of this node

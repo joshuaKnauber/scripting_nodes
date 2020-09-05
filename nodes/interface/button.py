@@ -33,7 +33,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         idname = "SNA_OT_BTN_"+self.operator_uid
         icon = ""
         if self.icon:
-            icon = "icon=\""+self.icon+"\""
+            icon = ",icon=\""+self.icon+"\""
 
         if not socket:
             # return the code for the buttons operator
