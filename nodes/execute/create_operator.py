@@ -3,6 +3,7 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 from ...node_tree.node_sockets import is_valid_python, make_valid_python
+from uuid import uuid4
 
 
 class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
@@ -44,13 +45,16 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
     description: bpy.props.StringProperty(default="My Operators description",name="Description",description="Description of the operator shown in tooltips", update=update_description)
     confirm_option: bpy.props.BoolProperty(name="Confirm", description="Operator needs to be confirmed")
     group_item: bpy.props.StringProperty()
+    operator_uid: bpy.props.StringProperty()
 
     def inititialize(self,context):
+        self.operator_uid = uuid4().hex[:10]
         self.update_op_name(None)
         self.sockets.create_input(self,"BOOLEAN","Run Condition")
         self.sockets.create_output(self,"EXECUTE","Execute")
         item = bpy.context.space_data.node_tree.custom_operator_properties.add()
         item.name = self.op_name
+        item.identifier = self.operator_uid
         item.description = self.description
         self.group_item = item.name
 
@@ -76,10 +80,10 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [
-                        ["class SN_OT_" + self.op_name.replace(" ", "_") + "_UID_(bpy.types.Operator):"]
+                        ["class SN_OT_Operator_" + self.operator_uid + "(bpy.types.Operator):"]
                     ],
                     "indented": [
-                        ["bl_idname = 'scripting_nodes." + self.op_name.lower().replace(" ", "_") + "'"],
+                        ["bl_idname = 'scripting_nodes.sn_ot_operator_" + self.operator_uid.lower() + "'"],
                         ["bl_label = '" + self.op_name +"'"],
                         ["bl_description = '" + self.description + "'"],
                         ["bl_options = {\"REGISTER\"}"],
@@ -113,8 +117,8 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def get_register_block(self):
-        return ["bpy.utils.register_class(SN_OT_" + self.op_name.replace(" ", "_") + "_UID_)"]
+        return ["bpy.utils.register_class(SN_OT_Operator_" + self.operator_uid + ")"]
 
     def get_unregister_block(self):
-        return ["bpy.utils.unregister_class(SN_OT_" + self.op_name.replace(" ", "_") + "_UID_)"]
+        return ["bpy.utils.unregister_class(SN_OT_Operator_" + self.operator_uid + ")"]
 
