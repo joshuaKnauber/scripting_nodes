@@ -20,7 +20,7 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_input(self,"BOOLEAN","Alert").set_value(False)
 
         self.sockets.create_input(self,"FLOAT","Scale X").set_value(1)
-        self.sockets.create_input(self,"FLOAT","Scale X").set_value(1)
+        self.sockets.create_input(self,"FLOAT","Scale Y").set_value(1)
 
         self.sockets.create_output(self,"LAYOUT","Layout", True)
 
