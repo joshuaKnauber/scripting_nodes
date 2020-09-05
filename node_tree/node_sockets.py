@@ -47,8 +47,9 @@ class SN_StringSocket(bpy.types.NodeSocket, SN_Socket):
     _is_data_socket = True
 
     def update_socket_value(self,context):
-        if not is_valid_python(self.socket_value,self.is_python_name):
-            self.socket_value = make_valid_python(self.socket_value,self.is_python_name)
+        if self.socket_value != "":
+            if not is_valid_python(self.socket_value,self.is_python_name):
+                self.socket_value = make_valid_python(self.socket_value,self.is_python_name)
 
     socket_value: bpy.props.StringProperty(
         name="String",
