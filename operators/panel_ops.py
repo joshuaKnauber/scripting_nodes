@@ -106,6 +106,7 @@ class SN_ChoosePanelLocation(bpy.types.Operator):
     def execute(self, context):
         global trigger_node
         if trigger_node:
+            trigger_node.category = "CUSTOM"
             trigger_node.space = self.space
             trigger_node.region = self.region
             if self.context:

@@ -162,12 +162,13 @@ class SN_ScriptingBaseNode:
         for input_socket in self.inputs:
             for link in input_socket.links:
                 if link.from_socket.bl_idname != link.to_socket.bl_idname:
-                    if link.from_socket._is_data_socket and link.to_socket._is_data_socket:
-                        self.cast_link(link)
-                    else:
-                        from_socket = link.from_socket
-                        to_socket = link.to_socket
-                        bpy.context.space_data.node_tree.links.remove(link)
+                    if hasattr(link.from_socket,"_is_data_socket"):
+                        if link.from_socket._is_data_socket and link.to_socket._is_data_socket:
+                            self.cast_link(link)
+                        else:
+                            from_socket = link.from_socket
+                            to_socket = link.to_socket
+                            bpy.context.space_data.node_tree.links.remove(link)
 
     def draw_icon_chooser(self,layout):
         """ draws the options for choosing an icon """
