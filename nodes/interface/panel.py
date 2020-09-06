@@ -93,7 +93,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         box = layout.box()
         row = box.row()
         row.scale_y = 1.5
-        row.operator("visual_scripting.create_panel_locations",icon="EYEDROPPER").trigger_node = self.name
+        row.operator("visual_scripting.create_panel_locations",icon="EYEDROPPER",text="Select location").trigger_node = self.name
 
         msg = self.space.replace("_"," ").title()+" -> "+self.region.replace("_"," ").title()
 
