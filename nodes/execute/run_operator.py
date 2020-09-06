@@ -80,6 +80,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
     enum_collection: bpy.props.CollectionProperty(type=SN_EnumCollection)
 
     def inititialize(self,context):
+        self.update_enum(None)
         self.sockets.create_input(self,"EXECUTE","Execute")
         self.sockets.create_output(self,"EXECUTE","Execute")
 
@@ -117,7 +118,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                 execute = ["bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + "('INVOKE_DEFAULT'"] + props + [")"]
         else:
             if self.propName in bpy.context.space_data.node_tree.custom_operator_properties:
-                execute = ["bpy.ops.scripting_nodes.sn_ot_operator_" + bpy.context.space_data.node_tree.custom_operator_properties[self.propName].identifier.lower() + "('INVOKE_DEFAULT')"]
+                execute = ["bpy.ops.scripting_nodes.sna_ot_operator_" + bpy.context.space_data.node_tree.custom_operator_properties[self.propName].identifier.lower() + "('INVOKE_DEFAULT')"]
 
         return {"blocks": [{"lines": [execute],"indented": []},{"lines": [[next_code]],"indented": []}],"errors": errors}
 
