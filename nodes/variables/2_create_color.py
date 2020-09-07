@@ -1,4 +1,4 @@
-#SN_VectorVariableNode
+#SN_ColorVariableNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
@@ -10,21 +10,21 @@ class SN_VectorArray(bpy.types.PropertyGroup):
     def get_python_value(self):
         return str(self.value)#TODO: return four_value if needed
 
-    value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable")
-    four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable")
+    value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable", subtype="COLOR")
+    four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable",subtype="COLOR")
 
 bpy.utils.register_class(SN_VectorArray)
 
 
-class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
-    bl_idname = "SN_VectorVariableNode"
-    bl_label = "Vector Variable"
+class SN_ColorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
+    bl_idname = "SN_ColorVariableNode"
+    bl_label = "Color Variable"
     bl_icon = "DRIVER_TRANSFORM"
     node_color = (0.6,0.2,0.8)
     should_be_registered = True
 
-    value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable")
-    four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable")
+    value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable",subtype="COLOR")
+    four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable",subtype="COLOR")
 
     def update_socket_value(self,context):
         if not is_valid_python(self.var_name,True):
@@ -73,9 +73,9 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:
                 if self.use_four_numbers:
-                    item.type = "four_vector"
+                    item.type = "four_color"
                 else:
-                    item.type = "vector"
+                    item.type = "color"
 
         identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
         for node in bpy.context.space_data.node_tree.nodes:
@@ -100,7 +100,7 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.groupItem = item.name
         for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:
-                item.type = "vector"
+                item.type = "color"
                 item.socket_type = "VECTOR"
         self.update_socket_value(context)
 
@@ -153,9 +153,9 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def get_variable_line(self):
         if not self.is_array:
             if self.use_four_numbers:
-                return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.four_value[0])+", "+str(self.four_value[1])+", "+str(self.four_value[2])+", "+str(self.four_value[3])+ "), size=4)"
+                return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(subtype='COLOR', name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.four_value[0])+", "+str(self.four_value[1])+", "+str(self.four_value[2])+", "+str(self.four_value[3])+ "), size=4)"
             else:
-                return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.value[0])+", "+str(self.value[1])+", "+str(self.value[2])+ "))"
+                return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(subtype='COLOR', name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.value[0])+", "+str(self.value[1])+", "+str(self.value[2])+ "))"
         else:
             return self.var_name.replace(" ", "_") + "_array: bpy.props.CollectionProperty(type=ArrayCollection_UID_)"
 
@@ -164,8 +164,9 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.is_array:
             for element in self.array_items:
                 if self.use_four_numbers:
-                    register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().four_vector = (" + str(element.four_value[0])+", "+str(element.four_value[1])+", "+str(element.four_value[2])+", "+str(element.four_value[3]) + ")")
+                    register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().four_color = (" + str(element.four_value[0])+", "+str(element.four_value[1])+", "+str(element.four_value[2])+", "+str(element.four_value[3]) + ")")
                 else:
-                    register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().vector = (" +str(element.value[0])+", "+str(element.value[1])+", "+str(element.value[2])+")")
+                    register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().color = (" +str(element.value[0])+", "+str(element.value[1])+", "+str(element.value[2])+")")
 
         return register_block
+

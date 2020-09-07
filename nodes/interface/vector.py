@@ -14,7 +14,7 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
 
 class SN_VectorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_VectorInputNode"
-    bl_label = "Vector Input"
+    bl_label = "Display Vector"
     bl_icon = "SORTALPHA"
     node_color = (0.89,0.6,0)
     bl_width_default = 190

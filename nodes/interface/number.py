@@ -14,7 +14,7 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
 
 class SN_NumberInputNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_NumberInputNode"
-    bl_label = "Number Input"
+    bl_label = "Display Number"
     bl_icon = "SORTALPHA"
     node_color = (0.89,0.6,0)
     bl_width_default = 190
