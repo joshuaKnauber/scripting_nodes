@@ -1,4 +1,4 @@
-#SN_VectorInputNode
+#SN_ColorInputNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
@@ -10,9 +10,9 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
     description: bpy.props.StringProperty(name="Description",default="")
 
 
-class SN_VectorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
-    bl_idname = "SN_VectorInputNode"
-    bl_label = "Display Vector"
+class SN_ColorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
+    bl_idname = "SN_ColorInputNode"
+    bl_label = "Display Color"
     bl_icon = "SORTALPHA"
     node_color = (0.89,0.6,0)
     bl_width_default = 190
@@ -32,7 +32,7 @@ class SN_VectorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_name(self, context):
         if self.search_prop == "custom":
             if self.search_value in bpy.context.space_data.node_tree.search_variables:
-                if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector":
+                if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "color" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color":
                     if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                         if len(self.inputs) == 4:
                             if self.inputs[3].name != "Index":
@@ -90,19 +90,11 @@ class SN_VectorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                         data_type = self.inputs[3].links[0].from_node.data_type(self.inputs[3].links[0].from_socket)
                         if data_type != "":
                             for prop in eval(data_type).bl_rna.properties:
-                                if prop.type == "VECTOR":
-                                    if prop.subtype != "COLOR":
-                                        item = self.search_properties.add()
-                                        item.name = prop.name
-                                        item.identifier = prop.identifier
-                                        item.description = prop.description
-                                elif prop.type == "INT" or prop.type == "FLOAT":
-                                    if prop.is_array:
-                                        if prop.subtype != "COLOR":
-                                            item = self.search_properties.add()
-                                            item.name = prop.name
-                                            item.identifier = prop.identifier
-                                            item.description = prop.description
+                                if prop.subtype == "COLOR":
+                                    item = self.search_properties.add()
+                                    item.name = prop.name
+                                    item.identifier = prop.identifier
+                                    item.description = prop.description
 
     search_value: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
@@ -116,7 +108,7 @@ class SN_VectorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.prop_search(self,"search_value", bpy.context.space_data.node_tree, "search_variables", text="")
 
             if self.search_value in bpy.context.space_data.node_tree.search_variables:
-                if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector":
+                if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "color" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color":
                     if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                         if len(self.inputs) != 4:
                             self.update_name(None)
@@ -128,7 +120,7 @@ class SN_VectorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                             self.inputs.remove(self.inputs[3])
                 else:
                     box = layout.box()
-                    box.label(text="Please select a vector variable")
+                    box.label(text="Please select a color variable")
 
 
     def evaluate(self, socket, node_data, errors):
@@ -138,7 +130,7 @@ class SN_VectorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                 return {"blocks": [{"lines": [[layout_type, ".prop(", node_data["input_data"][3]["code"], ", '", self.search_properties[self.search_value].identifier, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], ")"]],"indented": []}],"errors": errors}
         else:
             if self.search_value in bpy.context.space_data.node_tree.search_variables:
-                if bpy.context.space_data.node_tree.search_variables[self.search_value].type in ["vector", "four_vector"]:
+                if bpy.context.space_data.node_tree.search_variables[self.search_value].type in ["color", "four_color"]:
                     if len(self.inputs) == 4:
                         return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_.", bpy.context.space_data.node_tree.search_variables[self.search_value].name.replace(" ", "_"), "_array[", node_data["input_data"][3]["code"], "], '", bpy.context.space_data.node_tree.search_variables[self.search_value].type, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], ")"]],"indented": []}],"errors": errors}
                     else:

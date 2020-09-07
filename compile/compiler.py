@@ -127,7 +127,7 @@ class ScriptingNodesCompiler():
 
     def _get_variable_registers(self, tree):
         """ returns the variable registers for the given node tree """
-        variable_ids = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode", "SN_EnumVariableNode"]
+        variable_ids = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode", "SN_EnumVariableNode", "SN_ColorVariableNode"]
         register_function = ""
 
         for node in tree.nodes:
@@ -138,7 +138,7 @@ class ScriptingNodesCompiler():
 
     def _get_array_registers(self, tree):
         """ returns the variable registers for the given node tree """
-        variable_ids = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode", "SN_EnumVariableNode"]
+        variable_ids = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode", "SN_EnumVariableNode", "SN_ColorVariableNode"]
         register_function = "# Set the addons array variables\ndef set_variables():"
 
         has_nodes = False

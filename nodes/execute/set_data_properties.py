@@ -11,6 +11,7 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
     description: bpy.props.StringProperty(name="Description",default="")
     type: bpy.props.StringProperty(name="Type",default="")
     use_four_numbers: bpy.props.BoolProperty()
+    is_color: bpy.props.BoolProperty(default=False)
 
 class SN_PT_FilterPanel(bpy.types.Panel):
     bl_space_type = 'NODE_EDITOR'
@@ -83,6 +84,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             item.name = prop.name
                                             item.identifier = prop.identifier
                                             item.description = prop.description
+                                            item.is_color = prop.subtype == "COLOR"
                                             if not prop.type in ["INT", "FLOAT"]:
                                                 item.type = prop.type
                                             else:
@@ -123,6 +125,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     op.socket_name = self.search_value
                     op.is_output = False
                     op.use_four_numbers = self.search_properties[self.search_value].use_four_numbers
+                    op.is_color = self.search_properties[self.search_value].is_color
                 if is_existing:
                     op = row.operator("scripting_nodes.remove_scene_data_socket",text="",icon="REMOVE")
                     op.node_name = self.name

@@ -1,7 +1,7 @@
 import bpy
 from ..handler.socket_handler import SocketHandler
 
-def add_data_output(node,label,is_output,use_four_numbers,prop_type=""):
+def add_data_output(node,label,is_output,use_four_numbers,prop_type="", is_color=False):
     sockets = SocketHandler()
     if prop_type == "STRING" or prop_type == "ENUM":
         if is_output:
@@ -19,7 +19,7 @@ def add_data_output(node,label,is_output,use_four_numbers,prop_type=""):
         else:
             socket = sockets.create_input(node,"VECTOR",label)
             socket.use_four_numbers = use_four_numbers
-            socket.is_color = label == "Color"
+            socket.is_color = is_color
     elif prop_type == "INT":
         if is_output:
             sockets.create_output(node,"INTEGER",label)
@@ -52,13 +52,14 @@ class SN_OT_AddSceneDataSocket(bpy.types.Operator):
     socket_name: bpy.props.StringProperty()
     is_output: bpy.props.BoolProperty()
     use_four_numbers: bpy.props.BoolProperty()
+    is_color: bpy.props.BoolProperty()
 
     def execute(self, context):
         for node in context.space_data.node_tree.nodes:
             if node.name == self.node_name:
                 for prop in node.search_properties:
                     if prop.name == self.socket_name:
-                        add_data_output(node,self.socket_name, self.is_output, self.use_four_numbers, prop.type)
+                        add_data_output(node,self.socket_name, self.is_output, self.use_four_numbers, prop.type, self.is_color)
         return {"FINISHED"}
 
 
