@@ -23,6 +23,11 @@ def get_possible_panel_locations():
     return possible_locations[:]
 
 
+def redraw(context):
+    for area in context.screen.areas:
+        area.tag_redraw()
+
+
 trigger_node = None
 def set_trigger_node(node):
     global trigger_node
@@ -80,6 +85,7 @@ bpy.utils.register_class(SN_PT_LocationPickerPanel_{uid})"""
 
         if self.trigger_node in context.space_data.node_tree.nodes:
             set_trigger_node(context.space_data.node_tree.nodes[self.trigger_node])
+        redraw(context)
         return {"FINISHED"}
 
 
@@ -115,6 +121,7 @@ class SN_ChoosePanelLocation(bpy.types.Operator):
                 trigger_node.context = "NONE"
             trigger_node = None
         remove_created_panels()
+        redraw(context)
         return {"FINISHED"}
 
 
@@ -127,43 +134,61 @@ class SN_CancelPanelLocation(bpy.types.Operator):
 
     def execute(self, context):
         remove_created_panels()
+        redraw(context)
         return {"FINISHED"}
 
 
 
-def prepend_panel(self, context, prepend=False):
+def prepend_panel(self, context, prepend=True):
     row = self.layout.row()
     row.scale_y = 1.2
     row.alert = True
     op = row.operator("visual_scripting.choose_existing_panel_location",icon="EYEDROPPER")
     op.prepend = prepend
+    op.panel_name = ""
+    if hasattr(self,"bl_label"):
+        op.panel_name = self.bl_label
+    op.panel_idname = self.bl_idname
     col = row.column()
     col.alert = False
     col.operator("visual_scripting.cancel_existing_panel_location",text="",emboss=False,icon="PANEL_CLOSE")
 
 def append_panel(self, context):
-    prepend_panel(self,context,True)
+    prepend_panel(self,context,False)
 
+
+global_panel_uid = None
 class SN_CreateExistingPanelLocation(bpy.types.Operator):
     bl_idname = "visual_scripting.create_existing_panel_location"
     bl_label = "Create Existing Panel"
     bl_description = "Create the possible panel locations"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
 
+    panel_uid: bpy.props.StringProperty()
+
     @classmethod
     def poll(cls, context):
-        return True
+        return not context.scene.sn_properties.showing_add_to_panel
 
     def execute(self, context):
+        global global_panel_uid
+        global_panel_uid = self.panel_uid
+
         for panel in dir(bpy.types):
             panel = eval("bpy.types."+panel)
             if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type"):
                 panel.prepend(prepend_panel)
                 panel.append(append_panel)
+        context.scene.sn_properties.showing_add_to_panel = True
+        redraw(context)
         return {"FINISHED"}
 
 
 def remove_appended_panels():
+    global global_panel_uid
+    global_panel_uid = None
+    bpy.context.scene.sn_properties.showing_add_to_panel = False
+
     for panel in dir(bpy.types):
         panel = eval("bpy.types."+panel)
         if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type"):
@@ -178,14 +203,27 @@ class SN_ChooseExistingPanelLocation(bpy.types.Operator):
     bl_options = {"REGISTER","UNDO","INTERNAL"}
 
     panel_name: bpy.props.StringProperty()
+    panel_idname: bpy.props.StringProperty()
     prepend: bpy.props.BoolProperty()
 
     def execute(self, context):
+        global global_panel_uid
+
         for panel in dir(bpy.types):
-            if panel == self.panel_name:
+            if panel == self.panel_idname:
                 panel = eval("bpy.types."+panel)
-                print(panel,self.prepend)
+
+                for node_group in bpy.data.node_groups:
+                    if node_group.bl_idname == "ScriptingNodesTree":
+                        for node in node_group.nodes:
+                            if hasattr(node, "panel_uid") and node.bl_idname == "SN_AddToPanelNode":
+                                if node.panel_uid == global_panel_uid:
+                                    node.append = not self.prepend
+                                    node.panel_idname = self.panel_idname
+                                    node.panel_name = self.panel_name
+                                    
         remove_appended_panels()
+        redraw(context)
         return {"FINISHED"}
 
 
@@ -197,4 +235,5 @@ class SN_CancelExistingPanelLocation(bpy.types.Operator):
 
     def execute(self, context):
         remove_appended_panels()
+        redraw(context)
         return {"FINISHED"}

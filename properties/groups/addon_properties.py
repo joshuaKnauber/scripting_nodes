@@ -102,3 +102,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     tutorial_scale: bpy.props.FloatProperty(default=1,min=0.1, soft_max=5, name="Docs Scale", description="The scale of the drawn UI elements")
     show_python_docs: bpy.props.BoolProperty(default=True,name="Show Python Docs",description="Shows the python code if the documentation is enabled")
+
+
+    # showing the append panel selector
+    showing_add_to_panel: bpy.props.BoolProperty(default=False)
