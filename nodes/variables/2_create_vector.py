@@ -6,10 +6,6 @@ from ...node_tree.node_sockets import is_valid_python, make_valid_python
 
 
 class SN_VectorArray(bpy.types.PropertyGroup):
-
-    def get_python_value(self):
-        return str(self.value)#TODO: return four_value if needed
-
     value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable")
     four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable")
 

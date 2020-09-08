@@ -6,10 +6,6 @@ from ...node_tree.node_sockets import is_valid_python, make_valid_python
 
 
 class SN_IntegerArray(bpy.types.PropertyGroup):
-
-    def get_python_value(self):
-        return str(self.value)
-
     value: bpy.props.IntProperty(default=0,name="Value",description="Value of this variable")
     
 bpy.utils.register_class(SN_IntegerArray)

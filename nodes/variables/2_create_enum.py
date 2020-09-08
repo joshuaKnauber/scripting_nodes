@@ -32,10 +32,6 @@ class SN_RemoveEnumItem(bpy.types.Operator):
         return {"FINISHED"}
 
 class SN_StringArray(bpy.types.PropertyGroup):
-
-    def get_python_value(self):
-        return self.value
-
     name: bpy.props.StringProperty(default="",name="Display Name",description="The name of the enum item")
     description: bpy.props.StringProperty(default="",name="Description",description="Shown when hovering over the enum item")
     

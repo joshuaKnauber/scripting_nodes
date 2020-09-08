@@ -32,10 +32,6 @@ class SN_RemoveVariableArrayElement(bpy.types.Operator):
 
 
 class SN_BooleanArray(bpy.types.PropertyGroup):
-
-    def get_python_value(self):
-        return str(self.value)
-
     value: bpy.props.BoolProperty(default=True,name="Value",description="Value of this variable")
     
 bpy.utils.register_class(SN_BooleanArray)

@@ -6,10 +6,6 @@ from ...node_tree.node_sockets import is_valid_python, make_valid_python
 
 
 class SN_StringArray(bpy.types.PropertyGroup):
-
-    def get_python_value(self):
-        return self.value
-
     value: bpy.props.StringProperty(default="",name="Value",description="Value of this variable")
     
 bpy.utils.register_class(SN_StringArray)
