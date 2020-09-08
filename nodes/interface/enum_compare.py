@@ -39,6 +39,7 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                 link.from_node.update()
                 
         self.update_socket_connections()
+        self.update_vector_sockets()
 
         self.sn_enum_property_properties.clear()
 

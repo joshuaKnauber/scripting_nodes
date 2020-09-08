@@ -11,6 +11,7 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
     description: bpy.props.StringProperty(name="Description",default="")
     type: bpy.props.StringProperty(name="Type",default="")
     use_four_numbers: bpy.props.BoolProperty()
+    is_color: bpy.props.BoolProperty(default=False)
 
 class SN_PT_FilterPanel(bpy.types.Panel):
     bl_space_type = 'NODE_EDITOR'
@@ -105,6 +106,8 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 else:
                                     if prop.is_array:
                                         item.type = "VECTOR"
+                                        item.use_four_numbers = prop.array_length == 4
+                                        item.is_color = prop.subtype == COLOR
                                     else:
                                         item.type = prop.type
 
@@ -131,6 +134,7 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.inputs.remove(inp)
 
         self.update_socket_connections()
+        self.update_vector_sockets()
 
 
     def draw_buttons(self, context, layout):
@@ -161,6 +165,7 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     op.socket_name = self.search_value
                     op.is_output = True
                     op.use_four_numbers = self.search_properties[self.search_value].use_four_numbers
+                    op.is_color = self.search_properties[self.search_value].is_color
                 if is_existing:
                     op = row.operator("scripting_nodes.remove_scene_data_socket",text="",icon="REMOVE")
                     op.node_name = self.name

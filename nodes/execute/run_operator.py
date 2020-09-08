@@ -47,8 +47,9 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
                         elif prop.type == "FLOAT" or prop.type == "INT":
                             if prop.array_length > 1:
-                                self.sockets.create_input(self, "VECTOR", prop.name)
-                                self.inputs[-1].use_four_numbers = prop.array_length == 4
+                                socket = self.sockets.create_input(self, "VECTOR", prop.name)
+                                socket.use_four_numbers = prop.array_length == 4
+                                socket.is_color = prop.subtype == "COLOR"
                             else:
                                 if prop.type in identifiers:
                                     self.sockets.create_input(self, identifiers[prop.type], prop.name).set_value(prop.default)

@@ -17,6 +17,7 @@ class SN_CastVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.sockets.create_input(self, "FLOAT", "Fourth Number")
         else:
             self.inputs.remove(self.inputs[1])
+        self.outputs[0].use_four_numbers = True
 
     use_four_numbers: bpy.props.BoolProperty(default=False,name="Use Four Numbers", description="Outputs a vector with four numbers instead of three", update=update_inputs)
 

@@ -47,7 +47,9 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if len(self.inputs) == 1:
                     self.inputs.remove(self.inputs[0])
             self.sockets.change_socket_type(self, self.outputs[0], bpy.context.space_data.node_tree.search_variables[self.search_value].socket_type, label=bpy.context.space_data.node_tree.search_variables[self.search_value].name)
-    
+            if self.outputs[0].bl_idname == "SN_VectorSocket":
+                self.outputs[0].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
+
     search_value: bpy.props.StringProperty(name="Search Value", description="", update=update_outputs)
 
     def draw_buttons(self, context, layout):

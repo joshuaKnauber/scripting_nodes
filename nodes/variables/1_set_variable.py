@@ -68,7 +68,8 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                         self.sockets.change_socket_type(self, self.inputs[2], bpy.context.space_data.node_tree.search_variables[self.search_value].socket_type, label="Value")
 
                     if self.inputs[2].bl_idname == "SN_VectorSocket":
-                        self.inputs[2].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector"
+                        self.inputs[2].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
+                        self.inputs[2].is_color = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "color" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
 
                 else:
                     for inp in self.inputs:
@@ -85,7 +86,7 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     
                     if self.inputs[1].bl_idname == "SN_VectorSocket":
                         for inp_index in range(len(self.inputs)-1):
-                            self.inputs[inp_index+1].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector"
+                            self.inputs[inp_index+1].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
 
     search_value: bpy.props.StringProperty(name="Search Value", description="", update=update_outputs)
     operation: bpy.props.EnumProperty(items=[("clear", "Clear and Replace", "Clear the Array and set new values"), ("set_value", "Set Value", "Set a value using an index")], name="Operation", description="", update=update_operation)
@@ -117,6 +118,7 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 link.from_node.update()
                 
         self.update_socket_connections()
+        self.update_vector_sockets()
         self.update_operation(None)
 
     def evaluate(self, socket, node_data, errors):

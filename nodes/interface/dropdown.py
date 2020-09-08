@@ -54,6 +54,7 @@ class SN_DropdownNode(bpy.types.Node, SN_ScriptingBaseNode):
                 link.from_node.update()
 
         self.update_socket_connections()
+        self.update_vector_sockets()
         if self.search_prop == "internal":
             if not self.search_value in self.search_properties:
                 self.search_value = ""

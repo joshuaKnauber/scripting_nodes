@@ -138,6 +138,15 @@ class SN_ScriptingBaseNode:
                     else:
                         created_sockets.append(self.add_dynamic_socket(inputs,socket,index,last_parent))
 
+    def update_vector_sockets(self):
+        for input_socket in self.inputs:
+            for link in input_socket.links:
+                if link.from_socket.bl_idname == "SN_VectorSocket" and link.to_socket.bl_idname == "SN_VectorSocket":
+                    if link.from_socket.use_four_numbers != link.to_socket.use_four_numbers:
+                        from_socket = link.from_socket
+                        to_socket = link.to_socket
+                        bpy.context.space_data.node_tree.links.remove(link)
+
     def _average_position(self,node1,node2,new_node):
         x = (node1.location[0]+node1.width) + (node2.location[0]-node1.location[0]-node1.width)/2 - new_node.width/2
         y = (node1.location[1]+node1.height) + (node2.location[1]-node1.location[1]-node1.height)/2 - new_node.height/2
@@ -187,6 +196,7 @@ class SN_ScriptingBaseNode:
                 link.from_node.update()
                 
         self.update_socket_connections()
+        self.update_vector_sockets()
 
 
 

@@ -1,4 +1,3 @@
-
 #SN_VectorMathNode
 
 import bpy

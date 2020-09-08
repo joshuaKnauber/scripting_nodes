@@ -64,6 +64,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 link.from_node.update()
                 
         self.update_socket_connections()
+        self.update_vector_sockets()
 
         if not self.search_value in self.search_properties:
             self.search_value = ""
@@ -91,6 +92,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                                 if prop.is_array:
                                                     item.type = "VECTOR"
                                                     item.use_four_numbers = prop.array_length == 4
+                                                    item.is_color = prop.subtype == COLOR
                                                 else:
                                                     item.type = prop.type
                 else:

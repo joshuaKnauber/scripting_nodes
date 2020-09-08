@@ -12,9 +12,12 @@ class SN_VectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.6,0.2,0.8)
     should_be_registered = False
 
+    def update_four(self, context):
+        self.outputs[0].use_four_numbers = self.use_four_numbers
+
     value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable")
     four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable")
-    use_four_numbers: bpy.props.BoolProperty(default=False,name="Use Four Numbers", description="Outputs a vector with four numbers instead of three")
+    use_four_numbers: bpy.props.BoolProperty(default=False,name="Use Four Numbers", description="Outputs a vector with four numbers instead of three", update=update_four)
 
     def inititialize(self,context):
         self.sockets.create_output(self,"VECTOR","Value")

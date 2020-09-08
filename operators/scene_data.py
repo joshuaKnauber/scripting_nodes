@@ -15,7 +15,9 @@ def add_data_output(node,label,is_output,use_four_numbers,prop_type="", is_color
             sockets.create_input(node,"BOOLEAN",label)
     elif prop_type == "VECTOR":
         if is_output:
-            sockets.create_output(node,"VECTOR",label)
+            socket = sockets.create_input(node,"VECTOR",label)
+            socket.use_four_numbers = use_four_numbers
+            socket.is_color = is_color
         else:
             socket = sockets.create_input(node,"VECTOR",label)
             socket.use_four_numbers = use_four_numbers

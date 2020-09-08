@@ -50,8 +50,8 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                         self.sockets.create_input(self, "INTEGER", "Index").set_value(0)
                         self.sockets.create_input(self, bpy.context.space_data.node_tree.search_variables[self.search_value].socket_type, bpy.context.space_data.node_tree.search_variables[self.search_value].name)
                     if self.inputs[2].bl_idname == "SN_VectorSocket":
-                        if context != "None":
-                            self.inputs[2].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector"
+                        self.inputs[2].is_color = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "color" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
+                        self.inputs[2].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
 
                 else:
                     if len(self.inputs) != 2:
@@ -60,9 +60,11 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                     if len(self.inputs) != 2:
                         self.sockets.create_input(self, bpy.context.space_data.node_tree.search_variables[self.search_value].socket_type, bpy.context.space_data.node_tree.search_variables[self.search_value].name)
+                    
                     if self.inputs[1].bl_idname == "SN_VectorSocket":
-                        if context != "None":
-                            self.inputs[1].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector"
+                        self.inputs[1].is_color = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "color" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
+                        self.inputs[1].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
+
 
     search_value: bpy.props.StringProperty(name="Search Value", description="", update=update_outputs)
     operation: bpy.props.EnumProperty(items=[("start", "Start", "The first element in the array"), ("end", "End", "The last element in the array"), ("index", "Index", "Set a value using an index")], name="Operation", description="", update=update_operation)
