@@ -22,7 +22,13 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
         if self.examples != "NONE":
             with open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.json")) as examples:
                 examples = json.load(examples)
-                pass
+                example = examples[self.examples]
+                
+                path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.blend","NodeTree")
+
+                bpy.ops.wm.append(filename=example["tree_name"], directory=path)
+                if example["tree_name"] in bpy.data.node_groups:
+                    context.space_data.node_tree = bpy.data.node_groups[example["tree_name"]]
             self.examples = "NONE"
 
     example_cache = []
@@ -102,3 +108,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     tutorial_scale: bpy.props.FloatProperty(default=1,min=0.1, soft_max=5, name="Docs Scale", description="The scale of the drawn UI elements")
     show_python_docs: bpy.props.BoolProperty(default=True,name="Show Python Docs",description="Shows the python code if the documentation is enabled")
+
+
+    # showing the append panel selector
+    showing_add_to_panel: bpy.props.BoolProperty(default=False)

@@ -115,16 +115,17 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def layout_type(self):
         return "layout"
 
+    def get_idname(self):
+        return "SNA_PT_"+self.panel_uid
+
     def get_register_block(self):
-        idname = "SNA_PT_"+self.panel_uid
-        return ["bpy.utils.register_class("+idname+")"]
+        return ["bpy.utils.register_class("+self.get_idname()+")"]
 
     def get_unregister_block(self):
-        idname = "SNA_PT_"+self.panel_uid
-        return ["bpy.utils.unregister_class("+idname+")"]
+        return ["bpy.utils.unregister_class("+self.get_idname()+")"]
 
     def evaluate(self, socket, node_data, errors):
-        idname = "SNA_PT_"+self.panel_uid
+        idname = self.get_idname()
 
         label = self.label
         if label == "":

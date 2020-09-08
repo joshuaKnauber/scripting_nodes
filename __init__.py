@@ -44,6 +44,7 @@ def load_handler(dummy):
     bpy.context.scene.sn_properties.package_uninstalled_without_compile = False
     
     bpy.context.scene.sn_properties.show_node_info = False
+    bpy.context.scene.sn_properties.showing_add_to_panel = False
     
     compiler().unregister_existing()
     for tree in bpy.data.node_groups:
