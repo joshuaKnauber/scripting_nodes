@@ -70,7 +70,7 @@ class ScriptingNodesCompiler():
     def _get_node_code(self, node, output, indents):
         """ returns the code block for the given node """
         node_code = ""
-        input_output_data, errors = self_get_node_data(node)
+        input_output_data, errors = self._get_node_data(node)
         node_data = node.evaluate(output,input_output_data,errors)
         for block in node_data["blocks"]:
             node_code += self._compile_code_block(block, indents)
