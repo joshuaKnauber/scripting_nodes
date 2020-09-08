@@ -76,7 +76,7 @@ class SN_ScriptingBaseNode:
 
         return socket_data, errors
 
-    def get_node_data(self):
+    def get_node_data(self, tree):
         errors = []
         node_input_data = []
         node_output_data = []
@@ -91,7 +91,7 @@ class SN_ScriptingBaseNode:
             node_output_data.append(socket_data)
             errors += socket_errors
 
-        return {"input_data":node_input_data,"output_data":node_output_data}, errors
+        return {"input_data":node_input_data,"output_data":node_output_data, "node_tree":tree}, errors
 
     def add_dynamic_socket(self,inputs,socket,index,parent):
         if inputs:

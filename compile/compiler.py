@@ -62,10 +62,15 @@ class ScriptingNodesCompiler():
         indented = self._compile_lines(block["indented"], indents + self._indents)
         return lines + indented
 
+    def _get_node_data(self, node): #TODO this function needs the node_tree
+        for tree in bpy.data.node_groups:
+            if node in tree.nodes:
+                return node.get_node_data(tree)
+
     def _get_node_code(self, node, output, indents):
         """ returns the code block for the given node """
         node_code = ""
-        input_output_data, errors = node.get_node_data()
+        input_output_data, errors = self_get_node_data(node)
         node_data = node.evaluate(output,input_output_data,errors)
         for block in node_data["blocks"]:
             node_code += self._compile_code_block(block, indents)
