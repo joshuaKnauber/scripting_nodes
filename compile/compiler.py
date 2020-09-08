@@ -302,7 +302,7 @@ class ScriptingNodesCompiler():
             if module["node_tree"] == tree:
                 if self._run_register:
                     module["module"].register()
-                    if "def set_variables():" in module["text"].as_string():
+                    if "def set_variables():" in module["text"].as_string() and bpy.context.space_data != None:
                         module["module"].set_variables()
 
     def _unregister_tree(self, tree):
