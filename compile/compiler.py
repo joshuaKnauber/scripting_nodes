@@ -64,8 +64,9 @@ class ScriptingNodesCompiler():
 
     def _get_node_data(self, node): #TODO this function needs the node_tree
         for tree in bpy.data.node_groups:
-            if node in tree.nodes:
-                return node.get_node_data(tree)
+            for tree_node in tree.nodes:
+                if node == tree_node:
+                    return node.get_node_data(tree)
 
     def _get_node_code(self, node, output, indents):
         """ returns the code block for the given node """
