@@ -12,6 +12,10 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
     has_seen_tutorial: bpy.props.BoolProperty(default=False)
     has_seen_welcome_message: bpy.props.BoolProperty(default=False)
 
+    def update_shortcuts(self,context):
+        pass
+    enable_compile_shortcut: bpy.props.BoolProperty(default=True,name="Use Compile Shortcut",description="You can use this shortcut to quickly recompile your addon",update=update_shortcuts)
+
     def _draw_install_package(self,layout):
         """ draws the button for installing packages """
         row = layout.row()

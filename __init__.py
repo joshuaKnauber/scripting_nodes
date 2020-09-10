@@ -34,6 +34,7 @@ from .properties.groups.addon_properties import ScriptingNodesProperties
 from .properties.groups.package_marketplace import ScriptingNodesMarketplace
 from .interface.node_header import node_header
 from .compile.compiler import compiler
+from .operators.keymaps.keymaps import register_keymaps,unregister_keymaps
 
 auto_load.init()
 
@@ -114,6 +115,9 @@ def depsgraph_handler(dummy):
 def register():
     # register the classes of the addon
     auto_load.register()
+
+    # register the keymaps
+    register_keymaps()
     
     # register the node categories
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
@@ -142,6 +146,9 @@ def register():
 def unregister():
     # unregister the addon classes
     auto_load.unregister()
+
+    # unregister keymaps
+    unregister_keymaps()
 
     # unregister the node categories
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
