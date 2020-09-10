@@ -24,14 +24,16 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.search_value = ""
 
         else:
+            self.update_operation(None)
             if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
-                self.update_operation(None)
                 if len(self.inputs) == 2:
                     if self.inputs[1].bl_idname == "SN_VectorSocket":
-                        self.inputs[1].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector"
+                        self.inputs[1].is_color = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "color" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
+                        self.inputs[1].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
                 if len(self.inputs) == 3:
                     if self.inputs[2].bl_idname == "SN_VectorSocket":
-                        self.inputs[2].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector"
+                        self.inputs[2].is_color = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "color" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
+                        self.inputs[2].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
 
             else:
                 for inp in range(len(self.inputs)-1):
@@ -52,6 +54,10 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if self.inputs[2].bl_idname == "SN_VectorSocket":
                         self.inputs[2].is_color = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "color" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
                         self.inputs[2].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
+                    
+                    if self.inputs[2].name != bpy.context.space_data.node_tree.search_variables[self.search_value].name:
+                            self.inputs.remove(self.inputs[2])
+                            self.sockets.create_input(self, bpy.context.space_data.node_tree.search_variables[self.search_value].socket_type, bpy.context.space_data.node_tree.search_variables[self.search_value].name)
 
                 else:
                     if len(self.inputs) != 2:
@@ -60,7 +66,11 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                     if len(self.inputs) != 2:
                         self.sockets.create_input(self, bpy.context.space_data.node_tree.search_variables[self.search_value].socket_type, bpy.context.space_data.node_tree.search_variables[self.search_value].name)
-                    
+                    else:
+                        if self.inputs[1].name != bpy.context.space_data.node_tree.search_variables[self.search_value].name:
+                            self.inputs.remove(self.inputs[1])
+                            self.sockets.create_input(self, bpy.context.space_data.node_tree.search_variables[self.search_value].socket_type, bpy.context.space_data.node_tree.search_variables[self.search_value].name)
+
                     if self.inputs[1].bl_idname == "SN_VectorSocket":
                         self.inputs[1].is_color = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "color" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
                         self.inputs[1].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
@@ -76,7 +86,7 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         if self.search_value in bpy.context.space_data.node_tree.search_variables:
             if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
-                self.update_operation("None")
+                # self.update_operation("None")
                 if bpy.context.space_data.node_tree.search_variables[self.search_value].description != "":
                     box = col.box()
                     box.label(text=bpy.context.space_data.node_tree.search_variables[self.search_value].description)
@@ -94,21 +104,6 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.inputs.remove(self.inputs[1])
             box = col.box()
             box.label(text="Please select an array")
-
-    def get_vector(self, socket):
-        value = ""
-        if socket.use_four_numbers:
-            if not socket.is_linked:
-                value = (socket.get_value()[0], socket.get_value()[1], socket.get_value()[2], socket.get_value()[3])
-
-        else:
-            if not socket.is_linked:
-                value = (socket.get_value()[0], socket.get_value()[1], socket.get_value()[2])
-        value = str(value)
-        if socket.is_linked:
-            value = socket.links[0].from_socket
-
-        return value
 
     def evaluate(self, socket, node_data, errors):
         next_code = ""
