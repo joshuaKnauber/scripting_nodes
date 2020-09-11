@@ -86,7 +86,6 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         if self.search_value in bpy.context.space_data.node_tree.search_variables:
             if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
-                # self.update_operation("None")
                 if bpy.context.space_data.node_tree.search_variables[self.search_value].description != "":
                     box = col.box()
                     box.label(text=bpy.context.space_data.node_tree.search_variables[self.search_value].description)
