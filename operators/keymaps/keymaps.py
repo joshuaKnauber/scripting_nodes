@@ -17,6 +17,7 @@ def draw_keymaps( layout ):
     if "compile" in addon_keymaps:
         kmi = addon_keymaps[ "compile" ][1]
         row = box.row()
+        row.enabled = addon_prefs.enable_compile_shortcut
         row.prop( kmi, "type", text="", full_event=True )
 
 
