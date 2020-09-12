@@ -8,7 +8,7 @@ class SN_OT_WelcomeMessage(bpy.types.Operator):
     bl_options = {"REGISTER","INTERNAL"}
 
     def execute(self, context):
-        context.preferences.addons[__name__.partition('.')[0]].preferences.has_seen_welcome_message = True
+        context.preferences.addons[__name__.partition('.')[0]].preferences.has_seen_tutorial = True
         return {"FINISHED"}
 
     def draw(self,context):
