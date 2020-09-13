@@ -9,7 +9,7 @@ class SN_ExistsNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_ExistsNode"
     bl_label = "Exists"
     bl_icon = "FORCE_CHARGE"
-    node_color = (0.65,0,0)
+    node_color = (0.125,0.125,0.125)
     bl_width_default = 100
     should_be_registered = False
 

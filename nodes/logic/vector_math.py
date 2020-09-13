@@ -10,7 +10,7 @@ class SN_VectorMathNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_VectorMathNode"
     bl_label = "Vector Math"
     bl_icon = "CON_TRANSLIKE"
-    node_color = (0.65,0,0)
+    node_color = (0.125,0.125,0.125)
     should_be_registered = False
 
     def update_operation(self,context):

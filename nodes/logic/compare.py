@@ -9,7 +9,7 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_CompareNode"
     bl_label = "Compare"
     bl_icon = "CON_SAMEVOL"
-    node_color = (0.65,0,0)
+    node_color = (0.125,0.125,0.125)
     should_be_registered = False
 
     operation: bpy.props.EnumProperty(items=[("==", "=", "Equal"), ("!=", "≠", "Not equal"), ("<", "<", "Smaller than"), (">", ">", "Bigger than"), ("<=", "≤", "Smaller or equal to"), (">=", "≥", "Bigger or equal to")],name="Operation", description="The operation you want to commence")

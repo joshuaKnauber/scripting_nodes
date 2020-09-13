@@ -9,7 +9,7 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_MathNode"
     bl_label = "Math"
     bl_icon = "CON_TRANSLIKE"
-    node_color = (0.65,0,0)
+    node_color = (0.125,0.125,0.125)
     should_be_registered = False
 
     operation: bpy.props.EnumProperty(items=[("+", "Add", "Add two numbers"), ("-", "Subtract", "Subtract two numbers"), ("*", "Multiply", "Multiply two numbers"), ("/", "Divide", "Divide two numbers")],name="Operation", description="The operation you want to commence")
