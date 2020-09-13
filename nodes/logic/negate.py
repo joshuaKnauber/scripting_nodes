@@ -13,6 +13,13 @@ class SN_NegateNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 100
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used for <important>negating a boolean</>.",
+                ""],
+        "python": ["<blue>not</> <red>False</>"]
+
+    }
+
     def inititialize(self,context):
         self.sockets.create_input(self,"BOOLEAN","Value")
         self.sockets.create_output(self,"BOOLEAN","Output")

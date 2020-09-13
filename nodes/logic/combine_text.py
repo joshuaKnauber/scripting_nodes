@@ -12,6 +12,13 @@ class SN_CombineTextNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.125,0.125,0.125)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used for <important>combining two strings</>.",
+                ""],
+        "python": ["<string>\"Hello \"</> + <string>\"there\"</>"]
+
+    }
+
     def inititialize(self,context):
         self.sockets.create_input(self,"STRING","Value")
         self.sockets.create_input(self,"STRING","Value")
