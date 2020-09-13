@@ -81,9 +81,12 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_enum(self, context):
         if self.search_prop == "internal":
-            self.sockets.create_input(self,"OBJECT","Input")
+            if len(self.inputs) != 2:
+                self.sockets.create_input(self,"OBJECT","Input")
         else:
-            self.inputs.remove(self.inputs[1])
+            for input_socket in self.inputs:
+                if input_socket.name != "Execute":
+                    self.inputs.remove(input_socket)
 
     propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
     sn_enum_property_properties: bpy.props.CollectionProperty(type=SN_EnumSearchPropertyGroup)

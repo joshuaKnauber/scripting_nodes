@@ -11,6 +11,18 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 
+    docs = {
+        "text": ["The For Node is used to <important>do something for every item in a data block</>.",
+                "",
+                "Collection Input: <subtext>The data block you want to go through</>",
+                "Repeat Output:  <subtext>The nodes you want to repeat for every element</>",
+                "Element Output: <subtext>The element that is in the data block (for example a pose bone)</>",
+                "Index Output: <subtext>The index of the element starting from 0</>"],
+        "python": ["for obj in bpy.data.objects:",
+                   "    <function>print</>(obj.name)"]
+
+    }
+
     def reset_data_type(self, context):
         if self.inputs[1].links[0].from_socket.bl_idname in ["SN_CollectionSocket", "SN_ObjectSocket"]:
             if self.outputs[2].is_linked:

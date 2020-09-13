@@ -107,7 +107,7 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     if prop.is_array:
                                         item.type = "VECTOR"
                                         item.use_four_numbers = prop.array_length == 4
-                                        item.is_color = prop.subtype == COLOR
+                                        # item.is_color = prop.subtype == "COLOR"
                                     else:
                                         item.type = prop.type
 

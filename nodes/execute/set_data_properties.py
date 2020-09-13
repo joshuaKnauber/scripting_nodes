@@ -43,6 +43,15 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 180
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>set properties of an object</>.",
+                "",
+                "Object Input: The object whos properties you want to edit",
+                "Other Inputs: The value you set to that property"],
+        "python": ["bpy.data.objects[0].name = <string>\"Suzanne\"</>"]
+
+    }
+
     def reset_data_type(self, context):
         for inp in self.inputs:
             if inp.bl_idname != "SN_ObjectSocket" and inp.name != "Execute":
@@ -85,14 +94,14 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             item.name = prop.name
                                             item.identifier = prop.identifier
                                             item.description = prop.description
-                                            item.is_color = prop.subtype == "COLOR"
+                                            # item.is_color = prop.subtype == "COLOR"
                                             if not prop.type in ["INT", "FLOAT"]:
                                                 item.type = prop.type
                                             else:
                                                 if prop.is_array:
                                                     item.type = "VECTOR"
                                                     item.use_four_numbers = prop.array_length == 4
-                                                    item.is_color = prop.subtype == COLOR
+                                                    # item.is_color = prop.subtype == "COLOR"
                                                 else:
                                                     item.type = prop.type
                 else:

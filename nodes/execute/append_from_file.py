@@ -13,6 +13,16 @@ class SN_AppendFromFileNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 300
     should_be_registered = False
 
+    docs = {
+        "text": ["Append from file is used to <important>append data from a different file</>.",
+                "",
+                "Path Input: <subtext>The path to the file you want to append from</>",
+                "Name Input: <subtext>The name of the item you want to append</>",
+                "Linked Input: <subtext>If true, item will adapt changes from the original file</>"],
+        "python": [r"bpy.ops.wm.append(directory=r<string>'C:\Users\me\Documents\Blender\scripts\untitled.blend\\Object'</>, filename=<string>\"Cube\"</>, link=<red>true</>)"]
+
+    }
+
     def update_file_path(self, context):
         if not self.file_path == bpy.path.abspath(self.file_path):
             self.file_path = bpy.path.abspath(self.file_path)

@@ -12,6 +12,14 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>run a script</>.",
+                "",
+                "<important>Make sure your script doesn't have functions and works before selecting it here</>"],
+        "python": []
+
+    }
+
     def inititialize(self, context):
         self.sockets.create_input(self, "EXECUTE", "Execute")
         self.sockets.create_output(self, "EXECUTE", "Execute")

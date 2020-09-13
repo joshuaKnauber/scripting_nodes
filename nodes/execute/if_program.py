@@ -12,6 +12,18 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 
+    docs = {
+        "text": ["The If Node is used to <important>do two different things depending on the input</>.",
+                "",
+                "Value Input: <subtext>If true 'Do' gets executed, if false 'Else' gets executed</>"],
+        "python": ["if <number>5</> < <number>10</>:",
+                   "    <function>print</>(\"True\")",
+                   "else:",
+                   "    <function>print</>(\"False\")"]
+
+    }
+
+
     def inititialize(self,context):
         self.sockets.create_input(self,"EXECUTE","Execute")
         self.sockets.create_input(self,"BOOLEAN","Value")

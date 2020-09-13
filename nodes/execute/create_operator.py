@@ -15,6 +15,32 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = True
 
+    docs = {
+        "text": ["Create Operator is used to <important>create an operator</> (duh).",
+                "",
+                "Should Run Input: <subtext>Operator isn't executed if False</>",
+                "Confirm: <subtext>Operator needs to be confirmed</>"],
+        "python": ["<function>class</> My_Operator(bpy.types.Operator):",
+                   "    bl_idname = <string>'my_category.my_operator'</>",
+                   "    bl_label = <string>'My Operator'</>",
+                   "    bl_description = <string>'My Operators description'</>",
+                   "    bl_options = {<string>\"REGISTER\"</>,<string>\"UNDO\"</>}",
+                   "",
+                   "    <yellow>@classmethod</>",
+                   "    <grey>def</> <function>poll</>(<blue>cls</>, <blue>context</>):",
+                   "        return <red>true</>",
+                   "",
+                   "    <grey>def</> <function>execute</>(<blue>self</>, <blue>context</>):",
+                   "        <function>print</>(<string>\"Hi\"</>)",
+                   "        <function>print</>(<string>\"Hello there\"</>)",
+                   "        return {<string>\"FINISHED\"</>}",
+                   "",
+                   "<grey>def</> <function>invoke</>(<blue>self</>, <blue>context</>, <blue>event</>):",
+                   "        return context.window_manager.invoke_confirm(self, event)"]
+
+    }
+
+
     def update_description(self, context):
         if not is_valid_python(self.description,True):
             self.description = make_valid_python(self.description,True)

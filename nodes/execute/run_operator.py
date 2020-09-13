@@ -26,6 +26,13 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 250
     node_color = (0.2, 0.2, 0.2)
 
+    docs = {
+        "text": ["This node is used to <important>run an operator</>.",
+                ""],
+        "python": ["bpy.ops.screen.userpref_show()"]
+
+    }
+
     def update_name(self, context):
         self.enum_collection.clear()
         for inp in self.inputs:
@@ -49,7 +56,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                             if prop.array_length > 1:
                                 socket = self.sockets.create_input(self, "VECTOR", prop.name)
                                 socket.use_four_numbers = prop.array_length == 4
-                                socket.is_color = prop.subtype == "COLOR"
+                                # socket.is_color = prop.subtype == "COLOR"
                             else:
                                 if prop.type in identifiers:
                                     self.sockets.create_input(self, identifiers[prop.type], prop.name).set_value(prop.default)

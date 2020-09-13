@@ -12,6 +12,17 @@ class SN_RepeatProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 
+    docs = {
+        "text": ["The repeat node is used to <important>repeat a certain block of nodes a number of times</>.",
+                "",
+                "Repetitions Input: <subtext>The number of times the nodes get executed</>",
+                "Repeat Output: <subtext>Whatever is connected here will be repeated, can be any number of execute nodes</>",
+                "Step Output: <subtext>The current index of the step starting at 0</>"],
+        "python": ["<function>for</> Step in <function>range</>( <number>5</> ):",
+                   "    <function>print</>( \"test\" )",
+                   "    <function>print</>( Step )"]
+    }
+
     def inititialize(self,context):
         self.var_name = self.get_var_name()
 
