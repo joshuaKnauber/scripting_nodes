@@ -188,9 +188,9 @@ class SN_FloatSocket(bpy.types.NodeSocket, SN_Socket):
             if value <= 1:
                 self.factor_value = value
             else:
-                value = 1
+                self.factor_value = 1
         else:
-            self.positive_value = 0
+            self.factor_value = 0
 
     def draw(self, context, layout, node, text):
         if self.is_output or self.is_linked:
