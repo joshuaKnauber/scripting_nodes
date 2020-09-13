@@ -43,6 +43,15 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 180
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used for <important>getting the properties of objects or controlling collections</>.",
+                "Object Input: Changes to data block input, used to select the object or data block you want to use",
+                ""],
+        "python": ["bpy.data.objects[<string>'Cube'</>].active_material"]
+
+    }
+
+
     def update_index(self, context):
         for inp in self.inputs:
             if inp.bl_idname != "SN_CollectionSocket" and inp.bl_idname != "SN_ObjectSocket":
@@ -74,7 +83,7 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     use_index: bpy.props.BoolProperty(name="Use Index", description="Use Index instead of name", default=True, update=update_index)
 
     def inititialize(self,context):
-        self.sockets.create_input(self,"OBJECT","Data block")
+        self.sockets.create_input(self,"OBJECT","Object or data block")
 
     def update(self):
         self.update_dynamic(True)

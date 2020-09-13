@@ -15,7 +15,7 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
     docs = {
         "text": ["The If Node is used to <important>do two different things depending on the input</>.",
                 "",
-                "Value Input: <subtext>If true 'Do' gets executed, if false 'Else' gets executed</>"],
+                "Value Input: <subtext>If True 'Do' gets executed, if False 'Else' gets executed</>"],
         "python": ["if <number>5</> < <number>10</>:",
                    "    <function>print</>(\"True\")",
                    "else:",

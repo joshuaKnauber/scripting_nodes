@@ -12,6 +12,13 @@ class SN_StringNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0,0.75,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used as a <important>string input</>.",
+                ""],
+        "python": ["<string>\"Hello There\"</>"]
+
+    }
+
     string_value: bpy.props.StringProperty(name="Value")
 
     def inititialize(self,context):

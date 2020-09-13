@@ -12,6 +12,13 @@ class SN_ColorNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.6,0.2,0.8)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used as a <important>color input</>.",
+                ""],
+        "python": ["<green>(0.6, 0.2, 0.8)</>"]
+
+    }
+
     def update_four(self, context):
         self.outputs[0].use_four_numbers = self.use_four_numbers
 

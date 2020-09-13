@@ -28,7 +28,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                    "",
                    "    <yellow>@classmethod</>",
                    "    <grey>def</> <function>poll</>(<blue>cls</>, <blue>context</>):",
-                   "        return <red>true</>",
+                   "        return <red>True</>",
                    "",
                    "    <grey>def</> <function>execute</>(<blue>self</>, <blue>context</>):",
                    "        <function>print</>(<string>\"Hi\"</>)",

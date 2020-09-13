@@ -12,6 +12,13 @@ class SN_ObjectDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.53, 0.55, 0.53)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used for <important>data blocks</>.",
+                ""],
+        "python": ["bpy.data.objects"]
+
+    }
+
     def get_data_type(self, context):
         items = []
         for dataType in bpy.data.rna_type.properties:

@@ -12,6 +12,14 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2,0.4,0.75)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used as a <important>random number input</>.",
+                ""],
+        "python": ["import random",
+                "random.randint(<number>0</>, <number>5</>)"]
+
+    }
+
     def update_socket(self, context):
         if self.use_float:
             self.color = (0.23,0.65,0.75)

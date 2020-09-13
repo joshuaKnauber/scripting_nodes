@@ -12,6 +12,13 @@ class SN_VectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.6,0.2,0.8)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used as a <important>vector input</>.",
+                ""],
+        "python": ["<green>(2.87, 4.26, 5.7)</>"]
+
+    }
+
     def update_four(self, context):
         self.outputs[0].use_four_numbers = self.use_four_numbers
 
