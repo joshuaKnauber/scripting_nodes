@@ -138,9 +138,9 @@ class DrawingFuncs:
         }
         self.buttons.append(buttonData)
 
-        bgl.glLineWidth(2)
-        for i in range(1,int(close_button_size//2)):
-            draw_circle_2d( (buttonData["minX"]+close_button_size//2,buttonData["minY"]+close_button_size//2), (0.9,0.15,0.25,1), max(1,close_button_size//2-i), 32)
+        # bgl.glLineWidth(2)
+        # for i in range(1,int(close_button_size//2)):
+        #     draw_circle_2d( (buttonData["minX"]+close_button_size//2,buttonData["minY"]+close_button_size//2), (0.9,0.15,0.25,1), max(1,close_button_size//2-i), 32)
 
         scale = context.scene.sn_properties.tutorial_scale
         blf.size(0, int(13*scale), 72)
@@ -148,10 +148,10 @@ class DrawingFuncs:
         self.draw_text("<subtext>Esc</>", int(13*scale), (buttonData["minX"]-width-int(10*scale) ,buttonData["minY"]+height//2), 0)
 
         # draw close cross
-        # self.black_shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-        # self.black_shader.bind()
-        # self.black_shader.uniform_float("color", (0, 0, 0, 1.0))
+        self.black_shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+        self.black_shader.bind()
+        self.black_shader.uniform_float("color", (1,1,1,1))
 
-        # self.create_close_cross(context, close_button_size, padding-outline_width/2, 4)
-        # bgl.glLineWidth(close_cross_width)
-        # self.close_cross_batch.draw(self.black_shader)
+        self.create_close_cross(context, close_button_size, padding+10, 4)
+        bgl.glLineWidth(close_cross_width)
+        self.close_cross_batch.draw(self.black_shader)
