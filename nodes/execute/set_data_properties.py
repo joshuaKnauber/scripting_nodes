@@ -56,16 +56,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_input(self,"OBJECT","Data block")
         self.sockets.create_output(self,"EXECUTE","Execute")
 
-    def update(self):
-        self.update_dynamic(True)
-        self.update_dynamic(False)
-        for input_socket in self.inputs:
-            for link in input_socket.links:
-                link.from_node.update()
-                
-        self.update_socket_connections()
-        self.update_vector_sockets()
-
+    def update_node(self):
         if not self.search_value in self.search_properties:
             self.search_value = ""
 

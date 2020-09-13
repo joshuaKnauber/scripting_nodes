@@ -74,15 +74,7 @@ class SN_TextInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.search_value = ""
         self.update()
 
-    def update(self):
-        self.update_dynamic(True)
-        self.update_dynamic(False)
-        for input_socket in self.inputs:
-            for link in input_socket.links:
-                link.from_node.update()
-
-        self.update_socket_connections()
-        self.update_vector_sockets()
+    def update_node(self):
         if self.search_prop == "internal":
             if not self.search_value in self.search_properties:
                 self.search_value = ""

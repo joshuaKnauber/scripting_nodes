@@ -198,6 +198,8 @@ class SN_ScriptingBaseNode:
         self.update_socket_connections()
         self.update_vector_sockets()
 
+        self.update_node()
+
 
 
 
@@ -301,3 +303,7 @@ class SN_ScriptingBaseNode:
         return: List - like ['bpy.context.scene.sn_generated_addon_properties_UID_.my_name.add().bool = True', 'bpy.context.scene.sn_generated_addon_properties_UID_.my_name.add().bool = False']
         """
         return []
+
+    def update_node(self):
+        """runs when the node is updated by connecting sockets
+        """
