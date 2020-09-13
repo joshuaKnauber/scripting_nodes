@@ -8,7 +8,7 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_AddToArrayVariableNode"
     bl_label = "Add to Array"
     bl_icon = "ADD"
-    node_color = (0.75,0.75,0.75)
+    node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 
     def inititialize(self, context):

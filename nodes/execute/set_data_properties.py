@@ -39,7 +39,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_SetDataPropertiesNode"
     bl_label = "Set Object Data Properties"
     bl_icon = "MESH_CUBE"
-    node_color = (0.53, 0.55, 0.53)
+    node_color = (0.2, 0.2, 0.2)
     bl_width_default = 180
     should_be_registered = False
 
