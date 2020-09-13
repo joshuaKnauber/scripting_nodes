@@ -91,7 +91,6 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
     def update_tutorial_info(self,context):
         if self.show_tutorial:
             self.tut_index = 0
-            context.preferences.addons[__name__.partition('.')[0]].preferences.has_seen_tutorial = True
             self.show_node_info = False
             bpy.ops.scripting_nodes.draw_tutorial("INVOKE_DEFAULT")
 

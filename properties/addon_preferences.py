@@ -15,7 +15,13 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
                                             ("SETTINGS","Settings","Settings for the addon","PREFERENCES",2)],
                                         update = update_nav)
 
-    has_seen_tutorial: bpy.props.BoolProperty(default=False)
+    def update_seen_tutorial(self,context):
+        if not self.tutorial_updated_self:
+            context.scene.sn_properties.show_tutorial = True
+        self.tutorial_updated_self = True
+
+    tutorial_updated_self: bpy.props.BoolProperty(default=False)
+    has_seen_tutorial: bpy.props.BoolProperty(default=False, update=update_seen_tutorial)
 
     marketplace_search: bpy.props.StringProperty(default="",name="Search")
 

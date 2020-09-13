@@ -64,7 +64,7 @@ def node_header(self, context):
             if not context.preferences.addons[__name__.partition('.')[0]].preferences.has_seen_tutorial:
                 col = row.column(align=True)
                 col.alert = True
-                col.prop(context.scene.sn_properties,"show_tutorial",text="Show Tutorial", icon="HELP", toggle=True)
+                col.prop(context.preferences.addons[__name__.partition('.')[0]].preferences,"has_seen_tutorial",text="Show Tutorial", icon="HELP", toggle=True)
             else:
                 row.prop(context.scene.sn_properties,"show_tutorial",text="", icon="HELP", toggle=True)
 
