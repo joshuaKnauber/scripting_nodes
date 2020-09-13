@@ -62,7 +62,11 @@ class SN_DrawDocs(DrawingFuncs, bpy.types.Operator):
             self.draw_close_setup(context,close_button_size,padding,outline_width,close_cross_width)
         
             # draw tutorial title
-            node = context.space_data.node_tree.nodes.active
+            node = None
+            for selected in context.space_data.node_tree.nodes:
+                if selected.select:
+                    node = selected
+                    break
             if node:
                 if hasattr(node,"docs"):
                     self.draw_text("<serpens>SERPENS</> - Node Info: "+node.bl_label,font_size_title,(padding+10,padding+10),0)
