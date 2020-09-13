@@ -12,6 +12,13 @@ class SN_CastBooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.65,0,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>cast data to a boolean</>."
+                ""],
+        "python": ["bool(<string>\"0\"</>)"]
+
+    }
+
     def inititialize(self, context):
         self.sockets.create_input(self,"DATA","Data")
         self.sockets.create_output(self,"BOOLEAN","Boolean")

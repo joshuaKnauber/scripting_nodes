@@ -12,6 +12,14 @@ class SN_IntegerNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2,0.4,0.75)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used as an <important>integer input</>.",
+                "Integers are whole numbers, for example <number>2</>, <number>4</>, <number>54</>"
+                ""],
+        "python": ["<number>6</>"]
+
+    }
+
     int_value: bpy.props.IntProperty(name="Value")
 
     def inititialize(self,context):

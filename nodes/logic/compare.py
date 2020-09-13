@@ -12,6 +12,13 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.125,0.125,0.125)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>compare two values</>.",
+                ""],
+        "python": ["<number>8</> <= <number>4</>"]
+
+    }
+
     operation: bpy.props.EnumProperty(items=[("==", "=", "Equal"), ("!=", "≠", "Not equal"), ("<", "<", "Smaller than"), (">", ">", "Bigger than"), ("<=", "≤", "Smaller or equal to"), (">=", "≥", "Bigger or equal to")],name="Operation", description="The operation you want to commence")
 
     def inititialize(self,context):
@@ -27,7 +34,7 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
-                        [node_data["input_data"][0]["code"], self.operation, node_data["input_data"][1]["code"]]
+                        ["(", node_data["input_data"][0]["code"], self.operation, node_data["input_data"][1]["code"], ")"]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]

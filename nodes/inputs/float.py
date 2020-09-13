@@ -12,6 +12,14 @@ class SN_FloatNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.23,0.65,0.75)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used as an <important>float input</>.",
+                "Floats are decimal numbers, for example <number>5.5</>, <number>24.453</>, <number>46.231</>"
+                ""],
+        "python": ["<number>8.21</>"]
+
+    }
+
     float_value: bpy.props.FloatProperty(name="Value")
 
     def inititialize(self,context):

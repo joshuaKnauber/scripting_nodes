@@ -12,6 +12,13 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = False
     bl_width_default = 225
 
+    docs = {
+        "text": ["This node is used to <important>set a variable</>."
+                ""],
+        "python": ["self.property_name = <number>3</>"]
+
+    }
+
     def inititialize(self, context):
         self.sockets.create_input(self, "EXECUTE", "Execute")
         self.sockets.create_output(self, "EXECUTE", "Execute")

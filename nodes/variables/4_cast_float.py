@@ -12,6 +12,13 @@ class SN_CastFloatNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.23,0.65,0.75)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>cast data to a float</>."
+                ""],
+        "python": ["float(<string>\"34.54\"</>)"]
+
+    }
+
     def inititialize(self, context):
         self.sockets.create_input(self,"DATA","Data")
         self.sockets.create_output(self,"FLOAT","Float")

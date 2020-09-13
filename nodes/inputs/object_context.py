@@ -12,6 +12,13 @@ class SN_ObjectContextNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.53, 0.55, 0.53)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node has a few outputs for <important>important objects</>.",
+                ""],
+        "python": ["bpy.context.active_object"]
+
+    }
+
     def inititialize(self,context):
         self.sockets.create_output(self,"OBJECT", "Active bone")
         self.sockets.create_output(self,"OBJECT", "Active object")

@@ -12,6 +12,13 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.125,0.125,0.125)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used for <important>comparing two booleans</>.",
+                ""],
+        "python": ["<red>True</> and <red>False</>"]
+
+    }
+
     andOr: bpy.props.EnumProperty(items=[(" and ", "And", "Both need to be true"), (" or ", "Or", "At least one needs to be true")],name="Operation", description="The operation you want to commence")
 
     def inititialize(self,context):

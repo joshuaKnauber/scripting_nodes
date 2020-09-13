@@ -12,6 +12,14 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.65,0,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used as an <important>boolean input</>.",
+                "This means it can be either <red>True</> or <red>False</>",
+                ""],
+        "python": ["<red>True</> or <red>False</>"]
+
+    }
+
     bool_value: bpy.props.BoolProperty(name="Value")
 
     def inititialize(self,context):

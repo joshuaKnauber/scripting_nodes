@@ -18,9 +18,21 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 
+    docs = {
+        "text": ["Enum compare is used to <important>see all options of the selected property</>.",
+                "",
+                "Object Input: <subtext>The object you want to get the properties from</>",
+                "Other Outputs: <subtext>The output will be executed if the enum corresponds to the outputs name</>",
+                "Tip: Press CTRL + H to hide unnecessary outputs"],
+        "python": ["if bpy.data.objects[0].display_type == <string>\"WIRE\"</>:",
+                   "    <function>print</>(<string>\"Wire\"</>)",
+                   "elif bpy.data.objects[0].display_type == <string>\"BOUNDS\"</>:",
+                   "    <function>print</>(<string>\"Bounds\"</>)"]
+
+    }
+
     def reset_data_type(self, context):
-        if self.inputs[1].links[0].from_socket.bl_idname == "SN_ObjectSocket":
-            self.update()
+        self.update()
 
     def update_name(self, context):
         for out in self.outputs:
@@ -72,9 +84,12 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_enum(self, context):
         if self.search_prop == "internal":
-            self.sockets.create_input(self,"OBJECT","Input")
+            if len(self.inputs) != 2:
+                self.sockets.create_input(self,"OBJECT","Input")
         else:
-            self.inputs.remove(self.inputs[1])
+            for input_socket in self.inputs:
+                if input_socket.name != "Execute":
+                    self.inputs.remove(input_socket)
 
     propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
     sn_enum_property_properties: bpy.props.CollectionProperty(type=SN_EnumSearchPropertyGroup)
