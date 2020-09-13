@@ -27,10 +27,14 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
     def _draw_install_package(self,layout):
         """ draws the button for installing packages """
-        row = layout.row()
-        row.scale_y = 1.5
+        row = layout.row(align=True)
         split = row.split(factor=0.5)
-        split.operator("scripting_nodes.install_package",icon="PACKAGE")
+        col = split.column(align=True)
+
+        row = col.row(align=True)
+        row.scale_y = 1.5
+        row.operator("scripting_nodes.install_package",icon="PACKAGE")
+        col.operator("wm.url_open",text="Developer Documentation",icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
         split.label(text="")
 
     def _draw_installed_package(self, package_data, index):
@@ -100,9 +104,10 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
         elif self.navigation == "MARKETPLACE":
 
-            row = self.layout.row(align=True)
-            row.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH")
-            row.prop(self,"marketplace_search",text="",icon="VIEWZOOM")
+            row = self.layout.row()
+            split = row.split(factor=0.35)
+            split.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH")
+            split.prop(self,"marketplace_search",text="",icon="VIEWZOOM")
 
             for package in context.scene.sn_marketplace:
                 if self.marketplace_search in package.title or not self.marketplace_search:
