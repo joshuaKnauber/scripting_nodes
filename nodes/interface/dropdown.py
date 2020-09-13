@@ -90,8 +90,8 @@ class SN_DropdownNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.search_value in self.search_properties:
                 return {"blocks": [{"lines": [[layout_type, ".prop(", node_data["input_data"][4]["code"], ", '", self.search_properties[self.search_value].identifier, "', expand=", node_data["input_data"][1]["code"], ", emboss=", node_data["input_data"][2]["code"], ", text=", node_data["input_data"][3]["code"], icon, ")"]],"indented": []}],"errors": errors}
         else:
-            if self.search_value in bpy.context.space_data.node_tree.sn_enum_property_properties:
-                return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_", ", '", bpy.context.space_data.node_tree.sn_enum_property_properties[self.search_value].name.replace(" ", "_"), "', expand=", node_data["input_data"][1]["code"], ", emboss=", node_data["input_data"][2]["code"], ", text=", node_data["input_data"][3]["code"], icon, ")"]],"indented": []}],"errors": errors}
+            if self.search_value in node_data["node_tree"].sn_enum_property_properties:
+                return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_", ", '", node_data["node_tree"].sn_enum_property_properties[self.search_value].name.replace(" ", "_"), "', expand=", node_data["input_data"][1]["code"], ", emboss=", node_data["input_data"][2]["code"], ", text=", node_data["input_data"][3]["code"], icon, ")"]],"indented": []}],"errors": errors}
 
         return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
 

@@ -140,7 +140,7 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             if_block.append({"lines": [["if ", node_data["input_data"][1]["code"], "." + self.sn_enum_property_properties[self.propName].identifier + " == '" + item.identifier + "':"]],"indented": [[output.links[0].to_socket]]})
         
         else:
-            if self.propName in bpy.context.space_data.node_tree.sn_enum_property_properties:
+            if self.propName in node_data["node_tree"].sn_enum_property_properties:
                 for output in self.outputs:
                     if output.is_linked:
                         if output.name != "Execute":

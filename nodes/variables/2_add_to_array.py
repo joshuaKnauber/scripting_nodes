@@ -117,18 +117,18 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             next_code = node_data["output_data"][0]["code"]
 
         blocks = [{"lines": [],"indented": []}]
-        if self.search_value in bpy.context.space_data.node_tree.search_variables:
-            if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
+        if self.search_value in node_data["node_tree"].search_variables:
+            if node_data["node_tree"].search_variables[self.search_value].is_array:
                 if self.operation == "index":
-                    add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.add().", bpy.context.space_data.node_tree.search_variables[self.search_value].type, " = ", node_data["input_data"][2]["code"]]
-                    blocks = [{"lines": [add_text, ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.move(len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array)-1, ", node_data["input_data"][1]["code"], ")"]], "indented": []}]
+                    add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.add().", node_data["node_tree"].search_variables[self.search_value].type, " = ", node_data["input_data"][2]["code"]]
+                    blocks = [{"lines": [add_text, ["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.move(len(bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array)-1, ", node_data["input_data"][1]["code"], ")"]], "indented": []}]
                 else:
-                    add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.add().", bpy.context.space_data.node_tree.search_variables[self.search_value].type, " = ", node_data["input_data"][1]["code"]]
+                    add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.add().", node_data["node_tree"].search_variables[self.search_value].type, " = ", node_data["input_data"][1]["code"]]
 
                     if self.operation == "end":
                         blocks = [{"lines": [add_text], "indented": []}]
                     elif self.operation == "start":
-                        blocks = [{"lines": [add_text, ["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.move(len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array)-1, 0)"]], "indented": []}]
+                        blocks = [{"lines": [add_text, ["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.move(len(bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array)-1, 0)"]], "indented": []}]
 
         return {"blocks": blocks + [{"lines": [[next_code]],"indented": []}], "errors": errors}
 

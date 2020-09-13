@@ -90,16 +90,16 @@ class SN_RemoveFromArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             next_code = node_data["output_data"][0]["code"]
 
         blocks = [{"lines": [],"indented": []}]
-        if self.search_value in bpy.context.space_data.node_tree.search_variables:
-            if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
+        if self.search_value in node_data["node_tree"].search_variables:
+            if node_data["node_tree"].search_variables[self.search_value].is_array:
                 if self.operation == "index":
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.remove(", node_data["input_data"][1]["code"], ")"]], "indented": []}]
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.remove(", node_data["input_data"][1]["code"], ")"]], "indented": []}]
                 elif self.operation == "start":
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.remove(0)"]], "indented": []}]
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.remove(0)"]], "indented": []}]
                 elif self.operation == "end":
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.remove(len(bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array)-1)"]], "indented": []}]
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.remove(len(bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array)-1)"]], "indented": []}]
                 else:
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + bpy.context.space_data.node_tree.search_variables[self.search_value].name + "_array.clear()"]], "indented": []}]
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.clear()"]], "indented": []}]
 
         return {"blocks": blocks + [{"lines": [[next_code]],"indented": []}], "errors": errors}
 

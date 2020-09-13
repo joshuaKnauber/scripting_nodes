@@ -78,7 +78,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
         self.update_op_name(None)
         self.sockets.create_input(self,"BOOLEAN","Should Run")
         self.sockets.create_output(self,"EXECUTE","Execute")
-        item = bpy.context.space_data.node_tree.custom_operator_properties.add()
+        item = context.space_data.node_tree.custom_operator_properties.add()
         item.name = self.op_name
         item.identifier = self.operator_uid
         item.description = self.description
