@@ -62,3 +62,13 @@ class SN_OT_RunFunction(bpy.types.Operator):
         if self.funcName != "":
             compiler().run_function(self.funcName)
         return {"FINISHED"}
+
+class SN_OT_ClearPrints(bpy.types.Operator):
+    bl_idname = "scripting_nodes.clear_prints"
+    bl_label = "Clear Print Messages"
+    bl_description = "Clears all print messages"
+    bl_options = {"REGISTER","INTERNAL","UNDO"}
+
+    def execute(self, context):
+        context.scene.sn_properties.print_texts.clear()
+        return {"FINISHED"}

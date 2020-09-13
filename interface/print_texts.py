@@ -15,9 +15,11 @@ class SN_PT_PrintTextPanel(bpy.types.Panel):
     def poll(cls, context):
         return len(bpy.context.scene.sn_properties.print_texts) > 0
 
-    def draw(self, context):
-        layout = self.layout
+    def draw_header(self,context):
+        self.layout.operator("scripting_nodes.clear_prints",icon="TRASH",text="")
 
+
+    def draw(self, context):
         for text in bpy.context.scene.sn_properties.print_texts:
-            layout.label(text=text.text)
+            self.layout.label(text=text.text)
 

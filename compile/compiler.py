@@ -320,8 +320,6 @@ class ScriptingNodesCompiler():
 
     def _unregister_tree(self, tree):
         """ unregisters the module if already registered and removes it """
-        bpy.context.scene.sn_properties.print_texts.clear()
-
         for module in self._modules:
             if module[ "node_tree" ] == tree:
                 if self._run_register and module["module"]:
@@ -346,6 +344,7 @@ class ScriptingNodesCompiler():
 
     def _recompile(self, tree):
         """ compiles the active node tree """
+        bpy.context.scene.sn_properties.print_texts.clear()
         self.remove_reroutes(tree) # this should be a temporary solution until this is solved
 
         tree.uid = choice(ascii_uppercase)
@@ -358,8 +357,9 @@ class ScriptingNodesCompiler():
 
         tree.use_fake_user = True
 
-        if bpy.context.area:
-            bpy.context.area.tag_redraw()
+        if bpy.context.screen:
+            for area in bpy.context.screen.areas:
+                area.tag_redraw()
 
         return success
 
