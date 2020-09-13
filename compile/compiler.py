@@ -330,8 +330,24 @@ class ScriptingNodesCompiler():
                 self._modules.remove(module)
                 break
 
+    def remove_reroutes(self, tree):
+        for node in tree.nodes:
+            if node.bl_idname == "NodeReroute":
+                left = None
+                if node.inputs[0].is_linked:
+                    left = node.inputs[0].links[0].from_socket
+                right = []
+                for link in node.outputs[0].links:
+                    right.append(link.to_socket)
+                tree.nodes.remove(node)
+                if left:
+                    for socket in right:
+                        tree.links.new(left, socket)
+
     def _recompile(self, tree):
         """ compiles the active node tree """
+        self.remove_reroutes(tree) # this should be a temporary solution until this is solved
+
         tree.uid = choice(ascii_uppercase)
         for _ in range(7):
             tree.uid += choice(ascii_lowercase)
