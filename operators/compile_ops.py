@@ -5,15 +5,17 @@ from ..compile.compiler import compiler
 class SN_OT_CompileActive(bpy.types.Operator):
     bl_idname = "scripting_nodes.compile_active"
     bl_label = "Compile Addon"
-    bl_description = "Compiles the active node trees addon"
+    bl_description = "Compiles the active node trees addon (Shift+R)"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
 
     @classmethod
     def poll(cls, context):
-        return True
+        if context.space_data.node_tree != None:
+            return context.space_data.node_tree.bl_idname == "ScriptingNodesTree"
 
     def execute(self, context):
         compiler().compile_active()
+        self.report({"INFO"},message="Successfully compiled addon!")
         return {"FINISHED"}
 
     def draw(self,context):

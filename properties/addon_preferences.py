@@ -1,16 +1,17 @@
 import bpy
 import os
 import json
+from ..operators.keymaps.keymaps import draw_keymaps
 
 class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
     bl_idname = __name__.partition('.')[0]
 
-    navigation: bpy.props.EnumProperty(items=[("PACKAGES","Packages","The place to manage your packages","PACKAGE",0),
-                                            ("MARKETPLACE","Marketplace","The place to find new packages","IMAGE",1)])
+    navigation: bpy.props.EnumProperty(items=[("PACKAGES","Your Packages","The place to manage your packages","PACKAGE",0),
+                                            ("MARKETPLACE","Marketplace","The place to find new packages","IMAGE",1),
+                                            ("SETTINGS","Settings","Settings for the addon","PREFERENCES",2)])
 
     has_seen_tutorial: bpy.props.BoolProperty(default=False)
-    has_seen_welcome_message: bpy.props.BoolProperty(default=False)
 
     def update_shortcuts(self,context):
         pass
@@ -94,6 +95,9 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             self.layout.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH")
             for package in context.scene.sn_marketplace:
                 self.draw_market_package(package)
+
+        elif self.navigation == "SETTINGS":
+            draw_keymaps(self.layout)
 
 """
 Access:
