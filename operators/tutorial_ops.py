@@ -158,7 +158,7 @@ class SN_DrawTutorial(DrawingFuncs, bpy.types.Operator):
             width, height = self.get_width_height(context)
             padding = 2 * scale
             outline_width = 1.5 * scale
-            close_button_size = 20 * scale
+            close_button_size = 17 * scale
             close_cross_width = 5 * scale
             font_size_title = int(14 * scale)
             font_size_text = int(13 * scale)
@@ -168,7 +168,7 @@ class SN_DrawTutorial(DrawingFuncs, bpy.types.Operator):
             self.black_shader.bind()
             self.black_shader.uniform_float("color", (0, 0, 0, 1.0))
 
-            self.create_backdrop(context,padding)
+            self.create_backdrop(context,0)
             self.backdrop_batch.draw(self.black_shader)
 
             # draw outline

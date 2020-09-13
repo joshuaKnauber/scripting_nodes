@@ -49,7 +49,7 @@ class SN_DrawDocs(DrawingFuncs, bpy.types.Operator):
             width, height = self.get_width_height(context)
             padding = 2 * scale
             outline_width = 1.5 * scale
-            close_button_size = 20 * scale
+            close_button_size = 17 * scale
             close_cross_width = 5 * scale
             font_size_title = int(14 * scale)
             font_size_text = int(13 * scale)

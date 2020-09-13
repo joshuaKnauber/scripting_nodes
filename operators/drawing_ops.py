@@ -1,6 +1,7 @@
 import bpy
 import gpu
 from gpu_extras.batch import batch_for_shader
+from gpu_extras.presets import draw_circle_2d
 import blf
 import bgl
 from ..handler.text_colors import TextColorHandler
@@ -117,15 +118,16 @@ class DrawingFuncs:
         self.white_shader.bind()
         self.white_shader.uniform_float("color", (1, 1, 1, 1.0))
 
-        self.create_outline(context, padding)
-        bgl.glLineWidth(outline_width)
-        self.outline_batch.draw(self.white_shader)
+        # self.create_outline(context, padding)
+        # bgl.glLineWidth(outline_width)
+        # self.outline_batch.draw(self.white_shader)
 
 
     def draw_close_setup(self,context,close_button_size,padding,outline_width,close_cross_width):
-        vertices = self.create_close_button(context, close_button_size, padding-outline_width/2)
-        self.close_batch.draw(self.white_shader)
-        self.buttons.append({
+        # vertices = self.create_close_button(context, close_button_size, padding-outline_width/2)
+        # self.close_batch.draw(self.white_shader)
+        vertices = self.create_close_button(context, close_button_size, padding+10)
+        buttonData = {
             "minX": min(vertices, key = lambda t: t[0])[0],
             "minY": min(vertices, key = lambda t: t[1])[1],
             "maxX": max(vertices, key = lambda t: t[0])[0],
@@ -133,13 +135,23 @@ class DrawingFuncs:
             "close": True,
             "url": None,
             "callback": None
-        })
+        }
+        self.buttons.append(buttonData)
+
+        bgl.glLineWidth(2)
+        for i in range(1,int(close_button_size//2)):
+            draw_circle_2d( (buttonData["minX"]+close_button_size//2,buttonData["minY"]+close_button_size//2), (0.9,0.15,0.25,1), max(1,close_button_size//2-i), 32)
+
+        scale = context.scene.sn_properties.tutorial_scale
+        blf.size(0, int(13*scale), 72)
+        width, height = blf.dimensions(0, "Esc")
+        self.draw_text("<subtext>Esc</>", int(13*scale), (buttonData["minX"]-width-int(10*scale) ,buttonData["minY"]+height//2), 0)
 
         # draw close cross
-        self.black_shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
-        self.black_shader.bind()
-        self.black_shader.uniform_float("color", (0, 0, 0, 1.0))
+        # self.black_shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+        # self.black_shader.bind()
+        # self.black_shader.uniform_float("color", (0, 0, 0, 1.0))
 
-        self.create_close_cross(context, close_button_size, padding-outline_width/2, 4)
-        bgl.glLineWidth(close_cross_width)
-        self.close_cross_batch.draw(self.black_shader)
+        # self.create_close_cross(context, close_button_size, padding-outline_width/2, 4)
+        # bgl.glLineWidth(close_cross_width)
+        # self.close_cross_batch.draw(self.black_shader)
