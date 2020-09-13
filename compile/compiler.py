@@ -293,20 +293,27 @@ class ScriptingNodesCompiler():
             "module": None,
             "errors": []
         }
-        self._modules.append(module)
 
         text = self._create_addon_text( tree )
-        module = None
-        if self._run_register:
-            module = text.as_module()
-        self._modules[-1]["text"] = text
-        self._modules[-1]["module"] = module
+        try:
+            if self._run_register:
+                created_module = text.as_module()
+            else:
+                created_module = None
+        except:
+            created_module = None
+        module["text"] = text
+        module["module"] = created_module
+
+        self._modules.append(module)
+
+        return created_module != None
 
     def _register_tree(self, tree):
         """ finds the matching module and registers it """
         for module in self._modules:
             if module["node_tree"] == tree:
-                if self._run_register:
+                if self._run_register and module["module"]:
                     module["module"].register()
                     if "def set_variables():" in module["text"].as_string() and bpy.context.space_data != None:
                         module["module"].set_variables()
@@ -317,8 +324,8 @@ class ScriptingNodesCompiler():
 
         for module in self._modules:
             if module[ "node_tree" ] == tree:
-                if self._run_register:
-                    module[ "module" ].unregister()
+                if self._run_register and module["module"]:
+                    module["module"].unregister()
                 bpy.data.texts.remove(module["text"])
                 self._modules.remove(module)
                 break
@@ -330,7 +337,7 @@ class ScriptingNodesCompiler():
             tree.uid += choice(ascii_lowercase)
 
         self._unregister_tree(tree)
-        self._create_module(tree)
+        success = self._create_module(tree)
         self._register_tree(tree)
 
         tree.use_fake_user = True
@@ -338,9 +345,11 @@ class ScriptingNodesCompiler():
         if bpy.context.area:
             bpy.context.area.tag_redraw()
 
+        return success
+
     def compile_active(self):
         """ recompiles the active tree """
-        self._recompile(bpy.context.space_data.node_tree)
+        return self._recompile(bpy.context.space_data.node_tree)
 
     def compile_tree(self, tree):
         """ recompiles the given tree """

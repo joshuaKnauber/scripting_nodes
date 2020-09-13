@@ -14,8 +14,11 @@ class SN_OT_CompileActive(bpy.types.Operator):
             return context.space_data.node_tree.bl_idname == "ScriptingNodesTree"
 
     def execute(self, context):
-        compiler().compile_active()
-        self.report({"INFO"},message="Successfully compiled addon!")
+        success = compiler().compile_active()
+        if success:
+            self.report({"INFO"},message="Successfully compiled addon!")
+        else:
+            self.report({"ERROR"},message="Encountered a fatal error when compiling! Please contact the developers!")
         return {"FINISHED"}
 
     def draw(self,context):
