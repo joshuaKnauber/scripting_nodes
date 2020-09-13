@@ -12,6 +12,13 @@ class SN_CastVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.6,0.2,0.8)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>cast data to a vector</>."
+                ""],
+        "python": []
+
+    }
+
     def update_inputs(self, context):
         if self.use_four_numbers:
             self.sockets.create_input(self, "FLOAT", "Fourth Number")

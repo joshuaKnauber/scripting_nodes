@@ -11,6 +11,13 @@ class SN_RemoveFromArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>remove elements from an array</>."
+                ""],
+        "python": ["self.property_name.remove(<number>2</>)"]
+
+    }
+
     def inititialize(self, context):
         self.sockets.create_input(self, "EXECUTE", "Execute")
         self.sockets.create_output(self, "EXECUTE", "Execute")

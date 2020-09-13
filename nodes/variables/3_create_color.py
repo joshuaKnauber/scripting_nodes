@@ -19,6 +19,13 @@ class SN_ColorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.6,0.2,0.8)
     should_be_registered = True
 
+    docs = {
+        "text": ["This node is used to <important>create a color variable</>."
+                ""],
+        "python": ["property_name: bpy.props.FloatVectorProperty(subtype=<string>\"COLOR\"</>, name=<string>\"My Property\"</>, description=<string>\"My description\"</>)"]
+
+    }
+
     value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable",subtype="COLOR")
     four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable",subtype="COLOR")
 

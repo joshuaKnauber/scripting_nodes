@@ -12,6 +12,13 @@ class SN_CastIntegerNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2,0.4,0.75)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>cast data to an integer</>."
+                ""],
+        "python": ["int(<string>\"543\"</>)"]
+
+    }
+
     def inititialize(self, context):
         self.sockets.create_input(self,"DATA","Data")
         self.sockets.create_output(self,"INTEGER","Integer")

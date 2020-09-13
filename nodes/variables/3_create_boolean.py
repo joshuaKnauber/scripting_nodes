@@ -44,6 +44,13 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.65,0,0)
     should_be_registered = True
 
+    docs = {
+        "text": ["This node is used to <important>create a boolean variable</>."
+                ""],
+        "python": ["property_name: bpy.props.BoolProperty(name=<string>\"My Property\"</>, description=<string>\"My description\"</>, default=<red>True</>)"]
+
+    }
+
     value: bpy.props.BoolProperty(default=True,name="Value",description="Value of this variable")
 
     def update_socket_value(self,context):

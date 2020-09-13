@@ -18,6 +18,13 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2,0.4,0.75)
     should_be_registered = True
 
+    docs = {
+        "text": ["This node is used to <important>create a integer variable</>."
+                ""],
+        "python": ["property_name: bpy.props.IntProperty(name=<string>\"My Property\"</>, description=<string>\"My description\"</>, default=<number>2</>)"]
+
+    }
+
     value: bpy.props.IntProperty(default=0,name="Value",description="Value of this variable")
 
     def update_socket_value(self,context):

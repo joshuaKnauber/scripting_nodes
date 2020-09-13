@@ -11,6 +11,13 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.75,0.75,0.75)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>get the value of a variable</>."
+                ""],
+        "python": ["self.property_name"]
+
+    }
+
     def inititialize(self, context):
         self.sockets.create_output(self, "DATA", "")
 

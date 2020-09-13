@@ -18,6 +18,13 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0,0.75,0)
     should_be_registered = True
 
+    docs = {
+        "text": ["This node is used to <important>create a string variable</>."
+                ""],
+        "python": ["property_name: bpy.props.StringProperty(name=<string>\"My Property\"</>, description=<string>\"My description\"</>, default=<string>\"Hi\"</>)"]
+
+    }
+
     value: bpy.props.StringProperty(default="",name="Value",description="Value of this variable")
 
     def update_socket_value(self,context):
