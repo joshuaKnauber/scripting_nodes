@@ -8,7 +8,7 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_IfProgramNode"
     bl_label = "If (Program)"
-    bl_icon = "CON_ACTION"
+    bl_icon = "SNAP_EDGE"
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 

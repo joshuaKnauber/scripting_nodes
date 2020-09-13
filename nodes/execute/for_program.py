@@ -7,7 +7,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_ForProgramNode"
     bl_label = "For (Program)"
-    bl_icon = "CON_ACTION"
+    bl_icon = "MATCUBE"
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 

@@ -7,7 +7,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 class SN_CastBooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_CastBooleanNode"
     bl_label = "Cast To Boolean"
-    bl_icon = "DRIVER_TRANSFORM"
+    bl_icon = "CON_TRANSFORM"
     bl_width_default = 130
     node_color = (0.65,0,0)
     should_be_registered = False

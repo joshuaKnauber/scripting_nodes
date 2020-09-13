@@ -10,7 +10,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_PanelNode"
     bl_label = "Panel"
-    bl_icon = "SORTALPHA"
+    bl_icon = "MENU_PANEL"
     bl_width_default = 250
     node_color = (0.89,0.6,0)
     should_be_registered = True

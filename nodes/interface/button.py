@@ -8,7 +8,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_ButtonNode"
     bl_label = "Button"
-    bl_icon = "SNAP_FACE"
+    bl_icon = "RADIOBUT_ON"
     node_color = (0.89,0.6,0)
     should_be_registered = True
 

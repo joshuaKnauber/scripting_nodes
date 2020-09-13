@@ -8,7 +8,7 @@ class SN_RepeatProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RepeatProgramNode"
     bl_label = "Repeat (Program)"
-    bl_icon = "CON_ACTION"
+    bl_icon = "FILE_REFRESH"
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 

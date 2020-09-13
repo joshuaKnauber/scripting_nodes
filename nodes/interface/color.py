@@ -13,7 +13,7 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
 class SN_ColorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_ColorInputNode"
     bl_label = "Display Color"
-    bl_icon = "SORTALPHA"
+    bl_icon = "MATERIAL_DATA"
     node_color = (0.89,0.6,0)
     bl_width_default = 190
     should_be_registered = False

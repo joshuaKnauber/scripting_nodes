@@ -10,7 +10,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_CreateOperator"
     bl_label = "Create Operator"
-    bl_icon = "CONSOLE"
+    bl_icon = "SEQ_CHROMA_SCOPE"
     bl_width_default = 250
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = True

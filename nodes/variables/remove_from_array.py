@@ -7,7 +7,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 class SN_RemoveFromArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_RemoveFromArrayVariableNode"
     bl_label = "Remove from Array"
-    bl_icon = "DRIVER_TRANSFORM"
+    bl_icon = "PANEL_CLOSE"
     node_color = (0.75,0.75,0.75)
     should_be_registered = False
 

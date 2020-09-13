@@ -14,7 +14,7 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_EnumCompareProgramNode"
     bl_label = "Enum Compare (Program)"
-    bl_icon = "CON_ACTION"
+    bl_icon = "LINENUMBERS_ON"
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 

@@ -8,7 +8,7 @@ class SN_RepeatLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RepeatLayoutNode"
     bl_label = "Repeat (Layout)"
-    bl_icon = "CON_ACTION"
+    bl_icon = "FILE_REFRESH"
     node_color = (0.89,0.6,0)
     should_be_registered = False
 

@@ -14,7 +14,7 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_EnumCompareLayoutNode"
     bl_label = "Enum Compare (Layout)"
-    bl_icon = "CON_ACTION"
+    bl_icon = "LINENUMBERS_ON"
     node_color = (0.89,0.6,0)
     should_be_registered = False
 

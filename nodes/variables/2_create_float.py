@@ -14,7 +14,7 @@ bpy.utils.register_class(SN_FloatArray)
 class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_FloatVariableNode"
     bl_label = "Float Variable"
-    bl_icon = "DRIVER_TRANSFORM"
+    bl_icon = "CON_TRANSFORM"
     node_color = (0.23,0.65,0.75)
     should_be_registered = True
 

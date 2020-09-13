@@ -7,7 +7,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_AddToArrayVariableNode"
     bl_label = "Add to Array"
-    bl_icon = "DRIVER_TRANSFORM"
+    bl_icon = "ADD"
     node_color = (0.75,0.75,0.75)
     should_be_registered = False
 

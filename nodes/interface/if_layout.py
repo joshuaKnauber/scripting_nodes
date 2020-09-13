@@ -8,7 +8,7 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_IfLayoutNode"
     bl_label = "If (Layout)"
-    bl_icon = "CON_ACTION"
+    bl_icon = "SNAP_EDGE"
     node_color = (0.89,0.6,0)
     should_be_registered = False
 

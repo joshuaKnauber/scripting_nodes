@@ -8,7 +8,7 @@ class SN_AppendFromFileNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_AppendFromFileNode"
     bl_label = "Append from file"
-    bl_icon = "CONSOLE"
+    bl_icon = "APPEND_BLEND"
     node_color = (0.2, 0.2, 0.2)
     bl_width_default = 300
     should_be_registered = False
