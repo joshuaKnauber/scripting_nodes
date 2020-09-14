@@ -1,10 +1,18 @@
 {
-    "Add monkey": {
-        "tree_name": "Add Monkey", 
-        "icon": "MONKEY"
+    "Layout": {
+        "tree_name": "Layout",
+        "icon": "RESTRICT_VIEW_OFF"
     },
-    "Add scalable monkey": {
-        "tree_name": "Add Scalable Monkey", 
-        "icon": "FULLSCREEN_ENTER"
+    "Operator": {
+        "tree_name": "Operator",
+        "icon": "SEQ_CHROMA_SCOPE"
+    },
+    "Object Data": {
+        "tree_name": "Object Data",
+        "icon": "OUTLINER_OB_GROUP_INSTANCE"
+    },
+    "Variables": {
+        "tree_name": "Variables",
+        "icon": "DRIVER_TRANSFORM"
     }
 }
