@@ -237,6 +237,7 @@ class ScriptingNodesCompiler():
         text.write(cd.license_block())
         self._write_paragraphs(text, 2)
         text.write(cd.scripting_nodes_block())
+        text.write("\nsn_tree_name = \""+tree.name+"\"")
         self._write_paragraphs(text,2)
 
         self.write_addon_info(text,tree)
@@ -245,9 +246,13 @@ class ScriptingNodesCompiler():
         text.write(self._get_needed_imports(tree))
         text.write("\nfrom bpy.app.handlers import persistent")
         self._write_paragraphs(text,2)
+        
+        text.write(cd.comment_block("UTILITY FUNCTIONS"))
+        text.write(cd.print_function_block())
+        self._write_paragraphs(text,2)
+
 
         if self._using_cast(tree):
-            text.write(cd.comment_block("UTILITY FUNCTIONS"))
             text.write(cd.utility_block())
             self._write_paragraphs(text,2)
 

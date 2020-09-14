@@ -105,12 +105,13 @@ def depsgraph_handler(dummy):
         if area.type == "NODE_EDITOR":
             if area.spaces[0].tree_type == "ScriptingNodesTree":
                 if area.spaces[0].node_tree:
-                    if not area.spaces[0].node_tree.added_basic_nodes:
-                        add_basic_nodes(area.spaces[0].node_tree)
+                    if hasattr(area.spaces[0].node_tree,"added_basic_nodes"):
+                        if not area.spaces[0].node_tree.added_basic_nodes:
+                            add_basic_nodes(area.spaces[0].node_tree)
 
-                        prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
-                        if not prefs.has_seen_tutorial:
-                            bpy.ops.scripting_nodes.welcome_message("INVOKE_DEFAULT")
+                            prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
+                            if not prefs.has_seen_tutorial:
+                                bpy.ops.scripting_nodes.welcome_message("INVOKE_DEFAULT")
 
 def register():
     # register the classes of the addon

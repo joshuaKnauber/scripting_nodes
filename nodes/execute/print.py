@@ -41,9 +41,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
             "blocks": [
                 {
                     "lines": [
-                        ["print("] + print_text + [")"],
-                        ["try: bpy.context.scene.sn_properties.print_texts.add().text = str("] + print_text + [")"],
-                        ["except: pass"]
+                        ["sn_print("] + print_text + [")"]
                     ],
                     "indented": [
                     ]

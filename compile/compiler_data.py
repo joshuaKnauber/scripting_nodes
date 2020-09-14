@@ -28,6 +28,21 @@ class CompilerData():
 
     def unregister_block(self):
         return "def unregister():"
+
+    def print_function_block(self):
+        return """def sn_print(text):
+    print(text) # actual print command
+    try: # try to find the area in which the addon is opened and add the print text
+        for area in bpy.context.screen.areas:
+            if area.type == "NODE_EDITOR":
+                if area.spaces[0].node_tree:
+                    if area.spaces[0].node_tree.bl_idname == "ScriptingNodesTree":
+                        if sn_tree_name == area.spaces[0].node_tree.name:
+                            bpy.context.scene.sn_properties.print_texts.add().text = str(text)
+
+        for area in bpy.context.screen.areas:
+            area.tag_redraw()
+    except: pass"""
         
     def utility_block(self):
         return """def cast_int(cast):
