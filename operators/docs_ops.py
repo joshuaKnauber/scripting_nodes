@@ -74,7 +74,7 @@ class SN_DrawDocs(DrawingFuncs, bpy.types.Operator):
                     # draw tutorial text
                     y_offset = height - padding - font_size_text - 10
                     for index, line in enumerate(node.docs["text"]):
-                        y_offset -= 3
+                        y_offset -= 5
                         if not line:
                             y_offset -= font_size_text
                         y_offset -= self.draw_text(line,font_size_text,(padding+10, y_offset),0)
@@ -85,7 +85,7 @@ class SN_DrawDocs(DrawingFuncs, bpy.types.Operator):
                         y_offset -= self.draw_text("Python Example:",font_size_python,(padding+10,y_offset),0)
                         y_offset -= 8
                         for index, line in enumerate(node.docs["python"]):
-                            y_offset -= 5
+                            y_offset -= 7
                             y_offset -= self.draw_text(line,font_size_python,(padding+10, y_offset),0)
                 else:
                     self.draw_text("<serpens>SERPENS</> - Select a node from the addon to show infos",font_size_title,(padding+10,padding+10),0)

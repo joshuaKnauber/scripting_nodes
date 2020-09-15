@@ -15,6 +15,34 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = True
 
+    docs = {
+        "text": ["This node adds a <important>panel to the interface.</>",
+                "Press the 'Select Location' button to pick where the panel should be displayed"
+                "",
+                "Label: <subtext>This is the label that will be shown in the panels header.</>",
+                "Hide Header: <subtext>This determines if the header of the panel should be shown or hidden.</>",
+                "Default Closed: <subtext>If this is True, the panel will be closed by default.</>",
+                "Show Panel: <subtext>This determines if the panel should be shown or hidden.</>",
+                "",
+                "Header Output: You can add layouts to the header here.",
+                "Panel Output: You can add layouts to the panel here."],
+        "python": ["<function>class</> My_PT_Panel(bpy.types.Panel):",
+                   "    bl_idname = <string>'My_PT_Panel'</>",
+                   "    bl_label = <string>'My Panel'</>",
+                   "    bl_space_type = <string>'PROPERTIES'</>",
+                   "    bl_region_type = <string>'WINDOW'</>",
+                   "    bl_context = <string>'object'</>",
+                   "    bl_options = {<string>\"HIDE_HEADER\"</>}",
+                   "",
+                   "    <yellow>@classmethod</>",
+                   "    <grey>def</> <function>poll</>(<blue>cls</>, <blue>context</>):",
+                   "        return <red>True</>",
+                   "",
+                   "    <grey>def</> <function>draw</>(<blue>self</>, <blue>context</>):",
+                   "        layout = self.layout",
+                   "        layout.<function>label</>(text=<string>\"My label text\"</>, icon=<string>\"MONKEY\"</>)"]
+    }
+
     def space_items(self,context):
         items = []
         for location in get_possible_panel_locations():
