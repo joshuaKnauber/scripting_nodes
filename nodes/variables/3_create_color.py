@@ -128,7 +128,7 @@ class SN_ColorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 col.prop(self,"value",text="")
 
-        layout.prop(self,"use_four_numbers")
+        layout.prop(self,"use_four_numbers", text="Use Alpha")
         layout.prop(self,"is_array")
 
         if self.is_array:

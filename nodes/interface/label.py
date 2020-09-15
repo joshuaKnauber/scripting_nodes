@@ -12,6 +12,13 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["The label node can add <important>text and an icon</> in your interface.",
+                "",
+                "Text: <subtext>The text that will be shown on the label</>"],
+        "python": ["layout.<function>label</>(text=<string>\"My label text\"</>, icon=<string>\"MONKEY\"</>)"]
+    }
+
     def inititialize(self,context):
         self.sockets.create_input(self,"LAYOUT","Layout")
         self.sockets.create_input(self,"STRING","Text")

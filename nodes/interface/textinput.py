@@ -21,12 +21,14 @@ class SN_TextInputNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = False
 
     docs = {
-        "text": ["This node is used to <important>display a text input</>.",
-                "Emboss Input: Text is embossed in the layout",
-                "Text Input: The text that is displayed next to the input",
-                ""],
-        "python": ["layout.prop(bpy.data.objects[0], 'name', emboss=True, text=\"Name\")"]
-
+        "text": ["The text node can add <important>a text input</> to your interface.",
+                "",
+                "Internal/Custom: <subtext>Internal uses the Input Socket while custom is looking for String variables in your nodes</>",
+                "                           <subtext>You can select the property from the search below this</>",
+                "Emboss: <subtext>If the input should have an embossed look</>",
+                "Text: <subtext>The text that will be shown on the input</>",
+                "Input: <subtext>The object data that contains the string property</>"],
+        "python": ["layout.<function>prop</>(data, <string>\"string_property\"</>, text=<string>\"My input text\"</>)"]
     }
 
     def reset_data_type(self, context):
