@@ -1,5 +1,5 @@
 #SN_AppendFromFileNode
-
+ 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 
