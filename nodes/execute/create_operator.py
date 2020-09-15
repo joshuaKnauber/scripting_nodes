@@ -20,7 +20,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                 "",
                 "Should Run Input: <subtext>Operator isn't executed if False</>",
                 "Confirm: <subtext>Operator needs to be confirmed</>"],
-        "python": ["<function>class</> My_Operator(bpy.types.Operator):",
+        "python": ["<function>class</> My_OT_Operator(bpy.types.Operator):",
                    "    bl_idname = <string>'my_category.my_operator'</>",
                    "    bl_label = <string>'My Operator'</>",
                    "    bl_description = <string>'My Operators description'</>",
