@@ -12,6 +12,13 @@ class SN_BranchNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["The branch node <important>allows you to use the same layout type for multiple sockets</>.",
+                ""],
+        "python": []
+    }
+
+
     def inititialize(self,context):
         self.sockets.create_input(self,"LAYOUT","Layout")
         self.sockets.create_output(self,"LAYOUT","Layout", True)

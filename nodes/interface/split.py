@@ -12,6 +12,15 @@ class SN_SplitNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["The split node can change a layout to <important>be split in two sides</>.",
+                "",
+                "Aligned: <subtext>Align all layouts with each other</>",
+                "Enabled: <subtext>Only splits the layout if this is True</>",
+                "Alert: <subtext>Is diplayed red like an alert</>"],
+        "python": ["layout.<function>split</>(align=<red>True</>, factor=<number>0.4</>)"]
+    }
+
     def inititialize(self,context):
         self.sockets.create_input(self,"LAYOUT","Layout")
         factor = self.sockets.create_input(self, "FLOAT", "Factor")

@@ -12,6 +12,13 @@ class SN_SeperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["The separator node <important>separates the layout</>.",
+                "",
+                "Factor: <subtext>How big the separator is</>"],
+        "python": ["layout.<function>separator</>(factor=<number>0.9</>)"]
+    }
+
     def inititialize(self,context):
         self.sockets.create_input(self,"LAYOUT","Layout")
         factor = self.sockets.create_input(self, "FLOAT", "Factor")

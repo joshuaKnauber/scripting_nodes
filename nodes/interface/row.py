@@ -12,6 +12,15 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["The row node can display a layout in <important> a row or from left to right</>.",
+                "",
+                "Aligned: <subtext>All following nodes are aligned</>",
+                "Enabled: <subtext>Only displays a column if this is True</>",
+                "Alert: <subtext>Is diplayed red like an alert</>"],
+        "python": ["layout.<function>row</>(align=True)"]
+    }
+
     def inititialize(self,context):
         self.sockets.create_input(self,"LAYOUT","Layout")
 

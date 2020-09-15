@@ -12,6 +12,17 @@ class SN_RepeatLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["The repeat layout node is used to <important>repeat a certain block of layout nodes a number of times</>.",
+                "",
+                "Repetitions Input: <subtext>The number of times the nodes get executed</>",
+                "Repeat Output: <subtext>Whatever is connected here will be repeated, can be any number of layout nodes (using branch layout)</>",
+                "Step Output: <subtext>The current index of the step starting at 0</>"],
+        "python": ["<function>for</> Step in <function>range</>( <number>5</> ):",
+                   "    layout.label(text='Something')"]
+    }
+
+
     def get_var_name(self):
         highest_var_name = 0
         for node in bpy.context.space_data.node_tree.nodes:

@@ -12,6 +12,18 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = True
 
+    docs = {
+        "text": ["The button node creates <important>a clickable button in your layout</>.",
+                "",
+                "Text Input: <subtext>The text that is displayed on the button</>",
+                "Description Input: <subtext>The description of the button</>",
+                "Emboss: <subtext>If the input should have an embossed look</>",
+                "Depress: <subtext>The button depreesses in the layout</>",
+                "Tip: Press CTRL + H to hide unnecessary outputs"],
+        "python": ["layout.operator(<string>\"scripting_nodes.my_test_operator\"</>,text=<string>'Test'</>,emboss=True,depress=False)"]
+
+    }
+
     operator_uid: bpy.props.StringProperty()
 
     def inititialize(self,context):

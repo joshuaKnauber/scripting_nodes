@@ -18,6 +18,17 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["Enum compare layout is used to <important>see all options of the selected property</>.",
+                "",
+                "Object Input: <subtext>The object you want to get the properties from</>",
+                "Other Outputs: <subtext>The output will be displayed if the enum corresponds to the outputs name</>",
+                "Tip: Press CTRL + H to hide unnecessary outputs"],
+        "python": ["if bpy.data.objects[0].display_type == <string>\"WIRE\"</>:",
+                   "    layout.label(text=<string>\"Wire\"</>)"]
+
+    }
+
     def reset_data_type(self, context):
         self.update()
 

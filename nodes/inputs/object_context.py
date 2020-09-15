@@ -14,6 +14,7 @@ class SN_ObjectContextNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     docs = {
         "text": ["This node has a few outputs for <important>important objects</>.",
+                "Tip: Press CTRL + H to hide unnecessary outputs",
                 ""],
         "python": ["bpy.context.active_object"]
 

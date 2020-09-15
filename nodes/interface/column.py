@@ -12,6 +12,15 @@ class SN_ColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["The column node can display a layout in <important> a column or from top to bottom</>.",
+                "",
+                "Aligned: <subtext>All following nodes are aligned</>",
+                "Enabled: <subtext>Only displays a box if this is True</>",
+                "Alert: <subtext>Is diplayed red like an alert</>"],
+        "python": ["layout.<function>column</>(align=True)"]
+    }
+
     def inititialize(self,context):
         self.sockets.create_input(self,"LAYOUT","Layout")
 

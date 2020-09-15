@@ -11,6 +11,17 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["The for layout node <important>repeats a layout for each element in a data block collection</>.",
+                "",
+                "Collection Input: <subtext>The data block collection you want to go through</>",
+                "Repeat Output:  <subtext>The layout you want to display for every element</>",
+                "Element Output: <subtext>The element that is in the data block (for example a pose bone)</>",
+                "Index Output: <subtext>The index of the element starting from 0</>"],
+        "python": ["for obj in bpy.data.objects:",
+                   "    layout.label(text=obj.name)"]
+    }
+
     def reset_data_type(self, context):
         if self.inputs[1].links[0].from_socket.bl_idname in ["SN_CollectionSocket", "SN_ObjectSocket"]:
             if self.outputs[1].is_linked:

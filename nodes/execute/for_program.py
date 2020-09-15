@@ -14,7 +14,7 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
     docs = {
         "text": ["The For Node is used to <important>do something for every item in a data block</>.",
                 "",
-                "Collection Input: <subtext>The data block you want to go through</>",
+                "Collection Input: <subtext>The data block collection you want to go through</>",
                 "Repeat Output:  <subtext>The nodes you want to repeat for every element</>",
                 "Element Output: <subtext>The element that is in the data block (for example a pose bone)</>",
                 "Index Output: <subtext>The index of the element starting from 0</>"],

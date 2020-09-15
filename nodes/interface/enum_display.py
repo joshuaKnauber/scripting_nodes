@@ -20,6 +20,18 @@ class SN_EnumDisplayNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 190
     should_be_registered = False
 
+    docs = {
+        "text": ["The enum diplay node can add <important>a enum input</> to your interface.",
+                "",
+                "Internal/Custom: <subtext>Internal uses the Input Socket while custom is looking for Enum variables in your nodes</>",
+                "                           <subtext>You can select the property from the search below this</>",
+                "Expand: <subtext>If the input should be expanded</>",
+                "Emboss: <subtext>If the input should have an embossed look</>",
+                "Text: <subtext>The text that will be shown on the input</>",
+                "Input: <subtext>The object data that contains the enum property</>"],
+        "python": ["layout.<function>prop</>(data, <string>\"enum_property\"</>, text=<string>\"My input text\"</>)"]
+    }
+
     def reset_data_type(self, context):
         self.search_properties.clear()
         self.update()

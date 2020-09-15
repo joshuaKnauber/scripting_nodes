@@ -12,6 +12,16 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = False
 
+    docs = {
+        "text": ["The if layout node <important>does two different things depending on the input</>.",
+                "",
+                "Value: <subtext>If this is True the 'Do' is displayed else 'Else' is displayed</>"],
+        "python": ["if <red>True</>:",
+                   "    layout.label(text=<string>'Hi'</>)",
+                   "else:",
+                   "    layout.label(text=<string>'Bye'</>)"]
+    }
+
     def inititialize(self,context):
         self.sockets.create_input(self,"LAYOUT","Layout")
         self.sockets.create_input(self,"BOOLEAN","Value")
