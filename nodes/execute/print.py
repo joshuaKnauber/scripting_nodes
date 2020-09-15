@@ -15,7 +15,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
     docs = {
         "text": ["The print node is used to <important>write things to the console</>.",
                 "",
-                "Value Inputs: <subtext>What is connected here will be printed.",
+                "Value Inputs: <subtext>What is connected here will be printed.</>",
                 "<subtext>                   This can be any type of data like </>numbers, strings, etc."],
         "python": ["<function>print</>( <string>\"my example\"</>, <number>123</>, <string>\"test\"</> )"]
     }
