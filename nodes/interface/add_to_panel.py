@@ -15,6 +15,18 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.89,0.6,0)
     should_be_registered = True
 
+    docs = {
+        "text": ["This node adds <important>layouts to an existing panel.</>",
+                "Press the 'Select Location' button to pick where your layouts should go."
+                "",
+                "Layout Output: You can add layouts to the panel here."],
+        "python": ["<grey>def</> <function>add_this_to_panel</>(<blue>self</>, <blue>context</>):",
+                   "    layout = self.layout",
+                   "    layout.<function>label</>(text=<string>\"My label text\"</>, icon=<string>\"MONKEY\"</>)",
+                   "",
+                   "bpy.types.RENDER_PT_render.append(add_this_to_panel)"]
+    }
+
     panel_idname: bpy.props.StringProperty()
     panel_name: bpy.props.StringProperty()
     append: bpy.props.BoolProperty()
