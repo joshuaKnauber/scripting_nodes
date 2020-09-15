@@ -83,11 +83,11 @@ class SN_ColorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                         data_type = self.inputs[3].links[0].from_node.data_type(self.inputs[3].links[0].from_socket)
                         if data_type != "":
                             for prop in eval(data_type).bl_rna.properties:
-                                if prop.subtype == "COLOR":
-                                    item = self.search_properties.add()
-                                    item.name = prop.name
-                                    item.identifier = prop.identifier
-                                    item.description = prop.description
+                                #if prop.subtype == "COLOR":
+                                item = self.search_properties.add()
+                                item.name = prop.name
+                                item.identifier = prop.identifier
+                                item.description = prop.description
 
     search_value: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)

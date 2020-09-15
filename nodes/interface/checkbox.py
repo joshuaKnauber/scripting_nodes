@@ -14,11 +14,21 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
 
 class SN_CheckboxNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_CheckboxNode"
-    bl_label = "Checkbox"
+    bl_label = "Display Checkbox"
     bl_icon = "CON_TRANSFORM"
     node_color = (0.89,0.6,0)
     bl_width_default = 190
     should_be_registered = False
+
+    docs = {
+        "text": ["This node is used to <important>display a checkbox or toggle button</>.",
+                "Toggle Input: Displays a toggle input instead of a checkbox",
+                "Emboss Input: Toggle is embossed in the layout",
+                "Text Input: The text that is displayed next to the checkbox",
+                ""],
+        "python": ["layout.prop(bpy.data.objects[0], 'display_bounds', emboss=True, text=\"Name\")"]
+
+    }
 
     def reset_data_type(self, context):
         self.search_properties.clear()

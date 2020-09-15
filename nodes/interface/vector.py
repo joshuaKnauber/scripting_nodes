@@ -18,6 +18,16 @@ class SN_VectorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 190
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>display a vector</>.",
+                "Emboss Input: Vector is embossed in the layout",
+                "Text Input: The text that is displayed next to the vector",
+                "Tip: Works well with the column node"
+                ""],
+        "python": ["layout.prop(bpy.data.objects[0], 'location', emboss=True, text=\"Location\")"]
+
+    }
+
     def reset_data_type(self, context):
         self.search_properties.clear()
         self.update()
@@ -84,18 +94,18 @@ class SN_VectorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                         if data_type != "":
                             for prop in eval(data_type).bl_rna.properties:
                                 if prop.type == "VECTOR":
-                                    if prop.subtype != "COLOR":
+                                    #if prop.subtype != "COLOR":
+                                    item = self.search_properties.add()
+                                    item.name = prop.name
+                                    item.identifier = prop.identifier
+                                    item.description = prop.description
+                                elif prop.type == "INT" or prop.type == "FLOAT":
+                                    if prop.is_array:
+                                        #if prop.subtype != "COLOR":
                                         item = self.search_properties.add()
                                         item.name = prop.name
                                         item.identifier = prop.identifier
                                         item.description = prop.description
-                                elif prop.type == "INT" or prop.type == "FLOAT":
-                                    if prop.is_array:
-                                        if prop.subtype != "COLOR":
-                                            item = self.search_properties.add()
-                                            item.name = prop.name
-                                            item.identifier = prop.identifier
-                                            item.description = prop.description
 
     search_value: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)

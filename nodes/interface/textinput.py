@@ -20,6 +20,15 @@ class SN_TextInputNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 190
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>display a text input</>.",
+                "Emboss Input: Text is embossed in the layout",
+                "Text Input: The text that is displayed next to the input",
+                ""],
+        "python": ["layout.prop(bpy.data.objects[0], 'name', emboss=True, text=\"Name\")"]
+
+    }
+
     def reset_data_type(self, context):
         self.search_properties.clear()
         self.update()
