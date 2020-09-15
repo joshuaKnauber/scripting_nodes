@@ -99,9 +99,9 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                     items.append( (location["category"],location["category"],location["category"]) )
         return items
 
-    space: bpy.props.EnumProperty(name="Space",description="Space the panel should go in",items=space_items)
-    region: bpy.props.EnumProperty(name="Region",description="Region the panel should go in",items=region_items)
-    context: bpy.props.EnumProperty(name="Context",description="Context the panel should be shown in",items=context_items)
+    space: bpy.props.StringProperty(name="Space",description="Space the panel should go in")
+    region: bpy.props.StringProperty(name="Region",description="Region the panel should go in")
+    context: bpy.props.StringProperty(name="Context",description="Context the panel should be shown in")
     category: bpy.props.EnumProperty(name="Category",description="Category the panel should be shown in",items=category_items)
     custom_category: bpy.props.StringProperty(name="Custom Category",description="Category the panel should be shown in",default="My Category")
 
