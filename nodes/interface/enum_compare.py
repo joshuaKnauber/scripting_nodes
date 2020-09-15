@@ -19,22 +19,16 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = False
 
     def reset_data_type(self, context):
-        if self.inputs[1].links[0].from_socket.bl_idname == "SN_ObjectSocket":
-            self.update()
+        self.update()
 
     def update_name(self, context):
-        for out in self.outputs:
-            if out.name != "Layout":
-                try:
-                    self.outputs.remove(out)
-                except RuntimeError:
-                    pass 
+        self.outputs.clear()
         self.generate_sockets()
 
     def update_node(self):
         self.sn_enum_property_properties.clear()
 
-        if len(self.inputs) == 2:
+        if len(self.inputs) == 2 and self.search_prop == "internal":
             if len(self.inputs[1].links) == 1:
                 if self.inputs[1].links[0].from_socket.bl_idname == "SN_ObjectSocket":
 
@@ -55,6 +49,7 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.propName = ""
 
     def generate_sockets(self):
+        self.outputs.clear()
         if self.search_prop == "internal":
             if self.propName in self.sn_enum_property_properties:
                 data_type = self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket)
@@ -71,13 +66,15 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 self.sockets.create_output(self,"LAYOUT", array_item.name)
 
     def update_enum(self, context):
+        self.outputs.clear()
         if self.search_prop == "internal":
             if len(self.inputs) != 2:
                 self.sockets.create_input(self,"OBJECT","Input")
         else:
             for input_socket in self.inputs:
-                if input_socket.name != "Execute":
+                if input_socket.name != "Layout":
                     self.inputs.remove(input_socket)
+        self.generate_sockets()
 
     propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
     sn_enum_property_properties: bpy.props.CollectionProperty(type=SN_EnumSearchPropertyGroup)
@@ -100,14 +97,7 @@ class SN_EnumCompareLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                     box = col.box()
                     box.label(text=bpy.context.space_data.node_tree.sn_enum_property_properties[self.propName].description)
             else:
-                if len(self.outputs) > 1:
-                    for out in self.outputs:
-                        if out.name != "Layout":
-                            try:
-                                self.outputs.remove(out)
-                            except RuntimeError:
-                                pass
-        
+                self.outputs.clear()
 
     def evaluate(self, socket, node_data, errors):
         if_block = []

@@ -1,4 +1,4 @@
-#SN_DropdownNode
+#SN_EnumDisplayNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
@@ -12,9 +12,9 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
     description: bpy.props.StringProperty(name="Description",default="")
 
 
-class SN_DropdownNode(bpy.types.Node, SN_ScriptingBaseNode):
-    bl_idname = "SN_DropdownNode"
-    bl_label = "Display Dropdown"
+class SN_EnumDisplayNode(bpy.types.Node, SN_ScriptingBaseNode):
+    bl_idname = "SN_EnumDisplayNode"
+    bl_label = "Display Enum"
     bl_icon = "COLLAPSEMENU"
     node_color = (0.89,0.6,0)
     bl_width_default = 190

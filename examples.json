@@ -14,5 +14,9 @@
     "Variables": {
         "tree_name": "Variables",
         "icon": "DRIVER_TRANSFORM"
+    },
+    "Enum Example": {
+        "tree_name": "Enum",
+        "icon": "COLLAPSEMENU"
     }
 }
