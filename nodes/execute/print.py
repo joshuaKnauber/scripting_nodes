@@ -10,7 +10,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Print"
     bl_icon = "CONSOLE"
     node_color = (0.2, 0.2, 0.2)
-    should_be_registered = False
+    should_be_registered = False 
 
     docs = {
         "text": ["The print node is used to <important>write things to the console</>.",
