@@ -72,7 +72,7 @@ class ScriptingNodesCompiler():
         """ returns the code block for the given node """
         node_code = ""
         input_output_data, errors = self._get_node_data(node)
-        node_data = node.evaluate(output,input_output_data,errors)
+        node_data = node.evaluate_internal(output,input_output_data,errors)
         for block in node_data["blocks"]:
             node_code += self._compile_code_block(block, indents)
         self._add_errors_to_active(node_data["errors"])
@@ -299,6 +299,8 @@ class ScriptingNodesCompiler():
             "errors": []
         }
 
+        self._modules.append(module)
+
         text = self._create_addon_text( tree )
         try:
             if self._run_register:
@@ -309,8 +311,6 @@ class ScriptingNodesCompiler():
             created_module = None
         module["text"] = text
         module["module"] = created_module
-
-        self._modules.append(module)
 
         return created_module != None
 

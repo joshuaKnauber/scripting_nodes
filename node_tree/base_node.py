@@ -14,6 +14,8 @@ class SN_ScriptingBaseNode:
 
     should_be_registered = False # customizable
 
+    min_blender_version = None
+
     docs = { # customizable
         "text": ["<orange>This node hasn't been documented yet.</>"],
         "python": []
@@ -200,6 +202,35 @@ class SN_ScriptingBaseNode:
 
         self.update_node()
 
+    def is_valid_blender_version(self):
+        if not self.min_blender_version:
+            return True
+        else:
+            version = bpy.app.version
+            if version[0] > self.min_blender_version[0]:
+                return True
+            if version[0] == self.min_blender_version[0] and version[1] > self.min_blender_version[1]:
+                return True
+            if version[0] == self.min_blender_version[0] and version[1] == self.min_blender_version[1] and version[2] > self.min_blender_version[2]:
+                return True
+            if version == self.min_blender_version:
+                return True
+            return False
+
+    def evaluate_internal(self, socket, node_data, errors):
+        if self.is_valid_blender_version():
+            return self.evaluate(socket, node_data, errors)
+        else:
+            errors.append({
+                "title": "Incompatible blender version",
+                "message": "This node requires blender version "+str(self.min_blender_version).replace("(","").replace(")","").replace(" ","").replace(",","."),
+                "node": self,
+                "fatal": True
+            })
+            return {
+            "blocks": [{"lines": [], "indented": []}],
+            "errors": errors 
+        }
 
 
 
