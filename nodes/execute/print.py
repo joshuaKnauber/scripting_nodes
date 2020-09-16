@@ -12,8 +12,6 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = False
 
-    min_blender_version = (2,90,0)
-
     docs = {
         "text": ["The print node is used to <important>write things to the console</>.",
                 "",
