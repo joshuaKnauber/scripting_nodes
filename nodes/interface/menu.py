@@ -1,4 +1,4 @@
-#SN_PieMenuNode
+#SN_MenuNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
@@ -6,10 +6,10 @@ from ...operators.panel_ops import get_possible_panel_locations
 from uuid import uuid4
 
 
-class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_PieMenuNode"
-    bl_label = "Pie Menu"
+    bl_idname = "SN_MenuNode"
+    bl_label = "Menu"
     bl_icon = "MENU_PANEL"
     bl_width_default = 250
     node_color = (0.89,0.6,0)
@@ -43,29 +43,26 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
                    "        layout.<function>label</>(text=<string>\"My label text\"</>, icon=<string>\"MONKEY\"</>)"]
     }
 
-    label: bpy.props.StringProperty(default="My Menu",name="Label", description="Name shown in the center of the pie menu")
+    label: bpy.props.StringProperty(default="My Menu",name="Label", description="Name shown on the menu")
 
-    pie_uid: bpy.props.StringProperty()
+    menu_uid: bpy.props.StringProperty()
 
     def inititialize(self,context):
-        self.pie_uid = uuid4().hex[:10]
+        self.menu_uid = uuid4().hex[:10]
         self.sockets.create_input(self,"BOOLEAN","Show Menu")
         self.sockets.create_output(self,"LAYOUT","Menu",True)
 
     def copy(self,context):
-        self.pie_uid = uuid4().hex[:10]
+        self.menu_uid = uuid4().hex[:10]
 
     def draw_buttons(self,context,layout):
-        row = layout.row()
-        row.label(text="Use a shortcut node to display the menu!", icon="INFO")
-        
         layout.prop(self,"label")
 
     def layout_type(self):
-        return "pie"
+        return "layout"
 
     def get_idname(self):
-        return "SNA_MT_"+self.pie_uid
+        return "SNA_MT_"+self.menu_uid
 
     def get_register_block(self):
         return ["bpy.utils.register_class("+self.get_idname()+")"]
@@ -111,7 +108,6 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
                             "lines": [],
                             "indented": [
                                 ["layout = self.layout"],
-                                ["pie = layout.menu_pie()"],
                             ] + menu_layout
                         },
                         [""],
