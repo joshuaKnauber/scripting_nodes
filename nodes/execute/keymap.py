@@ -121,7 +121,8 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         items = [("EMPTY","Any Space","Any Space")]
         for space in spaces:
-            items.append((space,space.replace("_"," ").title(),space.replace("_"," ").title()))
+            if not space in ["TEXT_EDITOR", "NLA_EDITOR", "TOPBAR", "PREFERENCES"]:
+                items.append((space,space.replace("_"," ").title(),space.replace("_"," ").title()))
         return items
 
     keymap_uid: bpy.props.StringProperty()
@@ -252,26 +253,26 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
                 })
 
 
-        print(self.get_space_items(bpy.context))
         space_names = {
             "EMPTY": "Window",
             "VIEW_3D": "3D View",
-            "PROPERTIES": " ",
-            "FILE_BROWSER": "",
-            "CLIP_EDITOR": "",
-            "DOPESHEET_EDITOR": "",
-            "GRAPH_EDITOR": "",
-            "IMAGE_EDITOR": "Image (Generic)",
-            "TEXT_EDITOR": "",
+            "PROPERTIES": "Property Editor",
+            "FILE_BROWSER": "File Browser",
+            "CLIP_EDITOR": "Clip Editor",
+            "DOPESHEET_EDITOR": "Dopesheet",
+            "GRAPH_EDITOR": "Graph Editor",
+            "IMAGE_EDITOR": "Image",
+            # "TEXT_EDITOR": "",
             "NODE_EDITOR": "Node Editor",
-            "NLA_EDITOR": "",
-            "OUTLINER": "",
-            "SEQUENCE_EDITOR": "",
-            "TOPBAR": "",
-            "PREFERENCES": ""
+            # "NLA_EDITOR": "",
+            "OUTLINER": "Outliner",
+            "SEQUENCE_EDITOR": "Sequencer",
+            # "TOPBAR": "",
+            # "PREFERENCES": ""
         }
         space_name = space_names[self.space_type]
 
+        print(self.space_type)
         return {"blocks": [
             {
                 "lines": [
