@@ -204,17 +204,26 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, socket, node_data, errors):
         shortcuts = []
 
+        for item in self.shortcuts:
+            shortcut = []
+            idname = "test"# depending on panel ...
+            shortcut.append([ f"kmi = km.keymap_items.new(idname=\"{idname}\",type=\"{item.event_type}\",value=\"{item.value}\",shift={str(item.shift)},ctrl={str(item.ctrl)},alt={str(item.alt)},repeat={str(item.repeat)})" ])
+            # add in name for menu and panel
+            shortcut.append(["addon_keymaps.append((km, kmi))"])
 
+            shortcuts += shortcut
 
         return {"blocks": [
             {
                 "lines": [
-                    ["def ",self.function_name(),"():"]
+                    ["def ",self.function_name(),"():"],
                 ],
                 "indented": [
                     ["global addon_keymaps"],
                     ["kc = bpy.context.window_manager.keyconfigs.addon"],
-                    [""]+shortcuts
-                ]
+                    [""],
+                    ["km = kc.keymaps.new(name=\"",self.space_type.replace("_"," ").title(),"\", space_type=\"",self.space_type,"\")"],
+                    [""]
+                ]+shortcuts
             }
         ],"errors": errors}
