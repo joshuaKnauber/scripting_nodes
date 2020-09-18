@@ -62,9 +62,9 @@ class SN_OT_RemoveShortcut(bpy.types.Operator):
 
 
 class SN_ShortcutPropertyGroup(bpy.types.PropertyGroup):
-    shift: bpy.props.BoolProperty(default=False,name="Shift",description="Use the Shift key for this shortcut")
-    ctrl: bpy.props.BoolProperty(default=False,name="Ctrl",description="Use the Ctrl key for this shortcut")
-    alt: bpy.props.BoolProperty(default=False,name="Alt",description="Use the Alt key for this shortcut")
+    shift: bpy.props.BoolProperty(default=False,name="Shift",description="Use the Shift modifier key for this shortcut")
+    ctrl: bpy.props.BoolProperty(default=False,name="Ctrl",description="Use the Ctrl modifier key for this shortcut")
+    alt: bpy.props.BoolProperty(default=False,name="Alt",description="Use the Alt modifier key for this shortcut")
     any_mod: bpy.props.BoolProperty(default=False,name="Any Modifier",description="Use any modifier key for this shortcut")
 
     repeat: bpy.props.BoolProperty(default=False,name="Active on Key-Repeat", description="Active on key-repeat events (when a key is held)")
@@ -75,6 +75,9 @@ class SN_ShortcutPropertyGroup(bpy.types.PropertyGroup):
     event_type: bpy.props.StringProperty(default="NONE")
 
     call_type: bpy.props.EnumProperty(items=[("OPERATOR","Operator","Operator"),("PANEL","Panel","Panel"),("MENU","Menu","Menu")])
+    custom_type: bpy.props.EnumProperty(items=[("CUSTOM","Custom","Custom"),("INTERNAL","Internal","Internal")])
+
+    operator: bpy.props.StringProperty(name="Operator",description="The operator that will be run when the shortcut is executed")
 
 
 class SN_OT_AddShortcut(bpy.types.Operator):
@@ -146,8 +149,17 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
             op.node_name = self.name
             op.index = index
 
-            row = box.row()
+            _col = box.column(align=True)
+            row = _col.row()
             row.prop(shortcut,"call_type",text=" ",expand=True)
+            row = _col.row()
+            row.prop(shortcut,"custom_type",text=" ",expand=True)
+
+            if shortcut.call_type == "OPERATOR":
+                if shortcut.custom_type == "INTERNAL":
+                    pass
+                else:
+                    box.prop_search(shortcut,"operator",bpy.context.space_data.node_tree,"custom_operator_properties",text="")
 
 
             box = col.box()
