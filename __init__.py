@@ -47,6 +47,7 @@ def load_handler(dummy):
     bpy.context.scene.sn_properties.show_node_info = False
     bpy.context.scene.sn_properties.show_tutorial = False
     bpy.context.scene.sn_properties.showing_add_to_panel = False
+    bpy.context.scene.sn_properties.recording_shortcut = False
     
     compiler().unregister_existing()
     for tree in bpy.data.node_groups:

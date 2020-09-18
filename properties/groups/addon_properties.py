@@ -111,3 +111,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     # showing the append panel selector
     showing_add_to_panel: bpy.props.BoolProperty(default=False)
+
+
+    # recording a shortcut
+    recording_shortcut: bpy.props.BoolProperty(default=False)
