@@ -74,10 +74,13 @@ class SN_ShortcutPropertyGroup(bpy.types.PropertyGroup):
 
     event_type: bpy.props.StringProperty(default="NONE")
 
-    call_type: bpy.props.EnumProperty(items=[("OPERATOR","Operator","Operator"),("PANEL","Panel","Panel"),("MENU","Menu","Menu")])
+    call_type: bpy.props.EnumProperty(items=[("OPERATOR","Operator","Operator"),("PANEL","Panel","Panel"),("PIE_MENU"," Pie Menu","Pie Menu"),("MENU"," Menu","Menu")])
     custom_type: bpy.props.EnumProperty(items=[("CUSTOM","Custom","Custom"),("INTERNAL","Internal","Internal")])
 
     operator: bpy.props.StringProperty(name="Operator",description="The operator that will be run when the shortcut is executed")
+    panel: bpy.props.StringProperty(name="Operator",description="The operator that will be run when the shortcut is executed")
+    menu: bpy.props.StringProperty(name="Operator",description="The operator that will be run when the shortcut is executed")
+    pie_menu: bpy.props.StringProperty(name="Operator",description="The operator that will be run when the shortcut is executed")
 
 
 class SN_OT_AddShortcut(bpy.types.Operator):
@@ -100,7 +103,7 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_KeymapNode"
     bl_label = "Keymap"
     bl_icon = "FILE_SCRIPT"
-    bl_width_default = 220
+    bl_width_default = 250
     node_color = (0.2, 0.2, 0.2)
     should_be_registered = True
 
@@ -161,6 +164,24 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
                 else:
                     box.prop_search(shortcut,"operator",bpy.context.space_data.node_tree,"custom_operator_properties",text="")
 
+            elif shortcut.call_type == "PANEL":
+                if shortcut.custom_type == "INTERNAL":
+                    pass
+                else:
+                    box.prop_search(shortcut,"panel",bpy.context.space_data.node_tree,"sn_panel_collection_property",text="")
+
+            elif shortcut.call_type == "PIE_MENU":
+                if shortcut.custom_type == "INTERNAL":
+                    pass
+                else:
+                    box.prop_search(shortcut,"pie_menu",bpy.context.space_data.node_tree,"sn_pie_menu_collection_property",text="")
+
+            elif shortcut.call_type == "MENU":
+                if shortcut.custom_type == "INTERNAL":
+                    pass
+                else:
+                    box.prop_search(shortcut,"menu",bpy.context.space_data.node_tree,"sn_menu_collection_property",text="")
+
 
             box = col.box()
 
@@ -206,9 +227,27 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         for item in self.shortcuts:
             shortcut = []
-            idname = "test"# depending on panel ...
+
+            if item.call_type == "OPERATOR":
+                pass
+        
+            elif item.call_type == "PANEL":
+                pass
+
+            elif item.call_type == "PIE_MENU":
+                idname = "wm.call_menu_pie"
+
+            elif item.call_type == "MENU":
+                pass
+
             shortcut.append([ f"kmi = km.keymap_items.new(idname=\"{idname}\",type=\"{item.event_type}\",value=\"{item.value}\",shift={str(item.shift)},ctrl={str(item.ctrl)},alt={str(item.alt)},repeat={str(item.repeat)})" ])
-            # add in name for menu and panel
+            
+            if item.call_type == "PIE_MENU":
+                if item.custom_type == "CUSTOM":
+                    shortcut.append([ "kmi.properties.name = \"", node_data["node_tree"].sn_pie_menu_collection_property[item.pie_menu].identifier, "\"" ])
+                else:
+                    pass
+
             shortcut.append(["addon_keymaps.append((km, kmi))"])
 
             shortcuts += shortcut
@@ -224,6 +263,6 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
                     [""],
                     ["km = kc.keymaps.new(name=\"",self.space_type.replace("_"," ").title(),"\", space_type=\"",self.space_type,"\")"],
                     [""]
-                ]+shortcuts
+                ]+shortcuts+[[""]]
             }
         ],"errors": errors}
