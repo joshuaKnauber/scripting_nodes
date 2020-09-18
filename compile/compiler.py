@@ -125,8 +125,8 @@ class ScriptingNodesCompiler():
                     for line in node.get_register_block():
                         register_function += "\n" + " "*self._indents + line
                         has_nodes = True
-        
-        if not has_nodes and not "sn_generated_addon_properties" in register_function:
+
+        if not has_nodes and not self._get_variable_registers(tree):
             register_function += "\n" + " "*self._indents + "pass"
 
         return register_function
@@ -162,6 +162,10 @@ class ScriptingNodesCompiler():
     def _get_unregister_function(self, tree):
         """ returns the unregister function for the given node tree """
         unregister_function = CompilerData().unregister_block()
+        unregister_function += "\n" + " "*self._indents + "global addon_keymaps"
+        unregister_function += "\n" + " "*self._indents + "for km, kmi in addon_keymaps:"
+        unregister_function += "\n" + " "*self._indents*2 + "km.keymap_items.remove(kmi)"
+        unregister_function += "\n" + " "*self._indents + "addon_keymaps.clear()\n"
 
         if self._get_variable_registers(tree):
             unregister_function += "\n" + " "*self._indents + "# Unregister variables"
@@ -177,9 +181,6 @@ class ScriptingNodesCompiler():
                     for line in node.get_unregister_block():
                         unregister_function += "\n" + " "*self._indents + line
                         has_nodes = True
-        
-        if not has_nodes and not "ArrayCollection" in unregister_function:
-            unregister_function += "\n" + " "*self._indents + "pass"
 
         return unregister_function
 
@@ -238,6 +239,8 @@ class ScriptingNodesCompiler():
         self._write_paragraphs(text, 2)
         text.write(cd.scripting_nodes_block())
         text.write("\nsn_tree_name = \""+tree.name+"\"")
+        self._write_paragraphs(text,1)
+        text.write(cd.keymap_block())
         self._write_paragraphs(text,2)
 
         self.write_addon_info(text,tree)
@@ -276,7 +279,6 @@ class ScriptingNodesCompiler():
             text.write(self._get_array_registers(tree))
             self._write_paragraphs(text,3)
 
-        text.write(cd.keymap_block())
         self._write_paragraphs(text,2)
 
         text.write(cd.comment_block("REGISTER / UNREGISTER"))
