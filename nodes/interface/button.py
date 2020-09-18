@@ -36,6 +36,9 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.sockets.create_output(self,"EXECUTE","Execute")
 
+    def copy(self,context):
+        self.operator_uid = uuid4().hex[:10]
+
     search_value: bpy.props.StringProperty(name="Search value", description="")
 
     def draw_buttons(self,context,layout):

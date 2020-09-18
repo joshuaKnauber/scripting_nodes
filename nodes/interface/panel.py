@@ -117,6 +117,9 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"LAYOUT","Header",True)
         self.sockets.create_output(self,"LAYOUT","Panel",True)
 
+    def copy(self,context):
+        self.panel_uid = uuid4().hex[:10]
+
     def draw_buttons(self,context,layout):
         box = layout.box()
         row = box.row()

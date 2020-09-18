@@ -84,6 +84,9 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
         item.description = self.description
         self.group_item = item.name
 
+    def copy(self,context):
+        self.operator_uid = uuid4().hex[:10]
+
     def draw_buttons(self, context, layout):
         layout.prop(self,"op_name")
         layout.prop(self,"description")
