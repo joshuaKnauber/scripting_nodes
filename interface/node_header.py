@@ -55,3 +55,5 @@ def node_header(self, context):
             row.separator()
             
         self.layout.prop(context.scene.sn_properties,"examples",text="")
+
+        self.layout.operator("wm.url_open",text="Report a Bug",icon="ORPHAN_DATA").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/bugs/"
