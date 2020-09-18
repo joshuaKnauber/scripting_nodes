@@ -319,9 +319,14 @@ class ScriptingNodesCompiler():
         for module in self._modules:
             if module["node_tree"] == tree:
                 if self._run_register and module["module"]:
-                    module["module"].register()
+                    try:
+                        module["module"].register()
+                    except:
+                        return False
                     if "def set_variables():" in module["text"].as_string() and bpy.context.space_data != None:
                         module["module"].set_variables()
+                    return True
+        return False
 
     def _unregister_tree(self, tree):
         """ unregisters the module if already registered and removes it """
@@ -358,7 +363,8 @@ class ScriptingNodesCompiler():
 
         self._unregister_tree(tree)
         success = self._create_module(tree)
-        self._register_tree(tree)
+        if success:
+            success = self._register_tree(tree)
 
         tree.use_fake_user = True
 
