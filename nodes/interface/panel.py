@@ -133,7 +133,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def free(self):
         for x, item in enumerate(bpy.context.space_data.node_tree.sn_panel_collection_property):
-                if item.name == self.panel_item:
+                if item.identifier == self.panel_item:
                     bpy.context.space_data.node_tree.sn_panel_collection_property.remove(x)
 
     def draw_buttons(self,context,layout):

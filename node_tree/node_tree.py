@@ -35,6 +35,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     # custom panel collection
     sn_panel_collection_property: bpy.props.CollectionProperty(type=SearchVariablesGroup)
     
+    # custom panel collection
+    sn_pie_menu_collection_property: bpy.props.CollectionProperty(type=SearchVariablesGroup)
+    
+    # custom panel collection
+    sn_menu_collection_property: bpy.props.CollectionProperty(type=SearchVariablesGroup)
+
     # custom operator search
     custom_operator_properties: bpy.props.CollectionProperty(type=SearchVariablesGroup)
 
