@@ -99,26 +99,42 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                     items.append( (location["category"],location["category"],location["category"]) )
         return items
 
+    def update_item(self, context):
+        for item in bpy.context.space_data.node_tree.sn_panel_collection_property:
+            if item.identifier == self.panel_item:
+                item.name = self.label
+
     space: bpy.props.StringProperty(name="Space",description="Space the panel should go in", default="PROPERTIES")
     region: bpy.props.StringProperty(name="Region",description="Region the panel should go in", default="WINDOW")
     context: bpy.props.StringProperty(name="Context",description="Context the panel should be shown in", default="object")
     category: bpy.props.EnumProperty(name="Category",description="Category the panel should be shown in",items=category_items)
     custom_category: bpy.props.StringProperty(name="Custom Category",description="Category the panel should be shown in",default="My Category")
 
-    label: bpy.props.StringProperty(default="My Panel",name="Label", description="Name shown in the header of the panel")
+    label: bpy.props.StringProperty(default="My Panel",name="Label", description="Name shown in the header of the panel", update=update_item)
     hide_header: bpy.props.BoolProperty(default=False,name="Hide Header", description="Hide the header of the panel")
     default_closed: bpy.props.BoolProperty(default=False,name="Default Closed", description="Close the panel by default")
 
     panel_uid: bpy.props.StringProperty()
+    panel_item: bpy.props.StringProperty()
 
     def inititialize(self,context):
         self.panel_uid = uuid4().hex[:10]
+        item = bpy.context.space_data.node_tree.sn_panel_collection_property.add()
+        item.identifier = self.get_idname()
+        item.name = self.label
+        self.panel_item = self.get_idname()
+
         self.sockets.create_input(self,"BOOLEAN","Show Panel")
         self.sockets.create_output(self,"LAYOUT","Header",True)
         self.sockets.create_output(self,"LAYOUT","Panel",True)
 
     def copy(self,context):
         self.panel_uid = uuid4().hex[:10]
+
+    def free(self):
+        for x, item in enumerate(bpy.context.space_data.node_tree.sn_panel_collection_property):
+                if item.name == self.panel_item:
+                    bpy.context.space_data.node_tree.sn_panel_collection_property.remove(x)
 
     def draw_buttons(self,context,layout):
         box = layout.box()
