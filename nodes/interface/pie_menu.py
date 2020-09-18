@@ -45,20 +45,18 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_item(self, context):
         for item in bpy.context.space_data.node_tree.sn_pie_menu_collection_property:
-            if item.identifier == self.pie_item:
+            if item.identifier == self.get_idname():
                 item.name = self.label
 
     label: bpy.props.StringProperty(default="My Menu",name="Label", description="Name shown in the center of the pie menu", update=update_item)
 
     pie_uid: bpy.props.StringProperty()
-    pie_item: bpy.props.StringProperty()
 
     def inititialize(self,context):
         self.pie_uid = uuid4().hex[:10]
         item = bpy.context.space_data.node_tree.sn_pie_menu_collection_property.add()
         item.identifier = self.get_idname()
         item.name = self.label
-        self.pie_item = self.get_idname()
 
         self.sockets.create_input(self,"BOOLEAN","Show Menu")
         self.sockets.create_output(self,"LAYOUT","Menu",True)
@@ -68,7 +66,7 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def free(self):
         for x, item in enumerate(bpy.context.space_data.node_tree.sn_pie_menu_collection_property):
-            if item.identifier == self.pie_item:
+            if item.identifier == self.get_idname():
                 bpy.context.space_data.node_tree.sn_pie_menu_collection_property.remove(x)
 
     def draw_buttons(self,context,layout):

@@ -43,17 +43,31 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
                    "        layout.<function>label</>(text=<string>\"My label text\"</>, icon=<string>\"MONKEY\"</>)"]
     }
 
-    label: bpy.props.StringProperty(default="My Menu",name="Label", description="Name shown on the menu")
+    def update_item(self, context):
+        for item in bpy.context.space_data.node_tree.sn_menu_collection_property:
+            if item.identifier == self.get_idname():
+                item.name = self.label
+
+    label: bpy.props.StringProperty(default="My Menu",name="Label", description="Name shown on the menu", update=update_item)
 
     menu_uid: bpy.props.StringProperty()
 
     def inititialize(self,context):
         self.menu_uid = uuid4().hex[:10]
+        item = bpy.context.space_data.node_tree.sn_menu_collection_property.add()
+        item.identifier = self.get_idname()
+        item.name = self.label
+
         self.sockets.create_input(self,"BOOLEAN","Show Menu")
         self.sockets.create_output(self,"LAYOUT","Menu",True)
 
     def copy(self,context):
         self.menu_uid = uuid4().hex[:10]
+
+    def free(self):
+        for x, item in enumerate(bpy.context.space_data.node_tree.sn_menu_collection_property):
+            if item.identifier == self.get_idname():
+                bpy.context.space_data.node_tree.sn_menu_collection_property.remove(x)
 
     def draw_buttons(self,context,layout):
         layout.prop(self,"label")
