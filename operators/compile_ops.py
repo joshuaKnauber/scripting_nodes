@@ -10,8 +10,10 @@ class SN_OT_CompileActive(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if context.space_data.node_tree != None:
-            return context.space_data.node_tree.bl_idname == "ScriptingNodesTree"
+        if hasattr(context.space_data,"node_tree"):
+            if context.space_data.node_tree != None:
+                return context.space_data.node_tree.bl_idname == "ScriptingNodesTree"
+        return False
 
     def execute(self, context):
         success = compiler().compile_active()
