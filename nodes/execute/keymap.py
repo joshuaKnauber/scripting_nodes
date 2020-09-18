@@ -227,40 +227,54 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         for item in self.shortcuts:
             shortcut = []
+            additions = None
 
             if item.call_type == "OPERATOR":
-                pass
+                if item.custom_type == "CUSTOM" and item.operator in node_data["node_tree"].custom_operator_properties:
+                    idname = "scripting_nodes.sna_ot_operator_" + node_data["node_tree"].custom_operator_properties[item.operator].identifier
+                    additions = []
+                else:
+                    additions = []
         
             elif item.call_type == "PANEL":
                 idname = "wm.call_panel"
+                if item.panel:
+                    if item.custom_type == "CUSTOM" and item.panel in node_data["node_tree"].sn_panel_collection_property:
+                        additions = [[ "kmi.properties.name = \"", node_data["node_tree"].sn_panel_collection_property[item.panel].identifier, "\"" ],
+                                    ["kmi.properties.keep_open = True"]]
+                    elif item.custom_type == "INTERNAL":
+                        additions = []
 
             elif item.call_type == "PIE_MENU":
                 idname = "wm.call_menu_pie"
+                if item.pie_menu:
+                    if item.custom_type == "CUSTOM" and item.pie_menu in node_data["node_tree"].sn_pie_menu_collection_property:
+                        additions = [[ "kmi.properties.name = \"", node_data["node_tree"].sn_pie_menu_collection_property[item.pie_menu].identifier, "\"" ]]
+                    elif item.custom_type == "INTERNAL":
+                        additions = []
 
             elif item.call_type == "MENU":
                 idname = "wm.call_menu"
+                if item.menu:
+                    if item.custom_type == "CUSTOM" and item.menu in node_data["node_tree"].sn_menu_collection_property:
+                        additions = [[ "kmi.properties.name = \"", node_data["node_tree"].sn_menu_collection_property[item.menu].identifier, "\"" ]]
+                    elif item.custom_type == "INTERNAL":
+                        additions = []
 
-            shortcut.append([ f"kmi = km.keymap_items.new(idname=\"{idname}\",type=\"{item.event_type}\",value=\"{item.value}\",shift={str(item.shift)},ctrl={str(item.ctrl)},alt={str(item.alt)},repeat={str(item.repeat)})" ])
-            
-            if item.call_type == "PANEL":
-                if item.custom_type == "CUSTOM":
-                    shortcut.append([ "kmi.properties.name = \"", node_data["node_tree"].sn_panel_collection_property[item.panel].identifier, "\"" ])
-                else:
-                    pass
-            elif item.call_type == "PIE_MENU":
-                if item.custom_type == "CUSTOM":
-                    shortcut.append([ "kmi.properties.name = \"", node_data["node_tree"].sn_pie_menu_collection_property[item.pie_menu].identifier, "\"" ])
-                else:
-                    pass
-            elif item.call_type == "MENU":
-                if item.custom_type == "CUSTOM":
-                    shortcut.append([ "kmi.properties.name = \"", node_data["node_tree"].sn_menu_collection_property[item.menu].identifier, "\"" ])
-                else:
-                    pass
+            if additions != None:
+                shortcut.append([ f"kmi = km.keymap_items.new(idname=\"{idname}\",type=\"{item.event_type}\",value=\"{item.value}\",shift={str(item.shift)},ctrl={str(item.ctrl)},alt={str(item.alt)},any={str(item.any_mod)},repeat={str(item.repeat)})" ])
+                shortcut += additions
+                shortcut.append(["addon_keymaps.append((km, kmi))"])
+                shortcuts += shortcut
+                shortcuts.append([""])
 
-            shortcut.append(["addon_keymaps.append((km, kmi))"])
-
-            shortcuts += shortcut
+            else:
+                errors.append({
+                    "title": "Faulty selection",
+                    "message": "One of your shortcuts has a invalid operation selected",
+                    "node": self,
+                    "fatal": True
+                })
 
         return {"blocks": [
             {
@@ -273,6 +287,6 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
                     [""],
                     ["km = kc.keymaps.new(name=\"",self.space_type.replace("_"," ").title(),"\", space_type=\"",self.space_type,"\")"],
                     [""]
-                ]+shortcuts+[[""]]
+                ]+shortcuts
             }
         ],"errors": errors}
