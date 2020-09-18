@@ -232,19 +232,29 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
                 pass
         
             elif item.call_type == "PANEL":
-                pass
+                idname = "wm.call_panel"
 
             elif item.call_type == "PIE_MENU":
                 idname = "wm.call_menu_pie"
 
             elif item.call_type == "MENU":
-                pass
+                idname = "wm.call_menu"
 
             shortcut.append([ f"kmi = km.keymap_items.new(idname=\"{idname}\",type=\"{item.event_type}\",value=\"{item.value}\",shift={str(item.shift)},ctrl={str(item.ctrl)},alt={str(item.alt)},repeat={str(item.repeat)})" ])
             
-            if item.call_type == "PIE_MENU":
+            if item.call_type == "PANEL":
+                if item.custom_type == "CUSTOM":
+                    shortcut.append([ "kmi.properties.name = \"", node_data["node_tree"].sn_panel_collection_property[item.panel].identifier, "\"" ])
+                else:
+                    pass
+            elif item.call_type == "PIE_MENU":
                 if item.custom_type == "CUSTOM":
                     shortcut.append([ "kmi.properties.name = \"", node_data["node_tree"].sn_pie_menu_collection_property[item.pie_menu].identifier, "\"" ])
+                else:
+                    pass
+            elif item.call_type == "MENU":
+                if item.custom_type == "CUSTOM":
+                    shortcut.append([ "kmi.properties.name = \"", node_data["node_tree"].sn_menu_collection_property[item.menu].identifier, "\"" ])
                 else:
                     pass
 

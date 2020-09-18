@@ -27,8 +27,8 @@ class SN_SubMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
     def update_enum(self,context):
-        self.menu_options.clear()
         if self.search_prop == "INTERNAL":
+            self.menu_options.clear()
             for menu_name in dir(bpy.types):
                 if "_MT_" in menu_name:
                     menu = eval("bpy.types."+menu_name)
@@ -37,9 +37,6 @@ class SN_SubMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if hasattr(menu,"bl_label") and menu.bl_label and not menu.bl_label in self.menu_options:
                         item.name = menu.bl_label
                     item.identifier = menu_name
-
-        else:
-            pass
 
     menu_identifier: bpy.props.StringProperty()
     menu_options: bpy.props.CollectionProperty(type=SN_MenusPropertyGroup)
@@ -53,7 +50,11 @@ class SN_SubMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self,context,layout):
         self.draw_icon_chooser(layout)
         layout.prop(self,"search_prop",text=" ",expand=True)
-        layout.prop_search(self,"menu_identifier",self,"menu_options",text="")
+
+        if self.search_prop == "INTERNAL":
+            layout.prop_search(self,"menu_identifier",self,"menu_options",text="")
+        else:
+            layout.prop_search(self,"menu_identifier",context.space_data.node_tree,"sn_menu_collection_property",text="")
 
     def evaluate(self, socket, node_data, errors):
         layout_type = self.inputs[0].links[0].from_node.layout_type()
