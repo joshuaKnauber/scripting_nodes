@@ -101,7 +101,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_item(self, context):
         for item in bpy.context.space_data.node_tree.sn_panel_collection_property:
-            if item.identifier == self.panel_item:
+            if item.identifier == self.get_idname():
                 item.name = self.label
 
     space: bpy.props.StringProperty(name="Space",description="Space the panel should go in", default="PROPERTIES")
@@ -115,14 +115,12 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     default_closed: bpy.props.BoolProperty(default=False,name="Default Closed", description="Close the panel by default")
 
     panel_uid: bpy.props.StringProperty()
-    panel_item: bpy.props.StringProperty()
 
     def inititialize(self,context):
         self.panel_uid = uuid4().hex[:10]
         item = bpy.context.space_data.node_tree.sn_panel_collection_property.add()
         item.identifier = self.get_idname()
         item.name = self.label
-        self.panel_item = self.get_idname()
 
         self.sockets.create_input(self,"BOOLEAN","Show Panel")
         self.sockets.create_output(self,"LAYOUT","Header",True)
@@ -133,7 +131,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def free(self):
         for x, item in enumerate(bpy.context.space_data.node_tree.sn_panel_collection_property):
-                if item.identifier == self.panel_item:
+                if item.identifier == self.get_idname():
                     bpy.context.space_data.node_tree.sn_panel_collection_property.remove(x)
 
     def draw_buttons(self,context,layout):
