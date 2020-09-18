@@ -69,10 +69,10 @@ class SN_SubMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             if self.search_prop == "CUSTOM":
                 if self.menu_identifier in node_data["node_tree"].sn_menu_collection_property:
-                    menu = [layout_type,".menu(\"",node_data["node_tree"].sn_menu_collection_property[self.menu_identifier].identifier,"\",text=",node_data["input_data"][1]["code"],icon,")"]                    
+                    menu = [layout_type,".menu(\"",node_data["node_tree"].sn_menu_collection_property[self.menu_identifier].identifier,"\",text=",node_data["input_data"][1]["code"],icon,")"]
 
             else:
-                pass
+                menu = [layout_type,".menu(\"",self.menu_options[self.menu_identifier].identifier,"\",text=",node_data["input_data"][1]["code"],icon,")"]
 
         return {
             "blocks": [
