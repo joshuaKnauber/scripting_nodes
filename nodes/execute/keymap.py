@@ -24,7 +24,7 @@ class SN_RecordShortcut(bpy.types.Operator):
 
     def modal(self, context, event):
         
-        if event.type and not event.type in ["MOUSEMOVE", "INBETWEEN_MOUSEMOVE"]:
+        if event.type and not event.type in ["MOUSEMOVE", "INBETWEEN_MOUSEMOVE", "TIMER_REPORT"]:
             context.scene.sn_properties.recording_shortcut = False
             shortcut = context.space_data.node_tree.nodes[self.node_name].shortcuts[self.index]
             shortcut.event_type = event.type
@@ -60,6 +60,11 @@ class SN_OT_RemoveShortcut(bpy.types.Operator):
     def execute(self, context):
         context.space_data.node_tree.nodes[self.node_name].shortcuts.remove(self.index)
         return {"FINISHED"}
+
+
+class SN_MenuItemPropertyGroup(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+    identifier: bpy.props.StringProperty()
 
 
 class SN_ShortcutPropertyGroup(bpy.types.PropertyGroup):
@@ -139,9 +144,29 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
     shortcuts: bpy.props.CollectionProperty(type=SN_ShortcutPropertyGroup)
     space_type: bpy.props.EnumProperty(name="Space",items=get_space_items)
 
+    menu_collection: bpy.props.CollectionProperty(type=SN_MenuItemPropertyGroup)
+    pie_menu_collection: bpy.props.CollectionProperty(type=SN_MenuItemPropertyGroup)
+
+    def get_menu_name(self,identifier):
+        suffix = ""
+        if not identifier.split("_")[0] == "MT":
+            suffix = " (" + identifier.split("_")[0].title() + ")"
+        return identifier.split("_MT_")[-1].replace("_"," ").title() + suffix
+
+    def create_menu_collections(self):
+        for menu in dir(bpy.types):
+            if "_MT_" in menu:
+                if "_pie" in menu:
+                    item = self.pie_menu_collection.add()
+                else:
+                    item = self.menu_collection.add()
+                item.identifier = menu
+                item.name = self.get_menu_name(menu)
+
     def inititialize(self, context):
         self.keymap_uid = uuid4().hex[:10]
         create_internal_ops()
+        self.create_menu_collections()
 
     def copy(self,context):
         self.keymap_uid = uuid4().hex[:10]
@@ -191,13 +216,15 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if shortcut.use_custom == "CUSTOM":
                     box.prop_search(shortcut,"pie_menu",bpy.context.space_data.node_tree,"sn_pie_menu_collection_property",text="")
                 else:
-                    pass
+                    box.label(text="Some pie menus only work in certain spaces!")
+                    box.prop_search(shortcut,"pie_menu",self,"pie_menu_collection",text="")
 
             elif shortcut.call_type == "MENU":
                 if shortcut.use_custom == "CUSTOM":
                     box.prop_search(shortcut,"menu",bpy.context.space_data.node_tree,"sn_menu_collection_property",text="")
                 else:
-                    pass
+                    box.label(text="Some menus only work in certain spaces!")
+                    box.prop_search(shortcut,"menu",self,"menu_collection",text="")
 
 
             box = col.box()
@@ -259,25 +286,31 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
             elif item.call_type == "PANEL":
                 idname = "wm.call_panel"
                 if item.panel:
-                    if item.panel in node_data["node_tree"].sn_panel_collection_property:
-                        additions = [[ "kmi.properties.name = \"", node_data["node_tree"].sn_panel_collection_property[item.panel].identifier, "\"" ],
-                                    ["kmi.properties.keep_open = True"]]
+                    if item.use_custom == "CUSTOM":
+                        if item.panel in node_data["node_tree"].sn_panel_collection_property:
+                            additions = [[ "kmi.properties.name = \"", node_data["node_tree"].sn_panel_collection_property[item.panel].identifier, "\"" ],
+                                        ["kmi.properties.keep_open = True"]]
                     else:
-                        if item.panel:
-                            additions = [[ "kmi.properties.name = \"", item.panel, "\"" ],
-                                    ["kmi.properties.keep_open = True"]]
+                        additions = [[ "kmi.properties.name = \"", item.panel, "\"" ],
+                                ["kmi.properties.keep_open = True"]]
 
             elif item.call_type == "PIE_MENU":
                 idname = "wm.call_menu_pie"
                 if item.pie_menu:
-                    if item.pie_menu in node_data["node_tree"].sn_pie_menu_collection_property:
-                        additions = [[ "kmi.properties.name = \"", node_data["node_tree"].sn_pie_menu_collection_property[item.pie_menu].identifier, "\"" ]]
+                    if item.use_custom == "CUSTOM":
+                        if item.pie_menu in node_data["node_tree"].sn_pie_menu_collection_property:
+                            additions = [[ "kmi.properties.name = \"", node_data["node_tree"].sn_pie_menu_collection_property[item.pie_menu].identifier, "\"" ]]
+                    else:
+                        additions = [[ "kmi.properties.name = \"", self.pie_menu_collection[item.pie_menu].identifier, "\"" ]]
 
             elif item.call_type == "MENU":
                 idname = "wm.call_menu"
                 if item.menu:
-                    if item.menu in node_data["node_tree"].sn_menu_collection_property:
-                        additions = [[ "kmi.properties.name = \"", node_data["node_tree"].sn_menu_collection_property[item.menu].identifier, "\"" ]]
+                    if item.use_custom == "CUSTOM":
+                        if item.menu in node_data["node_tree"].sn_menu_collection_property:
+                            additions = [[ "kmi.properties.name = \"", node_data["node_tree"].sn_menu_collection_property[item.menu].identifier, "\"" ]]
+                    else:
+                        additions = [[ "kmi.properties.name = \"", self.menu_collection[item.menu].identifier, "\"" ]]
 
             if additions != None:
                 shortcut.append([ f"kmi = km.keymap_items.new(idname=\"{idname}\",type=\"{item.event_type}\",value=\"{item.value}\",shift={str(item.shift)},ctrl={str(item.ctrl)},alt={str(item.alt)},any={str(item.any_mod)},repeat={str(item.repeat)})" ])
@@ -312,7 +345,9 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
             # "TOPBAR": "",
             # "PREFERENCES": ""
         }
-        space_name = space_names[self.space_type]
+        space_name = "Window"
+        if self.space_type in space_names:
+            space_name = space_names[self.space_type]
 
         return {"blocks": [
             {
