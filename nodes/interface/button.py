@@ -72,7 +72,28 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     ["def execute(self, context):"]
                                 ],
                                 "indented": [
-                                    [execute],
+                                    {
+                                        "lines": [
+                                            ["try:"]
+                                        ],
+                                        "indented": [
+                                            [execute]
+                                        ]
+                                    },
+                                    {
+                                        "lines": [
+                                            ["except Exception as exc:"]
+                                        ],
+                                        "indented": [
+                                            ["self.report({\"ERROR\"},message=\"There was an error when running this operation! It has been printed to the console.\")"],
+                                            ["print(\"START ERROR | Node Name: ",self.name," | (If you are this addons developer you might want to report this to the Serpens team) \")"],
+                                            ["print(\"\")"],
+                                            ["print(exc)"],
+                                            ["print(\"\")"],
+                                            ["print(\"END ERROR - - - - \")"],
+                                            ["print(\"\")"]
+                                        ]
+                                    },
                                     ["return {\"FINISHED\"}"],
                                     [""]
                                 ]
