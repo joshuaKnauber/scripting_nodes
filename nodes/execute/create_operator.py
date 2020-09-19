@@ -67,9 +67,21 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                 self.group_item = self.op_name
                 item.name = self.op_name
 
+    def update_popup(self,context):
+        if self.popup_option == "PANEL":
+            if len(self.outputs) == 1:
+                self.sockets.create_output(self,"LAYOUT","Popup",True)
+        else:
+            for output in self.outputs:
+                if not output == self.outputs[0]:
+                    for link in output.links:
+                        context.space_data.node_tree.links.remove(link)
+            while len(self.outputs) > 1:
+                self.sockets.remove_output(self,self.outputs[-1])
+
     op_name: bpy.props.StringProperty(default="My Operator",name="Label",description="Label of the operator", update=update_op_name)
     description: bpy.props.StringProperty(default="My Operators description",name="Description",description="Description of the operator shown in tooltips", update=update_description)
-    confirm_option: bpy.props.BoolProperty(name="Confirm", description="Operator needs to be confirmed")
+    popup_option: bpy.props.EnumProperty(name="Popup Type",items=[("NONE","None","None"),("CONFIRM","Confirm","Confirm"),("PANEL","Panel","Panel")],update=update_popup)
     group_item: bpy.props.StringProperty()
     operator_uid: bpy.props.StringProperty()
 
@@ -90,20 +102,32 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self,"op_name")
         layout.prop(self,"description")
-        layout.prop(self,"confirm_option", toggle=True)
+        row = layout.row()
+        row.prop(self,"popup_option", text=" ", expand=True)
 
     def free(self):
         for x, item in enumerate(bpy.context.space_data.node_tree.custom_operator_properties):
             if item.name == self.group_item:
                 bpy.context.space_data.node_tree.custom_operator_properties.remove(x)
 
+    def layout_type(self):
+        return "layout"
+
     def evaluate(self, socket, node_data, errors):
         execute = ""
         if node_data["output_data"][0]["code"]:
             execute = node_data["output_data"][0]["code"]
-        confirm_text = {"lines": [], "indented": []}
-        if self.confirm_option:
-            confirm_text = {"lines": [["def invoke(self, context, event):"]], "indented": [["return context.window_manager.invoke_confirm(self, event)"], [""]]}
+
+        popup_text = {"lines": [], "indented": []}
+        if self.popup_option == "CONFIRM":
+            popup_text = {"lines": [["def invoke(self, context, event):"]], "indented": [["return context.window_manager.invoke_confirm(self, event)"], [""]]}
+        elif self.popup_option == "PANEL":
+            popup_text = {"lines": [["def invoke(self, context, event):"]], "indented": [["return context.window_manager.invoke_props_dialog(self, width=250)"], [""]]}
+
+        popup_layout = []
+        for output_data in node_data["output_data"]:
+            if output_data["name"] == "Popup" and output_data["code"] != None:
+                popup_layout.append([output_data["code"]])
 
         return {
             "blocks": [
@@ -137,7 +161,15 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                                 [""]
                             ]
                         },
-                        confirm_text
+                        {
+                            "lines": [
+                                ["def draw(self, context):"],
+                            ],
+                            "indented": [
+                                ["layout = self.layout"]
+                            ] + popup_layout
+                        },
+                        popup_text
                     ]
                 }
             ],
