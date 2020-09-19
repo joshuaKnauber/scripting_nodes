@@ -56,4 +56,6 @@ def node_header(self, context):
             
         self.layout.prop(context.scene.sn_properties,"examples",text="")
 
-        self.layout.operator("wm.url_open",text="Report a Bug",icon="ORPHAN_DATA").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/bugs/"
+        row = self.layout.row(align=True)
+        row.operator("wm.url_open",text="Report a Bug",icon_value=bpy.context.scene.sn_icons[ "bug" ].icon_id).url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/bugs/"
+        row.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id).url = "https://discord.com/invite/NK6kyae"

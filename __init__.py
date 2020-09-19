@@ -124,12 +124,27 @@ def depsgraph_handler(dummy):
                             if not prefs.has_seen_tutorial:
                                 bpy.ops.scripting_nodes.welcome_message("INVOKE_DEFAULT")
 
+def register_icons():
+    bpy.types.Scene.sn_icons = bpy.utils.previews.new()
+    icons_dir = os.path.join( os.path.dirname( __file__ ), "icons" )
+
+    icons = [ "discord", "bug" ]
+
+    for icon in icons:
+        bpy.types.Scene.sn_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
+
+def unregister_icons():
+    bpy.utils.previews.remove( bpy.types.Scene.lp_icons )
+
 def register():
     # register the classes of the addon
     auto_load.register()
 
     # register the keymaps
     register_keymaps()
+
+    # register the icons
+    register_icons()
     
     # register the node categories
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
@@ -161,6 +176,9 @@ def unregister():
 
     # unregister keymaps
     unregister_keymaps()
+
+    # unregister the icons
+    unregister_icons()
 
     # unregister the node categories
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
