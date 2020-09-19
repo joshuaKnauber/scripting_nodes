@@ -158,6 +158,7 @@ def append_panel(self, context):
 
 
 global_panel_uid = None
+global_shortcut_index = -1
 class SN_CreateExistingPanelLocation(bpy.types.Operator):
     bl_idname = "visual_scripting.create_existing_panel_location"
     bl_label = "Create Existing Panel"
@@ -165,6 +166,7 @@ class SN_CreateExistingPanelLocation(bpy.types.Operator):
     bl_options = {"REGISTER","UNDO","INTERNAL"}
 
     panel_uid: bpy.props.StringProperty()
+    shortcut_index: bpy.props.IntProperty(default=-1,options={"SKIP_SAVE"})
 
     @classmethod
     def poll(cls, context):
@@ -172,12 +174,15 @@ class SN_CreateExistingPanelLocation(bpy.types.Operator):
 
     def execute(self, context):
         global global_panel_uid
+        global global_shortcut_index
         global_panel_uid = self.panel_uid
+        global_shortcut_index = self.shortcut_index
 
         for panel in dir(bpy.types):
             panel = eval("bpy.types."+panel)
             if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type"):
-                panel.prepend(prepend_panel)
+                if self.shortcut_index == -1:
+                    panel.prepend(prepend_panel)
                 panel.append(append_panel)
         context.scene.sn_properties.showing_add_to_panel = True
         redraw(context)
@@ -186,7 +191,9 @@ class SN_CreateExistingPanelLocation(bpy.types.Operator):
 
 def remove_appended_panels():
     global global_panel_uid
+    global global_shortcut_index
     global_panel_uid = None
+    global_shortcut_index = -1
     bpy.context.scene.sn_properties.showing_add_to_panel = False
 
     for panel in dir(bpy.types):
@@ -208,6 +215,7 @@ class SN_ChooseExistingPanelLocation(bpy.types.Operator):
 
     def execute(self, context):
         global global_panel_uid
+        global global_shortcut_index
 
         for panel in dir(bpy.types):
             if panel == self.panel_idname:
@@ -216,11 +224,20 @@ class SN_ChooseExistingPanelLocation(bpy.types.Operator):
                 for node_group in bpy.data.node_groups:
                     if node_group.bl_idname == "ScriptingNodesTree":
                         for node in node_group.nodes:
-                            if hasattr(node, "panel_uid") and node.bl_idname == "SN_AddToPanelNode":
-                                if node.panel_uid == global_panel_uid:
-                                    node.append = not self.prepend
-                                    node.panel_idname = self.panel_idname
-                                    node.panel_name = self.panel_name
+                            if global_shortcut_index == -1:
+                                if hasattr(node, "panel_uid") and node.bl_idname == "SN_AddToPanelNode":
+                                    if node.panel_uid == global_panel_uid:
+                                        node.append = not self.prepend
+                                        node.panel_idname = self.panel_idname
+                                        node.panel_name = self.panel_name
+                            else:
+                                if hasattr(node, "keymap_uid") and node.bl_idname == "SN_KeymapNode":
+                                    if node.keymap_uid == global_panel_uid:
+                                        node.shortcuts[global_shortcut_index].panel = self.panel_idname
+                                        if self.panel_name:
+                                            node.shortcuts[global_shortcut_index].panel_name = self.panel_name
+                                        else:
+                                            node.shortcuts[global_shortcut_index].panel_name = self.panel_idname
                                     
         remove_appended_panels()
         redraw(context)

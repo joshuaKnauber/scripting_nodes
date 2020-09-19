@@ -4,6 +4,7 @@ import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 from ...node_tree.node_sockets import is_valid_python, make_valid_python
 from ...operators.panel_ops import get_possible_panel_locations
+from .run_operator import create_internal_ops
 from uuid import uuid4
 
 
@@ -74,12 +75,21 @@ class SN_ShortcutPropertyGroup(bpy.types.PropertyGroup):
 
     event_type: bpy.props.StringProperty(default="NONE")
 
+    def update_custom(self,context):
+        self.operator = ""
+        self.panel = ""
+        self.menu = ""
+        self.pie_menu = ""
+
     call_type: bpy.props.EnumProperty(items=[("OPERATOR","Operator","Operator"),("PANEL","Panel","Panel"),("PIE_MENU"," Pie Menu","Pie Menu"),("MENU"," Menu","Menu")])
+    use_custom: bpy.props.EnumProperty(items=[("CUSTOM","Custom","Custom"),("INTERNAL","Internal","Internal")], update=update_custom,
+                                        name="Use Custom", description="Use your own items or blenders internals")
 
     operator: bpy.props.StringProperty(name="Operator",description="The operator that will be run when the shortcut is executed")
-    panel: bpy.props.StringProperty(name="Operator",description="The operator that will be run when the shortcut is executed")
-    menu: bpy.props.StringProperty(name="Operator",description="The operator that will be run when the shortcut is executed")
-    pie_menu: bpy.props.StringProperty(name="Operator",description="The operator that will be run when the shortcut is executed")
+    panel: bpy.props.StringProperty(name="Panel",description="The panel that will be shown when the shortcut is executed")
+    panel_name: bpy.props.StringProperty(name="Panel Name",description="The name of the panelthat will be shown when the shortcut is executed")
+    menu: bpy.props.StringProperty(name="Menu",description="The menu that will be shown when the shortcut is executed")
+    pie_menu: bpy.props.StringProperty(name="Pie Menu",description="The pie menu that will be shown when the shortcut is executed")
 
 
 class SN_OT_AddShortcut(bpy.types.Operator):
@@ -131,6 +141,7 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def inititialize(self, context):
         self.keymap_uid = uuid4().hex[:10]
+        create_internal_ops()
 
     def copy(self,context):
         self.keymap_uid = uuid4().hex[:10]
@@ -151,20 +162,42 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
             op.node_name = self.name
             op.index = index
 
-            row = box.row()
+            _col = box.column(align=True)
+            row = _col.row(align=True)
             row.prop(shortcut,"call_type",text=" ",expand=True)
+            row = _col.row(align=True)
+            row.prop(shortcut,"use_custom",text=" ",expand=True)
 
             if shortcut.call_type == "OPERATOR":
-                box.prop_search(shortcut,"operator",bpy.context.space_data.node_tree,"custom_operator_properties",text="")
+                if shortcut.use_custom == "CUSTOM":
+                    box.prop_search(shortcut,"operator",bpy.context.space_data.node_tree,"custom_operator_properties",text="")
+                else:
+                    box.label(text="Some operators only work in certain spaces!")
+                    box.prop_search(shortcut,"operator",bpy.context.scene.sn_properties,"operator_properties",text="")
 
             elif shortcut.call_type == "PANEL":
-                box.prop_search(shortcut,"panel",bpy.context.space_data.node_tree,"sn_panel_collection_property",text="")
+                if shortcut.use_custom == "CUSTOM":
+                    box.prop_search(shortcut,"panel",bpy.context.space_data.node_tree,"sn_panel_collection_property",text="")
+                else:
+                    box.label(text="Some panels only work in certain spaces!")
+                    txt = "Select location"
+                    if shortcut.panel:
+                        txt = shortcut.panel_name
+                    op = box.operator("visual_scripting.create_existing_panel_location",icon="EYEDROPPER",text=txt)
+                    op.panel_uid = self.keymap_uid
+                    op.shortcut_index = index
 
             elif shortcut.call_type == "PIE_MENU":
-                box.prop_search(shortcut,"pie_menu",bpy.context.space_data.node_tree,"sn_pie_menu_collection_property",text="")
+                if shortcut.use_custom == "CUSTOM":
+                    box.prop_search(shortcut,"pie_menu",bpy.context.space_data.node_tree,"sn_pie_menu_collection_property",text="")
+                else:
+                    pass
 
             elif shortcut.call_type == "MENU":
-                box.prop_search(shortcut,"menu",bpy.context.space_data.node_tree,"sn_menu_collection_property",text="")
+                if shortcut.use_custom == "CUSTOM":
+                    box.prop_search(shortcut,"menu",bpy.context.space_data.node_tree,"sn_menu_collection_property",text="")
+                else:
+                    pass
 
 
             box = col.box()
@@ -214,15 +247,24 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
             additions = None
 
             if item.call_type == "OPERATOR":
-                if item.operator in node_data["node_tree"].custom_operator_properties:
-                    idname = "scripting_nodes.sna_ot_operator_" + node_data["node_tree"].custom_operator_properties[item.operator].identifier
-                    additions = []
+                if item.use_custom == "CUSTOM":
+                    if item.operator in node_data["node_tree"].custom_operator_properties:
+                        idname = "scripting_nodes.sna_ot_operator_" + node_data["node_tree"].custom_operator_properties[item.operator].identifier
+                        additions = []
+                else:
+                    if item.operator in bpy.context.scene.sn_properties.operator_properties:
+                        idname = bpy.context.scene.sn_properties.operator_properties[item.operator].identifier
+                        additions = []
         
             elif item.call_type == "PANEL":
                 idname = "wm.call_panel"
                 if item.panel:
                     if item.panel in node_data["node_tree"].sn_panel_collection_property:
                         additions = [[ "kmi.properties.name = \"", node_data["node_tree"].sn_panel_collection_property[item.panel].identifier, "\"" ],
+                                    ["kmi.properties.keep_open = True"]]
+                    else:
+                        if item.panel:
+                            additions = [[ "kmi.properties.name = \"", item.panel, "\"" ],
                                     ["kmi.properties.keep_open = True"]]
 
             elif item.call_type == "PIE_MENU":
@@ -272,7 +314,6 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
         }
         space_name = space_names[self.space_type]
 
-        print(self.space_type)
         return {"blocks": [
             {
                 "lines": [

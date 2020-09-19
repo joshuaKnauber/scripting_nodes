@@ -5,6 +5,20 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 from ...node_tree.node_sockets import is_valid_python, make_valid_python
 
 
+def create_internal_ops():
+    if not len(bpy.context.scene.sn_properties.operator_properties):
+        for category in dir(bpy.ops):
+            if category != "scripting_nodes" and not category[0].isnumeric():
+                for operator in dir(eval("bpy.ops."+category)):
+                    if not operator[0].isnumeric():
+                        name = eval("bpy.ops."+category+"."+operator).get_rna_type().name
+                        if name and not name + " - " + category.replace("_"," ").title() in bpy.context.scene.sn_properties.operator_properties:
+                            item = bpy.context.scene.sn_properties.operator_properties.add()
+                            item.name = name + " - " + category.replace("_"," ").title()
+                            item.description = eval("bpy.ops."+category+"."+operator).get_rna_type().description
+                            item.identifier = category + "." + operator
+
+
 class SN_EnumCollection(bpy.types.PropertyGroup):
     def get_items(self, context):
         items = []
@@ -72,16 +86,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
     def update_enum(self, context):
         self.propName = ""
         if self.search_prop == "internal":
-            if not len(bpy.context.scene.sn_properties.operator_properties):
-                for category in dir(bpy.ops):
-                    if category != "scripting_nodes" and not category[0].isnumeric():
-                        for operator in dir(eval("bpy.ops."+category)):
-                            if not operator[0].isnumeric():
-                                if eval("bpy.ops."+category+"."+operator).get_rna_type().name and not eval("bpy.ops."+category+"."+operator).get_rna_type().name + " - " + category.replace("_"," ").title() in bpy.context.scene.sn_properties.operator_properties:
-                                    item = bpy.context.scene.sn_properties.operator_properties.add()
-                                    item.name = eval("bpy.ops."+category+"."+operator).get_rna_type().name + " - " + category.replace("_"," ").title()
-                                    item.description = eval("bpy.ops."+category+"."+operator).get_rna_type().description
-                                    item.identifier = category + "." + operator
+            create_internal_ops()
 
     propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
     search_prop: bpy.props.EnumProperty(items=[("internal", "Internal", "Blenders internal properties"), ("custom", "Custom", "Your custom enums")], name="Properties", description="Which properties to display", update=update_enum)
