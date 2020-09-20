@@ -114,7 +114,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
         return "layout"
 
     def evaluate(self, socket, node_data, errors):
-        execute = ""
+        execute = "pass"
         if node_data["output_data"][0]["code"]:
             execute = node_data["output_data"][0]["code"]
 

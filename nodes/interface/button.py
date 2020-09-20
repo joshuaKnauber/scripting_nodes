@@ -52,7 +52,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         if not socket:
             # return the code for the buttons operator
-            execute = ""
+            execute = "pass"
             if node_data["output_data"][0]["code"]:
                 execute = node_data["output_data"][0]["code"]
             return {
