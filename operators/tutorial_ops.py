@@ -49,6 +49,8 @@ class SN_DrawTutorial(DrawingFuncs, bpy.types.Operator):
 
     def close(self, context):
         bpy.types.SpaceNodeEditor.draw_handler_remove(self.handler, 'WINDOW')
+        if "sn_close_icon.png" in bpy.data.images:
+            bpy.data.images.remove(bpy.data.images["sn_close_icon.png"])
         self.remove_imgs()
         if context.area:
             context.area.tag_redraw()
@@ -173,9 +175,6 @@ class SN_DrawTutorial(DrawingFuncs, bpy.types.Operator):
 
             # draw outline
             self.draw_outline(context,outline_width,padding)
-
-            # draw close button
-            self.draw_close_setup(context,close_button_size,padding,outline_width,close_cross_width)
         
             # draw tutorial title
             self.draw_text("<serpens>SERPENS</> - Tutorial",font_size_title,(padding+10,padding+10),0)
@@ -189,3 +188,6 @@ class SN_DrawTutorial(DrawingFuncs, bpy.types.Operator):
                 self.image_shader.bind()
                 self.image_shader.uniform_float("gamma", .454)
                 self.image_batch.draw(self.image_shader)
+
+            # draw close button
+            self.draw_close_setup(context,close_button_size,padding,outline_width,close_cross_width)
