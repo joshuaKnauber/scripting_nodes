@@ -1,7 +1,8 @@
 import bpy
+import os
 import gpu
 from gpu_extras.batch import batch_for_shader
-from gpu_extras.presets import draw_circle_2d
+from gpu_extras.presets import draw_circle_2d, draw_texture_2d
 import blf
 import bgl
 from ..handler.text_colors import TextColorHandler
@@ -123,6 +124,50 @@ class DrawingFuncs:
         # self.outline_batch.draw(self.white_shader)
 
 
+    def load_close_icon(self,context,image_name,size,padding):
+        image = bpy.data.images.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"icons",image_name),check_existing=True)
+        width, height = self.get_width_height(context)
+
+        vertex_shader = '''
+            uniform mat4 ModelViewProjectionMatrix;
+            in vec2 texCoord;
+            in vec2 pos;
+            out vec2 texCoord_interp;
+            void main()
+            {
+            gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0f, 1.0f);
+            gl_Position.z = 1.0;
+            texCoord_interp = texCoord;
+            }
+        '''
+        fragment_shader = '''
+            in vec2 texCoord_interp;
+            out vec4 fragColor;
+            uniform float gamma;
+            uniform sampler2D image;
+            void main()
+            {
+            fragColor = pow(texture(image, texCoord_interp), vec4(gamma));
+            }
+        '''
+
+        self.image_shader = gpu.types.GPUShader(vertex_shader, fragment_shader)
+
+        x = width - size - padding
+        y = height - size - padding
+        self.image_batch = batch_for_shader(
+            self.image_shader, 'TRI_FAN',
+            {
+                "pos": ( (x, y), (x+size, y), (x+size, y+size), (x, y+size) ),
+                "texCoord": ((0, 0), (1, 0), (1, 1), (0, 1)),
+            },
+        )
+
+        if image.gl_load():
+            raise Exception()
+        return image
+
+
     def draw_close_setup(self,context,close_button_size,padding,outline_width,close_cross_width):
         # vertices = self.create_close_button(context, close_button_size, padding-outline_width/2)
         # self.close_batch.draw(self.white_shader)
@@ -152,6 +197,16 @@ class DrawingFuncs:
         self.black_shader.bind()
         self.black_shader.uniform_float("color", (1,1,1,1))
 
-        self.create_close_cross(context, close_button_size, padding+10, 4)
-        bgl.glLineWidth(close_cross_width)
-        self.close_cross_batch.draw(self.black_shader)
+        # self.create_close_cross(context, close_button_size, padding+10, 4)
+        # bgl.glLineWidth(close_cross_width)
+        # self.close_cross_batch.draw(self.black_shader)
+
+        image = self.load_close_icon(context,"sn_close_icon.png",close_button_size,padding+10)
+        bgl.glActiveTexture(bgl.GL_TEXTURE0)
+        bgl.glBindTexture(bgl.GL_TEXTURE_2D, image.bindcode)
+        bgl.glEnable(bgl.GL_BLEND)
+
+        self.image_shader.bind()
+        self.image_shader.uniform_float("gamma", .454)
+        self.image_batch.draw(self.image_shader)
+        bgl.glDisable(bgl.GL_BLEND)

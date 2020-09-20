@@ -10,6 +10,8 @@ class SN_DrawDocs(DrawingFuncs, bpy.types.Operator):
 
     def close(self, context):
         bpy.types.SpaceNodeEditor.draw_handler_remove(self.handler, 'WINDOW')
+        if "sn_close_icon.png" in bpy.data.images:
+            bpy.data.images.remove(bpy.data.images["sn_close_icon.png"])
         if context.area:
             context.area.tag_redraw()
         return {'FINISHED'}
