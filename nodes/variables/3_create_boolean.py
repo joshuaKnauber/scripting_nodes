@@ -109,10 +109,8 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def inititialize(self, context):
         item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
-        for item in bpy.context.space_data.node_tree.search_variables:
-            if item.name == self.groupItem:
-                item.type = "bool"
-                item.socket_type = "BOOLEAN"
+        item.type = "bool"
+        item.socket_type = "BOOLEAN"
         self.update_socket_value(context)
 
     def draw_buttons(self,context,layout):
@@ -143,6 +141,13 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op.element_index = array_index
             
             layout.operator("scripting_nodes.add_variable_array_element",icon="ADD").node_name = self.name
+
+    def copy(self, context):
+        item = bpy.context.space_data.node_tree.search_variables.add()
+        self.groupItem = item.name
+        item.type = "bool"
+        item.socket_type = "BOOLEAN"
+        self.update_socket_value(context)
 
     def free(self):
         for x, item in enumerate(bpy.context.space_data.node_tree.search_variables):

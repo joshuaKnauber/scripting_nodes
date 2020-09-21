@@ -81,13 +81,17 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     array_items: bpy.props.CollectionProperty(type=SN_IntegerArray)
 
     def inititialize(self, context):
-        global groupItem
         item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
-        for item in bpy.context.space_data.node_tree.search_variables:
-            if item.name == self.groupItem:
-                item.type = "int"
-                item.socket_type = "INTEGER"
+        item.type = "int"
+        item.socket_type = "INTEGER"
+        self.update_socket_value(context)
+
+    def copy(self, context):
+        item = bpy.context.space_data.node_tree.search_variables.add()
+        self.groupItem = item.name
+        item.type = "int"
+        item.socket_type = "INTEGER"
         self.update_socket_value(context)
 
     def free(self):
