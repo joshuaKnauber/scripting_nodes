@@ -30,7 +30,7 @@ class CompilerData():
         return "def unregister():"
 
     def print_function_block(self):
-        return """def sn_print(text=""):
+        return """def sn_print(*text):
     print(text) # actual print command
     try: # try to find the area in which the addon is opened and add the print text
         for area in bpy.context.screen.areas:
