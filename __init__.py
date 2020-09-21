@@ -155,8 +155,6 @@ def register():
     bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False)
 
 def unregister():
-    # unregister the addon classes
-    auto_load.unregister()
 
     # unregister keymaps
     unregister_keymaps()
@@ -182,8 +180,8 @@ def unregister():
     # remove the marketplace list
     del bpy.types.Scene.sn_marketplace
 
-    # remove the operator property
-    del bpy.types.Scene.sn_operators
-
     # unregister property for storing if the text is a sn file
     del bpy.types.Text.is_sn_addon
+
+    # unregister the addon classes
+    auto_load.unregister()
