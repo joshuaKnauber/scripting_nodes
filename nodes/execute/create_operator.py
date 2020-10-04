@@ -18,8 +18,11 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
     docs = {
         "text": ["Create Operator is used to <important>create an operator</> (duh).",
                 "",
-                "Should Run Input: <subtext>Operator isn't executed if False</>",
-                "Confirm: <subtext>Operator needs to be confirmed</>"],
+                "Label: <subtext>The name of the operator.</>",
+                "Description: <subtext>The description of the operator.</>",
+                "None/Confirm/Popup: <subtext>Confirm asks you before running the operator.</>",
+                "                 <subtext>Popup shows you a popup and runs the operator when clicking OK.</>",
+                "Should Run Input: <subtext>Operator isn't executed if False</>"],
         "python": ["<function>class</> My_OT_Operator(bpy.types.Operator):",
                    "    bl_idname = <string>'my_category.my_operator'</>",
                    "    bl_label = <string>'My Operator'</>",
@@ -79,7 +82,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     op_name: bpy.props.StringProperty(default="My Operator",name="Label",description="Label of the operator", update=update_op_name)
     description: bpy.props.StringProperty(default="My Operators description",name="Description",description="Description of the operator shown in tooltips", update=update_description)
-    popup_option: bpy.props.EnumProperty(name="Popup Type",items=[("NONE","None","None"),("CONFIRM","Confirm","Confirm"),("PANEL","Panel","Panel")],update=update_popup)
+    popup_option: bpy.props.EnumProperty(name="Popup Type",items=[("NONE","None","None"),("CONFIRM","Confirm","Confirm"),("PANEL","Popup","Popup")],update=update_popup)
     operator_uid: bpy.props.StringProperty()
 
     def inititialize(self,context):
