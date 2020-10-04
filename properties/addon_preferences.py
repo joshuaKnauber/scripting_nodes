@@ -1,7 +1,7 @@
 import bpy
 import os
 import json
-from ..operators.keymaps.keymaps import draw_keymaps, register_keymaps, unregister_keymaps
+from ..operators.keymaps.keymaps import register_keymaps, unregister_keymaps
 
 class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
@@ -11,8 +11,8 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         self.marketplace_search = ""
 
     navigation: bpy.props.EnumProperty(items=[("PACKAGES","Your Packages","The place to manage your packages","PACKAGE",0),
-                                            ("MARKETPLACE","Marketplace","The place to find new packages","IMAGE",1),
-                                            ("SETTINGS","Settings","Settings for the addon","PREFERENCES",2)],
+                                            ("MARKETPLACE","Marketplace","The place to find new packages","IMAGE",1)],
+                                            #("SETTINGS","Settings","Settings for the addon","PREFERENCES",2)],
                                         update = update_nav)
 
     def update_seen_tutorial(self,context):
@@ -24,12 +24,6 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
     has_seen_tutorial: bpy.props.BoolProperty(default=False, update=update_seen_tutorial)
 
     marketplace_search: bpy.props.StringProperty(default="",name="Search")
-
-    def update_shortcuts(self,context):
-        unregister_keymaps()
-        register_keymaps()
-
-    enable_compile_shortcut: bpy.props.BoolProperty(default=True,name="Use Compile Shortcut",description="You can use this shortcut to quickly recompile your addon",update=update_shortcuts)
 
     def _draw_install_package(self,layout):
         """ draws the button for installing packages """
@@ -118,9 +112,6 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             for package in context.scene.sn_marketplace:
                 if self.marketplace_search in package.title or not self.marketplace_search:
                     self.draw_market_package(package)
-
-        elif self.navigation == "SETTINGS":
-            draw_keymaps(self.layout)
 
 """
 Access:
