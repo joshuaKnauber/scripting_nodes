@@ -11,8 +11,8 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         self.marketplace_search = ""
 
     navigation: bpy.props.EnumProperty(items=[("PACKAGES","Your Packages","The place to manage your packages","PACKAGE",0),
-                                            ("MARKETPLACE","Marketplace","The place to find new packages","IMAGE",1)],
-                                            #("SETTINGS","Settings","Settings for the addon","PREFERENCES",2)],
+                                            ("MARKETPLACE","Marketplace","The place to find new packages","IMAGE",1),
+                                            ("SETTINGS","Settings","Settings for the addon","PREFERENCES",2)],
                                         update = update_nav)
 
     def update_seen_tutorial(self,context):
@@ -24,6 +24,8 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
     has_seen_tutorial: bpy.props.BoolProperty(default=False, update=update_seen_tutorial)
 
     marketplace_search: bpy.props.StringProperty(default="",name="Search")
+
+    show_python_file: bpy.props.BoolProperty(default=False,name="Show Python File", description="Show python file in text editor after compiling")
 
     def _draw_install_package(self,layout):
         """ draws the button for installing packages """
@@ -112,6 +114,10 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             for package in context.scene.sn_marketplace:
                 if self.marketplace_search in package.title or not self.marketplace_search:
                     self.draw_market_package(package)
+
+        elif self.navigation == "SETTINGS":
+            row = self.layout.row()
+            row.prop(self,"show_python_file")
 
 """
 Access:

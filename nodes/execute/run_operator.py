@@ -11,7 +11,9 @@ def create_internal_ops():
             if category != "scripting_nodes" and not category[0].isnumeric():
                 for operator in dir(eval("bpy.ops."+category)):
                     if not operator[0].isnumeric():
-                        name = eval("bpy.ops."+category+"."+operator).get_rna_type().name
+                        op = eval("bpy.ops."+category+"."+operator).get_rna_type()
+                        # name = op.name
+                        name = op.identifier.split("_OT_")[-1].replace("_"," ").title()
                         if name and not name + " - " + category.replace("_"," ").title() in bpy.context.scene.sn_properties.operator_properties:
                             item = bpy.context.scene.sn_properties.operator_properties.add()
                             item.name = name + " - " + category.replace("_"," ").title()

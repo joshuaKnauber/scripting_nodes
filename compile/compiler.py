@@ -19,7 +19,6 @@ class ScriptingNodesCompiler():
         self._indents = 4 # the number of indents that should be used in the generated files
         self._modules = [] # the currently registered modules
         self._run_register = True # runs register and set_variables on compile
-        self._hide_file = True # adds a dot in front of the file name to hide it
 
     def _only_string_in_line(self, line):
         """ returns if there are only strings in the given line """
@@ -225,7 +224,8 @@ class ScriptingNodesCompiler():
 
     def _create_addon_text(self, tree, is_export=False):
         """ creates the text for the addon with the given tree """
-        if self._hide_file and not is_export:
+        addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
+        if not addon_prefs.show_python_file and not is_export:
             text = bpy.data.texts.new("." + tree.name + " - " + tree.get_file_name())
         else:
             if is_export:
