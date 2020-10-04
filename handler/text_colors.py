@@ -10,6 +10,7 @@ class TextColorHandler:
             "number": (0.2,0.4,0.75),
             "string": (0,0.75,0,1),
             "data": (0.7,0.7,0.7),
+            "boolean": (1,0.4,0.4),
 
             "red": (1,0.4,0.4),
             "blue": (0,0.3,1),

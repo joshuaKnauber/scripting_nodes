@@ -121,10 +121,28 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = True
 
     docs = {
-        "text": ["This node is used to <important>run a script</>.",
+        "text": ["This node is used to <important>add custom shortcuts</>.",
+                "One keymap can add multiple shorcuts for one space type."
+                "You can add a shortcut by clicking 'Add Shortcut'."
                 "",
-                "<important>Make sure your script doesn't have functions and works before selecting it here</>"],
-        "python": []
+                "Space: <subtext>Here you can select what the shortcut should do</>",
+                "",
+                "Operator/Panel/...: <subtext>The space the shortcuts should work in</>",
+                "Custom/Internal: <subtext>Custom will show the selected types that you created in your addon.</>",
+                "               <subtext>Internal shows the ones that are provided by blender.</>",
+                "Selection: <subtext>You can select an option from the dropdown that should be run</>",
+                "Modifier Keys/Key: <subtext>Here you can select the actual shortcut</>",
+                "Press/...: <subtext>The type of action you need to perform to run the shortcut</>",
+                "Repeat Key: <subtext>When you hold the shortcut and this is enabled, it will run repeatedly</>"],
+        "python": [
+            "kmi = km.keymap_items.<function>new</>(idname=<string>\"wm.call_menu\"</>,",
+            "                           type=<string>\"NONE\"</>,",
+            "                           value=<string>\"PRESS\"</>,",
+            "                           shift=<boolean>False</>,ctrl=<boolean>False</>,alt=<boolean>False</>,any=<boolean>False</>,",
+            "                           repeat=<boolean>False</>)",
+            "kmi.properties.name = <string>\"NLA_MT_add\"</>",
+            "addon_keymaps.<function>append</>((km, kmi))"
+        ]
 
     }
 
