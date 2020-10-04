@@ -29,6 +29,7 @@ from bpy.app.handlers import persistent
 import atexit
 import os
 from . import auto_load
+from bpy.utils import previews
 from .node_tree.node_categories import get_node_categories
 from .properties.groups.addon_properties import ScriptingNodesProperties
 from .properties.groups.package_marketplace import ScriptingNodesMarketplace

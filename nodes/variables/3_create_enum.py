@@ -102,6 +102,11 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         layout.operator("scripting_nodes.add_enum_item",icon="ADD").node_name = self.name
 
+    def copy(self, context):
+        item = bpy.context.space_data.node_tree.sn_enum_property_properties.add()
+        self.groupItem = item.name
+        self.update_socket_value(context)
+
     def free(self):
         for x, item in enumerate(bpy.context.space_data.node_tree.sn_enum_property_properties):
             if item.name == self.groupItem:

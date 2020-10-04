@@ -128,6 +128,9 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def copy(self,context):
         self.panel_uid = uuid4().hex[:10]
+        item = bpy.context.space_data.node_tree.sn_panel_collection_property.add()
+        item.identifier = self.get_idname()
+        item.name = self.label
 
     def free(self):
         for x, item in enumerate(bpy.context.space_data.node_tree.sn_panel_collection_property):

@@ -81,13 +81,17 @@ class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     array_items: bpy.props.CollectionProperty(type=SN_FloatArray)
 
     def inititialize(self, context):
-        global groupItem
         item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
-        for item in bpy.context.space_data.node_tree.search_variables:
-            if item.name == self.groupItem:
-                item.type = "float"
-                item.socket_type = "FLOAT"
+        item.type = "float"
+        item.socket_type = "FLOAT"
+        self.update_socket_value(context)
+
+    def copy(self, context):
+        item = bpy.context.space_data.node_tree.search_variables.add()
+        self.groupItem = item.name
+        item.type = "float"
+        item.socket_type = "FLOAT"
         self.update_socket_value(context)
 
     def free(self):

@@ -98,13 +98,17 @@ class SN_VectorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     use_four_numbers: bpy.props.BoolProperty(default=False,name="Use Four Numbers", update=update_four)
 
     def inititialize(self, context):
-        global groupItem
         item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
-        for item in bpy.context.space_data.node_tree.search_variables:
-            if item.name == self.groupItem:
-                item.type = "vector"
-                item.socket_type = "VECTOR"
+        item.type = "vector"
+        item.socket_type = "VECTOR"
+        self.update_socket_value(context)
+
+    def copy(self, context):
+        item = bpy.context.space_data.node_tree.search_variables.add()
+        self.groupItem = item.name
+        item.type = "vector"
+        item.socket_type = "VECTOR"
         self.update_socket_value(context)
 
     def free(self):

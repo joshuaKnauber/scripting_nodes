@@ -46,8 +46,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
             self.description = make_valid_python(self.description,True)
         
         for item in bpy.context.space_data.node_tree.custom_operator_properties:
-            if item.name == self.group_item:
-                self.group_item = self.description
+            if item.identifier == self.operator_uid:
                 item.description = self.description
     
     def update_op_name(self, context):
@@ -63,8 +62,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                         self.op_name = "New " + self.op_name
 
         for item in bpy.context.space_data.node_tree.custom_operator_properties:
-            if item.name == self.group_item:
-                self.group_item = self.op_name
+            if item.identifier == self.operator_uid:
                 item.name = self.op_name
 
     def update_popup(self,context):
@@ -82,7 +80,6 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
     op_name: bpy.props.StringProperty(default="My Operator",name="Label",description="Label of the operator", update=update_op_name)
     description: bpy.props.StringProperty(default="My Operators description",name="Description",description="Description of the operator shown in tooltips", update=update_description)
     popup_option: bpy.props.EnumProperty(name="Popup Type",items=[("NONE","None","None"),("CONFIRM","Confirm","Confirm"),("PANEL","Panel","Panel")],update=update_popup)
-    group_item: bpy.props.StringProperty()
     operator_uid: bpy.props.StringProperty()
 
     def inititialize(self,context):
@@ -90,14 +87,20 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
         self.update_op_name(None)
         self.sockets.create_input(self,"BOOLEAN","Should Run")
         self.sockets.create_output(self,"EXECUTE","Execute")
+
         item = bpy.context.space_data.node_tree.custom_operator_properties.add()
         item.name = self.op_name
         item.identifier = self.operator_uid
         item.description = self.description
-        self.group_item = item.name
 
     def copy(self,context):
         self.operator_uid = uuid4().hex[:10]
+        self.update_op_name(None)
+
+        item = bpy.context.space_data.node_tree.custom_operator_properties.add()
+        item.name = self.op_name
+        item.identifier = self.operator_uid
+        item.description = self.description
 
     def draw_buttons(self, context, layout):
         layout.prop(self,"op_name")
@@ -107,7 +110,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     def free(self):
         for x, item in enumerate(bpy.context.space_data.node_tree.custom_operator_properties):
-            if item.name == self.group_item:
+            if item.identifier == self.operator_uid:
                 bpy.context.space_data.node_tree.custom_operator_properties.remove(x)
 
     def layout_type(self):
