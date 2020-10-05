@@ -36,7 +36,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         row = col.row(align=True)
         row.scale_y = 1.5
         row.operator("scripting_nodes.install_package",icon="PACKAGE")
-        col.operator("wm.url_open",text="Developer Documentation",icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
+        row.operator("wm.url_open",text="",icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
         split.label(text="")
 
     def _draw_installed_package(self, package_data, index):
