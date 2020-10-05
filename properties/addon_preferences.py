@@ -108,12 +108,18 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
             row = self.layout.row()
             split = row.split(factor=0.35)
-            split.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH")
+            row = split.row(align=True)
+            row.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH")
+            row.operator("wm.url_open",text="", icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
             split.prop(self,"marketplace_search",text="",icon="VIEWZOOM")
 
-            for package in context.scene.sn_marketplace:
-                if self.marketplace_search in package.title or not self.marketplace_search:
-                    self.draw_market_package(package)
+            if len(context.scene.sn_marketplace) == 1:
+                self.layout.label(text="No packages found")
+            else:
+                for package in context.scene.sn_marketplace:
+                    if not package.title == "placeholder":
+                        if self.marketplace_search in package.title or not self.marketplace_search:
+                            self.draw_market_package(package)
 
         elif self.navigation == "SETTINGS":
             row = self.layout.row()

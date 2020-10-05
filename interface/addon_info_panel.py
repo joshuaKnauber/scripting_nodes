@@ -39,7 +39,7 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
         col.label(text="Category")
         col.prop(context.space_data.node_tree, "addon_category", text="")
         col.separator()
-        col.label(text="Blender version")
+        col.label(text="Minimum Blender version")
         row = col.row()
         row.prop(context.space_data.node_tree, "addon_blender", text="")
         col.label(text="Addon version")

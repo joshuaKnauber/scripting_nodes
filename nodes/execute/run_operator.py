@@ -44,6 +44,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     docs = {
         "text": ["This node is used to <important>run an operator</>.",
+                "Internal/Custom: <subtext>Here you can select if you want to use operators you create in this addon or blenders internal ones</>"
                 ""],
         "python": ["bpy.ops.screen.userpref_show()"]
 
@@ -117,7 +118,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
         if node_data["output_data"][0]["code"]:
             next_code = node_data["output_data"][0]["code"]
 
-        execute = []
+        execute = ["pass"]
         if self.search_prop == "internal":
             if self.propName in bpy.context.scene.sn_properties.operator_properties:
                 props = []

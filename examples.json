@@ -18,5 +18,9 @@
     "Enum Example": {
         "tree_name": "Enum",
         "icon": "COLLAPSEMENU"
+    },
+    "Render Buttons": {
+        "tree_name": "Render Buttons",
+        "icon": "RENDER_STILL"
     }
 }
