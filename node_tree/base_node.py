@@ -1,4 +1,5 @@
 import bpy
+import addon_utils
 from ..handler.socket_handler import SocketHandler
 
 
@@ -15,6 +16,7 @@ class SN_ScriptingBaseNode:
     should_be_registered = False # customizable
 
     min_blender_version = None
+    serpens_versions = None
 
     docs = { # customizable
         "text": ["<orange>This node hasn't been documented yet.</>"],
@@ -26,6 +28,15 @@ class SN_ScriptingBaseNode:
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == 'SN_ScriptingNodesTree'
+
+    def get_serpens_version(self):
+        for addon in addon_utils.modules():
+            if "SERPENS" in addon.bl_info["name"]:
+                return addon.bl_info["version"]
+
+    def is_valid_serpens_version(self):
+        version = self.get_serpens_version()
+        return self.serpens_versions == None or (version[0],version[1]) in self.serpens_versions
 
     def init(self,context):
         self.use_custom_color = True
@@ -218,9 +229,7 @@ class SN_ScriptingBaseNode:
             return False
 
     def evaluate_internal(self, socket, node_data, errors):
-        if self.is_valid_blender_version():
-            return self.evaluate(socket, node_data, errors)
-        else:
+        if not self.is_valid_blender_version():
             errors.append({
                 "title": "Incompatible blender version",
                 "message": "This node requires blender version "+str(self.min_blender_version).replace("(","").replace(")","").replace(" ","").replace(",","."),
@@ -228,9 +237,19 @@ class SN_ScriptingBaseNode:
                 "fatal": True
             })
             return {
-            "blocks": [{"lines": [], "indented": []}],
-            "errors": errors 
-        }
+                "blocks": [{"lines": [["pass"]], "indented": []}],
+                "errors": errors 
+            }
+
+        elif not self.is_valid_serpens_version():
+            errors.append({
+                "title": "Incompatible Serpens version",
+                "message": "This node is made for any version from "+str(self.serpens_versions)+". This might cause issues",
+                "node": self,
+                "fatal": False
+            })
+
+        return self.evaluate(socket, node_data, errors)
 
 
 
