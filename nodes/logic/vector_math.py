@@ -1,4 +1,3 @@
-
 #SN_VectorMathNode
 
 import bpy
@@ -36,9 +35,14 @@ class SN_VectorMathNode(bpy.types.Node, SN_ScriptingBaseNode):
     operation: bpy.props.EnumProperty(items=[("ADD", "Add", "Add two vectors"), ("SUBTRACT", "Subtract", "Subtract two vectors"),
                                             ("CROSS_PRODUCT", "Cross Product", "Calculate the cross product between two vectors"),
                                             ("DOT_PRODUCT", "Dot Product", "Calculate the dot product between two vectors"),
-                                            ("DISTANCE", "Distance", "Calculate the distance between two vectors"),
                                             ("LENGTH", "Length", "Calculate the length of the vector")],
                                             update=update_operation,name="Operation", description="The operation you want to commence")
+
+    def update_four(self,context):
+        self.inputs[0].use_four_numbers = self.use_four
+        self.inputs[1].use_four_numbers = self.use_four
+
+    use_four: bpy.props.BoolProperty(default=False,name="Use Four Numbers", update=update_four)
 
     def inititialize(self,context):
         self.sockets.create_input(self,"VECTOR","Value")
@@ -47,13 +51,37 @@ class SN_VectorMathNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "operation", text="")
+        layout.prop(self,"use_four")
 
     def evaluate(self, socket, node_data, errors):
+        v1 = node_data["input_data"][0]["code"]
+
+        if not self.operation == "LENGTH":
+            v2 = node_data["input_data"][1]["code"]
+
+        operation = [v1]
+
+        values = "xyz"
+        if self.use_four:
+            values = "xyzw"
+        
+        if self.operation == "ADD":
+            operation = ["(mathutils.Vector(",v1,") + mathutils.Vector(",v2,")).",values]
+        elif self.operation == "SUBTRACT":
+            operation = ["(mathutils.Vector(",v1,") - mathutils.Vector(",v2,")).",values]
+        elif self.operation == "CROSS_PRODUCT":
+            operation = ["(mathutils.Vector(",v1,").cross(mathutils.Vector(",v2,"))).",values]
+        elif self.operation == "DOT_PRODUCT":
+            operation = ["(mathutils.Vector(",v1,").dot(mathutils.Vector(",v2,")))"]
+        elif self.operation == "LENGTH":
+            operation = ["mathutils.Vector(",v1,").length"]
+
+
         return {
             "blocks": [
                 {
                     "lines": [ # lines is a list of lists, where the lists represent the different lines
-                        ["(", node_data["input_data"][0]["code"], self.operation, node_data["input_data"][1]["code"], ")"]
+                        operation
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
                     ]
@@ -63,4 +91,4 @@ class SN_VectorMathNode(bpy.types.Node, SN_ScriptingBaseNode):
         }
 
     def required_imports(self):
-        return ["math"]
+        return ["mathutils"]
