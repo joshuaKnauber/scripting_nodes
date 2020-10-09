@@ -12,6 +12,13 @@ class SN_VectorMathNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.125,0.125,0.125)
     should_be_registered = False
 
+    docs = {
+        "text": ["This node is used to <important>do vector math operations</>."
+                ""],
+        "python": ["mathutils.Vector(<blue>(1,2,3)</>) * mathutils.Vector(<blue>(4,5,6))</>)"]
+
+    }
+
     def update_operation(self,context):
         if self.operation in ["ADD","SUBTRACT","CROSS_PRODUCT"]:
             if len(self.inputs) == 1:
