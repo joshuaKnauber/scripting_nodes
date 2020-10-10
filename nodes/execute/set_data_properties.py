@@ -79,7 +79,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                             self.search_properties.clear()
                             for prop in eval(data_type).bl_rna.properties:
                                 if getattr(bpy.context.scene.sn_properties, filter_attr[prop.type]):
-                                    if not prop.name == "RNA" and not prop.type in ["COLLECTION", "POINTER", "ENUM"]:
+                                    if not prop.name == "RNA" and not prop.type in ["COLLECTION", "POINTER"]:
                                         if not prop.is_readonly:
                                             item = self.search_properties.add()
                                             item.name = prop.name
@@ -144,7 +144,10 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 set_blocks = []
                 for x, inp in enumerate(self.inputs):
                     if inp.name != "Execute" and inp.bl_idname != "SN_ObjectSocket":
-                        set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = ", node_data["input_data"][x]["code"]])
+                        if self.search_properties[inp.name].type != "ENUM":
+                            set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = ", node_data["input_data"][x]["code"]])
+                        else:
+                            set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = get_enum_identifier(", node_data["input_data"][1]["code"], ".bl_rna.properties['" + self.search_properties[inp.name].identifier + "'].enum_items, " + node_data["input_data"][x]["code"] + ")"])
                 return {"blocks": [{"lines": set_blocks,"indented": []}, {"lines": [[next_code]],"indented": []}],"errors": errors}
 
         return {"blocks": [{"lines": [],"indented": []}, {"lines": [[next_code]],"indented": []}],"errors": errors}

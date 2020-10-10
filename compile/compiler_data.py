@@ -43,7 +43,14 @@ class CompilerData():
 
         for area in bpy.context.screen.areas:
             area.tag_redraw()
-    except: pass"""
+    except: pass
+    
+def get_enum_identifier(enumItems, name):
+    for item in enumItems:
+        if item.name == name:
+            return item.identifier
+            
+    return ''"""
         
     def utility_block(self):
         return """def cast_int(cast):
