@@ -64,14 +64,37 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if self.var_name == node.var_name:
                         self.var_name = "new_" + self.var_name
 
-        for item in bpy.context.space_data.node_tree.sn_enum_property_properties:
+        for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:
                 self.groupItem = self.var_name
                 item.name = self.var_name
 
+        for item in bpy.context.space_data.node_tree.sn_enum_property_properties:
+            if item.name == self.groupItem:
+                self.groupItem = self.var_name
+                item.name = self.var_name
+        
+        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in identifiers:
+                node.update_outputs(None)
+
+    def update_description(self, context):
+        if not is_valid_python(self.description,True):
+            self.description = make_valid_python(self.description,True)
+    
+        for item in bpy.context.space_data.node_tree.search_variables:
+            if item.name == self.groupItem:
+                item.description = self.description
+    
+        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in identifiers:
+                node.update_outputs(None)
+
     var_name: bpy.props.StringProperty(name="Name",description="Name of this enum",update=update_socket_value)
 
-    description: bpy.props.StringProperty(name="Description",description="Description of this enum")
+    description: bpy.props.StringProperty(name="Description",description="Description of this enum", update=update_description)
 
     array_items: bpy.props.CollectionProperty(type=SN_StringArray)
 
@@ -80,6 +103,9 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def inititialize(self, context):
         item = bpy.context.space_data.node_tree.sn_enum_property_properties.add()
         self.groupItem = item.name
+        item = bpy.context.space_data.node_tree.search_variables.add()
+        item.type = "enum"
+        item.socket_type = "STRING"
         self.update_socket_value(context)
 
     def draw_buttons(self,context,layout):
@@ -105,12 +131,22 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def copy(self, context):
         item = bpy.context.space_data.node_tree.sn_enum_property_properties.add()
         self.groupItem = item.name
+        item = bpy.context.space_data.node_tree.search_variables.add()
+        item.type = "enum"
+        item.socket_type = "STRING"
+
+        item = bpy.context.space_data.node_tree.search_variables.add()
+        item.type = "enum"
+        item.socket_type = "STRING"
         self.update_socket_value(context)
 
     def free(self):
         for x, item in enumerate(bpy.context.space_data.node_tree.sn_enum_property_properties):
             if item.name == self.groupItem:
                 bpy.context.space_data.node_tree.sn_enum_property_properties.remove(x)
+        for x, item in enumerate(bpy.context.space_data.node_tree.search_variables):
+            if item.name == self.groupItem:
+                bpy.context.space_data.node_tree.search_variables.remove(x)
 
     def evaluate(self, socket, node_data, errors):
         blocks = []
