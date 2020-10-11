@@ -10,6 +10,7 @@ class SN_OT_WelcomeMessage(bpy.types.Operator):
     def execute(self, context):
         context.preferences.addons[__name__.partition('.')[0]].preferences.tutorial_updated_self = True
         context.preferences.addons[__name__.partition('.')[0]].preferences.has_seen_tutorial = True
+        bpy.ops.wm.save_userpref()
         return {"FINISHED"}
 
     def draw(self,context):

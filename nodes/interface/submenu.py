@@ -18,12 +18,13 @@ class SN_SubMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = False
 
     docs = {
-        "text": ["The row node can display a layout in <important> a row or from left to right</>.",
+        "text": ["The node adds a <important>submenu</> to your interface.",
                 "",
-                "Aligned: <subtext>All following nodes are aligned</>",
-                "Enabled: <subtext>Only displays a column if this is True</>",
-                "Alert: <subtext>Is diplayed red like an alert</>"],
-        "python": ["layout.<function>row</>(align=True)"]
+                "Internal/Custom: <subtext>Internal shows a list of the blender menus and custom shows the ones you create in your addon</>",
+                "                           <subtext>You can select the menu from the search below this</>",
+                "Layout: <subtext>The layout the menu will be shown in</>",
+                "Text: <subtext>The text that will be shown on the input</>"],
+        "python": ["layout.<function>menu</>(<string>\"VIEW3D_MT_transform\"</>)"]
     }
 
     def update_enum(self,context):

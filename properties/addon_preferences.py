@@ -1,7 +1,7 @@
 import bpy
 import os
 import json
-from ..operators.keymaps.keymaps import draw_keymaps, register_keymaps, unregister_keymaps
+from ..operators.keymaps.keymaps import register_keymaps, unregister_keymaps
 
 class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
@@ -25,11 +25,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
     marketplace_search: bpy.props.StringProperty(default="",name="Search")
 
-    def update_shortcuts(self,context):
-        unregister_keymaps()
-        register_keymaps()
-
-    enable_compile_shortcut: bpy.props.BoolProperty(default=True,name="Use Compile Shortcut",description="You can use this shortcut to quickly recompile your addon",update=update_shortcuts)
+    show_python_file: bpy.props.BoolProperty(default=False,name="Show Python File", description="Show python file in text editor after compiling")
 
     def _draw_install_package(self,layout):
         """ draws the button for installing packages """
@@ -40,7 +36,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         row = col.row(align=True)
         row.scale_y = 1.5
         row.operator("scripting_nodes.install_package",icon="PACKAGE")
-        col.operator("wm.url_open",text="Developer Documentation",icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
+        row.operator("wm.url_open",text="",icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
         split.label(text="")
 
     def _draw_installed_package(self, package_data, index):
@@ -112,15 +108,22 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
             row = self.layout.row()
             split = row.split(factor=0.35)
-            split.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH")
+            row = split.row(align=True)
+            row.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH")
+            row.operator("wm.url_open",text="", icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
             split.prop(self,"marketplace_search",text="",icon="VIEWZOOM")
 
-            for package in context.scene.sn_marketplace:
-                if self.marketplace_search in package.title or not self.marketplace_search:
-                    self.draw_market_package(package)
+            if len(context.scene.sn_marketplace) == 1:
+                self.layout.label(text="No packages found")
+            else:
+                for package in context.scene.sn_marketplace:
+                    if not package.title == "placeholder":
+                        if self.marketplace_search in package.title or not self.marketplace_search:
+                            self.draw_market_package(package)
 
         elif self.navigation == "SETTINGS":
-            draw_keymaps(self.layout)
+            row = self.layout.row()
+            row.prop(self,"show_python_file")
 
 """
 Access:

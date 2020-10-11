@@ -18,7 +18,14 @@ class SN_OT_CompileActive(bpy.types.Operator):
     def execute(self, context):
         success = compiler().compile_active()
         if success:
-            self.report({"INFO"},message="Successfully compiled addon!")
+            has_fatal = False
+            for error in compiler().get_active_addons_errors():
+                if error["fatal"]:
+                    has_fatal = True
+            if not has_fatal:
+                self.report({"INFO"},message="Successfully compiled addon!")
+            else:
+                self.report({"WARNING"},message="Fatal errors found! Check the N-Panel for debugging.")
         else:
             self.report({"ERROR"},message="Encountered a fatal error when compiling! Please contact the developers!")
         return {"FINISHED"}

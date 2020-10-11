@@ -11,7 +11,9 @@ def create_internal_ops():
             if category != "scripting_nodes" and not category[0].isnumeric():
                 for operator in dir(eval("bpy.ops."+category)):
                     if not operator[0].isnumeric():
-                        name = eval("bpy.ops."+category+"."+operator).get_rna_type().name
+                        op = eval("bpy.ops."+category+"."+operator).get_rna_type()
+                        # name = op.name
+                        name = op.identifier.split("_OT_")[-1].replace("_"," ").title()
                         if name and not name + " - " + category.replace("_"," ").title() in bpy.context.scene.sn_properties.operator_properties:
                             item = bpy.context.scene.sn_properties.operator_properties.add()
                             item.name = name + " - " + category.replace("_"," ").title()
@@ -42,6 +44,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     docs = {
         "text": ["This node is used to <important>run an operator</>.",
+                "Internal/Custom: <subtext>Here you can select if you want to use operators you create in this addon or blenders internal ones</>"
                 ""],
         "python": ["bpy.ops.screen.userpref_show()"]
 
@@ -126,7 +129,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
         if node_data["output_data"][0]["code"]:
             next_code = node_data["output_data"][0]["code"]
 
-        execute = []
+        execute = ["pass"]
         if self.search_prop == "internal":
             if self.propName in bpy.context.scene.sn_properties.operator_properties:
                 props = []

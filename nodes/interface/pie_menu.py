@@ -16,23 +16,15 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = True
 
     docs = {
-        "text": ["This node adds a <important>panel to the interface.</>",
-                "Press the 'Select Location' button to pick where the panel should be displayed"
+        "text": ["This node adds a <important>pie menu</>",
+                "You need a keymap node to show it"
                 "",
-                "Label: <subtext>This is the label that will be shown in the panels header.</>",
-                "Hide Header: <subtext>This determines if the header of the panel should be shown or hidden.</>",
-                "Default Closed: <subtext>If this is True, the panel will be closed by default.</>",
-                "Show Panel: <subtext>This determines if the panel should be shown or hidden.</>",
+                "Label: <subtext>This is the label that will be shown in the middle of the menu.</>",
+                "Show Menu: <subtext>This determines if the menu should be shown or hidden.</>",
                 "",
-                "Header Output: You can add layouts to the header here.",
-                "Panel Output: You can add layouts to the panel here."],
-        "python": ["<function>class</> My_PT_Panel(bpy.types.Panel):",
-                   "    bl_idname = <string>'My_PT_Panel'</>",
-                   "    bl_label = <string>'My Panel'</>",
-                   "    bl_space_type = <string>'PROPERTIES'</>",
-                   "    bl_region_type = <string>'WINDOW'</>",
-                   "    bl_context = <string>'object'</>",
-                   "    bl_options = {<string>\"HIDE_HEADER\"</>}",
+                "Menu Output: You can add layouts to the menu here."],
+        "python": ["<function>class</> My_MT_PIE_Menu(bpy.types.Menu):",
+                   "    bl_label = <string>'My Pie Menu'</>",
                    "",
                    "    <yellow>@classmethod</>",
                    "    <grey>def</> <function>poll</>(<blue>cls</>, <blue>context</>):",
@@ -40,7 +32,8 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
                    "",
                    "    <grey>def</> <function>draw</>(<blue>self</>, <blue>context</>):",
                    "        layout = self.layout",
-                   "        layout.<function>label</>(text=<string>\"My label text\"</>, icon=<string>\"MONKEY\"</>)"]
+                   "        pie = self.menu_pie()",
+                   "        pie.<function>label</>(text=<string>\"My label text\"</>, icon=<string>\"MONKEY\"</>)"]
     }
 
     def update_item(self, context):
@@ -72,10 +65,7 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
             if item.identifier == self.get_idname():
                 bpy.context.space_data.node_tree.sn_pie_menu_collection_property.remove(x)
 
-    def draw_buttons(self,context,layout):
-        row = layout.row()
-        row.label(text="Use a shortcut node to display the menu!", icon="INFO")
-        
+    def draw_buttons(self,context,layout):        
         layout.prop(self,"label")
 
     def layout_type(self):

@@ -16,23 +16,15 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = True
 
     docs = {
-        "text": ["This node adds a <important>panel to the interface.</>",
-                "Press the 'Select Location' button to pick where the panel should be displayed"
+        "text": ["This node adds a <important>menu</>",
                 "",
-                "Label: <subtext>This is the label that will be shown in the panels header.</>",
-                "Hide Header: <subtext>This determines if the header of the panel should be shown or hidden.</>",
-                "Default Closed: <subtext>If this is True, the panel will be closed by default.</>",
-                "Show Panel: <subtext>This determines if the panel should be shown or hidden.</>",
+                "Label: <subtext>This is the label that will be shown at the top of the menu.</>",
+                "Show Menu: <subtext>This determines if the menu should be shown or hidden.</>",
                 "",
-                "Header Output: You can add layouts to the header here.",
-                "Panel Output: You can add layouts to the panel here."],
-        "python": ["<function>class</> My_PT_Panel(bpy.types.Panel):",
-                   "    bl_idname = <string>'My_PT_Panel'</>",
-                   "    bl_label = <string>'My Panel'</>",
-                   "    bl_space_type = <string>'PROPERTIES'</>",
-                   "    bl_region_type = <string>'WINDOW'</>",
-                   "    bl_context = <string>'object'</>",
-                   "    bl_options = {<string>\"HIDE_HEADER\"</>}",
+                "Menu Output: You can add layouts to the menu here."],
+        "python": ["<function>class</> My_MT_Menu(bpy.types.Menu):",
+                   "    bl_idname = <string>'My Menu'</>",
+                   "    bl_label = <string>'My_MT_Menu'</>",
                    "",
                    "    <yellow>@classmethod</>",
                    "    <grey>def</> <function>poll</>(<blue>cls</>, <blue>context</>):",
@@ -40,7 +32,7 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
                    "",
                    "    <grey>def</> <function>draw</>(<blue>self</>, <blue>context</>):",
                    "        layout = self.layout",
-                   "        layout.<function>label</>(text=<string>\"My label text\"</>, icon=<string>\"MONKEY\"</>)"]
+                   "        pie.<function>label</>(text=<string>\"My label text\"</>, icon=<string>\"MONKEY\"</>)"]
     }
 
     def update_item(self, context):
