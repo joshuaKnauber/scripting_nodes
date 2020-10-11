@@ -65,6 +65,10 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
             if item.identifier == self.operator_uid:
                 item.name = self.op_name
 
+        for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in ["SN_RunOperator", "SN_KeymapNode"]:
+                node.update_name_external()
+
     def update_popup(self,context):
         if self.popup_option == "PANEL":
             if len(self.outputs) == 1:

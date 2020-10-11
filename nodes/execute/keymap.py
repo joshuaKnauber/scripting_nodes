@@ -86,11 +86,20 @@ class SN_ShortcutPropertyGroup(bpy.types.PropertyGroup):
         self.menu = ""
         self.pie_menu = ""
 
+    def update_name(self, context):
+        if self.use_custom == "CUSTOM":
+            if not self.operator in bpy.context.space_data.node_tree.custom_operator_properties and self.operator != "":
+                self.operator = ""
+                self.op_uid = ""
+            else:
+                self.op_uid = bpy.context.space_data.node_tree.custom_operator_properties[self.operator].identifier
+
     call_type: bpy.props.EnumProperty(items=[("OPERATOR","Operator","Operator"),("PANEL","Panel","Panel"),("PIE_MENU"," Pie Menu","Pie Menu"),("MENU"," Menu","Menu")])
     use_custom: bpy.props.EnumProperty(items=[("CUSTOM","Custom","Custom"),("INTERNAL","Internal","Internal")], update=update_custom,
                                         name="Use Custom", description="Use your own items or blenders internals")
 
-    operator: bpy.props.StringProperty(name="Operator",description="The operator that will be run when the shortcut is executed")
+    op_uid: bpy.props.StringProperty()
+    operator: bpy.props.StringProperty(name="Operator",description="The operator that will be run when the shortcut is executed", update=update_name)
     panel: bpy.props.StringProperty(name="Panel",description="The panel that will be shown when the shortcut is executed")
     panel_name: bpy.props.StringProperty(name="Panel Name",description="The name of the panelthat will be shown when the shortcut is executed")
     menu: bpy.props.StringProperty(name="Menu",description="The menu that will be shown when the shortcut is executed")
@@ -127,6 +136,14 @@ class SN_KeymapNode(bpy.types.Node, SN_ScriptingBaseNode):
         "python": []
 
     }
+
+    def update_name_external(self):
+        for shortcut in self.shortcuts:
+            if shortcut.call_type == "OPERATOR":
+                if shortcut.use_custom == "CUSTOM":
+                    for op in bpy.context.space_data.node_tree.custom_operator_properties:
+                        if op.identifier == shortcut.op_uid:
+                            shortcut.operator = op.name
 
     def get_space_items(self,context):
         spaces = []

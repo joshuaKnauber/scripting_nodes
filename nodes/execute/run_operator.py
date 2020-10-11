@@ -47,6 +47,12 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     }
 
+    def update_name_external(self):
+        if self.search_prop == "custom":
+            for op in bpy.context.space_data.node_tree.custom_operator_properties:
+                if op.identifier == self.op_uid:
+                    self.propName = op.name
+
     def update_name(self, context):
         self.enum_collection.clear()
         for inp in self.inputs:
@@ -79,15 +85,20 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                         else:
                             if prop.type in identifiers:
                                 self.sockets.create_input(self, identifiers[prop.type], prop.name).set_value(prop.default)
+
         else:
             if not self.propName in bpy.context.space_data.node_tree.custom_operator_properties and self.propName != "":
                 self.propName = ""
+                self.op_uid = ""
+            else:
+                self.op_uid = bpy.context.space_data.node_tree.custom_operator_properties[self.propName].identifier
 
     def update_enum(self, context):
         self.propName = ""
         if self.search_prop == "internal":
             create_internal_ops()
 
+    op_uid: bpy.props.StringProperty()
     propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
     search_prop: bpy.props.EnumProperty(items=[("internal", "Internal", "Blenders internal properties"), ("custom", "Custom", "Your custom enums")], name="Properties", description="Which properties to display", update=update_enum)
     enum_collection: bpy.props.CollectionProperty(type=SN_EnumCollection)
