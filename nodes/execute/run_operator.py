@@ -90,7 +90,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
             if not self.propName in bpy.context.space_data.node_tree.custom_operator_properties and self.propName != "":
                 self.propName = ""
                 self.op_uid = ""
-            else:
+            elif self.propName != "":
                 self.op_uid = bpy.context.space_data.node_tree.custom_operator_properties[self.propName].identifier
 
     def update_enum(self, context):
