@@ -102,6 +102,13 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         self.layout.separator()
 
         if self.navigation == "PACKAGES":
+
+            row = self.layout.row(align=True)
+            box = row.box()
+            box.label(text="If you feel like a node or a feature is missing, let us know in discord!", icon="INFO")
+            box = row.box()
+            box.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id, emboss=False).url = "https://discord.com/invite/NK6kyae"
+
             self._draw_installed_packages()
 
         elif self.navigation == "MARKETPLACE":
