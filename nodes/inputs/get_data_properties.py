@@ -13,27 +13,6 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
     use_four_numbers: bpy.props.BoolProperty()
     is_color: bpy.props.BoolProperty(default=False)
 
-class SN_PT_FilterPanel(bpy.types.Panel):
-    bl_space_type = 'NODE_EDITOR'
-    bl_region_type = 'WINDOW'
-    bl_label = "Filter"
-    bl_width = 150
-    bl_ui_units_x = 6
-
-    def draw(self, context):
-        layout = self.layout
-
-        layout.label(text="Data Types:")
-        row = layout.row(align=True)
-        
-        row.prop(context.scene.sn_properties, "filter_string", icon="SORTALPHA", text="")
-        row.prop(context.scene.sn_properties, "filter_bool", icon="FORCE_CHARGE", text="")
-        row.prop(context.scene.sn_properties, "filter_int", icon="CON_TRANSFORM", text="")
-        row.prop(context.scene.sn_properties, "filter_float", icon="CON_TRANSFORM", text="")
-        row.prop(context.scene.sn_properties, "filter_vector", icon="CON_TRANSFORM", text="")
-        row.prop(context.scene.sn_properties, "filter_data_block_collection", icon="OUTLINER_OB_GROUP_INSTANCE", text="")
-        row.prop(context.scene.sn_properties, "filter_data_block", icon="MESH_CUBE", text="")
-
 class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_GetDataPropertiesNode"
