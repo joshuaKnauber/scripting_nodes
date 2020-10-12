@@ -44,6 +44,7 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                         ["if ", node_data["input_data"][1]["code"], ":"]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
+                        ["pass"],
                         [do_layout]
                     ]
                 },
@@ -52,6 +53,7 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                         ["else:"]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
+                        ["pass"],
                         [else_layout]
                     ]
                 }

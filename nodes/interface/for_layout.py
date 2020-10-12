@@ -72,7 +72,7 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
             return {"blocks": [{"lines": [[self.index_name]],"indented": []}],"errors": errors}
         # return the code block and next output
         else:
-            output = "pass"
+            output = ""
             if node_data["output_data"][0]["code"]:
                 output = node_data["output_data"][0]["code"]
 
@@ -85,6 +85,7 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                             ["for " + self.index_name + ", " + self.var_name + " in enumerate(", node_data["input_data"][1]["code"], "):"]
                         ],
                         "indented": [ # indented is a list of lists, where the lists represent the different lines
+                            ["pass"],
                             [output]
                         ]
                     }
