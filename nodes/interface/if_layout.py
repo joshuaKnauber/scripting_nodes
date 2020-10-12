@@ -29,11 +29,11 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"LAYOUT","Else")
 
     def evaluate(self, socket, node_data, errors):
-        do_layout = "pass"
+        do_layout = ""
         if node_data["output_data"][0]["code"]:
             do_layout = node_data["output_data"][0]["code"]
 
-        else_layout = "pass"
+        else_layout = ""
         if node_data["output_data"][1]["code"]:
             else_layout = node_data["output_data"][1]["code"]
 
