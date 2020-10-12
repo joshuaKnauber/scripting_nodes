@@ -139,6 +139,9 @@ class SN_TextInputNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.search_prop == "internal":
             if self.search_value in self.search_properties:
                 return {"blocks": [{"lines": [[layout_type, ".prop(", node_data["input_data"][3]["code"], ", '", self.search_properties[self.search_value].identifier, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], icon, ")"]],"indented": []}],"errors": errors}
+            else:
+                errors.append({"title": "No variable selected", "message": "You need to select the variable you want to display", "node": self, "fatal": True})
+                return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
         else:
             if self.search_value in node_data["node_tree"].search_variables:
                 if node_data["node_tree"].search_variables[self.search_value].type == "string":
@@ -146,6 +149,14 @@ class SN_TextInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                         return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_.", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "_array[", node_data["input_data"][3]["code"], "], '", node_data["node_tree"].search_variables[self.search_value].type, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], icon, ")"]],"indented": []}],"errors": errors}
                     else:
                         return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_, '", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], icon, ")"]],"indented": []}],"errors": errors}
+
+                else:
+                    errors.append({"title": "Wrong variable selected", "message": "You need to select a string variable", "node": self, "fatal": True})
+                    return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
+
+            else:
+                errors.append({"title": "No variable selected", "message": "You need to select the variable you want to display", "node": self, "fatal": True})
+                return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
 
         return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
 
