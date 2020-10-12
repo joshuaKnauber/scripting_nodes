@@ -79,6 +79,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                             if prop.array_length > 1:
                                 socket = self.sockets.create_input(self, "VECTOR", prop.name)
                                 socket.use_four_numbers = prop.array_length == 4
+                                socket.is_color = prop.name == "Color"
                                 # socket.is_color = prop.subtype == "COLOR"
                             else:
                                 if prop.type in identifiers:

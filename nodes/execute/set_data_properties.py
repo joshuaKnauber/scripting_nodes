@@ -85,6 +85,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             item.name = prop.name
                                             item.identifier = prop.identifier
                                             item.description = prop.description
+                                            item.is_color = prop.name == "Color"
                                             # item.is_color = prop.subtype == "COLOR"
                                             if not prop.type in ["INT", "FLOAT"]:
                                                 item.type = prop.type
@@ -92,6 +93,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                                 if prop.is_array:
                                                     item.type = "VECTOR"
                                                     item.use_four_numbers = prop.array_length == 4
+                                                    item.is_color = prop.name == "Color"
                                                     # item.is_color = prop.subtype == "COLOR"
                                                 else:
                                                     item.type = prop.type
