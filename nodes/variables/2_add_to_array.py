@@ -129,6 +129,10 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                         blocks = [{"lines": [add_text], "indented": []}]
                     elif self.operation == "start":
                         blocks = [{"lines": [add_text, ["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.move(len(bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array)-1, 0)"]], "indented": []}]
+            else:
+                errors.append({"title": "No array selected", "message": "Please select an array", "node": self, "fatal": True})
+        else:
+            errors.append({"title": "No array selected", "message": "Please select an array", "node": self, "fatal": True})
 
         return {"blocks": blocks + [{"lines": [[next_code]],"indented": []}], "errors": errors}
 

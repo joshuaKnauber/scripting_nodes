@@ -100,6 +100,10 @@ class SN_RemoveFromArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.remove(len(bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array)-1)"]], "indented": []}]
                 else:
                     blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.clear()"]], "indented": []}]
+            else:
+                errors.append({"title": "No array selected", "message": "Please select an array", "node": self, "fatal": True})
+        else:
+            errors.append({"title": "No array selected", "message": "Please select an array", "node": self, "fatal": True})
 
         return {"blocks": blocks + [{"lines": [[next_code]],"indented": []}], "errors": errors}
 
