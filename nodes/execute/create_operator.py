@@ -46,12 +46,12 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_description(self, context):
         if not is_valid_python(self.description,True):
-            self.description = make_valid_python(self.description,True)
-        
+            self.description = make_valid_python(self.description, True, True)
+
         for item in bpy.context.space_data.node_tree.custom_operator_properties:
             if item.identifier == self.operator_uid:
                 item.description = self.description
-    
+
     def update_op_name(self, context):
         if self.op_name == "":
             self.op_name = "My Operator"

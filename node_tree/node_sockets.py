@@ -30,13 +30,13 @@ def is_valid_python(value,is_python_name):
             return True
     return False
 
-def make_valid_python(value,is_python_name):
+def make_valid_python(value,is_python_name,can_be_empty=False):
     if is_python_name:
         while value and value[0].isdigit():
             value = value[1:]
         for char in _invalid_chars:
             value = value.replace(char,"")
-        if not value:
+        if not value and not can_be_empty:
             value = "name"
     return value
 

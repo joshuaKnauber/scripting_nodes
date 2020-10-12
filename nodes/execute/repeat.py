@@ -66,7 +66,7 @@ class SN_RepeatProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
             if node_data["output_data"][0]["code"]:
                 next_code = node_data["output_data"][0]["code"]
 
-            output = "pass"
+            output = ""
             if node_data["output_data"][1]["code"]:
                 output = node_data["output_data"][1]["code"]
 
@@ -78,6 +78,7 @@ class SN_RepeatProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                             ["for " + self.var_name + " in range(", node_data["input_data"][1]["code"], "):"]
                         ],
                         "indented": [ # indented is a list of lists, where the lists represent the different lines
+                            ["pass"],
                             [output]
                         ]
                     },

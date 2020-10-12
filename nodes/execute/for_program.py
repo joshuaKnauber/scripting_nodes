@@ -82,8 +82,6 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
             if node_data["output_data"][1]["code"]:
                 output = node_data["output_data"][1]["code"]
 
-            if output == "":
-                output = "pass"
             return {
                 "blocks": [
                     {
@@ -93,6 +91,7 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                             ["for " + self.index_name + ", " + self.var_name + " in enumerate(", node_data["input_data"][1]["code"], "):"]
                         ],
                         "indented": [ # indented is a list of lists, where the lists represent the different lines
+                            ["pass"],
                             [output]
                         ]
                     },

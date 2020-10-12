@@ -36,11 +36,11 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
         if node_data["output_data"][0]["code"]:
             next_code = node_data["output_data"][0]["code"]
 
-        do_code = "pass"
+        do_code = ""
         if node_data["output_data"][1]["code"]:
             do_code = node_data["output_data"][1]["code"]
 
-        else_code = "pass"
+        else_code = ""
         if node_data["output_data"][2]["code"]:
             else_code = node_data["output_data"][2]["code"]
 
@@ -51,6 +51,7 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                         ["if ", node_data["input_data"][1]["code"], ":"]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
+                        ["pass"],
                         [do_code]
                     ]
                 },
@@ -59,6 +60,7 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                         ["else:"]
                     ],
                     "indented": [ # indented is a list of lists, where the lists represent the different lines
+                        ["pass"],
                         [else_code]
                     ]
                 },
