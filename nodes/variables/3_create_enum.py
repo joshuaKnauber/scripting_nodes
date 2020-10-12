@@ -70,8 +70,8 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 item.name = self.var_name
 
         for item in bpy.context.space_data.node_tree.sn_enum_property_properties:
-            if item.name == self.groupItem:
-                self.groupItem = self.var_name
+            if item.name == self.enumItem:
+                self.enumItem = self.var_name
                 item.name = self.var_name
         
         identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
@@ -99,11 +99,13 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     array_items: bpy.props.CollectionProperty(type=SN_StringArray)
 
     groupItem: bpy.props.StringProperty(default="item_name_placeholder")
+    enumItem: bpy.props.StringProperty(default="item_name_placeholder")
 
     def inititialize(self, context):
         item = bpy.context.space_data.node_tree.sn_enum_property_properties.add()
-        self.groupItem = item.name
+        item.name = self.enumItem
         item = bpy.context.space_data.node_tree.search_variables.add()
+        item.name = self.groupItem
         item.type = "enum"
         item.socket_type = "STRING"
         self.update_socket_value(context)
@@ -130,19 +132,20 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def copy(self, context):
         item = bpy.context.space_data.node_tree.sn_enum_property_properties.add()
-        self.groupItem = item.name
+        item.name = self.enumItem
         item = bpy.context.space_data.node_tree.search_variables.add()
         item.type = "enum"
         item.socket_type = "STRING"
 
         item = bpy.context.space_data.node_tree.search_variables.add()
+        item.name = self.groupItem
         item.type = "enum"
         item.socket_type = "STRING"
         self.update_socket_value(context)
 
     def free(self):
         for x, item in enumerate(bpy.context.space_data.node_tree.sn_enum_property_properties):
-            if item.name == self.groupItem:
+            if item.name == self.enumItem:
                 bpy.context.space_data.node_tree.sn_enum_property_properties.remove(x)
         for x, item in enumerate(bpy.context.space_data.node_tree.search_variables):
             if item.name == self.groupItem:
