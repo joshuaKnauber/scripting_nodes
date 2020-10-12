@@ -63,20 +63,25 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.sockets.create_input(self,"STRING","Name")
 
     def reset_data_type(self, context):
+        self.search_value = ""
         if self.inputs[0].links[0].from_socket.bl_idname == "SN_CollectionSocket":
             if self.outputs[0].is_linked:
                 if self.outputs[0].links[0].to_socket.bl_idname in ["SN_CollectionSocket", "SN_ObjectSocket"]:
                     self.outputs[0].links[0].to_node.reset_data_type(None)
-            else:
-                self.update()
+                else:
+                    self.update()
 
         elif self.inputs[0].links[0].from_socket.bl_idname == "SN_ObjectSocket":
+            self.update()
+            for out in self.outputs:
+                if not out.name in self.search_properties:
+                    self.outputs.remove(out)
+
             for out in self.outputs:
                 if out.bl_idname in ["SN_CollectionSocket", "SN_ObjectSocket"]:
                     if out.is_linked:
                         out.links[0].to_node.reset_data_type(None)
-            else:
-                self.update()
+            self.update()
 
     search_value: bpy.props.StringProperty(name="Search value", description="")
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
@@ -119,10 +124,6 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                         # item.is_color = prop.subtype == "COLOR"
                                     else:
                                         item.type = prop.type
-
-                for out in self.outputs:
-                    if not out.name in self.search_properties:
-                        self.outputs.remove(out)
 
             elif self.inputs[0].links[0].from_socket.bl_idname == "SN_CollectionSocket":
                 if not self.inputs[0].bl_idname == "SN_CollectionSocket":
@@ -168,6 +169,11 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if inp.name == self.search_value:
                         is_existing = True
 
+                if self.search_value == "":
+                    op = row.operator("scripting_nodes.add_custom_socket",text="",icon="ADD")
+                    op.node_name = self.name
+                    op.is_output = True
+
                 if not is_existing and not self.search_value == "":
                     op = row.operator("scripting_nodes.add_scene_data_socket",text="",icon="ADD")
                     op.node_name = self.name
@@ -193,10 +199,13 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     return {"blocks": [{"lines": [["len(", node_data["input_data"][0]["code"], ") != 0"]],"indented": []}],"errors": errors}
 
             elif self.inputs[0].links[0].from_socket.bl_idname == "SN_ObjectSocket":
-                if self.search_properties[socket.name].type != "ENUM":
-                    return {"blocks": [{"lines": [[node_data["input_data"][0]["code"], "." + self.search_properties[socket.name].identifier]],"indented": []}],"errors": errors}
+                if socket.name in self.search_properties:
+                    if self.search_properties[socket.name].type != "ENUM":
+                        return {"blocks": [{"lines": [[node_data["input_data"][0]["code"], "." + self.search_properties[socket.name].identifier]],"indented": []}],"errors": errors}
+                    else:
+                        return {"blocks": [{"lines": [[node_data["input_data"][0]["code"], ".bl_rna.properties['" + self.search_properties[socket.name].identifier + "'].enum_items[", node_data["input_data"][0]["code"], "." + self.search_properties[socket.name].identifier + "].name"]],"indented": []}],"errors": errors}
                 else:
-                    return {"blocks": [{"lines": [[node_data["input_data"][0]["code"], ".bl_rna.properties['" + self.search_properties[socket.name].identifier + "'].enum_items[", node_data["input_data"][0]["code"], "." + self.search_properties[socket.name].identifier + "].name"]],"indented": []}],"errors": errors}
+                    return {"blocks": [{"lines": [[node_data["input_data"][0]["code"], "." + socket.name]],"indented": []}],"errors": errors}
 
         return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
 

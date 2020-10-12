@@ -1,7 +1,7 @@
 import bpy
 from ..handler.socket_handler import SocketHandler
 
-def add_data_output(node,label,is_output,use_four_numbers,prop_type="", is_color=False):
+def add_data_output(node, label, is_output, prop_type="", use_four_numbers=False, is_color=False):
     sockets = SocketHandler()
     if prop_type == "STRING" or prop_type == "ENUM":
         if is_output:
@@ -15,7 +15,7 @@ def add_data_output(node,label,is_output,use_four_numbers,prop_type="", is_color
             sockets.create_input(node,"BOOLEAN",label)
     elif prop_type == "VECTOR":
         if is_output:
-            socket = sockets.create_input(node,"VECTOR",label)
+            socket = sockets.create_output(node,"VECTOR",label)
             socket.use_four_numbers = use_four_numbers
             socket.is_color = is_color
         else:
@@ -46,8 +46,8 @@ def add_data_output(node,label,is_output,use_four_numbers,prop_type="", is_color
 
 class SN_OT_AddSceneDataSocket(bpy.types.Operator):
     bl_idname = "scripting_nodes.add_scene_data_socket"
-    bl_label = "Add output"
-    bl_description = "Adds the selected output"
+    bl_label = "Add socket"
+    bl_description = "Adds the selected socket"
     bl_options = {"REGISTER","INTERNAL"}
 
     node_name: bpy.props.StringProperty()
@@ -61,14 +61,14 @@ class SN_OT_AddSceneDataSocket(bpy.types.Operator):
             if node.name == self.node_name:
                 for prop in node.search_properties:
                     if prop.name == self.socket_name:
-                        add_data_output(node,self.socket_name, self.is_output, self.use_four_numbers, prop.type, self.is_color)
+                        add_data_output(node,self.socket_name, self.is_output, prop.type, self.use_four_numbers, self.is_color)
         return {"FINISHED"}
 
 
 class SN_OT_RemoveSceneDataSocket(bpy.types.Operator):
     bl_idname = "scripting_nodes.remove_scene_data_socket"
-    bl_label = "Remove output"
-    bl_description = "Removes the selected output"
+    bl_label = "Remove socket"
+    bl_description = "Removes the selected socket"
     bl_options = {"REGISTER","INTERNAL"}
 
     node_name: bpy.props.StringProperty()
@@ -84,3 +84,36 @@ class SN_OT_RemoveSceneDataSocket(bpy.types.Operator):
                     if inp.name == self.socket_name:
                         node.inputs.remove(inp)
         return {"FINISHED"}
+
+
+class SN_OT_AddCustomSocket(bpy.types.Operator):
+    bl_idname = "scripting_nodes.add_custom_socket"
+    bl_label = "Add socket"
+    bl_description = "Adds the selected socket"
+    bl_options = {"REGISTER","INTERNAL"}
+
+    node_name: bpy.props.StringProperty()
+    is_output: bpy.props.BoolProperty()
+    propName: bpy.props.StringProperty()
+    propType: bpy.props.EnumProperty(items=[("STRING", "String", ""), ("STRING", "Enum", ""), ("BOOLEAN", "Boolean", ""), ("VECTOR", "Vector", ""), ("INTEGER", "Integer", ""), ("FLOAT", "Float", "")], name="Type", description="The type of the property")
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "propName", text="Property Identifier")
+        layout.prop(self, "propType")
+        box = layout.box()
+        box.alert = True
+        box.label(text="Warning: You will need to put in the python identifier of your property!")
+
+    def execute(self, context):
+        for node in context.space_data.node_tree.nodes:
+            if node.name == self.node_name:
+                if self.is_output:
+                    node.sockets.create_output(node,self.propType,self.propName)
+                else:
+                    node.sockets.create_input(node,self.propType,self.propName)
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self, width=400)
+
