@@ -17,7 +17,7 @@ class CompilerData():
     def scripting_nodes_block(self):
         return """# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # This addon was generated with the Visual Scripting Addon.
-# You can find the addon under PLACEHOLDER.COM
+# You can find the addon under https://blendermarket.com/products/serpens
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #"""
 
     def keymap_block(self):
