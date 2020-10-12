@@ -126,25 +126,32 @@ class SN_EnumCompareProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
             next_code = node_data["output_data"][0]["code"]
 
         if_block = []
-        if self.search_prop == "internal":
-            if self.inputs[1].is_linked:
-                data_type = self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket)
-                if data_type != "":
-                    data_type = eval(data_type + ".bl_rna.properties['" + self.sn_enum_property_properties[self.propName].identifier + "'].enum_items")
+        if self.propName != "":
+            if self.search_prop == "internal":
+                if self.propName in self.sn_enum_property_properties:
+                    if self.inputs[1].is_linked:
+                        data_type = self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket)
+                        if data_type != "":
+                            data_type = eval(data_type + ".bl_rna.properties['" + self.sn_enum_property_properties[self.propName].identifier + "'].enum_items")
+                            for output in self.outputs:
+                                if output.is_linked:
+                                    if output.name != "Execute":
+                                        for item in data_type:
+                                            if item.name == output.name:
+                                                if_block.append({"lines": [["if ", node_data["input_data"][1]["code"], "." + self.sn_enum_property_properties[self.propName].identifier + " == '" + item.identifier + "':"]],"indented": [[output.links[0].to_socket]]})
+                else:
+                    errors.append({"title": "Property does not exist", "message": "This property does not exist", "node": self, "fatal": True})
+
+            else:
+                if self.propName in node_data["node_tree"].sn_enum_property_properties:
                     for output in self.outputs:
                         if output.is_linked:
                             if output.name != "Execute":
-                                if self.propName in self.sn_enum_property_properties:
-                                    for item in data_type:
-                                        if item.name == output.name:
-                                            if_block.append({"lines": [["if ", node_data["input_data"][1]["code"], "." + self.sn_enum_property_properties[self.propName].identifier + " == '" + item.identifier + "':"]],"indented": [[output.links[0].to_socket]]})
-        
+                                if_block.append({"lines": [["if bpy.context.scene.sn_generated_addon_properties_UID_." + self.propName.replace(" ", "_") + " == '" + output.name + "':"]],"indented": [[output.links[0].to_socket]]})
+                else:
+                    errors.append({"title": "Property does not exist", "message": "This property does not exist", "node": self, "fatal": True})
         else:
-            if self.propName in node_data["node_tree"].sn_enum_property_properties:
-                for output in self.outputs:
-                    if output.is_linked:
-                        if output.name != "Execute":
-                            if_block.append({"lines": [["if bpy.context.scene.sn_generated_addon_properties_UID_." + self.propName.replace(" ", "_") + " == '" + output.name + "':"]],"indented": [[output.links[0].to_socket]]})
+            errors.append({"title": "No property selected", "message": "There is no property selected", "node": self, "fatal": True})
 
         if_block.append({"lines": [[next_code]],"indented": []})
         return {

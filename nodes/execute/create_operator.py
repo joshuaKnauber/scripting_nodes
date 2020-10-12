@@ -171,6 +171,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                                         ["try:"]
                                     ],
                                     "indented": [
+                                        ["pass"],
                                         [execute]
                                     ]
                                 },

@@ -77,6 +77,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             ["try:"]
                                         ],
                                         "indented": [
+                                            ["pass"],
                                             [execute]
                                         ]
                                     },
