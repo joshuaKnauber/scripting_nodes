@@ -8,7 +8,7 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_AndOrNode"
     bl_label = "And/Or"
-    bl_icon = "MEMORY"
+    bl_icon = "GRAPH"
     node_color = (0.125,0.125,0.125)
     should_be_registered = False
 
