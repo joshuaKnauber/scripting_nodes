@@ -60,7 +60,7 @@ class SN_OT_CopyCommand(bpy.types.Operator):
             addon_info["url"] = None
             addon_info["price"] = None
 
-        bpy.context.window_manager.clipboard = str(addon_info)
+        bpy.context.window_manager.clipboard = str(addon_info).replace("'","\"")
 
         self.report({"INFO"},message="Copied successfully!")
         return {"FINISHED"}
