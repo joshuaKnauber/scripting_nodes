@@ -1,5 +1,6 @@
 import bpy
 import os
+import json
 from bpy_extras.io_utils import ExportHelper
 from ..compile.compiler import compiler
 
@@ -60,7 +61,7 @@ class SN_OT_CopyCommand(bpy.types.Operator):
             addon_info["url"] = None
             addon_info["price"] = None
 
-        bpy.context.window_manager.clipboard = str(addon_info).replace("'","\"")
+        bpy.context.window_manager.clipboard = json.dumps(addon_info)
 
         self.report({"INFO"},message="Copied successfully!")
         return {"FINISHED"}
@@ -91,7 +92,7 @@ class SN_OT_ExportToMarketplaceAddon(bpy.types.Operator):
     def draw(self,context):
         box = self.layout.box()
         box.alert = True
-        box.label(text="Please only upload youre addon here if you think it could be interesting to others!",icon="ERROR")
+        box.label(text="Please only upload your addon here if you think it could be interesting to others!",icon="ERROR")
 
         self.layout.separator()
 
