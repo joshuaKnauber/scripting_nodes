@@ -116,10 +116,11 @@ class SN_OT_ExportToMarketplaceAddon(bpy.types.Operator):
 
             if self.upload_type == "DIRECT":
                 col.label(text="    • Go in the #addon-market channel on discord and post the following:")
-                row = col.row()
+                row = col.row(align=True)
                 split = row.split(factor=0.03)
                 split.label(text=" ")
                 split.operator("scripting_nodes.copy_command",text="Click To Copy!",icon="COPYDOWN")
+                row.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id).url = "https://discord.com/invite/NK6kyae"
                 row.label(text=" ")
                 col.separator()
                 col.label(text="    • You will be asked to upload your addon. Export it and do so.")
@@ -141,12 +142,13 @@ class SN_OT_ExportToMarketplaceAddon(bpy.types.Operator):
             if self.expand_3:
                 col = box.column(align=False)
                 col.label(text="    • Go in the #addon-market channel on discord and post the following:")
-                row = col.row()
+                row = col.row(align=True)
                 split = row.split(factor=0.03)
                 split.label(text=" ")
                 op = split.operator("scripting_nodes.copy_command",text="Click To Copy!",icon="COPYDOWN")
                 op.url = self.url
                 op.price = self.price
+                row.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id).url = "https://discord.com/invite/NK6kyae"
                 row.label(text=" ")
 
 
