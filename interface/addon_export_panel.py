@@ -20,8 +20,11 @@ class SN_PT_ExportPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         if compiler().is_active_compiled():
-            row = layout.row()
+            col = layout.column(align=True)
+            row = col.row(align=True)
             row.scale_y = 1.5
             row.operator("scripting_nodes.export_addon", text="Export addon",icon="EXPORT")
+            row = col.row(align=True)
+            row.operator("scripting_nodes.export_to_marketplace", text="Add to marketplace",icon="UGLYPACKAGE")
         else:
             layout.label(text="Compile the addon before exporting!")
