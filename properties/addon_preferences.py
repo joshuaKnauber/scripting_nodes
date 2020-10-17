@@ -90,8 +90,8 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
             self._draw_install_package(layout)
 
-    def draw_market_package(self,package):
-        box = self.layout.box()
+    def draw_market_package(self,package, layout):
+        box = layout.box()
         box.label(text=package.title)
         col = box.column(align=True)
         col.enabled = False
@@ -155,13 +155,42 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             box.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id, emboss=False).url = "https://discord.com/invite/NK6kyae"
             
             col.separator()
+            col.separator()
             col.label(text="Settings")
             col.prop(self,"show_python_file")
 
         elif self.main_nav == "PACKAGES":
 
             col = row.column()
+            
+            row = col.row()
+            split = row.split(factor=0.5)
+            split.label(text="Package Marketplace")
+            row = split.row(align=True)
+            row.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH",text="Load")
+            row.prop(self,"marketplace_search",text="",icon="VIEWZOOM")            
+            row.operator("wm.url_open",text="", icon="URL", emboss=False).url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
+
+            if len(context.scene.sn_marketplace) == 1:
+                box = col.box()
+                box.enabled = False
+                box.label(text="No packages found")
+            elif len(context.scene.sn_marketplace) == 0:
+                box = col.box()
+                box.enabled = False
+                box.label(text="Load the marketplace first")                
+            else:
+                for package in context.scene.sn_marketplace:
+                    if not package.title == "placeholder":
+                        if self.marketplace_search in package.title or not self.marketplace_search:
+                            self.draw_market_package(package,col)
+                            
+            col.separator()
+            col.separator()
             self._draw_installed_packages(col)
+
+        elif self.main_nav == "ADDONS":
+            pass
 
 
 """
