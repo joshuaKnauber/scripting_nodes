@@ -101,43 +101,6 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         row.scale_y = 1.25
         row.operator("wm.url_open",text=package.price).url = package.url
 
-    # def draw(self, context):
-    #     row = self.layout.row(align=True)
-    #     row.scale_y = 1.25
-    #     row.prop(self,"navigation",text=" ",expand=True)
-    #     self.layout.separator()
-
-    #     if self.navigation == "PACKAGES":
-
-    #         row = self.layout.row(align=True)
-    #         box = row.box()
-    #         box.label(text="If you feel like a node or a feature is missing, let us know in discord!", icon="INFO")
-    #         box = row.box()
-    #         box.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id, emboss=False).url = "https://discord.com/invite/NK6kyae"
-
-    #         self._draw_installed_packages()
-
-    #     elif self.navigation == "MARKETPLACE":
-
-    #         row = self.layout.row()
-    #         split = row.split(factor=0.35)
-    #         row = split.row(align=True)
-    #         row.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH")
-    #         row.operator("wm.url_open",text="", icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
-    #         split.prop(self,"marketplace_search",text="",icon="VIEWZOOM")
-
-    #         if len(context.scene.sn_marketplace) == 1:
-    #             self.layout.label(text="No packages found")
-    #         else:
-    #             for package in context.scene.sn_marketplace:
-    #                 if not package.title == "placeholder":
-    #                     if self.marketplace_search in package.title or not self.marketplace_search:
-    #                         self.draw_market_package(package)
-
-    #     elif self.navigation == "SETTINGS":
-    #         row = self.layout.row()
-    #         row.prop(self,"show_python_file")
-
 
     def draw(self,context):
         row = self.layout.row()

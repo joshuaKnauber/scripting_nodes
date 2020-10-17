@@ -42,6 +42,7 @@ class SN_OT_CopyCommand(bpy.types.Operator):
 
     url: bpy.props.StringProperty(default="",options={"SKIP_SAVE"})
     price: bpy.props.StringProperty(default="Free",options={"SKIP_SAVE"})
+    blender: bpy.props.BoolProperty(default=False,options={"SKIP_SAVE"})
 
     def execute(self, context):
         tree = context.space_data.node_tree
@@ -55,6 +56,7 @@ class SN_OT_CopyCommand(bpy.types.Operator):
             "addon_version": list(tree.addon_version),
             "url": self.url,
             "price": self.price,
+            "blender": False
         }
 
         if self.url == "":
@@ -75,6 +77,7 @@ class SN_OT_ExportToMarketplaceAddon(bpy.types.Operator):
 
     url: bpy.props.StringProperty(default="",name="Addon URL",description="Enter the url to your addon here")
     price: bpy.props.StringProperty(default="Free",name="Addon Price",description="Enter the price of your addon here")
+    blender: bpy.props.BoolProperty(default=False,options={"SKIP_SAVE"})
 
     upload_type: bpy.props.EnumProperty(name="Upload Type",items=[("DIRECT","Direct Upload","Upload the addon directly"),("URL","External Link","Provide an external url for your addon")])
 
@@ -88,6 +91,12 @@ class SN_OT_ExportToMarketplaceAddon(bpy.types.Operator):
 
     def execute(self, context):
         return {"FINISHED"}
+    
+    def is_small_file(self):
+        if bpy.data.filepath:
+            if os.path.exists(bpy.data.filepath):
+                return os.stat(bpy.data.filepath).st_size < 2000000
+        return False
 
     def draw(self,context):
         box = self.layout.box()
@@ -106,6 +115,11 @@ class SN_OT_ExportToMarketplaceAddon(bpy.types.Operator):
             col = box.column(align=True)
             col.label(text="    • Set your addons name, description, version, ...")
             col.label(text="    • If you want to update an addon use the same name")
+            # if self.is_small_file():
+            #     col.label(text="    • Select if you want to upload your node tree file as well")
+            #     col.prop(self,"blender")
+            # else:
+            #     col.label(text="    • Reduce your file size to max. 2MB to upload the blend file as well")
 
         self.layout.separator()
 
