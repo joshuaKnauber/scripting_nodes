@@ -31,6 +31,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
     has_seen_tutorial: bpy.props.BoolProperty(default=False, update=update_seen_tutorial)
 
     marketplace_search: bpy.props.StringProperty(default="",name="Search")
+    addon_search: bpy.props.StringProperty(default="",name="Search")
 
     show_python_file: bpy.props.BoolProperty(default=False,name="Show Python File", description="Show python file in text editor after compiling")
 
@@ -126,13 +127,13 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
             col = row.column()
             
-            row = col.row()
-            split = row.split(factor=0.5)
+            _row = col.row()
+            split = _row.split(factor=0.5)
             split.label(text="Package Marketplace")
-            row = split.row(align=True)
-            row.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH",text="Load")
-            row.prop(self,"marketplace_search",text="",icon="VIEWZOOM")            
-            row.operator("wm.url_open",text="", icon="URL", emboss=False).url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
+            _row = split.row(align=True)
+            _row.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH",text="Load")
+            _row.prop(self,"marketplace_search",text="",icon="VIEWZOOM")            
+            _row.operator("wm.url_open",text="", icon="URL", emboss=False).url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
 
             if len(context.scene.sn_marketplace) == 1:
                 box = col.box()
@@ -141,7 +142,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             elif len(context.scene.sn_marketplace) == 0:
                 box = col.box()
                 box.enabled = False
-                box.label(text="Load the marketplace first")                
+                box.label(text="Load the package marketplace first")                
             else:
                 for package in context.scene.sn_marketplace:
                     if not package.title == "placeholder":
@@ -153,7 +154,27 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             self._draw_installed_packages(col)
 
         elif self.main_nav == "ADDONS":
-            pass
+            col = row.column()
+            _row = col.row()
+            split = _row.split(factor=0.5)
+            split.label(text="Addon Marketplace")
+            _row = split.row(align=True)
+            _row.operator("scripting_nodes.load_addons",icon="FILE_REFRESH",text="Load")
+            _row.prop(self,"addon_search",text="",icon="VIEWZOOM")
+            
+            if len(context.scene.sn_addons) == 1:
+                box = col.box()
+                box.enabled = False
+                box.label(text="No addons found")
+            elif len(context.scene.sn_addons) == 0:
+                box = col.box()
+                box.enabled = False
+                box.label(text="Load the addon marketplace first")                
+            else:
+                for addon in context.scene.sn_addons:
+                    if not addon.title == "placeholder":
+                        if self.addon_search in addon.title or not self.addon_search:
+                            self.draw_market_package(addon,col)
 
 
 """
