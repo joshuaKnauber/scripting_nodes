@@ -15,6 +15,13 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
                                             ("SETTINGS","Settings","Settings for the addon","PREFERENCES",2)],
                                         update = update_nav)
 
+    def nav_items(self,context):
+        return [("ADDON","","Serpens",bpy.context.scene.sn_icons[ "serpens" ].icon_id,0),
+                ("PACKAGES","","Packages","PACKAGE",1),
+                ("ADDONS","","Addons","ASSET_MANAGER",2)]
+
+    main_nav: bpy.props.EnumProperty(items=nav_items)
+
     def update_seen_tutorial(self,context):
         if not self.tutorial_updated_self:
             context.scene.sn_properties.show_tutorial = True
@@ -39,9 +46,9 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         row.operator("wm.url_open",text="",icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
         split.label(text="")
 
-    def _draw_installed_package(self, package_data, index):
+    def _draw_installed_package(self, package_data, index, layout):
         """ draws the ui for an installed package """
-        box = self.layout.box()
+        box = layoutt.box()
         row = box.row()
         split = row.split(factor=0.925)
         column = split.column(align=True)
@@ -54,10 +61,9 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         row.scale_y = 3
         row.operator("scripting_nodes.uninstall_package",text="",icon="TRASH",emboss=False).package_index = index
 
-    def _draw_installed_packages(self):
+    def _draw_installed_packages(self, layout):
         """ draws the list of installed packages """
-        layout = self.layout
-        layout.label(text="Installed packages:")
+        layout.label(text="Installed packages")
         if bpy.context.scene.sn_properties.package_installed_without_compile:
             box = layout.box()
             box.alert = True
@@ -80,7 +86,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
                 installed_packages = json.load(packages)["packages"]
 
             for index, package in enumerate(installed_packages):
-                self._draw_installed_package(package, index)
+                self._draw_installed_package(package, index, layout)
 
             self._draw_install_package(layout)
 
@@ -95,42 +101,68 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         row.scale_y = 1.25
         row.operator("wm.url_open",text=package.price).url = package.url
 
-    def draw(self, context):
-        row = self.layout.row(align=True)
-        row.scale_y = 1.25
-        row.prop(self,"navigation",text=" ",expand=True)
-        self.layout.separator()
+    # def draw(self, context):
+    #     row = self.layout.row(align=True)
+    #     row.scale_y = 1.25
+    #     row.prop(self,"navigation",text=" ",expand=True)
+    #     self.layout.separator()
 
-        if self.navigation == "PACKAGES":
+    #     if self.navigation == "PACKAGES":
 
-            row = self.layout.row(align=True)
-            box = row.box()
-            box.label(text="If you feel like a node or a feature is missing, let us know in discord!", icon="INFO")
-            box = row.box()
+    #         row = self.layout.row(align=True)
+    #         box = row.box()
+    #         box.label(text="If you feel like a node or a feature is missing, let us know in discord!", icon="INFO")
+    #         box = row.box()
+    #         box.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id, emboss=False).url = "https://discord.com/invite/NK6kyae"
+
+    #         self._draw_installed_packages()
+
+    #     elif self.navigation == "MARKETPLACE":
+
+    #         row = self.layout.row()
+    #         split = row.split(factor=0.35)
+    #         row = split.row(align=True)
+    #         row.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH")
+    #         row.operator("wm.url_open",text="", icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
+    #         split.prop(self,"marketplace_search",text="",icon="VIEWZOOM")
+
+    #         if len(context.scene.sn_marketplace) == 1:
+    #             self.layout.label(text="No packages found")
+    #         else:
+    #             for package in context.scene.sn_marketplace:
+    #                 if not package.title == "placeholder":
+    #                     if self.marketplace_search in package.title or not self.marketplace_search:
+    #                         self.draw_market_package(package)
+
+    #     elif self.navigation == "SETTINGS":
+    #         row = self.layout.row()
+    #         row.prop(self,"show_python_file")
+
+
+    def draw(self,context):
+        row = self.layout.row()
+        col = row.column()
+        col.prop(self,"main_nav",expand=True,text=" ")
+        col.scale_x = 1.5
+        col.scale_y = 1.5
+        
+        if self.main_nav == "ADDON":
+            col = row.column()
+            _row = col.row(align=True)
+            box = _row.box()
+            box.label(text="If you feel like a node or a feature is missing, let us know on discord!", icon="INFO")
+            box = _row.box()
             box.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id, emboss=False).url = "https://discord.com/invite/NK6kyae"
+            
+            col.separator()
+            col.label(text="Settings")
+            col.prop(self,"show_python_file")
 
-            self._draw_installed_packages()
+        elif self.main_nav == "PACKAGES":
 
-        elif self.navigation == "MARKETPLACE":
+            col = row.column()
+            self._draw_installed_packages(col)
 
-            row = self.layout.row()
-            split = row.split(factor=0.35)
-            row = split.row(align=True)
-            row.operator("scripting_nodes.load_marketplace",icon="FILE_REFRESH")
-            row.operator("wm.url_open",text="", icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
-            split.prop(self,"marketplace_search",text="",icon="VIEWZOOM")
-
-            if len(context.scene.sn_marketplace) == 1:
-                self.layout.label(text="No packages found")
-            else:
-                for package in context.scene.sn_marketplace:
-                    if not package.title == "placeholder":
-                        if self.marketplace_search in package.title or not self.marketplace_search:
-                            self.draw_market_package(package)
-
-        elif self.navigation == "SETTINGS":
-            row = self.layout.row()
-            row.prop(self,"show_python_file")
 
 """
 Access:

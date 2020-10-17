@@ -74,7 +74,7 @@ def register_icons():
     bpy.types.Scene.sn_icons = bpy.utils.previews.new()
     icons_dir = os.path.join( os.path.dirname( __file__ ), "icons" )
 
-    icons = [ "discord", "bug" ]
+    icons = [ "discord", "bug", "serpens" ]
 
     for icon in icons:
         bpy.types.Scene.sn_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
