@@ -43,6 +43,8 @@ class SN_OT_ChooseIcon(bpy.types.Operator):
     bl_options = {"REGISTER","INTERNAL","UNDO"}
 
     node_name: bpy.props.StringProperty(options={"HIDDEN"})
+    
+    icon_search: bpy.props.StringProperty(default="")
 
     @classmethod
     def poll(cls, context):
@@ -54,11 +56,15 @@ class SN_OT_ChooseIcon(bpy.types.Operator):
     def draw(self, context):
         icons = bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items.keys()
 
+        row = self.layout.row()
+        row.prop(self,"icon_search",text="",icon="VIEWZOOM")
+
         grid = self.layout.grid_flow(align=True,even_columns=True, even_rows=True)
         for icon in icons:
-            op = grid.operator("scripting_nodes.select_icon",text="", icon=icon)
-            op.node_name = self.node_name
-            op.icon = icon
+            if self.icon_search.lower() in icon.lower() or not self.icon_search:
+                op = grid.operator("scripting_nodes.select_icon",text="", icon=icon)
+                op.node_name = self.node_name
+                op.icon = icon
 
     def invoke(self, context, event):
         return context.window_manager.invoke_popup(self,width=900)
