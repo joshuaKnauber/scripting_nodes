@@ -113,6 +113,9 @@ def register():
     # register the marketplace list
     bpy.types.Scene.sn_marketplace = bpy.props.CollectionProperty(type=ScriptingNodesMarketplace)
 
+    # register the addon list
+    bpy.types.Scene.sn_addons = bpy.props.CollectionProperty(type=ScriptingNodesMarketplace)
+
     # register property for storing if the text is a sn file
     bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False)
 
@@ -144,6 +147,9 @@ def unregister():
 
     # remove the marketplace list
     del bpy.types.Scene.sn_marketplace
+
+    # remove the marketplace list
+    del bpy.types.Scene.sn_addons
 
     # unregister property for storing if the text is a sn file
     del bpy.types.Text.is_sn_addon
