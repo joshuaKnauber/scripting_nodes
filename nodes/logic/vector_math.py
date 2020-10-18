@@ -40,6 +40,7 @@ class SN_VectorMathNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.sockets.create_output(self,"FLOAT","Output")
 
     operation: bpy.props.EnumProperty(items=[("ADD", "Add", "Add two vectors"), ("SUBTRACT", "Subtract", "Subtract two vectors"),
+                                            ("MULTIPLY", "Multiply", "Multiply two vectors"), ("DIVIDE", "Divide", "Divide two vectors"),
                                             ("CROSS_PRODUCT", "Cross Product", "Calculate the cross product between two vectors"),
                                             ("DOT_PRODUCT", "Dot Product", "Calculate the dot product between two vectors"),
                                             ("LENGTH", "Length", "Calculate the length of the vector")],
@@ -76,6 +77,10 @@ class SN_VectorMathNode(bpy.types.Node, SN_ScriptingBaseNode):
             operation = ["(mathutils.Vector(",v1,") + mathutils.Vector(",v2,")).",values]
         elif self.operation == "SUBTRACT":
             operation = ["(mathutils.Vector(",v1,") - mathutils.Vector(",v2,")).",values]
+        elif self.operation == "MULTIPLY":
+            operation = ["mathutils.Vector(x * y for x, y in zip(",v1,", ",v2,")).",values]
+        elif self.operation == "DIVIDE":
+            operation = ["mathutils.Vector(x / y for x, y in zip(",v1,", ",v2,")).",values]
         elif self.operation == "CROSS_PRODUCT":
             operation = ["(mathutils.Vector(",v1,").cross(mathutils.Vector(",v2,"))).",values]
         elif self.operation == "DOT_PRODUCT":
