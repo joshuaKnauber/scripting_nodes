@@ -162,6 +162,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             box.label(text="    • Fixed spaces in variable names")
             box.label(text="    • Operators get refreshed")
             box.label(text="    • Changed run operator property generation")
+            box.label(text="    • Added single line option to run script")
 
 
         elif self.main_nav == "PACKAGES":
