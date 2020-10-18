@@ -39,6 +39,19 @@ from .handler.depsgraph import handle_depsgraph_update
 
 auto_load.init()
 
+
+@persistent
+def unload_collections(dummy=None):
+    # clear all collections for nodes that are to big to store or need to be update on reload
+    print("unload")
+
+@persistent
+def load_collections(dummy=None):
+    # load all collections that are cleared in unload_collections
+    print("load")
+
+
+
 @persistent
 def load_handler(dummy):
     """ function that is run after the file is loaded """
@@ -55,6 +68,9 @@ def load_handler(dummy):
         if tree.bl_idname == "ScriptingNodesTree":
             if tree.compile_on_start:
                 compiler().compile_tree(tree)
+
+    unload_collections()
+    load_collections()
 
 def unload_handler(dummy=None):
     """ function that is run before blender is closed and when a new file is opened """
@@ -101,6 +117,12 @@ def register():
     # add the load handler
     bpy.app.handlers.load_post.append(load_handler)
 
+    # add the save handler
+    bpy.app.handlers.save_pre.append(unload_collections)
+
+    # add the save handler
+    bpy.app.handlers.save_post.append(load_collections)
+
     # add the unload handler
     atexit.register(unload_handler)
 
@@ -141,6 +163,12 @@ def unregister():
 
     # unnregister the depsgraph handler
     bpy.app.handlers.depsgraph_update_post.remove(depsgraph_handler)
+
+    # unnregister the depsgraph handler
+    bpy.app.handlers.save_pre.remove(unload_collections)
+
+    # unnregister the depsgraph handler
+    bpy.app.handlers.save_post.remove(load_collections)
 
     # remove the addon properties
     del bpy.types.Scene.sn_properties
