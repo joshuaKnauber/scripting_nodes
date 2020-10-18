@@ -25,6 +25,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
     operator_uid: bpy.props.StringProperty()
+    show_in_search: bpy.props.BoolProperty(default=False,name="Show In Search",description="If enabled, this buttons execute functions will be available in the operator search")
 
     def inititialize(self,context):
         self.operator_uid = uuid4().hex[:10]
@@ -43,12 +44,17 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_buttons(self,context,layout):
         self.draw_icon_chooser(layout)
+        layout.prop(self,"show_in_search")
 
     def evaluate(self, socket, node_data, errors):
         idname = "SNA_OT_BTN_"+self.operator_uid
         icon = ""
         if self.icon:
             icon = ",icon=\""+self.icon+"\""
+
+        options = ["bl_options = {\"REGISTER\"}"]
+        if not self.show_in_search:
+            options = ["bl_options = {\"REGISTER\",\"INTERNAL\"}"]
 
         if not socket:
             # return the code for the buttons operator
@@ -65,7 +71,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                             ["bl_idname = 'scripting_nodes." + idname.lower() + "'"],
                             ["bl_label = ",node_data["input_data"][1]["code"],""],
                             ["bl_description = ",node_data["input_data"][2]["code"],""],
-                            ["bl_options = {\"REGISTER\",\"INTERNAL\"}"],
+                            options,
                             [""],
                             {
                                 "lines": [

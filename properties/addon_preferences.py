@@ -154,6 +154,8 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             col.separator()
             col.label(text="Changelog 1.0.1")
             box = col.box()
+            box.label(text="    • Added built in update notifications")
+            box.label(text="    • Added 'Show In Search' option to button node")
             box.label(text="    • Fixed encoding error when installing on some machines")
 
         elif self.main_nav == "PACKAGES":
