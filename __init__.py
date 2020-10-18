@@ -16,7 +16,7 @@ bl_info = {
     "author" : "Joshua Knauber, Finn Knauber", 
     "description" : "Adds a node editor for building addons with nodes",
     "blender" : (2, 80, 0),
-    "version" : (1, 0, 0),
+    "version" : (1, 0, 1),
     "location" : "Editors -> Visual Scripting",
     "wiki_url": "", 
     "category" : "Node" 

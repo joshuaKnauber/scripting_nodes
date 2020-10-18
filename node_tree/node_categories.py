@@ -24,7 +24,7 @@ def get_node_categories():
     for category in node_categories_list:
         category_items = []
         for node in node_categories_list[category]:
-            with open(node) as node_file:
+            with open(node, encoding="utf-8") as node_file:
                 first_lines = True
                 for line in node_file.readlines():
                     if first_lines:

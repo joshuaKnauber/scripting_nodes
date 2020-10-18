@@ -26,11 +26,11 @@ class SN_OT_InstallPackage(bpy.types.Operator, ImportHelper):
 
         for filename in files:
             if filename == "package_info.json":
-                with open(os.path.join(addon_folder,"nodes",filename)) as package_data:
+                with open(os.path.join(addon_folder,"nodes",filename), encoding="utf-8") as package_data:
                     package_data = json.load(package_data)
                     if "name" in package_data and "description" in package_data and "nodes" in package_data and "author" in package_data:
 
-                        with open(os.path.join(addon_folder,"installed_packages.json"),"r+") as packages:
+                        with open(os.path.join(addon_folder,"installed_packages.json"),"r+", encoding="utf-8") as packages:
                             packages_content = json.load(packages)
                             packages_content["packages"].append(package_data)
                             packages.seek(0)
@@ -82,7 +82,7 @@ class SN_OT_UninstallPackage(bpy.types.Operator):
     def _remove_node_files(self):
         """ removes the node files from the addon folder """
         addon_folder = os.path.dirname(os.path.dirname(__file__))
-        with open(os.path.join(addon_folder,"installed_packages.json"),"r+") as packages:
+        with open(os.path.join(addon_folder,"installed_packages.json"),"r+", encoding="utf-8") as packages:
             packages_content = json.load(packages)["packages"][self.package_index]
             for node in packages_content["nodes"]:
                 if not "__init__.py" in node:
@@ -107,7 +107,7 @@ class SN_OT_UninstallPackage(bpy.types.Operator):
     def _remove_package_from_json(self):
         """ removes the package from the json file """
         addon_folder = os.path.dirname(os.path.dirname(__file__))
-        with open(os.path.join(addon_folder,"installed_packages.json"),"r+") as packages:
+        with open(os.path.join(addon_folder,"installed_packages.json"),"r+", encoding="utf-8") as packages:
             packages_content = json.load(packages)
             packages_content["packages"].pop(self.package_index)
             packages.seek(0)

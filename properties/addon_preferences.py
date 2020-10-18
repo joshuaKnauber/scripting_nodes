@@ -83,7 +83,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
             installed_packages = []
             addon_folder = os.path.dirname(os.path.dirname(__file__))
-            with open(os.path.join(addon_folder,"installed_packages.json")) as packages:
+            with open(os.path.join(addon_folder,"installed_packages.json"), encoding="utf-8") as packages:
                 installed_packages = json.load(packages)["packages"]
 
             for index, package in enumerate(installed_packages):
@@ -122,6 +122,12 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             col.separator()
             col.label(text="Settings")
             col.prop(self,"show_python_file")
+
+            col.separator()
+            col.separator()
+            col.label(text="Changelog 1.0.1")
+            box = col.box()
+            box.label(text="    • Fixed encoding error when installing on some machines")
 
         elif self.main_nav == "PACKAGES":
 

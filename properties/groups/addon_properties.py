@@ -21,7 +21,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
     def update_examples(self, context):
         """ updates the examples """
         if self.examples != "NONE":
-            with open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.json")) as examples:
+            with open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.json"), encoding="utf-8") as examples:
                 examples = json.load(examples)
                 example = examples[self.examples]
 
@@ -45,7 +45,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
             return self.example_cache
         else:
             items = [("NONE","Choose an example","Choose an example addon","PRESET",0)]
-            with open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.json")) as examples:
+            with open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.json"), encoding="utf-8") as examples:
                 examples = json.load(examples)
                 for index, key in enumerate(examples):
                     example = examples[key]

@@ -28,7 +28,7 @@ class SN_OT_ExportAddon(bpy.types.Operator):
 
     def execute(self, context):
         text = compiler().get_export_file()
-        with open(self.filepath, "w") as addon_file:
+        with open(self.filepath, "w", encoding="utf-8") as addon_file:
             addon_file.write(text.as_string())
         bpy.data.texts.remove(text)
         return {"FINISHED"}
