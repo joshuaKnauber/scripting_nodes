@@ -161,6 +161,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             box.label(text="    • Fixed encoding error when installing on some machines")
             box.label(text="    • Fixed spaces in variable names")
             box.label(text="    • Operators get refreshed")
+            box.label(text="    • Changed run operator property generation")
 
 
         elif self.main_nav == "PACKAGES":

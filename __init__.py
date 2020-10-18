@@ -39,24 +39,9 @@ from .interface.node_header import node_header
 from .compile.compiler import compiler
 from .operators.keymaps.keymaps import register_keymaps,unregister_keymaps
 from .handler.depsgraph import handle_depsgraph_update
+from .nodes.execute.run_operator import create_internal_ops
 
 auto_load.init()
-
-def create_internal_ops():
-    if not len(bpy.context.scene.sn_properties.operator_properties):
-        for category in dir(bpy.ops):
-            if category != "scripting_nodes" and not category[0].isnumeric():
-                for operator in dir(eval("bpy.ops."+category)):
-                    if not operator[0].isnumeric():
-                        op = eval("bpy.ops."+category+"."+operator).get_rna_type()
-                        # name = op.name
-                        name = op.identifier.split("_OT_")[-1].replace("_"," ").title()
-                        if name and not name + " - " + category.replace("_"," ").title() in bpy.context.scene.sn_properties.operator_properties:
-                            item = bpy.context.scene.sn_properties.operator_properties.add()
-                            item.name = name + " - " + category.replace("_"," ").title()
-                            item.description = eval("bpy.ops."+category+"."+operator).get_rna_type().description
-                            item.identifier = category + "." + operator
-
 
 @persistent
 def unload_collections(dummy=None):

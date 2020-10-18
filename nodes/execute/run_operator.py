@@ -72,23 +72,26 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                         if prop.type == "ENUM":
                             item = self.enum_collection.add()
                             item.identifier = "bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties['" + prop.identifier + "'].enum_items"
-                            item.prop_name = prop.name
+                            item.prop_name = prop.identifier.replace("_", " ").title()
                             item.prop_identifier = prop.identifier
 
                         elif prop.type == "FLOAT" or prop.type == "INT":
                             if prop.array_length > 1:
-                                socket = self.sockets.create_input(self, "VECTOR", prop.name)
+                                name = prop.identifier.replace("_", " ").title()
+                                socket = self.sockets.create_input(self, "VECTOR", name)
                                 socket.use_four_numbers = prop.array_length == 4
                                 socket.is_color = prop.name == "Color"
                                 # socket.is_color = prop.subtype == "COLOR"
                             else:
                                 if prop.type in identifiers:
-                                    self.sockets.create_input(self, identifiers[prop.type], prop.name).set_value(prop.default)
+                                    name = prop.identifier.replace("_", " ").title()
+                                    self.sockets.create_input(self, identifiers[prop.type], name).set_value(prop.default)
                                     self.inputs[-1].value = prop.default
 
                         else:
                             if prop.type in identifiers:
-                                self.sockets.create_input(self, identifiers[prop.type], prop.name).set_value(prop.default)
+                                name = prop.identifier.replace("_", " ").title()
+                                self.sockets.create_input(self, identifiers[prop.type], name).set_value(prop.default)
 
         else:
             if not self.propName in bpy.context.space_data.node_tree.custom_operator_properties and self.propName != "":
