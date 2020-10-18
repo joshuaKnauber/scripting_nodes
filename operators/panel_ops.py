@@ -19,6 +19,10 @@ def get_possible_panel_locations():
 
                 if not location in possible_locations:
                     possible_locations.append(location)
+
+    additional_locations = [
+    ]
+    possible_locations += additional_locations
                         
     return possible_locations[:]
 
