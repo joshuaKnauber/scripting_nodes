@@ -156,6 +156,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             box = col.box()
             box.label(text="    • Added built in update notifications")
             box.label(text="    • Added 'Show In Search' option to button node")
+            box.label(text="    • Added 'Show popups' option to run operator node")
             box.label(text="    • Fixed encoding error when installing on some machines")
 
         elif self.main_nav == "PACKAGES":

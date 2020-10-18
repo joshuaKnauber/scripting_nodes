@@ -107,6 +107,8 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
     search_prop: bpy.props.EnumProperty(items=[("internal", "Internal", "Blenders internal properties"), ("custom", "Custom", "Your custom enums")], name="Properties", description="Which properties to display", update=update_enum)
     enum_collection: bpy.props.CollectionProperty(type=SN_EnumCollection)
 
+    use_invoke: bpy.props.BoolProperty(default=True,name="Show Popups",description="Shows confirm and other popups. Might cause issues if not enabled for internal operators.")
+
     def inititialize(self,context):
         self.update_enum(None)
         self.sockets.create_input(self,"EXECUTE","Execute")
@@ -119,6 +121,8 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             layout.prop_search(self,"propName",bpy.context.space_data.node_tree,"custom_operator_properties",text="")
 
+        layout.prop(self,"use_invoke")
+
         if len(self.enum_collection):
             layout.separator(factor=1)
             box = layout.box()
@@ -129,6 +133,10 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
         next_code = ""
         if node_data["output_data"][0]["code"]:
             next_code = node_data["output_data"][0]["code"]
+
+        invoke = "'EXEC_DEFAULT'"
+        if self.use_invoke:
+            invoke = "'INVOKE_DEFAULT'"
 
         execute = ["pass"]
         if self.search_prop == "internal":
@@ -143,10 +151,10 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                 for prop in self.enum_collection:
                     props+=[", " + prop.prop_identifier + "='", prop.enum + "'"]
 
-                execute = ["bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + "('INVOKE_DEFAULT'"] + props + [")"]
+                execute = ["bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + "("+invoke+""] + props + [")"]
         else:
             if self.propName in node_data["node_tree"].custom_operator_properties:
-                execute = ["bpy.ops.scripting_nodes.sna_ot_operator_" + node_data["node_tree"].custom_operator_properties[self.propName].identifier.lower() + "('INVOKE_DEFAULT')"]
+                execute = ["bpy.ops.scripting_nodes.sna_ot_operator_" + node_data["node_tree"].custom_operator_properties[self.propName].identifier.lower() + "("+invoke+")"]
 
         return {"blocks": [{"lines": [execute],"indented": []},{"lines": [[next_code]],"indented": []}],"errors": errors}
 
