@@ -27,6 +27,9 @@ import nodeitems_utils
 from bpy.app.handlers import persistent
 import atexit
 import os
+import json
+import requests
+import datetime
 from . import auto_load
 from bpy.utils import previews
 from .node_tree.node_categories import get_node_categories
@@ -52,6 +55,33 @@ def load_collections(dummy=None):
 
 
 
+def check_for_update():
+    url = "https://raw.githubusercontent.com/joshuaKnauber/visual_scripting_addon_docs/packages/packages.json"
+
+    try:
+        version = requests.get(url).json()["newest_version"]
+        if version[0] > bl_info["version"][0]:
+            bpy.ops.scripting_nodes.update_message("INVOKE_DEFAULT",version=tuple(version))
+        elif version[0] == bl_info["version"][0]:
+            if version[1] > bl_info["version"][1]:
+                bpy.ops.scripting_nodes.update_message("INVOKE_DEFAULT",version=tuple(version))
+            elif version[1] == bl_info["version"][1]:
+                if version[2] > bl_info["version"][2]:
+                    bpy.ops.scripting_nodes.update_message("INVOKE_DEFAULT",version=tuple(version))
+
+    except:
+        print("Couldn't check for Serpens updates!")
+
+def update_notification():
+    prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
+
+    if prefs.do_update_notif and not prefs.seen_new_update:
+        with open(os.path.join(os.path.dirname(__file__),"update_log.json"), "r" ,encoding="utf-8") as update_data:
+            update_data = json.loads(update_data.read())
+            last_date = datetime.date(year=update_data["last_update"][2],month=update_data["last_update"][1],day=update_data["last_update"][0])
+            if (datetime.date.today() - last_date).days >= update_data["update_frequency"]:
+                check_for_update()
+
 @persistent
 def load_handler(dummy):
     """ function that is run after the file is loaded """
@@ -71,6 +101,8 @@ def load_handler(dummy):
 
     unload_collections()
     load_collections()
+
+    update_notification()
 
 def unload_handler(dummy=None):
     """ function that is run before blender is closed and when a new file is opened """

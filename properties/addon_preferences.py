@@ -1,6 +1,7 @@
 import bpy
 import os
 import json
+import datetime
 from ..operators.keymaps.keymaps import register_keymaps, unregister_keymaps
 
 class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
@@ -34,6 +35,27 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
     addon_search: bpy.props.StringProperty(default="",name="Search")
 
     show_python_file: bpy.props.BoolProperty(default=False,name="Show Python File", description="Show python file in text editor after compiling")
+
+    def update_check_frequency(self,context):
+        with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"update_log.json"), "r+" ,encoding="utf-8") as update_data:
+            update_info = json.loads(update_data.read())
+            update_info["update_frequency"] = self.update_frequency
+            update_data.seek(0)
+            update_data.write(json.dumps(update_info,indent=4))
+            update_data.truncate()
+
+    def update_seen_update(self,context):
+        with open(os.path.join(os.path.dirname(os.path.dirname(__file__)),"update_log.json"), "r+" ,encoding="utf-8") as update_data:
+            update_info = json.loads(update_data.read())
+            now = datetime.date.today()
+            update_info["last_update"] = [now.day, now.month, now.year]
+            update_data.seek(0)
+            update_data.write(json.dumps(update_info,indent=4))
+            update_data.truncate()
+
+    do_update_notif: bpy.props.BoolProperty(default=True,name="Get Update Notifications", description="Get notifications when the addon has been updated")
+    update_frequency: bpy.props.IntProperty(default=2,min=1,max=14,name="Days Between Check",description="The amount of days to wait before checking for updates", update=update_check_frequency)
+    seen_new_update: bpy.props.BoolProperty(default=False,name="Seen Update",description="Don't show this notification again.",update=update_seen_update)
 
     def _draw_install_package(self,layout):
         """ draws the button for installing packages """
@@ -122,6 +144,11 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             col.separator()
             col.label(text="Settings")
             col.prop(self,"show_python_file")
+            _row = col.row()
+            _row.prop(self,"do_update_notif")
+            _row = _row.row()
+            _row.enabled = self.do_update_notif
+            _row.prop(self,"update_frequency")
 
             col.separator()
             col.separator()
