@@ -17,8 +17,11 @@ class SN_Socket:
 _invalid_chars = ["\\","-","?",".",",","<",">","*","+","-","#","'","~","@","€","|","\"","²",
                   "³","§","$","%","&","/","(","[","]",")","=","}","{","´","´","^","°",":",";"]
 
-def is_valid_python(value,is_python_name):
+def is_valid_python(value,is_python_name,can_have_spaces=True):
     if value:
+        if not can_have_spaces:
+            if " " in value:
+                return False
         if not is_python_name:
             return True
         else:
@@ -30,7 +33,7 @@ def is_valid_python(value,is_python_name):
             return True
     return False
 
-def make_valid_python(value,is_python_name,can_be_empty=False):
+def make_valid_python(value,is_python_name,can_be_empty=False,can_have_spaces=True):
     if is_python_name:
         while value and value[0].isdigit():
             value = value[1:]
@@ -38,6 +41,8 @@ def make_valid_python(value,is_python_name,can_be_empty=False):
             value = value.replace(char,"")
         if not value and not can_be_empty:
             value = "name"
+        if not can_have_spaces:
+            value = value.replace(" ", "_")
     return value
 
 class SN_StringSocket(bpy.types.NodeSocket, SN_Socket):

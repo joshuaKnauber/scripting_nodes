@@ -28,8 +28,8 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     value: bpy.props.StringProperty(default="",name="Value",description="Value of this variable")
 
     def update_socket_value(self,context):
-        if not is_valid_python(self.var_name,True):
-            self.var_name = make_valid_python(self.var_name,True)
+        if not is_valid_python(self.var_name,True, can_have_spaces=False):
+            self.var_name = make_valid_python(self.var_name,True, can_have_spaces=False)
 
         identifiers = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode", "SN_EnumVariableNode", "SN_ColorVariableNode"]
 
