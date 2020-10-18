@@ -119,7 +119,7 @@ class SN_CheckboxNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.search_value in bpy.context.space_data.node_tree.search_variables:
                 if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "bool":
                     if bpy.context.space_data.node_tree.search_variables[self.search_value].description != "":
-                        box = col.box()
+                        box = layout.box()
                         box.label(text=bpy.context.space_data.node_tree.search_variables[self.search_value].description)
 
                     if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:

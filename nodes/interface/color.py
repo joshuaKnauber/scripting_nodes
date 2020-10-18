@@ -113,12 +113,13 @@ class SN_ColorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             if self.search_value in bpy.context.space_data.node_tree.search_variables:
                 if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "color" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color":
+                    if bpy.context.space_data.node_tree.search_variables[self.search_value].description != "":
+                        box = layout.box()
+                        box.label(text=bpy.context.space_data.node_tree.search_variables[self.search_value].description)
+                    
                     if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                         if len(self.inputs) != 4:
                             self.update_name(None)
-                        if bpy.context.space_data.node_tree.search_variables[self.search_value].description != "":
-                            box = col.box()
-                            box.label(text=bpy.context.space_data.node_tree.search_variables[self.search_value].description)
                     else:
                         if len(self.inputs) == 4:
                             self.inputs.remove(self.inputs[3])
