@@ -42,16 +42,31 @@ from .handler.depsgraph import handle_depsgraph_update
 
 auto_load.init()
 
+def create_internal_ops():
+    if not len(bpy.context.scene.sn_properties.operator_properties):
+        for category in dir(bpy.ops):
+            if category != "scripting_nodes" and not category[0].isnumeric():
+                for operator in dir(eval("bpy.ops."+category)):
+                    if not operator[0].isnumeric():
+                        op = eval("bpy.ops."+category+"."+operator).get_rna_type()
+                        # name = op.name
+                        name = op.identifier.split("_OT_")[-1].replace("_"," ").title()
+                        if name and not name + " - " + category.replace("_"," ").title() in bpy.context.scene.sn_properties.operator_properties:
+                            item = bpy.context.scene.sn_properties.operator_properties.add()
+                            item.name = name + " - " + category.replace("_"," ").title()
+                            item.description = eval("bpy.ops."+category+"."+operator).get_rna_type().description
+                            item.identifier = category + "." + operator
+
 
 @persistent
 def unload_collections(dummy=None):
     # clear all collections for nodes that are to big to store or need to be update on reload
-    print("unload")
+    bpy.context.scene.sn_properties.operator_properties.clear()
 
 @persistent
 def load_collections(dummy=None):
     # load all collections that are cleared in unload_collections
-    print("load")
+    create_internal_ops()
 
 
 
