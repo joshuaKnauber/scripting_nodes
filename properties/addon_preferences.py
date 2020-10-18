@@ -158,6 +158,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             box.label(text="    • Added 'Show In Search' option to button node")
             box.label(text="    • Added 'Show popups' option to run operator node")
             box.label(text="    • Added Multiply and Divide to Vector Math node")
+            box.label(text="    • Added search to icon popup")
             box.label(text="    • Fixed encoding error when installing on some machines")
             box.label(text="    • Fixed spaces in variable names")
             box.label(text="    • Operators get refreshed")
