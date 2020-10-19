@@ -56,7 +56,7 @@ class SN_OT_CopyCommand(bpy.types.Operator):
             "addon_version": list(tree.addon_version),
             "url": self.url,
             "price": self.price,
-            "blender": False
+            "blend": False
         }
 
         if self.url == "":
@@ -162,6 +162,7 @@ class SN_OT_ExportToMarketplaceAddon(bpy.types.Operator):
                 op = split.operator("scripting_nodes.copy_command",text="Click To Copy!",icon="COPYDOWN")
                 op.url = self.url
                 op.price = self.price
+                op.blender = self.blender
                 row.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id).url = "https://discord.com/invite/NK6kyae"
                 row.label(text=" ")
 
