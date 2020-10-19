@@ -18,8 +18,8 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
     def nav_items(self,context):
         return [("ADDON","","Serpens",bpy.context.scene.sn_icons[ "serpens" ].icon_id,0),
-                ("PACKAGES","","Packages","PACKAGE",1)]
-                # ("ADDONS","","Addons","ASSET_MANAGER",2)]
+                ("PACKAGES","","Packages","PACKAGE",1),
+                ("ADDONS","","Addons","ASSET_MANAGER",2)]
 
     main_nav: bpy.props.EnumProperty(items=nav_items)
 
@@ -155,6 +155,8 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             col.label(text="Changelog 1.0.1")
             box = col.box()
             _col = box.column(align=True)
+            _col.label(text="    • Added first iteration of addon marketplace")
+            _col.label(text="    • Fixed crashes by removing default node setup (good old default cube :/)")
             _col.label(text="    • Added built in update notifications")
             _col.label(text="    • Added 'Show In Search' option to button node")
             _col.label(text="    • Added 'Show popups' option to run operator node")
