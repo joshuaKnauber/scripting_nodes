@@ -168,7 +168,10 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col.label(text="    • Added license info button")
             _col.label(text="    • Added single line option to run script")
             _col.label(text="    • Fixed variable descriptions")
-            _col.label(text="    • Added get Path node")
+            _col.label(text="    • Added get path node")
+            _col.label(text="    • Added path exist node")
+            _col.label(text="    • Added combine paths node")
+            _col.label(text="    • Added collections and objects to set data properties")
 
 
         elif self.main_nav == "PACKAGES":
