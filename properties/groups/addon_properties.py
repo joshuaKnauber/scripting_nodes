@@ -30,9 +30,11 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                 primer = bpy.data.node_groups.new(".sn_primer","ScriptingNodesTree")
                 context.area.spaces[0].node_tree = primer
                 
-                path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.blend","NodeTree")
+                path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.blend")
 
-                bpy.ops.wm.append(filename=example["tree_name"], directory=path)
+                with bpy.data.libraries.load(path, link=False) as (data_from, data_to):
+                    data_to.node_groups = [example["tree_name"]]
+
                 if example["tree_name"] in bpy.data.node_groups:
                     context.space_data.node_tree = bpy.data.node_groups[example["tree_name"]]
             self.examples = "NONE"
