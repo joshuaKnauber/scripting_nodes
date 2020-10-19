@@ -24,7 +24,7 @@ class SN_OT_WelcomeMessage(bpy.types.Operator):
 
 
 
-class SN_OT_UpdateeMessage(bpy.types.Operator):
+class SN_OT_UpdateMessage(bpy.types.Operator):
     bl_idname = "scripting_nodes.update_message"
     bl_label = "There's an update for Serpens!"
     bl_description = ""
@@ -42,6 +42,26 @@ class SN_OT_UpdateeMessage(bpy.types.Operator):
         self.layout.label(text="You can download version "+str(self.version[0])+"."+str(self.version[1])+"."+str(self.version[2])+" right now!")
         self.layout.separator()
         self.layout.prop(bpy.context.preferences.addons[__name__.partition('.')[0]].preferences,"seen_new_update",text="Don't show again")
+
+    def invoke(self,context,event):
+        return context.window_manager.invoke_popup(self, width=300)
+
+
+
+class SN_OT_ExportInfo(bpy.types.Operator):
+    bl_idname = "scripting_nodes.export_info"
+    bl_label = "Export Info"
+    bl_description = ""
+    bl_options = {"REGISTER","INTERNAL"}
+
+    def execute(self, context):
+        return {"FINISHED"}
+
+    def draw(self,context):
+        self.layout.label(text="• The exported addon is under the GPL license")
+        self.layout.label(text="• You can distribute and sell it")
+        self.layout.label(text="• Credit to Serpens is appreciated but not required")
+        
 
     def invoke(self,context,event):
         return context.window_manager.invoke_popup(self, width=300)

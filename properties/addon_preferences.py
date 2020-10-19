@@ -18,8 +18,8 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
     def nav_items(self,context):
         return [("ADDON","","Serpens",bpy.context.scene.sn_icons[ "serpens" ].icon_id,0),
-                ("PACKAGES","","Packages","PACKAGE",1),
-                ("ADDONS","","Addons","ASSET_MANAGER",2)]
+                ("PACKAGES","","Packages","PACKAGE",1)]
+                # ("ADDONS","","Addons","ASSET_MANAGER",2)]
 
     main_nav: bpy.props.EnumProperty(items=nav_items)
 
@@ -154,20 +154,22 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             col.separator()
             col.label(text="Changelog 1.0.1")
             box = col.box()
-            box.label(text="    • Added built in update notifications")
-            box.label(text="    • Added 'Show In Search' option to button node")
-            box.label(text="    • Added 'Show popups' option to run operator node")
-            box.label(text="    • Added Multiply and Divide to Vector Math node")
-            box.label(text="    • Added search to icon popup")
-            box.label(text="    • Fixed encoding error when installing on some machines")
-            box.label(text="    • Fixed spaces in variable names")
-            box.label(text="    • Operators get refreshed")
-            box.label(text="    • Changed run operator property generation")
-            box.label(text="    • Added single line option to run script")
-            box.label(text="    • Fixed variable descriptions")
-            box.label(text="    • Added get Path node")
-            box.label(text="    • Added Path Exist node")
-            box.label(text="    • Added Collections and Objects to set data properties")
+            _col = box.column(align=True)
+            _col.label(text="    • Added built in update notifications")
+            _col.label(text="    • Added 'Show In Search' option to button node")
+            _col.label(text="    • Added 'Show popups' option to run operator node")
+            _col.label(text="    • Added Multiply and Divide to Vector Math node")
+            _col.label(text="    • Added search to icon popup")
+            _col.label(text="    • Fixed encoding error when installing on some machines")
+            _col.label(text="    • Fixed spaces in variable names")
+            _col.label(text="    • Operators get refreshed")
+            _col.label(text="    • Changed run operator property generation")
+            _col.label(text="    • Added license info button")
+            _col.label(text="    • Added single line option to run script")
+            _col.label(text="    • Fixed variable descriptions")
+            _col.label(text="    • Added get Path node")
+            _col.label(text="    • Added Path Exist node")
+            _col.label(text="    • Added Collections and Objects to set data properties")
 
 
         elif self.main_nav == "PACKAGES":
