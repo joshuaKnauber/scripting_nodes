@@ -54,7 +54,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def reset_data_type(self, context):
         for inp in self.inputs:
-            if inp.bl_idname != "SN_ObjectSocket" and inp.name != "Execute":
+            if inp.name != "Data block" and inp.name != "Execute":
                 self.inputs.remove(inp)
 
     search_value: bpy.props.StringProperty(name="Search value", description="")
@@ -79,7 +79,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                             self.search_properties.clear()
                             for prop in eval(data_type).bl_rna.properties:
                                 if getattr(bpy.context.scene.sn_properties, filter_attr[prop.type]):
-                                    if not prop.name == "RNA" and not prop.type in []:
+                                    if not prop.name == "RNA":
                                         if not prop.is_readonly:
                                             item = self.search_properties.add()
                                             item.name = prop.name
@@ -100,13 +100,13 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 else:
                     self.search_properties.clear()
                     for inp in self.inputs:
-                        if inp.bl_idname != "SN_ObjectSocket" and inp.name != "Execute":
+                        if inp.name != "Data block" and inp.name != "Execute":
                             if not inp.name in self.search_properties:
                                 self.inputs.remove(inp)
             else:
                 self.search_properties.clear()
                 for inp in self.inputs:
-                    if inp.bl_idname != "SN_ObjectSocket" and inp.name != "Execute":
+                    if inp.name != "Data block" and inp.name != "Execute":
                         if not inp.name in self.search_properties:
                             self.inputs.remove(inp)
 
@@ -150,7 +150,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.inputs[1].links[0].from_socket.bl_idname == "SN_ObjectSocket":
                 set_blocks = []
                 for x, inp in enumerate(self.inputs):
-                    if inp.name != "Execute" and inp.bl_idname != "SN_ObjectSocket":
+                    if inp.name != "Data block" and inp.name != "Execute":
                         if inp.name in self.search_properties:
                             if self.search_properties[inp.name].type != "ENUM":
                                 set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = ", node_data["input_data"][x]["code"]])
