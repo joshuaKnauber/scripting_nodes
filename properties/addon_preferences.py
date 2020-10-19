@@ -170,6 +170,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col.label(text="    • Added get path node")
             _col.label(text="    • Added path exist node")
             _col.label(text="    • Added combine paths node")
+            _col.label(text="    • Added path operations node")
             _col.label(text="    • Added collections and objects to set data properties")
 
 
