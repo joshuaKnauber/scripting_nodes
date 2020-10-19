@@ -79,7 +79,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                             self.search_properties.clear()
                             for prop in eval(data_type).bl_rna.properties:
                                 if getattr(bpy.context.scene.sn_properties, filter_attr[prop.type]):
-                                    if not prop.name == "RNA" and not prop.type in ["COLLECTION", "POINTER"]:
+                                    if not prop.name == "RNA" and not prop.type in []:
                                         if not prop.is_readonly:
                                             item = self.search_properties.add()
                                             item.name = prop.name
