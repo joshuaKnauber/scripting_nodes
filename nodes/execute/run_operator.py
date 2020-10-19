@@ -66,7 +66,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
             if not self.propName in bpy.context.scene.sn_properties.operator_properties and self.propName != "":
                 self.propName = ""
             elif self.propName in bpy.context.scene.sn_properties.operator_properties:
-                identifiers = {"STRING": "STRING", "ENUM": "STRING","BOOLEAN": "BOOLEAN", "FLOAT": "FLOAT", "INT": "INTEGER"}
+                identifiers = {"STRING": "STRING", "BOOLEAN": "BOOLEAN", "FLOAT": "FLOAT", "INT": "INTEGER", "COLLECTION": "COLLECTION", "POINTER": "OBJECT"}
                 for prop in eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties"):
                     if prop.name != "RNA" and prop.type != "POINTER":
                         if prop.type == "ENUM":
@@ -83,10 +83,9 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                                 socket.is_color = prop.name == "Color"
                                 # socket.is_color = prop.subtype == "COLOR"
                             else:
-                                if prop.type in identifiers:
-                                    name = prop.identifier.replace("_", " ").title()
-                                    self.sockets.create_input(self, identifiers[prop.type], name).set_value(prop.default)
-                                    self.inputs[-1].value = prop.default
+                                name = prop.identifier.replace("_", " ").title()
+                                self.sockets.create_input(self, identifiers[prop.type], name).set_value(prop.default)
+                                self.inputs[-1].value = prop.default
 
                         else:
                             if prop.type in identifiers:
@@ -148,7 +147,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                 for x, inp in enumerate(self.inputs):
                     if inp.name != "Execute":
                         for prop in eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties"):
-                            if prop.name == inp.name:
+                            if prop.identifier.replace("_", " ").title() == inp.name:
                                 props+=[", " + prop.identifier + "=", node_data["input_data"][x]["code"]]
 
                 for prop in self.enum_collection:
