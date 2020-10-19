@@ -1,9 +1,7 @@
 import bpy
 
 
-
-def add_basic_nodes(tree):
-    """ adds the basic nodes when adding a new node tree """
+def add_nodes(tree):
     panel = tree.nodes.new("SN_PanelNode")
     button = tree.nodes.new("SN_ButtonNode")
     run_operator = tree.nodes.new("SN_RunOperator")
@@ -44,9 +42,11 @@ def add_basic_nodes(tree):
     print_.parent = frame_ops
     string.parent = frame_ops
 
+
+def add_basic_nodes(tree):
+    """ adds the basic nodes when adding a new node tree """
     tree.use_fake_user = True
     tree.added_basic_nodes = True
-
 
 
 def handle_depsgraph_update():

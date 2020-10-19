@@ -155,6 +155,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             col.label(text="Changelog 1.0.1")
             box = col.box()
             _col = box.column(align=True)
+            _col.label(text="    • Fixed crashes by removing default node setup (good old default cube :/)")
             _col.label(text="    • Added built in update notifications")
             _col.label(text="    • Added 'Show In Search' option to button node")
             _col.label(text="    • Added 'Show popups' option to run operator node")
