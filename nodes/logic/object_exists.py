@@ -1,13 +1,13 @@
-#SN_ExistsNode
+#SN_ObjectExistsNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
-class SN_ExistsNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_ObjectExistsNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_ExistsNode"
-    bl_label = "Exists"
+    bl_idname = "SN_ObjectExistsNode"
+    bl_label = "Object Exists"
     bl_icon = "FORCE_CHARGE"
     node_color = (0.125,0.125,0.125)
     bl_width_default = 100
