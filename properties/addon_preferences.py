@@ -165,6 +165,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             box.label(text="    • Changed run operator property generation")
             box.label(text="    • Added single line option to run script")
             box.label(text="    • Fixed variable descriptions")
+            box.label(text="    • Added get Path node")
 
 
         elif self.main_nav == "PACKAGES":

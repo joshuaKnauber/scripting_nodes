@@ -29,7 +29,7 @@ class CompilerData():
     def unregister_block(self):
         return "def unregister():"
 
-    def print_function_block(self):
+    def functions_block(self):
         return """def sn_print(*text):
     text = ', '.join(map(str, text))
     print(text) # actual print command
@@ -50,8 +50,20 @@ def get_enum_identifier(enumItems, name):
         if item.name == name:
             return item.identifier
             
-    return ''"""
-        
+    return ''
+    
+def get_python_filepath():
+    path = os.path.dirname(bpy.data.filepath)
+    try:
+        __file__
+        exported = True
+    except:
+        exported = False
+    if exported:
+        path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+    return path"""
+
     def utility_block(self):
         return """def cast_int(cast):
     int_string = ""

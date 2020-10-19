@@ -251,7 +251,7 @@ class ScriptingNodesCompiler():
         self._write_paragraphs(text,2)
         
         text.write(cd.comment_block("UTILITY FUNCTIONS"))
-        text.write(cd.print_function_block())
+        text.write(cd.functions_block())
         self._write_paragraphs(text,2)
 
 
