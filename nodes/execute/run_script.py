@@ -25,9 +25,15 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self, "EXECUTE", "Execute")
 
     search_value: bpy.props.StringProperty(name="Search value", description="")
+    script_line: bpy.props.StringProperty(name="Script Line", description="The script line you want to execute")
+    operation: bpy.props.EnumProperty(items=[("SCRIPT", "Script", "Run a script"), ("LINE", "Single Line", "Run a single line")], name="Operation", description="")
 
     def draw_buttons(self,context,layout):
-        layout.prop_search(self, "search_value", bpy.data, "texts", icon="TEXT", text="")
+        layout.prop(self, "operation", expand=True)
+        if self.operation == "SCRIPT":
+            layout.prop_search(self, "search_value", bpy.data, "texts", icon="TEXT", text="")
+        else:
+            layout.prop(self, "script_line", text="")
 
     def evaluate(self, socket, node_data, errors):
         next_code = ""
@@ -35,11 +41,14 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
             next_code = node_data["output_data"][0]["code"]
 
         script = []
-        if self.search_value.lstrip() in bpy.data.texts:
-            text = bpy.data.texts[self.search_value.lstrip()]
-            script_text = text.as_string().split("\n")
-            for line in script_text:
-                script.append([line])
+        if self.operation == "SCRIPT":
+            if self.search_value.lstrip() in bpy.data.texts:
+                text = bpy.data.texts[self.search_value.lstrip()]
+                script_text = text.as_string().split("\n")
+                for line in script_text:
+                    script.append([line])
+        else:
+            script = [[self.script_line]]
 
         return {
             "blocks": [

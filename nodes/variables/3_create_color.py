@@ -52,8 +52,8 @@ class SN_ColorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 node.update_outputs(None)
 
     def update_description(self, context):
-        if not is_valid_python(self.description,True):
-            self.description = make_valid_python(self.description,True)
+        if not is_valid_python(self.description, True, can_be_empty=True):
+            self.description = make_valid_python(self.description, True, can_be_empty=True)
     
         for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:

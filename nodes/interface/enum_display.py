@@ -89,7 +89,7 @@ class SN_EnumDisplayNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             if self.search_value in bpy.context.space_data.node_tree.sn_enum_property_properties:
                 if bpy.context.space_data.node_tree.sn_enum_property_properties[self.search_value].description != "":
-                    box = col.box()
+                    box = layout.box()
                     box.label(text=bpy.context.space_data.node_tree.sn_enum_property_properties[self.search_value].description)
 
     def evaluate(self, socket, node_data, errors):
