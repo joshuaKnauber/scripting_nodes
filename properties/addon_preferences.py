@@ -124,6 +124,27 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         row.scale_y = 1.25
         row.operator("wm.url_open",text=package.price).url = package.url
 
+    def draw_addon(self,addon,layout):
+        box = layout.box()
+        box.label(text=addon.title)
+
+        col = box.column(align=True)
+        col.enabled=False
+        col.label(text="Description: "+addon.author)
+        col.label(text="Author: "+addon.author)
+        row = col.row()
+        row.label(text="Category: "+addon.category)
+        v = addon.blender_version
+        row.label(text="Blender Version: "+str(v[0])+"."+str(v[1])+"."+str(v[2]))
+        v = addon.addon_version
+        row.label(text="Addon Version: "+str(v[0])+"."+str(v[1])+"."+str(v[2]))
+
+        row = box.row()
+        row.scale_y = 1.25
+        if addon.url and addon.price:
+            row.operator("wm.url_open",text=addon.price).url = addon.url
+        else:
+            row.operator("scripting_nodes.download_addon",text="Download").url = addon.url
 
     def draw(self,context):
         row = self.layout.row()
@@ -231,7 +252,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
                 for addon in context.scene.sn_addons:
                     if not addon.title == "placeholder":
                         if self.addon_search in addon.title or not self.addon_search:
-                            self.draw_market_package(addon,col)
+                            self.draw_addon(addon,col)
 
 
 """
