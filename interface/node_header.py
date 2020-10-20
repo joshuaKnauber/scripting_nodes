@@ -14,15 +14,12 @@ class SN_PT_TutorialSettingsPopover(bpy.types.Panel):
         layout.prop(context.scene.sn_properties,"show_python_docs")
 
 
-def node_header_before(self, context):
-    if context.space_data.tree_type == "ScriptingNodesTree":
-        if context.space_data.node_tree:
-            if len(context.space_data.node_tree.nodes) == 0:
-                self.layout.operator("scripting_nodes.add_base_nodes",text="",icon="ADD")
-
-
 def node_header(self, context):
     if context.space_data.tree_type == "ScriptingNodesTree":
+
+        if context.space_data.node_tree:
+            if len(context.space_data.node_tree.nodes) == 0:
+                self.layout.operator("scripting_nodes.add_base_nodes",text="Basic Node Setup",icon="ADD")
 
         row = self.layout.row(align=True)
 
