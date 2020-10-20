@@ -33,6 +33,23 @@ class SN_EnumCollection(bpy.types.PropertyGroup):
     prop_identifier: bpy.props.StringProperty()
     prop_name: bpy.props.StringProperty()
     enum: bpy.props.EnumProperty(items=get_items)
+    is_set: bpy.props.BoolProperty()
+
+class SN_EnumFlagCollection(bpy.types.PropertyGroup):
+
+    def get_items(self, context):
+        items = []
+        if self.identifier != "":
+            for prop in eval(self.identifier):
+                items.append((prop.identifier, prop.name, prop.description))
+
+        return items
+
+    identifier: bpy.props.StringProperty()
+    prop_identifier: bpy.props.StringProperty()
+    prop_name: bpy.props.StringProperty()
+    enum: bpy.props.EnumProperty(items=get_items, options={"ENUM_FLAG"})
+
 
 class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
@@ -58,6 +75,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_name(self, context):
         self.enum_collection.clear()
+        self.enum_flag_collection.clear()
         for inp in self.inputs:
             if inp.name != "Execute":
                 self.inputs.remove(inp)
@@ -68,12 +86,13 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
             elif self.propName in bpy.context.scene.sn_properties.operator_properties:
                 identifiers = {"STRING": "STRING", "BOOLEAN": "BOOLEAN", "FLOAT": "FLOAT", "INT": "INTEGER", "COLLECTION": "COLLECTION", "POINTER": "OBJECT"}
                 for prop in eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties"):
-                    if prop.name != "RNA" and prop.type != "POINTER":
+                    if prop.name != "RNA":
                         if prop.type == "ENUM":
                             item = self.enum_collection.add()
                             item.identifier = "bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties['" + prop.identifier + "'].enum_items"
                             item.prop_name = prop.identifier.replace("_", " ").title()
                             item.prop_identifier = prop.identifier
+                            item.is_set = bool(len(prop.default_flag))
 
                         elif prop.type == "FLOAT" or prop.type == "INT":
                             if prop.array_length > 1:
@@ -85,12 +104,13 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                             else:
                                 name = prop.identifier.replace("_", " ").title()
                                 self.sockets.create_input(self, identifiers[prop.type], name).set_value(prop.default)
-                                self.inputs[-1].value = prop.default
 
                         else:
                             if prop.type in identifiers:
                                 name = prop.identifier.replace("_", " ").title()
-                                self.sockets.create_input(self, identifiers[prop.type], name).set_value(prop.default)
+                                socket = self.sockets.create_input(self, identifiers[prop.type], name)
+                                if not socket.bl_idname in ["SN_CollectionSocket", "SN_ObjectSocket"]:
+                                    socket.set_value(prop.default)
 
         else:
             if not self.propName in bpy.context.space_data.node_tree.custom_operator_properties and self.propName != "":
@@ -108,6 +128,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
     propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
     search_prop: bpy.props.EnumProperty(items=[("internal", "Internal", "Blenders internal properties"), ("custom", "Custom", "Your custom enums")], name="Properties", description="Which properties to display", update=update_enum)
     enum_collection: bpy.props.CollectionProperty(type=SN_EnumCollection)
+    enum_flag_collection: bpy.props.CollectionProperty(type=SN_EnumFlagCollection)
 
     use_invoke: bpy.props.BoolProperty(default=True,name="Show Popups",description="Shows confirm and other popups. Might cause issues if not enabled for internal operators.")
 
@@ -125,11 +146,16 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
         layout.prop(self,"use_invoke")
 
-        if len(self.enum_collection):
+        if len(self.enum_collection) or len(self.enum_flag_collection):
             layout.separator(factor=1)
             box = layout.box()
             for prop in self.enum_collection:
                 box.prop(prop, "enum", text=prop.prop_name)
+
+            # for prop in self.enum_flag_collection:
+            #     new_box = box.box()
+            #     new_box.label(text=prop.prop_name)
+            #     new_box.prop(prop, "enum", expand=True)
 
     def evaluate(self, socket, node_data, errors):
         next_code = ""
@@ -151,7 +177,10 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                                 props+=[", " + prop.identifier + "=", node_data["input_data"][x]["code"]]
 
                 for prop in self.enum_collection:
-                    props+=[", " + prop.prop_identifier + "='", prop.enum + "'"]
+                    if prop.is_set:
+                        props+=[", " + prop.prop_identifier + "={'", prop.enum + "'}"]
+                    else:
+                        props+=[", " + prop.prop_identifier + "='", prop.enum + "'"]
 
                 execute = ["bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + "("+invoke+""] + props + [")"]
         else:
