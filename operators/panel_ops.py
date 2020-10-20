@@ -184,7 +184,7 @@ class SN_CreateExistingPanelLocation(bpy.types.Operator):
 
         for panel in dir(bpy.types):
             panel = eval("bpy.types."+panel)
-            if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type"):
+            if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type") and hasattr(panel,"prepend"):
                 if self.shortcut_index == -1:
                     panel.prepend(prepend_panel)
                 panel.append(append_panel)
@@ -202,7 +202,7 @@ def remove_appended_panels():
 
     for panel in dir(bpy.types):
         panel = eval("bpy.types."+panel)
-        if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type"):
+        if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type") and hasattr(panel,"prepend"):
             panel.remove(prepend_panel)
             panel.remove(append_panel)
 

@@ -60,10 +60,23 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     search_value: bpy.props.StringProperty(name="Search value", description="")
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
 
+    function_props = {
+        "bpy.types.Object": [
+            {
+                "function": "select_set",
+                "name": "Select",
+                "type": "BOOLEAN"
+            }
+        ]
+    }
+
     def inititialize(self, context):
         self.sockets.create_input(self,"EXECUTE","Execute")
         self.sockets.create_input(self,"OBJECT","Data block")
         self.sockets.create_output(self,"EXECUTE","Execute")
+
+    def get_data_type(self):
+        return self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket)
 
     def update_node(self):
         if not self.search_value in self.search_properties:
@@ -74,7 +87,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             if len(self.inputs[1].links) == 1:
                 if self.inputs[1].links[0].from_socket.bl_idname == "SN_ObjectSocket":
                     if self.inputs[1].links[0].from_socket.node.bl_idname != "SN_ForLayoutNode":
-                        data_type = self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket)
+                        data_type = self.get_data_type()
                         if data_type != "":
                             self.search_properties.clear()
                             for prop in eval(data_type).bl_rna.properties:
@@ -97,6 +110,15 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                                     # item.is_color = prop.subtype == "COLOR"
                                                 else:
                                                     item.type = prop.type
+                            
+                            # add functions to search props
+                            if data_type in self.function_props:
+                                for prop in self.function_props[data_type]:
+                                    item = self.search_properties.add()
+                                    item.name = prop["name"]
+                                    item.identifier = prop["function"]
+                                    item.description = prop["name"]
+                                    item.type = prop["type"]
                 else:
                     self.search_properties.clear()
                     for inp in self.inputs:
@@ -141,6 +163,15 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     op.socket_name = self.search_value
 
 
+    def is_function_prop(self,identifier):
+        data_type = self.get_data_type()
+        if data_type in self.function_props:
+            for prop in self.function_props[data_type]:
+                if prop["function"] == identifier:
+                    return True
+        return False
+
+
     def evaluate(self, socket, node_data, errors):
         next_code = ""
         if node_data["output_data"][0]["code"]:
@@ -152,10 +183,14 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 for x, inp in enumerate(self.inputs):
                     if inp.name != "Data block" and inp.name != "Execute":
                         if inp.name in self.search_properties:
-                            if self.search_properties[inp.name].type != "ENUM":
-                                set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = ", node_data["input_data"][x]["code"]])
+
+                            if self.is_function_prop(self.search_properties[inp.name].identifier): # call function props
+                                set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, "(", node_data["input_data"][x]["code"],")"])
                             else:
-                                set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = get_enum_identifier(", node_data["input_data"][1]["code"], ".bl_rna.properties['" + self.search_properties[inp.name].identifier + "'].enum_items, " + node_data["input_data"][x]["code"] + ")"])
+                                if self.search_properties[inp.name].type != "ENUM":
+                                    set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = ", node_data["input_data"][x]["code"]])
+                                else:
+                                    set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = get_enum_identifier(", node_data["input_data"][1]["code"], ".bl_rna.properties['" + self.search_properties[inp.name].identifier + "'].enum_items, " + node_data["input_data"][x]["code"] + ")"])
                         else:
                             set_blocks.append([node_data["input_data"][1]["code"], "." + inp.name, " = ", node_data["input_data"][x]["code"]])
 

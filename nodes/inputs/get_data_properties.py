@@ -66,8 +66,21 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
     use_index: bpy.props.BoolProperty(name="Use Index", description="Use Index instead of name", default=True, update=update_index)
 
+    function_props = {
+        "bpy.types.Object": [
+            {
+                "function": "select_get()",
+                "name": "Select",
+                "type": "BOOLEAN"
+            }
+        ]
+    }
+
     def inititialize(self,context):
         self.sockets.create_input(self,"OBJECT","Object or data block")
+
+    def get_data_type(self):
+        return self.inputs[0].links[0].from_node.data_type(self.inputs[0].links[0].from_socket)
 
     def update(self):
         self.update_dynamic(True)
@@ -85,7 +98,7 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.sockets.change_socket_type(self, self.inputs[0], "OBJECT")
 
                 self.search_properties.clear()
-                data_type = self.inputs[0].links[0].from_node.data_type(self.inputs[0].links[0].from_socket)
+                data_type = self.get_data_type()
                 if data_type != "":
                     for prop in eval(data_type).bl_rna.properties:
                         if getattr(bpy.context.scene.sn_properties, filter_attr[prop.type]):
@@ -104,6 +117,15 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                         # item.is_color = prop.subtype == "COLOR"
                                     else:
                                         item.type = prop.type
+
+                    # add functions to search props
+                    if data_type in self.function_props:
+                        for prop in self.function_props[data_type]:
+                            item = self.search_properties.add()
+                            item.name = prop["name"]
+                            item.identifier = prop["function"]
+                            item.description = prop["name"]
+                            item.type = prop["type"]
 
             elif self.inputs[0].links[0].from_socket.bl_idname == "SN_CollectionSocket":
                 if not self.inputs[0].bl_idname == "SN_CollectionSocket":

@@ -20,6 +20,14 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         "python": ["<function>print</>( <string>\"my example\"</>, <number>123</>, <string>\"test\"</> )"]
     }
 
+    is_report: bpy.props.BoolProperty(default=False,name="Report",description="Show a report message instead of printing")
+    report_type: bpy.props.EnumProperty(name="Report Types",items=[("INFO","Info","Info"),("WARNING","Warning","Warning"),("ERROR","Error","Error")])
+
+    def draw_buttons(self,context,layout):
+        layout.prop(self,"is_report")
+        if self.is_report:
+            layout.prop(self,"report_type",text="")
+
     def inititialize(self,context):
         self.sockets.create_input(self,"EXECUTE","Execute")
         self.sockets.create_input(self,"DATA","Value",True)
@@ -37,11 +45,15 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         if print_text:
             print_text = print_text[1:]
 
+        print_start = ["sn_print("]
+        if self.is_report:
+            print_start = ["self.report({\"",self.report_type,"\"}, message="]
+
         return {
             "blocks": [
                 {
                     "lines": [
-                        ["sn_print("] + print_text + [")"]
+                        print_start + print_text + [")"]
                     ],
                     "indented": [
                     ]
