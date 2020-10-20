@@ -21,7 +21,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
                 ("PACKAGES","","Packages","PACKAGE",1),
                 ("ADDONS","","Addons","ASSET_MANAGER",2)]
 
-    main_nav: bpy.props.EnumProperty(items=nav_items)
+    main_nav: bpy.props.EnumProperty(items=nav_items, name="Main Navigation")
 
     def update_seen_tutorial(self,context):
         if not self.tutorial_updated_self:
