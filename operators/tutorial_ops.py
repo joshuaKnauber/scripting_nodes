@@ -4,6 +4,7 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 import bgl
 from .drawing_ops import DrawingFuncs
+from ..handler.depsgraph import add_nodes
 
 
 
@@ -191,3 +192,15 @@ class SN_DrawTutorial(DrawingFuncs, bpy.types.Operator):
 
             # draw close button
             self.draw_close_setup(context,close_button_size,padding,outline_width,close_cross_width)
+
+
+
+class SN_AddBaseNodes(bpy.types.Operator):
+    bl_idname = "scripting_nodes.add_base_nodes"
+    bl_label = "Add Base Nodes"
+    bl_description = "Adds the base nodes"
+    bl_options = {"REGISTER","INTERNAL"}
+
+    def execute(self, context):
+        add_nodes(context.space_data.node_tree)
+        return {'FINISHED'}
