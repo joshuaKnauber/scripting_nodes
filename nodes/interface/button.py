@@ -69,8 +69,8 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                         ],
                         "indented": [
                             ["bl_idname = 'scripting_nodes." + idname.lower() + "'"],
-                            ["bl_label = ",node_data["input_data"][1]["code"],""],
-                            ["bl_description = ",node_data["input_data"][2]["code"],""],
+                            ["bl_label = ",node_data["input_data"][1]["value"],""],
+                            ["bl_description = ",node_data["input_data"][2]["value"],""],
                             options,
                             [""],
                             {
