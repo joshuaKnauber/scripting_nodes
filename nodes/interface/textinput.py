@@ -147,7 +147,7 @@ class SN_TextInputNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.search_value in node_data["node_tree"].search_variables:
                 if node_data["node_tree"].search_variables[self.search_value].type == "string":
                     if len(self.inputs) == 4:
-                        return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_.", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "_array[", node_data["input_data"][3]["code"], "], '", node_data["node_tree"].search_variables[self.search_value].type, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], icon, ")"]],"indented": []}],"errors": errors}
+                        return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_.", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "_array[", node_data["input_data"][3]["code"], "], '", node_data["node_tree"].search_variables[self.search_value].string_type, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], icon, ")"]],"indented": []}],"errors": errors}
                     else:
                         return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_, '", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], icon, ")"]],"indented": []}],"errors": errors}
 

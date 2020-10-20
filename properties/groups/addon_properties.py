@@ -15,6 +15,7 @@ class SearchVariablesGroup(bpy.types.PropertyGroup):
     socket_type: bpy.props.StringProperty(default="")
     is_array: bpy.props.BoolProperty(default=False)
     identifier: bpy.props.StringProperty(default="")
+    string_type: bpy.props.StringProperty(default="")
 
 class ScriptingNodesProperties(bpy.types.PropertyGroup):
 

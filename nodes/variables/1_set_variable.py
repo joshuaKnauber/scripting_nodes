@@ -103,11 +103,19 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.search_value in node_data["node_tree"].search_variables:
             if node_data["node_tree"].search_variables[self.search_value].is_array:
                 if self.operation == "set_value":
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array[", node_data["input_data"][1]["code"], "]." + node_data["node_tree"].search_variables[self.search_value].type, " = ", node_data["input_data"][2]["code"]]],"indented": []}]
+                    var_type = node_data["node_tree"].search_variables[self.search_value].type
+                    if var_type == "string":
+                        var_type = node_data["node_tree"].search_variables[self.search_value].string_type
+
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array[", node_data["input_data"][1]["code"], "]." + var_type, " = ", node_data["input_data"][2]["code"]]],"indented": []}]
 
                 else:
                     items = [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.clear()"]]
-                    items.append(["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.add().", node_data["node_tree"].search_variables[self.search_value].type, " = ", node_data["input_data"][1]["code"]])
+                    var_type = node_data["node_tree"].search_variables[self.search_value].type
+                    if var_type == "string":
+                        var_type = node_data["node_tree"].search_variables[self.search_value].string_type
+
+                    items.append(["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.add().", var_type, " = ", node_data["input_data"][1]["code"]])
                     blocks = [{"lines": items,"indented": []}]
 
             else:

@@ -82,7 +82,11 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.search_value in node_data["node_tree"].search_variables:
             if node_data["node_tree"].search_variables[self.search_value].is_array:
                 if socket == self.outputs[0]:
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array[", node_data["input_data"][0]["code"], "]." + node_data["node_tree"].search_variables[self.search_value].type]],"indented": []}]
+                    var_type = node_data["node_tree"].search_variables[self.search_value].type
+                    if var_type == "string":
+                        var_type = node_data["node_tree"].search_variables[self.search_value].string_type
+
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array[", node_data["input_data"][0]["code"], "]." + var_type]],"indented": []}]
                 elif socket == self.outputs[1]:
                     blocks = [{"lines": [["len(bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array)"]],"indented": []}]
                 elif socket == self.outputs[2]:

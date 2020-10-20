@@ -175,6 +175,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col.label(text="    • Added path operations node")
             _col.label(text="    • Added collections and objects to set data properties")
             _col.label(text="    • Fixed import/export operators")
+            _col.label(text="    • Added path subtypes to string variable")
 
 
         elif self.main_nav == "PACKAGES":

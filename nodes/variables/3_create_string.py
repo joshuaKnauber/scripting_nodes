@@ -6,8 +6,10 @@ from ...node_tree.node_sockets import is_valid_python, make_valid_python
 
 
 class SN_StringArray(bpy.types.PropertyGroup):
-    value: bpy.props.StringProperty(default="",name="Value",description="Value of this variable")
-    
+    none: bpy.props.StringProperty(default="",name="Value",description="Value of this variable")
+    file_path: bpy.props.StringProperty(default="",name="Value",description="Value of this variable", subtype="FILE_PATH")
+    dir_path: bpy.props.StringProperty(default="",name="Value",description="Value of this variable", subtype="DIR_PATH")
+  
 bpy.utils.register_class(SN_StringArray)
 
 
@@ -25,7 +27,9 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     }
 
-    value: bpy.props.StringProperty(default="",name="Value",description="Value of this variable")
+    none: bpy.props.StringProperty(default="",name="Value",description="Value of this variable")
+    file_path: bpy.props.StringProperty(default="",name="Value",description="Value of this variable", subtype="FILE_PATH")
+    dir_path: bpy.props.StringProperty(default="",name="Value",description="Value of this variable", subtype="DIR_PATH")
 
     def update_socket_value(self,context):
         if not is_valid_python(self.var_name,True, can_have_spaces=False):
@@ -70,6 +74,16 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             if node.bl_idname in identifiers:
                 node.update_outputs(None)
 
+    def update_subtype(self, context):
+        for item in bpy.context.space_data.node_tree.search_variables:
+            if item.name == self.groupItem:
+                if self.subtype == "NONE":
+                    item.string_type = "string"
+                elif self.subtype == "FILE_PATH":
+                    item.string_type = "string_filepath"
+                else:
+                    item.string_type = "string_dirpath"
+
     groupItem: bpy.props.StringProperty(default="item_name_placeholder")
     
     var_name: bpy.props.StringProperty(name="Name",description="Name of this variable",update=update_socket_value)
@@ -78,12 +92,15 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     is_array: bpy.props.BoolProperty(default=False,name="Make Array",description="Allows you to add multiple elements of the same type to this variable", update=update_array)
 
+    subtype: bpy.props.EnumProperty(items=[("NONE", "None", "No subtype"), ("FILE_PATH", "Filepath", "A path to a file"), ("DIR_PATH", "Directorypath", "A path to a directory")], name="Subtype",description="The subtype of this variable", update=update_subtype)
+
     array_items: bpy.props.CollectionProperty(type=SN_StringArray)
 
     def inititialize(self, context):
         item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
         item.type = "string"
+        item.string_type = "string"
         item.socket_type = "STRING"
         self.update_socket_value(context)
 
@@ -91,6 +108,7 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
         item.type = "string"
+        item.string_type = "string"
         item.socket_type = "STRING"
         self.update_socket_value(context)
 
@@ -106,11 +124,13 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         col = layout.column(align=True)
         col.label(text="Description:")
         col.prop(self,"description",text="")
+        col.separator()
+        col.prop(self, "subtype", expand=True)
         
         if not self.is_array:
             col = layout.column(align=True)
             col.label(text="Default Value:")
-            col.prop(self,"value",text="")
+            col.prop(self,self.subtype.lower(),text="")
 
         layout.prop(self,"is_array")
 
@@ -121,7 +141,7 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 split = row.split(factor=0.2)
                 split.label(text=str(array_index))
                 row = split.row()
-                row.prop(array_element,"value",text="")
+                row.prop(array_element,self.subtype.lower(),text="")
                 op = row.operator("scripting_nodes.remove_variable_array_element",text="",icon="PANEL_CLOSE",emboss=False)
                 op.node_name = self.name
                 op.element_index = array_index
@@ -134,7 +154,15 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def get_variable_line(self):
         if not self.is_array:
-            return self.var_name.replace(" ", "_") + ": bpy.props.StringProperty(name='" + self.var_name + "', description='" + self.description + "', default='" + self.value + "')"
+            subtype = ", subtype='" + self.subtype + "'"
+            if self.subtype == "NONE":
+                value = self.none
+            elif self.subtype == "FILE_PATH":
+                value = self.file_path
+            else:
+                value = self.dir_path
+
+            return self.var_name.replace(" ", "_") + ": bpy.props.StringProperty(name='" + self.var_name + "', description='" + self.description + "', default='" + value + "'" + subtype + ")"
         else:
             return self.var_name.replace(" ", "_") + "_array: bpy.props.CollectionProperty(type=ArrayCollection_UID_)"
 
@@ -142,6 +170,12 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         register_block = []
         if self.is_array:
             for element in self.array_items:
-                register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().string = '" + element.value + "'")
+                if self.subtype == "NONE":
+                    register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().string = '" + element.none + "'")
+                elif self.subtype == "FILE_PATH":
+                    register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().string_filepath = '" + element.file_path + "'")
+                else:
+                    register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().string_dirpath = '" + element.dir_path + "'")
 
         return register_block
+
