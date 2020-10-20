@@ -77,7 +77,7 @@ class SN_DownloadAddon(bpy.types.Operator):
     url: bpy.props.StringProperty()
 
     def invoke(self, context, event):
-        self.filepath = os.path.join(self.filepath,self.url)
+        self.filepath = os.path.join(self.filepath,self.url[:-21]+".py")
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
