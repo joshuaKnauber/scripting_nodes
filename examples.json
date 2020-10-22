@@ -15,6 +15,10 @@
         "tree_name": "Variables",
         "icon": "DRIVER_TRANSFORM"
     },
+    "User Input": {
+        "tree_name": "User Input",
+        "icon": "USER"
+    },
     "Enum Example": {
         "tree_name": "Enum",
         "icon": "COLLAPSEMENU"

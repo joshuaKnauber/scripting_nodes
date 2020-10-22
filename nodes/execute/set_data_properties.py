@@ -190,7 +190,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 if self.search_properties[inp.name].type != "ENUM":
                                     set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = ", node_data["input_data"][x]["code"]])
                                 else:
-                                    set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = get_enum_identifier(", node_data["input_data"][1]["code"], ".bl_rna.properties['" + self.search_properties[inp.name].identifier + "'].enum_items, " + node_data["input_data"][x]["code"] + ")"])
+                                    set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = get_enum_identifier(", node_data["input_data"][1]["code"], ".bl_rna.properties['" + self.search_properties[inp.name].identifier + "'].enum_items, ", node_data["input_data"][x]["code"], ")"])
                         else:
                             set_blocks.append([node_data["input_data"][1]["code"], "." + inp.name, " = ", node_data["input_data"][x]["code"]])
 
