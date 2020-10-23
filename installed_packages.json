@@ -1,3 +1,13 @@
 {
-    "packages": []
+    "packages": [
+        {
+            "name": "My Package",
+            "description": "This is an example package",
+            "author": "Joshua Knauber",
+            "nodes": [
+                "Interface/better_label.py",
+                "Input/dice.py"
+            ]
+        }
+    ]
 }
