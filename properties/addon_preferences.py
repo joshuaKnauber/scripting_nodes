@@ -71,7 +71,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
     def _draw_installed_package(self, package_data, index, layout):
         """ draws the ui for an installed package """
-        box = layoutt.box()
+        box = layout.box()
         row = box.row()
         split = row.split(factor=0.925)
         column = split.column(align=True)
