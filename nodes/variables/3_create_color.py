@@ -6,8 +6,8 @@ from ...node_tree.node_sockets import is_valid_python, make_valid_python
 
 
 class SN_VectorArray(bpy.types.PropertyGroup):
-    value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable", subtype="COLOR")
-    four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable",subtype="COLOR")
+    value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable", subtype="COLOR",min=0,max=1)
+    four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable",subtype="COLOR",min=0,max=1)
 
 bpy.utils.register_class(SN_VectorArray)
 
@@ -26,8 +26,8 @@ class SN_ColorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     }
 
-    value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable",subtype="COLOR")
-    four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable",subtype="COLOR")
+    value: bpy.props.FloatVectorProperty(default=(0,0,0),name="Value",description="Value of this variable",subtype="COLOR",min=0,max=1)
+    four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),size=4,name="Value",description="Value of this variable",subtype="COLOR",min=0,max=1)
 
     def update_socket_value(self,context):
         if not is_valid_python(self.var_name,True, can_have_spaces=False):
