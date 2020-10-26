@@ -57,6 +57,8 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             if inp.name != "Data block" and inp.name != "Execute":
                 self.inputs.remove(inp)
 
+        self.update_node()
+
     search_value: bpy.props.StringProperty(name="Search value", description="")
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
 
