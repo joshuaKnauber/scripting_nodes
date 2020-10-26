@@ -178,6 +178,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col = box.column(align=True)
             _col.label(text="    • Fixed set data properties with enum input")
             _col.label(text="    • Fixed Color variable")
+            _col.label(text="    • Fixed Run Operator with empty enums")
 
         elif self.main_nav == "PACKAGES":
 
