@@ -3,6 +3,7 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 from ...node_tree.node_sockets import is_valid_python, make_valid_python
+from uuid import uuid4
 
 
 class SN_StringArray(bpy.types.PropertyGroup):
@@ -50,6 +51,9 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
         for node in bpy.context.space_data.node_tree.nodes:
+            if node.bl_idname in ["SN_GetVariableNode"]:
+                node.name_change(self.var_uid, self.var_name)
+        for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname in identifiers:
                 node.update_outputs(None)
 
@@ -96,20 +100,26 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     array_items: bpy.props.CollectionProperty(type=SN_StringArray)
 
+    var_uid: bpy.props.StringProperty()
+
     def inititialize(self, context):
+        self.var_uid = uuid4().hex[:10]
         item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
         item.type = "string"
         item.string_type = "string"
         item.socket_type = "STRING"
+        item.identifier = self.var_uid
         self.update_socket_value(context)
 
     def copy(self, context):
+        self.var_uid = uuid4().hex[:10]
         item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
         item.type = "string"
         item.string_type = "string"
         item.socket_type = "STRING"
+        item.identifier = self.var_uid
         self.update_socket_value(context)
 
     def free(self):

@@ -179,6 +179,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col.label(text="    • Fixed set data properties with enum input")
             _col.label(text="    • Fixed Color variable")
             _col.label(text="    • Fixed Run Operator with empty enums")
+            _col.label(text="    • Variables get found in the search prop after name change")
 
         elif self.main_nav == "PACKAGES":
 

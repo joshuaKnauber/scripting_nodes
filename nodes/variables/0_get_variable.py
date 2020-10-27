@@ -18,11 +18,16 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     }
 
+    def name_change(self, uid, name):
+        if uid == self.var_uid:
+            self.search_value = name
+
     def inititialize(self, context):
         self.sockets.create_output(self, "DATA", "")
 
     def update_outputs(self, context):
         if self.search_value == "":
+            self.var_uid = ""
             if len(self.outputs) == 3:
                 self.outputs.remove(self.outputs[1])
                 self.outputs.remove(self.outputs[1])
@@ -31,6 +36,7 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.outputs[0].bl_idname != "SN_DataSocket":
                 self.sockets.change_socket_type(self, self.outputs[0], "DATA", label=" ")
         elif not self.search_value in bpy.context.space_data.node_tree.search_variables:
+            self.var_uid = ""
             if len(self.outputs) == 3:
                 self.outputs.remove(self.outputs[1])
                 self.outputs.remove(self.outputs[1])
@@ -41,6 +47,7 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.outputs[0].bl_idname != "SN_DataSocket":
                 self.sockets.change_socket_type(self, self.outputs[0], "DATA", label=" ")
         else:
+            self.var_uid = bpy.context.space_data.node_tree.search_variables[self.search_value].identifier
             if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                 if len(self.outputs) != 3:
                     self.sockets.create_output(self, "INTEGER", "Length")
@@ -58,6 +65,7 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.outputs[0].use_four_numbers = bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_vector" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "four_color"
 
     search_value: bpy.props.StringProperty(name="Search Value", description="", update=update_outputs)
+    var_uid: bpy.props.StringProperty()
 
     def draw_buttons(self, context, layout):
         col = layout.column()
