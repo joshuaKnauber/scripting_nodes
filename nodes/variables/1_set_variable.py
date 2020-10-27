@@ -18,6 +18,10 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         "python": ["self.property_name = <number>3</>"]
 
     }
+    
+    def name_change(self, uid, name):
+        if uid == self.var_uid:
+            self.search_value = name
 
     def inititialize(self, context):
         self.sockets.create_input(self, "EXECUTE", "Execute")
@@ -28,9 +32,11 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.inputs.remove(self.inputs[1])
 
         if not self.search_value in bpy.context.space_data.node_tree.search_variables:
+            self.var_uid = ""
             if self.search_value != "":
                 self.search_value = ""
         else:
+            self.var_uid = bpy.context.space_data.node_tree.search_variables[self.search_value].identifier
             if not bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                 if not len(self.inputs) == 2:
                     self.sockets.create_input(self, bpy.context.space_data.node_tree.search_variables[self.search_value].socket_type, bpy.context.space_data.node_tree.search_variables[self.search_value].name)
@@ -80,6 +86,7 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     search_value: bpy.props.StringProperty(name="Search Value", description="", update=update_outputs)
     operation: bpy.props.EnumProperty(items=[("clear", "Clear and Replace", "Clear the Array and set a new value"), ("set_value", "Set Value", "Set a value using an index")], name="Operation", description="", update=update_operation)
+    var_uid: bpy.props.StringProperty()
 
     def draw_buttons(self, context, layout):
         col = layout.column()

@@ -47,7 +47,7 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
         for node in bpy.context.space_data.node_tree.nodes:
-            if node.bl_idname in ["SN_GetVariableNode"]:
+            if node.bl_idname in identifiers:
                 node.name_change(self.var_uid, self.var_name)
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname in identifiers:
