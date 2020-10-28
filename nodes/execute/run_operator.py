@@ -12,12 +12,16 @@ def create_internal_ops():
                 for operator in dir(eval("bpy.ops."+category)):
                     if not operator[0].isnumeric():
                         op = eval("bpy.ops."+category+"."+operator).get_rna_type()
-                        # name = op.name
+                        name = op.name
                         name = op.identifier.split("_OT_")[-1].replace("_"," ").title()
                         if name and not name + " - " + category.replace("_"," ").title() in bpy.context.scene.sn_properties.operator_properties:
                             item = bpy.context.scene.sn_properties.operator_properties.add()
+
                             item.name = name + " - " + category.replace("_"," ").title()
-                            item.description = eval("bpy.ops."+category+"."+operator).get_rna_type().description
+                            # print(op)
+                            # if hasattr(op, "description"):
+                            #     pass
+                            #     item.description = op.description
                             item.identifier = category + "." + operator
 
 

@@ -45,6 +45,7 @@ def add_nodes(tree):
 
 def add_basic_nodes(tree):
     """ adds the basic nodes when adding a new node tree """
+    add_nodes(tree)
     tree.use_fake_user = True
     tree.added_basic_nodes = True
 
@@ -61,6 +62,3 @@ def handle_depsgraph_update():
                             prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
                             if not prefs.has_seen_tutorial:
                                 bpy.ops.scripting_nodes.welcome_message("INVOKE_DEFAULT")
-
-    if ".sn_primer" in bpy.data.node_groups:
-        bpy.data.node_groups.remove(bpy.data.node_groups[".sn_primer"])
