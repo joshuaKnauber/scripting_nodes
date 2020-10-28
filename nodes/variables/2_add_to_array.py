@@ -127,8 +127,6 @@ class SN_AddToArrayVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.search_value in node_data["node_tree"].search_variables:
             if node_data["node_tree"].search_variables[self.search_value].is_array:
                 var_type = node_data["node_tree"].search_variables[self.search_value].type
-                if var_type == "string":
-                    var_type = node_data["node_tree"].search_variables[self.search_value].string_type
 
                 if self.operation == "index":
                     add_text = ["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array.add().", var_type, " = ", node_data["input_data"][2]["code"]]

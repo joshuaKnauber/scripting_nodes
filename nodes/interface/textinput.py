@@ -45,7 +45,7 @@ class SN_TextInputNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_name(self, context):
         if self.search_prop == "custom":
             if self.search_value in bpy.context.space_data.node_tree.search_variables:
-                if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "string":
+                if bpy.context.space_data.node_tree.search_variables[self.search_value].type in ["string", "string_filepath", "string_dirpath"]:
                     if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                         if len(self.inputs) == 4:
                             if self.inputs[3].name != "Index":
@@ -115,7 +115,7 @@ class SN_TextInputNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.prop_search(self,"search_value", bpy.context.space_data.node_tree, "search_variables", text="")
 
             if self.search_value in bpy.context.space_data.node_tree.search_variables:
-                if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "string":
+                if bpy.context.space_data.node_tree.search_variables[self.search_value].type in ["string", "string_filepath", "string_dirpath"]:
                     if bpy.context.space_data.node_tree.search_variables[self.search_value].description != "":
                         box = layout.box()
                         box.label(text=bpy.context.space_data.node_tree.search_variables[self.search_value].description)
@@ -145,9 +145,9 @@ class SN_TextInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                 return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
         else:
             if self.search_value in node_data["node_tree"].search_variables:
-                if node_data["node_tree"].search_variables[self.search_value].type == "string":
+                if node_data["node_tree"].search_variables[self.search_value].type in ["string", "string_filepath", "string_dirpath"]:
                     if len(self.inputs) == 4:
-                        return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_.", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "_array[", node_data["input_data"][3]["code"], "], '", node_data["node_tree"].search_variables[self.search_value].string_type, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], icon, ")"]],"indented": []}],"errors": errors}
+                        return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_.", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "_array[", node_data["input_data"][3]["code"], "], '", node_data["node_tree"].search_variables[self.search_value].type, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], icon, ")"]],"indented": []}],"errors": errors}
                     else:
                         return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_, '", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], icon, ")"]],"indented": []}],"errors": errors}
 

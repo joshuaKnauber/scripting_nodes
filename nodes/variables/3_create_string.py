@@ -82,11 +82,11 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:
                 if self.subtype == "NONE":
-                    item.string_type = "string"
+                    item.type = "string"
                 elif self.subtype == "FILE_PATH":
-                    item.string_type = "string_filepath"
+                    item.type = "string_filepath"
                 else:
-                    item.string_type = "string_dirpath"
+                    item.type = "string_dirpath"
 
     groupItem: bpy.props.StringProperty(default="item_name_placeholder")
     
@@ -107,7 +107,6 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
         item.type = "string"
-        item.string_type = "string"
         item.socket_type = "STRING"
         item.identifier = self.var_uid
         self.update_socket_value(context)
@@ -117,7 +116,6 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
         item.type = "string"
-        item.string_type = "string"
         item.socket_type = "STRING"
         item.identifier = self.var_uid
         self.update_socket_value(context)
