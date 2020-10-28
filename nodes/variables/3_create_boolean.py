@@ -43,7 +43,7 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Boolean Variable"
     bl_icon = "CON_TRANSFORM"
     node_color = (0.65,0,0)
-    should_be_registered = True
+    should_be_registered = False
 
     docs = {
         "text": ["This node is used to <important>create a boolean variable</>."
@@ -93,6 +93,10 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 node.update_outputs(None)
 
     def update_array(self, context):
+        if self.is_array:
+            self.outputs.remove(self.outputs[0])
+        else:
+            self.sockets.create_output(self, "EXECUTE", "Update")
         for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:
                 item.is_array = self.is_array
@@ -114,6 +118,7 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     var_uid: bpy.props.StringProperty()
 
     def inititialize(self, context):
+        self.sockets.create_output(self, "EXECUTE", "Update")
         self.var_uid = uuid4().hex[:10]
         item = bpy.context.space_data.node_tree.search_variables.add()
         self.groupItem = item.name
@@ -166,12 +171,21 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 bpy.context.space_data.node_tree.search_variables.remove(x)
 
     def evaluate(self, socket, node_data, errors):
-        blocks = []
+        next_code = ""
+        if node_data["output_data"][0]["code"]:
+            next_code = node_data["output_data"][0]["code"]
+
+        indented = [["pass"]]
+        if next_code:
+            indented = [["pass"], [next_code]]
+            
+
+        blocks = [{"lines": [["def update_" + self.var_name + "(self, context):"]],"indented": indented}]
         return {"blocks": blocks, "errors": errors}
 
     def get_variable_line(self):
         if not self.is_array:
-            return self.var_name.replace(" ", "_") + ": bpy.props.BoolProperty(name='" + self.var_name + "', description='" + self.description + "', default=" + str(self.value) + ")"
+            return self.var_name.replace(" ", "_") + ": bpy.props.BoolProperty(name='" + self.var_name + "', description='" + self.description + "', default=" + str(self.value) + ", update=update_" + self.var_name + ")"
         else:
             return self.var_name.replace(" ", "_") + "_array: bpy.props.CollectionProperty(type=ArrayCollection_UID_)"
 

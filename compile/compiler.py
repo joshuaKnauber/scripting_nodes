@@ -158,6 +158,16 @@ class ScriptingNodesCompiler():
                     
         return register_function
 
+    def _write_update_functions(self, tree):
+        """ returns the  for the given node tree """
+        variable_ids = ["SN_BooleanVariableNode", "SN_FloatVariableNode", "SN_IntegerVariableNode", "SN_StringVariableNode", "SN_VectorVariableNode", "SN_EnumVariableNode", "SN_ColorVariableNode"]
+        update_string = ""
+        for node in tree.nodes:
+            if node.bl_idname in variable_ids:
+                update_string += self._get_node_code(node, node.outputs[0], self._indents)
+
+        return update_string
+
     def _get_unregister_function(self, tree):
         """ returns the unregister function for the given node tree """
         unregister_function = CompilerData().unregister_block()
@@ -273,6 +283,8 @@ class ScriptingNodesCompiler():
         text.write(cd.comment_block("PROPERTIES"))
         if var_registers:
             text.write("# Store the addons variables\nclass GeneratedAddonProperties_UID_(bpy.types.PropertyGroup):\n" + " "*self._indents + "set_default: bpy.props.BoolProperty(default=True)")
+            self._write_paragraphs(text,1)
+            text.write(self._write_update_functions(tree))
             text.write(var_registers)
             text.write("\n\n# Check and set if the variable default values\n@persistent\ndef check_variables(dummy):\n"+" "*self._indents+"if bpy.context.scene.sn_generated_addon_properties_UID_" + ".set_default:\n" + " "*self._indents*2 + "bpy.context.scene.sn_generated_addon_properties_UID_" + ".set_default = False\n" + " "*self._indents*2 + "set_variables()\n")
             self._write_paragraphs(text,1)
