@@ -11,6 +11,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = "RADIOBUT_ON"
     node_color = (0.89,0.6,0)
     should_be_registered = True
+    bl_width_default = 200
 
     docs = {
         "text": ["The button node creates <important>a clickable button in your layout</>.",
