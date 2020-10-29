@@ -45,7 +45,7 @@ class SN_NumberInputNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_name(self, context):
         if self.search_prop == "custom":
             if self.search_value in bpy.context.space_data.node_tree.search_variables:
-                if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "int" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "float":
+                if "int" in bpy.context.space_data.node_tree.search_variables[self.search_value].type or "float" in bpy.context.space_data.node_tree.search_variables[self.search_value].type:
                     if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                         if len(self.inputs) == 4:
                             if self.inputs[3].name != "Index":
@@ -114,7 +114,7 @@ class SN_NumberInputNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.prop_search(self,"search_value", bpy.context.space_data.node_tree, "search_variables", text="")
 
             if self.search_value in bpy.context.space_data.node_tree.search_variables:
-                if bpy.context.space_data.node_tree.search_variables[self.search_value].type == "int" or bpy.context.space_data.node_tree.search_variables[self.search_value].type == "float":
+                if "int" in bpy.context.space_data.node_tree.search_variables[self.search_value].type or "float" in bpy.context.space_data.node_tree.search_variables[self.search_value].type:
                     if bpy.context.space_data.node_tree.search_variables[self.search_value].description != "":
                         box = layout.box()
                         box.label(text=bpy.context.space_data.node_tree.search_variables[self.search_value].description)
@@ -141,7 +141,7 @@ class SN_NumberInputNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         else:
             if self.search_value in node_data["node_tree"].search_variables:
-                if node_data["node_tree"].search_variables[self.search_value].type in ["int", "float"]:
+                if "int" in node_data["node_tree"].search_variables[self.search_value].type or "float" in node_data["node_tree"].search_variables[self.search_value].type:
                     if len(self.inputs) == 4:
                         return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_.", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "_array[", node_data["input_data"][3]["code"], "], '", node_data["node_tree"].search_variables[self.search_value].type, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], ")"]],"indented": []}],"errors": errors}
                     else:

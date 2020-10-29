@@ -78,6 +78,11 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             if node.bl_idname in identifiers:
                 node.update_outputs(None)
 
+    def update_subtype(self, context):
+        for item in bpy.context.space_data.node_tree.search_variables:
+            if item.name == self.groupItem:
+                item.type = self.subtype
+
     groupItem: bpy.props.StringProperty(default="item_name_placeholder")
     
     var_name: bpy.props.StringProperty(name="Name",description="Name of this variable",update=update_socket_value)
@@ -87,6 +92,8 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     is_array: bpy.props.BoolProperty(default=False,name="Make Array",description="Allows you to add multiple elements of the same type to this variable", update=update_array)
 
     array_items: bpy.props.CollectionProperty(type=SN_IntegerArray)
+
+    subtype: bpy.props.EnumProperty(items=[("float", "None", "No subtype"), ("float_pixel", "Pixel", ""), ("float_unsigned", "Unsigned", ""), ("float_percentage", "Percentage", ""), ("float_factor", "Factor", ""), ("float_angle", "Angle", ""), ("float_time", "Time", ""), ("float_distance", "Distance", "")], name="Subtype",description="The subtype of this variable", update=update_subtype)
 
     var_uid: bpy.props.StringProperty()
 
@@ -121,6 +128,9 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         col = layout.column(align=True)
         col.label(text="Description:")
         col.prop(self,"description",text="")
+        col.separator()
+        col.prop(self, "subtype", expand=True)
+
         
         if not self.is_array:
             col = layout.column(align=True)
@@ -158,7 +168,8 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def get_variable_line(self):
         if not self.is_array:
-            return self.var_name.replace(" ", "_") + ": bpy.props.IntProperty(name='" + self.var_name + "', description='" + self.description + "', default=" + str(self.value) + ", update=update_" + self.var_name + ")"
+            identifiers = {"float": "NONE", "float_pixel": "PIXEL", "float_unsigned": "UNSIGNED", "float_percentage": "PERCENTAGE", "float_factor": "FACTOR", "float_angle": "ANGLE", "float_time": "TIME", "float_distance": "DISTANCE"}
+            return self.var_name.replace(" ", "_") + ": bpy.props.IntProperty(name='" + self.var_name + "', description='" + self.description + "', default=" + str(self.value) + ", subtype='" + identifiers[self.subtype] + "', update=update_" + self.var_name + ")"
         else:
             return self.var_name.replace(" ", "_") + "_array: bpy.props.CollectionProperty(type=ArrayCollection_UID_)"
 
@@ -166,6 +177,6 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         register_block = []
         if self.is_array:
             for element in self.array_items:
-                register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add().int = " + str(element.value))
+                register_block.append("bpy.context.scene.sn_generated_addon_properties_UID_." + self.var_name.replace(" ", "_") + "_array.add()." + self.subtype + " = " + str(element.value))
 
         return register_block
