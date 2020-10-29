@@ -183,7 +183,7 @@ class SN_ScriptingBaseNode:
     def update_socket_connections(self):
         for input_socket in self.inputs:
             if input_socket.bl_idname in ["SN_ExecuteSocket","SN_LayoutSocket"]:
-                if input_socket.is_linked:
+                if len(input_socket.links) > 0:
                     if len(input_socket.links[0].from_socket.links) > 1:
                         bpy.context.space_data.node_tree.links.remove(input_socket.links[-1])
             for link in input_socket.links:
