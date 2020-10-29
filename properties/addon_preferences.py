@@ -177,6 +177,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             box = col.box()
             _col = box.column(align=True)
             # _col.label(text="    • ")
+            _col.label(text="    • Fixed crashes with other addons")
             _col.label(text="    • Fixed set data properties with enum input")
             _col.label(text="    • Fixed Color variable")
             _col.label(text="    • Fixed Run Operator with empty enums")

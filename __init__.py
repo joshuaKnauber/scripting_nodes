@@ -12,11 +12,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
  
 bl_info = {
-    "name" : "SERPENS - Visual Scripting",
+    "name" : "Serpens",
     "author" : "Joshua Knauber, Finn Knauber", 
     "description" : "Adds a node editor for building addons with nodes",
     "blender" : (2, 80, 0),
-    "version" : (1, 0, 1),
+    "version" : (1, 0, 2),
     "location" : "Editors -> Visual Scripting",
     "wiki_url": "", 
     "category" : "Node" 
