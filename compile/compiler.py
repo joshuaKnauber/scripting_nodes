@@ -164,7 +164,8 @@ class ScriptingNodesCompiler():
         update_string = ""
         for node in tree.nodes:
             if node.bl_idname in variable_ids:
-                update_string += self._get_node_code(node, node.outputs[0], self._indents)
+                if len(node.outputs):
+                    update_string += self._get_node_code(node, node.outputs[0], self._indents)
 
         return update_string
 
