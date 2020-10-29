@@ -146,7 +146,10 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"EXECUTE","Execute")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "search_prop", expand=True)
+        row = layout.row(align=True)
+        row.prop(self, "search_prop", expand=True)
+        row.operator("scripting_nodes.paste_operator",icon="PASTEDOWN",text="").node_name = self.name
+
         if self.search_prop == "internal":
             layout.prop_search(self,"propName",bpy.context.scene.sn_properties,"operator_properties",text="")
         else:
