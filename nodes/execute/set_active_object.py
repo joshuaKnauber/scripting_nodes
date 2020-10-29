@@ -29,7 +29,7 @@ class SN_SetActiveObjectNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"EXECUTE","Execute")
 
     def update_node(self):
-        if self.inputs[1].is_linked:
+        if len(self.inputs[1].links):
             if self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket) != "bpy.types.Object":
                 link = self.inputs[1].links[0]
                 from_socket = link.from_socket

@@ -182,6 +182,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col.label(text="    • Fixed Run Operator with empty enums")
             _col.label(text="    • Variables get found in the search prop after name change")
             _col.label(text="    • Added update function to variables")
+            _col.label(text="    • Added set active object node")
 
         elif self.main_nav == "PACKAGES":
 
