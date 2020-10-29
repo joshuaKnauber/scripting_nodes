@@ -44,48 +44,60 @@ class SN_ScriptingBaseNode:
 
         self.inititialize(context)
 
-    def get_socket_data(self, socket, connected_attr):
+    def get_socket_data(self, real_socket, link_socket, connected_attr):
         socket_data = {
-            "socket": socket,
-            "name": socket.name,
+            "socket": real_socket,
+            "name": real_socket.name,
             "value": None,
             "connected": None,
             "code": None
         }
         errors = []
+        
+        if link_socket.is_linked and getattr(link_socket.links[0], connected_attr).node.bl_idname == "NodeReroute":
 
-        # data socket
-        if socket._is_data_socket:
-            socket_data["value"] = str(socket.get_value())
-            socket_data["code"] = socket_data["value"]
+            reroute = getattr(link_socket.links[0], connected_attr)
+            if reroute == reroute.node.inputs[0]:
+                reroute = reroute.node.outputs[0]
+            else:
+                reroute = reroute.node.inputs[0]
 
-            if socket.is_linked:
-                if getattr(socket.links[0], connected_attr)._is_data_socket:
-                    socket_data["connected"] = getattr(socket.links[0], connected_attr)
-                    socket_data["code"] = socket_data["connected"]
+            socket_data, errors = self.get_socket_data(real_socket, reroute, connected_attr)
 
-                else:
-                    errors.append({
-                        "title": "Wrong connection",
-                        "message": "One of the sockets of this node has a wrong socket type connected",
-                        "node": self,
-                        "fatal": True
-                    })
+        else:
 
-        # layout, execute or object socket
-        elif socket.bl_idname in ["SN_LayoutSocket","SN_ExecuteSocket","SN_ObjectSocket", "SN_CollectionSocket"]:
-            if socket.is_linked:
-                if getattr(socket.links[0], connected_attr).bl_idname == socket.bl_idname:
-                    socket_data["connected"] = getattr(socket.links[0], connected_attr)
-                    socket_data["code"] = getattr(socket.links[0], connected_attr)
+            # data socket
+            if real_socket._is_data_socket:
+                socket_data["value"] = str(real_socket.get_value())
+                socket_data["code"] = socket_data["value"]
 
-                else:
-                    errors.append({
-                        "title": "Wrong connection",
-                        "message": "One of the sockets of this node has a wrong socket type connected",
-                        "node": self,
-                        "fatal": True
-                    })
+                if link_socket.is_linked:
+                    if getattr(link_socket.links[0], connected_attr)._is_data_socket:
+                        socket_data["connected"] = getattr(link_socket.links[0], connected_attr)
+                        socket_data["code"] = socket_data["connected"]
+
+                    else:
+                        errors.append({
+                            "title": "Wrong connection",
+                            "message": "One of the sockets of this node has a wrong socket type connected",
+                            "node": self,
+                            "fatal": True
+                        })
+
+            # layout, execute or object socket
+            elif real_socket.bl_idname in ["SN_LayoutSocket","SN_ExecuteSocket","SN_ObjectSocket", "SN_CollectionSocket"]:
+                if link_socket.is_linked:
+                    if getattr(link_socket.links[0], connected_attr).bl_idname == real_socket.bl_idname:
+                        socket_data["connected"] = getattr(link_socket.links[0], connected_attr)
+                        socket_data["code"] = getattr(link_socket.links[0], connected_attr)
+
+                    else:
+                        errors.append({
+                            "title": "Wrong connection",
+                            "message": "One of the sockets of this node has a wrong socket type connected",
+                            "node": self,
+                            "fatal": True
+                        })
 
         return socket_data, errors
 
@@ -95,12 +107,12 @@ class SN_ScriptingBaseNode:
         node_output_data = []
 
         for input_socket in self.inputs:
-            socket_data, socket_errors = self.get_socket_data(input_socket, "from_socket")
+            socket_data, socket_errors = self.get_socket_data(input_socket, input_socket, "from_socket")
             node_input_data.append(socket_data)
             errors += socket_errors
 
         for output_socket in self.outputs:
-            socket_data, socket_errors = self.get_socket_data(output_socket, "to_socket")
+            socket_data, socket_errors = self.get_socket_data(output_socket, output_socket, "to_socket")
             node_output_data.append(socket_data)
             errors += socket_errors
 
@@ -182,19 +194,34 @@ class SN_ScriptingBaseNode:
 
     def update_socket_connections(self):
         for input_socket in self.inputs:
+
             if input_socket.bl_idname in ["SN_ExecuteSocket","SN_LayoutSocket"]:
                 if len(input_socket.links) > 0:
                     if len(input_socket.links[0].from_socket.links) > 1:
                         bpy.context.space_data.node_tree.links.remove(input_socket.links[-1])
-            for link in input_socket.links:
-                if link.from_socket.bl_idname != link.to_socket.bl_idname:
-                    if hasattr(link.from_socket,"_is_data_socket"):
-                        if link.from_socket._is_data_socket and link.to_socket._is_data_socket:
-                            self.cast_link(link)
-                        else:
+
+            else:
+                for link in input_socket.links:
+                    if link.from_socket.bl_idname != link.to_socket.bl_idname:
+
+                        from_socket = None
+                        if hasattr(link.from_socket,"_is_data_socket"):
                             from_socket = link.from_socket
-                            to_socket = link.to_socket
-                            bpy.context.space_data.node_tree.links.remove(link)
+                        elif link.from_socket.node.bl_idname == "NodeReroute":
+                            from_socket = link.from_socket
+                            while from_socket != None and from_socket.node.bl_idname == "NodeReroute":
+                                if from_socket.node.inputs[0].is_linked:
+                                    from_socket = from_socket.node.inputs[0].links[0].from_socket
+                                else:
+                                    from_socket = None
+
+                        if from_socket:
+                            if from_socket._is_data_socket and link.to_socket._is_data_socket:
+                                self.cast_link(link)
+                            else:
+                                bpy.context.space_data.node_tree.links.remove(link)
+
+
 
     def draw_icon_chooser(self,layout):
         """ draws the options for choosing an icon """

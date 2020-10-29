@@ -369,7 +369,7 @@ class ScriptingNodesCompiler():
     def _recompile(self, tree):
         """ compiles the active node tree """
         bpy.context.scene.sn_properties.print_texts.clear()
-        self.remove_reroutes(tree) # this should be a temporary solution until this is solved
+        # self.remove_reroutes(tree) # this should be a temporary solution until this is solved
 
         tree.uid = choice(ascii_uppercase)
         for _ in range(7):
