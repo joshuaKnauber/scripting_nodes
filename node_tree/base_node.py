@@ -106,8 +106,8 @@ class SN_ScriptingBaseNode:
 
         return {"input_data":node_input_data,"output_data":node_output_data, "node_tree":tree}, errors
 
-    def add_dynamic_socket(self,inputs,socket,index,parent):
-        if inputs:
+    def add_dynamic_socket(self,use_inputs,socket,index,parent):
+        if use_inputs:
             socket = self.sockets.create_input(self,socket.socket_type,socket.name,True)
             self.inputs.move(len(self.inputs)-1,index+1)
         else:
@@ -116,8 +116,8 @@ class SN_ScriptingBaseNode:
         socket.dynamic_parent = parent
         return socket
 
-    def update_dynamic(self,inputs):
-        if inputs:
+    def update_dynamic(self,use_inputs):
+        if use_inputs:
             sockets = self.inputs
         else:
             sockets = self.outputs
@@ -125,7 +125,7 @@ class SN_ScriptingBaseNode:
         for socket in sockets:
             if socket.dynamic and socket.dynamic_parent:
                 if not socket.is_linked:
-                    if inputs:
+                    if use_inputs:
                         self.inputs.remove(socket)
                     else:
                         self.outputs.remove(socket)
@@ -140,16 +140,16 @@ class SN_ScriptingBaseNode:
                 if socket.dynamic and not socket.dynamic_parent and socket.is_linked:
                     if not len(sockets) == index+1:
                         if sockets[index+1].dynamic_parent != socket.uid:
-                            created_sockets.append(self.add_dynamic_socket(inputs,socket,index,socket.uid))
+                            created_sockets.append(self.add_dynamic_socket(use_inputs,socket,index,socket.uid))
                     else:
-                        created_sockets.append(self.add_dynamic_socket(inputs,socket,index,socket.uid))
+                        created_sockets.append(self.add_dynamic_socket(use_inputs,socket,index,socket.uid))
                         
                 elif socket.dynamic and socket.dynamic_parent == last_parent:
                     if not len(sockets) == index+1:
                         if sockets[index+1].dynamic_parent != last_parent:
-                            created_sockets.append(self.add_dynamic_socket(inputs,socket,index,last_parent))
+                            created_sockets.append(self.add_dynamic_socket(use_inputs,socket,index,last_parent))
                     else:
-                        created_sockets.append(self.add_dynamic_socket(inputs,socket,index,last_parent))
+                        created_sockets.append(self.add_dynamic_socket(use_inputs,socket,index,last_parent))
 
     def update_vector_sockets(self):
         for input_socket in self.inputs:
@@ -182,6 +182,10 @@ class SN_ScriptingBaseNode:
 
     def update_socket_connections(self):
         for input_socket in self.inputs:
+            if input_socket.bl_idname in ["SN_ExecuteSocket","SN_LayoutSocket"]:
+                if len(input_socket.links) > 0:
+                    if len(input_socket.links[0].from_socket.links) > 1:
+                        bpy.context.space_data.node_tree.links.remove(input_socket.links[-1])
             for link in input_socket.links:
                 if link.from_socket.bl_idname != link.to_socket.bl_idname:
                     if hasattr(link.from_socket,"_is_data_socket"):
@@ -202,14 +206,11 @@ class SN_ScriptingBaseNode:
             row.operator("scripting_nodes.clear_icon",text="",icon="PANEL_CLOSE",emboss=False).node_name = self.name
 
     def update(self):
-        self.update_dynamic(True)
-        self.update_dynamic(False)
-        for input_socket in self.inputs:
-            for link in input_socket.links:
-                link.from_node.update()
-                
         self.update_socket_connections()
         self.update_vector_sockets()
+
+        self.update_dynamic(True)
+        self.update_dynamic(False)
 
         self.update_node()
 

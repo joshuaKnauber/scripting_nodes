@@ -12,12 +12,16 @@ def create_internal_ops():
                 for operator in dir(eval("bpy.ops."+category)):
                     if not operator[0].isnumeric():
                         op = eval("bpy.ops."+category+"."+operator).get_rna_type()
-                        # name = op.name
+                        name = op.name
                         name = op.identifier.split("_OT_")[-1].replace("_"," ").title()
                         if name and not name + " - " + category.replace("_"," ").title() in bpy.context.scene.sn_properties.operator_properties:
                             item = bpy.context.scene.sn_properties.operator_properties.add()
+
                             item.name = name + " - " + category.replace("_"," ").title()
-                            item.description = eval("bpy.ops."+category+"."+operator).get_rna_type().description
+                            # print(op)
+                            # if hasattr(op, "description"):
+                            #     pass
+                            #     item.description = op.description
                             item.identifier = category + "." + operator
 
 
@@ -128,6 +132,15 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
         if self.search_prop == "internal":
             create_internal_ops()
 
+    def get_context_items(self,context):
+        items = []
+        areas = ["DEFAULT", "VIEW_3D", "IMAGE_EDITOR", "NODE_EDITOR", "SEQUENCE_EDITOR", "CLIP_EDITOR", "DOPESHEET_EDITOR",
+                "GRAPH_EDITOR", "NLA_EDITOR", "TEXT_EDITOR", "CONSOLE", "INFO", "TOPBAR", "STATUSBAR", "OUTLINER",
+                "PROPERTIES", "FILE_BROWSER", "PREFERENCES"]
+        for area in areas:
+            items.append((area,area.replace("_"," ").title(),area.replace("_"," ").title()))
+        return items
+
     op_uid: bpy.props.StringProperty()
     propName: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
     search_prop: bpy.props.EnumProperty(items=[("internal", "Internal", "Blenders internal properties"), ("custom", "Custom", "Your custom enums")], name="Properties", description="Which properties to display", update=update_enum)
@@ -136,14 +149,20 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     use_invoke: bpy.props.BoolProperty(default=True,name="Show Popups",description="Shows confirm and other popups. Might cause issues if not enabled for internal operators.")
 
+    context_override: bpy.props.EnumProperty(items=get_context_items,name="Context Override")
+
     def inititialize(self,context):
         self.update_enum(None)
         self.sockets.create_input(self,"EXECUTE","Execute")
         self.sockets.create_output(self,"EXECUTE","Execute")
 
     def draw_buttons(self, context, layout):
-        layout.prop(self, "search_prop", expand=True)
+        row = layout.row(align=True)
+        row.prop(self, "search_prop", expand=True)
+        row.operator("scripting_nodes.paste_operator",icon="PASTEDOWN",text="").node_name = self.name
+
         if self.search_prop == "internal":
+            layout.prop(self,"context_override",text="Context")
             layout.prop_search(self,"propName",bpy.context.scene.sn_properties,"operator_properties",text="")
         else:
             layout.prop_search(self,"propName",bpy.context.space_data.node_tree,"custom_operator_properties",text="")
@@ -171,6 +190,8 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
             invoke = "'INVOKE_DEFAULT'"
 
         execute = ["pass"]
+        context_set = []
+        context_reset = []
         if self.search_prop == "internal":
             if self.propName in bpy.context.scene.sn_properties.operator_properties:
                 props = []
@@ -186,10 +207,17 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                     else:
                         props+=[", " + prop.prop_identifier + "='", prop.enum + "'"]
 
+                if self.context_override != "DEFAULT":
+                    context_set = [
+                        ["op_reset_context = context.area.type"],
+                        ["context.area.type = \"",self.context_override,"\""]
+                    ]
+                    context_reset = ["context.area.type = op_reset_context"]
+
                 execute = ["bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + "("+invoke+""] + props + [")"]
         else:
             if self.propName in node_data["node_tree"].custom_operator_properties:
                 execute = ["bpy.ops.scripting_nodes.sna_ot_operator_" + node_data["node_tree"].custom_operator_properties[self.propName].identifier.lower() + "("+invoke+")"]
 
-        return {"blocks": [{"lines": [execute],"indented": []},{"lines": [[next_code]],"indented": []}],"errors": errors}
+        return {"blocks": [{"lines": context_set + [execute, context_reset], "indented": []},{"lines": [[next_code]],"indented": []}],"errors": errors}
 

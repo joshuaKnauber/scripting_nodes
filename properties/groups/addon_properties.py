@@ -24,11 +24,6 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
             with open(os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.json"), encoding="utf-8") as examples:
                 examples = json.load(examples)
                 example = examples[self.examples]
-
-                if ".sn_primer" in bpy.data.node_groups:
-                    bpy.data.node_groups.remove(bpy.data.node_groups[".sn_primer"])
-                primer = bpy.data.node_groups.new(".sn_primer","ScriptingNodesTree")
-                context.area.spaces[0].node_tree = primer
                 
                 path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))),"examples.blend")
 

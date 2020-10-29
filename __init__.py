@@ -12,11 +12,11 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
  
 bl_info = {
-    "name" : "SERPENS - Visual Scripting",
+    "name" : "Serpens",
     "author" : "Joshua Knauber, Finn Knauber", 
     "description" : "Adds a node editor for building addons with nodes",
     "blender" : (2, 80, 0),
-    "version" : (1, 0, 1),
+    "version" : (1, 0, 2),
     "location" : "Editors -> Visual Scripting",
     "wiki_url": "", 
     "category" : "Node" 
@@ -36,6 +36,7 @@ from .node_tree.node_categories import get_node_categories
 from .properties.groups.addon_properties import ScriptingNodesProperties
 from .properties.groups.package_marketplace import ScriptingNodesMarketplace
 from .interface.node_header import node_header
+from .interface.right_click_menu import serpens_right_click
 from .compile.compiler import compiler
 from .operators.keymaps.keymaps import register_keymaps,unregister_keymaps
 from .handler.depsgraph import handle_depsgraph_update
@@ -139,7 +140,11 @@ def register():
 
     # register the icons
     register_icons()
-    
+
+    # add right click
+    try: bpy.types.WM_MT_button_context.append(serpens_right_click)
+    except: pass
+
     # register the node categories
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
 
@@ -180,6 +185,10 @@ def unregister():
 
     # unregister the icons
     unregister_icons()
+
+    # remove right click
+    try: bpy.types.WM_MT_button_context.remove(serpens_right_click)
+    except: pass
 
     # unregister the node categories
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
