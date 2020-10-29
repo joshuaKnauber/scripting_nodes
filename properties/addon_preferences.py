@@ -178,11 +178,13 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col = box.column(align=True)
             # _col.label(text="    • ")
             _col.label(text="    • Fixed crashes with other addons")
+            _col.label(text="    • Added context override to run operator")
             _col.label(text="    • Fixed set data properties with enum input")
             _col.label(text="    • Fixed Color variable")
             _col.label(text="    • Fixed Run Operator with empty enums")
             _col.label(text="    • Variables get found in the search prop after name change")
             _col.label(text="    • Added update function to variables")
+            _col.label(text="    • Improved dynamic sockets")
 
         elif self.main_nav == "PACKAGES":
 
