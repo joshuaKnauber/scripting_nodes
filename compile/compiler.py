@@ -272,7 +272,7 @@ class ScriptingNodesCompiler():
         var_registers = self._get_variable_registers(tree)
         if var_registers:
             text.write(cd.comment_block("CLASSES"))
-            text.write("# Create Array Collection for use in PROPERTIES\nclass ArrayCollection_UID_(bpy.types.PropertyGroup):\n"+ " "*self._indents +"string: bpy.props.StringProperty()\n"+ " "*self._indents +"string_filepath: bpy.props.StringProperty(subtype='FILE_PATH')\n"+ " "*self._indents +"string_dirpath: bpy.props.StringProperty(subtype='DIR_PATH')\n"+ " "*self._indents +"bool: bpy.props.BoolProperty()\n"+ " "*self._indents +"int: bpy.props.IntProperty()\n"+ " "*self._indents +"float: bpy.props.FloatProperty()\n"+ " "*self._indents +"vector: bpy.props.FloatVectorProperty()\n"+ " "*self._indents +"four_vector: bpy.props.FloatVectorProperty(size=4)\n"+" "*self._indents +"color: bpy.props.FloatVectorProperty(subtype='COLOR')\n"+ " "*self._indents +"four_color: bpy.props.FloatVectorProperty(subtype='COLOR', size=4)\n")
+            text.write(cd.array_class_block())
             self._write_paragraphs(text,1)
 
         text.write(cd.comment_block("CODE"))

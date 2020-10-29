@@ -29,6 +29,38 @@ class CompilerData():
     def unregister_block(self):
         return "def unregister():"
 
+    def array_class_block(self):
+        return """ # Create Array Collection for use in PROPERTIES
+class ArrayCollection_UID_(bpy.types.PropertyGroup):
+    string: bpy.props.StringProperty()
+    string_filepath: bpy.props.StringProperty(subtype='FILE_PATH')
+    string_dirpath: bpy.props.StringProperty(subtype='DIR_PATH')
+    bool: bpy.props.BoolProperty()
+
+    int: bpy.props.IntProperty()
+    int_pixel: bpy.props.IntProperty(subtype="PIXEL")
+    int_unsigned: bpy.props.IntProperty(subtype="UNSIGNED")
+    int_percentage: bpy.props.IntProperty(subtype="PERCENTAGE")
+    int_factor: bpy.props.IntProperty(subtype="FACTOR")
+    int_angle: bpy.props.IntProperty(subtype="ANGLE")
+    int_time: bpy.props.IntProperty(subtype="TIME")
+    int_distance: bpy.props.IntProperty(subtype="DISTANCE")
+
+    float: bpy.props.FloatProperty()
+    float_pixel: bpy.props.FloatProperty(subtype="PIXEL")
+    float_unsigned: bpy.props.FloatProperty(subtype="UNSIGNED")
+    float_percentage: bpy.props.FloatProperty(subtype="PERCENTAGE")
+    float_factor: bpy.props.FloatProperty(subtype="FACTOR")
+    float_angle: bpy.props.FloatProperty(subtype="ANGLE")
+    float_time: bpy.props.FloatProperty(subtype="TIME")
+    float_distance: bpy.props.FloatProperty(subtype="DISTANCE")
+
+    vector: bpy.props.FloatVectorProperty()
+    four_vector: bpy.props.FloatVectorProperty(size=4)
+    color: bpy.props.FloatVectorProperty(subtype='COLOR')
+    four_color: bpy.props.FloatVectorProperty(subtype='COLOR', size=4)
+"""
+
     def functions_block(self):
         return """def sn_print(*text):
     text = ', '.join(map(str, text))
