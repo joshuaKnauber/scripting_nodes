@@ -19,6 +19,7 @@ class SN_ColorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = "MATERIAL_DATA"
     node_color = (0.6,0.2,0.8)
     should_be_registered = False
+    bl_width_default = 200
 
     docs = {
         "text": ["This node is used to <important>create a color variable</>."

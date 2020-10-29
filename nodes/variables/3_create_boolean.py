@@ -44,6 +44,7 @@ class SN_BooleanVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = "CON_TRANSFORM"
     node_color = (0.65,0,0)
     should_be_registered = False
+    bl_width_default = 200
 
     docs = {
         "text": ["This node is used to <important>create a boolean variable</>."

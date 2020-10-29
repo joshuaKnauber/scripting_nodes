@@ -18,6 +18,7 @@ class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = "CON_TRANSFORM"
     node_color = (0.23,0.65,0.75)
     should_be_registered = False
+    bl_width_default = 200
 
     docs = {
         "text": ["This node is used to <important>create a float variable</>."
@@ -129,7 +130,7 @@ class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         col.label(text="Description:")
         col.prop(self,"description",text="")
         col.separator()
-        col.prop(self, "subtype", expand=True)
+        col.prop(self, "subtype")
 
         if not self.is_array:
             col = layout.column(align=True)

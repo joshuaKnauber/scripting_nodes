@@ -20,6 +20,7 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = "CON_TRANSFORM"
     node_color = (0,0.75,0)
     should_be_registered = False
+    bl_width_default = 200
 
     docs = {
         "text": ["This node is used to <important>create a string variable</>."
@@ -138,7 +139,7 @@ class SN_StringVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         col.label(text="Description:")
         col.prop(self,"description",text="")
         col.separator()
-        col.prop(self, "subtype", expand=True)
+        col.prop(self, "subtype")
         
         if not self.is_array:
             col = layout.column(align=True)
