@@ -188,6 +188,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col.label(text="    • Improved dynamic sockets")
             _col.label(text="    • Added subtypes to int and float variables")
             _col.label(text="    • Added min/max to float and int variables")
+            _col.label(text="    • Added slider option to display number")
 
         elif self.main_nav == "PACKAGES":
 

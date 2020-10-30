@@ -103,6 +103,7 @@ class SN_NumberInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     item.description = prop.description
 
     search_value: bpy.props.StringProperty(name="Name", description="The name of the property", update=update_name)
+    use_slider: bpy.props.BoolProperty(name="Use Slider")
     search_properties: bpy.props.CollectionProperty(type=SN_SearchPropertyGroup)
     search_prop: bpy.props.EnumProperty(items=[("internal", "Internal", "Blenders internal properties"), ("custom", "Custom", "Your custom numbers")], name="Properties", description="Which properties to display", update=update_enum)
 
@@ -118,7 +119,7 @@ class SN_NumberInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if bpy.context.space_data.node_tree.search_variables[self.search_value].description != "":
                         box = layout.box()
                         box.label(text=bpy.context.space_data.node_tree.search_variables[self.search_value].description)
-                    
+
                     if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
                         if len(self.inputs) != 4:
                             self.update_name(None)
@@ -128,13 +129,17 @@ class SN_NumberInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                 else:
                     box = layout.box()
                     box.label(text="Please select a int or float variable")
+        layout.prop(self, "use_slider")
 
 
     def evaluate(self, socket, node_data, errors):
         layout_type = self.inputs[0].links[0].from_node.layout_type()
+
+        slider = ", slider=" + str(self.use_slider)
+
         if self.search_prop == "internal":
             if self.search_value in self.search_properties:
-                return {"blocks": [{"lines": [[layout_type, ".prop(", node_data["input_data"][3]["code"], ", '", self.search_properties[self.search_value].identifier, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], ")"]],"indented": []}],"errors": errors}
+                return {"blocks": [{"lines": [[layout_type, ".prop(", node_data["input_data"][3]["code"], ", '", self.search_properties[self.search_value].identifier, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], slider, ")"]],"indented": []}],"errors": errors}
             else:
                 errors.append({"title": "No variable selected", "message": "You need to select the variable you want to display", "node": self, "fatal": True})
                 return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
@@ -143,9 +148,9 @@ class SN_NumberInputNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.search_value in node_data["node_tree"].search_variables:
                 if "int" in node_data["node_tree"].search_variables[self.search_value].type or "float" in node_data["node_tree"].search_variables[self.search_value].type:
                     if len(self.inputs) == 4:
-                        return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_.", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "_array[", node_data["input_data"][3]["code"], "], '", node_data["node_tree"].search_variables[self.search_value].type, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], ")"]],"indented": []}],"errors": errors}
+                        return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_.", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "_array[", node_data["input_data"][3]["code"], "], '", node_data["node_tree"].search_variables[self.search_value].type, "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], slider, ")"]],"indented": []}],"errors": errors}
                     else:
-                        return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_, '", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], ")"]],"indented": []}],"errors": errors}
+                        return {"blocks": [{"lines": [[layout_type, ".prop(bpy.context.scene.sn_generated_addon_properties_UID_, '", node_data["node_tree"].search_variables[self.search_value].name.replace(" ", "_"), "', emboss=", node_data["input_data"][1]["code"], ", text=", node_data["input_data"][2]["code"], slider, ")"]],"indented": []}],"errors": errors}
                 else:
                     errors.append({"title": "Wrong variable selected", "message": "You need to select a number variable", "node": self, "fatal": True})
                     return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
