@@ -92,7 +92,8 @@ class SN_ShortcutPropertyGroup(bpy.types.PropertyGroup):
                 self.operator = ""
                 self.op_uid = ""
             else:
-                self.op_uid = bpy.context.space_data.node_tree.custom_operator_properties[self.operator].identifier
+                if self.operator in bpy.context.space_data.node_tree.custom_operator_properties:
+                    self.op_uid = bpy.context.space_data.node_tree.custom_operator_properties[self.operator].identifier
 
     call_type: bpy.props.EnumProperty(items=[("OPERATOR","Operator","Operator"),("PANEL","Panel","Panel"),("PIE_MENU"," Pie Menu","Pie Menu"),("MENU"," Menu","Menu")])
     use_custom: bpy.props.EnumProperty(items=[("CUSTOM","Custom","Custom"),("INTERNAL","Internal","Internal")], update=update_custom,
