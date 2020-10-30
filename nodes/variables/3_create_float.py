@@ -28,6 +28,8 @@ class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
     value: bpy.props.FloatProperty(default=0,name="Value",description="Value of this variable")
+    min_value: bpy.props.FloatProperty(default=0,name="Min",description="The minimum value of this variable")
+    max_value: bpy.props.FloatProperty(default=0,name="Max",description="The maximum value of this variable")
 
     def update_socket_value(self,context):
         if not is_valid_python(self.var_name,True, can_have_spaces=False):
@@ -90,6 +92,9 @@ class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     description: bpy.props.StringProperty(name="Description",description="Description of this variable", update=update_description)
 
+    use_min: bpy.props.BoolProperty(default=False,name="Use Min",description="Use a minimum value")
+    use_max: bpy.props.BoolProperty(default=False,name="Use Max",description="Use a maximum value")
+
     is_array: bpy.props.BoolProperty(default=False,name="Make Array",description="Allows you to add multiple elements of the same type to this variable", update=update_array)
 
     array_items: bpy.props.CollectionProperty(type=SN_FloatArray)
@@ -136,6 +141,15 @@ class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             col = layout.column(align=True)
             col.label(text="Default Value:")
             col.prop(self,"value",text="")
+            split = col.split()
+            col = split.column(align=True)
+            col.prop(self, "use_min")
+            if self.use_min:
+                col.prop(self, "min_value")
+            col = split.column(align=True)
+            col.prop(self, "use_max")
+            if self.use_max:
+                col.prop(self, "max_value")
 
         layout.prop(self,"is_array")
 
@@ -169,7 +183,14 @@ class SN_FloatVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def get_variable_line(self):
         if not self.is_array:
             identifiers = {"float": "NONE", "float_pixel": "PIXEL", "float_unsigned": "UNSIGNED", "float_percentage": "PERCENTAGE", "float_factor": "FACTOR", "float_angle": "ANGLE", "float_time": "TIME", "float_distance": "DISTANCE"}
-            return self.var_name.replace(" ", "_") + ": bpy.props.FloatProperty(name='" + self.var_name + "', description='" + self.description + "', default=" + str(self.value) + ", subtype='" + identifiers[self.subtype] + "', update=update_" + self.var_name + ")"
+            min_code = ""
+            max_code = ""
+            if self.use_min:
+                min_code = ", min=" + str(self.min_value)
+            if self.use_max:
+                max_code = ", max=" + str(self.max_value)
+
+            return self.var_name.replace(" ", "_") + ": bpy.props.FloatProperty(name='" + self.var_name + "', description='" + self.description + "', default=" + str(self.value) + ", subtype='" + identifiers[self.subtype] + "', update=update_" + self.var_name + min_code + max_code + ")"
         else:
             return self.var_name.replace(" ", "_") + "_array: bpy.props.CollectionProperty(type=ArrayCollection_UID_)"
 
