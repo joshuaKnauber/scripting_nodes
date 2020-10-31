@@ -38,6 +38,7 @@ class SN_OT_PasteOperator(bpy.types.Operator):
 
                             node.search_prop = "internal"
                             node.propName = item.name
+                            print(item.name)
                             self.report({"INFO"},message="Selected copied operator!")
                             return {"FINISHED"}
 
