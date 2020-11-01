@@ -118,3 +118,53 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
     # recording a shortcut
     recording_shortcut: bpy.props.BoolProperty(default=False)
+
+
+    # record action
+    def update_record_action(self,context):
+        if self.recording_action:
+            pass
+
+        else:
+            old_type = context.area.type
+            context.area.type = "INFO"
+            bpy.ops.info.select_all()
+            bpy.ops.info.report_copy()
+            context.area.type = old_type
+
+            actions = bpy.context.window_manager.clipboard.split("bpy.context.scene.sn_properties.recording_action = True")[-1].splitlines()
+            action_nodes = []
+            for action in actions:
+
+                node = None
+                if "(" in action and ")" in action: # process operator
+                    action = action.split(".")[2] + "." + action.split(".")[3].split("(")[0]
+                    node = context.space_data.node_tree.nodes.new("SN_RunOperator")
+                    node.search_prop = "internal"
+
+                    for cat in dir(bpy.ops):
+                        for op in dir(eval("bpy.ops."+cat)):
+                            if cat + "." + op == action:
+                                for item in context.scene.sn_properties.operator_properties:
+                                    if item.identifier == action:
+                                        node.propName = item.name
+
+                    if node.propName: # set operator properties
+                        pass
+
+                elif "=" in action: # process property
+                    pass
+                
+                if node: # process node
+                    action_nodes.append(node)
+
+            # place nodes
+            for node in context.space_data.node_tree.nodes:
+                node.select = False
+            node_loc = [0,0]
+            for node in action_nodes:
+                node.location = tuple(node_loc)
+                node_loc[0] += node.width + 50
+                node.select = True
+
+    recording_action: bpy.props.BoolProperty(default=False,name="Record Actions",update=update_record_action)
