@@ -71,3 +71,4 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
             ],
             "errors": errors
         }
+
