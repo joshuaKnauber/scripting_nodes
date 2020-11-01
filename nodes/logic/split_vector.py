@@ -46,8 +46,6 @@ class SN_SplitVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
         for i in range(len(self.outputs)):
             if socket == self.outputs[i]:
                 out_index = i
-
-        print(node_data["input_data"][0]["code"])
         
         return {
             "blocks": [
