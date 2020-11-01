@@ -28,12 +28,12 @@ def add_nodes(tree):
     tree.links.new(operator.outputs[0],print_.inputs[0])
     tree.links.new(string.outputs[0],print_.inputs[1])
 
-    operator.location = (-150,300)
-    print_.location = (150,300)
-    string.location = (150,150)
+    operator.location = (-150,330)
+    print_.location = (150,330)
+    string.location = (150,170)
     panel.location = (-150,0)
     button.location = (150,0)
-    run_operator.location = (350,0)
+    run_operator.location = (380,0)
 
     panel.parent = frame_layout
     button.parent = frame_layout

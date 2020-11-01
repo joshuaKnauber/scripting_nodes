@@ -1,12 +1,12 @@
-#SN_SetModifierNode
+#SN_DefineModifierTypeNode
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 
-class SN_SetModifierNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_DefineModifierTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_SetModifierNode"
-    bl_label = "Set Modifier"
+    bl_idname = "SN_DefineModifierTypeNode"
+    bl_label = "Define Modifier Type"
     bl_icon = "MESH_CUBE"
     node_color = (0.53, 0.55, 0.53)
     bl_width_default = 180

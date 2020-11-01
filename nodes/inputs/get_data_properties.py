@@ -76,6 +76,9 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         ]
     }
 
+    def copy(self, node):
+        self.search_value = ""
+
     def inititialize(self,context):
         self.sockets.create_input(self,"OBJECT","Object or data block")
 
@@ -160,7 +163,7 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if data_type == "bpy.types.Modifier":
                     box = layout.box()
                     box.alert = True
-                    box.label(text="Use the set Modifier Node after this one!")
+                    box.label(text="Continue with the 'Define Modifier Type' node")
 
             elif self.inputs[0].links[0].from_socket.bl_idname == "SN_ObjectSocket":
                 row = layout.row(align=True)
