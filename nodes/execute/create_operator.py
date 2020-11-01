@@ -201,7 +201,8 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                                 ["layout = self.layout"]
                             ] + popup_layout
                         },
-                        popup_text
+                        popup_text,
+                        {"lines": [[""],[""]], "indented": []}
                     ]
                 }
             ],
