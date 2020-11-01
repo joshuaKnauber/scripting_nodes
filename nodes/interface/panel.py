@@ -222,6 +222,14 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         for output_data in node_data["output_data"]:
             if output_data["name"] == "Panel" and output_data["code"] != None:
                 panel_layout.append([output_data["code"]])
+
+        space = self.space
+        region = self.region
+        if self.only_in_popover:
+            space = "OUTLINER"
+            region = "HEADER"
+            context = ""
+            category = ""
         
         return {
             "blocks": [
@@ -232,8 +240,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                     "indented": [
                         ["bl_label = \"",label,"\""],
                         ["bl_idname = \"",idname,"\""],
-                        ["bl_space_type = \"",self.space,"\""],
-                        ["bl_region_type = \"",self.region,"\""],
+                        ["bl_space_type = \"",space,"\""],
+                        ["bl_region_type = \"",region,"\""],
                         context,
                         category,
                         options,
