@@ -45,6 +45,3 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
         col.label(text="Addon version")
         row = col.row()
         row.prop(context.space_data.node_tree, "addon_version", text="")
-
-        layout.separator()
-        layout.prop(context.space_data.node_tree,"compile_on_start")

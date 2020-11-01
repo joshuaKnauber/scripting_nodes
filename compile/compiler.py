@@ -374,10 +374,9 @@ class ScriptingNodesCompiler():
         bpy.context.scene.sn_properties.print_texts.clear()
         # self.remove_reroutes(tree) # this should be a temporary solution until this is solved
 
-        if not tree.uid:
-            tree.uid = choice(ascii_uppercase)
-            for _ in range(7):
-                tree.uid += choice(ascii_lowercase)
+        tree.uid = choice(ascii_uppercase)
+        for _ in range(7):
+            tree.uid += choice(ascii_lowercase)
 
         self._unregister_tree(tree)
         success = self._create_module(tree)
