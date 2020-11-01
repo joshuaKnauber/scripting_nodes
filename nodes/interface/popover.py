@@ -15,12 +15,9 @@ class SN_PopoverNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = False
 
     docs = {
-        "text": ["The row node can display a layout in <important> a row or from left to right</>.",
-                "",
-                "Aligned: <subtext>All following nodes are aligned</>",
-                "Enabled: <subtext>Only displays a column if this is True</>",
-                "Alert: <subtext>Is diplayed red like an alert</>"],
-        "python": ["layout.<function>row</>(align=True)"]
+        "text": ["The popover node displays a <important>popover from a selected panel</>.",
+                "",],
+        "python": ["layout.<function>popover</>(<string>\"SN_PT_MyPanel\"</>)"]
     }
 
     def update_custom(self,context):
