@@ -83,6 +83,15 @@ def get_enum_identifier(enumItems, name):
             return item.identifier
             
     return ''
+
+def report_sn_error(error):
+    self.report({"ERROR"},message="There was an error when running this operation! It has been printed to the console.")
+    print("START ERROR | Node Name: ",self.name," | (If you are this addons developer you might want to report this to the Serpens team) ")
+    print("")
+    print(error)
+    print("")
+    print("END ERROR - - - - ")
+    print("")
     
 def get_python_filepath():
     path = os.path.dirname(bpy.data.filepath)

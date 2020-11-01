@@ -180,13 +180,7 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                                         ["except Exception as exc:"]
                                     ],
                                     "indented": [
-                                        ["self.report({\"ERROR\"},message=\"There was an error when running this operation! It has been printed to the console.\")"],
-                                        ["print(\"START ERROR | Node Name: ",self.name," | (If you are this addons developer you might want to report this to the Serpens team) \")"],
-                                        ["print(\"\")"],
-                                        ["print(exc)"],
-                                        ["print(\"\")"],
-                                        ["print(\"END ERROR - - - - \")"],
-                                        ["print(\"\")"]
+                                        ["report_sn_error(exc)"]
                                     ]
                                 },
                                 ["return {\"FINISHED\"}"],
