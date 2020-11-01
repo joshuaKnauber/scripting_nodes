@@ -194,6 +194,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col.label(text="    • Added define modifier type node")
             _col.label(text="    • Added popover node")
             _col.label(text="    • Added more UI contexts for panel and add to panel")
+            _col.label(text="    • Added split/combine vector nodes")
 
         elif self.main_nav == "PACKAGES":
 
