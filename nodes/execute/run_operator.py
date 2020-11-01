@@ -135,6 +135,7 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
     def get_context_items(self,context):
         items = []
         areas = ["DEFAULT", "VIEW_3D", "IMAGE_EDITOR", "NODE_EDITOR", "SEQUENCE_EDITOR", "CLIP_EDITOR", "DOPESHEET_EDITOR",
+                "DOPESHEET_ACTION_EDITOR", "DOPESHEET_SHAPEKEY_EDITOR", "DOPESHEET_GREASE_PENCIL", "DOPESHEET_MASK_EDITOR", "DOPESHEET_CACHE_FILE",
                 "GRAPH_EDITOR", "NLA_EDITOR", "TEXT_EDITOR", "CONSOLE", "INFO", "TOPBAR", "STATUSBAR", "OUTLINER",
                 "PROPERTIES", "FILE_BROWSER", "PREFERENCES"]
         for area in areas:
@@ -207,11 +208,27 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                     else:
                         props+=[", " + prop.prop_identifier + "='", prop.enum + "'"]
 
+                context_modes = {
+                    "DOPESHEET_ACTION_EDITOR": "ACTION",
+                    "DOPESHEET_SHAPEKEY_EDITOR": "SHAPEKEY",
+                    "DOPESHEET_GREASE_PENCIL": "GPENCIL",
+                    "DOPESHEET_MASK_EDITOR": "MASK",
+                    "DOPESHEET_CACHE_FILE": "CACHEFILE"
+                }
+
                 if self.context_override != "DEFAULT":
+                    context_mode = None
+                    context_override = self.context_override
+                    if self.context_override in context_modes:
+                        context_mode = context_modes[self.context_override]
+                        context_override = "DOPESHEET_EDITOR"
+
                     context_set = [
                         ["op_reset_context = context.area.type"],
-                        ["context.area.type = \"",self.context_override,"\""]
+                        ["context.area.type = \"",context_override,"\""]
                     ]
+                    if context_mode:
+                        context_set.append(["context.space_data.mode = \"",context_mode,"\""])
                     context_reset = ["context.area.type = op_reset_context"]
 
                 execute = ["bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + "("+invoke+""] + props + [")"]
