@@ -157,6 +157,10 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     box = layout.box()
                     box.label(text=eval(data_type).bl_rna.name)
                 layout.prop(self, "use_index")
+                if data_type == "bpy.types.Modifier":
+                    box = layout.box()
+                    box.alert = True
+                    box.label(text="Use the set Modifier Node after this one!")
 
             elif self.inputs[0].links[0].from_socket.bl_idname == "SN_ObjectSocket":
                 row = layout.row(align=True)

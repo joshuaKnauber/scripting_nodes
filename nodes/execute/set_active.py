@@ -42,21 +42,15 @@ class SN_SetActiveNode(bpy.types.Node, SN_ScriptingBaseNode):
             if len(self.inputs[1].links):
                 if self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket) != "bpy.types.Object":
                     link = self.inputs[1].links[0]
-                    from_socket = link.from_socket
-                    to_socket = link.to_socket
                     bpy.context.space_data.node_tree.links.remove(link)
         elif len(self.inputs) == 3:
             if len(self.inputs[1].links):
                 if self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket) != "bpy.types.Object":
                     link = self.inputs[1].links[0]
-                    from_socket = link.from_socket
-                    to_socket = link.to_socket
                     bpy.context.space_data.node_tree.links.remove(link)
             if len(self.inputs[2].links):
                 if self.inputs[2].links[0].from_node.data_type(self.inputs[2].links[0].from_socket) != "bpy.types.Action":
                     link = self.inputs[2].links[0]
-                    from_socket = link.from_socket
-                    to_socket = link.to_socket
                     bpy.context.space_data.node_tree.links.remove(link)
 
     def draw_buttons(self, context, layout):
