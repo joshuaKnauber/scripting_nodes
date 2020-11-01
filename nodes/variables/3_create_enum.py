@@ -164,8 +164,12 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, socket, node_data, errors):
         next_code = ""
-        if node_data["output_data"][0]["code"]:
-            next_code = node_data["output_data"][0]["code"]
+        if len(self.outputs):
+            if node_data["output_data"][0]["code"]:
+                next_code = node_data["output_data"][0]["code"]
+        else:
+            errors.append({"title": "To use update re-add this node!", "message": "", "node": self, "fatal": False})
+
 
         indented = [["pass"]]
         if next_code:
@@ -179,5 +183,8 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         items = []
         for element in self.array_items:
             items.append((element.name, element.name, element.description))
-        return self.var_name.replace(" ", "_") + ": bpy.props.EnumProperty(items=" + str(items) + ", name='" + self.var_name + "', description='" + self.description + "'" + ", update=update_" + self.var_name + ")"
+        if len(self.outputs):
+            return self.var_name.replace(" ", "_") + ": bpy.props.EnumProperty(items=" + str(items) + ", name='" + self.var_name + "', description='" + self.description + "'" + ", update=update_" + self.var_name + ")"
+        else:
+            return self.var_name.replace(" ", "_") + ": bpy.props.EnumProperty(items=" + str(items) + ", name='" + self.var_name + "', description='" + self.description + "'" + ")"
 

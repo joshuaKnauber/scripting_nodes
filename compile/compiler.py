@@ -166,6 +166,8 @@ class ScriptingNodesCompiler():
             if node.bl_idname in variable_ids:
                 if len(node.outputs):
                     update_string += self._get_node_code(node, node.outputs[0], self._indents)
+                else:
+                    self._get_node_code(node, None, self._indents)
 
         return update_string
 

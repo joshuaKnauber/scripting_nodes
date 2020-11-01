@@ -70,7 +70,8 @@ class SN_ColorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_array(self, context):
         if self.is_array:
-            self.outputs.remove(self.outputs[0])
+            if len(self.outputs):
+                self.outputs.remove(self.outputs[0])
         else:
             self.sockets.create_output(self, "EXECUTE", "Update")
         for item in bpy.context.space_data.node_tree.search_variables:
@@ -171,23 +172,33 @@ class SN_ColorVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, socket, node_data, errors):
         next_code = ""
-        if node_data["output_data"][0]["code"]:
-            next_code = node_data["output_data"][0]["code"]
+        if len(self.outputs):
+            if node_data["output_data"][0]["code"]:
+                next_code = node_data["output_data"][0]["code"]
+        elif not self.is_array:
+            errors.append({"title": "To use update re-add this node!", "message": "", "node": self, "fatal": False})
+
 
         indented = [["pass"]]
         if next_code:
             indented = [["pass"], [next_code]]
-            
 
         blocks = [{"lines": [["def update_" + self.var_name + "(self, context):"]],"indented": indented}]
         return {"blocks": blocks, "errors": errors}
 
     def get_variable_line(self):
         if not self.is_array:
-            if self.use_four_numbers:
-                return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(subtype='COLOR', name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.four_value[0])+", "+str(self.four_value[1])+", "+str(self.four_value[2])+", "+str(self.four_value[3])+ "), size=4" + ", update=update_" + self.var_name + ")"
+            if len(self.outputs):
+                if self.use_four_numbers:
+                    return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(subtype='COLOR', name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.four_value[0])+", "+str(self.four_value[1])+", "+str(self.four_value[2])+", "+str(self.four_value[3])+ "), size=4" + ", update=update_" + self.var_name + ")"
+                else:
+                    return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(subtype='COLOR', name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.value[0])+", "+str(self.value[1])+", "+str(self.value[2])+ ")" + ", update=update_" + self.var_name + ")"
             else:
-                return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(subtype='COLOR', name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.value[0])+", "+str(self.value[1])+", "+str(self.value[2])+ ")" + ", update=update_" + self.var_name + ")"
+                if self.use_four_numbers:
+                    return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(subtype='COLOR', name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.four_value[0])+", "+str(self.four_value[1])+", "+str(self.four_value[2])+", "+str(self.four_value[3])+ "), size=4" + ")"
+                else:
+                    return self.var_name.replace(" ", "_") + ": bpy.props.FloatVectorProperty(subtype='COLOR', name='" + self.var_name + "', description='" + self.description + "', default=(" +str(self.value[0])+", "+str(self.value[1])+", "+str(self.value[2])+ ")" + ")"
+
         else:
             return self.var_name.replace(" ", "_") + "_array: bpy.props.CollectionProperty(type=ArrayCollection_UID_)"
 
