@@ -1,4 +1,6 @@
 import bpy
+from random import choice
+from string import ascii_uppercase, ascii_lowercase
 
 
 def add_nodes(tree):
@@ -45,6 +47,9 @@ def add_nodes(tree):
 
 def add_basic_nodes(tree):
     """ adds the basic nodes when adding a new node tree """
+    tree.uid = choice(ascii_uppercase)
+    for _ in range(7):
+        tree.uid += choice(ascii_lowercase)
     add_nodes(tree)
     tree.use_fake_user = True
     tree.added_basic_nodes = True
