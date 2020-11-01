@@ -116,6 +116,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     panel_uid: bpy.props.StringProperty()
 
+    only_in_popover: bpy.props.BoolProperty(name="Only In Popovers",description="Show this panel only in popovers")
+
     def inititialize(self,context):
         self.panel_uid = uuid4().hex[:10]
         item = bpy.context.space_data.node_tree.sn_panel_collection_property.add()
@@ -159,6 +161,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"label")
         layout.prop(self,"hide_header")
         layout.prop(self,"default_closed")
+        layout.prop(self,"only_in_popover")
 
     def layout_type(self):
         return "layout"

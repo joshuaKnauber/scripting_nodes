@@ -21,6 +21,7 @@ def get_possible_panel_locations():
                     possible_locations.append(location)
 
     additional_locations = [
+        {"space":"OUTLINER", "region":"HEADER", "category":"", "context":""}
     ]
     possible_locations += additional_locations
                         
