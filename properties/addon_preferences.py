@@ -193,6 +193,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col.label(text="    • Added get/set custom properties nodes")
             _col.label(text="    • Added define modifier type node")
             _col.label(text="    • Added popover node")
+            _col.label(text="    • Added more UI contexts for panel and add to panel")
 
         elif self.main_nav == "PACKAGES":
 

@@ -2,7 +2,6 @@
 
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
-from ...operators.panel_ops import get_possible_panel_locations
 from uuid import uuid4
 
 

@@ -20,10 +20,11 @@ def get_possible_panel_locations():
                 if not location in possible_locations:
                     possible_locations.append(location)
 
-    additional_locations = [
-        {"space":"OUTLINER", "region":"HEADER", "category":"", "context":""}
-    ]
-    possible_locations += additional_locations
+        additional_locations = [
+            {"space":"GRAPH_EDITOR", "region":"UI", "category":"Misc", "context":""},
+            {"space":"NLA_EDITOR", "region":"UI", "category":"Misc", "context":""}
+        ]
+        possible_locations += additional_locations
                         
     return possible_locations[:]
 
@@ -72,7 +73,10 @@ class SN_PT_LocationPickerPanel_{uid}(bpy.types.Panel):
         row = self.layout.row()
         row.alert = True
         row.scale_y = 2
-        op = row.operator("visual_scripting.choose_panel_location",icon="EYEDROPPER")
+        txt = "Choose This Location"
+        if "{location["context"]}":
+            txt += " ({location["context"].replace("_"," ").title()})"
+        op = row.operator("visual_scripting.choose_panel_location",icon="EYEDROPPER",text=txt)
         op.space = "{location["space"]}"
         op.region = "{location["region"]}"
         op.context = "{location["context"]}"
@@ -185,7 +189,7 @@ class SN_CreateExistingPanelLocation(bpy.types.Operator):
 
         for panel in dir(bpy.types):
             panel = eval("bpy.types."+panel)
-            if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type") and hasattr(panel,"prepend"):
+            if hasattr(panel,"bl_space_type") and hasattr(panel,"prepend"):
                 if self.shortcut_index == -1:
                     panel.prepend(prepend_panel)
                 panel.append(append_panel)
@@ -203,7 +207,7 @@ def remove_appended_panels():
 
     for panel in dir(bpy.types):
         panel = eval("bpy.types."+panel)
-        if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type") and hasattr(panel,"prepend"):
+        if hasattr(panel,"bl_space_type") and hasattr(panel,"prepend"):
             panel.remove(prepend_panel)
             panel.remove(append_panel)
 
