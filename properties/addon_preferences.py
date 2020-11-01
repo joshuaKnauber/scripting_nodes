@@ -189,8 +189,10 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col.label(text="    • Added subtypes to int and float variables")
             _col.label(text="    • Added min/max to float and int variables")
             _col.label(text="    • Added slider option to display number")
+            _col.label(text="    • Fixed issues with print/report")
             _col.label(text="    • Added get/set custom properties nodes")
-            _col.label(text="    • Added set modifier node")
+            _col.label(text="    • Added define modifier type node")
+            _col.label(text="    • Added popover node")
 
         elif self.main_nav == "PACKAGES":
 

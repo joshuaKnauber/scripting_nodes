@@ -91,7 +91,7 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         ],
                         "indented": [
                             ["layout = self.layout"],
-                        ] + panel_layout
+                        ] + panel_layout + [[""],[""]]
                     }
                 ],
                 "errors": errors

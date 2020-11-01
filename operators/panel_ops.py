@@ -242,6 +242,13 @@ class SN_ChooseExistingPanelLocation(bpy.types.Operator):
                                             node.shortcuts[global_shortcut_index].panel_name = self.panel_name
                                         else:
                                             node.shortcuts[global_shortcut_index].panel_name = self.panel_idname
+                                elif hasattr(node, "popover_uid") and node.bl_idname == "SN_PopoverNode":
+                                    if node.popover_uid == global_panel_uid:
+                                        node.panelProp = self.panel_idname
+                                        if self.panel_name:
+                                            node.panel_name = self.panel_name
+                                        else:
+                                            node.panel_name = self.panel_idname
                                     
         remove_appended_panels()
         redraw(context)
