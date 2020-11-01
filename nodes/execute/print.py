@@ -38,22 +38,25 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         if node_data["output_data"][0]["code"]:
             next_code = node_data["output_data"][0]["code"]
         
-        print_text = []
+        print_text = ["\"\""]
         for socket in node_data["input_data"]:
             if socket["name"] == "Value" and socket["code"] != None and socket["code"] != "None":
                 print_text += [",", socket["code"]]
-        if print_text:
-            print_text = print_text[1:]
+        if len(print_text) > 1:
+            print_text = print_text[2:]
 
         print_start = ["sn_print("]
+        print_end = []
         if self.is_report:
-            print_start = ["self.report({\"",self.report_type,"\"}, message="]
+            print_start = ["try: self.report({\"",self.report_type,"\"}, message="]
+            print_end = ["except: print(\"Serpens - Can't report in this context!\")"]
 
         return {
             "blocks": [
                 {
                     "lines": [
-                        print_start + print_text + [")"]
+                        print_start + print_text + [")"],
+                        print_end
                     ],
                     "indented": [
                     ]
