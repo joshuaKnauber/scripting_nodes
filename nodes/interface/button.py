@@ -93,7 +93,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             ["except Exception as exc:"]
                                         ],
                                         "indented": [
-                                            ["report_sn_error(exc)"]
+                                            ["report_sn_error(self,exc)"]
                                         ]
                                     },
                                     ["return {\"FINISHED\"}"],

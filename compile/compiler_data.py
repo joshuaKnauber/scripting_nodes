@@ -84,7 +84,7 @@ def get_enum_identifier(enumItems, name):
             
     return ''
 
-def report_sn_error(error):
+def report_sn_error(self,error):
     self.report({"ERROR"},message="There was an error when running this operation! It has been printed to the console.")
     print("START ERROR | Node Name: ",self.name," | (If you are this addons developer you might want to report this to the Serpens team) ")
     print("")
