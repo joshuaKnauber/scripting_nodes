@@ -92,7 +92,17 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                 for prop in eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties"):
                     if prop.name != "RNA":
                         if prop.type == "ENUM":
-                            if len(eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties['" + prop.identifier + "'].enum_items")):
+                            if len(eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties['" + prop.identifier + "'].enum_items")) == 1:
+                                if eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties['" + prop.identifier + "'].enum_items[0].name") == "Default":
+                                    name = prop.identifier.replace("_", " ").title()
+                                    self.sockets.create_input(self, "STRING", name)
+                                else:
+                                    item = self.enum_collection.add()
+                                    item.identifier = "bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties['" + prop.identifier + "'].enum_items"
+                                    item.prop_name = prop.identifier.replace("_", " ").title()
+                                    item.prop_identifier = prop.identifier
+                                    item.is_set = bool(len(prop.default_flag))
+                            elif len(eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties['" + prop.identifier + "'].enum_items")):
                                 item = self.enum_collection.add()
                                 item.identifier = "bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties['" + prop.identifier + "'].enum_items"
                                 item.prop_name = prop.identifier.replace("_", " ").title()
