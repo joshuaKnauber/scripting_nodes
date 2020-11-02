@@ -12,6 +12,7 @@ class SN_SearchPropertyGroup(bpy.types.PropertyGroup):
     type: bpy.props.StringProperty(name="Type",default="")
     use_four_numbers: bpy.props.BoolProperty()
     is_color: bpy.props.BoolProperty(default=False)
+    is_set: bpy.props.BoolProperty(default=False)
 
 class SN_PT_FilterPanel(bpy.types.Panel):
     bl_space_type = 'NODE_EDITOR'
@@ -102,8 +103,11 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             item.description = prop.description
                                             item.is_color = prop.name == "Color"
                                             # item.is_color = prop.subtype == "COLOR"
-                                            if not prop.type in ["INT", "FLOAT"]:
+                                            if not prop.type in ["INT", "FLOAT", "ENUM"]:
                                                 item.type = prop.type
+                                            elif prop.type == "ENUM":
+                                                item.type = prop.type
+                                                item.is_set = bool(len(prop.default_flag))
                                             else:
                                                 if prop.is_array:
                                                     item.type = "VECTOR"
@@ -112,7 +116,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                                     # item.is_color = prop.subtype == "COLOR"
                                                 else:
                                                     item.type = prop.type
-                            
+
                             # add functions to search props
                             if data_type in self.function_props:
                                 for prop in self.function_props[data_type]:
@@ -192,7 +196,11 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 if self.search_properties[inp.name].type != "ENUM":
                                     set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = ", node_data["input_data"][x]["code"]])
                                 else:
-                                    set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = get_enum_identifier(", node_data["input_data"][1]["code"], ".bl_rna.properties['" + self.search_properties[inp.name].identifier + "'].enum_items, ", node_data["input_data"][x]["code"], ")"])
+                                    if self.search_properties[inp.name].is_set:
+                                        set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = {get_enum_identifier(", node_data["input_data"][1]["code"], ".bl_rna.properties['" + self.search_properties[inp.name].identifier + "'].enum_items, ", node_data["input_data"][x]["code"], ")}"])
+                                    else:
+                                        set_blocks.append([node_data["input_data"][1]["code"], "." + self.search_properties[inp.name].identifier, " = get_enum_identifier(", node_data["input_data"][1]["code"], ".bl_rna.properties['" + self.search_properties[inp.name].identifier + "'].enum_items, ", node_data["input_data"][x]["code"], ")"])
+
                         else:
                             set_blocks.append([node_data["input_data"][1]["code"], "." + inp.name, " = ", node_data["input_data"][x]["code"]])
 
