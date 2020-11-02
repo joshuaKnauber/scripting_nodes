@@ -28,19 +28,20 @@ class SN_OT_PasteOperator(bpy.types.Operator):
 
         copied = bpy.context.window_manager.clipboard
         for cat in dir(bpy.ops):
-            for op in dir(eval("bpy.ops."+cat)):
-                op = eval("bpy.ops." + cat + "." + op)
+            if cat != "scripting_nodes" and not cat[0].isnumeric():
+                for op in dir(eval("bpy.ops."+cat)):
+                    op = eval("bpy.ops." + cat + "." + op)
 
-                if op.idname() == copied:
+                    if op.idname() == copied:
 
-                    for item in context.scene.sn_properties.operator_properties:
-                        if item.identifier == op.idname_py():
+                        for item in context.scene.sn_properties.operator_properties:
+                            if item.identifier == op.idname_py():
 
-                            node.search_prop = "internal"
-                            node.propName = item.name
-                            print(item.name)
-                            self.report({"INFO"},message="Selected copied operator!")
-                            return {"FINISHED"}
+                                node.search_prop = "internal"
+                                node.propName = item.name
+                                print(item.name)
+                                self.report({"INFO"},message="Selected copied operator!")
+                                return {"FINISHED"}
 
         self.report({"WARNING"},message="Couldn't find copied operator!")
         return {"FINISHED"}
