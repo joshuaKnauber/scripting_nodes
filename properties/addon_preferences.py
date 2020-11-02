@@ -173,7 +173,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
 
             col.separator()
             col.separator()
-            col.label(text="Changelog 1.0.2")
+            col.label(text="Changelog 1.0.3")
             box = col.box()
             _col = box.column(align=True)
             # _col.label(text="    • ")
