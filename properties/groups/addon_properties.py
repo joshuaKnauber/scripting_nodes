@@ -143,12 +143,15 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                     node.search_prop = "internal"
 
                     for cat in dir(bpy.ops):
-                        if cat != "scripting_nodes" and not cat[0].isnumeric():
-                            for op in dir(eval("bpy.ops."+cat)):
-                                if cat + "." + op == action:
-                                    for item in context.scene.sn_properties.operator_properties:
-                                        if item.identifier == action:
-                                            node.propName = item.name
+                        try:
+                            if cat != "scripting_nodes" and not cat[0].isnumeric():
+                                for op in dir(eval("bpy.ops."+cat)):
+                                    if not op[0].isnumeric():
+                                        if cat + "." + op == action:
+                                            for item in context.scene.sn_properties.operator_properties:
+                                                if item.identifier == action:
+                                                    node.propName = item.name
+                        except:pass
 
                     if node.propName: # set operator properties
                         pass
