@@ -28,20 +28,26 @@ class SN_OT_PasteOperator(bpy.types.Operator):
 
         copied = bpy.context.window_manager.clipboard
         for cat in dir(bpy.ops):
-            if cat != "scripting_nodes" and not cat[0].isnumeric():
-                for op in dir(eval("bpy.ops."+cat)):
-                    op = eval("bpy.ops." + cat + "." + op)
+            try:
+                if cat != "scripting_nodes" and not cat[0].isnumeric() and cat:
+                    for op in dir(eval("bpy.ops."+cat)):
+                        try:
+                            if not op[0].isnumeric():
+                                op = eval("bpy.ops." + cat + "." + op)
 
-                    if op.idname() == copied:
+                                if op.idname() == copied:
 
-                        for item in context.scene.sn_properties.operator_properties:
-                            if item.identifier == op.idname_py():
+                                    for item in context.scene.sn_properties.operator_properties:
+                                        if item.identifier == op.idname_py():
 
-                                node.search_prop = "internal"
-                                node.propName = item.name
-                                print(item.name)
-                                self.report({"INFO"},message="Selected copied operator!")
-                                return {"FINISHED"}
+                                            node.search_prop = "internal"
+                                            node.propName = item.name
+                                            self.report({"INFO"},message="Selected copied operator!")
+                                            return {"FINISHED"}
+                        except:
+                            print("Serpens - Couldn't load category "+category+" with operator "+op)
+            except:
+                print("Serpens - Couldn't load category "+cat)
 
         self.report({"WARNING"},message="Couldn't find copied operator!")
         return {"FINISHED"}
