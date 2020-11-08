@@ -146,9 +146,9 @@ class SN_CreateOperator(bpy.types.Node, SN_ScriptingBaseNode):
                         ["class SNA_OT_Operator_" + self.operator_uid + "(bpy.types.Operator):"]
                     ],
                     "indented": [
-                        ["bl_idname = 'scripting_nodes.sna_ot_operator_" + self.operator_uid.lower() + "'"],
-                        ["bl_label = '" + self.op_name +"'"],
-                        ["bl_description = '" + self.description + "'"],
+                        ["bl_idname = \"scripting_nodes.sna_ot_operator_" + self.operator_uid.lower() + "\""],
+                        ["bl_label = \"" + self.op_name +"\""],
+                        ["bl_description = \"" + self.description + "\""],
                         ["bl_options = {\"REGISTER\",\"UNDO\"}"],
                         [""],
                         {

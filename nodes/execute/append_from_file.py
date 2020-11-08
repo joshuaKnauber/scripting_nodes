@@ -68,12 +68,12 @@ class SN_AppendFromFileNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         if self.fixed_path:
             if self.file_path != "":
-                filepath=["r'" + self.file_path + "\\" + self.append_type + "'"]
+                filepath=["r\"" + self.file_path + "\\" + self.append_type + "\""]
             else:
                 errors.append({"title": "Invalid file path", "message": "Your file path is invalid", "node": self, "fatal": True})
                 return {"blocks": [{"lines": [],"indented": []},{"lines": [[next_code]],"indented": []}],"errors": errors}
         else:
-            filepath=[node_data["input_data"][3]["code"], " + r'\\" + self.append_type + "'"]
+            filepath=[node_data["input_data"][3]["code"], " + r\"\\" + self.append_type + "\""]
 
         return {
             "blocks": [
