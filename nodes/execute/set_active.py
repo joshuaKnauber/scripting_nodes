@@ -13,21 +13,30 @@ class SN_SetActiveNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = False
 
     docs = {
-        "text": ["The Set Active Node is used to <important>set an active object or active action</>.",
+        "text": ["The Set Active Node is used to <important>set an active object, action or node</>.",
                 "",
                 "Object Input: <subtext>The object you want to set as active object</>",
-                "Action Input: <subtext>The action you want to set as active action</>"],
+                "Action Input: <subtext>The action you want to set as active action</>",
+                "Nodes Input: <subtext>The nodes where you want to set your active node</>",
+                "Node Input: <subtext>The node you want to set as active node</>"],
         "python": ["bpy.context.view_layer.objects.active = bpy.data.objects[0]"]
 
     }
 
     def update_type(self, context):
-        if self.active_type == "object":
-            self.inputs.remove(self.inputs[-1])
-        else:
-            self.sockets.create_input(self, "OBJECT", "Action")
+        if len(self.inputs) == 3:
+            self.inputs.remove(self.inputs[2])
 
-    active_type: bpy.props.EnumProperty(name="Type", items=[("object", "Object", ""), ("action", "Action", "")], update=update_type)
+        if self.active_type == "object":
+            self.sockets.change_socket_type(self, self.inputs[1], "OBJECT", "Object")
+        elif self.active_type == "action":
+            self.sockets.change_socket_type(self, self.inputs[1], "OBJECT", "Object")
+            self.sockets.create_input(self, "OBJECT", "Action")
+        else:
+            self.sockets.change_socket_type(self, self.inputs[1], "OBJECT", "Node")
+            self.sockets.create_input(self, "COLLECTION", "Nodes")
+
+    active_type: bpy.props.EnumProperty(name="Type", items=[("object", "Object", ""), ("action", "Action", ""), ("node", "Node", "")], update=update_type)
 
     def reset_data_type(self, context):
         self.update_node()
@@ -40,18 +49,32 @@ class SN_SetActiveNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_node(self):
         if len(self.inputs) == 2:
             if len(self.inputs[1].links):
-                if self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket) != "bpy.types.Object":
-                    link = self.inputs[1].links[0]
-                    bpy.context.space_data.node_tree.links.remove(link)
+                if self.active_type == "object":
+                    if self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket) != "bpy.types.Object":
+                        link = self.inputs[1].links[0]
+                        bpy.context.space_data.node_tree.links.remove(link)
+
         elif len(self.inputs) == 3:
             if len(self.inputs[1].links):
-                if self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket) != "bpy.types.Object":
-                    link = self.inputs[1].links[0]
-                    bpy.context.space_data.node_tree.links.remove(link)
+                if self.active_type == "action":
+                    if self.inputs[1].links[0].from_node.data_type(self.inputs[1].links[0].from_socket) != "bpy.types.Object":
+                        link = self.inputs[1].links[0]
+                        bpy.context.space_data.node_tree.links.remove(link)
+                elif self.active_type == "node":
+                    if "Node" in self.inputs[2].links[0].from_node.data_type(self.inputs[2].links[0].from_socket):
+                        link = self.inputs[1].links[0]
+                        bpy.context.space_data.node_tree.links.remove(link)
+
             if len(self.inputs[2].links):
-                if self.inputs[2].links[0].from_node.data_type(self.inputs[2].links[0].from_socket) != "bpy.types.Action":
-                    link = self.inputs[2].links[0]
-                    bpy.context.space_data.node_tree.links.remove(link)
+                if self.active_type == "action":
+                    if self.inputs[2].links[0].from_node.data_type(self.inputs[2].links[0].from_socket) != "bpy.types.Action":
+                        link = self.inputs[2].links[0]
+                        bpy.context.space_data.node_tree.links.remove(link)
+                if self.active_type == "node":
+                    if "Node" in self.inputs[2].links[0].from_node.data_type(self.inputs[2].links[0].from_socket):
+                        link = self.inputs[2].links[0]
+                        bpy.context.space_data.node_tree.links.remove(link)
+
 
     def draw_buttons(self, context, layout):
         layout.prop(self, "active_type", expand=True)
@@ -67,6 +90,19 @@ class SN_SetActiveNode(bpy.types.Node, SN_ScriptingBaseNode):
                 active_object = node_data["input_data"][1]["code"]
 
             return {"blocks": [{"lines": [["bpy.context.view_layer.objects.active = ", active_object]],"indented": []},{"lines": [[next_code]],"indented": []}],"errors": errors}
+
+        elif self.active_type == "node":
+            active_node = "None"
+            if node_data["input_data"][1]["code"]:
+                active_node = node_data["input_data"][1]["code"]
+
+            if node_data["input_data"][2]["code"]:
+                nodes = node_data["input_data"][2]["code"]
+            else:
+                errors.append({"title": "No nodes provided", "message": "You need to put in the collecion of nodes where your node is", "node": self, "fatal": True})
+                return {"blocks": [{"lines": [[next_code]],"indented": []}],"errors": errors}
+
+            return {"blocks": [{"lines": [[nodes, ".active = ", active_node]],"indented": []},{"lines": [[next_code]],"indented": []}],"errors": errors}
 
         else:
             if node_data["input_data"][1]["code"]:
