@@ -177,8 +177,11 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             box = col.box()
             _col = box.column(align=True)
             # _col.label(text="    • ")
+            _col.label(text="    • Fixed general bugs")
             _col.label(text="    • Added insert keyframe node")
             _col.label(text="    • Fixed issues with numbers at the start of operators")
+            _col.label(text="    • Added lights and nodes to define type")
+            _col.label(text="    • Added node to set active")
 
         elif self.main_nav == "PACKAGES":
 
