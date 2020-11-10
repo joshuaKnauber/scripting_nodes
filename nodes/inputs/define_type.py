@@ -87,6 +87,19 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
             return shader
         else:
             return texture
+    
+    def get_nodesockets(self, context):
+        sockets = []
+        socket_names = []
+
+        for class_type in dir(bpy.types):
+            if "NodeSocket" in class_type and not class_type in ["NodeSocket"]:
+                if not eval("bpy.types." + class_type).bl_rna.name.replace(" Node Socket", "") in socket_names:
+                    if not eval("bpy.types." + class_type).bl_rna.name.replace(" Node Socket", "") in ['Node Socket Template', 'Boolean Interface', 'Color Interface', 'Float Interface', 'Integer Interface', 'Shader Interface', 'NodeSocketInterfaceStandard', 'String Interface', 'Vector Interface', "NodeSocketStandard", "Virtual"]:
+                        sockets.append(("bpy.types." + eval("bpy.types." + class_type).bl_rna.identifier, eval("bpy.types." + class_type).bl_rna.name.replace(" Node Socket", ""), ""))
+                        socket_names.append(eval("bpy.types." + class_type).bl_rna.name.replace(" Node Socket", ""))
+
+        return sockets
 
 
     def update_output(self, context):
@@ -99,7 +112,7 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
     light: bpy.props.EnumProperty(items=[("bpy.types.PointLight", "Point", ""), ("bpy.types.SunLight", "Sun", ""), ("bpy.types.SpotLight", "Spot", ""), ("bpy.types.AreaLight", "Area", "")], name="Light", description="The light type you want to output", update=update_output)
     node_type: bpy.props.EnumProperty(items=[("compositor", "Compositor", ""), ("shader", "Shader", ""), ("texture", "Texture", "")], name="Node Type", description="The node type", update=update_output)
     node: bpy.props.EnumProperty(items=get_nodes, name="Node", description="The node type you want to output", update=update_output)
-
+    node_socket: bpy.props.EnumProperty(items=get_nodesockets, name="NodeSocket", description="The nodesocket type you want to output", update=update_output)
 
     def inititialize(self,context):
         self.sockets.create_input(self,"OBJECT", "Type")
@@ -111,7 +124,7 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_node(self):
         if len(self.inputs) == 1:
             if len(self.inputs[0].links) == 1:
-                if not self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node"]:
+                if not self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node", "bpy.types.NodeSocket"]:
                     link = self.inputs[0].links[0]
                     bpy.context.space_data.node_tree.links.remove(link)
 
@@ -126,10 +139,12 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
                 elif self.get_data_type() == "bpy.types.Node":
                     layout.prop(self, "node_type")
                     layout.prop(self, "node")
+                elif self.get_data_type() == "bpy.types.NodeSocket":
+                    layout.prop(self, "node_socket")
 
     def evaluate(self, socket, node_data, errors):
         if len(self.inputs[0].links) == 1:
-            if self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node"]:
+            if self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node", "bpy.types.NodeSocket"]:
                 return {"blocks": [{"lines": [[node_data["input_data"][0]["code"]]],"indented": []}],"errors": errors}
         errors.append({"title": "No modifier provided", "message": "You need to put in the modifier whos properties you want to get", "node": self, "fatal": True})
         return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
@@ -143,6 +158,8 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
                     return self.light
                 elif self.get_data_type() == "bpy.types.Node":
                     return self.node
+                elif self.get_data_type() == "bpy.types.NodeSocket":
+                    return self.node_socket
                 
         return ""
 

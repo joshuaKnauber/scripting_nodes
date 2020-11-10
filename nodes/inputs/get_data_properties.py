@@ -160,7 +160,7 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     box = layout.box()
                     box.label(text=eval(data_type).bl_rna.name)
                 layout.prop(self, "use_index")
-                if data_type in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node"]:
+                if data_type in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node", "bpy.types.NodeSocket"]:
                     box = layout.box()
                     box.alert = True
                     box.label(text="Continue with the 'Define Type' node")
