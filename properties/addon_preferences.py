@@ -183,6 +183,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col.label(text="    • Added lights, nodes and sockets to define type")
             _col.label(text="    • Added node to set active")
             _col.label(text="    • Changed run script line to string socket")
+            _col.label(text="    • Added python path output to get variable")
 
         elif self.main_nav == "PACKAGES":
 

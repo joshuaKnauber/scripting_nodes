@@ -28,8 +28,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         if len(self.inputs) == 2:
             self.inputs.remove(self.inputs[1])
         if self.operation == "LINE":
-            socket = self.sockets.create_input(self, "STRING", "Line")
-            socket.is_string = False
+            self.sockets.create_input(self, "STRING", "Line")
 
     search_value: bpy.props.StringProperty(name="Search value", description="")
     operation: bpy.props.EnumProperty(items=[("SCRIPT", "Script", "Run a script"), ("LINE", "Single Line", "Run a single line")], name="Operation", update=update_outputs)
@@ -52,7 +51,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
                 for line in script_text:
                     script.append([line])
         else:
-            script = [[node_data["input_data"][1]["code"]]]
+            script = [["eval(", node_data["input_data"][1]["code"], ")"]]
 
         return {
             "blocks": [
