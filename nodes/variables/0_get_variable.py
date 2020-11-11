@@ -24,22 +24,23 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def inititialize(self, context):
         self.sockets.create_output(self, "DATA", "")
+        self.sockets.create_output(self, "STRING", "Path to variable")
 
     def update_outputs(self, context):
         if self.search_value == "":
             self.var_uid = ""
-            if len(self.outputs) == 3:
-                self.outputs.remove(self.outputs[1])
-                self.outputs.remove(self.outputs[1])
+            if len(self.outputs) == 4:
+                self.outputs.remove(self.outputs[2])
+                self.outputs.remove(self.outputs[2])
             if len(self.inputs) == 1:
                 self.inputs.remove(self.inputs[0])
             if self.outputs[0].bl_idname != "SN_DataSocket":
                 self.sockets.change_socket_type(self, self.outputs[0], "DATA", label=" ")
         elif not self.search_value in bpy.context.space_data.node_tree.search_variables:
             self.var_uid = ""
-            if len(self.outputs) == 3:
-                self.outputs.remove(self.outputs[1])
-                self.outputs.remove(self.outputs[1])
+            if len(self.outputs) == 4:
+                self.outputs.remove(self.outputs[2])
+                self.outputs.remove(self.outputs[2])
             if len(self.inputs) == 1:
                 self.inputs.remove(self.inputs[0])
 
@@ -49,16 +50,16 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             self.var_uid = bpy.context.space_data.node_tree.search_variables[self.search_value].identifier
             if bpy.context.space_data.node_tree.search_variables[self.search_value].is_array:
-                if len(self.outputs) != 3:
+                if len(self.outputs) != 4:
                     self.sockets.create_output(self, "INTEGER", "Length")
                     self.sockets.create_output(self, "BOOLEAN", "Is empty")
-                if len(self.inputs) != 1:
+                if len(self.inputs) != 2:
                     self.sockets.create_input(self, "INTEGER", "Index").set_value(0)
             else:
-                if len(self.outputs) == 3:
-                    self.outputs.remove(self.outputs[1])
-                    self.outputs.remove(self.outputs[1])
-                if len(self.inputs) == 1:
+                if len(self.outputs) == 4:
+                    self.outputs.remove(self.outputs[2])
+                    self.outputs.remove(self.outputs[2])
+                if len(self.inputs) == 2:
                     self.inputs.remove(self.inputs[0])
             self.sockets.change_socket_type(self, self.outputs[0], bpy.context.space_data.node_tree.search_variables[self.search_value].socket_type, label=bpy.context.space_data.node_tree.search_variables[self.search_value].name)
             if self.outputs[0].bl_idname == "SN_VectorSocket":
@@ -73,9 +74,9 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         col.prop_search(self,"search_value", bpy.context.space_data.node_tree, "search_variables", text="")
 
         if not self.search_value in bpy.context.space_data.node_tree.search_variables:
-            if len(self.outputs) == 3:
-                self.outputs.remove(self.outputs[1])
-                self.outputs.remove(self.outputs[1])
+            if len(self.outputs) == 4:
+                self.outputs.remove(self.outputs[2])
+                self.outputs.remove(self.outputs[2])
             if len(self.inputs) == 1:
                 self.inputs.remove(self.inputs[0])
             if self.outputs[0].bl_idname != "SN_DataSocket":
@@ -90,13 +91,20 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.search_value in node_data["node_tree"].search_variables:
             if node_data["node_tree"].search_variables[self.search_value].is_array:
                 if socket == self.outputs[0]:
-                    var_type = node_data["node_tree"].search_variables[self.search_value].type
-                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array[", node_data["input_data"][0]["code"], "]." + var_type]],"indented": []}]
-                elif socket == self.outputs[1]:
-                    blocks = [{"lines": [["len(bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array)"]],"indented": []}]
+                    if socket.name == "Path to variable":
+                        var_type = node_data["node_tree"].search_variables[self.search_value].type
+                        blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array[", node_data["input_data"][0]["code"], "]." + var_type]],"indented": []}]
+                    else:
+                        var_type = node_data["node_tree"].search_variables[self.search_value].type
+                        blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array[", node_data["input_data"][0]["code"], "]." + var_type]],"indented": []}]
                 elif socket == self.outputs[2]:
+                    blocks = [{"lines": [["len(bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array)"]],"indented": []}]
+                elif socket == self.outputs[3]:
                     blocks = [{"lines": [["len(bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name + "_array) == 0"]],"indented": []}]
             else:
-                blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name]],"indented": []}]
+                if socket.name == "Path to variable":
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name]],"indented": []}]
+                else:
+                    blocks = [{"lines": [["bpy.context.scene.sn_generated_addon_properties_UID_." + node_data["node_tree"].search_variables[self.search_value].name]],"indented": []}]
         return {"blocks": blocks, "errors": errors}
 
