@@ -24,16 +24,20 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_input(self, "EXECUTE", "Execute")
         self.sockets.create_output(self, "EXECUTE", "Execute")
 
+    def update_outputs(self, context):
+        if len(self.inputs) == 2:
+            self.inputs.remove(self.inputs[1])
+        if self.operation == "LINE":
+            socket = self.sockets.create_input(self, "STRING", "Line")
+            socket.is_string = False
+
     search_value: bpy.props.StringProperty(name="Search value", description="")
-    script_line: bpy.props.StringProperty(name="Script Line", description="The script line you want to execute")
-    operation: bpy.props.EnumProperty(items=[("SCRIPT", "Script", "Run a script"), ("LINE", "Single Line", "Run a single line")], name="Operation", description="")
+    operation: bpy.props.EnumProperty(items=[("SCRIPT", "Script", "Run a script"), ("LINE", "Single Line", "Run a single line")], name="Operation", update=update_outputs)
 
     def draw_buttons(self,context,layout):
         layout.prop(self, "operation", expand=True)
         if self.operation == "SCRIPT":
             layout.prop_search(self, "search_value", bpy.data, "texts", icon="TEXT", text="")
-        else:
-            layout.prop(self, "script_line", text="")
 
     def evaluate(self, socket, node_data, errors):
         next_code = ""
@@ -48,7 +52,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
                 for line in script_text:
                     script.append([line])
         else:
-            script = [[self.script_line]]
+            script = [[node_data["input_data"][1]["code"]]]
 
         return {
             "blocks": [

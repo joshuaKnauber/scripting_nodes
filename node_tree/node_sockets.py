@@ -71,9 +71,13 @@ class SN_StringSocket(bpy.types.NodeSocket, SN_Socket):
     )
 
     is_python_name: bpy.props.BoolProperty(default=False,update=update_socket_value)
+    is_string: bpy.props.BoolProperty(default=True)
 
     def get_value(self):
-        return "r\"" + self.socket_value + "\""
+        if self.is_string:
+            return "r\"" + self.socket_value + "\""
+        else:
+            return self.socket_value
 
     def set_value(self,value):
         self.socket_value = value
