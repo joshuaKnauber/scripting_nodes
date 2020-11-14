@@ -174,14 +174,8 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                                     for inp in node.inputs:
                                         if property_id.replace("_", " ").title() == inp.name:
                                             # set value
-                                            if eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") == "STRING":
+                                            if eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") == ["STRING", "BOOLEAN", "INT", "FLOAT"]:
                                                 inp.set_value(eval(values[x]))
-                                            elif eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") == "BOOLEAN":
-                                                inp.set_value(bool(values[x]))
-                                            elif eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") == "INT":
-                                                inp.set_value(int(values[x]))
-                                            elif eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") == "FLOAT":
-                                                inp.set_value(float(values[x]))
 
                                 else:
                                     for enum in node.enum_collection:
