@@ -136,3 +136,4 @@ class SocketHandler():
             node.inputs.move(len(node.inputs)-1, index)
             if link:
                 bpy.context.space_data.node_tree.links.new(inp, link)
+

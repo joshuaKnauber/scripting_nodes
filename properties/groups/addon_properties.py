@@ -138,6 +138,20 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
                 node = None
                 if "(" in action and ")" in action: # process operator
+                    properties = []
+                    values = []
+
+                    items = []
+                    for prop_string in action.split("(")[-1][:-1].split("="):
+                        for item in prop_string.split(","):
+                            items.append(item.strip())
+
+                    for x, prop in enumerate(items):
+                        if x%2 == 0:
+                            properties.append(prop)
+                        else:
+                            values.append(prop)
+
                     action = action.split(".")[2] + "." + action.split(".")[3].split("(")[0]
                     node = context.space_data.node_tree.nodes.new("SN_RunOperator")
                     node.search_prop = "internal"
@@ -154,10 +168,11 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                         except:pass
 
                     if node.propName: # set operator properties
-                        pass
-
-                elif "=" in action: # process property
-                    pass
+                        for x, property_id in enumerate(properties):
+                            for inp in node.inputs:
+                                if property_id.replace("_", " ").title() == inp.name:
+                                    # set value
+                                    print(property_id, values[x])
                 
                 if node: # process node
                     action_nodes.append(node)

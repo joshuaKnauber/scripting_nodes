@@ -21,12 +21,12 @@ def node_header(self, context):
             if len(context.space_data.node_tree.nodes) == 0:
                 self.layout.operator("scripting_nodes.add_base_nodes",text="Basic Node Setup",icon="ADD")
 
-            # txt = "Start Recording"
-            # icn = "HANDLETYPE_AUTO_CLAMP_VEC"
-            # if context.scene.sn_properties.recording_action:
-            #     txt = "Stop Recording"
-            #     icn = "KEYTYPE_EXTREME_VEC"
-            # self.layout.prop(context.scene.sn_properties,"recording_action",text=txt,icon=icn,toggle=True)
+            txt = "Start Recording"
+            icn = "HANDLETYPE_AUTO_CLAMP_VEC"
+            if context.scene.sn_properties.recording_action:
+                txt = "Stop Recording"
+                icn = "KEYTYPE_EXTREME_VEC"
+            self.layout.prop(context.scene.sn_properties,"recording_action",text=txt,icon=icn,toggle=True)
 
         row = self.layout.row(align=True)
 
