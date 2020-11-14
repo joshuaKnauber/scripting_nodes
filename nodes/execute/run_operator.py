@@ -150,8 +150,9 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     def get_context_items(self,context):
         items = []
-        areas = ["DEFAULT", "VIEW_3D", "IMAGE_EDITOR", "NODE_EDITOR", "SEQUENCE_EDITOR", "CLIP_EDITOR", "DOPESHEET_EDITOR",
-                "DOPESHEET_ACTION_EDITOR", "DOPESHEET_SHAPEKEY_EDITOR", "DOPESHEET_GREASE_PENCIL", "DOPESHEET_MASK_EDITOR", "DOPESHEET_CACHE_FILE",
+        areas = ["DEFAULT", "VIEW_3D", "IMAGE_EDITOR", "SEQUENCE_EDITOR", "CLIP_EDITOR",
+                "NODE_EDITOR", "COMPOSITOR_NODE_EDITOR", "TEXTURE_NODE_EDITOR", "SCRIPTING_NODE_EDITOR", "SHADER_NODE_EDITOR",
+                "DOPESHEET_EDITOR", "DOPESHEET_ACTION_EDITOR", "DOPESHEET_SHAPEKEY_EDITOR", "DOPESHEET_GREASE_PENCIL", "DOPESHEET_MASK_EDITOR", "DOPESHEET_CACHE_FILE",
                 "GRAPH_EDITOR", "NLA_EDITOR", "TEXT_EDITOR", "CONSOLE", "INFO", "TOPBAR", "STATUSBAR", "OUTLINER",
                 "PROPERTIES", "FILE_BROWSER", "PREFERENCES"]
         for area in areas:
@@ -225,26 +226,37 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                         props+=[", " + prop.prop_identifier + "='", prop.enum + "'"]
 
                 context_modes = {
-                    "DOPESHEET_ACTION_EDITOR": "ACTION",
-                    "DOPESHEET_SHAPEKEY_EDITOR": "SHAPEKEY",
-                    "DOPESHEET_GREASE_PENCIL": "GPENCIL",
-                    "DOPESHEET_MASK_EDITOR": "MASK",
-                    "DOPESHEET_CACHE_FILE": "CACHEFILE"
+                    "DOPESHEET_ACTION_EDITOR": {"context":"DOPESHEET_EDITOR", "type": "ACTION", "tree_type": None},
+                    "DOPESHEET_SHAPEKEY_EDITOR": {"context":"DOPESHEET_EDITOR", "type": "SHAPEKEY", "tree_type": None},
+                    "DOPESHEET_GREASE_PENCIL": {"context":"DOPESHEET_EDITOR", "type": "GPENCIL", "tree_type": None},
+                    "DOPESHEET_MASK_EDITOR": {"context":"DOPESHEET_EDITOR", "type": "MASK", "tree_type": None},
+                    "DOPESHEET_CACHE_FILE": {"context":"DOPESHEET_EDITOR", "type": "CACHEFILE", "tree_type": None},
+                    "COMPOSITOR_NODE_EDITOR": {"context":"NODE_EDITOR", "type": None, "tree_type": "CompositorNodeTree"},
+                    "TEXTURE_NODE_EDITOR": {"context":"NODE_EDITOR", "type": None, "tree_type": "TextureNodeTree"},
+                    "SCRIPTING_NODE_EDITOR": {"context":"NODE_EDITOR", "type": None, "tree_type": "ScriptingNodesTree"},
+                    "SHADER_NODE_EDITOR": {"context":"NODE_EDITOR", "type": None, "tree_type": "ShaderNodeTree"},
                 }
 
                 if self.context_override != "DEFAULT":
                     context_mode = None
+                    context_tree_type = None
                     context_override = self.context_override
+                    
                     if self.context_override in context_modes:
-                        context_mode = context_modes[self.context_override]
-                        context_override = "DOPESHEET_EDITOR"
+                        context_mode = context_modes[self.context_override]["type"]
+                        context_tree_type = context_modes[self.context_override]["tree_type"]
+                        context_override = context_modes[self.context_override]["context"]
 
                     context_set = [
                         ["op_reset_context = context.area.type"],
                         ["context.area.type = \"",context_override,"\""]
                     ]
+
                     if context_mode:
                         context_set.append(["context.space_data.mode = \"",context_mode,"\""])
+                    if context_tree_type:
+                        context_set.append(["context.space_data.tree_type = \"",context_tree_type,"\""])
+
                     context_reset = ["context.area.type = op_reset_context"]
 
                 execute = ["bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + "("+invoke+""] + props + [")"]
