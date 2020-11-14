@@ -169,11 +169,25 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
                     if node.propName: # set operator properties
                         for x, property_id in enumerate(properties):
-                            for inp in node.inputs:
-                                if property_id.replace("_", " ").title() == inp.name:
-                                    # set value
-                                    print(property_id, values[x])
-                
+                            if property_id:
+                                if eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") != "ENUM":
+                                    for inp in node.inputs:
+                                        if property_id.replace("_", " ").title() == inp.name:
+                                            # set value
+                                            if eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") == "STRING":
+                                                inp.set_value(eval(values[x]))
+                                            elif eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") == "BOOLEAN":
+                                                inp.set_value(bool(values[x]))
+                                            elif eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") == "INT":
+                                                inp.set_value(int(values[x]))
+                                            elif eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") == "FLOAT":
+                                                inp.set_value(float(values[x]))
+
+                                else:
+                                    for enum in node.enum_collection:
+                                        if enum.prop_identifier == property_id:
+                                            enum.enum = eval(values[x])
+
                 if node: # process node
                     action_nodes.append(node)
 
