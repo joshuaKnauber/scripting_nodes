@@ -134,6 +134,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
             actions = bpy.context.window_manager.clipboard.split("bpy.context.scene.sn_properties.recording_action = True")[-1].splitlines()
             action_nodes = []
+            node_socket = None
             for action in actions:
 
                 node = None
@@ -157,6 +158,9 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
                     action = action.split(".")[2] + "." + action.split(".")[3].split("(")[0]
                     node = context.space_data.node_tree.nodes.new("SN_RunOperator")
+                    if node_socket:
+                        context.space_data.node_tree.links.new(node_socket, node.inputs[0])
+                    node_socket = node.outputs[0]
                     node.search_prop = "internal"
 
                     for cat in dir(bpy.ops):
