@@ -107,7 +107,7 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                         if getattr(bpy.context.scene.sn_properties, filter_attr[prop.type]):
                             if not prop.name == "RNA":
                                 item = self.search_properties.add()
-                                item.name = prop.name
+                                item.name = prop.identifier.replace("_", " ").title()
                                 item.identifier = prop.identifier
                                 item.description = prop.description
                                 if not prop.type in ["INT", "FLOAT"]:
