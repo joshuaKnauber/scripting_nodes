@@ -14,8 +14,9 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     docs = {
         "text": ["This node is used to <important>change the default properties coming from modifier into specific properties of the modifier type</>.",
+                "Object Input: The input of the Modifier whos properties you want to change",
                 "Modifier Input: The input of the Modifier whos properties you want to change",
-                "Modifier Input: The output of the Modifier",
+                "Modifier Output: The output of the Modifier",
                 ""],
         "python": []
 
@@ -101,6 +102,22 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         return sockets
 
+    def get_objects(self, context):
+        items = []
+        items.append(('bpy.types.Mesh', "Mesh", ""))
+        items.append(("bpy.types.Light", "Light", ""))
+        items.append(("bpy.types.Camera", "Camera", ""))
+        items.append(("bpy.types.GreasePencil", "GPencil", ""))
+        items.append(("bpy.types.Armature", "Armature", ""))
+        items.append(("BlendDataProbes", "Probe", ""))
+        items.append(("bpy.types.Speaker", "Speaker", ""))
+        items.append(("bpy.types.Curve", "Curve", ""))
+        items.append(("bpy.types.BlendDataFonts", "Font", ""))
+        items.append(("bpy.types.Volume", "Volume", ""))
+        items.append(("bpy.types.Lattice", "Lattice", ""))
+
+        return items
+
 
     def update_output(self, context):
         if len(self.outputs) == 1:
@@ -113,6 +130,8 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_type: bpy.props.EnumProperty(items=[("compositor", "Compositor", ""), ("shader", "Shader", ""), ("texture", "Texture", "")], name="Node Type", description="The node type", update=update_output)
     node: bpy.props.EnumProperty(items=get_nodes, name="Node", description="The node type you want to output", update=update_output)
     node_socket: bpy.props.EnumProperty(items=get_nodesockets, name="NodeSocket", description="The nodesocket type you want to output", update=update_output)
+    object_type: bpy.props.EnumProperty(items=get_objects, name="Object Type", description="The objects type", update=update_output)
+
 
     def inititialize(self,context):
         self.sockets.create_input(self,"OBJECT", "Type")
@@ -124,7 +143,7 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_node(self):
         if len(self.inputs) == 1:
             if len(self.inputs[0].links) == 1:
-                if not self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node", "bpy.types.NodeSocket"]:
+                if not self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node", "bpy.types.NodeSocket", "bpy.types.Object"]:
                     link = self.inputs[0].links[0]
                     bpy.context.space_data.node_tree.links.remove(link)
 
@@ -141,12 +160,18 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
                     layout.prop(self, "node")
                 elif self.get_data_type() == "bpy.types.NodeSocket":
                     layout.prop(self, "node_socket")
+                elif self.get_data_type() == "bpy.types.Object":
+                    layout.prop(self, "object_type")
+            else:
+                box = layout.box()
+                box.label(text="Connect one of the following:")
+                box.label(text="Object, Modifier, Light, Node, NodeSocket")
 
     def evaluate(self, socket, node_data, errors):
         if len(self.inputs[0].links) == 1:
-            if self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node", "bpy.types.NodeSocket"]:
+            if self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node", "bpy.types.NodeSocket", "bpy.types.Object"]:
                 return {"blocks": [{"lines": [[node_data["input_data"][0]["code"]]],"indented": []}],"errors": errors}
-        errors.append({"title": "No modifier provided", "message": "You need to put in the modifier whos properties you want to get", "node": self, "fatal": True})
+        errors.append({"title": "No input provided", "message": "You need to put in the type you want to define", "node": self, "fatal": True})
         return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
 
     def data_type(self, output):
@@ -160,6 +185,8 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
                     return self.node
                 elif self.get_data_type() == "bpy.types.NodeSocket":
                     return self.node_socket
+                elif self.get_data_type() == "bpy.types.Object":
+                    return self.object_type
                 
         return ""
 

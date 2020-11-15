@@ -178,6 +178,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col = box.column(align=True)
             # _col.label(text="    • ")
             _col.label(text="    • Added functionality to record operators and convert them into nodes")
+            _col.label(text="    • Added object to define type")
 
         elif self.main_nav == "PACKAGES":
 
