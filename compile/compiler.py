@@ -351,7 +351,8 @@ class ScriptingNodesCompiler():
             if module[ "node_tree" ] == tree:
                 if self._run_register and module["module"]:
                     module["module"].unregister()
-                bpy.data.texts.remove(module["text"])
+                try: bpy.data.texts.remove(module["text"])
+                except: pass
                 self._modules.remove(module)
                 break
 
