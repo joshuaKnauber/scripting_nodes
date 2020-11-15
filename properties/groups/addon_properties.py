@@ -137,14 +137,17 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
             for action in actions:
 
                 node = None
-                if "(" in action and ")" in action: # process operator
+                if "bpy.ops" in action and "(" in action and ")" in action: # process operator
                     properties = []
                     values = []
 
                     items = []
-                    for prop_string in action.split("(")[-1][:-1].split("="):
-                        for item in prop_string.split(","):
-                            items.append(item.strip())
+                    for x, prop_string in enumerate("(".join(action.split("(")[1:])[:-1].split("=")):
+                        if x == 0 or x == len("(".join(action.split("(")[1:])[:-1].split("="))-1:
+                            items.append(prop_string.strip())
+                        else:
+                            items.append(",".join(prop_string.split(",")[:-1]).strip())
+                            items.append(prop_string.split(",")[-1].strip())
 
                     for x, prop in enumerate(items):
                         if x%2 == 0:
@@ -174,7 +177,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                                     for inp in node.inputs:
                                         if property_id.replace("_", " ").title() == inp.name:
                                             # set value
-                                            if eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") == ["STRING", "BOOLEAN", "INT", "FLOAT"]:
+                                            if eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") in ["STRING", "BOOLEAN", "INT", "FLOAT"]:
                                                 inp.set_value(eval(values[x]))
 
                                 else:

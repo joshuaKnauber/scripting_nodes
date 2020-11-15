@@ -276,8 +276,11 @@ class SN_VectorSocket(bpy.types.NodeSocket, SN_Socket):
         return max(0, min(digit, 1))
 
     def set_value(self,value):
-        self.socket_value = value
-        self.socket_value_quad = value
+        if self.use_four_numbers:
+            self.socket_value_quad = value
+        else:
+            self.socket_value = value
+
         if self.is_color:
             if self.use_four_numbers:
                 self.color_alpha_value = (self.clamp(value[0]),self.clamp(value[1]),self.clamp(value[2]),self.clamp(value[3]))
