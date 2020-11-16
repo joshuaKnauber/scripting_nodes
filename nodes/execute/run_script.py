@@ -51,7 +51,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
                 for line in script_text:
                     script.append([line])
         else:
-            script = [["eval(", node_data["input_data"][1]["code"], ")"]]
+            script = [["exec(", node_data["input_data"][1]["code"], ")"]]
 
         return {
             "blocks": [
