@@ -258,15 +258,20 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                     if not in_search_prop:
                         try:
                             if type(eval(value)) == str:
-                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=True, propType="STRING")
+                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=False, propType="STRING")
+                                node.inputs[2].set_value(eval(value))
                             elif type(eval(value)) == bool:
-                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=True, propType="BOOLEAN")
+                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=False, propType="BOOLEAN")
+                                node.inputs[2].set_value(eval(value))
                             elif type(eval(value)) == int:
-                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=True, propType="INTEGER")
+                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=False, propType="INTEGER")
+                                node.inputs[2].set_value(eval(value))
                             elif type(eval(value)) == float:
-                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=True, propType="FLOAT")
+                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=False, propType="FLOAT")
+                                node.inputs[2].set_value(eval(value))
                             elif type(eval(value)) == tuple:
-                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=True, propType="VECTOR")
+                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=False, propType="VECTOR")
+                                node.inputs[2].set_value(eval(value))
                         except:
                             pass
 
