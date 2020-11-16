@@ -24,6 +24,7 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def reset_data_type(self, context):
         self.update_node()
+        self.update_output(None)
 
     def get_modifiers(self, context):
         gpencil = []

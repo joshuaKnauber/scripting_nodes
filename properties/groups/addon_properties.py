@@ -158,6 +158,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
                     action = action.split(".")[2] + "." + action.split(".")[3].split("(")[0]
                     node = context.space_data.node_tree.nodes.new("SN_RunOperator")
+                    action_nodes.append(node)
                     if node_socket:
                         context.space_data.node_tree.links.new(node_socket, node.inputs[0])
                     node_socket = node.outputs[0]
@@ -189,8 +190,86 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                                         if enum.prop_identifier == property_id:
                                             enum.enum = eval(values[x])
 
-                if node: # process node
+                elif "bpy.data" in action:
+                    value = action.split(" = ")[1]
+                    action = action.split(" = ")[0].replace("bpy.data.", "")
+                    path = []
+
+                    is_string = False
+                    current_path = ""
+                    for char in action:
+                        if char == "\"":
+                            is_string = not is_string
+                        if not is_string:
+                            if char == ".":
+                                if current_path != "":
+                                    path.append(current_path)
+                                current_path = ""
+                            elif char == "[":
+                                if current_path != "":
+                                    path.append(current_path)
+                                current_path = "["
+                            elif char == "]":
+                                current_path+=char
+                                if current_path != "":
+                                    path.append(current_path)
+                                current_path = ""
+                            else:
+                                current_path+=char
+                        else:
+                            current_path+=char
+                    path.append(current_path)
+
+                    data_node = context.space_data.node_tree.nodes.new("SN_ObjectDataNode")
+                    action_nodes.append(data_node)
+                    data_node.data_type_enum = path[0]
+                    node_socket = data_node.outputs[0]
+
+                    for node_path in path[1:-1]:
+                        if "[" in node_path:
+                            node = context.space_data.node_tree.nodes.new("SN_GetDataPropertiesNode")
+                            action_nodes.append(node)
+                            context.space_data.node_tree.links.new(node.inputs[0], node_socket)
+                            node.use_index = False
+                            node.inputs[1].set_value(eval(node_path[1:-1]))
+                        else:
+                            node = context.space_data.node_tree.nodes.new("SN_GetDataPropertiesNode")
+                            action_nodes.append(node)
+                            context.space_data.node_tree.links.new(node.inputs[0], node_socket)
+                            for prop in node.search_properties:
+                                if node_path == prop.identifier:
+                                    node.search_value = prop.name
+                                    bpy.ops.scripting_nodes.add_scene_data_socket(node_name=node.name, socket_name=prop.name, is_output=True, use_four_numbers=node.search_properties[prop.name].use_four_numbers, is_color=node.search_properties[prop.name].is_color)
+                            
+                        node_socket = node.outputs[0]
+
+                    node = context.space_data.node_tree.nodes.new("SN_SetDataPropertiesNode")
                     action_nodes.append(node)
+                    context.space_data.node_tree.links.new(node.inputs[1], node_socket)
+
+                    in_search_prop = False
+                    for prop in node.search_properties:
+                        if path[-1] == prop.identifier:
+                            in_search_prop = True
+                            node.search_value = prop.name
+                            bpy.ops.scripting_nodes.add_scene_data_socket(node_name=node.name, socket_name=prop.name, is_output=False, use_four_numbers=node.search_properties[prop.name].use_four_numbers, is_color=node.search_properties[prop.name].is_color)
+                            node.inputs[2].set_value(eval(value))
+
+                    if not in_search_prop:
+                        try:
+                            if type(eval(value)) == str:
+                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=True, propType="STRING")
+                            elif type(eval(value)) == bool:
+                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=True, propType="BOOLEAN")
+                            elif type(eval(value)) == int:
+                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=True, propType="INTEGER")
+                            elif type(eval(value)) == float:
+                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=True, propType="FLOAT")
+                            elif type(eval(value)) == tuple:
+                                bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=True, propType="VECTOR")
+                        except:
+                            pass
+
 
             # place nodes
             for node in context.space_data.node_tree.nodes:
