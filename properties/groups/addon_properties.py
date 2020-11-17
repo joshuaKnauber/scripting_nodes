@@ -190,9 +190,15 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                                         if enum.prop_identifier == property_id:
                                             enum.enum = eval(values[x])
 
-                elif "bpy.data" in action:
-                    value = action.split(" = ")[1]
-                    action = action.split(" = ")[0].replace("bpy.data.", "")
+                elif "bpy.data" in action or "bpy.context" in action:
+                    is_dot_data = False
+                    if "bpy.data" in action:
+                        is_dot_data = True
+                        value = action.split(" = ")[1]
+                        action = action.split(" = ")[0].replace("bpy.data.", "")
+                    else:
+                        value = action.split(" = ")[1]
+                        action = action.split(" = ")[0].replace("bpy.context.", "")
                     path = []
 
                     is_string = False
@@ -220,10 +226,26 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                             current_path+=char
                     path.append(current_path)
 
-                    data_node = context.space_data.node_tree.nodes.new("SN_ObjectDataNode")
-                    action_nodes.append(data_node)
-                    data_node.data_type_enum = path[0]
-                    node_socket = data_node.outputs[0]
+                    if is_dot_data:
+                        data_node = context.space_data.node_tree.nodes.new("SN_ObjectDataNode")
+                        action_nodes.append(data_node)
+                        is_collection = False
+                        for dataType in bpy.data.rna_type.properties:
+                            if dataType.identifier == path[0]:
+                                is_collection = True
+                                data_node.data_type_enum = path[0]
+                        if not is_collection:
+                            break
+                        node_socket = data_node.outputs[0]
+                    else:
+                        context_type = {"active_bone": "Active bone","active_object": "Active object","object": "Active object","active_pose_bone": "Active pose bone","area": "Area","collection": "Collection","pose_object": "Pose Object","region": "Region","scene": "Scene","screen": "Screen","view_layer": "View layer","window_manager": "Window manager","workspace": "Workspace"}
+                        context_node = context.space_data.node_tree.nodes.new("SN_ObjectContextNode")
+                        action_nodes.append(context_node)
+
+                        if path[0] in context_type:
+                            node_socket = context_node.outputs[context_type[path[0]]]
+                        else:
+                            break
 
                     for node_path in path[1:-1]:
                         if "[" in node_path:
@@ -240,7 +262,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                                 if node_path == prop.identifier:
                                     node.search_value = prop.name
                                     bpy.ops.scripting_nodes.add_scene_data_socket(node_name=node.name, socket_name=prop.name, is_output=True, use_four_numbers=node.search_properties[prop.name].use_four_numbers, is_color=node.search_properties[prop.name].is_color)
-                            
+
                         node_socket = node.outputs[0]
 
                     node = context.space_data.node_tree.nodes.new("SN_SetDataPropertiesNode")

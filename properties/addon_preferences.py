@@ -177,13 +177,12 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             box = col.box()
             _col = box.column(align=True)
             # _col.label(text="    • ")
-            _col.label(text="    • Added functionality to record operators and convert them into nodes")
+            _col.label(text="    • Added functionality to record operators and property changes and convert them into nodes")
             _col.label(text="    • Added object to define type")
 
         elif self.main_nav == "PACKAGES":
-
             col = row.column()
-            
+
             _row = col.row()
             split = _row.split(factor=0.5)
             split.label(text="Package Marketplace")
