@@ -179,6 +179,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             # _col.label(text="    • ")
             _col.label(text="    • Added functionality to record operators and property changes and convert them into nodes")
             _col.label(text="    • Added object to define type")
+            _col.label(text="    • Added radians/degrees node")
 
         elif self.main_nav == "PACKAGES":
             col = row.column()

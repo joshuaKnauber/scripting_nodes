@@ -134,7 +134,8 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
             actions = bpy.context.window_manager.clipboard.split("bpy.context.scene.sn_properties.recording_action = True")[-1].splitlines()
             action_nodes = []
-            node_socket = None
+            execute_inputs = []
+            execute_outputs = []
             for action in actions:
 
                 node = None
@@ -159,9 +160,8 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                     action = action.split(".")[2] + "." + action.split(".")[3].split("(")[0]
                     node = context.space_data.node_tree.nodes.new("SN_RunOperator")
                     action_nodes.append(node)
-                    if node_socket:
-                        context.space_data.node_tree.links.new(node_socket, node.inputs[0])
-                    node_socket = node.outputs[0]
+                    execute_inputs.append(node.inputs[0])
+                    execute_outputs.append(node.outputs[0])
                     node.search_prop = "internal"
 
                     for cat in dir(bpy.ops):
@@ -173,7 +173,8 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                                             for item in context.scene.sn_properties.operator_properties:
                                                 if item.identifier == action:
                                                     node.propName = item.name
-                        except:pass
+                        except:
+                            print("Something went wrong! Please check the generated node setup.")
 
                     if node.propName: # set operator properties
                         for x, property_id in enumerate(properties):
@@ -191,6 +192,9 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                                             enum.enum = eval(values[x])
 
                 elif "bpy.data" in action or "bpy.context" in action:
+                    action = action.replace("[0]", "")
+                    action = action.replace("[1]", "")
+                    action = action.replace("[2]", "")
                     is_dot_data = False
                     if "bpy.data" in action:
                         is_dot_data = True
@@ -267,6 +271,8 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
 
                     node = context.space_data.node_tree.nodes.new("SN_SetDataPropertiesNode")
                     action_nodes.append(node)
+                    execute_inputs.append(node.inputs[0])
+                    execute_outputs.append(node.outputs[0])
                     context.space_data.node_tree.links.new(node.inputs[1], node_socket)
 
                     in_search_prop = False
@@ -275,7 +281,10 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                             in_search_prop = True
                             node.search_value = prop.name
                             bpy.ops.scripting_nodes.add_scene_data_socket(node_name=node.name, socket_name=prop.name, is_output=False, use_four_numbers=node.search_properties[prop.name].use_four_numbers, is_color=node.search_properties[prop.name].is_color)
-                            node.inputs[2].set_value(eval(value))
+                            try:
+                                node.inputs[2].set_value(eval(value))
+                            except:
+                                print("Something went wrong! Please check the generated node setup.")
 
                     if not in_search_prop:
                         try:
@@ -295,14 +304,21 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                                 bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=False, propType="VECTOR")
                                 node.inputs[2].set_value(eval(value))
                         except:
-                            pass
-
+                            print("Something went wrong! Please check the generated node setup.")
+            
+            execute_inputs.pop(0)
+            for socket in range(len(execute_inputs)):
+                context.space_data.node_tree.links.new(execute_outputs[socket], execute_inputs[socket])
 
             # place nodes
             for node in context.space_data.node_tree.nodes:
                 node.select = False
             node_loc = [0,0]
             for node in action_nodes:
+                if node.bl_idname in ["SN_GetDataPropertiesNode", "SN_ObjectDataNode", "SN_ObjectContextNode"]:
+                    node_loc = [node_loc[0], -75]
+                else:
+                    node_loc = [node_loc[0], 0]
                 node.location = tuple(node_loc)
                 node_loc[0] += node.width + 50
                 node.select = True
