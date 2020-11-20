@@ -37,6 +37,7 @@ class SN_ObjectContextNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.sockets.create_output(self,"OBJECT", "View layer")
         self.sockets.create_output(self,"OBJECT", "Window manager")
         self.sockets.create_output(self,"OBJECT", "Workspace")
+        self.sockets.create_output(self,"OBJECT", "Preferences")
 
 
     def evaluate(self, socket, node_data, errors):
@@ -55,6 +56,7 @@ class SN_ObjectContextNode(bpy.types.Node, SN_ScriptingBaseNode):
             "View layer": "view_layer",
             "Window manager": "window_manager",
             "Workspace": "workspace",
+            "Preferences": "preferences",
         }
         return {
             "blocks": [
@@ -84,6 +86,7 @@ class SN_ObjectContextNode(bpy.types.Node, SN_ScriptingBaseNode):
             "View layer": "ViewLayer",
             "Window manager": "WindowManager",
             "Workspace": "WorkSpace",
+            "Preferences": "Preferences",
         }
 
         context_type = context_type[output.name]
