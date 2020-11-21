@@ -239,6 +239,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                                 is_collection = True
                                 data_node.data_type_enum = path[0]
                         if not is_collection:
+                            print("Something went wrong! Please check the generated node setup.")
                             break
                         node_socket = data_node.outputs[0]
                     else:
@@ -249,6 +250,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                         if path[0] in context_type:
                             node_socket = context_node.outputs[context_type[path[0]]]
                         else:
+                            print("Something went wrong! Please check the generated node setup.")
                             break
 
                     for node_path in path[1:-1]:
@@ -303,12 +305,15 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                             elif type(eval(value)) == tuple:
                                 bpy.ops.scripting_nodes.add_custom_socket(node_name=node.name, propName=path[-1], is_output=False, propType="VECTOR")
                                 node.inputs[2].set_value(eval(value))
+                            else:
+                                print("Something went wrong! Please check the generated node setup.")
                         except:
                             print("Something went wrong! Please check the generated node setup.")
-            
-            execute_inputs.pop(0)
-            for socket in range(len(execute_inputs)):
-                context.space_data.node_tree.links.new(execute_outputs[socket], execute_inputs[socket])
+
+            if len(execute_inputs):
+                execute_inputs.pop(0)
+                for socket in range(len(execute_inputs)):
+                    context.space_data.node_tree.links.new(execute_outputs[socket], execute_inputs[socket])
 
             # place nodes
             for node in context.space_data.node_tree.nodes:
@@ -316,9 +321,9 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
             node_loc = [0,0]
             for node in action_nodes:
                 if node.bl_idname in ["SN_GetDataPropertiesNode", "SN_ObjectDataNode", "SN_ObjectContextNode"]:
-                    node_loc = [node_loc[0], -75]
+                    node_loc[1] = -75
                 else:
-                    node_loc = [node_loc[0], 0]
+                    node_loc[1] = 0
                 node.location = tuple(node_loc)
                 node_loc[0] += node.width + 50
                 node.select = True
