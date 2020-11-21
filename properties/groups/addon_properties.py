@@ -243,7 +243,7 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                             break
                         node_socket = data_node.outputs[0]
                     else:
-                        context_type = {"active_bone": "Active bone","active_object": "Active object","object": "Active object","active_pose_bone": "Active pose bone","area": "Area","collection": "Collection","pose_object": "Pose Object","region": "Region","scene": "Scene","screen": "Screen","view_layer": "View layer","window_manager": "Window manager","workspace": "Workspace"}
+                        context_type = {"active_bone": "Active bone","active_object": "Active object","object": "Active object","active_pose_bone": "Active pose bone","area": "Area","collection": "Collection","pose_object": "Pose Object","region": "Region","scene": "Scene","screen": "Screen","view_layer": "View layer","window_manager": "Window manager","workspace": "Workspace", "preferences": "Preferences"}
                         context_node = context.space_data.node_tree.nodes.new("SN_ObjectContextNode")
                         action_nodes.append(context_node)
 

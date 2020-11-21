@@ -97,14 +97,14 @@ class SN_VectorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 if prop.type == "VECTOR":
                                     #if prop.subtype != "COLOR":
                                     item = self.search_properties.add()
-                                    item.name = prop.name
+                                    item.name = prop.identifier.replace("_", " ").title()
                                     item.identifier = prop.identifier
                                     item.description = prop.description
                                 elif prop.type == "INT" or prop.type == "FLOAT":
                                     if prop.is_array:
                                         #if prop.subtype != "COLOR":
                                         item = self.search_properties.add()
-                                        item.name = prop.name
+                                        item.name = prop.identifier.replace("_", " ").title()
                                         item.identifier = prop.identifier
                                         item.description = prop.description
 

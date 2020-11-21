@@ -71,7 +71,7 @@ class SN_EnumDisplayNode(bpy.types.Node, SN_ScriptingBaseNode):
                             for prop in eval(data_type).bl_rna.properties:
                                 if prop.type == "ENUM":
                                     item = self.search_properties.add()
-                                    item.name = prop.name
+                                    item.name = prop.identifier.replace("_", " ").title()
                                     item.identifier = prop.identifier
                                     item.description = prop.description
 
