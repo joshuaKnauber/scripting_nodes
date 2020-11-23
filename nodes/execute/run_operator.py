@@ -217,11 +217,10 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                     if inp.name != "Execute":
                         for prop in eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties"):
                             if prop.identifier.replace("_", " ").title() == inp.name:
-                                if inp.bl_idname == "SN_CollectionSocket":
-                                    if node_data["input_data"][x]["code"] != None:
-                                        props+=[", " + prop.identifier + "=", node_data["input_data"][x]["code"]]
-                                    else:
-                                        props+=[", " + prop.identifier + "= []"]
+                                if inp.bl_idname == "SN_CollectionSocket" and node_data["input_data"][x]["code"] == None:
+                                    props+=[", " + prop.identifier + "= []"]
+                                elif inp.bl_idname == "SN_ObjectSocket" and node_data["input_data"][x]["code"] == None:
+                                    props+=[", " + prop.identifier + "= None"] 
                                 else:
                                     props+=[", " + prop.identifier + "=", node_data["input_data"][x]["code"]]
 
