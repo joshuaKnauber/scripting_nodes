@@ -29,6 +29,28 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_buttons(self, context, layout):
         layout.prop(self, "operation", text="")
 
+    def update(self):
+        if len(self.inputs) == 2 and len(self.outputs):
+            if len(self.inputs[0].links):
+                if self.inputs[0].links[0].from_socket.bl_idname == "SN_IntSocket" and not self.outputs[0].bl_idname == "SN_IntSocket":
+                    self.sockets.change_socket_type(self, self.inputs[0], "INTEGER")
+                    self.sockets.change_socket_type(self, self.inputs[1], "INTEGER")
+                    self.sockets.change_socket_type(self, self.outputs[0], "INTEGER")
+            if len(self.inputs[1].links):
+                if self.inputs[1].links[0].from_socket.bl_idname == "SN_IntSocket" and not self.outputs[0].bl_idname == "SN_IntSocket":
+                    self.sockets.change_socket_type(self, self.inputs[0], "INTEGER")
+                    self.sockets.change_socket_type(self, self.inputs[1], "INTEGER")
+                    self.sockets.change_socket_type(self, self.outputs[0], "INTEGER")
+            if not len(self.inputs[0].links) and not len(self.inputs[1].links) and not self.outputs[0].bl_idname == "SN_FloatSocket":
+                self.sockets.change_socket_type(self, self.inputs[0], "FLOAT")
+                self.sockets.change_socket_type(self, self.inputs[1], "FLOAT")
+                self.sockets.change_socket_type(self, self.outputs[0], "FLOAT")
+
+        self.update_socket_connections()
+        self.update_vector_sockets()
+        self.update_dynamic(True)
+        self.update_dynamic(False)
+
     def evaluate(self, socket, node_data, errors):
         return {
             "blocks": [

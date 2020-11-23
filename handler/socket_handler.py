@@ -113,14 +113,14 @@ class SocketHandler():
             if node_socket == socket:
                 is_input = True
                 index = socket_index
-                if node_socket.is_linked:
+                if len(node_socket.links):
                     link = node_socket.links[0].from_socket
         
         if not is_input:
             for socket_index, node_socket in enumerate(node.outputs):
                 if node_socket == socket:
                     index = socket_index
-                    if node_socket.is_linked:
+                    if len(node_socket.links):
                         link = node_socket.links[0].to_socket
 
         if not is_input:
