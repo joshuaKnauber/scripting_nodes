@@ -184,7 +184,8 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                                         if property_id.replace("_", " ").title() == inp.name:
                                             # set value
                                             if eval("bpy.ops." + action + ".get_rna_type().properties['" + property_id + "'].type") in ["STRING", "BOOLEAN", "INT", "FLOAT"]:
-                                                inp.set_value(eval(values[x]))
+                                                if inp.bl_idname != "SN_VectorSocket":
+                                                    inp.set_value(eval(values[x]))
 
                                 else:
                                     for enum in node.enum_collection:
