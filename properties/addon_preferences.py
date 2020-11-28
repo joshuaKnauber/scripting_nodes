@@ -124,13 +124,31 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         row.scale_y = 1.25
         row.operator("wm.url_open",text=package.price).url = package.url
 
+    def get_descr_lines(self,text):
+        descr = []
+        split = text.split(" ")
+
+        line = ""
+        for elem in split:
+            if len(line) >= 80:
+                descr.append(line)
+                line = ""
+            else:
+                line += " "+elem
+        descr.append(line)
+
+        return descr
+
     def draw_addon(self,addon,layout):
         box = layout.box()
         box.label(text=addon.title)
 
         col = box.column(align=True)
         col.enabled=False
-        col.label(text="Description: "+addon.author)
+        descr = self.get_descr_lines(addon.text)
+        col.label(text="Description: "+descr[0])
+        for line in descr[1:]:
+            col.label(text="                     " + line)
         col.label(text="Author: "+addon.author)
         row = col.row()
         row.label(text="Category: "+addon.category)
@@ -139,12 +157,15 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         v = addon.addon_version
         row.label(text="Addon Version: "+str(v[0])+"."+str(v[1])+"."+str(v[2]))
 
-        row = box.row()
+        row = box.row(align=True)
         row.scale_y = 1.25
         if addon.url and addon.price:
             row.operator("wm.url_open",text=addon.price).url = addon.url
         else:
-            row.operator("scripting_nodes.download_addon",text="Download").url = addon.url
+            row.operator("scripting_nodes.download_addon",text="Download Addon").url = addon.url
+        
+        if True:#addon.blender:
+            row.operator("scripting_nodes.download_blend",text="Download .blend").url = addon.url
 
     def draw(self,context):
         row = self.layout.row()
@@ -205,7 +226,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             else:
                 for package in context.scene.sn_marketplace:
                     if not package.title == "placeholder":
-                        if self.marketplace_search in package.title or not self.marketplace_search:
+                        if self.marketplace_search.lower() in package.title.lower() or not self.marketplace_search:
                             self.draw_market_package(package,col)
                             
             col.separator()
@@ -232,7 +253,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             else:
                 for addon in context.scene.sn_addons:
                     if not addon.title == "placeholder":
-                        if self.addon_search in addon.title or not self.addon_search:
+                        if self.addon_search.lower() in addon.title.lower() or not self.addon_search:
                             self.draw_addon(addon,col)
 
 

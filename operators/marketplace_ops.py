@@ -69,27 +69,24 @@ class SN_DownloadAddon(bpy.types.Operator):
     bl_description = "Downloads this addon"
     bl_options = {"REGISTER","INTERNAL"}
 
-    filepath: bpy.props.StringProperty(name="File Path", description="Filepath used for saving the file", maxlen=1024, subtype='FILE_PATH')
+    url: bpy.props.StringProperty()
 
-    filename_ext = ".py"
-    filter_glob: bpy.props.StringProperty(default='*.py', options={'HIDDEN'})
+    def execute(self, context):
+        bpy.context.window_manager.clipboard = "Get File " + self.url + ".py"
+        self.report({"INFO"},message="Copied successfully! Paste the command in the discord channel.")
+        return {"FINISHED"}
+
+
+
+class SN_DownloaBlend(bpy.types.Operator):
+    bl_idname = "scripting_nodes.download_blend"
+    bl_label = "Download Blend"
+    bl_description = "Copies the command for downloading the blend file in discord"
+    bl_options = {"REGISTER","INTERNAL"}
 
     url: bpy.props.StringProperty()
 
-    def invoke(self, context, event):
-        self.filepath = os.path.join(self.filepath,self.url[:-21]+".py")
-        context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
-
     def execute(self, context):
-        url = "https://raw.githubusercontent.com/joshuaKnauber/serpens_addon_market/main/addons/" + self.url
-
-        try:
-            addon = requests.get(url)
-            with open(self.filepath,"w", encoding="utf-8") as python_file:
-                python_file.write(addon.content.decode("utf-8").replace("\r",""))
-
-        except:
-            self.report({"ERROR"},message="Couldn't find what we were looking for. Check your connection!")
-            
+        bpy.context.window_manager.clipboard = "Get File " + self.url + ".blend"
+        self.report({"INFO"},message="Copied successfully! Paste the command in the discord channel.")
         return {"FINISHED"}
