@@ -56,7 +56,7 @@ class SN_OT_CopyCommand(bpy.types.Operator):
             "addon_version": list(tree.addon_version),
             "url": self.url,
             "price": self.price,
-            "blend": False
+            "blend": self.blender
         }
 
         if self.url == "":
@@ -91,12 +91,6 @@ class SN_OT_ExportToMarketplaceAddon(bpy.types.Operator):
 
     def execute(self, context):
         return {"FINISHED"}
-    
-    def is_small_file(self):
-        if bpy.data.filepath:
-            if os.path.exists(bpy.data.filepath):
-                return os.stat(bpy.data.filepath).st_size < 2000000
-        return False
 
     def draw(self,context):
         box = self.layout.box()
@@ -115,11 +109,12 @@ class SN_OT_ExportToMarketplaceAddon(bpy.types.Operator):
             col = box.column(align=True)
             col.label(text="    • Set your addons name, description, version, ...")
             col.label(text="    • If you want to update an addon use the same name")
-            # if self.is_small_file():
-            #     col.label(text="    • Select if you want to upload your node tree file as well")
-            #     col.prop(self,"blender")
-            # else:
-            #     col.label(text="    • Reduce your file size to max. 2MB to upload the blend file as well")
+            col.label(text="    • Select if you want to upload your blend file with the node tree")
+            col.separator()
+            row = col.row(align=True)
+            row.label(icon="BLANK1")
+            row.prop(self,"blender", text="Upload blend file")
+            row.label(icon="BLANK1")
 
         self.layout.separator()
 
@@ -133,7 +128,8 @@ class SN_OT_ExportToMarketplaceAddon(bpy.types.Operator):
                 row = col.row(align=True)
                 split = row.split(factor=0.03)
                 split.label(text=" ")
-                split.operator("scripting_nodes.copy_command",text="Click To Copy!",icon="COPYDOWN")
+                op = split.operator("scripting_nodes.copy_command",text="Click To Copy!",icon="COPYDOWN")
+                op.blender = self.blender
                 row.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id).url = "https://discord.com/invite/NK6kyae"
                 row.label(text=" ")
                 col.separator()
