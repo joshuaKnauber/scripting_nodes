@@ -51,6 +51,7 @@ class SN_LoadAddons(bpy.types.Operator):
                 item.author = addon["author"]
                 item.blender_version = tuple(addon["blender_version"])
                 item.addon_version = tuple(addon["addon_version"])
+                item.blender = addon["blend"]
                 if addon["url"]:
                     item.url = addon["url"]
                 if addon["price"]:

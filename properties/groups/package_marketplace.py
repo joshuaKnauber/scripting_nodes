@@ -11,3 +11,4 @@ class ScriptingNodesMarketplace(bpy.types.PropertyGroup):
     category: bpy.props.StringProperty(name="Category")
     blender_version: bpy.props.IntVectorProperty(name="Blender Version")
     addon_version: bpy.props.IntVectorProperty(name="Addon Version")
+    blender: bpy.props.BoolProperty(name="Blender")

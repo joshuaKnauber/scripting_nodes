@@ -164,7 +164,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         else:
             row.operator("scripting_nodes.download_addon",text="Download Addon").url = addon.url
         
-        if True:#addon.blender:
+        if addon.blender:
             row.operator("scripting_nodes.download_blend",text="Download .blend").url = addon.url
 
     def draw(self,context):
