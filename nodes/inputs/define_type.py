@@ -13,10 +13,11 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
     should_be_registered = False
 
     docs = {
-        "text": ["This node is used to <important>change the default properties coming from modifier into specific properties of the modifier type</>.",
+        "text": ["This node is used to <important>change the default properties coming from a get data properties node into specific property types</>.",
                 "Object Input: The input of the Modifier whos properties you want to change",
                 "Modifier Input: The input of the Modifier whos properties you want to change",
                 "Modifier Output: The output of the Modifier",
+                "Constraint Output: The output of the Constraint",
                 ""],
         "python": []
 
@@ -25,6 +26,16 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
     def reset_data_type(self, context):
         self.update_node()
         self.update_output(None)
+
+    def get_constraints(self, context):
+        constraints = ['CameraSolverConstraint', 'FollowTrackConstraint', 'ObjectSolverConstraint', 'CopyLocationConstraint', 'CopyRotationConstraint', 'CopyScaleConstraint', 'CopyTransformsConstraint', 'LimitDistanceConstraint', 'LimitLocationConstraint', 'LimitRotationConstraint', 'LimitScaleConstraint', 'MaintainVolumeConstraint', 'TransformConstraint', 'TransformCacheConstraint', 'ClampToConstraint', 'DampedTrackConstraint', 'LockedTrackConstraint', 'StretchToConstraint', 'TrackToConstraint', 'ActionConstraint', 'ArmatureConstraint', 'ChildOfConstraint', 'FloorConstraint', 'FollowPathConstraint', 'PivotConstraint', 'ShrinkwrapConstraint']
+        names = ['Camera Solver', 'Follow Track', 'Object Solver', 'Copy Location', 'Copy Rotation', 'Copy Scale', 'Copy Transforms', 'Limit Distance', 'Limit Location', 'Limit Rotation', 'Limit Scale', 'Maintain Volume', 'Transformation', 'Transform Cache', 'Clamp To', 'Damped Track', 'Locked Track', 'Stretch To', 'Track To', 'Action', 'Armature', 'Child Of', 'Floor', 'Follow Path', 'Pivot', 'Shrinkwrap']
+        tuple_constraints = []
+        
+        for x, constraint in enumerate(constraints):
+            tuple_constraints.append(("bpy.types." + constraint, names[x], ""))
+
+        return tuple_constraints
 
     def get_modifiers(self, context):
         gpencil = []
@@ -132,6 +143,7 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
     node: bpy.props.EnumProperty(items=get_nodes, name="Node", description="The node type you want to output", update=update_output)
     node_socket: bpy.props.EnumProperty(items=get_nodesockets, name="NodeSocket", description="The nodesocket type you want to output", update=update_output)
     object_type: bpy.props.EnumProperty(items=get_objects, name="Object Type", description="The objects type", update=update_output)
+    constraint_type: bpy.props.EnumProperty(items=get_constraints, name="Constraint Type", description="The constraint type", update=update_output)
 
 
     def inititialize(self,context):
@@ -144,7 +156,7 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_node(self):
         if len(self.inputs) == 1:
             if len(self.inputs[0].links) == 1:
-                if not self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node", "bpy.types.NodeSocket", "bpy.types.Object"]:
+                if not self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node", "bpy.types.NodeSocket", "bpy.types.Object", "bpy.types.Constraint"]:
                     link = self.inputs[0].links[0]
                     bpy.context.space_data.node_tree.links.remove(link)
 
@@ -163,14 +175,16 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
                     layout.prop(self, "node_socket")
                 elif self.get_data_type() == "bpy.types.Object":
                     layout.prop(self, "object_type")
+                elif self.get_data_type() == "bpy.types.Constraint":
+                    layout.prop(self, "constraint_type")
             else:
                 box = layout.box()
                 box.label(text="Connect one of the following:")
-                box.label(text="Object, Modifier, Light, Node, NodeSocket")
+                box.label(text="Object, Modifier, Light, Node, NodeSocket, Constraint")
 
     def evaluate(self, socket, node_data, errors):
         if len(self.inputs[0].links) == 1:
-            if self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node", "bpy.types.NodeSocket", "bpy.types.Object"]:
+            if self.get_data_type() in ["bpy.types.Modifier", "bpy.types.Light", "bpy.types.Node", "bpy.types.NodeSocket", "bpy.types.Object", "bpy.types.Constraint"]:
                 return {"blocks": [{"lines": [[node_data["input_data"][0]["code"]]],"indented": []}],"errors": errors}
         errors.append({"title": "No input provided", "message": "You need to put in the type you want to define", "node": self, "fatal": True})
         return {"blocks": [{"lines": [],"indented": []}],"errors": errors}
@@ -188,6 +202,8 @@ class SN_DefineTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
                     return self.node_socket
                 elif self.get_data_type() == "bpy.types.Object":
                     return self.object_type
+                elif self.get_data_type() == "bpy.types.Constraint":
+                    return self.constraint_type
                 
         return ""
 
