@@ -52,9 +52,9 @@ class SN_CheckboxNode(bpy.types.Node, SN_ScriptingBaseNode):
                         if len(self.inputs) == 5:
                             if self.inputs[4].name != "Index":
                                 self.inputs.remove(self.inputs[4])
-                                self.sockets.create_input(self,"INTEGER","Index")
+                                self.sockets.create_input(self,"INTEGER","Index").set_value(0)
                         else:
-                            self.sockets.create_input(self,"INTEGER","Index")
+                            self.sockets.create_input(self,"INTEGER","Index").set_value(0)
                     else:
                         for inp in self.inputs:
                             if not inp.name in ["Layout", "Toggle", "Emboss", "Text"]:

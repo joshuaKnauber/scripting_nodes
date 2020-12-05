@@ -76,7 +76,7 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.enumItem = self.var_name
                 item.name = self.var_name
         
-        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
+        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode", "SN_ChangeVariableByNode"]
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname in identifiers:
                 node.name_change(self.var_uid, self.var_name)
@@ -92,7 +92,7 @@ class SN_EnumVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             if item.name == self.groupItem:
                 item.description = self.description
     
-        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
+        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode", "SN_ChangeVariableByNode"]
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname in identifiers:
                 node.update_outputs(None)

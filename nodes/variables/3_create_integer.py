@@ -48,7 +48,7 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.groupItem = self.var_name
                 item.name = self.var_name
 
-        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
+        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode", "SN_ChangeVariableByNode"]
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname in identifiers:
                 node.name_change(self.var_uid, self.var_name)
@@ -63,7 +63,7 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:
                 item.description = self.description
-        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
+        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode", "SN_ChangeVariableByNode"]
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname in identifiers:
                 node.update_outputs(None)
@@ -77,7 +77,7 @@ class SN_IntegerVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         for item in bpy.context.space_data.node_tree.search_variables:
             if item.name == self.groupItem:
                 item.is_array = self.is_array
-        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode"]
+        identifiers = ["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToArrayVariableNode", "SN_RemoveFromArrayVariableNode", "SN_ChangeVariableByNode"]
         for node in bpy.context.space_data.node_tree.nodes:
             if node.bl_idname in identifiers:
                 node.update_outputs(None)

@@ -48,9 +48,9 @@ class SN_VectorInputNode(bpy.types.Node, SN_ScriptingBaseNode):
                         if len(self.inputs) == 4:
                             if self.inputs[3].name != "Index":
                                 self.inputs.remove(self.inputs[3])
-                                self.sockets.create_input(self,"INTEGER","Index")
+                                self.sockets.create_input(self,"INTEGER","Index").set_value(0)
                         else:
-                            self.sockets.create_input(self,"INTEGER","Index")
+                            self.sockets.create_input(self,"INTEGER","Index").set_value(0)
                     else:
                         for inp in self.inputs:
                             if not inp.name in ["Layout", "Emboss", "Text"]:

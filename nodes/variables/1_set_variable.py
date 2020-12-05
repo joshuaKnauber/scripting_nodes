@@ -69,7 +69,7 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                         self.sockets.create_input(self, bpy.context.space_data.node_tree.search_variables[self.search_value].socket_type, bpy.context.space_data.node_tree.search_variables[self.search_value].name)
                 else:
                     if not len(self.inputs) == 3:
-                        self.sockets.create_input(self, "INTEGER", "Index")
+                        self.sockets.create_input(self, "INTEGER", "Index").set_value(0)
                         self.sockets.create_input(self, bpy.context.space_data.node_tree.search_variables[self.search_value].socket_type, bpy.context.space_data.node_tree.search_variables[self.search_value].name)
                     if not self.inputs[2].name == bpy.context.space_data.node_tree.search_variables[self.search_value].name:
                         self.inputs.remove(self.inputs[2])
