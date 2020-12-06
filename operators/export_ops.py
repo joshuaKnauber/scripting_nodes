@@ -54,14 +54,17 @@ class SN_OT_CopyCommand(bpy.types.Operator):
             "author": tree.addon_author,
             "blender_version": list(tree.addon_blender),
             "addon_version": list(tree.addon_version),
+            "external": self.url != "",
             "url": self.url,
             "price": self.price,
-            "blend": self.blender
+            "blend": self.blender,
+            "blend_url": "",
+            "user": 0
         }
 
         if self.url == "":
-            addon_info["url"] = None
-            addon_info["price"] = None
+            addon_info["url"] = ""
+            addon_info["price"] = ""
 
         bpy.context.window_manager.clipboard = json.dumps(addon_info)
 
