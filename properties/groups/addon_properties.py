@@ -272,7 +272,11 @@ class ScriptingNodesProperties(bpy.types.PropertyGroup):
                                     node.search_value = prop.name
                                     bpy.ops.scripting_nodes.add_scene_data_socket(node_name=node.name, socket_name=prop.name, is_output=True, use_four_numbers=node.search_properties[prop.name].use_four_numbers, is_color=node.search_properties[prop.name].is_color)
 
-                        node_socket = node.outputs[0]
+                        try:
+                            node_socket = node.outputs[0]
+                        except:
+                            print("Something went wrong! Please check the generated node setup.")
+                            break
 
                     node = context.space_data.node_tree.nodes.new("SN_SetDataPropertiesNode")
                     action_nodes.append(node)
