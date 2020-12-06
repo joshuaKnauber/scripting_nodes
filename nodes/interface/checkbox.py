@@ -100,7 +100,7 @@ class SN_CheckboxNode(bpy.types.Node, SN_ScriptingBaseNode):
                             for prop in eval(data_type).bl_rna.properties:
                                 if prop.type == "BOOLEAN":
                                     item = self.search_properties.add()
-                                    item.name = prop.identifier.replace("_", " ").title()
+                                    item.name = prop.name
                                     item.identifier = prop.identifier
                                     item.description = prop.description
 

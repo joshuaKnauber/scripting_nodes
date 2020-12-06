@@ -107,7 +107,7 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                         if getattr(bpy.context.scene.sn_properties, filter_attr[prop.type]):
                             if not prop.name == "RNA":
                                 item = self.search_properties.add()
-                                item.name = prop.identifier.replace("_", " ").title()
+                                item.name = prop.name
                                 item.identifier = prop.identifier
                                 item.description = prop.description
                                 if not prop.type in ["INT", "FLOAT"]:
@@ -229,7 +229,7 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                 elif self.inputs[0].bl_idname == "SN_ObjectSocket":
                     for prop in eval(data_type).bl_rna.properties:
-                        if prop.identifier.replace("_", " ").title() == output.name:
+                        if prop.name == output.name:
                             return "bpy.types." + eval(data_type).bl_rna.properties[prop.identifier].fixed_type.identifier
 
         return ""

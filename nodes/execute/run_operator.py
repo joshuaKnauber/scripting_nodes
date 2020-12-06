@@ -215,14 +215,25 @@ class SN_RunOperator(bpy.types.Node, SN_ScriptingBaseNode):
                 props = []
                 for x, inp in enumerate(self.inputs):
                     if inp.name != "Execute":
+                        found = False
                         for prop in eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties"):
                             if prop.identifier.replace("_", " ").title() == inp.name:
+                                found = True
                                 if inp.bl_idname == "SN_CollectionSocket" and node_data["input_data"][x]["code"] == None:
                                     props+=[", " + prop.identifier + "= []"]
                                 elif inp.bl_idname == "SN_ObjectSocket" and node_data["input_data"][x]["code"] == None:
                                     props+=[", " + prop.identifier + "= None"] 
                                 else:
                                     props+=[", " + prop.identifier + "=", node_data["input_data"][x]["code"]]
+                        if not found:
+                            for prop in eval("bpy.ops." + bpy.context.scene.sn_properties.operator_properties[self.propName].identifier + ".get_rna_type().bl_rna.properties"):
+                                if prop.name == inp.name:
+                                    if inp.bl_idname == "SN_CollectionSocket" and node_data["input_data"][x]["code"] == None:
+                                        props+=[", " + prop.identifier + "= []"]
+                                    elif inp.bl_idname == "SN_ObjectSocket" and node_data["input_data"][x]["code"] == None:
+                                        props+=[", " + prop.identifier + "= None"] 
+                                    else:
+                                        props+=[", " + prop.identifier + "=", node_data["input_data"][x]["code"]]
 
                 for prop in self.enum_collection:
                     if prop.is_set:

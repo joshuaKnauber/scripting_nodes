@@ -98,7 +98,7 @@ class SN_SetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     if not prop.name == "RNA":
                                         if not prop.is_readonly:
                                             item = self.search_properties.add()
-                                            item.name = prop.identifier.replace("_", " ").title()
+                                            item.name = prop.name
                                             item.identifier = prop.identifier
                                             item.description = prop.description
                                             item.is_color = prop.name == "Color"
