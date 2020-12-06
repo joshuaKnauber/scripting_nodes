@@ -203,6 +203,7 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
             _col.label(text="    • Added change variable by node")
             _col.label(text="    • Added preferences to the object context node")
             _col.label(text="    • Fixed the script line node in some cases")
+            _col.label(text="    • Added blend files to addon marketplace")
 
         elif self.main_nav == "PACKAGES":
             col = row.column()
