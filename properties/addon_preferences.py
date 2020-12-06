@@ -127,12 +127,11 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
     def get_descr_lines(self,text):
         descr = []
         split = text.split(" ")
-
         line = ""
         for elem in split:
             if len(line) >= 80:
                 descr.append(line)
-                line = ""
+                line = elem
             else:
                 line += " "+elem
         descr.append(line)
@@ -162,10 +161,10 @@ class ScriptingNodesAddonPreferences(bpy.types.AddonPreferences):
         if addon.url and addon.price:
             row.operator("wm.url_open",text=addon.price).url = addon.url
         else:
-            row.operator("scripting_nodes.download_addon",text="Download Addon").url = addon.url
+            row.operator("wm.url_open",text="Download Addon").url = addon.url
         
         if addon.blender:
-            row.operator("scripting_nodes.download_blend",text="Download .blend").url = addon.url
+            row.operator("wm.url_open",text="Download .blend").url = addon.blend_url
 
     def draw(self,context):
         row = self.layout.row()
