@@ -147,6 +147,8 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
             for inp in self.inputs:
                 if inp.bl_idname != "SN_CollectionSocket" and inp.bl_idname != "SN_ObjectSocket":
                     self.inputs.remove(inp)
+            if not self.inputs[0].bl_idname == "SN_ObjectSocket":
+                self.sockets.change_socket_type(self, self.inputs[0], "OBJECT")
 
         self.update_socket_connections()
         self.update_vector_sockets()
@@ -222,12 +224,12 @@ class SN_GetDataPropertiesNode(bpy.types.Node, SN_ScriptingBaseNode):
         if len(self.inputs[0].links) == 1:
             data_type = self.inputs[0].links[0].from_node.data_type(self.inputs[0].links[0].from_socket)
             if data_type != "":
-                if self.inputs[0].links[0].from_socket.bl_idname == "SN_CollectionSocket":
-                    return "bpy.types." + eval(data_type).bl_rna.identifier
+                if self.inputs[0].bl_idname == "SN_CollectionSocket":
+                    return data_type
 
-                elif self.inputs[0].links[0].from_socket.bl_idname == "SN_ObjectSocket":
+                elif self.inputs[0].bl_idname == "SN_ObjectSocket":
                     for prop in eval(data_type).bl_rna.properties:
-                        if prop.name == output.name:
+                        if prop.identifier.replace("_", " ").title() == output.name:
                             return "bpy.types." + eval(data_type).bl_rna.properties[prop.identifier].fixed_type.identifier
 
         return ""
