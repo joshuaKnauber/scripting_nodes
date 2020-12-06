@@ -79,7 +79,7 @@ class SN_DownloadAddon(bpy.types.Operator):
 
 
 
-class SN_DownloaBlend(bpy.types.Operator):
+class SN_DownloadBlend(bpy.types.Operator):
     bl_idname = "scripting_nodes.download_blend"
     bl_label = "Download Blend"
     bl_description = "Copies the command for downloading the blend file in discord"
