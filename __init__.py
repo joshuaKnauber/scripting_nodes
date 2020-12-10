@@ -32,6 +32,11 @@ from . import auto_load
 
 from .keymaps.keymap import register_keymaps, unregister_keymaps
 from .node_tree.node_categories import get_node_categories
+from .interface.header.header import prepend_header, append_header
+
+from .node_tree.graphs.graph_lists import SN_GraphItem, update_graph_index
+from .node_tree.node_tree import update_create_tree
+from .settings.addon_properties import SN_AddonProperties
 
 
 auto_load.init()
@@ -48,12 +53,19 @@ def unload_handler(dummy=None):
 
 @persistent
 def depsgraph_handler(dummy):
-    pass
+    update_create_tree()
     
 
 def register():
     # register the classes of the addon
     auto_load.register()
+
+    # register the graph properties
+    bpy.types.NodeTree.sn_graphs = bpy.props.CollectionProperty(type=SN_GraphItem)
+    bpy.types.NodeTree.sn_graph_index = bpy.props.IntProperty(default=0, update=update_graph_index)
+    bpy.types.NodeTree.sn_addon_tree = bpy.props.PointerProperty(type=bpy.types.NodeTree)
+
+    bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties)
 
     # register the keymaps
     register_keymaps()
@@ -61,13 +73,32 @@ def register():
     # register node categories
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
 
+    # append the node tree header
+    bpy.types.NODE_HT_header.append(append_header)
+
+    # prepend the node tree header
+    # bpy.types.NODE_HT_header.prepend(prepend_header)
+
+    bpy.app.handlers.load_post.append(load_handler)
+    bpy.app.handlers.depsgraph_update_post.append(depsgraph_handler)
+
 
 def unregister():
+    # unregister the graph properties
+    del bpy.types.NodeTree.sn_graphs
+    del bpy.types.NodeTree.sn_graph_index
+
     # unregister keymaps
     unregister_keymaps()
 
     # register node categories
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
+
+    # remove the node tree header
+    bpy.types.NODE_HT_header.remove(append_header)
+
+    # remove the node tree header
+    bpy.types.NODE_HT_header.remove(prepend_header)
 
     # unregister the addon classes
     auto_load.unregister()
