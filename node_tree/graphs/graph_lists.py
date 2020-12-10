@@ -31,7 +31,9 @@ class SN_UL_GraphList(bpy.types.UIList):
         else:
             if item.is_main_graph:
                 return "SCRIPTPLUGINS"
-            return "DRIVER_TRANSFORM"
+            return "NODETREE"
     
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
-        layout.prop(item, "name", icon=self.get_graph_icon(item), text="")
+        row = layout.row()
+        row.label(icon=self.get_graph_icon(item))
+        row.prop(item, "name", text="")

@@ -6,6 +6,8 @@ def prepend_header(self, context):
 
 
 def append_header(self, context):
-    layout = self.layout
+    if context.space_data.node_tree and context.space_data.node_tree.bl_idname == "ScriptingNodesTree" and context.scene.sn.editing_addon != "NONE":
 
-    layout.prop(context.scene.sn,"editing_addon")
+        layout = self.layout
+
+        layout.prop(context.scene.sn,"editing_addon", text="")
