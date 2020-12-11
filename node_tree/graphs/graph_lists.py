@@ -2,7 +2,11 @@ import bpy
 
 
 def update_graph_index(self, context):
-    context.space_data.node_tree = self.sn_graphs[self.sn_graph_index].node_tree
+    graph_tree = self.sn_graphs[self.sn_graph_index].node_tree
+    context.space_data.node_tree = graph_tree
+
+def update_function_index(self, context):
+    context.space_data.node_tree = self.sn_functions[self.sn_function_index].node_tree
 
 
 class SN_GraphItem(bpy.types.PropertyGroup):
@@ -36,4 +40,4 @@ class SN_UL_GraphList(bpy.types.UIList):
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         row = layout.row()
         row.label(icon=self.get_graph_icon(item))
-        row.prop(item, "name", text="")
+        row.label(text=item.name)

@@ -20,3 +20,8 @@ class SN_PT_GraphPanel(bpy.types.Panel):
 
         layout.template_list("SN_UL_GraphList", "The_List", addon_tree, "sn_graphs", addon_tree, "sn_graph_index")
         layout.operator("sn.add_graph")
+
+        graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
+
+        layout.template_list("SN_UL_GraphList", "The_List", graph_tree, "sn_functions", graph_tree, "sn_function_index")
+        layout.operator("sn.add_function")

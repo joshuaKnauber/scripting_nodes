@@ -34,7 +34,7 @@ from .keymaps.keymap import register_keymaps, unregister_keymaps
 from .node_tree.node_categories import get_node_categories
 from .interface.header.header import prepend_header, append_header
 
-from .node_tree.graphs.graph_lists import SN_GraphItem, update_graph_index
+from .node_tree.graphs.graph_lists import SN_GraphItem, update_graph_index, update_function_index
 from .node_tree.node_tree import update_create_tree
 from .settings.addon_properties import SN_AddonProperties
 
@@ -63,6 +63,8 @@ def register():
     # register the graph properties
     bpy.types.NodeTree.sn_graphs = bpy.props.CollectionProperty(type=SN_GraphItem)
     bpy.types.NodeTree.sn_graph_index = bpy.props.IntProperty(default=0, update=update_graph_index)
+    bpy.types.NodeTree.sn_functions = bpy.props.CollectionProperty(type=SN_GraphItem)
+    bpy.types.NodeTree.sn_function_index = bpy.props.IntProperty(default=0, update=update_function_index)
     bpy.types.NodeTree.sn_addon_tree = bpy.props.PointerProperty(type=bpy.types.NodeTree)
 
     bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties)

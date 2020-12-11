@@ -17,8 +17,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
 
     def setup(self, is_graph, is_main, addon_tree):
-        item = addon_tree.sn_graphs.add()
-        addon_tree.sn_graph_index = len(addon_tree.sn_graphs)-1
+        if is_graph:
+            item = addon_tree.sn_graphs.add()
+            addon_tree.sn_graph_index = len(addon_tree.sn_graphs)-1
+        else:
+            item = addon_tree.sn_functions.add()
+            addon_tree.sn_function_index = len(addon_tree.sn_functions)-1
 
         item.addon_tree = addon_tree
         self.sn_addon_tree = addon_tree
@@ -37,7 +41,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         elif not is_graph and is_main:
             item.graph_type = "FUNCTION"
             item.is_main_graph = True
-            item.name = "Graph Function"
+            item.name = "Addon Graph"
 
         elif not is_graph and not is_main:
             item.graph_type = "FUNCTION"
