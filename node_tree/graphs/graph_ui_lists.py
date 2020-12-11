@@ -101,7 +101,7 @@ class SN_Graph(bpy.types.PropertyGroup):
                 items.append((cat,cat,cat))
             else:
                 items.append(("","",""))
-        return items+[("CUSTOM","Custom","Add your own category")]
+        return items+[("CUSTOM","- Custom Category -","Add your own category")]
 
     category: bpy.props.EnumProperty(items=get_categories,
                                         name="Category",
