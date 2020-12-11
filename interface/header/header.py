@@ -10,4 +10,6 @@ def append_header(self, context):
 
         layout = self.layout
 
-        layout.prop(context.scene.sn,"editing_addon", text="")
+        layout.prop_tabs_enum(context.scene.sn, "bookmarks")
+
+        layout.prop(context.scene.sn, "editing_addon", text="")

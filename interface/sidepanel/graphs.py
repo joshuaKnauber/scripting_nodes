@@ -16,12 +16,15 @@ class SN_PT_GraphPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        addon_tree = bpy.data.node_groups[context.scene.sn.editing_addon]
+        addon_tree = context.scene.sn.addon_tree()
 
-        layout.template_list("SN_UL_GraphList", "The_List", addon_tree, "sn_graphs", addon_tree, "sn_graph_index")
-        layout.operator("sn.add_graph")
+        row = layout.row(align=True)
+        row.template_list("SN_UL_GraphList", "The_List", addon_tree, "sn_graphs", addon_tree, "sn_graph_index")
+        col = row.column(align=True)
+        col.operator("sn.add_graph", text="", icon="ADD")
+        col.operator("sn.remove_graph", text="", icon="REMOVE").index = addon_tree.sn_graph_index
 
-        graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
-
-        layout.template_list("SN_UL_GraphList", "The_List", graph_tree, "sn_functions", graph_tree, "sn_function_index")
-        layout.operator("sn.add_function")
+        row = layout.row(align=True)
+        if len(addon_tree.sn_graphs):
+            graph = addon_tree.sn_graphs[addon_tree.sn_graph_index]
+            row.prop(graph, "name", text="")

@@ -12,25 +12,29 @@ class SN_OT_CreateGraph(bpy.types.Operator):
         return True
 
     def execute(self, context):
-        tree = bpy.data.node_groups.new("NodeTree", "ScriptingNodesTree")
-        tree.setup(is_graph=True, is_main=False, addon_tree=bpy.data.node_groups[context.scene.sn.editing_addon])
+        tree = bpy.data.node_groups.new("New Graph", "ScriptingNodesTree")
+        addon_tree = context.scene.sn.addon_tree()
+        tree.setup(addon_tree)
         return {"FINISHED"}
 
 
 
-class SN_OT_CreateFunction(bpy.types.Operator):
-    bl_idname = "sn.add_function"
-    bl_label = "Add Function"
-    bl_description = "Adds a new function to this graph"
+class SN_OT_RemoveGraph(bpy.types.Operator):
+    bl_idname = "sn.remove_graph"
+    bl_label = "Remove Graph"
+    bl_description = "Removes this graph from the addon"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    index: bpy.props.IntProperty(options={"SKIP_SAVE"})
 
     @classmethod
     def poll(cls, context):
-        return True
+        addon_tree = context.scene.sn.addon_tree()
+        return addon_tree.sn_graph_index != 0
 
     def execute(self, context):
-        # tree = bpy.data.node_groups.new("NodeTree", "ScriptingNodesTree")
-        addon_tree = bpy.data.node_groups[context.scene.sn.editing_addon]
-        # graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
-        # tree.setup(is_graph=False, is_main=len(graph_tree.sn_functions)==0, addon_tree=graph_tree)
+        addon_tree = context.scene.sn.addon_tree()
+        bpy.data.node_groups.remove(addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree)
+        addon_tree.sn_graphs.remove(addon_tree.sn_graph_index)
+        addon_tree.sn_graph_index -= 1
         return {"FINISHED"}
