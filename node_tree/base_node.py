@@ -9,6 +9,7 @@ class SN_ScriptingBaseNode:
 
     bl_icon = "NONE"
     bl_label = "Node"
+    node_color = (1,0,1)
 
 
     @classmethod
@@ -21,6 +22,8 @@ class SN_ScriptingBaseNode:
 
 
     def init(self,context):
+        self.color = self.node_color
+        self.use_custom_color = True
         self.on_create(context)
 
 
