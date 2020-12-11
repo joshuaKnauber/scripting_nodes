@@ -73,32 +73,36 @@ def register():
     # register node categories
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
 
-    # append the node tree header
+    # add the node tree header
     bpy.types.NODE_HT_header.append(append_header)
+    bpy.types.NODE_HT_header.prepend(prepend_header)
 
-    # prepend the node tree header
-    # bpy.types.NODE_HT_header.prepend(prepend_header)
-
+    # app handlers
     bpy.app.handlers.load_post.append(load_handler)
     bpy.app.handlers.depsgraph_update_post.append(depsgraph_handler)
 
 
 def unregister():
+    # unregister the addon classes
+    auto_load.unregister()
+
+    # remove the node tree header
+    bpy.types.NODE_HT_header.remove(append_header)
+    bpy.types.NODE_HT_header.remove(prepend_header)
+
     # unregister the graph properties
     del bpy.types.NodeTree.sn_graphs
     del bpy.types.NodeTree.sn_graph_index
 
-    # unregister keymaps
+    # addon properties
+    del bpy.types.Scene.sn
+
+    # unregister the keymaps
     unregister_keymaps()
 
-    # register node categories
+    # unregister node categories
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
 
-    # remove the node tree header
-    bpy.types.NODE_HT_header.remove(append_header)
-
-    # remove the node tree header
-    bpy.types.NODE_HT_header.remove(prepend_header)
-
-    # unregister the addon classes
-    auto_load.unregister()
+    # remove handlers
+    bpy.app.handlers.load_post.remove(load_handler)
+    bpy.app.handlers.depsgraph_update_post.remove(depsgraph_handler)

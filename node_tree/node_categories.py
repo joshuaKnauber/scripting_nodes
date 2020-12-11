@@ -30,7 +30,7 @@ def get_node_categories():
                     if "class" in line and "SN_ScriptingBaseNode" in line:
                         category_items.append(NodeItem(line.split("class ")[-1].split("(")[0]))
         if category_items:
-            node_categories.append(SN_ScriptingNodesCategory(category.upper(), category.replace("_"," ").title(), items=category_items))
+            node_categories.append(SN_ScriptingNodesCategory(category.replace(" ","_").lower(), category, items=category_items))
 
     node_categories.append(SN_ScriptingNodesCategory("LAYOUT", "Layout", items=[NodeItem("NodeFrame"),NodeItem("NodeReroute")]))
 
