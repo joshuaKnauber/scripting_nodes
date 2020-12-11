@@ -11,7 +11,7 @@ class SN_PT_GraphPanel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.sn.editing_addon != "NONE"
+        return context.scene.sn.editing_addon != "NONE" and context.space_data.tree_type == "ScriptingNodesTree"
 
     def draw(self, context):
         layout = self.layout
