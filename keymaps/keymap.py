@@ -22,19 +22,7 @@ def register_keymaps():
 
     km = kc.keymaps.new(name="Node Editor", space_type="NODE_EDITOR")
 
-    # shortcut for recompiling
-    # kmi = km.keymap_items.new(
-    #     idname="wm.call_menu",
-    #     type="A",
-    #     value="PRESS",
-    #     shift=True,
-    #     ctrl=False,
-    #     alt=False,
-    #     )
-    # kmi.properties.name = "SN_MT_AddNodeMenu"
-    # addon_keymaps[ "compile" ] = (km, kmi)
-
-    # shortcut for menu
+    # shortcut for compiling
     # kmi = km.keymap_items.new(
     #     idname="object.select_random",
     #     type="R",
