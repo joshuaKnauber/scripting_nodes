@@ -81,3 +81,24 @@ class SN_ScriptingBaseNode:
 
     def draw_buttons_ext(self,context,layout):
         self.draw_node_panel(context,layout)
+        
+        
+    ### CREATE SOCKETS
+    def add_string_input(self,label): return self.add_input("SN_StringSocket",label)
+    
+    
+    def add_input(self,idname,label):
+        socket = self.inputs.new(idname,label)
+        socket.setup_socket()
+        return socket
+
+
+    ### RETURNED CODE
+    def code_register(self,context,node_tree,main_tree,socket_data): pass #TODO:optional only once in return vvv
+    def code_unregister(self,context,node_tree,main_tree,socket_data): pass
+    def code_imperative(self,context,node_tree,main_tree,socket_data): pass
+    def code_evaluate(self,context,node_tree,main_tree,socket_data,touched_socket): pass
+    
+    
+    ### RETURNED TYPES
+    def what_layout(self,socket): pass
