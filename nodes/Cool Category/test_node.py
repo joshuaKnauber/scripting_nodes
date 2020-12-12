@@ -12,5 +12,5 @@ class SN_TestNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def on_create(self,context):
         self.add_string_input("my test")
-        self.inputs.new("SN_FloatSocket","test")
-        self.inputs.new("SN_IntSocket","test")
+        self.add_float_input("my test")
+        self.add_int_input("my test")

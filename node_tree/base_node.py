@@ -84,11 +84,22 @@ class SN_ScriptingBaseNode:
         
         
     ### CREATE SOCKETS
-    def add_string_input(self,label): return self.add_input("SN_StringSocket",label)
+    def add_string_input(self,label): return self.__add_input("SN_StringSocket",label)
+    def add_string_output(self,label): return self.__add_output("SN_StringSocket",label)
+    def add_float_input(self,label): return self.__add_input("SN_FloatSocket",label)
+    def add_float_output(self,label): return self.__add_output("SN_FloatSocket",label)
+    def add_int_input(self,label): return self.__add_input("SN_IntSocket",label)
+    def add_int_output(self,label): return self.__add_output("SN_IntSocket",label)
     
     
-    def add_input(self,idname,label):
+    def __add_input(self,idname,label):
         socket = self.inputs.new(idname,label)
+        socket.setup_socket()
+        return socket
+    
+    
+    def __add_output(self,idname,label):
+        socket = self.outputs.new(idname,label)
         socket.setup_socket()
         return socket
 
