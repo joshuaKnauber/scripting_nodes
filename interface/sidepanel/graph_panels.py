@@ -44,12 +44,18 @@ class SN_PT_VariablePanel(bpy.types.Panel):
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
 
         row = layout.row(align=False)
-        row.template_list("SN_UL_VariableList", "Variables", graph_tree, "sn_variables", graph_tree, "sn_variable_index")
+        col = row.column(align=True)
+        col.template_list("SN_UL_VariableList", "Variables", graph_tree, "sn_variables", graph_tree, "sn_variable_index")
+        if len(graph_tree.sn_variables):
+            btn_row = col.row(align=True)
+            btn_row.operator("sn.add_getter",icon="SORT_DESC")
+            btn_row.operator("sn.add_setter",icon="SORT_ASC")
         col = row.column(align=True)
         col.operator("sn.add_variable", text="", icon="ADD")
         col.operator("sn.remove_variable", text="", icon="REMOVE")
         
         if len(graph_tree.sn_variables):
+            layout.separator()
             row = layout.row()
             col = row.column()
             col.use_property_split = True
