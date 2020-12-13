@@ -1,83 +1,120 @@
 import bpy
 
 
+dynamic_links = []
+def get_dynamic_links(): return dynamic_links
+
+
+def get_socket_index(socket):
+    return int(socket.path_from_id().split("[")[-1].replace("]",""))
+
 
 class ScriptingSocket:
     connects_to = []
     socket_shape = "CIRCLE"
+    removable: bpy.props.BoolProperty(default=False)
+    default_text: bpy.props.StringProperty()
     
     def setup(self): pass
 
-    def setup_socket(self):
+    def setup_socket(self,removable,label):
         self.display_shape = self.socket_shape
+        self.removable = removable
+        self.default_text = label
         self.setup()
+        
+    def update(self,node,link): pass
+        
+    def update_socket(self,node,link):
+        self.update(node,link)
+        
+    def draw_remove_socket(self,layout):
+        op = layout.operator("sn.remove_socket", text="",icon="REMOVE", emboss=False)
+        op.index = get_socket_index(self)
+        op.tree_name = self.node.node_tree.name
+        op.node_name = self.node.name
+        op.is_output = self.is_output
+
+
+
+class SN_RemoveSocket(bpy.types.Operator):
+    bl_idname = "sn.remove_socket"
+    bl_label = "Remove Socket"
+    bl_description = "Removes this socket"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+    
+    tree_name: bpy.props.StringProperty()
+    node_name: bpy.props.StringProperty()
+    is_output: bpy.props.BoolProperty()
+    index: bpy.props.IntProperty()
+
+    def execute(self, context):
+        node = bpy.data.node_groups[self.tree_name].nodes[self.node_name]
+        if self.is_output:
+            node.outputs.remove(node.outputs[self.index])
+        else:
+            node.inputs.remove(node.inputs[self.index])
+        return {"FINISHED"}
 
 
 
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
     connects_to = ["SN_StringSocket","SN_FloatSocket","SN_IntSocket"]
-    socket_shape = "DIAMOND"
     
-    text: bpy.props.StringProperty(default="",
+    default_value: bpy.props.StringProperty(default="",
                                     name="Value",
                                     description="Value of this socket")
     
     @property
     def value(self):
-        return self.text
+        return self.default_value
 
     def draw(self, context, layout, node, text):
+        row = layout.row(align=True)
+        if self.removable:
+            self.draw_remove_socket(row)
         if self.is_output or self.is_linked:
-            layout.label(text=text)
+            row.label(text=text)
         else:
-            layout.prop(self, "text", text=text)
+            row.prop(self, "default_value", text=text)
 
     def draw_color(self, context, node):
         return (1.0, 0.4, 0.216, 0.5)
 
 
 
-class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_label = "Float"
+class SN_DynamicDataSocket(bpy.types.NodeSocket, ScriptingSocket):
+    bl_label = "Dynamic"
     connects_to = ["SN_StringSocket","SN_FloatSocket","SN_IntSocket"]
     
-    number: bpy.props.FloatProperty(default=0.0,
-                                    name="Value",
-                                    description="Value of this socket")
+    def get_socket_index(self,collection):
+        for i, socket in enumerate(collection):
+            if socket == self:
+                return i
+        return 0
     
-    @property
-    def value(self):
-        return self.number
+    def update_input(self,node,link):
+        from_socket = link.from_socket
+        pos = self.get_socket_index(node.inputs)
+        inp = node.add_input(from_socket.bl_idname,self.default_text,True)
+        node.inputs.move(len(node.inputs)-1,pos-1)
+        dynamic_links.append((link, from_socket, node.inputs[pos]))
+    
+    def update_output(self,node,link):
+        to_socket = link.to_socket
+        pos = self.get_socket_index(node.outputs)
+        out = node.add_output(to_socket.bl_idname,self.default_text,True)
+        node.outputs.move(len(node.outputs)-1)
+    
+    def update(self,node,link):
+        if self == link.to_socket:
+            self.update_input(node,link)
+        else:
+            self.update_output(node,link)
 
     def draw(self, context, layout, node, text):
-        if self.is_output or self.is_linked:
-            layout.label(text=text)
-        else:
-            layout.prop(self, "number", text=text)
+        layout.label(text=text)
 
     def draw_color(self, context, node):
-        return (1.0, 0.4, 0.216, 0.5)
-
-
-
-class SN_IntSocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_label = "Integer"
-    connects_to = ["SN_StringSocket","SN_FloatSocket","SN_IntSocket"]
-    
-    number: bpy.props.IntProperty(default=0,
-                                    name="Value",
-                                    description="Value of this socket")
-    
-    @property
-    def value(self):
-        return self.number
-
-    def draw(self, context, layout, node, text):
-        if self.is_output or self.is_linked:
-            layout.label(text=text)
-        else:
-            layout.prop(self, "number", text=text)
-
-    def draw_color(self, context, node):
-        return (1.0, 0.4, 0.216, 0.5)
+        return (0,0,0,0)

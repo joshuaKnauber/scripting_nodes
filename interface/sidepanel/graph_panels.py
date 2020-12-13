@@ -18,21 +18,37 @@ class SN_PT_GraphPanel(bpy.types.Panel):
 
         addon_tree = context.scene.sn.addon_tree()
 
-        list_col = layout.column(align=True)
-        row = list_col.row(align=True)
-        row.template_list("SN_UL_GraphList", "The_List", addon_tree, "sn_graphs", addon_tree, "sn_graph_index")
+        row = layout.row(align=False)
+        row.template_list("SN_UL_GraphList", "Graphs", addon_tree, "sn_graphs", addon_tree, "sn_graph_index")
         col = row.column(align=True)
         col.operator("sn.add_graph", text="", icon="ADD")
         col.operator("sn.remove_graph", text="", icon="REMOVE").index = addon_tree.sn_graph_index
 
-        graph = addon_tree.sn_graphs[addon_tree.sn_graph_index]
-        if addon_tree.sn_graph_index > 0:
-            row = list_col.row(align=True)
-            row.prop(graph, "name", text="")
-            row.prop(graph, "bookmarked", text="", emboss=False, icon="BOOKMARKS" if graph.bookmarked else "BLANK1")
-
 
 bpy.utils.register_class(SN_PT_GraphPanel)
+
+
+class SN_PT_VariablePanel(bpy.types.Panel):
+    bl_parent_id = "SN_PT_GraphPanel"
+    bl_idname = "SN_PT_VariablePanel"
+    bl_label = "Variables"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_order = 1
+
+    def draw(self, context):
+        layout = self.layout
+
+        addon_tree = context.scene.sn.addon_tree()
+        graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
+
+        row = layout.row(align=False)
+        row.template_list("SN_UL_VariableList", "Variables", graph_tree, "sn_variables", graph_tree, "sn_variable_index")
+        col = row.column(align=True)
+        col.operator("sn.add_variable", text="", icon="ADD")
+        col.operator("sn.remove_variable", text="", icon="REMOVE")
+
 
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
@@ -42,6 +58,8 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
+    bl_options = {"DEFAULT_CLOSED"}
+    bl_order = 2
 
     def draw(self, context):
         layout = self.layout

@@ -10,6 +10,8 @@ class SN_ScriptingBaseNode:
     bl_icon = "NONE"
     bl_label = "Node"
     node_color = (1,0,1)
+    
+    node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
 
 
     @classmethod
@@ -22,6 +24,7 @@ class SN_ScriptingBaseNode:
 
 
     def init(self,context):
+        self.node_tree = self.id_data
         self.color = self.node_color
         self.use_custom_color = True
         self.on_create(context)
@@ -64,6 +67,10 @@ class SN_ScriptingBaseNode:
 
 
     def insert_link(self,link):
+        if self == link.to_node:
+            link.to_socket.update_socket(self,link)
+        else:
+            link.from_socket.update_socket(self,link)
         self.on_link_insert(link)
 
 
@@ -84,23 +91,21 @@ class SN_ScriptingBaseNode:
         
         
     ### CREATE SOCKETS
-    def add_string_input(self,label): return self.__add_input("SN_StringSocket",label)
-    def add_string_output(self,label): return self.__add_output("SN_StringSocket",label)
-    def add_float_input(self,label): return self.__add_input("SN_FloatSocket",label)
-    def add_float_output(self,label): return self.__add_output("SN_FloatSocket",label)
-    def add_int_input(self,label): return self.__add_input("SN_IntSocket",label)
-    def add_int_output(self,label): return self.__add_output("SN_IntSocket",label)
+    def add_string_input(self,label,removable=False): return self.add_input("SN_StringSocket",label,removable)
+    def add_string_output(self,label,removable=False): return self.add_output("SN_StringSocket",label,removable)
+    def add_dynamic_data_input(self,label): return self.add_input("SN_DynamicDataSocket",label,False)
+    def add_dynamic_data_output(self,label): return self.add_output("SN_DynamicDataSocket",label,False)
     
     
-    def __add_input(self,idname,label):
+    def add_input(self,idname,label,removable):
         socket = self.inputs.new(idname,label)
-        socket.setup_socket()
+        socket.setup_socket(removable,label)
         return socket
     
     
-    def __add_output(self,idname,label):
+    def add_output(self,idname,label,removable):
         socket = self.outputs.new(idname,label)
-        socket.setup_socket()
+        socket.setup_socket(removable,label)
         return socket
 
 

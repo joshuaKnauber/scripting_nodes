@@ -11,6 +11,7 @@ class SN_TestNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     def on_create(self,context):
-        self.add_string_input("my test")
-        self.add_float_input("my test")
-        self.add_int_input("my test")
+        self.add_dynamic_data_input("dynamic in")
+        self.add_dynamic_data_output("dynamic out")
+        self.add_string_output("string out")
+        self.add_string_input("string inp")

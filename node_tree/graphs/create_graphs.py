@@ -38,3 +38,6 @@ class SN_OT_RemoveGraph(bpy.types.Operator):
         addon_tree.sn_graphs.remove(addon_tree.sn_graph_index)
         addon_tree.sn_graph_index -= 1
         return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_confirm(self, event)
