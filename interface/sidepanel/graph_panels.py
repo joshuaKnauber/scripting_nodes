@@ -48,37 +48,15 @@ class SN_PT_VariablePanel(bpy.types.Panel):
         col = row.column(align=True)
         col.operator("sn.add_variable", text="", icon="ADD")
         col.operator("sn.remove_variable", text="", icon="REMOVE")
-
-
-
-class SN_PT_AddonInfoPanel(bpy.types.Panel):
-    bl_parent_id = "SN_PT_GraphPanel"
-    bl_idname = "SN_PT_AddonInfoPanel"
-    bl_label = "Addon Info"
-    bl_space_type = 'NODE_EDITOR'
-    bl_region_type = 'UI'
-    bl_category = "Serpens"
-    bl_options = {"DEFAULT_CLOSED"}
-    bl_order = 2
-
-    def draw(self, context):
-        layout = self.layout
-
-        addon_tree = context.scene.sn.addon_tree()
-        addon_graph = addon_tree.sn_graphs[0]
         
-        layout.use_property_split = True
-        layout.use_property_decorate = False
-        layout.prop(addon_graph, "name", text="Name")
-        layout.prop(addon_graph, "description", text="Description")
-        layout.prop(addon_graph, "author", text="Author")
-        layout.prop(addon_graph, "location", text="Location")
-        layout.prop(addon_graph, "warning", text="Warning")
-        layout.prop(addon_graph, "wiki_url", text="Wiki URL")
-        layout.prop(addon_graph, "tracker_url", text="Tracker URL")
-        col = layout.column(align=True)
-        col.prop(addon_graph, "category", text="Category")
-        if addon_graph.category == "CUSTOM":
-            col.prop(addon_graph, "custom_category", text=" ")
-        layout.prop(addon_graph, "version", text="Version")
-        layout.prop(addon_graph, "blender", text="Blender")
+        if len(graph_tree.sn_variables):
+            row = layout.row()
+            col = row.column()
+            col.use_property_split = True
+            col.use_property_decorate = False
+            var = graph_tree.sn_variables[graph_tree.sn_variable_index]
+            
+            col.prop(var,"var_type",text="Type")
+            col.prop(var,"name",text="Name")
+            
+            row.label(text="",icon="BLANK1")

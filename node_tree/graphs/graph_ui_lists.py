@@ -39,7 +39,10 @@ class SN_Graph(bpy.types.PropertyGroup):
             self.name = unique_name
         self.node_tree.name = self.name
     
-    name: bpy.props.StringProperty(name="Name", description="The name of this graph or the addon", default="My Graph", update=update_name)
+    name: bpy.props.StringProperty(name="Name",
+                                   description="The name of this graph or the addon",
+                                   default="My Graph",
+                                   update=update_name)
 
     main_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
 

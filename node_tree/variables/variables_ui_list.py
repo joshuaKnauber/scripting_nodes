@@ -24,6 +24,14 @@ def get_unique_name(collection, base_name):
 
 
 
+variable_icons = {
+    "String": "SORTALPHA",
+    "Integer": "LINENUMBERS_ON",
+    "List": "PRESET"
+}
+
+
+
 class SN_Variable(bpy.types.PropertyGroup):
 
     def update_name(self,context):
@@ -31,9 +39,22 @@ class SN_Variable(bpy.types.PropertyGroup):
         if not self.name == unique_name:
             self.name = unique_name
     
-    name: bpy.props.StringProperty(name="Name", description="The name of this graph or the addon", default="my_variable", update=update_name)
+    name: bpy.props.StringProperty(name="Name",
+                                   description="The name of this variable",
+                                   default="my_variable",
+                                   update=update_name)
 
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
+
+    def get_var_types(self,context):
+        items = [("String","String","String",variable_icons["String"],0),
+                 ("Integer","Integer","Integer",variable_icons["Integer"],1),
+                 ("List","List","List",variable_icons["List"],2)]
+        return items
+    
+    var_type: bpy.props.EnumProperty(items=get_var_types,
+                                     name="Variable Type",
+                                     description="The type of value that this variable can store")
 
 
 
@@ -41,5 +62,5 @@ class SN_UL_VariableList(bpy.types.UIList):
     
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         row = layout.row()
-        row.label(text="", icon="DRIVER_TRANSFORM")
+        row.label(text="", icon= variable_icons[item.var_type])
         row.prop(item,"name",emboss=False,text="")
