@@ -6,6 +6,7 @@ def get_dynamic_links(): return dynamic_links
 
 remove_links = []
 def get_remove_links(): return remove_links
+def add_to_remove_links(link): remove_links.append(link)
 
 
 def get_socket_index(socket):
@@ -77,7 +78,7 @@ class SN_RemoveSocket(bpy.types.Operator):
 
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
-    connects_to = ["SN_StringSocket","SN_FloatSocket","SN_IntSocket"]
+    connects_to = ["SN_StringSocket","SN_FloatSocket","SN_IntSocket","SN_DynamicDataSocket"]
     
     default_value: bpy.props.StringProperty(default="",
                                     name="Value",
@@ -94,7 +95,10 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
             row.prop(self, "default_value", text=text)
 
     def draw_color(self, context, node):
-        return (1.0, 0.4, 0.216, 0.5)
+        c = (1.0, 0.4, 0.216)
+        if self.is_linked:
+            return (c[0], c[1], c[2], 1)
+        return (c[0], c[1], c[2], 0.5)
 
 
 
@@ -123,16 +127,29 @@ class SN_DynamicDataSocket(bpy.types.NodeSocket, ScriptingSocket):
         dynamic_links.append((link, to_socket, node.outputs[pos]))
     
     def update(self,node,link):
-        if not (link.to_socket.bl_label == "Dynamic" and link.from_socket.bl_label == "Dynamic"):
-            if self == link.to_socket:
-                self.update_input(node,link)
-            else:
-                self.update_output(node,link)
+        if self == link.to_socket:
+            self.update_input(node,link)
         else:
-            remove_links.append(link)
+            self.update_output(node,link)
 
     def draw_socket(self, context, layout, row, node, text):
         layout.label(text=text)
 
     def draw_color(self, context, node):
         return (0,0,0,0)
+    
+    
+
+class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
+    bl_label = "Execute"
+    connects_to = ["SN_ExecuteSocket"]
+    socket_shape = "DIAMOND"
+    
+    def draw_socket(self, context, layout, row, node, text):
+        row.label(text=text)
+
+    def draw_color(self, context, node):
+        c = (1, 1, 1)
+        if self.is_linked:
+            return (c[0], c[1], c[2], 1)
+        return (c[0], c[1], c[2], 0.5)

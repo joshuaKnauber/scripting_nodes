@@ -45,7 +45,10 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     def update_remove_links(self):
         remove_links = get_remove_links()
         for link in remove_links:
-            self.links.remove(link)
+            try:
+                self.links.remove(link)
+            except:
+                pass
         remove_links.clear()
 
 

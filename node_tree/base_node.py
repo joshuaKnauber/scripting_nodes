@@ -1,4 +1,6 @@
 import bpy
+from .sockets import add_to_remove_links
+
 
 
 class SN_ScriptingBaseNode:
@@ -67,11 +69,16 @@ class SN_ScriptingBaseNode:
 
 
     def insert_link(self,link):
-        if self == link.to_node:
-            link.to_socket.update_socket(self,link)
+        to_idname = link.to_socket.bl_idname
+        from_idname = link.from_socket.bl_idname
+        if from_idname in link.to_socket.connects_to and to_idname in link.from_socket.connects_to:
+            if self == link.to_node:
+                link.to_socket.update_socket(self,link)
+            else:
+                link.from_socket.update_socket(self,link)
+            self.on_link_insert(link)
         else:
-            link.from_socket.update_socket(self,link)
-        self.on_link_insert(link)
+            add_to_remove_links(link)
 
 
     ### DRAW NODE
@@ -95,6 +102,8 @@ class SN_ScriptingBaseNode:
     def add_string_output(self,label,removable=False): return self.add_output("SN_StringSocket",label,removable)
     def add_dynamic_data_input(self,label): return self.add_input("SN_DynamicDataSocket",label,False)
     def add_dynamic_data_output(self,label): return self.add_output("SN_DynamicDataSocket",label,False)
+    def add_execute_input(self,label,removable=False): return self.add_input("SN_ExecuteSocket",label,removable)
+    def add_execute_output(self,label,removable=False): return self.add_output("SN_ExecuteSocket",label,removable)
     
     
     def add_input(self,idname,label,removable):
