@@ -4,6 +4,9 @@ import bpy
 dynamic_links = []
 def get_dynamic_links(): return dynamic_links
 
+remove_links = []
+def get_remove_links(): return remove_links
+
 
 def get_socket_index(socket):
     return int(socket.path_from_id().split("[")[-1].replace("]",""))
@@ -125,6 +128,8 @@ class SN_DynamicDataSocket(bpy.types.NodeSocket, ScriptingSocket):
                 self.update_input(node,link)
             else:
                 self.update_output(node,link)
+        else:
+            remove_links.append(link)
 
     def draw_socket(self, context, layout, row, node, text):
         layout.label(text=text)

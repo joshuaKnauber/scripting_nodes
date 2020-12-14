@@ -1,5 +1,5 @@
 import bpy
-from .sockets import get_dynamic_links
+from .sockets import get_dynamic_links, get_remove_links
 
 
 def update_create_tree():
@@ -32,11 +32,23 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         main_tree.sn_graph_index = len(main_tree.sn_graphs)-1
 
         self.done_setup = True
-
-
-    def update(self):
+        
+        
+    def update_dynamic_links(self):
         dynamic_links = get_dynamic_links()
         for link in dynamic_links:
             self.links.remove(link[0])
             self.links.new(link[1],link[2])
         dynamic_links.clear()
+        
+        
+    def update_remove_links(self):
+        remove_links = get_remove_links()
+        for link in remove_links:
+            self.links.remove(link)
+        remove_links.clear()
+
+
+    def update(self):
+        self.update_dynamic_links()
+        self.update_remove_links()
