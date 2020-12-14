@@ -22,7 +22,6 @@ class ScriptingSocket:
     removable: bpy.props.BoolProperty(default=False)
     default_text: bpy.props.StringProperty()
     output_limit = 9999
-    input_limit = 1
     
     def setup(self): pass
 
@@ -30,7 +29,6 @@ class ScriptingSocket:
         self.display_shape = self.socket_shape
         self.removable = removable
         self.default_text = label
-        self.link_limit = 0
         self.setup()
         
     def update(self,node,link): pass
@@ -43,8 +41,6 @@ class ScriptingSocket:
         
     def update_socket(self,node,link):
         if self.is_output and len(node.outputs[self.get_socket_index(node.outputs)].links)+1 > self.output_limit:
-            add_to_remove_links(link)
-        elif not self.is_output and len(node.inputs[self.get_socket_index(node.inputs)].links)+1 > self.input_limit:
             add_to_remove_links(link)
         else:
             self.update(node,link)
@@ -161,7 +157,6 @@ class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Execute"
     connects_to = ["SN_ExecuteSocket"]
     socket_shape = "DIAMOND"
-    input_limit = 9999
     output_limit = 1
     
     def draw_socket(self, context, layout, row, node, text):
@@ -179,7 +174,6 @@ class SN_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Interface"
     connects_to = ["SN_InterfaceSocket"]
     socket_shape = "DIAMOND"
-    input_limit = 9999
     output_limit = 1
     
     def draw_socket(self, context, layout, row, node, text):
