@@ -63,7 +63,7 @@ class SN_PT_VariablePanel(bpy.types.Panel):
             var = graph_tree.sn_variables[graph_tree.sn_variable_index]
             
             col.prop(var,"var_type",text="Type")
-            col.prop(var,"name",text="Name")
+            col.separator()
             
             if var.var_type == "String":
                 col.prop(var,"str_default")
@@ -71,3 +71,36 @@ class SN_PT_VariablePanel(bpy.types.Panel):
                 col.prop(var,"int_default")
             
             row.label(text="",icon="BLANK1")
+
+
+class SN_PT_IconPanel(bpy.types.Panel):
+    bl_parent_id = "SN_PT_GraphPanel"
+    bl_idname = "SN_PT_IconPanel"
+    bl_label = "Custom Icons"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_order = 2
+    bl_options = {"DEFAULT_CLOSED"}
+
+    def draw(self, context):
+        layout = self.layout
+
+        addon_tree = context.scene.sn.addon_tree()
+        
+        row = layout.row(align=False)
+        col = row.column(align=True)
+        col.template_list("SN_UL_IconList", "Custom Icons", addon_tree, "sn_icons", addon_tree, "sn_icon_index")
+        if len(addon_tree.sn_icons):
+            col.operator("sn.add_get_icon",icon="SORT_DESC")
+        col = row.column(align=True)
+        col.operator("sn.add_icon", text="", icon="ADD")
+        col.operator("sn.remove_icon", text="", icon="REMOVE")
+        
+        
+        if len(addon_tree.sn_icons):
+            layout.separator()
+            col = layout.column()
+            col.use_property_split = True
+            icon = addon_tree.sn_icons[addon_tree.sn_icon_index]
+            col.prop_search(icon, "image", bpy.data, "images", text="Image")

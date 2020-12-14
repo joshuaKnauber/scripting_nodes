@@ -36,6 +36,7 @@ from .interface.header.header import prepend_header, append_header
 
 from .node_tree.graphs.graph_ui_lists import SN_Graph, update_graph_index
 from .node_tree.variables.variables_ui_list import SN_Variable
+from .node_tree.icons.icons_ui_list import SN_Icon
 from .node_tree.node_tree import update_create_tree
 from .settings.addon_properties import SN_AddonProperties
 
@@ -66,6 +67,8 @@ def register():
     bpy.types.NodeTree.sn_graph_index = bpy.props.IntProperty(default=0, update=update_graph_index)
     bpy.types.NodeTree.sn_variables = bpy.props.CollectionProperty(type=SN_Variable)
     bpy.types.NodeTree.sn_variable_index = bpy.props.IntProperty(default=0)
+    bpy.types.NodeTree.sn_icons = bpy.props.CollectionProperty(type=SN_Icon)
+    bpy.types.NodeTree.sn_icon_index = bpy.props.IntProperty(default=0)
 
     # addon properties
     bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties)
