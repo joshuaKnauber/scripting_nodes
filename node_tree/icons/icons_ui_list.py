@@ -56,6 +56,6 @@ class SN_UL_IconList(bpy.types.UIList):
         if item.image and item.image in bpy.data.images:
             row.label(text="", icon_value=bpy.data.images[item.image].preview.icon_id)
         else:
-            row.label(text="", icon="AUTO")
+            row.label(text="", icon="ERROR")
             
         row.prop(item,"name",emboss=False,text="")
