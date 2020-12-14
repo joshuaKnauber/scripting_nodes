@@ -104,6 +104,8 @@ class SN_ScriptingBaseNode:
     def add_dynamic_data_output(self,label): return self.add_output("SN_DynamicDataSocket",label,False)
     def add_execute_input(self,label,removable=False): return self.add_input("SN_ExecuteSocket",label,removable)
     def add_execute_output(self,label,removable=False): return self.add_output("SN_ExecuteSocket",label,removable)
+    def add_interface_input(self,label,removable=False): return self.add_input("SN_InterfaceSocket",label,removable)
+    def add_interface_output(self,label,removable=False): return self.add_output("SN_InterfaceSocket",label,removable)
     
     
     def add_input(self,idname,label,removable):

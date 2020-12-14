@@ -1,8 +1,10 @@
 import bpy
 
 
+
 dynamic_links = []
 def get_dynamic_links(): return dynamic_links
+
 
 remove_links = []
 def get_remove_links(): return remove_links
@@ -13,11 +15,14 @@ def get_socket_index(socket):
     return int(socket.path_from_id().split("[")[-1].replace("]",""))
 
 
+
 class ScriptingSocket:
     connects_to = []
     socket_shape = "CIRCLE"
     removable: bpy.props.BoolProperty(default=False)
     default_text: bpy.props.StringProperty()
+    output_limit = 9999
+    input_limit = 1
     
     def setup(self): pass
 
@@ -25,12 +30,24 @@ class ScriptingSocket:
         self.display_shape = self.socket_shape
         self.removable = removable
         self.default_text = label
+        self.link_limit = 0
         self.setup()
         
     def update(self,node,link): pass
+    
+    def get_socket_index(self,collection):
+        for i, socket in enumerate(collection):
+            if socket == self:
+                return i
+        return 0
         
     def update_socket(self,node,link):
-        self.update(node,link)
+        if self.is_output and len(node.outputs[self.get_socket_index(node.outputs)].links)+1 > self.output_limit:
+            add_to_remove_links(link)
+        elif not self.is_output and len(node.inputs[self.get_socket_index(node.inputs)].links)+1 > self.input_limit:
+            add_to_remove_links(link)
+        else:
+            self.update(node,link)
         
     def draw_remove_socket(self,layout):
         op = layout.operator("sn.remove_socket", text="",icon="REMOVE", emboss=False)
@@ -144,12 +161,32 @@ class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Execute"
     connects_to = ["SN_ExecuteSocket"]
     socket_shape = "DIAMOND"
+    input_limit = 9999
+    output_limit = 1
     
     def draw_socket(self, context, layout, row, node, text):
         row.label(text=text)
 
     def draw_color(self, context, node):
         c = (1, 1, 1)
+        if self.is_linked:
+            return (c[0], c[1], c[2], 1)
+        return (c[0], c[1], c[2], 0.5)
+    
+    
+
+class SN_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
+    bl_label = "Interface"
+    connects_to = ["SN_InterfaceSocket"]
+    socket_shape = "DIAMOND"
+    input_limit = 9999
+    output_limit = 1
+    
+    def draw_socket(self, context, layout, row, node, text):
+        row.label(text=text)
+
+    def draw_color(self, context, node):
+        c = (1, 0.7, 0)
         if self.is_linked:
             return (c[0], c[1], c[2], 1)
         return (c[0], c[1], c[2], 0.5)
