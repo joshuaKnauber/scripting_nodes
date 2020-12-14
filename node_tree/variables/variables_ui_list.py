@@ -1,4 +1,5 @@
 import bpy
+import re
 
 
 def name_is_unique(collection, name):
@@ -35,13 +36,18 @@ variable_icons = {
 class SN_Variable(bpy.types.PropertyGroup):
 
     def update_name(self,context):
-        unique_name = get_unique_name(self.node_tree.sn_variables, self.name)
-        if not self.name == unique_name:
-            self.name = unique_name
+        proper_name = re.sub(r'\W+', '', self.name.replace(" ","_"))
+        if not proper_name:
+            proper_name = "new_variable"
+        if proper_name[0].isnumeric():
+            proper_name = "var_"+proper_name
+        proper_name = get_unique_name(self.node_tree.sn_variables, proper_name)
+        if not self.name == proper_name:
+            self.name = proper_name
     
     name: bpy.props.StringProperty(name="Name",
                                    description="The name of this variable",
-                                   default="my_variable",
+                                   default="new_variable",
                                    update=update_name)
 
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)

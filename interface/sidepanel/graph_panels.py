@@ -104,3 +104,8 @@ class SN_PT_IconPanel(bpy.types.Panel):
             col.use_property_split = True
             icon = addon_tree.sn_icons[addon_tree.sn_icon_index]
             col.prop_search(icon, "image", bpy.data, "images", text="Image")
+            
+            
+            
+bpy.utils.register_class(SN_PT_VariablePanel)
+bpy.utils.register_class(SN_PT_IconPanel)

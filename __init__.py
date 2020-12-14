@@ -99,6 +99,10 @@ def unregister():
     # unregister the graph properties
     del bpy.types.NodeTree.sn_graphs
     del bpy.types.NodeTree.sn_graph_index
+    del bpy.types.NodeTree.sn_variables
+    del bpy.types.NodeTree.sn_variable_index
+    del bpy.types.NodeTree.sn_icons
+    del bpy.types.NodeTree.sn_icon_index
 
     # addon properties
     del bpy.types.Scene.sn
