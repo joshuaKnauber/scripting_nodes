@@ -34,6 +34,20 @@ class ScriptingSocket:
         op.tree_name = self.node.node_tree.name
         op.node_name = self.node.name
         op.is_output = self.is_output
+        
+    def draw_socket(self,context,layout,row,node,text): pass
+        
+    def draw(self, context, layout, node, text):
+        row = layout.row(align=True)
+        if self.is_output:
+            row.alignment = "RIGHT"
+        else:
+            row.alignment = "LEFT"
+        if self.removable and not self.is_output:
+            self.draw_remove_socket(row)
+        self.draw_socket(context,layout,row,node,text)
+        if self.removable and self.is_output:
+            self.draw_remove_socket(row)
 
 
 
@@ -70,10 +84,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     def value(self):
         return self.default_value
 
-    def draw(self, context, layout, node, text):
-        row = layout.row(align=True)
-        if self.removable:
-            self.draw_remove_socket(row)
+    def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:
             row.label(text=text)
         else:
@@ -115,7 +126,7 @@ class SN_DynamicDataSocket(bpy.types.NodeSocket, ScriptingSocket):
             else:
                 self.update_output(node,link)
 
-    def draw(self, context, layout, node, text):
+    def draw_socket(self, context, layout, row, node, text):
         layout.label(text=text)
 
     def draw_color(self, context, node):
