@@ -19,6 +19,9 @@ class SN_ScriptingBaseNode:
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == 'SN_ScriptingNodesTree'
+    
+    def update_needs_compile(self,context):
+        self.node_tree.has_changes = True
 
 
     ### INIT NODE
@@ -27,6 +30,7 @@ class SN_ScriptingBaseNode:
 
     def init(self,context):
         self.node_tree = self.id_data
+        self.node_tree.has_changes = True
         self.color = self.node_color
         self.use_custom_color = True
         self.on_create(context)
@@ -37,6 +41,7 @@ class SN_ScriptingBaseNode:
 
 
     def copy(self,node):
+        self.node_tree.has_changes = True
         self.on_copy(node)
 
 
@@ -45,6 +50,7 @@ class SN_ScriptingBaseNode:
 
 
     def free(self):
+        self.node_tree.has_changes = True
         self.on_free()
 
 
@@ -53,15 +59,17 @@ class SN_ScriptingBaseNode:
 
 
     def update(self):
+        self.node_tree.has_changes = True
         self.on_node_update()
 
 
     ### SOCKET UPDATE
-    def on_socket_update(self): pass
+    # def on_socket_update(self): pass
 
 
-    def socket_value_update(self, context):
-        self.on_socket_update()
+    # def socket_value_update(self, context):
+    #     self.node_tree.has_changes = True
+    #     self.on_socket_update()
 
 
     ### LINK UPDATE
@@ -69,6 +77,7 @@ class SN_ScriptingBaseNode:
 
 
     def insert_link(self,link):
+        self.node_tree.has_changes = True
         to_idname = link.to_socket.bl_idname
         from_idname = link.from_socket.bl_idname
         if from_idname in link.to_socket.connects_to and to_idname in link.from_socket.connects_to:
@@ -109,12 +118,14 @@ class SN_ScriptingBaseNode:
     
     
     def add_input(self,idname,label,removable):
+        self.node_tree.has_changes = True
         socket = self.inputs.new(idname,label)
         socket.setup_socket(removable,label)
         return socket
     
     
     def add_output(self,idname,label,removable):
+        self.node_tree.has_changes = True
         socket = self.outputs.new(idname,label)
         socket.setup_socket(removable,label)
         return socket

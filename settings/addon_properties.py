@@ -8,6 +8,13 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         for tree in bpy.data.node_groups:
             if len(tree.sn_graphs) and tree.sn_graphs[0].name == self.editing_addon:
                 return tree
+            
+            
+    def active_addon_has_changes(self):
+        for graph in self.addon_tree().sn_graphs:
+            if graph.node_tree.has_changes:
+                return True
+        return False
 
 
     def get_addon_items(self,context):

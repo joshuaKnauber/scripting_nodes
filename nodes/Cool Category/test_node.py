@@ -10,6 +10,14 @@ class SN_TestNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = (0.3,0.3,0.3)
     
     
+    test: bpy.props.BoolProperty(default=False,
+                                update=SN_ScriptingBaseNode.update_needs_compile)
+    
+    
+    def draw_node(self,context,layout):
+        layout.prop(self,"test")
+    
+    
     def on_create(self,context):
         self.add_execute_input("execute")
         self.add_execute_output("execute")

@@ -15,6 +15,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     bl_label = "Visual Scripting"
     bl_icon = 'FILE_SCRIPT'
     done_setup: bpy.props.BoolProperty(default=False)
+    
+    has_changes: bpy.props.BoolProperty(default=True)
 
 
     def setup(self, main_tree):
@@ -53,5 +55,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
 
     def update(self):
+        self.has_changes = True
         self.update_dynamic_links()
         self.update_remove_links()

@@ -17,12 +17,16 @@ def get_socket_index(socket):
 
 
 class ScriptingSocket:
+    
     connects_to = []
     socket_shape = "CIRCLE"
     removable: bpy.props.BoolProperty(default=False)
     default_text: bpy.props.StringProperty()
     output_limit = 9999
     
+    def socket_value_update(self,context):
+        self.node.node_tree.has_changes = True
+        
     def setup(self): pass
 
     def setup_socket(self,removable,label):
@@ -94,8 +98,9 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     connects_to = ["SN_StringSocket","SN_FloatSocket","SN_IntSocket","SN_DynamicDataSocket"]
     
     default_value: bpy.props.StringProperty(default="",
-                                    name="Value",
-                                    description="Value of this socket")
+                                            update=ScriptingSocket.socket_value_update,
+                                            name="Value",
+                                            description="Value of this socket")
     
     @property
     def value(self):
