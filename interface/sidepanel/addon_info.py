@@ -11,6 +11,10 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
     bl_options = {"DEFAULT_CLOSED"}
     bl_order = 2
 
+    @classmethod
+    def poll(cls, context):
+        return context.scene.sn.editing_addon != "NONE" and context.space_data.tree_type == "ScriptingNodesTree"
+
     def draw(self, context):
         layout = self.layout
 
@@ -35,4 +39,4 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
         
         row = layout.row()
         row.scale_y = 1.5
-        row.operator("object.add",text="Export",icon="EXPORT")
+        row.operator("object.add",text="Save Addon",icon="FILE_TICK")

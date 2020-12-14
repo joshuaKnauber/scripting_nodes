@@ -98,20 +98,22 @@ class SN_DynamicDataSocket(bpy.types.NodeSocket, ScriptingSocket):
         from_socket = link.from_socket
         pos = self.get_socket_index(node.inputs)
         inp = node.add_input(from_socket.bl_idname,self.default_text,True)
-        node.inputs.move(len(node.inputs)-1,pos-1)
+        node.inputs.move(len(node.inputs)-1,pos)
         dynamic_links.append((link, from_socket, node.inputs[pos]))
     
     def update_output(self,node,link):
         to_socket = link.to_socket
         pos = self.get_socket_index(node.outputs)
         out = node.add_output(to_socket.bl_idname,self.default_text,True)
-        node.outputs.move(len(node.outputs)-1)
+        node.outputs.move(len(node.outputs)-1,pos)
+        dynamic_links.append((link, to_socket, node.outputs[pos]))
     
     def update(self,node,link):
-        if self == link.to_socket:
-            self.update_input(node,link)
-        else:
-            self.update_output(node,link)
+        if not (link.to_socket.bl_label == "Dynamic" and link.from_socket.bl_label == "Dynamic"):
+            if self == link.to_socket:
+                self.update_input(node,link)
+            else:
+                self.update_output(node,link)
 
     def draw(self, context, layout, node, text):
         layout.label(text=text)

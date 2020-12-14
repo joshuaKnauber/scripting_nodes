@@ -21,6 +21,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         graph = main_tree.sn_graphs.add()
         graph.main_tree = main_tree
         graph.node_tree = self
+        graph.blender = bpy.app.version
 
         if main_tree == self:
             graph.name = "New Addon"
@@ -34,15 +35,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
 
     def update(self):
-        for link in get_dynamic_links():
+        dynamic_links = get_dynamic_links()
+        for link in dynamic_links:
             self.links.remove(link[0])
             self.links.new(link[1],link[2])
-        #         from_socket = link.from_socket
-        #         to_socket = link.to_socket
-        #         self.links.remove(link)
-        #         if to_socket.bl_label == "Dynamic":
-        #             to_socket_index = int(to_socket.path_from_id().split("[")[-1].replace("]",""))
-        #             self.links.new(from_socket,to_socket.node.inputs[to_socket_index-1])
-        #         if from_socket.bl_label == "Dynamic":
-        #             from_socket_index = int(from_socket.path_from_id().split("[")[-1].replace("]",""))
-        #             self.links.new(to_socket,from_socket.node.outputs[from_socket_index-1])
+        dynamic_links.clear()

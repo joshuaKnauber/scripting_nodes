@@ -55,6 +55,14 @@ class SN_Variable(bpy.types.PropertyGroup):
     var_type: bpy.props.EnumProperty(items=get_var_types,
                                      name="Variable Type",
                                      description="The type of value that this variable can store")
+    
+    str_default: bpy.props.StringProperty(default="",
+                                        name="Default Value",
+                                        description="The default value of this variable")
+    
+    int_default: bpy.props.IntProperty(default=0,
+                                        name="Default Value",
+                                        description="The default value of this variable")
 
 
 

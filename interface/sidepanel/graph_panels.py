@@ -65,4 +65,9 @@ class SN_PT_VariablePanel(bpy.types.Panel):
             col.prop(var,"var_type",text="Type")
             col.prop(var,"name",text="Name")
             
+            if var.var_type == "String":
+                col.prop(var,"str_default")
+            elif var.var_type == "Integer":
+                col.prop(var,"int_default")
+            
             row.label(text="",icon="BLANK1")
