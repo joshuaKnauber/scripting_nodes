@@ -1,5 +1,6 @@
 import bpy
 from .sockets import get_dynamic_links, get_remove_links
+from ..compiler.compiler import compile_addon
 
 
 def update_create_tree():
@@ -16,7 +17,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     bl_icon = 'FILE_SCRIPT'
     done_setup: bpy.props.BoolProperty(default=False)
     
-    has_changes: bpy.props.BoolProperty(default=True)
+    def update_changes(self,context):
+        # if self.has_changes and bpy.context.scene.sn.addon_tree().sn_graphs[0].autocompile:
+        #     compile_addon(context.scene.sn.addon_tree())
+        pass
+    
+    has_changes: bpy.props.BoolProperty(default=True, update=update_changes)
 
 
     def setup(self, main_tree):

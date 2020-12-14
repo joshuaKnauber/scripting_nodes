@@ -23,15 +23,15 @@ def register_keymaps():
     km = kc.keymaps.new(name="Node Editor", space_type="NODE_EDITOR")
 
     # shortcut for compiling
-    # kmi = km.keymap_items.new(
-    #     idname="object.select_random",
-    #     type="R",
-    #     value="PRESS",
-    #     shift=True,
-    #     ctrl=False,
-    #     alt=False,
-    #     )
-    # addon_keymaps[ "compile" ] = (km, kmi)
+    kmi = km.keymap_items.new(
+        idname="sn.compile",
+        type="R",
+        value="PRESS",
+        shift=True,
+        ctrl=False,
+        alt=False,
+        )
+    addon_keymaps[ "compile" ] = (km, kmi)
 
 
 def unregister_keymaps():

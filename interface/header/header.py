@@ -10,10 +10,12 @@ def append_header(self, context):
 
         layout = self.layout
         
+        row = layout.row(align=True)
         if context.scene.sn.active_addon_has_changes():
-            layout.operator("sn.compile",text="Compile",icon="FILE_REFRESH",depress=True)
+            row.operator("sn.compile",text="Compile",icon="FILE_REFRESH",depress=True)
         else:
-            layout.operator("sn.compile",text="Compiled",icon="CHECKMARK",depress=False)
+            row.operator("sn.compile",text="Compiled",icon="CHECKMARK",depress=False)
+        row.operator("sn.remove_addon",text="",icon="UNLINKED")
         
         layout.separator()
 

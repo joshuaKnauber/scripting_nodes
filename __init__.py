@@ -27,6 +27,7 @@ bl_info = {
 import bpy
 import nodeitems_utils
 from bpy.app.handlers import persistent
+import atexit
 
 from . import auto_load
 
@@ -40,17 +41,20 @@ from .node_tree.icons.icons_ui_list import SN_Icon
 from .node_tree.node_tree import update_create_tree
 from .settings.addon_properties import SN_AddonProperties
 
+from .compiler.compiler import handle_file_load, handle_file_unload
+
 
 auto_load.init()
 
 
 @persistent
 def load_handler(dummy):
-    pass
+    handle_file_unload()
+    handle_file_load()
 
 
 def unload_handler(dummy=None):
-    pass
+    handle_file_unload()
 
 
 @persistent
@@ -86,6 +90,7 @@ def register():
     # app handlers
     bpy.app.handlers.load_post.append(load_handler)
     bpy.app.handlers.depsgraph_update_post.append(depsgraph_handler)
+    atexit.register(unload_handler)
 
 
 def unregister():
@@ -116,3 +121,4 @@ def unregister():
     # remove handlers
     bpy.app.handlers.load_post.remove(load_handler)
     bpy.app.handlers.depsgraph_update_post.remove(depsgraph_handler)
+    atexit.unregister(unload_handler)

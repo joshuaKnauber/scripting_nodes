@@ -33,10 +33,14 @@ def get_unique_name(collection, base_name):
 
 class SN_Graph(bpy.types.PropertyGroup):
 
+    def update_changes(self,context):
+        self.main_tree.has_changes = True
+
     def update_name(self,context):
         unique_name = get_unique_name(self.main_tree.sn_graphs, self.name)
         if not self.name == unique_name:
             self.name = unique_name
+        self.update_changes(context)
         self.node_tree.name = self.name
     
     name: bpy.props.StringProperty(name="Name",
@@ -48,6 +52,7 @@ class SN_Graph(bpy.types.PropertyGroup):
     
     def update_autocompile(self,context):
         pass
+    
     
     autocompile: bpy.props.BoolProperty(default=False,
                                         name="Auto Compile",
@@ -61,18 +66,22 @@ class SN_Graph(bpy.types.PropertyGroup):
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
 
     bookmarked: bpy.props.BoolProperty(default=False,
+                                       update=update_changes,
                                         name="Bookmark",
                                         description="Will show this graph in the header for quick access")
 
     description: bpy.props.StringProperty(default="",
+                                       update=update_changes,
                                         name="Description",
                                         description="The description of the addon")
 
     author: bpy.props.StringProperty(default="Your Name",
+                                       update=update_changes,
                                         name="Author",
                                         description="The author of this addon")
 
     version: bpy.props.IntVectorProperty(default=(1,0,0),
+                                       update=update_changes,
                                         size=3,
                                         min=0,
                                         name="Version",
@@ -81,6 +90,7 @@ class SN_Graph(bpy.types.PropertyGroup):
     def update_blender(self,context):
         if not self.blender[1] > 9:
             self.blender = (self.blender[0],int(str(self.blender[1])+"0"),self.blender[2])
+        self.update_changes(context)
 
     blender: bpy.props.IntVectorProperty(default=(2,80,0),
                                         update=update_blender,
@@ -90,18 +100,22 @@ class SN_Graph(bpy.types.PropertyGroup):
                                         description="Minimum blender version required for this addon")
 
     location: bpy.props.StringProperty(default="",
+                                       update=update_changes,
                                         name="Location",
                                         description="Describes where the addons functionality can be found")
 
     warning: bpy.props.StringProperty(default="",
+                                       update=update_changes,
                                         name="Warning",
                                         description="Used if there is a bug or a problem that the user should be aware of")
 
     wiki_url: bpy.props.StringProperty(default="",
+                                       update=update_changes,
                                         name="Wiki URL",
                                         description="URL to the addons wiki")
 
     tracker_url: bpy.props.StringProperty(default="",
+                                       update=update_changes,
                                         name="Tracker URL",
                                         description="URL to the addons bug tracker")
 
@@ -119,10 +133,12 @@ class SN_Graph(bpy.types.PropertyGroup):
         return items+[("CUSTOM","- Custom Category -","Add your own category")]
 
     category: bpy.props.EnumProperty(items=get_categories,
+                                       update=update_changes,
                                         name="Category",
                                         description="The category the addon will be displayed in")
 
     custom_category: bpy.props.StringProperty(default="My Category",
+                                       update=update_changes,
                                         name="Custom Category",
                                         description="Your custom category")
 
