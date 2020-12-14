@@ -69,6 +69,43 @@ class ScriptingSocket:
         self.draw_socket(context,layout,row,node,text)
         if self.removable and self.is_output:
             self.draw_remove_socket(row)
+            
+            
+            
+class DynamicSocket(ScriptingSocket):
+    bl_label = "Dynamic"
+    
+    def get_socket_index(self,collection):
+        for i, socket in enumerate(collection):
+            if socket == self:
+                return i
+        return 0
+    
+    def update_input(self,node,link):
+        from_socket = link.from_socket
+        pos = self.get_socket_index(node.inputs)
+        inp = node.add_input(from_socket.bl_idname,self.default_text,True)
+        node.inputs.move(len(node.inputs)-1,pos)
+        dynamic_links.append((link, from_socket, node.inputs[pos]))
+    
+    def update_output(self,node,link):
+        to_socket = link.to_socket
+        pos = self.get_socket_index(node.outputs)
+        out = node.add_output(to_socket.bl_idname,self.default_text,True)
+        node.outputs.move(len(node.outputs)-1,pos)
+        dynamic_links.append((link, to_socket, node.outputs[pos]))
+    
+    def update(self,node,link):
+        if self == link.to_socket:
+            self.update_input(node,link)
+        else:
+            self.update_output(node,link)
+
+    def draw_socket(self, context, layout, row, node, text):
+        layout.label(text=text)
+
+    def draw_color(self, context, node):
+        return (0,0,0,0)
 
 
 
@@ -113,54 +150,21 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
             row.prop(self, "default_value", text=text)
 
     def draw_color(self, context, node):
-        c = (1.0, 0.4, 0.216)
+        c = (1, 0.1, 0.75)
         if self.is_linked:
             return (c[0], c[1], c[2], 1)
         return (c[0], c[1], c[2], 0.5)
+    
+    
 
-
-
-class SN_DynamicDataSocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_label = "Dynamic"
+class SN_DynamicDataSocket(bpy.types.NodeSocket, DynamicSocket):
     connects_to = ["SN_StringSocket","SN_FloatSocket","SN_IntSocket"]
-    
-    def get_socket_index(self,collection):
-        for i, socket in enumerate(collection):
-            if socket == self:
-                return i
-        return 0
-    
-    def update_input(self,node,link):
-        from_socket = link.from_socket
-        pos = self.get_socket_index(node.inputs)
-        inp = node.add_input(from_socket.bl_idname,self.default_text,True)
-        node.inputs.move(len(node.inputs)-1,pos)
-        dynamic_links.append((link, from_socket, node.inputs[pos]))
-    
-    def update_output(self,node,link):
-        to_socket = link.to_socket
-        pos = self.get_socket_index(node.outputs)
-        out = node.add_output(to_socket.bl_idname,self.default_text,True)
-        node.outputs.move(len(node.outputs)-1,pos)
-        dynamic_links.append((link, to_socket, node.outputs[pos]))
-    
-    def update(self,node,link):
-        if self == link.to_socket:
-            self.update_input(node,link)
-        else:
-            self.update_output(node,link)
-
-    def draw_socket(self, context, layout, row, node, text):
-        layout.label(text=text)
-
-    def draw_color(self, context, node):
-        return (0,0,0,0)
     
     
 
 class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Execute"
-    connects_to = ["SN_ExecuteSocket"]
+    connects_to = ["SN_ExecuteSocket", "SN_DynamicExecuteSocket"]
     socket_shape = "DIAMOND"
     output_limit = 1
     
@@ -175,9 +179,15 @@ class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     
 
+class SN_DynamicExecuteSocket(bpy.types.NodeSocket, DynamicSocket):
+    socket_shape = "DIAMOND"
+    connects_to = ["SN_ExecuteSocket"]
+    
+    
+
 class SN_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Interface"
-    connects_to = ["SN_InterfaceSocket"]
+    connects_to = ["SN_InterfaceSocket", "SN_DynamicInterfaceSocket"]
     socket_shape = "DIAMOND"
     output_limit = 1
     
@@ -189,3 +199,9 @@ class SN_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
         if self.is_linked:
             return (c[0], c[1], c[2], 1)
         return (c[0], c[1], c[2], 0.5)
+    
+    
+
+class SN_DynamicInterfaceSocket(bpy.types.NodeSocket, DynamicSocket):
+    socket_shape = "DIAMOND"
+    connects_to = ["SN_InterfaceSocket"]

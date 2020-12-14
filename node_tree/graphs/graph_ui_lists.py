@@ -45,6 +45,18 @@ class SN_Graph(bpy.types.PropertyGroup):
                                    update=update_name)
 
     main_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
+    
+    def update_autocompile(self,context):
+        pass
+    
+    autocompile: bpy.props.BoolProperty(default=False,
+                                        name="Auto Compile",
+                                        description="Automatically compiles your node tree when you make changes",
+                                        update=update_autocompile)
+    
+    compile_on_start: bpy.props.BoolProperty(default=False,
+                                             name="Compile on Startup",
+                                             description="Compiles this addon when you open this blender scene")
 
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
 
