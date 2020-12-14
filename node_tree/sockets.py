@@ -132,7 +132,7 @@ class SN_RemoveSocket(bpy.types.Operator):
 
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
-    connects_to = ["SN_StringSocket","SN_FloatSocket","SN_IntSocket","SN_DynamicDataSocket"]
+    connects_to = ["SN_StringSocket","SN_DynamicDataSocket"]
     
     default_value: bpy.props.StringProperty(default="",
                                             update=ScriptingSocket.socket_value_update,
@@ -158,7 +158,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     
 
 class SN_DynamicDataSocket(bpy.types.NodeSocket, DynamicSocket):
-    connects_to = ["SN_StringSocket","SN_FloatSocket","SN_IntSocket"]
+    connects_to = ["SN_StringSocket"]
     
     
 
