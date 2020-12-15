@@ -34,7 +34,7 @@ def get_unique_name(collection, base_name):
 class SN_Graph(bpy.types.PropertyGroup):
 
     def update_changes(self,context):
-        self.main_tree.has_changes = True
+        self.main_tree.set_changes(True)
 
     def update_name(self,context):
         unique_name = get_unique_name(self.main_tree.sn_graphs, self.name)
@@ -51,13 +51,18 @@ class SN_Graph(bpy.types.PropertyGroup):
     main_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
     
     def update_autocompile(self,context):
-        pass
-    
+        self.main_tree.set_changes(True)
     
     autocompile: bpy.props.BoolProperty(default=False,
                                         name="Auto Compile",
                                         description="Automatically compiles your node tree when you make changes",
                                         update=update_autocompile)
+    
+    autocompile_delay: bpy.props.FloatProperty(default=2,
+                                               min=0.5,
+                                               soft_max=5,
+                                               name="Auto Compile Delay",
+                                               description="The time waited before trying to automatically compile in seconds")
     
     compile_on_start: bpy.props.BoolProperty(default=False,
                                              name="Compile on Startup",

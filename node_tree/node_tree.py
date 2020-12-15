@@ -17,13 +17,20 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     bl_icon = 'FILE_SCRIPT'
     done_setup: bpy.props.BoolProperty(default=False)
     
-    def update_changes(self,context):
-        # if self.has_changes and bpy.context.scene.sn.addon_tree().sn_graphs[0].autocompile:
-        #     compile_addon(context.scene.sn.addon_tree())
-        pass
     
-    has_changes: bpy.props.BoolProperty(default=True, update=update_changes)
-
+    def set_changes(self, value):
+        self.has_changes = value
+    
+    has_changes: bpy.props.BoolProperty(default=True)
+    
+    def run_autocompile(self):
+        addon_tree = bpy.context.scene.sn.addon_tree()
+        if addon_tree.sn_graphs[0].autocompile and bpy.context.scene.sn.active_addon_has_changes():
+            compile_addon(addon_tree)
+            if bpy.context.screen:
+                for a in bpy.context.screen.areas: a.tag_redraw()
+        return addon_tree.sn_graphs[0].autocompile_delay
+    
 
     def setup(self, main_tree):
         graph = main_tree.sn_graphs.add()
@@ -32,6 +39,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         graph.blender = bpy.app.version
 
         if main_tree == self:
+            bpy.app.timers.register(self.run_autocompile, first_interval=0.1)
             graph.name = "New Addon"
             graph.bookmarked = True
         else:
@@ -61,6 +69,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
 
     def update(self):
-        self.has_changes = True
+        self.set_changes(True)
         self.update_dynamic_links()
         self.update_remove_links()

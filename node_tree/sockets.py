@@ -25,7 +25,7 @@ class ScriptingSocket:
     output_limit = 9999
     
     def socket_value_update(self,context):
-        self.node.node_tree.has_changes = True
+        self.node.node_tree.set_changes(True)
         
     def setup(self): pass
 

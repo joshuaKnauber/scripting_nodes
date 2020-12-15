@@ -73,6 +73,9 @@ def register():
     bpy.types.NodeTree.sn_variable_index = bpy.props.IntProperty(default=0)
     bpy.types.NodeTree.sn_icons = bpy.props.CollectionProperty(type=SN_Icon)
     bpy.types.NodeTree.sn_icon_index = bpy.props.IntProperty(default=0)
+    
+    # register the text properties
+    bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False)
 
     # addon properties
     bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties)
@@ -108,6 +111,9 @@ def unregister():
     del bpy.types.NodeTree.sn_variable_index
     del bpy.types.NodeTree.sn_icons
     del bpy.types.NodeTree.sn_icon_index
+
+    # unregister the text properties
+    del bpy.types.Text.is_sn_addon
 
     # addon properties
     del bpy.types.Scene.sn

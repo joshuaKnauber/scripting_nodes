@@ -21,8 +21,16 @@ def compile_addon(addon_tree):
     __write_blockcomment(txt, "UNREGISTER ADDON")
     __write_in_text(txt, __create_unregister_function(addon_tree))
     
+    
+    for graph in addon_tree.sn_graphs:
+        if graph.node_tree.has_changes:
+            graph.node_tree.set_changes(False)
+    print("compiled")
+
+    
     module = txt.as_module()
     addons.append({ "text": txt, "module": module, "addon_tree": addon_tree })
+
     return __register_module(module)
 
 
@@ -34,13 +42,20 @@ def addon_is_registered(addon_tree):
     
     
 def handle_file_load():
-    pass
+    for txt in bpy.data.texts:
+        if txt.is_sn_addon:
+            bpy.data.texts.remove(txt)
+    for tree in bpy.data.node_groups:
+        if len(tree.sn_graphs) > 0:
+            bpy.app.timers.register(tree.run_autocompile, first_interval=0.1)
+            if tree.sn_graphs[0].compile_on_start:
+                compile_addon(tree)
 
 
 def handle_file_unload():
     for addon in addons:
-        __remove_addon(addon)
-        
+        __unregister_module(addon["module"])
+
         
 def remove_addon(addon_tree):
     for addon in addons:
@@ -57,7 +72,6 @@ def __register_module(module):
 def __remove_addon(addon):
     __unregister_module(addon["module"])
     bpy.data.texts.remove(addon["text"])
-    addon["addon_tree"].has_changes = True
     addons.remove(addon)
     
     
@@ -66,7 +80,9 @@ def __unregister_module(module):
 
 
 def __create_text_file(name):
-    return bpy.data.texts.new(name)
+    txt = bpy.data.texts.new(name)
+    txt.is_sn_addon = True
+    return txt
 
 
 def __write_in_text(txt_file,text):

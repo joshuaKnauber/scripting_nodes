@@ -22,10 +22,6 @@ class SN_OT_Compile(bpy.types.Operator):
             self.report({"INFO"},message="Successfully compiled "+addon_tree.sn_graphs[0].name+"!")
         else:
             self.report({"WARNING"},message="There are errors in "+addon_tree.sn_graphs[0].name+"!")
-        
-        for graph in addon_tree.sn_graphs:
-            if graph.node_tree.has_changes:
-                graph.node_tree.has_changes = False
                 
         for a in context.screen.areas: a.tag_redraw()
         return {"FINISHED"}
@@ -41,12 +37,13 @@ class SN_OT_RemoveAddon(bpy.types.Operator):
     @classmethod
     def poll(cls, context):
         addon_tree = context.scene.sn.addon_tree()
-        return addon_tree != None and addon_is_registered(addon_tree)
+        return addon_tree != None and addon_is_registered(addon_tree) and not addon_tree.sn_graphs[0].autocompile
 
     def execute(self, context):
         addon_tree = context.scene.sn.addon_tree()
         
         remove_addon(addon_tree)
+        addon_tree.set_changes(True)
         
         for a in context.screen.areas: a.tag_redraw()
         return {"FINISHED"}
