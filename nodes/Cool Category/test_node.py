@@ -7,25 +7,16 @@ class SN_TestNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_TestNode"
     bl_label = "Test"
     bl_icon = "GRAPH"
-    node_color = (0.3,0.3,0.3)
     
-    
-    test: bpy.props.BoolProperty(default=False,
-                                update=SN_ScriptingBaseNode.update_needs_compile)
-    
-    
-    def draw_node(self,context,layout):
-        layout.prop(self,"test")
-    
+    node_options = {
+        "starts_tree": False,
+        "default_color": (0.3,0.3,0.3)
+    }
     
     def on_create(self,context):
-        self.add_execute_input("execute")
-        self.add_dynamic_execute_input("execute")
-        self.add_execute_output("execute")
-        self.add_interface_input("interface")
-        self.add_dynamic_interface_input("interface")
-        self.add_interface_output("interface")
-        self.add_dynamic_data_input("dynamic in")
-        self.add_dynamic_data_output("dynamic out")
-        self.add_string_output("string out")
-        self.add_string_input("string inp")
+        self.add_execute_input("Program")
+        self.add_execute_output("Program")
+        self.add_dynamic_data_input("lol")
+        
+    def code_evaluate(self, context, main_tree, socket_data, touched_socket):
+        pass

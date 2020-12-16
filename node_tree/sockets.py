@@ -138,7 +138,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             update=ScriptingSocket.socket_value_update,
                                             name="Value",
                                             description="Value of this socket")
-    
+
     @property
     def value(self):
         return self.default_value

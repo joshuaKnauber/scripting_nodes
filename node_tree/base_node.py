@@ -11,7 +11,11 @@ class SN_ScriptingBaseNode:
 
     bl_icon = "NONE"
     bl_label = "Node"
-    node_color = (1,0,1)
+    
+    node_options = {
+        "starts_tree": False,
+        "default_color": (1,0,1)
+    }
     
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
 
@@ -31,7 +35,7 @@ class SN_ScriptingBaseNode:
     def init(self,context):
         self.node_tree = self.id_data
         self.node_tree.set_changes(True)
-        self.color = self.node_color
+        self.color = self.node_options["default_color"]
         self.use_custom_color = True
         self.on_create(context)
 
@@ -41,6 +45,7 @@ class SN_ScriptingBaseNode:
 
 
     def copy(self,node):
+        self.node_tree = self.id_data
         self.node_tree.set_changes(True)
         self.on_copy(node)
 
@@ -133,13 +138,23 @@ class SN_ScriptingBaseNode:
         socket = self.outputs.new(idname,label)
         socket.setup_socket(removable,label)
         return socket
+    
+    
+    ### EVALUATE SOCKET
+    
+    
+    def eval(self, socket, indents=0):
+        #call evaluate on the sockets node
+        #add indents an return
+        return "    "*indents + "# test"
 
 
     ### RETURNED CODE
-    def code_register(self,context,node_tree,main_tree,socket_data): pass #TODO:optional only once in return vvv
-    def code_unregister(self,context,node_tree,main_tree,socket_data): pass
-    def code_imperative(self,context,node_tree,main_tree,socket_data): pass
-    def code_evaluate(self,context,node_tree,main_tree,socket_data,touched_socket): pass
+    def code_imports(self,context,node_tree,main_tree): pass #TODO:optional only once in return vvv
+    def code_register(self,context,node_tree,main_tree): pass
+    def code_unregister(self,context,node_tree,main_tree): pass
+    def code_imperative(self,context,node_tree,main_tree): pass
+    def code_evaluate(self,context,main_tree,touched_socket): pass
     
     
     ### RETURNED TYPES

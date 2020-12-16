@@ -16,6 +16,8 @@ def compile_addon(addon_tree):
     __write_in_text(txt, __create_addon_info(addon_tree))
     __write_blockcomment(txt, "SERPENS FUNCTIONS")
     __write_in_text(txt, __get_serpens_functions())
+    __write_blockcomment(txt, "EVALUATED CODE")
+    __write_in_text(txt, __create_evaluated(addon_tree))
     __write_blockcomment(txt, "REGISTER ADDON")
     __write_in_text(txt, __create_register_function(addon_tree))
     __write_blockcomment(txt, "UNREGISTER ADDON")
@@ -115,8 +117,8 @@ bl_info = {{
     "name": "{graph.name}",
     "description": "{graph.description}",
     "author": "{graph.author}",
-    "version": "({str(graph.version[0])+", "+str(graph.version[1])+", "+str(graph.version[2])})",
-    "blender": "({str(graph.blender[0])+", "+str(graph.blender[1])+", "+str(graph.blender[2])})",
+    "version": ({str(graph.version[0])+", "+str(graph.version[1])+", "+str(graph.version[2])}),
+    "blender": ({str(graph.blender[0])+", "+str(graph.blender[1])+", "+str(graph.blender[2])}),
     "location": "{graph.location}",
     "warning": "{graph.warning}",
     "wiki_url": "{graph.wiki_url}",
@@ -124,6 +126,27 @@ bl_info = {{
     "category": "{graph.category if graph.category!="CUSTOM" else graph.custom_category}"
 }}
 """
+
+
+def __evaluate_start_node(node, addon_tree):
+    node_result = node.code_evaluate(bpy.context, addon_tree, None)
+    node_code = "\n".join(node_result["code"])
+    return node_code
+
+
+def __evaluate_graph(graph, addon_tree):
+    graph_code = ""
+    for node in graph.node_tree.nodes:
+        if node.node_options["starts_tree"]:
+            graph_code += __evaluate_start_node(node, addon_tree)
+    return graph_code
+
+
+def __create_evaluated(addon_tree):
+    evaluated_code = ""
+    for graph in addon_tree.sn_graphs:
+        evaluated_code += __evaluate_graph(graph, addon_tree)
+    return evaluated_code
 
 
 def __create_register_function(addon_tree):
