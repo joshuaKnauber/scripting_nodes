@@ -47,7 +47,7 @@ class SN_PT_AddonErrorPanel(bpy.types.Panel):
         layout.prop(context.scene.sn,"show_char_control",text="",emboss=False,icon="PREFERENCES")
         
     def char_amount(self, context):
-        return int(context.area.regions[1].width // 16 * context.scene.sn.chars_per_line/10)
+        return context.area.regions[1].width // context.scene.sn.chars_per_line
 
     def draw(self, context):
         layout = self.layout
