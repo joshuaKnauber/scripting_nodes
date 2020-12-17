@@ -60,6 +60,13 @@ def compile_addon(addon_tree):
             __write_graphcomment(addon_data["text"], graph)
             __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["imports"])
         
+    # write imperative code
+    __write_blockcomment(addon_data["text"], "IMPERATIVE CODE")
+    for graph in addon_data["code"]["graph_code"]:
+        if addon_data["code"]["graph_code"][graph]["imperative"]:
+            __write_graphcomment(addon_data["text"], graph)
+            __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["imperative"])
+        
     # write evaluated nodes
     __write_blockcomment(addon_data["text"], "EVALUATED CODE")
     for graph in addon_data["code"]["graph_code"]:

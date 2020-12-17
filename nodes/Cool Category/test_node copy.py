@@ -33,10 +33,11 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
                     """
         }
         
-    def code_register(self, context, main_tree):
+    def code_imperative(self, context, main_tree):
         return {
             "code": f"""
-                    # hello im register
+                    # hello im imperative
+                    # {self.inputs[0].value}
                     """
         }
 
