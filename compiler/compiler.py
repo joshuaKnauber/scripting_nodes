@@ -1,5 +1,5 @@
 import bpy
-from time import time, sleep
+from time import time
 from .txt_blocks import license_block, serpens_functions
 
 
@@ -7,101 +7,110 @@ addons = []
 
 
 def compile_addon(addon_tree):
-    start_time = time()
-    
-    addon_data = __find_compiled_addon(addon_tree)
-    remove_addon(addon_tree)
-    txt = __create_text_file(addon_tree.sn_graphs[0].name)
-    addon_data["text"] = txt
-    
-    # add license block
-    if not "license_block" in addon_data["code"]:
-        addon_data["code"]["license_block"] = __get_license_block()
-    
-    # add addon info
-    addon_data["code"]["addon_info"] = __normalize_code(__create_addon_info(addon_tree), 0)
-
-    # add graph code placeholder
-    if not "graph_code" in addon_data["code"]:
-        addon_data["code"]["graph_code"] = {}
-
-    # collect existing did once lists
-    addon_did_once = {} 
-    for graph in addon_tree.sn_graphs:
-        if not graph.node_tree.has_changes and graph.name in addon_data["code"]["graph_code"]:
-            addon_did_once = {**addon_did_once, **addon_data["code"]["graph_code"][graph.name]["did_once"]}
-    
-    # go through all graphs
-    new_graph_code = {}
-    for graph in addon_tree.sn_graphs:
-        if graph.node_tree.has_changes or not graph.name in addon_data["code"]["graph_code"]:
-
-            # make graph code
-            graph_code, graph_did_once              = __evaluate_graph(graph, addon_tree, addon_did_once)
-            new_graph_code[graph.name]              = graph_code
-            new_graph_code[graph.name]["did_once"]  = graph_did_once
-            addon_did_once                          = {**addon_did_once, **graph_did_once}
-            graph.node_tree.has_changes             = False
-
-        else:
-            # add unchanged graph code
-            new_graph_code[graph.name] = addon_data["code"]["graph_code"][graph.name]
-
-    # add the graphs code
-    addon_data["code"]["graph_code"] = new_graph_code
-    
-    
-    # write license and addon info
-    __write_in_text(addon_data["text"], addon_data["code"]["license_block"])
-    __write_paragraphs(addon_data["text"], 2)
-    __write_in_text(addon_data["text"], addon_data["code"]["addon_info"])
-    
-    # write imports
-    __write_blockcomment(addon_data["text"], "IMPORTS")
-    for graph in addon_data["code"]["graph_code"]:
-        if addon_data["code"]["graph_code"][graph]["imports"]:
-            __write_graphcomment(addon_data["text"], graph)
-            __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["imports"])
+    try:
+        start_time = time()
         
-    # write imperative code
-    __write_blockcomment(addon_data["text"], "IMPERATIVE CODE")
-    for graph in addon_data["code"]["graph_code"]:
-        if addon_data["code"]["graph_code"][graph]["imperative"]:
-            __write_graphcomment(addon_data["text"], graph)
-            __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["imperative"])
+        # get and/or create addon data
+        addon_data = __find_compiled_addon(addon_tree)
+        remove_addon(addon_tree)
+        txt = __create_text_file(addon_tree.sn_graphs[0].name)
+        addon_data["text"] = txt
         
-    # write evaluated nodes
-    __write_blockcomment(addon_data["text"], "EVALUATED CODE")
-    for graph in addon_data["code"]["graph_code"]:
-        if addon_data["code"]["graph_code"][graph]["evaluated"]:
-            __write_graphcomment(addon_data["text"], graph)
-            __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["evaluated"])
-    
-    # write register function
-    __write_blockcomment(addon_data["text"], "REGISTER ADDON")
-    __write_in_text(addon_data["text"], "def register():")
-    __write_in_text(addon_data["text"], "   \"\"\" registers this addon \"\"\"")
-    for graph in addon_data["code"]["graph_code"]:
-        if addon_data["code"]["graph_code"][graph]["register"]:
-            __write_graphcomment(addon_data["text"], graph, 1)
-            __write_in_text(addon_data["text"], __normalize_code(addon_data["code"]["graph_code"][graph]["register"],1))
-    
-    # write unregister function
-    __write_blockcomment(addon_data["text"], "UNREGISTER ADDON")
-    __write_in_text(addon_data["text"], "def unregister():")
-    __write_in_text(addon_data["text"], "   \"\"\" removes this addon \"\"\"")
-    for graph in addon_data["code"]["graph_code"]:
-        if addon_data["code"]["graph_code"][graph]["unregister"]:
-            __write_graphcomment(addon_data["text"], graph, 1)
-            __write_in_text(addon_data["text"], __normalize_code(addon_data["code"]["graph_code"][graph]["unregister"],1))
-    
-    module = addon_data["text"].as_module()
-    addon_data["module"] = module
-    addons.append(addon_data)
+        # add license block
+        if not "license_block" in addon_data["code"]:
+            addon_data["code"]["license_block"] = __get_license_block()
+        
+        # add addon info
+        addon_data["code"]["addon_info"] = __normalize_code(__create_addon_info(addon_tree), 0)
 
-    end_time = time()
-    addon_tree.sn_graphs[0].last_compile_time = str(round(end_time-start_time,4))+"s"
-    return __register_module(module)
+        # add graph code placeholder
+        if not "graph_code" in addon_data["code"]:
+            addon_data["code"]["graph_code"] = {}
+
+        # collect existing did once lists
+        addon_did_once = {} 
+        for graph in addon_tree.sn_graphs:
+            if not graph.node_tree.has_changes and graph.name in addon_data["code"]["graph_code"]:
+                addon_did_once = {**addon_did_once, **addon_data["code"]["graph_code"][graph.name]["did_once"]}
+        
+        # go through all graphs
+        new_graph_code = {}
+        for graph in addon_tree.sn_graphs:
+            if graph.node_tree.has_changes or not graph.name in addon_data["code"]["graph_code"]:
+
+                # make graph code
+                graph_code, graph_did_once              = __evaluate_graph(graph, addon_tree, addon_did_once)
+                new_graph_code[graph.name]              = graph_code
+                new_graph_code[graph.name]["did_once"]  = graph_did_once
+                addon_did_once                          = {**addon_did_once, **graph_did_once}
+                graph.node_tree.has_changes             = False
+
+            else:
+                # add unchanged graph code
+                new_graph_code[graph.name] = addon_data["code"]["graph_code"][graph.name]
+
+        # add the graphs code
+        addon_data["code"]["graph_code"] = new_graph_code
+        
+        
+        # write license and addon info
+        __write_in_text(addon_data["text"], addon_data["code"]["license_block"])
+        __write_paragraphs(addon_data["text"], 2)
+        __write_in_text(addon_data["text"], addon_data["code"]["addon_info"])
+        
+        # write imports
+        __write_blockcomment(addon_data["text"], "IMPORTS")
+        for graph in addon_data["code"]["graph_code"]:
+            if addon_data["code"]["graph_code"][graph]["imports"]:
+                __write_graphcomment(addon_data["text"], graph)
+                __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["imports"])
+            
+        # write imperative code
+        __write_blockcomment(addon_data["text"], "IMPERATIVE CODE")
+        for graph in addon_data["code"]["graph_code"]:
+            if addon_data["code"]["graph_code"][graph]["imperative"]:
+                __write_graphcomment(addon_data["text"], graph)
+                __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["imperative"])
+            
+        # write evaluated nodes
+        __write_blockcomment(addon_data["text"], "EVALUATED CODE")
+        for graph in addon_data["code"]["graph_code"]:
+            if addon_data["code"]["graph_code"][graph]["evaluated"]:
+                __write_graphcomment(addon_data["text"], graph)
+                __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["evaluated"])
+        
+        # write register function
+        __write_blockcomment(addon_data["text"], "REGISTER ADDON")
+        __write_in_text(addon_data["text"], "def register():")
+        __write_in_text(addon_data["text"], "   \"\"\" registers this addon \"\"\"")
+        for graph in addon_data["code"]["graph_code"]:
+            if addon_data["code"]["graph_code"][graph]["register"]:
+                __write_graphcomment(addon_data["text"], graph, 1)
+                __write_in_text(addon_data["text"], __normalize_code(addon_data["code"]["graph_code"][graph]["register"],1))
+        
+        # write unregister function
+        __write_blockcomment(addon_data["text"], "UNREGISTER ADDON")
+        __write_in_text(addon_data["text"], "def unregister():")
+        __write_in_text(addon_data["text"], "   \"\"\" removes this addon \"\"\"")
+        for graph in addon_data["code"]["graph_code"]:
+            if addon_data["code"]["graph_code"][graph]["unregister"]:
+                __write_graphcomment(addon_data["text"], graph, 1)
+                __write_in_text(addon_data["text"], __normalize_code(addon_data["code"]["graph_code"][graph]["unregister"],1))
+        
+        # make module
+        module = addon_data["text"].as_module()
+        addon_data["module"] = module
+        addons.append(addon_data)
+
+        # save time
+        end_time = time()
+        addon_tree.sn_graphs[0].last_compile_time = str(round(end_time-start_time,4))+"s"
+
+        # register module
+        return __register_module(module)
+    
+    except:
+        return False
 
 
 def addon_is_registered(addon_tree):
@@ -143,8 +152,11 @@ def __find_compiled_addon(addon_tree):
     
     
 def __register_module(module):
-    # module.register()
-    return True
+    try:
+        module.register()
+        return True
+    except:
+        return False
 
 
 def __remove_addon(addon):
@@ -154,9 +166,8 @@ def __remove_addon(addon):
     
     
 def __unregister_module(module):
-    # if module:
-    #     module.unregister()
-    pass
+    if module:
+        module.unregister()
 
 
 def __create_text_file(name):

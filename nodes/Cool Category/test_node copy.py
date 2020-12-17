@@ -37,6 +37,7 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
                     # hello im imperative
+                    pfe
                     # {self.inputs[0].value}
                     """
         }
