@@ -5,34 +5,90 @@ from .txt_blocks import license_block, serpens_functions
 addons = []
 
 
-
 def compile_addon(addon_tree):
+    addon_data = __find_compiled_addon(addon_tree)
     remove_addon(addon_tree)
     txt = __create_text_file(addon_tree.sn_graphs[0].name)
+    addon_data["text"] = txt
     
-    __write_in_text(txt, __get_license_block())
-    __write_paragraphs(txt, 2)
-    __write_in_text(txt, __create_addon_info(addon_tree))
-    __write_blockcomment(txt, "SERPENS FUNCTIONS")
-    __write_in_text(txt, __get_serpens_functions())
-    __write_blockcomment(txt, "EVALUATED CODE")
-    __write_in_text(txt, __create_evaluated(addon_tree))
-    __write_blockcomment(txt, "REGISTER ADDON")
-    __write_in_text(txt, __create_register_function(addon_tree))
-    __write_blockcomment(txt, "UNREGISTER ADDON")
-    __write_in_text(txt, __create_unregister_function(addon_tree))
+    # add license block
+    if not "license_block" in addon_data["code"]:
+        addon_data["code"]["license_block"] = __get_license_block()
     
-    
+    # add addon info
+    addon_data["code"]["addon_info"] = __create_addon_info(addon_tree)
+
+    # add graph code placeholder
+    if not "graph_code" in addon_data["code"]:
+        addon_data["code"]["graph_code"] = {}
+
+    # go through all graphs
+    new_graph_code = {}
     for graph in addon_tree.sn_graphs:
-        if graph.node_tree.has_changes:
-            graph.node_tree.set_changes(False)
-    print("compiled")
+        if graph.node_tree.has_changes or not graph.name in addon_data["code"]["graph_code"]:
+
+            # make graph code
+            new_graph_code[graph.name] = __evaluate_graph(graph, addon_tree)
+
+        else:
+            new_graph_code[graph.name] = addon_data["code"]["graph_code"][graph.name]
+    
+    # add the graph code
+    addon_data["code"]["graph_code"] = new_graph_code
+    
+    
+    __write_in_text(addon_data["text"], addon_data["code"]["license_block"])
+    __write_paragraphs(addon_data["text"], 2)
+    __write_in_text(addon_data["text"], addon_data["code"]["addon_info"])
+    
+    __write_blockcomment(addon_data["text"], "IMPORTS")
+    for graph in addon_data["code"]["graph_code"]:
+        if addon_data["code"]["graph_code"][graph]["imports"]:
+            __write_graphcomment(addon_data["text"], graph)
+            __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["imports"])
+        
+    __write_blockcomment(addon_data["text"], "EVALUATED CODE")
+    for graph in addon_data["code"]["graph_code"]:
+        if addon_data["code"]["graph_code"][graph]["evaluated"]:
+            __write_graphcomment(addon_data["text"], graph)
+            __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["evaluated"])
+        
+    __write_blockcomment(addon_data["text"], "REGISTER ADDON")
+    for graph in addon_data["code"]["graph_code"]:
+        if addon_data["code"]["graph_code"][graph]["register"]:
+            __write_graphcomment(addon_data["text"], graph)
+            __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["register"])
+        
+    __write_blockcomment(addon_data["text"], "UNREGISTER ADDON")
+    for graph in addon_data["code"]["graph_code"]:
+        if addon_data["code"]["graph_code"][graph]["unregister"]:
+            __write_graphcomment(addon_data["text"], graph)
+            __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["unregister"])
+    
+    # __write_in_text(txt, __create_addon_info(addon_tree))
+    # __write_blockcomment(txt, "SERPENS FUNCTIONS")
+    # __write_in_text(txt, __get_serpens_functions())
+    
+    
+    # for graph in addon_tree.sn_graphs:
+    #     if graph.node_tree.has_changes:
+    #         graph.node_tree.set_changes(False)
+    # print("compiled")
 
     
-    module = txt.as_module()
-    addons.append({ "text": txt, "module": module, "addon_tree": addon_tree })
+    module = addon_data["text"].as_module()
+    addon_data["module"] = module
+    addons.append(addon_data)
 
     return __register_module(module)
+
+
+def __find_compiled_addon(addon_tree):
+    for addon in addons:
+        if addon["addon_tree"] == addon_tree:
+            edit_addon = addon
+            return edit_addon
+    return { "text": None, "code": {}, "module": None, "addon_tree": addon_tree }
 
 
 def addon_is_registered(addon_tree):
@@ -77,7 +133,8 @@ def __remove_addon(addon):
     
     
 def __unregister_module(module):
-    # module.unregister()
+    # if module:
+    #     module.unregister()
     pass
 
 
@@ -100,6 +157,12 @@ def __write_blockcomment(txt_file,text):
     __write_paragraphs(txt_file, 2)
     txt_file.write("###############   " + text)
     __write_paragraphs(txt_file, 2)
+
+
+def __write_graphcomment(txt_file,text):
+    __write_paragraphs(txt_file, 1)
+    txt_file.write("#######   " + text)
+    __write_paragraphs(txt_file, 1)
     
     
 def __get_license_block():
@@ -155,29 +218,9 @@ def process_node(node, touched_socket, indents=0):
 
 
 def __evaluate_graph(graph, addon_tree):
-    graph_code = ""
+    graph_code = { "imports":"", "imperative":"", "evaluated":"", "register":"", "unregister":"" }
     for node in graph.node_tree.nodes:
+        
         if node.node_options["starts_tree"]:
-            graph_code += process_node(node, None)
+            graph_code["evaluated"] += process_node(node, None)
     return graph_code
-
-
-def __create_evaluated(addon_tree):
-    evaluated_code = ""
-    for graph in addon_tree.sn_graphs:
-        evaluated_code += __evaluate_graph(graph, addon_tree)
-    return evaluated_code
-
-
-def __create_register_function(addon_tree):
-    return """
-def register():
-    pass
-"""
-
-
-def __create_unregister_function(addon_tree):
-    return """
-def unregister():
-    pass
-"""
