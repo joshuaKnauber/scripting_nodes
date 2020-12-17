@@ -77,6 +77,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     chars_per_line: bpy.props.IntProperty(default=10,
                                           min=5,
+                                          max=50,
                                           name="Line Wrap",
                                           description="Amount of characters which should go in one line")
 
