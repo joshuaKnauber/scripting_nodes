@@ -13,7 +13,7 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
         "starts_tree": True,
         "import_once": True,
         "evaluate_once": False,
-        "register_once": False,
+        "register_once": True,
         "unregister_once": False,
         "imperative_once": False,
     }
@@ -30,6 +30,13 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
                     import bpy
+                    """
+        }
+        
+    def code_register(self, context, main_tree):
+        return {
+            "code": f"""
+                    # hello im register
                     """
         }
 

@@ -69,17 +69,21 @@ def compile_addon(addon_tree):
     
     # write register function
     __write_blockcomment(addon_data["text"], "REGISTER ADDON")
+    __write_in_text(addon_data["text"], "def register():")
+    __write_in_text(addon_data["text"], "   \"\"\" registers this addon \"\"\"")
     for graph in addon_data["code"]["graph_code"]:
         if addon_data["code"]["graph_code"][graph]["register"]:
-            __write_graphcomment(addon_data["text"], graph)
-            __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["register"])
+            __write_graphcomment(addon_data["text"], graph, 1)
+            __write_in_text(addon_data["text"], __normalize_code(addon_data["code"]["graph_code"][graph]["register"],1))
     
     # write unregister function
     __write_blockcomment(addon_data["text"], "UNREGISTER ADDON")
+    __write_in_text(addon_data["text"], "def unregister():")
+    __write_in_text(addon_data["text"], "   \"\"\" removes this addon \"\"\"")
     for graph in addon_data["code"]["graph_code"]:
         if addon_data["code"]["graph_code"][graph]["unregister"]:
-            __write_graphcomment(addon_data["text"], graph)
-            __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["unregister"])
+            __write_graphcomment(addon_data["text"], graph, 1)
+            __write_in_text(addon_data["text"], __normalize_code(addon_data["code"]["graph_code"][graph]["unregister"],1))
     
     module = addon_data["text"].as_module()
     addon_data["module"] = module
@@ -164,9 +168,9 @@ def __write_blockcomment(txt_file,text):
     __write_paragraphs(txt_file, 2)
 
 
-def __write_graphcomment(txt_file,text):
+def __write_graphcomment(txt_file,text,indents=0):
     __write_paragraphs(txt_file, 1)
-    txt_file.write("#######   " + text)
+    txt_file.write(" "*indents*4 + "#######   " + text)
     __write_paragraphs(txt_file, 1)
     
     

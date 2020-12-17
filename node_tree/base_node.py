@@ -14,13 +14,13 @@ class SN_ScriptingBaseNode:
     bl_label = "Node"
     
     node_options = {
-        "default_color": (1,0,1)
+        "default_color": (1,0,1),
         "starts_tree": False,
         "import_once": False,
         "evaluate_once": False,
         "register_once": False,
         "unregister_once": False,
-        "imperative_once": False,
+        "imperative_once": False
     }
     
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
