@@ -11,8 +11,8 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.3,0.3,0.3),
         "starts_tree": True,
-        "import_once": False,
-        "evaluate_once": True,
+        "import_once": True,
+        "evaluate_once": False,
         "register_once": False,
         "unregister_once": False,
         "imperative_once": False,
@@ -32,7 +32,7 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
                     import bpy
                     """
         }
-        
+
     def code_evaluate(self, context, main_tree, touched_socket):
         strings = []
         for inp in self.inputs:
@@ -54,5 +54,6 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {"# "+self.inputs[0].value if self.inputs[0].value else ""}
                         {self.list_values(strings, 6)}
                         pass # again
+                        
                     """
         }

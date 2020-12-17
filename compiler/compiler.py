@@ -22,12 +22,13 @@ def compile_addon(addon_tree):
     if not "graph_code" in addon_data["code"]:
         addon_data["code"]["graph_code"] = {}
 
-    # go through all graphs
+    # collect existing did once lists
     addon_did_once = {} 
     for graph in addon_tree.sn_graphs:
         if not graph.node_tree.has_changes and graph.name in addon_data["code"]["graph_code"]:
             addon_did_once = {**addon_did_once, **addon_data["code"]["graph_code"][graph.name]["did_once"]}
     
+    # go through all graphs
     new_graph_code = {}
     for graph in addon_tree.sn_graphs:
         if graph.node_tree.has_changes or not graph.name in addon_data["code"]["graph_code"]:
@@ -40,9 +41,10 @@ def compile_addon(addon_tree):
             graph.node_tree.has_changes             = False
 
         else:
+            # add unchanged graph code
             new_graph_code[graph.name] = addon_data["code"]["graph_code"][graph.name]
-    print(addon_did_once)
-    # add the graph code
+
+    # add the graphs code
     addon_data["code"]["graph_code"] = new_graph_code
     
     
@@ -271,8 +273,6 @@ def __should_imperative(node, imperative_list):
 def __evaluate_graph(graph, addon_tree, addon_did_once):
     graph_code = { "imports":"", "imperative":"", "evaluated":"", "register":"", "unregister":"" }
     graph_did_once = { "imports":[], "imperative":[], "evaluated":[], "register":[], "unregister":[] }
-    if not addon_did_once:
-        addon_did_once = { "imports":[], "imperative":[], "evaluated":[], "register":[], "unregister":[] }
 
     for node in graph.node_tree.nodes:
         

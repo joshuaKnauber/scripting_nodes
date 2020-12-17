@@ -14,8 +14,8 @@ class SN_ScriptingBaseNode:
     bl_label = "Node"
     
     node_options = {
+        "default_color": (1,0,1)
         "starts_tree": False,
-        "default_color": (1,0,1),
         "import_once": False,
         "evaluate_once": False,
         "register_once": False,
@@ -163,7 +163,7 @@ class SN_ScriptingBaseNode:
 
 
     ### RETURNED CODE
-    def code_imports(self,context,main_tree): pass #TODO:optional only once in return vvv
+    def code_imports(self,context,main_tree): pass
     def code_register(self,context,main_tree): pass
     def code_unregister(self,context,main_tree): pass
     def code_imperative(self,context,main_tree): pass
