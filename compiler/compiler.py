@@ -109,7 +109,10 @@ def compile_addon(addon_tree):
         # register module
         return __register_module(module)
     
-    except ValueError:
+    except Exception as exc:
+        print("# # # # # # # # # ERROR WHILE COMPILING # # # # # # # # #")
+        print(exc)
+        print("# # # # # # # # # # # # # # # # # # # # # # # # # # # # #")
         return False
 
 
@@ -140,6 +143,7 @@ def handle_file_unload():
 def remove_addon(addon_tree):
     for addon in addons:
         if addon["addon_tree"] == addon_tree:
+            addon["addon_tree"].sn_graphs[0].errors.clear()
             __remove_addon(addon)
             break
 
