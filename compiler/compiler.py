@@ -37,58 +37,44 @@ def compile_addon(addon_tree):
     addon_data["code"]["graph_code"] = new_graph_code
     
     
+    # write license and addon info
     __write_in_text(addon_data["text"], addon_data["code"]["license_block"])
     __write_paragraphs(addon_data["text"], 2)
     __write_in_text(addon_data["text"], addon_data["code"]["addon_info"])
     
+    # write imports
     __write_blockcomment(addon_data["text"], "IMPORTS")
     for graph in addon_data["code"]["graph_code"]:
         if addon_data["code"]["graph_code"][graph]["imports"]:
             __write_graphcomment(addon_data["text"], graph)
             __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["imports"])
         
+    # write evaluated nodes
     __write_blockcomment(addon_data["text"], "EVALUATED CODE")
     for graph in addon_data["code"]["graph_code"]:
         if addon_data["code"]["graph_code"][graph]["evaluated"]:
             __write_graphcomment(addon_data["text"], graph)
             __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["evaluated"])
-        
+    
+    # write register function
     __write_blockcomment(addon_data["text"], "REGISTER ADDON")
     for graph in addon_data["code"]["graph_code"]:
         if addon_data["code"]["graph_code"][graph]["register"]:
             __write_graphcomment(addon_data["text"], graph)
             __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["register"])
-        
+    
+    # write unregister function
     __write_blockcomment(addon_data["text"], "UNREGISTER ADDON")
     for graph in addon_data["code"]["graph_code"]:
         if addon_data["code"]["graph_code"][graph]["unregister"]:
             __write_graphcomment(addon_data["text"], graph)
             __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["unregister"])
     
-    # __write_in_text(txt, __create_addon_info(addon_tree))
-    # __write_blockcomment(txt, "SERPENS FUNCTIONS")
-    # __write_in_text(txt, __get_serpens_functions())
-    
-    
-    # for graph in addon_tree.sn_graphs:
-    #     if graph.node_tree.has_changes:
-    #         graph.node_tree.set_changes(False)
-    # print("compiled")
-
-    
     module = addon_data["text"].as_module()
     addon_data["module"] = module
     addons.append(addon_data)
 
     return __register_module(module)
-
-
-def __find_compiled_addon(addon_tree):
-    for addon in addons:
-        if addon["addon_tree"] == addon_tree:
-            edit_addon = addon
-            return edit_addon
-    return { "text": None, "code": {}, "module": None, "addon_tree": addon_tree }
 
 
 def addon_is_registered(addon_tree):
@@ -119,6 +105,14 @@ def remove_addon(addon_tree):
         if addon["addon_tree"] == addon_tree:
             __remove_addon(addon)
             break
+
+
+def __find_compiled_addon(addon_tree):
+    for addon in addons:
+        if addon["addon_tree"] == addon_tree:
+            edit_addon = addon
+            return edit_addon
+    return { "text": None, "code": {}, "module": None, "addon_tree": addon_tree }
     
     
 def __register_module(module):
