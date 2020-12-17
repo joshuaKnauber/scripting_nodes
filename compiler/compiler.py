@@ -1,4 +1,5 @@
 import bpy
+from time import time, sleep
 from .txt_blocks import license_block, serpens_functions
 
 
@@ -6,6 +7,8 @@ addons = []
 
 
 def compile_addon(addon_tree):
+    start_time = time()
+    
     addon_data = __find_compiled_addon(addon_tree)
     remove_addon(addon_tree)
     txt = __create_text_file(addon_tree.sn_graphs[0].name)
@@ -96,6 +99,8 @@ def compile_addon(addon_tree):
     addon_data["module"] = module
     addons.append(addon_data)
 
+    end_time = time()
+    addon_tree.sn_graphs[0].last_compile_time = str(round(end_time-start_time,4))+"s"
     return __register_module(module)
 
 

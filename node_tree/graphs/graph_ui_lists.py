@@ -69,6 +69,10 @@ class SN_Graph(bpy.types.PropertyGroup):
                                              description="Compiles this addon when you open this blender scene")
 
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
+    
+    last_compile_time: bpy.props.StringProperty(default="-s",
+                                               name="Last Time",
+                                               description="The time the last compile took")
 
     bookmarked: bpy.props.BoolProperty(default=False,
                                        update=update_changes,

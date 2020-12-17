@@ -70,4 +70,6 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="Select a bookmarked graph")
 
 
-    ttp_addon_info: bpy.props.BoolProperty(default=True,name="Addon Info",description="This is the information that will be displayed in the user preferences")
+    ttp_addon_info: bpy.props.BoolProperty(default=True,
+                                           name="Addon Info",
+                                           description="This is the information that will be displayed in the user preferences")
