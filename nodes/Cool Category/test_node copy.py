@@ -9,9 +9,13 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_icon = "GRAPH"
     
     node_options = {
+        "default_color": (0.3,0.3,0.3),
         "starts_tree": True,
+        "import_once": False,
+        "evaluate_once": True,
         "register_once": False,
-        "default_color": (0.3,0.3,0.3)
+        "unregister_once": False,
+        "imperative_once": False,
     }
 
     def on_create(self,context):
@@ -21,6 +25,13 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_string_input("print 1")
         self.add_string_input("print 2")
         self.add_string_input("print 3")
+        
+    def code_imports(self, context, main_tree):
+        return {
+            "code": f"""
+                    import bpy
+                    """
+        }
         
     def code_evaluate(self, context, main_tree, touched_socket):
         strings = []

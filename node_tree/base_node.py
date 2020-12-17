@@ -15,8 +15,12 @@ class SN_ScriptingBaseNode:
     
     node_options = {
         "starts_tree": False,
+        "default_color": (1,0,1),
+        "import_once": False,
+        "evaluate_once": False,
         "register_once": False,
-        "default_color": (1,0,1)
+        "unregister_once": False,
+        "imperative_once": False,
     }
     
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
@@ -159,10 +163,10 @@ class SN_ScriptingBaseNode:
 
 
     ### RETURNED CODE
-    def code_imports(self,context,node_tree,main_tree): pass #TODO:optional only once in return vvv
-    def code_register(self,context,node_tree,main_tree): pass
-    def code_unregister(self,context,node_tree,main_tree): pass
-    def code_imperative(self,context,node_tree,main_tree): pass
+    def code_imports(self,context,main_tree): pass #TODO:optional only once in return vvv
+    def code_register(self,context,main_tree): pass
+    def code_unregister(self,context,main_tree): pass
+    def code_imperative(self,context,main_tree): pass
     def code_evaluate(self,context,main_tree,touched_socket): pass
     
     
