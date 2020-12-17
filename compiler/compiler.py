@@ -160,7 +160,11 @@ def __unregister_module(module):
 
 
 def __create_text_file(name):
-    txt = bpy.data.texts.new(name)
+    addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
+    if addon_prefs.show_txt:
+        txt = bpy.data.texts.new(name)
+    else:
+        txt = bpy.data.texts.new("."+name)
     txt.is_sn_addon = True
     return txt
 

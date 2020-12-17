@@ -184,7 +184,7 @@ class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
                 return self.links[0].to_socket.get_value(indents)
             else:
                 return process_node(self.node, self, indents)
-        return "pass"
+        return "pass\n"
     
     def draw_socket(self, context, layout, row, node, text):
         row.label(text=text)
