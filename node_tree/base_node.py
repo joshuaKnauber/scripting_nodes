@@ -14,7 +14,7 @@ class SN_ScriptingBaseNode:
     bl_label = "Node"
     
     node_options = {
-        "default_color": (1,0,1),
+        "default_color": (0.3,0.3,0.3),
         "starts_tree": False,
         "import_once": False,
         "evaluate_once": False,
@@ -41,7 +41,10 @@ class SN_ScriptingBaseNode:
     def init(self,context):
         self.node_tree = self.id_data
         self.node_tree.set_changes(True)
-        self.color = self.node_options["default_color"]
+        if "default_color" in self.node_options:
+            self.color = self.node_options["default_color"]
+        else:
+            self.color = (0.3,0.3,0.3)
         self.use_custom_color = True
         self.on_create(context)
 
