@@ -1,6 +1,9 @@
 import bpy
 
 
+PROPERTY_VAR_TYPES = ["STRING", "INTEGER"]
+
+
 class SN_PT_GraphPanel(bpy.types.Panel):
     bl_idname = "SN_PT_GraphPanel"
     bl_label = "Graphs"
@@ -64,6 +67,12 @@ class SN_PT_VariablePanel(bpy.types.Panel):
             
             col.prop(var,"var_type",text="Type")
             col.separator()
+            
+            if var.var_type in PROPERTY_VAR_TYPES:
+                col.prop(var,"make_property",text="Make Property")
+                if var.make_property:
+                    col.prop(var,"attach_property_to",text="Attach To")
+                col.separator()
             
             if var.var_type == "String":
                 col.prop(var,"str_default")

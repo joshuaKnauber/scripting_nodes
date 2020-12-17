@@ -26,9 +26,9 @@ def get_unique_name(collection, base_name):
 
 
 variable_icons = {
-    "String": "SORTALPHA",
-    "Integer": "LINENUMBERS_ON",
-    "List": "PRESET"
+    "STRING": "SORTALPHA",
+    "INTEGER": "LINENUMBERS_ON",
+    "LIST": "PRESET"
 }
 
 
@@ -53,14 +53,41 @@ class SN_Variable(bpy.types.PropertyGroup):
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
 
     def get_var_types(self,context):
-        items = [("String","String","String",variable_icons["String"],0),
-                 ("Integer","Integer","Integer",variable_icons["Integer"],1),
-                 ("List","List","List",variable_icons["List"],2)]
+        items = [("STRING","String","String",variable_icons["STRING"],0),
+                 ("INTEGER","Integer","Integer",variable_icons["INTEGER"],1),
+                 ("LIST","List","List",variable_icons["LIST"],2)]
         return items
     
+    def update_var_type(self,context):
+        self.make_property = False
+    
     var_type: bpy.props.EnumProperty(items=get_var_types,
+                                     update=update_var_type,
                                      name="Variable Type",
                                      description="The type of value that this variable can store")
+    
+    def update_make_property(self,context):
+        self.attach_property_to = "Scene"
+    
+    make_property: bpy.props.BoolProperty(default=False,
+                                          update=update_make_property,
+                                        name="Make Property",
+                                        description="Make this variable into a property that can be attached to ID objects")
+
+    def get_attach_items(self,context):
+        options = ["Action", "Armature", "Brush", "CacheFile", "Camera", "Collection", "Curve", "FreestyleLineStyle",
+                   "GreasePencil", "Image", "Key", "Lattice", "Library", "Light", "LightProbe", "Mask", "Material",
+                   "Mesh", "MetaBall", "MovieClip", "NodeTree", "Object", "PaintCurve", "Palette", "ParticleSettings",
+                   "Scene", "Screen", "Sound", "Speaker", "Text", "Texture", "VectorFont", "Volume", "WindowManager",
+                   "WorkSpace", "World"]
+        items = []
+        for option in options:
+            items.append((option,option,option))
+        return items
+    
+    attach_property_to: bpy.props.EnumProperty(items=get_attach_items,
+                                               name="Attach To",
+                                               description="This is the ID object which this property will be attached to")
     
     str_default: bpy.props.StringProperty(default="",
                                         name="Default Value",
