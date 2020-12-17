@@ -10,13 +10,19 @@ class SN_TestNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     node_options = {
         "starts_tree": False,
+        "register_once": False,
         "default_color": (0.3,0.3,0.3)
     }
     
     def on_create(self,context):
         self.add_execute_input("Program")
+        self.add_string_input("lol")
         self.add_execute_output("Program")
-        self.add_dynamic_data_input("lol")
         
-    def code_evaluate(self, context, main_tree, socket_data, touched_socket):
-        pass
+    def code_evaluate(self, context, main_tree, touched_socket):
+        return {
+            "code": f"""
+                    # this worked i think {self.inputs[1].value}
+                        # but this won't
+                    """
+        }

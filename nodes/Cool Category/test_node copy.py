@@ -10,21 +10,38 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     node_options = {
         "starts_tree": True,
+        "register_once": False,
         "default_color": (0.3,0.3,0.3)
     }
 
     def on_create(self,context):
         self.add_execute_output("Program")
-        self.add_string_output("help")
+        self.add_execute_output("Program")
+        self.add_execute_output("Program")
+        self.add_string_input("print 1")
+        self.add_string_input("print 2")
+        self.add_string_input("print 3")
         
     def code_evaluate(self, context, main_tree, touched_socket):
+        strings = []
+        for inp in self.inputs:
+            if inp.sn_type == "STRING":
+                strings.append("# "+inp.value)
+                
+        programs = []
+        for out in self.outputs:
+            if out.sn_type == "EXECUTE":
+                programs.append(out.block(0))
+                
         return {
-            "code": """
+            "code": f"""
                     def test():
                         pass
-                        {{my_socket}}
-                    """,
-            "data": {
-                "my_socket": self.outputs[0]
-            }
+                        print("{self.inputs[0].value}")
+                        {self.outputs[0].block(6)}
+                        {self.list_blocks(programs, 6)}
+                        {"# "+self.inputs[0].value if self.inputs[0].value else ""}
+                        {self.list_values(strings, 6)}
+                        pass # again
+                    """
         }

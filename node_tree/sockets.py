@@ -1,4 +1,5 @@
 import bpy
+from ..compiler.compiler import process_node
 
 
 
@@ -20,9 +21,17 @@ class ScriptingSocket:
     
     connects_to = []
     socket_shape = "CIRCLE"
+    sn_type = ""
     removable: bpy.props.BoolProperty(default=False)
     default_text: bpy.props.StringProperty()
     output_limit = 9999
+    
+    def get_value(self, indents=0): return ""
+    @property
+    def value(self): return self.get_value(0)
+    def block(self, indents):
+        code = self.get_value(indents)
+        return code[indents*4:]
     
     def socket_value_update(self,context):
         self.node.node_tree.set_changes(True)
@@ -132,6 +141,7 @@ class SN_RemoveSocket(bpy.types.Operator):
 
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
+    sn_type = "STRING"
     connects_to = ["SN_StringSocket","SN_DynamicDataSocket"]
     
     default_value: bpy.props.StringProperty(default="",
@@ -139,9 +149,8 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             name="Value",
                                             description="Value of this socket")
 
-    @property
-    def value(self):
-        return self.default_value
+    def get_value(self, indents=0):
+        return " "*indents*4 + self.default_value
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:
@@ -164,9 +173,18 @@ class SN_DynamicDataSocket(bpy.types.NodeSocket, DynamicSocket):
 
 class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Execute"
+    sn_type = "EXECUTE"
     connects_to = ["SN_ExecuteSocket", "SN_DynamicExecuteSocket"]
     socket_shape = "DIAMOND"
     output_limit = 1
+
+    def get_value(self, indents=0):
+        if self.is_linked:
+            if self.is_output:
+                return self.links[0].to_socket.get_value(indents)
+            else:
+                return process_node(self.node, self, indents)
+        return "pass"
     
     def draw_socket(self, context, layout, row, node, text):
         row.label(text=text)
@@ -187,9 +205,13 @@ class SN_DynamicExecuteSocket(bpy.types.NodeSocket, DynamicSocket):
 
 class SN_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Interface"
+    sn_type = "INTERFACE"
     connects_to = ["SN_InterfaceSocket", "SN_DynamicInterfaceSocket"]
     socket_shape = "DIAMOND"
     output_limit = 1
+
+    def get_value(self, indents=0):
+        return ""
     
     def draw_socket(self, context, layout, row, node, text):
         row.label(text=text)

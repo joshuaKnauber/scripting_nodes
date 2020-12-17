@@ -23,7 +23,7 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         
         layout.use_property_split = True
         layout.use_property_decorate = False
-        layout.prop(addon_graph, "autocompile", text="Auto Compile")
+        # layout.prop(addon_graph, "autocompile", text="Auto Compile")
         if addon_graph.autocompile:
             layout.prop(addon_graph, "autocompile_delay", text="Delay")
         layout.prop(addon_graph, "compile_on_start", text="Compile on Startup")

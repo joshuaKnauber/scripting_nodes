@@ -2,7 +2,6 @@ import bpy
 from .txt_blocks import license_block, serpens_functions
 
 
-
 addons = []
 
 
@@ -67,7 +66,7 @@ def remove_addon(addon_tree):
     
     
 def __register_module(module):
-    module.register()
+    # module.register()
     return True
 
 
@@ -78,7 +77,8 @@ def __remove_addon(addon):
     
     
 def __unregister_module(module):
-    module.unregister()
+    # module.unregister()
+    pass
 
 
 def __create_text_file(name):
@@ -128,9 +128,29 @@ bl_info = {{
 """
 
 
-def __evaluate_start_node(node, addon_tree):
-    node_result = node.code_evaluate(bpy.context, addon_tree, None)
-    node_code = "\n".join(node_result["code"])
+def __normalize_code(code, indents):
+    code = code.split("\n")
+    remove_indents = 999
+    for line in code:
+        if not line.isspace() and line:
+            amount_spaces = len(line) - len(line.lstrip())
+            remove_indents = min(amount_spaces, remove_indents)
+    new_code = []
+    for line in code:
+        if len(line) >= remove_indents:
+            new_code.append( " "*indents*4 + line[remove_indents:] )
+    if new_code and new_code[-1].isspace():
+        new_code = new_code[:-1]
+    return "\n".join(new_code)
+
+
+def combine_blocks(block_list, indents):
+    return __normalize_code("".join(block_list), indents)[indents*4:]
+
+
+def process_node(node, touched_socket, indents=0):
+    node_result = node.code_evaluate(bpy.context, bpy.context.scene.sn.addon_tree(), touched_socket)
+    node_code = __normalize_code(node_result["code"], indents)
     return node_code
 
 
@@ -138,7 +158,7 @@ def __evaluate_graph(graph, addon_tree):
     graph_code = ""
     for node in graph.node_tree.nodes:
         if node.node_options["starts_tree"]:
-            graph_code += __evaluate_start_node(node, addon_tree)
+            graph_code += process_node(node, None)
     return graph_code
 
 

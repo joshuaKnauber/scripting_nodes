@@ -1,5 +1,6 @@
 import bpy
 from .sockets import add_to_remove_links
+from ..compiler.compiler import combine_blocks
 
 
 
@@ -14,6 +15,7 @@ class SN_ScriptingBaseNode:
     
     node_options = {
         "starts_tree": False,
+        "register_once": False,
         "default_color": (1,0,1)
     }
     
@@ -140,13 +142,20 @@ class SN_ScriptingBaseNode:
         return socket
     
     
-    ### EVALUATE SOCKET
+    ### EVALUATE CODE
     
     
-    def eval(self, socket, indents=0):
-        #call evaluate on the sockets node
-        #add indents an return
-        return "    "*indents + "# test"
+    def list_values(self, value_list, indents):
+        code = ""
+        for value in value_list:
+            code += " "*indents*4 + value + "\n"
+        if len(code) >= indents*4:
+            return code[indents*4:]
+        return code
+    
+    
+    def list_blocks(self, block_list, indents):
+        return combine_blocks(block_list, indents)
 
 
     ### RETURNED CODE
