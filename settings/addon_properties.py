@@ -25,8 +25,15 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         if items:
             return items
         return [("NONE","NONE","NONE")]
+    
+    
+    def update_editing_addon(self,context):
+        addon_tree = self.addon_tree()
+        addon_tree.sn_graph_index = addon_tree.sn_graph_index
+
 
     editing_addon: bpy.props.EnumProperty(items=get_addon_items,
+                                        update=update_editing_addon,
                                         name="Editing Addon",
                                         description="Select the addon you want to edit")
 
