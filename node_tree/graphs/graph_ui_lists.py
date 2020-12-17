@@ -28,7 +28,17 @@ def get_unique_name(collection, base_name):
                 if item_base_name == base_name:
                     max_num = max(max_num, int(item.name.split(".")[-1]))
         return base_name + "." + str(max_num+1).zfill(3)
-
+    
+    
+    
+class SN_Error(bpy.types.PropertyGroup):
+    
+    title: bpy.props.StringProperty()
+    description: bpy.props.StringProperty()
+    fatal: bpy.props.BoolProperty()
+    node: bpy.props.StringProperty()
+    node_tree: bpy.props.StringProperty()
+    
 
 
 class SN_Graph(bpy.types.PropertyGroup):
@@ -69,6 +79,8 @@ class SN_Graph(bpy.types.PropertyGroup):
                                              description="Compiles this addon when you open this blender scene")
 
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
+    
+    errors: bpy.props.CollectionProperty(type=SN_Error)
     
     last_compile_time: bpy.props.StringProperty(default="-s",
                                                name="Last Time",

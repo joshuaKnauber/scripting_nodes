@@ -37,7 +37,6 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
                     # hello im imperative
-                    pfe
                     # {self.inputs[0].value}
                     """
         }
@@ -53,10 +52,12 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
             if out.sn_type == "EXECUTE":
                 programs.append(out.block(0))
                 
+        self.add_error("test error", "test description gesg psjepg jpsejg psejpg jpseg jpsej gposjegp jsepg jpes", True)
+                
         return {
             "code": f"""
                     def test():
-                        pass
+                        # {self.node_tree.name}
                         print("{self.inputs[0].value}")
                         {self.outputs[0].block(6)}
                         {self.list_blocks(programs, 6)}

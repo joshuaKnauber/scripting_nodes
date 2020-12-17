@@ -68,6 +68,17 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         update=update_select_bookmarked,
                                         name="Bookmarks",
                                         description="Select a bookmarked graph")
+    
+    
+    show_char_control: bpy.props.BoolProperty(default=False,
+                                              name="Show Line Wrap",
+                                              description="Shows the control for line wrapping")
+    
+    
+    chars_per_line: bpy.props.IntProperty(default=16,
+                                          min=5,
+                                          name="Line Wrap",
+                                          description="Amount of characters which should go in one line")
 
 
     ttp_addon_info: bpy.props.BoolProperty(default=True,

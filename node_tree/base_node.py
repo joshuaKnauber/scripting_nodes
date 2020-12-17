@@ -160,6 +160,18 @@ class SN_ScriptingBaseNode:
     
     def list_blocks(self, block_list, indents):
         return combine_blocks(block_list, indents)
+    
+    
+    ### ERROR HANDLING
+    
+    
+    def add_error(self, title, description, fatal):
+        error = bpy.context.scene.sn.addon_tree().sn_graphs[0].errors.add()
+        error.title = title
+        error.description = description
+        error.fatal = fatal
+        error.node = self.name
+        error.node_tree = self.node_tree.sn_graphs[0].name
 
 
     ### RETURNED CODE

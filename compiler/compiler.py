@@ -109,7 +109,7 @@ def compile_addon(addon_tree):
         # register module
         return __register_module(module)
     
-    except:
+    except ValueError:
         return False
 
 
@@ -127,6 +127,7 @@ def handle_file_load():
     for tree in bpy.data.node_groups:
         if len(tree.sn_graphs) > 0:
             bpy.app.timers.register(tree.run_autocompile, first_interval=0.1)
+            tree.sn_graphs[0].errors.clear()
             if tree.sn_graphs[0].compile_on_start:
                 compile_addon(tree)
 
