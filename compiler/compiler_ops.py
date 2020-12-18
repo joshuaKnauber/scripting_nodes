@@ -113,7 +113,10 @@ class SN_OT_ExportAddon(bpy.types.Operator):
                     save_img.filepath = os.path.join(dir_path, "icons", icon.name+".png")
                     save_img.save()
                     bpy.data.images.remove(save_img)
-                    
+
+            for asset in addon_tree.sn_assets:
+                if asset.path and os.path.exists(asset.path):
+                    shutil.copyfile(asset.path, os.path.join(dir_path, "assets", os.path.basename(asset.path)))
                 
             self.make_archive(dir_path, self.filepath)
             shutil.rmtree(dir_path)

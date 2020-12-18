@@ -40,6 +40,7 @@ from .interface.header.header import prepend_header, append_header
 from .node_tree.graphs.graph_ui_lists import SN_Graph, update_graph_index
 from .node_tree.variables.variables_ui_list import SN_Variable
 from .node_tree.icons.icons_ui_list import SN_Icon
+from .node_tree.assets.assets_ui_list import SN_Asset
 from .node_tree.node_tree import update_create_tree
 from .settings.addon_properties import SN_AddonProperties
 
@@ -89,6 +90,8 @@ def register():
     bpy.types.NodeTree.sn_variable_index = bpy.props.IntProperty(default=0)
     bpy.types.NodeTree.sn_icons = bpy.props.CollectionProperty(type=SN_Icon)
     bpy.types.NodeTree.sn_icon_index = bpy.props.IntProperty(default=0)
+    bpy.types.NodeTree.sn_assets = bpy.props.CollectionProperty(type=SN_Asset)
+    bpy.types.NodeTree.sn_asset_index = bpy.props.IntProperty(default=0)
     
     # register the text properties
     bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False)
@@ -130,6 +133,8 @@ def unregister():
     del bpy.types.NodeTree.sn_variable_index
     del bpy.types.NodeTree.sn_icons
     del bpy.types.NodeTree.sn_icon_index
+    del bpy.types.NodeTree.sn_assets
+    del bpy.types.NodeTree.sn_asset_index
 
     # unregister the text properties
     del bpy.types.Text.is_sn_addon

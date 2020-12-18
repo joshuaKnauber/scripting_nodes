@@ -108,11 +108,11 @@ class SN_PT_IconPanel(bpy.types.Panel):
         
         
         if len(addon_tree.sn_icons):
-            layout.separator()
             col = layout.column()
-            col.use_property_split = True
+            row = col.row()
             icon = addon_tree.sn_icons[addon_tree.sn_icon_index]
-            col.prop_search(icon, "image", bpy.data, "images", text="Image")
+            row.prop_search(icon, "image", bpy.data, "images", text="")
+            row.label(icon="BLANK1")
             
             
 class SN_PT_AssetsPanel(bpy.types.Panel):
@@ -129,6 +129,20 @@ class SN_PT_AssetsPanel(bpy.types.Panel):
         layout = self.layout
 
         addon_tree = context.scene.sn.addon_tree()
+        
+        row = layout.row(align=False)
+        col = row.column(align=True)
+        col.template_list("SN_UL_AssetList", "Assets", addon_tree, "sn_assets", addon_tree, "sn_asset_index")
+        col = row.column(align=True)
+        col.operator("sn.add_asset", text="", icon="ADD")
+        col.operator("sn.remove_asset", text="", icon="REMOVE")
+        
+        
+        if len(addon_tree.sn_assets):
+            col = layout.column()
+            row = col.row()
+            row.prop(addon_tree.sn_assets[addon_tree.sn_asset_index],"path",text="")
+            row.label(icon="BLANK1")
         
         
             
