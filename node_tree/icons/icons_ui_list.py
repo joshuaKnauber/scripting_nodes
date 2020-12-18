@@ -28,13 +28,25 @@ def get_unique_name(collection, base_name):
 class SN_Icon(bpy.types.PropertyGroup):
 
     def update_name(self,context):
+        # update icon nodes
+        if self.old_name:
+            for graph in context.scene.sn.addon_tree().sn_graphs:
+                for node in graph.node_tree.nodes:
+                    if node.bl_idname == "SN_GetIconNode":
+                        if node.custom_icon == self.old_name:
+                            node.custom_icon = self.name
+        self.old_name = self.name
+
+        # correct name
         proper_name = re.sub(r'\W+', '', self.name.replace(" ","_").upper())
         if not proper_name:
             proper_name = "ICON"
         proper_name = get_unique_name(context.scene.sn.addon_tree().sn_icons, proper_name)
         if not self.name == proper_name:
             self.name = proper_name
+        
     
+    old_name: bpy.props.StringProperty()
     name: bpy.props.StringProperty(name="Name",
                                    description="The name of this variable",
                                    default="my_variable",

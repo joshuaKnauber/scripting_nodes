@@ -37,3 +37,18 @@ class SN_OT_RemoveAsset(bpy.types.Operator):
 
     def invoke(self, context, event):
         return context.window_manager.invoke_confirm(self, event)
+    
+    
+    
+class SN_OT_AddGetAsset(bpy.types.Operator):
+    bl_idname = "sn.add_get_asset"
+    bl_label = "Add Getter"
+    bl_description = "Adds a node which gives you the path to this asset"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    def execute(self, context):
+        addon_tree = context.scene.sn.addon_tree()
+        graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
+
+        node = graph_tree.nodes.new("SN_TestNode")
+        return {"FINISHED"}
