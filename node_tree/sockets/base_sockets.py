@@ -1,5 +1,5 @@
 import bpy
-from ..compiler.compiler import process_node
+from ...compiler.compiler import process_node
 
 
 
@@ -136,94 +136,6 @@ class SN_RemoveSocket(bpy.types.Operator):
         else:
             node.inputs.remove(node.inputs[self.index])
         return {"FINISHED"}
-
-
-
-class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_label = "String"
-    sn_type = "STRING"
-    connects_to = ["SN_StringSocket","SN_DynamicDataSocket"]
-    
-    default_value: bpy.props.StringProperty(default="",
-                                            update=ScriptingSocket.socket_value_update,
-                                            name="Value",
-                                            description="Value of this socket")
-
-    def get_value(self, indents=0):
-        return " "*indents*4 + self.default_value
-
-    def draw_socket(self, context, layout, row, node, text):
-        if self.is_output or self.is_linked:
-            row.label(text=text)
-        else:
-            row.prop(self, "default_value", text=text)
-
-    def draw_color(self, context, node):
-        c = (1, 0.1, 0.75)
-        if self.is_linked:
-            return (c[0], c[1], c[2], 1)
-        return (c[0], c[1], c[2], 0.5)
     
     
 
-class SN_DynamicDataSocket(bpy.types.NodeSocket, DynamicSocket):
-    connects_to = ["SN_StringSocket"]
-    
-    
-
-class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_label = "Execute"
-    sn_type = "EXECUTE"
-    connects_to = ["SN_ExecuteSocket", "SN_DynamicExecuteSocket"]
-    socket_shape = "DIAMOND"
-    output_limit = 1
-
-    def get_value(self, indents=0):
-        if self.is_linked:
-            if self.is_output:
-                return self.links[0].to_socket.get_value(indents)
-            else:
-                return process_node(self.node, self, indents)
-        return "pass\n"
-    
-    def draw_socket(self, context, layout, row, node, text):
-        row.label(text=text)
-
-    def draw_color(self, context, node):
-        c = (1, 1, 1)
-        if self.is_linked:
-            return (c[0], c[1], c[2], 1)
-        return (c[0], c[1], c[2], 0.5)
-    
-    
-
-class SN_DynamicExecuteSocket(bpy.types.NodeSocket, DynamicSocket):
-    socket_shape = "DIAMOND"
-    connects_to = ["SN_ExecuteSocket"]
-    
-    
-
-class SN_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_label = "Interface"
-    sn_type = "INTERFACE"
-    connects_to = ["SN_InterfaceSocket", "SN_DynamicInterfaceSocket"]
-    socket_shape = "DIAMOND"
-    output_limit = 1
-
-    def get_value(self, indents=0):
-        return ""
-    
-    def draw_socket(self, context, layout, row, node, text):
-        row.label(text=text)
-
-    def draw_color(self, context, node):
-        c = (1, 0.7, 0)
-        if self.is_linked:
-            return (c[0], c[1], c[2], 1)
-        return (c[0], c[1], c[2], 0.5)
-    
-    
-
-class SN_DynamicInterfaceSocket(bpy.types.NodeSocket, DynamicSocket):
-    socket_shape = "DIAMOND"
-    connects_to = ["SN_InterfaceSocket"]

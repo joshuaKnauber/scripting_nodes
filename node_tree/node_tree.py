@@ -1,5 +1,5 @@
 import bpy
-from .sockets import get_dynamic_links, get_remove_links
+from .sockets.base_sockets import get_dynamic_links, get_remove_links
 from ..compiler.compiler import compile_addon
 
 

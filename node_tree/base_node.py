@@ -1,5 +1,5 @@
 import bpy
-from .sockets import add_to_remove_links
+from .sockets.base_sockets import add_to_remove_links
 from ..compiler.compiler import combine_blocks
 
 
@@ -119,10 +119,13 @@ class SN_ScriptingBaseNode:
     def draw_buttons_ext(self,context,layout):
         self.draw_node_panel(context,layout)
         
-        
+
     ### CREATE SOCKETS
+    def add_icon_input(self,label,removable=False): return self.add_input("SN_IconSocket",label,removable)
     def add_string_input(self,label,removable=False): return self.add_input("SN_StringSocket",label,removable)
     def add_string_output(self,label,removable=False): return self.add_output("SN_StringSocket",label,removable)
+    def add_data_input(self,label,removable=False): return self.add_input("SN_DataSocket",label,removable)
+    def add_data_output(self,label,removable=False): return self.add_output("SN_DataSocket",label,removable)
     def add_dynamic_data_input(self,label): return self.add_input("SN_DynamicDataSocket",label,False)
     def add_dynamic_data_output(self,label): return self.add_output("SN_DynamicDataSocket",label,False)
     def add_execute_input(self,label,removable=False): return self.add_input("SN_ExecuteSocket",label,removable)

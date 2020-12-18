@@ -27,7 +27,7 @@ def serpens_functions(addon_tree):
             def sn_icon(name):
                 if sn_is_dev():
                     if name in bpy.data.images:
-                        return bpy.data.images[name].preview.icon_id
-                    return ""
-                return bpy.context.scene.{addon_tree.sn_graphs[0].short_hand()}_icons[name].icon_id
+                        return str(bpy.data.images[name].preview.icon_id)
+                    return "WARNING"
+                return str(bpy.context.scene.{addon_tree.sn_graphs[0].short_hand()}_icons[name].icon_id)
             """
