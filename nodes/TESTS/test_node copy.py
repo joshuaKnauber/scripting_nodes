@@ -15,7 +15,7 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_icon_input("Icon")
+        self.add_string_input("inp")
         
         
     def code_evaluate(self, context, main_tree, touched_socket):

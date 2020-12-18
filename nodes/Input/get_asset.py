@@ -28,6 +28,7 @@ class SN_GetAssetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, main_tree, touched_socket):
         asset_path = ""
+        print("t", self.asset, main_tree.sn_assets)
         if self.asset and self.asset in main_tree.sn_assets:
             asset_path = main_tree.sn_assets[self.asset].path
         return {
