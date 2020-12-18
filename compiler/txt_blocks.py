@@ -21,6 +21,6 @@ def license_block():
 
 def serpens_functions():
     return """
-            def sn_check_icon(name):
+            def sn_icon(name):
                 return name
             """

@@ -22,6 +22,10 @@ def compile_addon(addon_tree):
         
         # add addon info
         addon_data["code"]["addon_info"] = __normalize_code(__create_addon_info(addon_tree), 0)
+        
+        # add serpens functions
+        if not "serpens_functions" in addon_data["code"]:
+            addon_data["code"]["serpens_functions"] = __normalize_code(__get_serpens_functions(), 0)
 
         # add graph code placeholder
         if not "graph_code" in addon_data["code"]:
@@ -64,6 +68,10 @@ def compile_addon(addon_tree):
             if addon_data["code"]["graph_code"][graph]["imports"]:
                 __write_graphcomment(addon_data["text"], graph)
                 __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["imports"])
+                
+        # write serpens functions
+        __write_blockcomment(addon_data["text"], "SERPENS FUNCTIONS")
+        __write_in_text(addon_data["text"], addon_data["code"]["serpens_functions"])
             
         # write imperative code
         __write_blockcomment(addon_data["text"], "IMPERATIVE CODE")
