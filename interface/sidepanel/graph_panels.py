@@ -115,6 +115,25 @@ class SN_PT_IconPanel(bpy.types.Panel):
             col.prop_search(icon, "image", bpy.data, "images", text="Image")
             
             
+class SN_PT_AssetsPanel(bpy.types.Panel):
+    bl_parent_id = "SN_PT_GraphPanel"
+    bl_idname = "SN_PT_AssetsPanel"
+    bl_label = "Assets"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_order = 3
+    bl_options = {"DEFAULT_CLOSED"}
+
+    def draw(self, context):
+        layout = self.layout
+
+        addon_tree = context.scene.sn.addon_tree()
+        
+        
+            
+            
             
 bpy.utils.register_class(SN_PT_VariablePanel)
 bpy.utils.register_class(SN_PT_IconPanel)
+bpy.utils.register_class(SN_PT_AssetsPanel)

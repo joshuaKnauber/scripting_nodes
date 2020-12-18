@@ -1,5 +1,8 @@
 import bpy
-from .compiler import compile_addon, remove_addon, addon_is_registered
+from bpy_extras.io_utils import ExportHelper
+import os
+import shutil
+from .compiler import compile_addon, remove_addon, addon_is_registered, compile_export
 
 
 
@@ -54,4 +57,58 @@ class SN_OT_RemoveAddon(bpy.types.Operator):
         addon_tree.set_changes(True)
         
         for a in context.screen.areas: a.tag_redraw()
+        return {"FINISHED"}
+    
+    
+    
+class SN_OT_ExportAddon(bpy.types.Operator):
+    bl_idname = "sn.save_addon"
+    bl_label = "Save Addon"
+    bl_description = "Saves the active addon as an installable addon"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+
+    filepath: bpy.props.StringProperty(name="File Path", description="Filepath used for exporting the file", maxlen=1024, subtype='FILE_PATH')
+
+    filename_ext = ".zip"
+    filter_glob: bpy.props.StringProperty(default='*.zip', options={'HIDDEN'})
+
+    @classmethod
+    def poll(cls, context):
+        return True
+
+    def invoke(self, context, event):
+        zip_name = context.scene.sn.addon_tree().sn_graphs[0].name.lower().replace(" ","_").replace("-","_") + ".zip"
+        self.filepath = os.path.join(self.filepath,zip_name)
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}
+
+    def make_archive(self, source, destination):
+        base = os.path.basename(destination)
+        name = base.split('.')[0]
+        format = base.split('.')[1]
+        archive_from = os.path.dirname(source)
+        archive_to = os.path.basename(source.strip(os.sep))
+        shutil.make_archive(name, format, archive_from, archive_to)
+        shutil.move('%s.%s'%(name,format), destination)
+
+    def execute(self, context):
+        if not ".zip" in self.filepath:
+            self.filepath += ".zip"
+        text = compile_export(context.scene.sn.addon_tree())
+        if text:
+            dir_name = context.scene.sn.addon_tree().sn_graphs[0].name.lower().replace(" ","_").replace("-","_")
+            dir_path = os.path.join(os.path.dirname(self.filepath),dir_name)
+            os.mkdir(dir_path)
+            os.mkdir(os.path.join(dir_path,"icons"))
+            os.mkdir(os.path.join(dir_path,"assets"))
+            
+            with open(os.path.join(dir_path,"__init__.py"), "w", encoding="utf-8") as py_file:
+                py_file.write(text.as_string())
+                
+            self.make_archive(dir_path, self.filepath)
+            shutil.rmtree(dir_path)
+            
+            bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
+        else:
+            self.report({"ERROR"},message="Your addon could not be compiled properly! Please debug before exporting.")
         return {"FINISHED"}

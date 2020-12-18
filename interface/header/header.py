@@ -22,3 +22,7 @@ def append_header(self, context):
         layout.prop_tabs_enum(context.scene.sn, "bookmarks")
 
         layout.prop(context.scene.sn, "editing_addon", text="")
+        
+        row = layout.row(align=True)
+        row.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id).url = "https://discord.com/invite/NK6kyae"
+        row.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "bug" ].icon_id).url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/bugs/"

@@ -29,6 +29,8 @@ import nodeitems_utils
 from bpy.app.handlers import persistent
 import atexit
 
+import os
+
 from . import auto_load
 
 from .keymaps.keymap import register_keymaps, unregister_keymaps
@@ -61,6 +63,20 @@ def unload_handler(dummy=None):
 def depsgraph_handler(dummy):
     update_create_tree()
     
+    
+def register_icons():
+    bpy.types.Scene.sn_icons = bpy.utils.previews.new()
+    icons_dir = os.path.join( os.path.dirname( __file__ ), "assets", "icons" )
+
+    icons = [ "discord", "bug", "serpens" ]
+
+    for icon in icons:
+        bpy.types.Scene.sn_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
+        
+        
+def unregister_icons():
+    bpy.utils.previews.remove( bpy.types.Scene.sn_icons )
+    
 
 def register():
     # register the classes of the addon
@@ -82,6 +98,9 @@ def register():
 
     # register the keymaps
     register_keymaps()
+
+    # register the icons
+    register_icons()
 
     # register node categories
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
@@ -120,6 +139,9 @@ def unregister():
 
     # unregister the keymaps
     unregister_keymaps()
+
+    # unregister the icons
+    unregister_icons()
 
     # unregister node categories
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')

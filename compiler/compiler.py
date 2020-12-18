@@ -114,6 +114,12 @@ def compile_addon(addon_tree):
         print(exc)
         print("# # # # # # # # # # # # # # # # # # # # # # # # # # # # #")
         return False
+    
+    
+def compile_export(addon_tree):
+    if compile_addon(addon_tree):
+        return addons[-1]["text"]
+    return False
 
 
 def addon_is_registered(addon_tree):

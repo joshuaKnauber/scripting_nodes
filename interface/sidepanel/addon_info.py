@@ -39,4 +39,4 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
         
         row = layout.row()
         row.scale_y = 1.5
-        row.operator("object.add",text="Save Addon",icon="FILE_TICK")
+        row.operator("sn.save_addon",text="Save Addon",icon="FILE_TICK")
