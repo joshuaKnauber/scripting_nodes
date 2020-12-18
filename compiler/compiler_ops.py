@@ -96,7 +96,8 @@ class SN_OT_ExportAddon(bpy.types.Operator):
             self.filepath += ".zip"
         text = compile_export(context.scene.sn.addon_tree())
         if text:
-            dir_name = context.scene.sn.addon_tree().sn_graphs[0].name.lower().replace(" ","_").replace("-","_")
+            addon_tree = context.scene.sn.addon_tree()
+            dir_name = addon_tree.sn_graphs[0].name.lower().replace(" ","_").replace("-","_")
             dir_path = os.path.join(os.path.dirname(self.filepath),dir_name)
             os.mkdir(dir_path)
             os.mkdir(os.path.join(dir_path,"icons"))
@@ -104,6 +105,15 @@ class SN_OT_ExportAddon(bpy.types.Operator):
             
             with open(os.path.join(dir_path,"__init__.py"), "w", encoding="utf-8") as py_file:
                 py_file.write(text.as_string())
+                
+            for icon in addon_tree.sn_icons:
+                if icon.image and icon.image in bpy.data.images:
+                    save_img = bpy.data.images[icon.image].copy()
+                    save_img.file_format = "PNG"
+                    save_img.filepath = os.path.join(dir_path, "icons", icon.name+".png")
+                    save_img.save()
+                    bpy.data.images.remove(save_img)
+                    
                 
             self.make_archive(dir_path, self.filepath)
             shutil.rmtree(dir_path)
