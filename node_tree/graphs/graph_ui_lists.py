@@ -1,4 +1,5 @@
 import bpy
+import re
 
 
 def update_graph_index(self, context):
@@ -57,6 +58,9 @@ class SN_Graph(bpy.types.PropertyGroup):
                                    description="The name of this graph or the addon",
                                    default="My Graph",
                                    update=update_name)
+    
+    def short_hand(self):
+        return re.sub(r'\W+', '', self.name.replace(" ","_")).lower()
 
     main_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
     

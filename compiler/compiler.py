@@ -25,7 +25,7 @@ def compile_addon(addon_tree):
         
         # add serpens functions
         if not "serpens_functions" in addon_data["code"]:
-            addon_data["code"]["serpens_functions"] = __normalize_code(__get_serpens_functions(), 0)
+            addon_data["code"]["serpens_functions"] = __normalize_code(__get_serpens_functions(addon_tree), 0)
 
         # add graph code placeholder
         if not "graph_code" in addon_data["code"]:
@@ -64,6 +64,8 @@ def compile_addon(addon_tree):
         
         # write imports
         __write_blockcomment(addon_data["text"], "IMPORTS")
+        __write_in_text(addon_data["text"], "import bpy")
+        __write_in_text(addon_data["text"], "import os")
         for graph in addon_data["code"]["graph_code"]:
             if addon_data["code"]["graph_code"][graph]["imports"]:
                 __write_graphcomment(addon_data["text"], graph)
@@ -88,9 +90,13 @@ def compile_addon(addon_tree):
                 __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["evaluated"])
         
         # write register function
+        __write_blockcomment(addon_data["text"], "REGISTER ICONS")
+        __write_in_text(addon_data["text"], __normalize_code(__create_icon_register(addon_tree),0))
+
         __write_blockcomment(addon_data["text"], "REGISTER ADDON")
         __write_in_text(addon_data["text"], "def register():")
         __write_in_text(addon_data["text"], "   \"\"\" registers this addon \"\"\"")
+        __write_in_text(addon_data["text"], "   sn_register_icons()")
         for graph in addon_data["code"]["graph_code"]:
             if addon_data["code"]["graph_code"][graph]["register"]:
                 __write_graphcomment(addon_data["text"], graph, 1)
@@ -100,6 +106,7 @@ def compile_addon(addon_tree):
         __write_blockcomment(addon_data["text"], "UNREGISTER ADDON")
         __write_in_text(addon_data["text"], "def unregister():")
         __write_in_text(addon_data["text"], "   \"\"\" removes this addon \"\"\"")
+        __write_in_text(addon_data["text"], "   sn_unregister_icons()")
         for graph in addon_data["code"]["graph_code"]:
             if addon_data["code"]["graph_code"][graph]["unregister"]:
                 __write_graphcomment(addon_data["text"], graph, 1)
@@ -115,7 +122,11 @@ def compile_addon(addon_tree):
         addon_tree.sn_graphs[0].last_compile_time = str(round(end_time-start_time,4))+"s"
 
         # register module
-        return __register_module(module)
+        success = __register_module(module)
+        if success == True:
+            return success
+        else:
+            raise success
     
     except Exception as exc:
         print("# # # # # # # # # ERROR WHILE COMPILING # # # # # # # # #")
@@ -174,8 +185,8 @@ def __register_module(module):
     try:
         module.register()
         return True
-    except:
-        return False
+    except Exception as exc:
+        return exc
 
 
 def __remove_addon(addon):
@@ -224,8 +235,28 @@ def __get_license_block():
     return license_block()
 
 
-def __get_serpens_functions():
-    return serpens_functions()
+def __get_serpens_functions(addon_tree):
+    return serpens_functions(addon_tree)
+
+
+def __create_icon_register(addon_tree):
+    icon_list = ""
+    for icon in addon_tree.sn_icons:
+        icon_list += icon.name
+    return f"""
+            def sn_register_icons():
+                if not sn_is_dev():
+                    bpy.types.Scene.{addon_tree.sn_graphs[0].short_hand()}_icons = bpy.utils.previews.new()
+                    icons = [{icon_list}]
+                
+                    icons_dir = os.path.join( os.path.dirname( __file__ ), "icons" )
+                    for icon in icons:
+                        bpy.types.Scene.{addon_tree.sn_graphs[0].short_hand()}_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
+                    
+            def sn_unregister_icons():
+                if not sn_is_dev():
+                    bpy.utils.previews.remove( bpy.types.Scene.{addon_tree.sn_graphs[0].short_hand()}_icons )
+            """
 
 
 def __create_addon_info(addon_tree):
