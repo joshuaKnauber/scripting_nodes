@@ -59,7 +59,7 @@ class SN_Graph(bpy.types.PropertyGroup):
                                    default="My Graph",
                                    update=update_name)
     
-    def short_hand(self):
+    def short(self):
         return re.sub(r'\W+', '', self.name.replace(" ","_")).lower()
 
     main_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)

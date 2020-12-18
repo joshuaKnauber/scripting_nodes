@@ -7,6 +7,7 @@ addons = []
 
 
 def compile_addon(addon_tree):
+    txt = None
     try:
         start_time = time()
         
@@ -129,6 +130,8 @@ def compile_addon(addon_tree):
             raise success
     
     except Exception as exc:
+        if txt:
+            bpy.data.texts.remove(txt)
         print("# # # # # # # # # ERROR WHILE COMPILING # # # # # # # # #")
         print(exc)
         print("# # # # # # # # # # # # # # # # # # # # # # # # # # # # #")
@@ -246,16 +249,16 @@ def __create_icon_register(addon_tree):
     return f"""
             def sn_register_icons():
                 if not sn_is_dev():
-                    bpy.types.Scene.{addon_tree.sn_graphs[0].short_hand()}_icons = bpy.utils.previews.new()
+                    bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons = bpy.utils.previews.new()
                     icons = [{icon_list}]
                 
                     icons_dir = os.path.join( os.path.dirname( __file__ ), "icons" )
                     for icon in icons:
-                        bpy.types.Scene.{addon_tree.sn_graphs[0].short_hand()}_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
+                        bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
                     
             def sn_unregister_icons():
                 if not sn_is_dev():
-                    bpy.utils.previews.remove( bpy.types.Scene.{addon_tree.sn_graphs[0].short_hand()}_icons )
+                    bpy.utils.previews.remove( bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons )
             """
 
 
@@ -288,7 +291,7 @@ def __normalize_code(code, indents):
     for line in code:
         if len(line) >= remove_indents:
             new_code.append( " "*indents*4 + line[remove_indents:] )
-    if new_code and new_code[-1].isspace():
+    if new_code[-1].isspace() or not new_code[-1]:
         new_code = new_code[:-1]
     return "\n".join(new_code)
 

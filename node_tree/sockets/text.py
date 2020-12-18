@@ -1,11 +1,13 @@
 import bpy
 from .base_sockets import ScriptingSocket, DynamicSocket
+from ...compiler.compiler import process_node
+
 
 
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
     sn_type = "STRING"
-    connects_to = ["SN_StringSocket","SN_DynamicDataSocket"]
+    connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_IconSocket"]
     
     default_value: bpy.props.StringProperty(default="",
                                             update=ScriptingSocket.socket_value_update,
@@ -13,7 +15,10 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             description="Value of this socket")
 
     def get_value(self, indents=0):
-        return " "*indents*4 + self.default_value
+        if self.is_output:
+            return process_node(self.node, self)
+        else:
+            return " "*indents*4 + self.default_value
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:
@@ -28,13 +33,26 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         return (c[0], c[1], c[2], 0.5)
     
     
-class SN_IconSocket(SN_StringSocket):
+    
+class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
+    bl_label = "Icon"
+    sn_type = "STRING"
+    connects_to = ["SN_StringSocket","SN_DynamicDataSocket"]
     
     def get_value(self, indents=0):
         if self.is_linked:
             value = self.links[0].from_socket.value
             if value.isnumeric():
-                return f"icon_value={value},"
+                return " "*indents*4 + f"icon_value={value},"
             elif value:
-                return f"icon=\"{value}\","
+                return " "*indents*4 + f"icon={value},"
         return ""
+
+    def draw_socket(self, context, layout, row, node, text):
+        row.label(text=text)
+
+    def draw_color(self, context, node):
+        c = (1, 0.1, 0.75)
+        if self.is_linked:
+            return (c[0], c[1], c[2], 1)
+        return (c[0], c[1], c[2], 0.5)

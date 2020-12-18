@@ -1,5 +1,7 @@
 import bpy
 from .base_sockets import ScriptingSocket, DynamicSocket
+from ...compiler.compiler import process_node
+
 
 
 class SN_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
@@ -27,6 +29,7 @@ class SN_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
             return (c[0], c[1], c[2], 1)
         return (c[0], c[1], c[2], 0.5)
     
+
 
 class SN_DynamicDataSocket(bpy.types.NodeSocket, DynamicSocket):
     connects_to = ["SN_StringSocket", "SN_DataSocket"]
