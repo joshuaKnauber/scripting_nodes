@@ -50,5 +50,6 @@ class SN_OT_AddGetAsset(bpy.types.Operator):
         addon_tree = context.scene.sn.addon_tree()
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
 
-        node = graph_tree.nodes.new("SN_TestNode")
+        node = graph_tree.nodes.new("SN_GetAssetNode")
+        node.asset = addon_tree.sn_assets[addon_tree.sn_asset_index].name
         return {"FINISHED"}

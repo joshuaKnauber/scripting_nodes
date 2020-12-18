@@ -133,7 +133,7 @@ class SN_PT_AssetsPanel(bpy.types.Panel):
         row = layout.row(align=False)
         col = row.column(align=True)
         col.template_list("SN_UL_AssetList", "Assets", addon_tree, "sn_assets", addon_tree, "sn_asset_index",rows=3)
-        if len(addon_tree.sn_assets):
+        if len(addon_tree.sn_assets) and addon_tree.sn_assets[addon_tree.sn_asset_index].name:
             col.operator("sn.add_get_asset",icon="SORT_DESC")
         col = row.column(align=True)
         col.operator("sn.add_asset", text="", icon="ADD")
