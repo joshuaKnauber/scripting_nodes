@@ -7,7 +7,7 @@ from ...compiler.compiler import process_node
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
     sn_type = "STRING"
-    connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_IconSocket"]
+    connects_to = ["SN_StringSocket","SN_DynamicDataSocket"]
     
     default_value: bpy.props.StringProperty(default="",
                                             update=ScriptingSocket.socket_value_update,
@@ -37,15 +37,18 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Icon"
     sn_type = "STRING"
-    connects_to = ["SN_StringSocket","SN_DynamicDataSocket"]
+    connects_to = ["SN_IconSocket"]
     
     def get_value(self, indents=0):
         if self.is_linked:
-            value = self.links[0].from_socket.value
-            if value.isnumeric():
-                return " "*indents*4 + f"icon_value={value},"
-            elif value:
-                return " "*indents*4 + f"icon={value},"
+            if self.is_output:
+                return process_node(self.node, self)
+            else:
+                value = self.links[0].from_socket.value
+                if value.isnumeric():
+                    return " "*indents*4 + f"icon_value={value},"
+                elif value:
+                    return " "*indents*4 + f"icon={value},"
         return ""
 
     def draw_socket(self, context, layout, row, node, text):

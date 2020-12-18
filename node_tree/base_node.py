@@ -121,9 +121,10 @@ class SN_ScriptingBaseNode:
         
 
     ### CREATE SOCKETS
-    def add_icon_input(self,label,removable=False): return self.add_input("SN_IconSocket",label,removable)
     def add_string_input(self,label,removable=False): return self.add_input("SN_StringSocket",label,removable)
     def add_string_output(self,label,removable=False): return self.add_output("SN_StringSocket",label,removable)
+    def add_icon_input(self,label,removable=False): return self.add_input("SN_IconSocket",label,removable)
+    def add_icon_output(self,label,removable=False): return self.add_output("SN_IconSocket",label,removable)
     def add_data_input(self,label,removable=False): return self.add_input("SN_DataSocket",label,removable)
     def add_data_output(self,label,removable=False): return self.add_output("SN_DataSocket",label,removable)
     def add_dynamic_data_input(self,label): return self.add_input("SN_DynamicDataSocket",label,False)

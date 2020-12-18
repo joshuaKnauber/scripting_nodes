@@ -74,7 +74,7 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_string_output("Icon")
+        self.add_icon_output("Icon")
 
 
     def draw_node(self,context,layout):

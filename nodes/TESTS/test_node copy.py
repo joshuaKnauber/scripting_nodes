@@ -21,6 +21,7 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, main_tree, touched_socket):
         return {
             "code": f"""
-                    print({self.inputs[0].value})
+                    # {self.inputs[0].value}
+                    
                     """
         }
