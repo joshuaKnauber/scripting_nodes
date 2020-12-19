@@ -26,9 +26,6 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_float_input("Scale X")
         self.add_float_input("Scale Y")
 
-    def draw_node(self,context,layout):
-        pass
-        
         
     def what_layout(self, socket):
         return "row"

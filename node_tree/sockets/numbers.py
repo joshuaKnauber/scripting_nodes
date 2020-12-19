@@ -1,5 +1,4 @@
 import bpy
-import sys
 from .base_sockets import ScriptingSocket, DynamicSocket
 from ...compiler.compiler import process_node
 
@@ -10,20 +9,12 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     sn_type = "NUMBER"
     connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket", "SN_FloatSocket"]
     
-    # def set_value(self, value):
-    #     self["default_value"] = value
-    
-    value_min: bpy.props.FloatProperty(default=-999)
-    value_max: bpy.props.FloatProperty(default=999)
+    slider: bpy.props.BoolProperty(default=False)
     
     default_value: bpy.props.FloatProperty(default=1.0,
                                             update=ScriptingSocket.socket_value_update,
-                                            # set=set_value,
                                             name="Value",
                                             description="Value of this socket")
-    
-    def default(self, value):
-        self.default_value = value
     
     def default(self, value):
         self.default_value = value
@@ -46,7 +37,7 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
         if self.is_output or self.is_linked:
             row.label(text=text)
         else:
-            row.prop(self, "default_value", text=text)
+            row.prop(self, "default_value", text=text, slider=self.slider)
 
     def draw_color(self, context, node):
         c = (0.3, 0.3, 1)
