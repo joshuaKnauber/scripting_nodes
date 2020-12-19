@@ -23,6 +23,8 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_input("Align").default(False)
         self.add_boolean_input("Enabled")
         self.add_boolean_input("Alert").default(False)
+        self.add_float_input("Scale X")
+        self.add_float_input("Scale Y")
 
     def draw_node(self,context,layout):
         pass
@@ -47,6 +49,8 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
                     row = {layout}.row(align={self.inputs["Align"].value})
                     row.enabled = {self.inputs["Enabled"].value}
                     row.alert = {self.inputs["Alert"].value}
+                    row.scale_x = {self.inputs["Scale X"].value}
+                    row.scale_y = {self.inputs["Scale Y"].value}
                     {self.list_blocks(row_layouts, 5)}
                     
                     """
