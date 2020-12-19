@@ -33,6 +33,8 @@ class ScriptingSocket:
         code = self.get_value(indents)
         return code[indents*4:]
     
+    def default(self, value): pass
+    
     def socket_value_update(self,context):
         self.node.node_tree.set_changes(True)
         

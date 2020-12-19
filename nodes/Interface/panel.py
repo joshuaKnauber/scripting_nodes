@@ -53,6 +53,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def on_create(self,context):
+        self.add_interface_output("Panel",True)
         self.add_dynamic_interface_output("Panel")
         self.add_dynamic_interface_output("Header")
 
@@ -64,7 +65,6 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         row = layout.row()
         row.scale_y = 1.5
         row.operator("sn.start_panel_selection",text="Outer Rim",icon="EYEDROPPER")
-        layout.label(text=self.uid)
          
         layout.prop(self, "label")
         layout.prop(self, "hide_header")
@@ -91,6 +91,16 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         option_closed = "\"DEFAULT_CLOSED\"," if self.default_closed else ""
         option_header = "\"HIDE_HEADER\"," if self.hide_header else ""
         
+        panel_layouts = []
+        for out in self.outputs:
+            if out.name == "Panel":
+                panel_layouts.append(out.block(0))
+        
+        header_layouts = []
+        for out in self.outputs:
+            if out.name == "Header":
+                header_layouts.append(out.block(0))
+        
         return {
             "code": f"""
                     class {self.idname()}(bpy.types.Panel):
@@ -109,9 +119,11 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                         def draw_header(self, context):
                             layout = self.layout
+                            {self.list_blocks(header_layouts, 7)}
                         
                         def draw(self, context):
                             layout = self.layout
+                            {self.list_blocks(panel_layouts, 7)}
                             
                     """
         }

@@ -13,6 +13,9 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             update=ScriptingSocket.socket_value_update,
                                             name="Value",
                                             description="Value of this socket")
+    
+    def default(self, value):
+        self.default_value = value
 
     def get_value(self, indents=0):
         if self.is_output:
