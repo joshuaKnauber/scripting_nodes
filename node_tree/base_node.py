@@ -1,6 +1,7 @@
 import bpy
 from .sockets.base_sockets import add_to_remove_links
 from ..compiler.compiler import combine_blocks
+from uuid import uuid4
 
 
 
@@ -24,6 +25,8 @@ class SN_ScriptingBaseNode:
     }
     
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
+    
+    uid: bpy.props.StringProperty()
 
 
     @classmethod
@@ -41,6 +44,7 @@ class SN_ScriptingBaseNode:
     def init(self,context):
         self.node_tree = self.id_data
         self.node_tree.set_changes(True)
+        self.uid = uuid4().hex[:5].upper()
         if "default_color" in self.node_options:
             self.color = self.node_options["default_color"]
         else:
@@ -55,6 +59,7 @@ class SN_ScriptingBaseNode:
 
     def copy(self,node):
         self.node_tree = self.id_data
+        self.uid = uuid4().hex[:5].upper()
         self.node_tree.set_changes(True)
         self.on_copy(node)
 
@@ -114,6 +119,8 @@ class SN_ScriptingBaseNode:
     ### CREATE SOCKETS
     def add_string_input(self,label,removable=False): return self.add_input("SN_StringSocket",label,removable)
     def add_string_output(self,label,removable=False): return self.add_output("SN_StringSocket",label,removable)
+    def add_boolean_input(self,label,removable=False): return self.add_input("SN_BooleanSocket",label,removable)
+    def add_boolean_output(self,label,removable=False): return self.add_output("SN_BooleanSocket",label,removable)
     def add_icon_input(self,label,removable=False): return self.add_input("SN_IconSocket",label,removable)
     def add_icon_output(self,label,removable=False): return self.add_output("SN_IconSocket",label,removable)
     def add_data_input(self,label,removable=False): return self.add_input("SN_DataSocket",label,removable)

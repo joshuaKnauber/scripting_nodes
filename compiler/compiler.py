@@ -96,8 +96,8 @@ def compile_addon(addon_tree):
 
         __write_blockcomment(addon_data["text"], "REGISTER ADDON")
         __write_in_text(addon_data["text"], "def register():")
-        __write_in_text(addon_data["text"], "   \"\"\" registers this addon \"\"\"")
-        __write_in_text(addon_data["text"], "   sn_register_icons()")
+        __write_in_text(addon_data["text"], "    \"\"\" registers this addon \"\"\"")
+        __write_in_text(addon_data["text"], "    sn_register_icons()")
         for graph in addon_data["code"]["graph_code"]:
             if addon_data["code"]["graph_code"][graph]["register"]:
                 __write_graphcomment(addon_data["text"], graph, 1)
@@ -106,8 +106,8 @@ def compile_addon(addon_tree):
         # write unregister function
         __write_blockcomment(addon_data["text"], "UNREGISTER ADDON")
         __write_in_text(addon_data["text"], "def unregister():")
-        __write_in_text(addon_data["text"], "   \"\"\" removes this addon \"\"\"")
-        __write_in_text(addon_data["text"], "   sn_unregister_icons()")
+        __write_in_text(addon_data["text"], "    \"\"\" removes this addon \"\"\"")
+        __write_in_text(addon_data["text"], "    sn_unregister_icons()")
         for graph in addon_data["code"]["graph_code"]:
             if addon_data["code"]["graph_code"][graph]["unregister"]:
                 __write_graphcomment(addon_data["text"], graph, 1)
@@ -128,9 +128,15 @@ def compile_addon(addon_tree):
             return success
         else:
             raise success
+        
+        # redraw
+        if context.screen:
+            for a in bpy.context.screen.areas:
+                a.tag_redraw()
     
     except Exception as exc:
-        if txt:
+        addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
+        if txt and addon_prefs.keep_after_error:
             bpy.data.texts.remove(txt)
         print("# # # # # # # # # ERROR WHILE COMPILING # # # # # # # # #")
         print(exc)

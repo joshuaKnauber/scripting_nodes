@@ -7,7 +7,7 @@ class SN_GetAssetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_GetAssetNode"
     bl_label = "Asset"
-    bl_icon = "GRAPH"
+    # bl_icon = "GRAPH"
     bl_width_default = 160
     
     node_options = {

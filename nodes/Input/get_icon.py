@@ -55,7 +55,7 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_GetIconNode"
     bl_label = "Icon"
-    bl_icon = "GRAPH"
+    # bl_icon = "GRAPH"
     bl_width_default = 200
     
     node_options = {
