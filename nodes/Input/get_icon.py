@@ -88,9 +88,11 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.icon_source == "CUSTOM":
             if self.custom_icon in addon_tree.sn_icons and addon_tree.sn_icons[self.custom_icon].image in bpy.data.images:
                 custom_icon = bpy.data.images[addon_tree.sn_icons[self.custom_icon].image].preview.icon_id
-                row.prop_search(self,"custom_icon",addon_tree,"sn_icons",text="",icon_value=custom_icon)
+                row.label(icon_value=custom_icon)
+                row.prop_search(self,"custom_icon",addon_tree,"sn_icons",text="")
             else:
-                row.prop_search(self,"custom_icon",addon_tree,"sn_icons",text="",icon="ERROR")                
+                row.label(icon="ERROR")
+                row.prop_search(self,"custom_icon",addon_tree,"sn_icons",text="")                
         else:
             op = row.operator("sn.select_icon",icon=self.icon)
             op.node = self.name
