@@ -28,7 +28,9 @@ def get_node_categories():
             with open(node, encoding="utf-8") as node_file:
                 for line in node_file.readlines():
                     if "class" in line and "SN_ScriptingBaseNode" in line:
-                        category_items.append(NodeItem(line.split("class ")[-1].split("(")[0]))
+                        name = line.split("class ")[-1].split("(")[0]
+                        if not name in ["SN_TutorialNode"]:
+                            category_items.append(NodeItem(name))
         if category_items:
             node_categories.append(SN_ScriptingNodesCategory(category.replace(" ","_").lower(), category, items=category_items))
 

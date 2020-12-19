@@ -77,15 +77,6 @@ class SN_ScriptingBaseNode:
         self.on_node_update()
 
 
-    ### SOCKET UPDATE
-    # def on_socket_update(self): pass
-
-
-    # def socket_value_update(self, context):
-    #     self.node_tree.set_changes(True)
-    #     self.on_socket_update()
-
-
     ### LINK UPDATE
     def on_link_insert(self,link): pass
 
@@ -190,4 +181,4 @@ class SN_ScriptingBaseNode:
     
     
     ### RETURNED TYPES
-    def what_layout(self,socket): pass
+    def what_layout(self,socket): return "layout"
