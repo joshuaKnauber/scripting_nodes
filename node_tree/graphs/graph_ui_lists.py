@@ -86,7 +86,7 @@ class SN_Graph(bpy.types.PropertyGroup):
     
     errors: bpy.props.CollectionProperty(type=SN_Error)
     
-    last_compile_time: bpy.props.StringProperty(default="-s",
+    last_compile_time: bpy.props.StringProperty(default="0s",
                                                name="Last Time",
                                                description="The time the last compile took")
 

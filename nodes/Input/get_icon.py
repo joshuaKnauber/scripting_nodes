@@ -64,13 +64,14 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
     
     icon_source: bpy.props.EnumProperty(name="Icon Source",
-                                      description="The source of the icons",
-                                      items=[("BLENDER","Blender","Blender","BLENDER",0),
-                                             ("CUSTOM","Custom","Custom","FILE_SCRIPT",1)])
+                                        update=SN_ScriptingBaseNode.update_needs_compile,
+                                        description="The source of the icons",
+                                        items=[("BLENDER","Blender","Blender","BLENDER",0),
+                                                ("CUSTOM","Custom","Custom","FILE_SCRIPT",1)])
 
     
-    icon: bpy.props.StringProperty(default="ERROR")
-    custom_icon: bpy.props.StringProperty(default="")
+    icon: bpy.props.StringProperty(default="ERROR",update=SN_ScriptingBaseNode.update_needs_compile)
+    custom_icon: bpy.props.StringProperty(default="",update=SN_ScriptingBaseNode.update_needs_compile)
 
 
     def on_create(self,context):
@@ -85,16 +86,14 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
         row = layout.row()
         addon_tree = context.scene.sn.addon_tree()
         if self.icon_source == "CUSTOM":
-            row.prop_search(self,"custom_icon",addon_tree,"sn_icons",text="",icon="VIEWZOOM")
             if self.custom_icon in addon_tree.sn_icons and addon_tree.sn_icons[self.custom_icon].image in bpy.data.images:
-                row.label(icon_value=bpy.data.images[addon_tree.sn_icons[self.custom_icon].image].preview.icon_id)
+                custom_icon = bpy.data.images[addon_tree.sn_icons[self.custom_icon].image].preview.icon_id
+                row.prop_search(self,"custom_icon",addon_tree,"sn_icons",text="",icon_value=custom_icon)
             else:
-                row.label(icon="ERROR")
-                
+                row.prop_search(self,"custom_icon",addon_tree,"sn_icons",text="",icon="ERROR")                
         else:
-            op = row.operator("sn.select_icon")
+            op = row.operator("sn.select_icon",icon=self.icon)
             op.node = self.name
-            row.label(icon=self.icon)
             
             
     def code_imperative(self, context, main_tree):

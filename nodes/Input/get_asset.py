@@ -14,7 +14,7 @@ class SN_GetAssetNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
     
-    asset: bpy.props.StringProperty(default="")
+    asset: bpy.props.StringProperty(default="",update=SN_ScriptingBaseNode.update_needs_compile)
 
 
     def on_create(self,context):

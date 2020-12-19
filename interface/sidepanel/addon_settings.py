@@ -25,7 +25,7 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         layout.use_property_decorate = False
         row = layout.row()
         row.alignment = "RIGHT"
-        row.label(text=addon_graph.last_compile_time)
+        row.label(text="Last Compile: "+addon_graph.last_compile_time)
         layout.prop(addon_graph, "autocompile", text="Auto Compile")
         if addon_graph.autocompile:
             layout.prop(addon_graph, "autocompile_delay", text="Delay")
