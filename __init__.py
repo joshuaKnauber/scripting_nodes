@@ -27,6 +27,7 @@ bl_info = {
 import bpy
 import nodeitems_utils
 from bpy.app.handlers import persistent
+from bpy.utils import previews
 import atexit
 
 import os
