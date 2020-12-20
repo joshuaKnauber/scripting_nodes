@@ -19,7 +19,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     def get_value(self, indents=0):
         if self.is_output:
-            return process_node(self.node, self)
+            return "\""+process_node(self.node, self)+"\""
         else:
             if self.is_linked:
                 if self.links[0].from_socket.sn_type == "STRING":
