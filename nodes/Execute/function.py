@@ -19,16 +19,18 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_name(self, context):
         if not self.func_name:
             self.func_name = "New Function"
-            self.get_item().name = self.func_name
+            
+        self.get_item().name = self.func_name
 
         unique_name = self.get_unique_name(self.func_name, self.addon_tree.sn_function_nodes, " ")
         if unique_name != self.func_name:
             self.func_name = unique_name
-            self.get_item().name = self.func_name
+        
+        self.get_item().name = self.func_name
 
 
     func_name: bpy.props.StringProperty(name="Name", description="Name of the function", update=update_name)
-
+    test_name: bpy.props.StringProperty()
 
     def on_create(self,context):
         self.add_execute_output("Execute")
@@ -38,7 +40,6 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_node(self,context,layout):
         layout.prop(self, "func_name")
-        layout.prop_search(self, "func_name", self.addon_tree, "sn_function_nodes")
 
 
     def code_imperative(self, context):
