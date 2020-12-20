@@ -61,12 +61,11 @@ class ScriptingSocket:
         if self.is_output and len(node.outputs[self.get_socket_index(node.outputs)].links)+1 > self.output_limit:
             add_to_remove_links(link)
         else:
-            if self.take_name:
+            if self.take_name and not self.taken_name:
                 if self.is_output:
                     self.taken_name = link.to_socket.name
                 else:
                     self.taken_name = link.from_socket.name
-                self.take_name = False
             self.update(node,link)
         
     def draw_remove_socket(self,layout):
@@ -120,7 +119,7 @@ class DynamicSocket(ScriptingSocket):
         inp = node.add_input(from_socket.bl_idname,self.default_text,True)
         inp.copy_name = self.copy_name
         inp.taken_name = self.taken_name
-        inp.take_name = True
+        inp.take_name = self.take_name
         self.taken_name = ""
         node.inputs.move(len(node.inputs)-1,pos)
         dynamic_links.append((link, from_socket, node.inputs[pos]))
@@ -131,7 +130,7 @@ class DynamicSocket(ScriptingSocket):
         out = node.add_output(to_socket.bl_idname,self.default_text,True)
         out.copy_name = self.copy_name
         out.taken_name = self.taken_name
-        out.take_name = True
+        out.take_name = self.take_name
         self.taken_name = ""
         node.outputs.move(len(node.outputs)-1,pos)
         dynamic_links.append((link, to_socket, node.outputs[pos]))

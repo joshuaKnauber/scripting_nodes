@@ -30,7 +30,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_execute_output("Execute")
-        self.add_dynamic_data_output("Parameter")
+        self.add_dynamic_data_output("Parameter").take_name = True
 
 
     def draw_node(self,context,layout):
