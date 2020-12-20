@@ -45,10 +45,18 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_imperative(self, context):
+        parameter = []
+        for out in self.outputs[1:-1]:
+            parameter.append(self.get_python_name(out.get_text(""), "parameter") + ", ")
+
+        parameter_string = ""
+        for item in parameter:
+            parameter_string+=item
+        parameter_string = parameter_string[:-2]
 
         return {
             "code": f"""
-                    def {self.item.identifier}():
+                    def {self.item.identifier}({parameter_string}):
                         {self.outputs[0].block(6)}
                         
                     """
