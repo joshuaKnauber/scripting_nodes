@@ -327,8 +327,10 @@ def combine_blocks(block_list, indents):
 
 def process_node(node, touched_socket, indents=0):
     node_result = node.code_evaluate(bpy.context, bpy.context.scene.sn.addon_tree(), touched_socket)
-    node_code = __normalize_code(node_result["code"], indents)
-    return node_code
+    if node_result:
+        node_code = __normalize_code(node_result["code"], indents)
+        return node_code
+    return ""
 
 
 def process_returned(node, node_result):
