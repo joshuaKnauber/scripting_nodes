@@ -49,6 +49,5 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
                     row.scale_x = {self.inputs["Scale X"].value}
                     row.scale_y = {self.inputs["Scale Y"].value}
                     {self.list_blocks(row_layouts, 5)}
-                    
                     """
         }

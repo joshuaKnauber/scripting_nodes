@@ -108,7 +108,5 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 icon = "\"ERROR\""
         return {
-            "code": f"""
-                    {icon_prefix}{icon}
-                    """
+            "code": f"{icon_prefix}{icon}"
         }
