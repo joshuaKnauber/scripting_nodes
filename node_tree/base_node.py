@@ -17,7 +17,7 @@ class SN_ScriptingBaseNode:
     
     node_options = {
         "default_color": (0.3,0.3,0.3),
-        "property_group": "",
+        "has_collection": False,
         "starts_tree": False,
         "import_once": False,
         "evaluate_once": False,
@@ -41,30 +41,36 @@ class SN_ScriptingBaseNode:
         
         
     ### PROPERTY GROUP
-    def get_item(self):
-        for item in getattr(bpy.context.scene.sn.addon_tree(),self.node_options["property_group"]):
+    @property
+    def collection(self):
+        return self.addon_tree.sn_nodes[self.bl_idname]
+
+
+    @property
+    def item(self):
+        for item in self.collection.items:
             if item.node_uid == self.uid:
                 return item
     
     
     def __create_property_group(self):
-        if "property_group" in self.node_options and self.node_options["property_group"]:
-            if not hasattr(bpy.context.scene.sn.addon_tree(),self.node_options["property_group"]):
-                exec("bpy.types.NodeTree."+self.node_options["property_group"] + "=bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)")
+        if "has_collection" in self.node_options and self.node_options["has_collection"]:
+            if not self.bl_idname in self.addon_tree.sn_nodes:
+                self.addon_tree.sn_nodes.add().name = self.bl_idname
 
 
     def __add_self_to_property_group(self):
-        if "property_group" in self.node_options and self.node_options["property_group"]:
-            item = getattr(bpy.context.scene.sn.addon_tree(),self.node_options["property_group"]).add()
+        if "has_collection" in self.node_options and self.node_options["has_collection"]:
+            item = self.addon_tree.sn_nodes[self.bl_idname].items.add()
             item.name = self.name
             item.node_uid = self.uid
 
 
     def __remove_self_from_property_group(self):
-        if "property_group" in self.node_options and self.node_options["property_group"]:
-            for index, item in enumerate(getattr(bpy.context.scene.sn.addon_tree(),self.node_options["property_group"])):
+        if "has_collection" in self.node_options and self.node_options["has_collection"]:
+            for index, item in enumerate(self.addon_tree.sn_nodes[self.bl_idname].items):
                 if item.node_uid == self.uid:
-                    getattr(bpy.context.scene.sn.addon_tree(),self.node_options["property_group"]).remove(index)
+                    self.addon_tree.sn_nodes[self.bl_idname].items.remove(index)
                     break
 
 
@@ -272,3 +278,9 @@ class SN_GenericPropertyGroup(bpy.types.PropertyGroup):
     identifier: bpy.props.StringProperty()
     description: bpy.props.StringProperty()
     node_uid: bpy.props.StringProperty()
+    
+    
+
+class SN_NodeCollection(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+    items: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)
