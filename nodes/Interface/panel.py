@@ -124,7 +124,6 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         def draw(self, context):
                             layout = self.layout
                             {self.list_blocks(panel_layouts, 7)}
-                            
                     """
         }
         

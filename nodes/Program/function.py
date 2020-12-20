@@ -8,10 +8,10 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_FunctionNode"
     bl_label = "Function"
     # bl_icon = "GRAPH"
-    bl_width_default = 160
+    bl_width_default = 200
 
     node_options = {
-        "default_color": (0.3,0.3,0.3),
+        "default_color": (0.2,0.2,0.2),
         "starts_tree": True,
         "has_collection": True
     }
@@ -35,7 +35,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_execute_output("Execute")
+        self.add_execute_output("Function")
         self.add_dynamic_data_output("Parameter").take_name = True
         self.update_name(None)
 
@@ -45,11 +45,12 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_imperative(self, context):
+        
+        code = self.outputs[0].block(6)
 
         return {
             "code": f"""
                     def {self.item.identifier}():
-                        {self.outputs[0].block(6)}
-                        
+                        {code if code else "pass"}
                     """
         }
