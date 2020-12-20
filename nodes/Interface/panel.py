@@ -31,7 +31,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.2,0.2,0.2),
         "starts_tree": True,
-        "property_group": "sn_panel_nodes"
+        "has_collection": True
     }
     
     
@@ -61,7 +61,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_input("Poll")
 
 
-    def draw_node(self,context,layout):        
+    def draw_node(self,context,layout):
         row = layout.row()
         row.scale_y = 1.5
         row.operator("sn.start_panel_selection",text="Outer Rim",icon="EYEDROPPER")
