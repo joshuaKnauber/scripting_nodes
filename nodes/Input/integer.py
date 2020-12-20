@@ -27,5 +27,5 @@ class SN_IntegerNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         return {
-            "code": f"""{self.value}"""
+            "code": f"{self.value}"
         }
