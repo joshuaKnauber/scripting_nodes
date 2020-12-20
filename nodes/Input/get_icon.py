@@ -96,35 +96,19 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             op = row.operator("sn.select_icon",icon=self.icon)
             op.node = self.name
-            
-            
-    def code_imperative(self, context, main_tree):
-        return {
-            "code": f"""
-                    def {main_tree.sn_graphs[0].short()}_icon(name, is_custom):
-                        if is_custom:
-                            if sn_is_dev():
-                                for tree in bpy.data.node_groups:
-                                    if len(tree.sn_icons):
-                                        return str(bpy.data.images[tree.sn_icons[name].image].preview.icon_id)
-                            else:
-                                if name in bpy.context.scene.{main_tree.sn_graphs[0].short()}_icons:
-                                    return str(bpy.context.scene.{main_tree.sn_graphs[0].short()}_icons[name].icon_id)
-                            return "ERROR"
-                        return name
-                    """
-        }
 
 
     def code_evaluate(self, context, main_tree, touched_socket):
-        icon = self.icon
+        icon = f"\"{self.icon}\""
+        icon_prefix = "icon="
         if self.icon_source == "CUSTOM":
             if self.custom_icon and self.custom_icon in main_tree.sn_icons:
-                icon = self.custom_icon
+                icon = f"bpy.context.scene.{main_tree.sn_graphs[0].short()}_icons[{self.custom_icon}].icon_id,"
+                icon_prefix = "icon_value="
             else:
-                icon = "ERROR"
+                icon = "\"ERROR\""
         return {
             "code": f"""
-                    {main_tree.sn_graphs[0].short()}_icon("{icon}",{str(self.icon_source == "CUSTOM")})
+                    {icon_prefix}{icon}
                     """
         }

@@ -47,16 +47,18 @@ class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
     sn_type = "STRING"
     connects_to = ["SN_IconSocket"]
     
+    allow_value: bpy.props.BoolProperty(default=True)
+    
     def get_value(self, indents=0):
         if self.is_linked:
             if self.is_output:
                 return process_node(self.node, self)
             else:
                 value = self.links[0].from_socket.value
-                if value.isnumeric():
-                    return " "*indents*4 + f"icon_value={value},"
-                elif value:
-                    return " "*indents*4 + f"icon={value},"
+                if "icon_value" in value and not self.allow_value:
+                    return "icon=\"ERROR\""
+                else:
+                    return value
         return ""
 
     def draw_socket(self, context, layout, row, node, text):
