@@ -26,7 +26,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
                     return self.links[0].from_socket.value
                 else:
                     return "str(" + self.links[0].from_socket.value + ")"
-            return " "*indents*4 + self.default_value
+            return " "*indents*4 + "\""+self.default_value+"\""
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:
