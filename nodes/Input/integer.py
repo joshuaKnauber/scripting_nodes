@@ -3,9 +3,9 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
 
-class SN_IntNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_IntegerNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_IntNode"
+    bl_idname = "SN_IntegerNode"
     bl_label = "Integer"
     # bl_icon = "GRAPH"
     bl_width_default = 160
@@ -17,7 +17,7 @@ class SN_IntNode(bpy.types.Node, SN_ScriptingBaseNode):
     value: bpy.props.IntProperty(name="Integer Value")
 
     def on_create(self,context):
-        self.add_string_output("Int").copy_name = True
+        self.add_string_output("Integer").copy_name = True
 
 
     def draw_node(self,context,layout):
