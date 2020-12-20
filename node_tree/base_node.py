@@ -16,6 +16,7 @@ class SN_ScriptingBaseNode:
     
     node_options = {
         "default_color": (0.3,0.3,0.3),
+        "has_property_group": False,
         "starts_tree": False,
         "import_once": False,
         "evaluate_once": False,
