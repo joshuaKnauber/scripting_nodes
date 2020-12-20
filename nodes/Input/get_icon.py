@@ -98,12 +98,12 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
             op.node = self.name
 
 
-    def code_evaluate(self, context, main_tree, touched_socket):
+    def code_evaluate(self, context, touched_socket):
         icon = f"\"{self.icon}\""
         icon_prefix = "icon="
         if self.icon_source == "CUSTOM":
-            if self.custom_icon and self.custom_icon in main_tree.sn_icons and main_tree.sn_icons[self.custom_icon].image in bpy.data.images:
-                icon = f"bpy.context.scene.{main_tree.sn_graphs[0].short()}_icons['{self.custom_icon}'].icon_id,"
+            if self.custom_icon and self.custom_icon in self.addon_tree.sn_icons and self.addon_tree.sn_icons[self.custom_icon].image in bpy.data.images:
+                icon = f"bpy.context.scene.{self.addon_tree.sn_graphs[0].short()}_icons['{self.custom_icon}'].icon_id,"
                 icon_prefix = "icon_value="
             else:
                 icon = "\"ERROR\""

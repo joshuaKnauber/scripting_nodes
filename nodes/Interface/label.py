@@ -22,9 +22,9 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_icon_input("Icon")
     
 
-    def code_evaluate(self, context, main_tree, touched_socket):
+    def code_evaluate(self, context, touched_socket):
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
         return {
-            "code": f"""{layout}.label(text="{self.inputs["Text"].value}",{self.inputs["Icon"].value})"""
+            "code": f"""{layout}.label(text={self.inputs["Text"].value},{self.inputs["Icon"].value})"""
         }

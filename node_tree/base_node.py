@@ -253,11 +253,11 @@ class SN_ScriptingBaseNode:
 
 
     ### RETURNED CODE
-    def code_imports(self,context,main_tree): pass
-    def code_register(self,context,main_tree): pass
-    def code_unregister(self,context,main_tree): pass
-    def code_imperative(self,context,main_tree): pass
-    def code_evaluate(self,context,main_tree,touched_socket): pass
+    def code_imports(self,context): pass
+    def code_register(self,context): pass
+    def code_unregister(self,context): pass
+    def code_imperative(self,context): pass
+    def code_evaluate(self,context,touched_socket): pass
     
     
     ### RETURNED TYPES

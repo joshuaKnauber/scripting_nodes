@@ -38,7 +38,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "func_name")
 
 
-    def code_imperative(self, context, main_tree):
+    def code_imperative(self, context):
 
         return {
             "code": f"""

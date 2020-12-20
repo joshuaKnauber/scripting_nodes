@@ -79,7 +79,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         return "SNA_PT_" + re.sub(r'\W+', '', self.label.replace(" ","_")) + "_" + self.uid
                 
 
-    def code_evaluate(self, context, main_tree, touched_socket):
+    def code_evaluate(self, context, touched_socket):
         
         label = self.label
         
@@ -129,7 +129,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         }
         
     
-    def code_register(self, context, main_tree):     
+    def code_register(self, context):     
         return {
             "code": f"""
                     bpy.utils.register_class({self.idname()})
@@ -138,7 +138,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         }
         
     
-    def code_unregister(self, context, main_tree):
+    def code_unregister(self, context):
         return {
             "code": f"""
                     bpy.utils.unregister_class({self.idname()})

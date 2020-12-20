@@ -21,7 +21,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_dynamic_data_input("Content")
 
 
-    def code_evaluate(self, context, main_tree, touched_socket):
+    def code_evaluate(self, context, touched_socket):
         contents = []
         for inp in self.inputs[1:-1]:
             contents.append(inp.value + ", ")

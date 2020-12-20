@@ -26,11 +26,10 @@ class SN_GetAssetNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop_search(self,"asset",addon_tree,"sn_assets",text="",icon="VIEWZOOM")
             
 
-    def code_evaluate(self, context, main_tree, touched_socket):
+    def code_evaluate(self, context, touched_socket):
         asset_path = ""
-        print("t", self.asset, main_tree.sn_assets)
-        if self.asset and self.asset in main_tree.sn_assets:
-            asset_path = main_tree.sn_assets[self.asset].path
+        if self.asset and self.asset in self.addon_tree.sn_assets:
+            asset_path = self.addon_tree.sn_assets[self.asset].path
         return {
             "code": f"""
                     {asset_path}

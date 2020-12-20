@@ -326,7 +326,7 @@ def combine_blocks(block_list, indents):
 
 
 def process_node(node, touched_socket, indents=0):
-    node_result = node.code_evaluate(bpy.context, bpy.context.scene.sn.addon_tree(), touched_socket)
+    node_result = node.code_evaluate(bpy.context, touched_socket)
     if node_result:
         node_code = __normalize_code(node_result["code"], indents)
         return node_code
@@ -392,19 +392,19 @@ def __evaluate_graph(graph, addon_tree, addon_did_once):
             if not node.bl_idname in graph_did_once["evaluated"]: graph_did_once["evaluated"].append(node.bl_idname)
         
         if __should_import(node, {**addon_did_once, **graph_did_once}["imports"]):
-            graph_code["imports"] += process_returned(node, node.code_imports(bpy.context, addon_tree))
+            graph_code["imports"] += process_returned(node, node.code_imports(bpy.context))
             if not node.bl_idname in graph_did_once["imports"]: graph_did_once["imports"].append(node.bl_idname)
             
         if __should_imperative(node, {**addon_did_once, **graph_did_once}["imperative"]):
-            graph_code["imperative"] += process_returned(node, node.code_imperative(bpy.context, addon_tree))
+            graph_code["imperative"] += process_returned(node, node.code_imperative(bpy.context))
             if not node.bl_idname in graph_did_once["imperative"]: graph_did_once["imperative"].append(node.bl_idname)
             
         if __should_register(node, {**addon_did_once, **graph_did_once}["register"]):
-            graph_code["register"] += process_returned(node, node.code_register(bpy.context, addon_tree))
+            graph_code["register"] += process_returned(node, node.code_register(bpy.context))
             if not node.bl_idname in graph_did_once["register"]: graph_did_once["register"].append(node.bl_idname)
             
         if __should_unregister(node, {**addon_did_once, **graph_did_once}["unregister"]):
-            graph_code["unregister"] += process_returned(node, node.code_unregister(bpy.context, addon_tree))
+            graph_code["unregister"] += process_returned(node, node.code_unregister(bpy.context))
             if not node.bl_idname in graph_did_once["unregister"]: graph_did_once["unregister"].append(node.bl_idname)
             
     return graph_code, graph_did_once

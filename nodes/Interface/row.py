@@ -31,7 +31,7 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
         return "row"
     
 
-    def code_evaluate(self, context, main_tree, touched_socket):
+    def code_evaluate(self, context, touched_socket):
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
         

@@ -23,7 +23,7 @@ class SN_TestNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_string_input("lol")
         self.add_execute_output("Program")
 
-    def code_evaluate(self, context, main_tree, touched_socket):
+    def code_evaluate(self, context, touched_socket):
         return {
             "code": f"""
                     # this worked i think {self.inputs[1].value}

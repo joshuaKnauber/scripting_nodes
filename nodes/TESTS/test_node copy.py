@@ -18,7 +18,7 @@ class SN_OtherTestNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_input("inp")
         
         
-    def code_evaluate(self, context, main_tree, touched_socket):
+    def code_evaluate(self, context, touched_socket):
         return {
             "code": f"""
                     # {self.inputs[0].value}

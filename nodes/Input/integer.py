@@ -24,7 +24,7 @@ class SN_IntegerNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "value", text="")
 
 
-    def code_evaluate(self, context, main_tree, touched_socket):
+    def code_evaluate(self, context, touched_socket):
 
         return {
             "code": f"""{self.value}"""
