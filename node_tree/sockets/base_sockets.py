@@ -119,6 +119,9 @@ class DynamicSocket(ScriptingSocket):
         pos = self.get_socket_index(node.inputs)
         inp = node.add_input(from_socket.bl_idname,self.default_text,True)
         inp.copy_name = self.copy_name
+        inp.taken_name = self.taken_name
+        inp.take_name = True
+        self.taken_name = ""
         node.inputs.move(len(node.inputs)-1,pos)
         dynamic_links.append((link, from_socket, node.inputs[pos]))
     
@@ -127,6 +130,9 @@ class DynamicSocket(ScriptingSocket):
         pos = self.get_socket_index(node.outputs)
         out = node.add_output(to_socket.bl_idname,self.default_text,True)
         out.copy_name = self.copy_name
+        out.taken_name = self.taken_name
+        out.take_name = True
+        self.taken_name = ""
         node.outputs.move(len(node.outputs)-1,pos)
         dynamic_links.append((link, to_socket, node.outputs[pos]))
     
