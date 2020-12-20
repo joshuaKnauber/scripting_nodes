@@ -7,7 +7,8 @@ from ...compiler.compiler import process_node
 class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Boolean"
     sn_type = "BOOLEAN"
-    connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket","SN_FloatSocket", "SN_IntSocket"]
+    connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket","SN_FloatSocket", "SN_IntSocket",
+                   "SN_VariableSocket","SN_DynamicVariableSocket"]
     
     default_value: bpy.props.BoolProperty(default=True,
                                             update=ScriptingSocket.socket_value_update,

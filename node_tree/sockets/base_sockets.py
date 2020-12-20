@@ -27,6 +27,7 @@ class ScriptingSocket:
     taken_name: bpy.props.StringProperty()
     copy_name: bpy.props.BoolProperty(default=False)
     default_text: bpy.props.StringProperty()
+    dynamic_overwrite = ""
     output_limit = 9999
     
     def get_value(self, indents=0): return ""
@@ -116,7 +117,10 @@ class DynamicSocket(ScriptingSocket):
     def update_input(self,node,link):
         from_socket = link.from_socket
         pos = self.get_socket_index(node.inputs)
-        inp = node.add_input(from_socket.bl_idname,self.default_text,True)
+        if self.dynamic_overwrite:
+            inp = node.add_input(self.dynamic_overwrite,self.default_text,True)
+        else:
+            inp = node.add_input(from_socket.bl_idname,self.default_text,True)
         inp.copy_name = self.copy_name
         inp.taken_name = self.taken_name
         inp.take_name = self.take_name
@@ -127,7 +131,10 @@ class DynamicSocket(ScriptingSocket):
     def update_output(self,node,link):
         to_socket = link.to_socket
         pos = self.get_socket_index(node.outputs)
-        out = node.add_output(to_socket.bl_idname,self.default_text,True)
+        if self.dynamic_overwrite:
+            out = node.add_output(self.dynamic_overwrite,self.default_text,True)
+        else:
+            out = node.add_output(to_socket.bl_idname,self.default_text,True)
         out.copy_name = self.copy_name
         out.taken_name = self.taken_name
         out.take_name = self.take_name
