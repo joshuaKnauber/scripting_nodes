@@ -13,24 +13,26 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.3,0.3,0.3),
         "starts_tree": True,
-        "property_group": "sn_function_nodes"
+        "has_collection": True
     }
 
     def update_name(self, context):
         if not self.func_name:
             self.func_name = "New Function"
             
-        self.get_item().name = self.func_name
+        self.item.name = self.func_name
+        self.item.identifier = self.get_python_name(self.func_name, "new_function")
 
-        unique_name = self.get_unique_name(self.func_name, self.addon_tree.sn_function_nodes, " ")
+        unique_name = self.get_unique_name(self.func_name, self.collection.items, " ")
         if unique_name != self.func_name:
             self.func_name = unique_name
         
-        self.get_item().name = self.func_name
+        self.item.name = self.func_name
+        self.item.identifier = self.get_python_name(self.func_name, "new_function")
 
 
     func_name: bpy.props.StringProperty(name="Name", description="Name of the function", update=update_name)
-    test_name: bpy.props.StringProperty()
+
 
     def on_create(self,context):
         self.add_execute_output("Execute")
@@ -46,9 +48,8 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         return {
             "code": f"""
-
-                    def something():
+                    def {self.item.identifier}():
                         {self.outputs[0].block(6)}
-
+                        
                     """
         }

@@ -17,7 +17,7 @@ class SN_FloatNode(bpy.types.Node, SN_ScriptingBaseNode):
     value: bpy.props.FloatProperty(name="Float Value")
 
     def on_create(self,context):
-        self.add_string_output("Float").copy_name = True
+        self.add_float_output("Float").copy_name = True
 
 
     def draw_node(self,context,layout):

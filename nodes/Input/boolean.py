@@ -17,14 +17,14 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
     value: bpy.props.BoolProperty(name="Boolean Value")
 
     def on_create(self,context):
-        self.add_string_output("Boolean").copy_name = True
+        self.add_boolean_output("Boolean").copy_name = True
 
 
     def draw_node(self,context,layout):
         layout.prop(self, "value")
 
 
-    def code_evaluate(self, context, main_tree, touched_socket):
+    def code_evaluate(self, context, touched_socket):
 
         return {
             "code": f"""{self.value}"""

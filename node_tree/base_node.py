@@ -200,6 +200,8 @@ class SN_ScriptingBaseNode:
     def add_boolean_output(self,label,removable=False): return self.add_output("SN_BooleanSocket",label,removable)
     def add_float_input(self,label,removable=False): return self.add_input("SN_FloatSocket",label,removable)
     def add_float_output(self,label,removable=False): return self.add_output("SN_FloatSocket",label,removable)
+    def add_integer_input(self,label,removable=False): return self.add_input("SN_FloatSocket",label,removable)
+    def add_integer_output(self,label,removable=False): return self.add_output("SN_FloatSocket",label,removable)
     def add_icon_input(self,label,removable=False): return self.add_input("SN_IconSocket",label,removable)
     def add_icon_output(self,label,removable=False): return self.add_output("SN_IconSocket",label,removable)
     def add_data_input(self,label,removable=False): return self.add_input("SN_DataSocket",label,removable)
