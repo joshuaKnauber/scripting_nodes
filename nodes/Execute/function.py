@@ -44,7 +44,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             "code": f"""
 
                     def something():
-                        pass
+                        {self.outputs[0].block(6)}
 
                     """
         }
