@@ -1,4 +1,5 @@
 import bpy
+import re
 from .sockets.base_sockets import add_to_remove_links
 from ..compiler.compiler import combine_blocks
 from uuid import uuid4
@@ -100,6 +101,40 @@ class SN_ScriptingBaseNode:
         else:
             add_to_remove_links(link)
 
+    ### NAME HANDLING
+    def get_python_name(self,name,empty_name=""):
+        python_name = re.sub(r'\W+', '', name.replace(" ","_").lower())
+        if not python_name:
+            python_name = empty_name
+        return python_name
+
+
+    def __name_is_unique(self,collection,name):
+        count = 0
+        for item in collection:
+            if item.name == name:
+                count += 1
+        return count <= 1
+
+
+    def get_unique_name(self,name,collection,separator="_"):
+        if self.__name_is_unique(collection, name):
+            return name
+        else:
+            max_num = 0
+            if separator in name and name.split(separator)[-1].isnumeric():
+                name = (separator).join(name.split(separator)[:-1])
+            for item in collection:
+                if separator in item.name and item.name.split(separator)[-1].isnumeric():
+                    item_name = (separator).join(item.name.split(separator)[:-1])
+                    if item_name == name:
+                        max_num = max(max_num, int(item.name.split(separator)[-1]))
+            return name + separator + str(max_num+1).zfill(3)
+
+    def get_unique_python_name(self,name,empty_name,collection,separator="_"):
+        return self.get_unique_name(self.get_python_name(name, empty_name), collection, separator)
+
+
 
     ### DRAW NODE
     def draw_node(self,context,layout): pass
@@ -192,3 +227,11 @@ class SN_ScriptingBaseNode:
     
     ### RETURNED TYPES
     def what_layout(self,socket): return "layout"
+
+
+
+class SN_GenericPropertyGroup(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+    identifier: bpy.props.StringProperty()
+    description: bpy.props.StringProperty()
+    node_uid: bpy.props.StringProperty()
