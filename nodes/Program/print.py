@@ -27,5 +27,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
             contents.append(inp.value + ", ")
 
         return {
-            "code": f"print({self.list_blocks(contents, 0)})"
+            "code": f"""
+                    print({self.list_blocks(contents, 0)})
+                    """
         }
