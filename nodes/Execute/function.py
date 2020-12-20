@@ -16,13 +16,14 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
     def update_name(self, context):
-        unique_name = self.func_name
-        if not unique_name:
-            unique_name = "New Function"
+        pass
+        # unique_name = self.func_name
+        # if not unique_name:
+        #     unique_name = "New Function"
 
-        unique_name = self.get_unique_name(unique_name, context.scene.sn_function_nodes, " ")
-        if unique_name != self.func_name:
-            self.func_name = unique_name
+        # unique_name = self.get_unique_name(unique_name, context.scene.sn_function_nodes, " ")
+        # if unique_name != self.func_name:
+        #     self.func_name = unique_name
 
 
     func_name: bpy.props.StringProperty(name="Name", description="Name of the function", update=update_name)
@@ -37,24 +38,13 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "func_name")
 
 
-    def on_link_insert(self,link):
-        if link.from_socket.name == "Parameter" and link.from_socket.removable:
-            for index, out in enumerate(self.outputs):
-                if out == link.from_socket:
-                    self.outputs[index].name = link.to_socket.name
-
-
     def code_imperative(self, context, main_tree):
 
         return {
             "code": f"""
 
-                    row = {layout}.row(align={self.inputs["Align"].value})
-                    row.enabled = {self.inputs["Enabled"].value}
-                    row.alert = {self.inputs["Alert"].value}
-                    row.scale_x = {self.inputs["Scale X"].value}
-                    row.scale_y = {self.inputs["Scale Y"].value}
-                    {self.list_blocks(row_layouts, 5)}
+                    def something():
+                        {self.outputs[0].block(6)}
 
                     """
         }

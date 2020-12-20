@@ -26,8 +26,5 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
         return {
-            "code": f"""
-                    {layout}.label(text="{self.inputs["Text"].value}",{self.inputs["Icon"].value})
-                    
-                    """
+            "code": f"""{layout}.label(text="{self.inputs["Text"].value}",{self.inputs["Icon"].value})"""
         }
