@@ -16,7 +16,7 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_interface_input("Interface")
+        self.add_interface_input("Interface").copy_name = True
 
         self.add_string_input("Text")
         self.add_icon_input("Icon")

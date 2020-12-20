@@ -16,7 +16,7 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_interface_input("Interface")
+        self.add_interface_input("Interface").copy_name = True
         self.add_interface_output("Row",True)
         self.add_dynamic_interface_output("Row")
 

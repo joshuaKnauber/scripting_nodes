@@ -55,8 +55,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         for link in dynamic_links:
             self.links.remove(link[0])
             link = self.links.new(link[1],link[2])
-            link.from_node.insert_link(link)
-            link.to_node.insert_link(link)
         dynamic_links.clear()
         
         

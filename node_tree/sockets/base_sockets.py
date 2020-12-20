@@ -23,6 +23,9 @@ class ScriptingSocket:
     socket_shape = "CIRCLE"
     sn_type = ""
     removable: bpy.props.BoolProperty(default=False)
+    take_name: bpy.props.BoolProperty(default=False)
+    taken_name: bpy.props.StringProperty()
+    copy_name: bpy.props.BoolProperty(default=False)
     default_text: bpy.props.StringProperty()
     output_limit = 9999
     
@@ -58,6 +61,12 @@ class ScriptingSocket:
         if self.is_output and len(node.outputs[self.get_socket_index(node.outputs)].links)+1 > self.output_limit:
             add_to_remove_links(link)
         else:
+            if self.take_name:
+                if self.is_output:
+                    self.taken_name = link.to_socket.name
+                else:
+                    self.taken_name = link.from_socket.name
+                self.take_name = False
             self.update(node,link)
         
     def draw_remove_socket(self,layout):
@@ -66,6 +75,20 @@ class ScriptingSocket:
         op.tree_name = self.node.node_tree.name
         op.node_name = self.node.name
         op.is_output = self.is_output
+        
+    def get_text(self,text):
+        if self.taken_name:
+            return self.taken_name
+        elif self.is_linked and self.copy_name:
+            if self.is_output and not self.links[0].to_socket.copy_name:
+                return self.links[0].to_socket.get_text(self.links[0].to_socket.name)
+            elif self.is_output and self.links[0].to_socket.copy_name:
+                return self.links[0].to_socket.name
+            elif not self.is_output and not self.links[0].from_socket.copy_name:
+                return self.links[0].from_socket.get_text(self.links[0].from_socket.name)
+            elif not self.is_output and self.links[0].from_socket.copy_name:
+                return self.links[0].from_socket.name
+        return text
         
     def draw_socket(self,context,layout,row,node,text): pass
         
@@ -77,10 +100,9 @@ class ScriptingSocket:
             row.alignment = "LEFT"
         if self.removable and not self.is_output:
             self.draw_remove_socket(row)
-        self.draw_socket(context,layout,row,node,text)
+        self.draw_socket(context,layout,row,node,self.get_text(text))
         if self.removable and self.is_output:
-            self.draw_remove_socket(row)
-            
+            self.draw_remove_socket(row)            
             
             
 class DynamicSocket(ScriptingSocket):
@@ -96,6 +118,7 @@ class DynamicSocket(ScriptingSocket):
         from_socket = link.from_socket
         pos = self.get_socket_index(node.inputs)
         inp = node.add_input(from_socket.bl_idname,self.default_text,True)
+        inp.copy_name = self.copy_name
         node.inputs.move(len(node.inputs)-1,pos)
         dynamic_links.append((link, from_socket, node.inputs[pos]))
     
@@ -103,6 +126,7 @@ class DynamicSocket(ScriptingSocket):
         to_socket = link.to_socket
         pos = self.get_socket_index(node.outputs)
         out = node.add_output(to_socket.bl_idname,self.default_text,True)
+        out.copy_name = self.copy_name
         node.outputs.move(len(node.outputs)-1,pos)
         dynamic_links.append((link, to_socket, node.outputs[pos]))
     
