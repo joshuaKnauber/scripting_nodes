@@ -25,7 +25,9 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
             return process_node(self.node, self)
         else:
             if self.is_linked:
-                if self.links[0].from_socket.sn_type == "NUMBER":
+                if self.links[0].from_socket.sn_type == "VARIABLE":
+                    return self.links[0].from_socket.value
+                elif self.links[0].from_socket.sn_type == "NUMBER":
                     return str(float(self.links[0].from_socket.value))
                 else:
                     value = self.links[0].from_socket.value
@@ -69,7 +71,9 @@ class SN_IntSocket(bpy.types.NodeSocket, ScriptingSocket):
             return process_node(self.node, self)
         else:
             if self.is_linked:
-                if self.links[0].from_socket.sn_type == "NUMBER":
+                if self.links[0].from_socket.sn_type == "VARIABLE":
+                    return self.links[0].from_socket.value
+                elif self.links[0].from_socket.sn_type == "NUMBER":
                     return str(int(self.links[0].from_socket.value))
                 else:
                     value = self.links[0].from_socket.value

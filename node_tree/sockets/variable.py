@@ -8,12 +8,21 @@ class SN_VariableSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Variable"
     sn_type = "VARIABLE"
     connects_to = ["SN_StringSocket","SN_DataSocket","SN_BooleanSocket","SN_FloatSocket", "SN_IntSocket"]
+
+    def update_name(self,context):
+        print("name")
+
+    name: bpy.props.StringProperty(update=update_name)
+
+    def update(self,node,link):
+        if self.is_output and not self.name and not self.name == link.to_socket.name:
+            self.name = link.to_socket.name
     
     def get_value(self, indents=0):
-        return " "*indents*4 + self.name
+        return process_node(self.node, self)
 
     def draw_socket(self, context, layout, row, node, text):
-        row.label(text="text")
+        row.prop(self, "name", text="")
 
     def draw_color(self, context, node):
         if self.is_linked:

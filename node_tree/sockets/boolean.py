@@ -23,7 +23,9 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
             return process_node(self.node, self)
         else:
             if self.is_linked:
-                if self.links[0].from_socket.sn_type == "BOOLEAN":
+                if self.links[0].from_socket.sn_type == "VARIABLE":
+                    return self.links[0].from_socket.value
+                elif self.links[0].from_socket.sn_type == "BOOLEAN":
                     return self.links[0].from_socket.value
                 else:
                     return "bool(" + self.links[0].from_socket.value + ")"

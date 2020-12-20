@@ -23,7 +23,9 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
             return "\""+process_node(self.node, self)+"\""
         else:
             if self.is_linked:
-                if self.links[0].from_socket.sn_type == "STRING":
+                if self.links[0].from_socket.sn_type == "VARIABLE":
+                    return self.links[0].from_socket.value
+                elif self.links[0].from_socket.sn_type == "STRING":
                     return self.links[0].from_socket.value
                 else:
                     return "str(" + self.links[0].from_socket.value + ")"
