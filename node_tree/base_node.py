@@ -17,7 +17,7 @@ class SN_ScriptingBaseNode:
     
     node_options = {
         "default_color": (0.3,0.3,0.3),
-        "has_property_group": False,
+        "property_group": "",
         "starts_tree": False,
         "import_once": False,
         "evaluate_once": False,
@@ -27,6 +27,7 @@ class SN_ScriptingBaseNode:
     }
     
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
+    addon_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
     
     uid: bpy.props.StringProperty()
 
@@ -37,6 +38,34 @@ class SN_ScriptingBaseNode:
     
     def update_needs_compile(self,context):
         self.node_tree.set_changes(True)
+        
+        
+    ### PROPERTY GROUP
+    def get_item(self):
+        for item in getattr(bpy.context.scene.sn.addon_tree(),self.node_options["property_group"]):
+            if item.node_uid == self.uid:
+                return item
+    
+    
+    def __create_property_group(self):
+        if "property_group" in self.node_options and self.node_options["property_group"]:
+            if not hasattr(bpy.context.scene.sn.addon_tree(),self.node_options["property_group"]):
+                exec("bpy.types.NodeTree."+self.node_options["property_group"] + "=bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)")
+
+
+    def __add_self_to_property_group(self):
+        if "property_group" in self.node_options and self.node_options["property_group"]:
+            item = getattr(bpy.context.scene.sn.addon_tree(),self.node_options["property_group"]).add()
+            item.name = self.name
+            item.node_uid = self.uid
+
+
+    def __remove_self_from_property_group(self):
+        if "property_group" in self.node_options and self.node_options["property_group"]:
+            for index, item in enumerate(getattr(bpy.context.scene.sn.addon_tree(),self.node_options["property_group"])):
+                if item.node_uid == self.uid:
+                    getattr(bpy.context.scene.sn.addon_tree(),self.node_options["property_group"]).remove(index)
+                    break
 
 
     ### INIT NODE
@@ -46,12 +75,15 @@ class SN_ScriptingBaseNode:
     def init(self,context):
         self.node_tree = self.id_data
         self.node_tree.set_changes(True)
+        self.addon_tree = bpy.context.scene.sn.addon_tree()
         self.uid = uuid4().hex[:5].upper()
         if "default_color" in self.node_options:
             self.color = self.node_options["default_color"]
         else:
             self.color = (0.3,0.3,0.3)
         self.use_custom_color = True
+        self.__create_property_group()
+        self.__add_self_to_property_group()
         self.on_create(context)
 
 
@@ -63,6 +95,7 @@ class SN_ScriptingBaseNode:
         self.node_tree = self.id_data
         self.uid = uuid4().hex[:5].upper()
         self.node_tree.set_changes(True)
+        self.__add_self_to_property_group()
         self.on_copy(node)
 
 
@@ -72,6 +105,7 @@ class SN_ScriptingBaseNode:
 
     def free(self):
         self.node_tree.set_changes(True)
+        self.__remove_self_from_property_group()
         self.on_free()
 
 
@@ -100,6 +134,7 @@ class SN_ScriptingBaseNode:
             self.on_link_insert(link)
         else:
             add_to_remove_links(link)
+
 
     ### NAME HANDLING
     def get_python_name(self,name,empty_name=""):
@@ -131,9 +166,9 @@ class SN_ScriptingBaseNode:
                         max_num = max(max_num, int(item.name.split(separator)[-1]))
             return name + separator + str(max_num+1).zfill(3)
 
+
     def get_unique_python_name(self,name,empty_name,collection,separator="_"):
         return self.get_unique_name(self.get_python_name(name, empty_name), collection, separator)
-
 
 
     ### DRAW NODE
