@@ -26,7 +26,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     def run_autocompile(self):
         addon_tree = bpy.context.scene.sn.addon_tree()
         if addon_tree.sn_graphs[0].autocompile and bpy.context.scene.sn.active_addon_has_changes():
-            compile_addon(addon_tree)
+            compile_addon(addon_tree,False)
             if bpy.context.screen:
                 for a in bpy.context.screen.areas: a.tag_redraw()
         return addon_tree.sn_graphs[0].autocompile_delay

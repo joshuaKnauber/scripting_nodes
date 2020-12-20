@@ -6,7 +6,8 @@ from .txt_blocks import license_block, serpens_functions
 addons = []
 
 
-def compile_addon(addon_tree):
+def compile_addon(addon_tree, is_export=False):
+    addon_tree.doing_export = is_export
     txt = None
     try:
         start_time = time()
@@ -136,7 +137,7 @@ def compile_addon(addon_tree):
     
     except Exception as exc:
         addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
-        if txt and addon_prefs.keep_after_error:
+        if txt and not addon_prefs.keep_after_error:
             bpy.data.texts.remove(txt)
         print("# # # # # # # # # ERROR WHILE COMPILING # # # # # # # # #")
         print(exc)
@@ -145,8 +146,9 @@ def compile_addon(addon_tree):
     
     
 def compile_export(addon_tree):
-    if compile_addon(addon_tree):
-        return addons[-1]["text"]
+    text = compile_addon(addon_tree,True)
+    if text != False:
+        return result
     return False
 
 
@@ -166,7 +168,7 @@ def handle_file_load():
             bpy.app.timers.register(tree.run_autocompile, first_interval=0.1)
             tree.sn_graphs[0].errors.clear()
             if tree.sn_graphs[0].compile_on_start:
-                compile_addon(tree)
+                compile_addon(tree,False)
 
 
 def handle_file_unload():
@@ -252,29 +254,36 @@ def __create_icon_register(addon_tree):
     icon_list = ""
     img_list = ""
     for icon in addon_tree.sn_icons:
-        icon_list += icon.name
         if icon.image and icon.image in bpy.data.images:
-            img_list += icon.image
-    return f"""
-            def sn_register_icons():
-                if not sn_is_dev():
+            icon_list += "\""+icon.name+"\","
+            img_list += "\""+icon.image+"\","
+    
+    if addon_tree.doing_export:
+        return f"""
+                def sn_register_icons():
                     icons = [{icon_list}]
                     bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons = bpy.utils.previews.new()
                 
                     icons_dir = os.path.join( os.path.dirname( __file__ ), "icons" )
                     for icon in icons:
                         bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
-                else:
-                    icons = [{img_list}]
-                    bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons = {{}}
-                    
-                    for icon in icons:
-                        bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons[icon] = {{"icon_id":99}}
-                    
-            def sn_unregister_icons():
-                if not sn_is_dev():
+                        
+                def sn_unregister_icons():
                     bpy.utils.previews.remove( bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons )
-            """
+                """
+    else:
+        return f"""
+                def sn_register_icons():
+                    imgs = [{img_list}]
+                    icons = [{icon_list}]
+                    bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons = {{}}
+                        
+                    for i in range(len(icons)):
+                        bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons[icons[i]] = bpy.data.images[imgs[i]].preview
+                        
+                def sn_unregister_icons():
+                    del bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons
+                """
 
 
 def __create_addon_info(addon_tree):

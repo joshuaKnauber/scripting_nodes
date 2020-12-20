@@ -21,6 +21,5 @@ def license_block():
 
 def serpens_functions(addon_tree):
     return f"""
-            def sn_is_dev():
-                return not ".py" in os.getcwd()
+            
             """

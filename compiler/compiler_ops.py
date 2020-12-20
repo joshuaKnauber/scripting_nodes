@@ -19,7 +19,7 @@ class SN_OT_Compile(bpy.types.Operator):
     def execute(self, context):
         addon_tree = context.scene.sn.addon_tree()
         
-        success = compile_addon(addon_tree)
+        success = compile_addon(addon_tree,False)
         
         if success:
             has_fatal = False

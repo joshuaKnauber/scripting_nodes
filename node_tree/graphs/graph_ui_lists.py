@@ -81,6 +81,8 @@ class SN_Graph(bpy.types.PropertyGroup):
     compile_on_start: bpy.props.BoolProperty(default=False,
                                              name="Compile on Startup",
                                              description="Compiles this addon when you open this blender scene")
+    
+    doing_export: bpy.props.BoolProperty(default=False)
 
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
     
