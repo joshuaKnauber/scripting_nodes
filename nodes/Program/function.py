@@ -47,21 +47,14 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
         if touched_socket:
             return {
-                "code": f"""{self.get_python_name(touched_socket.get_text("parameter"), "parameter")}"""
+                "code": f"""{touched_socket.value}"""
             }
 
 
     def code_imperative(self, context):
-        parameter = []
-        for out in self.outputs[1:-1]:
-            if not self.get_python_name(out.get_text("parameter"), "parameter") + ", " in parameter:
-                parameter.append(self.get_python_name(out.get_text("parameter"), "parameter") + ", ")
-            else:
-                parameter.append("fuck, ")
-
         parameter_string = ""
-        for item in parameter:
-            parameter_string+=item
+        for out in self.outputs[1:-1]:
+            parameter_string+=out.value+", "
 
         code = self.outputs[0].block(6)
 
