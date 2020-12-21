@@ -214,6 +214,8 @@ class SN_ScriptingBaseNode:
     ### CREATE SOCKETS
     def add_string_input(self,label,removable=False): return self.add_input("SN_StringSocket",label,removable)
     def add_string_output(self,label,removable=False): return self.add_output("SN_StringSocket",label,removable)
+    def add_dynamic_string_input(self,label): return self.add_input("SN_DynamicStringSocket",label,False)
+    def add_dynamic_string_output(self,label): return self.add_output("SN_DynamicStringSocket",label,False)
     def add_boolean_input(self,label,removable=False): return self.add_input("SN_BooleanSocket",label,removable)
     def add_boolean_output(self,label,removable=False): return self.add_output("SN_BooleanSocket",label,removable)
     def add_float_input(self,label,removable=False): return self.add_input("SN_FloatSocket",label,removable)

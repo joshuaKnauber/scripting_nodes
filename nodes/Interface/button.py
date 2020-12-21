@@ -22,6 +22,9 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_input("Emboss").default(True)
         self.add_boolean_input("Depress").default(False)
         self.add_icon_input("Icon")
+        
+        self.add_dynamic_string_input("test")
+        self.add_dynamic_string_output("test")
     
 
     def code_evaluate(self, context, touched_socket):
