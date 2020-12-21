@@ -39,9 +39,21 @@ class SN_ScriptingBaseNode:
 
     def on_any_change(self): pass
 
+
     def update_needs_compile(self,context):
         self.on_any_change()
         self.node_tree.set_changes(True)
+        
+        
+    ### UPDATE FROM NODE PER TYPE
+    def on_outside_update(self,node): pass
+    
+    
+    def update_nodes_by_type(self, idname):
+        for graph in self.addon_tree.sn_graphs:
+            for node in graph.node_tree.nodes:
+                if node.bl_idname == idname:
+                    node.on_outside_update(self)
         
         
     ### PROPERTY GROUP
