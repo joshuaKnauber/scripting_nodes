@@ -3,19 +3,109 @@ import re
 from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
+panel_locations = []
+panel_template = """
+class SN_PT_SelectPanelLocation_$ID$(bpy.types.Panel):
+    bl_label = "Select Panel Location"
+    bl_idname = "SN_PT_SelectPanelLocation_$ID$"
+    bl_space_type = '$SPACE$'
+    bl_region_type = '$REGION$'
+    bl_options = {"HIDE_HEADER"}
+    $CATEGORY$
+
+    def draw(self, context):
+        
+        if hasattr(context.space_data,"context"):
+            row = self.layout.row()
+            row.alert = True
+            row.scale_y = 1.5
+            op = row.operator("sn.select_panel",icon="EYEDROPPER",text="Any Context")
+            op.space = context.space_data.type
+            op.region = context.region_data.type
+            op = row.operator("sn.select_panel",icon="EYEDROPPER",text=f"'{context.space_data.context.title()}' only")
+            
+        else:
+            row = self.layout.row()
+            row.alert = True
+            row.scale_y = 1.5
+            row.operator("sn.select_panel",icon="EYEDROPPER",text="Select Location")
+
+bpy.utils.register_class(SN_PT_SelectPanelLocation_$ID$)
+"""
+
+
+remove_panels = []
+
 
 class SN_OT_StartPanelSelection(bpy.types.Operator):
     bl_idname = "sn.start_panel_selection"
     bl_label = "Select Panel"
     bl_description = "Start Panel Selection"
     bl_options = {"REGISTER", "INTERNAL", "UNDO"}
-
+    
     @classmethod
     def poll(cls, context):
-        return True
+        global remove_panels
+        return len(remove_panels) == 0
+    
+    def get_panel_locations(self):
+        regions = ["WINDOW", "HEADER", "CHANNELS", "TEMPORARY", "UI", "TOOLS", "TOOL_PROPS",
+                "PREVIEW", "HUD", "NAVIGATION_BAR", "EXECUTE", "FOOTER", "TOOL_HEADER"]
+        spaces = ["EMPTY", "VIEW_3D", "IMAGE_EDITOR", "NODE_EDITOR", "SEQUENCE_EDITOR", "CLIP_EDITOR",
+                "DOPESHEET_EDITOR", "GRAPH_EDITOR", "NLA_EDITOR", "TEXT_EDITOR", "CONSOLE", "INFO",
+                "TOPBAR", "STATUSBAR", "OUTLINER", "PROPERTIES", "FILE_BROWSER", "PREFERENCES"]
+        locations = []
+        for region in regions:
+            for space in spaces:
+                locations.append({"region":region,"space":space,"category":"Select Panel"})
+        return locations
+    
+    def add_to_locations(self,locations):
+        pass
 
     def execute(self, context):
-        
+        global panel_template
+        global remove_panels
+        locations = self.get_panel_locations()
+        self.add_to_locations(locations)
+        for index, location in enumerate(locations):
+            panel = panel_template
+            panel = panel.replace("$ID$",str(index))
+            panel = panel.replace("$REGION$",location["region"])
+            panel = panel.replace("$SPACE$",location["space"])
+            panel = panel.replace("$CATEGORY$","bl_category=\""+location["category"]+"\"")
+            try:
+                exec(panel)
+                remove_panels.append(f"bpy.utils.unregister_class(bpy.types.SN_PT_SelectPanelLocation_{str(index)})")
+            except:
+                pass
+        return {"FINISHED"}
+    
+    
+def remove_registered_panels():
+    global remove_panels
+    for panel in remove_panels:
+        try:
+            exec(panel)
+        except:
+            pass
+    remove_panels.clear()
+    
+    
+class SN_OT_SelectPanel(bpy.types.Operator):
+    bl_idname = "sn.select_panel"
+    bl_label = "Select Location"
+    bl_description = "Select this location for your panel"
+    bl_options = {"REGISTER", "INTERNAL", "UNDO"}
+    
+    space: bpy.props.StringProperty(options={"SKIP_SAVE"})
+    region: bpy.props.StringProperty(options={"SKIP_SAVE"})
+    context: bpy.props.StringProperty(options={"SKIP_SAVE"})
+    category: bpy.props.StringProperty(options={"SKIP_SAVE"})
+
+    def execute(self, context):
+        remove_registered_panels()
+        print(self.space,self.region,self.context,self.category)
         return {"FINISHED"}
 
 
