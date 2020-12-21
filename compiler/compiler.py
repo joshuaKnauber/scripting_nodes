@@ -68,6 +68,7 @@ def compile_addon(addon_tree, is_export=False):
         __write_blockcomment(addon_data["text"], "IMPORTS")
         __write_in_text(addon_data["text"], "import bpy")
         __write_in_text(addon_data["text"], "import os")
+        __write_in_text(addon_data["text"], "import math")
         for graph in addon_data["code"]["graph_code"]:
             if addon_data["code"]["graph_code"][graph]["imports"]:
                 __write_graphcomment(addon_data["text"], graph)
