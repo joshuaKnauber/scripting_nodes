@@ -33,3 +33,4 @@ class SN_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
 class SN_DynamicInterfaceSocket(bpy.types.NodeSocket, DynamicSocket):
     socket_shape = "DIAMOND"
     connects_to = ["SN_InterfaceSocket"]
+    add_idname = "SN_InterfaceSocket"

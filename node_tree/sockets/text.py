@@ -8,7 +8,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
     sn_type = "STRING"
     connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket","SN_FloatSocket", "SN_IntSocket",
-                   "SN_VariableSocket","SN_DynamicVariableSocket"]
+                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DataSocket"]
     
     default_value: bpy.props.StringProperty(default="",
                                             update=ScriptingSocket.socket_value_update,

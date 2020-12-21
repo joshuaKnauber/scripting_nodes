@@ -35,6 +35,7 @@ class ScriptingSocket:
     socket_shape = "CIRCLE"
     sn_type = ""
     removable: bpy.props.BoolProperty(default=False)
+    addable: bpy.props.BoolProperty(default=False)
     take_name: bpy.props.BoolProperty(default=False)
     taken_name: bpy.props.StringProperty(default="")
     copy_name: bpy.props.BoolProperty(default=False)
@@ -97,6 +98,15 @@ class ScriptingSocket:
         op.node_name = self.node.name
         op.is_output = self.is_output
         
+    def draw_add_socket(self,layout):
+        if self.add_idname:
+            op = layout.operator("sn.add_socket", text="",icon="ADD", emboss=False)
+            op.index = get_socket_index(self)
+            op.tree_name = self.node.node_tree.name
+            op.node_name = self.node.name
+            op.is_output = self.is_output
+            op.idname = self.add_idname
+        
     def get_text(self,text):
         if self.taken_name:
             return self.taken_name
@@ -121,17 +131,23 @@ class ScriptingSocket:
             row.alignment = "LEFT"
         if self.removable and not self.is_output:
             self.draw_remove_socket(row)
+        elif self.addable and not self.is_output:
+            self.draw_add_socket(row)
         if self.is_variable:
             row.prop(self,"var_name",text="")
         else:
             self.draw_socket(context,layout,row,node,self.get_text(text))
         if self.removable and self.is_output:
-            self.draw_remove_socket(row)            
+            self.draw_remove_socket(row)   
+        elif self.addable and self.is_output:
+            self.draw_add_socket(row)         
             
             
 class DynamicSocket(ScriptingSocket):
     bl_label = "Dynamic"
     make_variable = False
+    addable: bpy.props.BoolProperty(default=True)
+    add_idname = ""
     
     def get_socket_index(self,collection):
         for i, socket in enumerate(collection):
@@ -172,10 +188,11 @@ class DynamicSocket(ScriptingSocket):
             self.update_output(node,link)
 
     def draw_socket(self, context, layout, row, node, text):
-        layout.label(text=text)
+        row.label(text=text)
 
     def draw_color(self, context, node):
         return (0,0,0,0)
+
 
 
 
@@ -199,4 +216,36 @@ class SN_RemoveSocket(bpy.types.Operator):
         return {"FINISHED"}
     
     
+
+
+
+class SN_AddSocket(bpy.types.Operator):
+    bl_idname = "sn.add_socket"
+    bl_label = "Add Socket"
+    bl_description = "Adds this sockets default type"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+    
+    tree_name: bpy.props.StringProperty()
+    node_name: bpy.props.StringProperty()
+    is_output: bpy.props.BoolProperty()
+    index: bpy.props.IntProperty()
+    idname: bpy.props.StringProperty()
+
+    def execute(self, context):
+        node = bpy.data.node_groups[self.tree_name].nodes[self.node_name]
+        if self.is_output:
+            add_socket = node.outputs[self.index]
+            socket = node.add_output(self.idname,add_socket.default_text,True)
+            node.outputs.move(len(node.outputs)-1,self.index)
+        else:
+            add_socket = node.inputs[self.index]
+            socket = node.add_input(self.idname,add_socket.default_text,True)
+            node.inputs.move(len(node.inputs)-1,self.index)
+
+        socket.is_variable = add_socket.make_variable
+        socket.var_name = add_socket.default_text
+        socket.copy_name = add_socket.copy_name
+        socket.taken_name = add_socket.taken_name
+        socket.take_name = add_socket.take_name
+        return {"FINISHED"}
 
