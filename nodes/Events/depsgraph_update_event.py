@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_DephsgraphUpdateNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_DephsgraphUpdateNode"
-    bl_label = "Dephsgraph Update Event"
+    bl_label = "On Dephsgraph Update"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 

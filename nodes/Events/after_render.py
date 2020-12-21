@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_AfterRenderNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_AfterRenderNode"
-    bl_label = "After Render Events"
+    bl_label = "After Render"
     # bl_icon = "GRAPH"
     bl_width_default = 180
 

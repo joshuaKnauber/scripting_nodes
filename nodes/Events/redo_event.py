@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_RedoNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RedoNode"
-    bl_label = "Redo Event"
+    bl_label = "On Redo"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 

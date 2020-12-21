@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_OnSaveNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_OnSaveNode"
-    bl_label = "On Save Event"
+    bl_label = "On Save"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 

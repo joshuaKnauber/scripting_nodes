@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_UndoNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_UndoNode"
-    bl_label = "Undo Event"
+    bl_label = "On Undo"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 
