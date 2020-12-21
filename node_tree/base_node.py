@@ -96,7 +96,6 @@ class SN_ScriptingBaseNode:
 
     def init(self,context):
         self.node_tree = self.id_data
-        self.update_needs_compile(context)
         self.addon_tree = bpy.context.scene.sn.addon_tree()
         self.uid = uuid4().hex[:5].upper()
         if "default_color" in self.node_options:
@@ -106,6 +105,7 @@ class SN_ScriptingBaseNode:
         self.use_custom_color = True
         self.__create_property_group()
         self.__add_self_to_property_group()
+        self.update_needs_compile(context)
         self.on_create(context)
 
 
