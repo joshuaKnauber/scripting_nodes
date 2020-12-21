@@ -19,21 +19,42 @@ def get_socket_index(socket):
 
 class ScriptingSocket:
     
+    def update_var_name(self,context):
+        names = []
+        if self.is_output:
+            for out in self.node.outputs:
+                names.append(out.var_name)
+        else:
+            for inp in self.node.inputs:
+                names.append(inp.var_name)
+        unique_name = self.node.get_unique_python_name(self.var_name,"parameter",names)
+        if not self.var_name == unique_name:
+            self.var_name = unique_name
+    
     connects_to = []
     socket_shape = "CIRCLE"
     sn_type = ""
     removable: bpy.props.BoolProperty(default=False)
     take_name: bpy.props.BoolProperty(default=False)
-    taken_name: bpy.props.StringProperty()
+    taken_name: bpy.props.StringProperty(default="")
     copy_name: bpy.props.BoolProperty(default=False)
     default_text: bpy.props.StringProperty()
+    is_variable: bpy.props.BoolProperty(default=False)
+    var_name: bpy.props.StringProperty(default="", update=update_var_name)
     dynamic_overwrite = ""
     output_limit = 9999
     
     def get_value(self, indents=0): return ""
+    
     @property
-    def value(self): return self.get_value(0)
+    def value(self):
+        if self.is_variable:
+            return self.var_name
+        return self.get_value(0)
+    
     def block(self, indents):
+        if self.is_variable:
+            return " "*indents*4 + self.var_name
         code = self.get_value(indents)
         return code[indents*4:]
     
@@ -100,13 +121,17 @@ class ScriptingSocket:
             row.alignment = "LEFT"
         if self.removable and not self.is_output:
             self.draw_remove_socket(row)
-        self.draw_socket(context,layout,row,node,self.get_text(text))
+        if self.is_variable:
+            row.prop(self,"var_name",text="")
+        else:
+            self.draw_socket(context,layout,row,node,self.get_text(text))
         if self.removable and self.is_output:
             self.draw_remove_socket(row)            
             
             
 class DynamicSocket(ScriptingSocket):
     bl_label = "Dynamic"
+    make_variable = False
     
     def get_socket_index(self,collection):
         for i, socket in enumerate(collection):
@@ -117,10 +142,9 @@ class DynamicSocket(ScriptingSocket):
     def update_input(self,node,link):
         from_socket = link.from_socket
         pos = self.get_socket_index(node.inputs)
-        if self.dynamic_overwrite:
-            inp = node.add_input(self.dynamic_overwrite,self.default_text,True)
-        else:
-            inp = node.add_input(from_socket.bl_idname,self.default_text,True)
+        inp = node.add_input(from_socket.bl_idname,self.default_text,True)
+        inp.is_variable = self.make_variable
+        inp.var_name = link.from_socket.default_text
         inp.copy_name = self.copy_name
         inp.taken_name = self.taken_name
         inp.take_name = self.take_name
@@ -131,10 +155,9 @@ class DynamicSocket(ScriptingSocket):
     def update_output(self,node,link):
         to_socket = link.to_socket
         pos = self.get_socket_index(node.outputs)
-        if self.dynamic_overwrite:
-            out = node.add_output(self.dynamic_overwrite,self.default_text,True)
-        else:
-            out = node.add_output(to_socket.bl_idname,self.default_text,True)
+        out = node.add_output(to_socket.bl_idname,self.default_text,True)
+        out.is_variable = self.make_variable
+        out.var_name = link.to_socket.default_text
         out.copy_name = self.copy_name
         out.taken_name = self.taken_name
         out.take_name = self.take_name

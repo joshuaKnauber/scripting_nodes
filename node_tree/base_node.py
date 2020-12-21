@@ -153,7 +153,8 @@ class SN_ScriptingBaseNode:
     def __name_is_unique(self,collection,name):
         count = 0
         for item in collection:
-            if item.name == name:
+            item_name = item if type(item) == str else item.name
+            if item_name == name:
                 count += 1
         return count <= 1
 
@@ -166,10 +167,11 @@ class SN_ScriptingBaseNode:
             if separator in name and name.split(separator)[-1].isnumeric():
                 name = (separator).join(name.split(separator)[:-1])
             for item in collection:
-                if separator in item.name and item.name.split(separator)[-1].isnumeric():
-                    item_name = (separator).join(item.name.split(separator)[:-1])
-                    if item_name == name:
-                        max_num = max(max_num, int(item.name.split(separator)[-1]))
+                item_name = item if type(item) == str else item.name
+                if separator in item_name and item_name.split(separator)[-1].isnumeric():
+                    base_name = (separator).join(item_name.split(separator)[:-1])
+                    if base_name == name:
+                        max_num = max(max_num, int(item_name.split(separator)[-1]))
             return name + separator + str(max_num+1).zfill(3)
 
 
