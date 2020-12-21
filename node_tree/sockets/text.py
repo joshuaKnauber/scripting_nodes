@@ -43,7 +43,14 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
             return (c[0], c[1], c[2], 1)
         return (c[0], c[1], c[2], 0.5)
     
-    
+
+
+class SN_DynamicStringSocket(bpy.types.NodeSocket, DynamicSocket):
+    connects_to = ["SN_StringSocket","SN_BooleanSocket","SN_FloatSocket", "SN_IntSocket",
+                   "SN_VariableSocket","SN_DataSocket"]
+    add_idname = "SN_StringSocket"
+
+
     
 class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Icon"
