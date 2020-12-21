@@ -314,7 +314,9 @@ def __normalize_code(code, indents):
     new_code = []
     for line in code:
         if len(line) >= remove_indents:
-            new_code.append( " "*indents*4 + line[remove_indents:] )
+            line = line[remove_indents:]
+            line = line[(len(line) - len(line.lstrip()))%4:]
+            new_code.append( " "*indents*4 + line )
         else:
             new_code.append(line)
     if len(new_code) == 1:

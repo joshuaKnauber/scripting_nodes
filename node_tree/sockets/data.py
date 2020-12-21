@@ -34,4 +34,4 @@ class SN_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 class SN_DynamicDataSocket(bpy.types.NodeSocket, DynamicSocket):
     connects_to = ["SN_StringSocket", "SN_DataSocket","SN_BooleanSocket","SN_FloatSocket","SN_IntSocket",
-                   "SN_VariableSocket","SN_DynamicVariableSocket"]
+                   "SN_VariableSocket"]
