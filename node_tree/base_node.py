@@ -104,7 +104,7 @@ class SN_ScriptingBaseNode:
     def copy(self,node):
         self.node_tree = self.id_data
         self.uid = uuid4().hex[:5].upper()
-        self.update_needs_compile(context)
+        self.update_needs_compile(bpy.context)
         self.__add_self_to_property_group()
         self.on_copy(node)
 
@@ -114,7 +114,7 @@ class SN_ScriptingBaseNode:
 
 
     def free(self):
-        self.update_needs_compile(context)
+        self.update_needs_compile(bpy.context)
         self.__remove_self_from_property_group()
         self.on_free()
 
@@ -124,7 +124,7 @@ class SN_ScriptingBaseNode:
 
 
     def update(self):
-        self.update_needs_compile(context)
+        self.update_needs_compile(bpy.context)
         self.on_node_update()
 
 
@@ -133,7 +133,7 @@ class SN_ScriptingBaseNode:
 
 
     def insert_link(self,link):
-        self.update_needs_compile(context)
+        self.update_needs_compile(bpy.context)
         to_idname = link.to_socket.bl_idname
         from_idname = link.from_socket.bl_idname
         if from_idname in link.to_socket.connects_to and to_idname in link.from_socket.connects_to:
@@ -229,14 +229,14 @@ class SN_ScriptingBaseNode:
     
     
     def add_input(self,idname,label,removable):
-        self.update_needs_compile(context)
+        self.update_needs_compile(bpy.context)
         socket = self.inputs.new(idname,label)
         socket.setup_socket(removable,label)
         return socket
     
     
     def add_output(self,idname,label,removable):
-        self.update_needs_compile(context)
+        self.update_needs_compile(bpy.context)
         socket = self.outputs.new(idname,label)
         socket.setup_socket(removable,label)
         return socket

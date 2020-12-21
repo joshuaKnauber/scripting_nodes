@@ -35,7 +35,7 @@ class SN_SplitNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
-        print(repr(self.outputs[0].block(5)))
+        
         return {
             "code": f"""
 
