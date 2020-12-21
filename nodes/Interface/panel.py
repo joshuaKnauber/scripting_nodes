@@ -90,6 +90,8 @@ class SN_OT_StartPanelSelection(bpy.types.Operator):
                 remove_panels.append(f"bpy.utils.unregister_class(bpy.types.SN_PT_SelectPanelLocation_{str(index)})")
             except:
                 pass
+        for area in context.screen.areas:
+            area.tag_redraw()
         return {"FINISHED"}
     
     
@@ -122,6 +124,8 @@ class SN_OT_SelectPanel(bpy.types.Operator):
         panel_node.category = self.category
         panel_node = None
         remove_registered_panels()
+        for area in context.screen.areas:
+            area.tag_redraw()
         return {"FINISHED"}
 
 
