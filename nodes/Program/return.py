@@ -14,18 +14,20 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
 
-    connected_function: bpy.props.BoolProperty()
+    connected_function: bpy.props.BoolProperty(default=True)
 
     def on_create(self,context):
         self.add_execute_input("Execute")
         self.add_dynamic_data_input("Content")
 
     def on_node_update(self):
-        if self.inputs[0].is_linked:
+        if len(self.inputs[0].links):
             if self.what_start_idname() == "SN_FunctionNode":
                 self.connected_function = True
             else:
                 self.connected_function = False
+        else:
+            self.connected_function = True
 
     
     def draw_node(self, context, layout):
@@ -38,21 +40,18 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         for inp in self.inputs[1:-1]:
             contents.append(inp.value + ", ")
 
-
-        if not self.connected_function:
-            self.add_error("No function", "This node has to be connected to a function", False)
-            return {"code": ""}
-
         if not contents:
             self.add_error("No return", "Nothing will be returned from this function", False)
             return {
-                "code": f"""
-                        return None
-                        """
+                "code": ""
             }
 
-        return {
-            "code": f"""
-                    return {self.list_blocks(contents, 0)}
-                    """
-        }
+        if len(self.inputs[0].links) and self.connected_function:
+            return {
+                "code": f"""
+                        return {self.list_blocks(contents, 0)}
+                        """
+            }
+        else:
+            self.add_error("No function", "This node has to be connected to a function", False)
+            return {"code": {self.list_blocks(contents, 0)}}
