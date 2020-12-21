@@ -37,11 +37,21 @@ class SN_Variable(bpy.types.PropertyGroup):
 
     def update_name(self,context):
         proper_name = re.sub(r'\W+', '', self.name.replace(" ","_"))
-        if not proper_name:
-            proper_name = "new_variable"
-        if proper_name[0].isnumeric():
-            proper_name = "var_"+proper_name
-        proper_name = get_unique_name(self.node_tree.sn_variables, proper_name)
+        
+        if self.is_property:
+            if not proper_name:
+                proper_name = "new_property"
+            if proper_name[0].isnumeric():
+                proper_name = "prop_"+proper_name
+            proper_name = get_unique_name(self.node_tree.sn_properties, proper_name)
+        
+        else:
+            if not proper_name:
+                proper_name = "new_variable"
+            if proper_name[0].isnumeric():
+                proper_name = "var_"+proper_name
+            proper_name = get_unique_name(self.node_tree.sn_variables, proper_name)
+            
         if not self.name == proper_name:
             self.name = proper_name
     
@@ -54,8 +64,9 @@ class SN_Variable(bpy.types.PropertyGroup):
 
     def get_var_types(self,context):
         items = [("STRING","String","String",variable_icons["STRING"],0),
-                 ("INTEGER","Integer","Integer",variable_icons["INTEGER"],1),
-                 ("LIST","List","List",variable_icons["LIST"],2)]
+                 ("INTEGER","Integer","Integer",variable_icons["INTEGER"],1)]
+        if not self.is_property:
+            items += [("LIST","List","List",variable_icons["LIST"],2)]
         return items
     
     def update_var_type(self,context):
@@ -69,7 +80,7 @@ class SN_Variable(bpy.types.PropertyGroup):
     def update_make_property(self,context):
         self.attach_property_to = "Scene"
     
-    make_property: bpy.props.BoolProperty(default=False,
+    is_property: bpy.props.BoolProperty(default=False,
                                           update=update_make_property,
                                         name="Make Property",
                                         description="Make this variable into a property that can be attached to ID objects")

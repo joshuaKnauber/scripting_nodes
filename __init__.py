@@ -90,6 +90,8 @@ def register():
     bpy.types.NodeTree.sn_graph_index = bpy.props.IntProperty(default=0, update=update_graph_index)
     bpy.types.NodeTree.sn_variables = bpy.props.CollectionProperty(type=SN_Variable)
     bpy.types.NodeTree.sn_variable_index = bpy.props.IntProperty(default=0)
+    bpy.types.NodeTree.sn_properties = bpy.props.CollectionProperty(type=SN_Variable)
+    bpy.types.NodeTree.sn_property_index = bpy.props.IntProperty(default=0)
     bpy.types.NodeTree.sn_icons = bpy.props.CollectionProperty(type=SN_Icon)
     bpy.types.NodeTree.sn_icon_index = bpy.props.IntProperty(default=0)
     bpy.types.NodeTree.sn_assets = bpy.props.CollectionProperty(type=SN_Asset)
