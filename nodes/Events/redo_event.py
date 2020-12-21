@@ -16,7 +16,7 @@ class SN_RedoNode(bpy.types.Node, SN_ScriptingBaseNode):
         "import_once": True
     }
 
-    action: bpy.props.EnumProperty(items=[("redo_pre", "Before", ""), ("redo_post", "After", "")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.update_needs_compile)
+    action: bpy.props.EnumProperty(items=[("redo_pre", "Before", "On loading a redo step (before)"), ("redo_post", "After", "On loading a redo step (after)")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.update_needs_compile)
 
     def on_create(self,context):
         self.add_execute_output("On Redo")

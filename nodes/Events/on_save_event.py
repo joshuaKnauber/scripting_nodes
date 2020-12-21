@@ -16,7 +16,7 @@ class SN_OnSaveNode(bpy.types.Node, SN_ScriptingBaseNode):
         "import_once": True
     }
 
-    action: bpy.props.EnumProperty(items=[("save_pre", "Before", "Before the file is saved"), ("save_post", "After", "After the file is saved")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.update_needs_compile)
+    action: bpy.props.EnumProperty(items=[("save_pre", "Before", "On saving a blend file (before)"), ("save_post", "After", "On saving a blend file (after)")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.update_needs_compile)
 
     def on_create(self,context):
         self.add_execute_output("On Save")

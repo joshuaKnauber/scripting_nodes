@@ -16,7 +16,7 @@ class SN_AfterRenderNode(bpy.types.Node, SN_ScriptingBaseNode):
         "import_once": True
     }
 
-    action: bpy.props.EnumProperty(items=[("render_cancel", "Cancel", ""), ("render_post", "After", ""), ("render_complete", "Complete", "")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.update_needs_compile)
+    action: bpy.props.EnumProperty(items=[("render_cancel", "Cancel", "On canceling a render job"), ("render_post", "After", "On render (after)"), ("render_complete", "Complete", "On completion of render job")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.update_needs_compile)
 
     def on_create(self,context):
         self.add_execute_output("After Render")
