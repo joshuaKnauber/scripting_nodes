@@ -20,6 +20,8 @@ def get_socket_index(socket):
 class ScriptingSocket:
     
     def update_var_name(self,context):
+        if not self.var_name:
+            self["var_name"] = "Parameter"
         names = []
         if self.is_output:
             for out in self.node.outputs:
@@ -27,10 +29,10 @@ class ScriptingSocket:
         else:
             for inp in self.node.inputs:
                 names.append(inp.var_name)
-        unique_name = self.node.get_unique_python_name(self.var_name,"parameter",names)
+        unique_name = self.node.get_unique_name(self.var_name, names, " ")
         if not self.var_name == unique_name:
             self.var_name = unique_name
-    
+
     connects_to = []
     socket_shape = "CIRCLE"
     sn_type = ""
@@ -50,9 +52,9 @@ class ScriptingSocket:
     @property
     def value(self):
         if self.is_variable:
-            return self.var_name
+            return self.node.get_python_name(self.var_name,"parameter")
         return self.get_value(0)
-    
+
     def block(self, indents):
         if self.is_variable:
             return " "*indents*4 + self.var_name
