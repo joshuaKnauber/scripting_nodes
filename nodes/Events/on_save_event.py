@@ -38,7 +38,7 @@ class SN_OnSaveNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
                     @persistent
-                    def save_handler_{self.uid}(dummy):
+                    def {self.action}_handler_{self.uid}(dummy):
                         {code if code else "pass"}
                     """
         }
@@ -47,7 +47,7 @@ class SN_OnSaveNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_register(self, context):
         return {
             "code": f"""
-                    bpy.app.handlers.{self.action}.append(save_handler_{self.uid})
+                    bpy.app.handlers.{self.action}.append({self.action}_handler_{self.uid})
                     """
         }
 
@@ -55,6 +55,6 @@ class SN_OnSaveNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_unregister(self, context):
         return {
             "code": f"""
-                    bpy.app.handlers.{self.action}.remove(save_handler_{self.uid})
+                    bpy.app.handlers.{self.action}.remove({self.action}_handler_{self.uid})
                     """
         }

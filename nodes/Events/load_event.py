@@ -3,10 +3,10 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
 
-class SN_DephsgraphUpdateNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_LoadNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_DephsgraphUpdateNode"
-    bl_label = "Dephsgraph Update Event"
+    bl_idname = "SN_LoadNode"
+    bl_label = "Load Event"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 
@@ -16,10 +16,10 @@ class SN_DephsgraphUpdateNode(bpy.types.Node, SN_ScriptingBaseNode):
         "import_once": True
     }
 
-    action: bpy.props.EnumProperty(items=[("depsgraph_update_pre", "Before", ""), ("depsgraph_update_post", "After", "")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.update_needs_compile)
+    action: bpy.props.EnumProperty(items=[("load_pre", "Before", ""), ("load_post", "After", "")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.update_needs_compile)
 
     def on_create(self,context):
-        self.add_execute_output("On Dephsgraph Update")
+        self.add_execute_output("On Load")
 
 
     def draw_node(self,context,layout):
