@@ -29,5 +29,6 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
                     print({self.list_blocks(contents, 0)})
+                    {self.outputs[0].block(5)}
                     """
         }
