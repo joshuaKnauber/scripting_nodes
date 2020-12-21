@@ -12,9 +12,13 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     node_options = {
         "default_color": (0.2,0.2,0.2),
+        "is_function_node": True
     }
 
     recursion_warning: bpy.props.BoolProperty()
+
+    def on_function_change(self):
+        print("test")
 
     def update_name(self, context):
         self.recursion_warning = False

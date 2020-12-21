@@ -32,12 +32,14 @@ class ScriptingSocket:
         unique_name = self.node.get_unique_name(self.var_name, names, " ")
         if not self.var_name == unique_name:
             self.var_name = unique_name
-            
+        self.node.update_needs_compile(context)
+
     def update_is_variable(self,context):
         if self.is_variable:
             self.display_shape = self.socket_shape + "_DOT"
         else:
             self.display_shape = self.socket_shape.replace("_DOT","")
+        self.node.update_needs_compile(context)
     
     connects_to = []
     socket_shape = "CIRCLE"
