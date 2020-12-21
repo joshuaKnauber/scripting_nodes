@@ -17,8 +17,8 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     recursion_warning: bpy.props.BoolProperty()
 
-    def on_function_change(self):
-        print("test")
+    def on_outside_update(self, node):
+        pass
 
     def update_name(self, context):
         self.recursion_warning = False

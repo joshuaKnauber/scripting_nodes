@@ -41,10 +41,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.update_name(None)
 
     def on_any_change(self):
-        for graph in bpy.context.scene.sn.addon_tree().sn_graphs:
-            for node in graph.node_tree.nodes:
-                if node.bl_idname == "SN_RunFunctionNode":
-                    node.on_function_change()
+        self.update_nodes_by_type("SN_RunFunctionNode")
 
 
     def draw_node(self,context,layout):
