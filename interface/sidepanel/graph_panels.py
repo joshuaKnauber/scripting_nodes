@@ -1,9 +1,6 @@
 import bpy
 
 
-PROPERTY_VAR_TYPES = ["STRING", "INTEGER"]
-
-
 class SN_PT_GraphPanel(bpy.types.Panel):
     bl_idname = "SN_PT_GraphPanel"
     bl_label = "Graphs"
@@ -51,8 +48,8 @@ class SN_PT_VariablePanel(bpy.types.Panel):
         col.template_list("SN_UL_VariableList", "Variables", graph_tree, "sn_variables", graph_tree, "sn_variable_index",rows=3)
         if len(graph_tree.sn_variables):
             btn_row = col.row(align=True)
-            btn_row.operator("sn.add_getter",icon="SORT_DESC", text="Getter")
-            btn_row.operator("sn.add_setter",icon="SORT_ASC", text="Setter")
+            btn_row.operator("sn.add_var_getter",icon="SORT_DESC", text="Getter")
+            btn_row.operator("sn.add_var_setter",icon="SORT_ASC", text="Setter")
         col = row.column(align=True)
         col.operator("sn.add_variable", text="", icon="ADD")
         col.operator("sn.remove_variable", text="", icon="REMOVE")
@@ -68,15 +65,56 @@ class SN_PT_VariablePanel(bpy.types.Panel):
             col.prop(var,"var_type",text="Type")
             col.separator()
             
-            if var.var_type in PROPERTY_VAR_TYPES:
-                col.prop(var,"make_property",text="Make Property")
-                if var.make_property:
-                    col.prop(var,"attach_property_to",text="Attach To")
-                col.separator()
-            
-            if var.var_type == "String":
+            if var.var_type == "STRING":
                 col.prop(var,"str_default")
-            elif var.var_type == "Integer":
+            elif var.var_type == "INTEGER":
+                col.prop(var,"int_default")
+            
+            row.label(text="",icon="BLANK1")
+            
+            
+class SN_PT_PropertyPanel(bpy.types.Panel):
+    bl_parent_id = "SN_PT_GraphPanel"
+    bl_idname = "SN_PT_PropertyPanel"
+    bl_label = "Properties"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_order = 2
+
+    def draw(self, context):
+        layout = self.layout
+
+        addon_tree = context.scene.sn.addon_tree()
+
+        row = layout.row(align=False)
+        col = row.column(align=True)
+        col.template_list("SN_UL_VariableList", "Properties", addon_tree, "sn_properties", addon_tree, "sn_property_index",rows=3)
+        if len(addon_tree.sn_properties):
+            btn_row = col.row(align=True)
+            btn_row.operator("sn.add_prop_getter",icon="SORT_DESC", text="Getter")
+            btn_row.operator("sn.add_prop_setter",icon="SORT_ASC", text="Setter")
+        col = row.column(align=True)
+        col.operator("sn.add_property", text="", icon="ADD")
+        col.operator("sn.remove_property", text="", icon="REMOVE")
+        
+        if len(addon_tree.sn_properties):
+            layout.separator()
+            row = layout.row()
+            col = row.column()
+            col.use_property_split = True
+            col.use_property_decorate = False
+            var = addon_tree.sn_properties[addon_tree.sn_property_index]
+            
+            col.prop(var,"var_type",text="Type")
+            col.separator()
+            
+            col.prop(var,"attach_property_to",text="Attach To")
+            col.separator()
+            
+            if var.var_type == "STRING":
+                col.prop(var,"str_default")
+            elif var.var_type == "INTEGER":
                 col.prop(var,"int_default")
             
             row.label(text="",icon="BLANK1")
@@ -89,7 +127,7 @@ class SN_PT_IconPanel(bpy.types.Panel):
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
-    bl_order = 2
+    bl_order = 3
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
@@ -122,7 +160,7 @@ class SN_PT_AssetsPanel(bpy.types.Panel):
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
-    bl_order = 3
+    bl_order = 4
     bl_options = {"DEFAULT_CLOSED"}
 
     def draw(self, context):
@@ -151,5 +189,6 @@ class SN_PT_AssetsPanel(bpy.types.Panel):
             
             
 bpy.utils.register_class(SN_PT_VariablePanel)
+bpy.utils.register_class(SN_PT_PropertyPanel)
 bpy.utils.register_class(SN_PT_IconPanel)
 bpy.utils.register_class(SN_PT_AssetsPanel)
