@@ -387,25 +387,26 @@ def __evaluate_graph(graph, addon_tree, addon_did_once):
     graph_did_once = { "imports":[], "imperative":[], "evaluated":[], "register":[], "unregister":[] }
 
     for node in graph.node_tree.nodes:
+        if not node.bl_idname in ["NodeFrame","NodeReroute"]:
         
-        if __should_evaluate(node, {**addon_did_once, **graph_did_once}["evaluated"]):
-            graph_code["evaluated"] += process_node(node, None)
-            if not node.bl_idname in graph_did_once["evaluated"]: graph_did_once["evaluated"].append(node.bl_idname)
-        
-        if __should_import(node, {**addon_did_once, **graph_did_once}["imports"]):
-            graph_code["imports"] += process_returned(node, node.code_imports(bpy.context))
-            if not node.bl_idname in graph_did_once["imports"]: graph_did_once["imports"].append(node.bl_idname)
+            if __should_evaluate(node, {**addon_did_once, **graph_did_once}["evaluated"]):
+                graph_code["evaluated"] += process_node(node, None)
+                if not node.bl_idname in graph_did_once["evaluated"]: graph_did_once["evaluated"].append(node.bl_idname)
             
-        if __should_imperative(node, {**addon_did_once, **graph_did_once}["imperative"]):
-            graph_code["imperative"] += process_returned(node, node.code_imperative(bpy.context))
-            if not node.bl_idname in graph_did_once["imperative"]: graph_did_once["imperative"].append(node.bl_idname)
-            
-        if __should_register(node, {**addon_did_once, **graph_did_once}["register"]):
-            graph_code["register"] += process_returned(node, node.code_register(bpy.context))
-            if not node.bl_idname in graph_did_once["register"]: graph_did_once["register"].append(node.bl_idname)
-            
-        if __should_unregister(node, {**addon_did_once, **graph_did_once}["unregister"]):
-            graph_code["unregister"] += process_returned(node, node.code_unregister(bpy.context))
-            if not node.bl_idname in graph_did_once["unregister"]: graph_did_once["unregister"].append(node.bl_idname)
+            if __should_import(node, {**addon_did_once, **graph_did_once}["imports"]):
+                graph_code["imports"] += process_returned(node, node.code_imports(bpy.context))
+                if not node.bl_idname in graph_did_once["imports"]: graph_did_once["imports"].append(node.bl_idname)
+                
+            if __should_imperative(node, {**addon_did_once, **graph_did_once}["imperative"]):
+                graph_code["imperative"] += process_returned(node, node.code_imperative(bpy.context))
+                if not node.bl_idname in graph_did_once["imperative"]: graph_did_once["imperative"].append(node.bl_idname)
+                
+            if __should_register(node, {**addon_did_once, **graph_did_once}["register"]):
+                graph_code["register"] += process_returned(node, node.code_register(bpy.context))
+                if not node.bl_idname in graph_did_once["register"]: graph_did_once["register"].append(node.bl_idname)
+                
+            if __should_unregister(node, {**addon_did_once, **graph_did_once}["unregister"]):
+                graph_code["unregister"] += process_returned(node, node.code_unregister(bpy.context))
+                if not node.bl_idname in graph_did_once["unregister"]: graph_did_once["unregister"].append(node.bl_idname)
             
     return graph_code, graph_did_once

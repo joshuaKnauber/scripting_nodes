@@ -148,7 +148,17 @@ class ScriptingSocket:
         if self.removable and self.is_output:
             self.draw_remove_socket(row)   
         elif self.addable and self.is_output:
-            self.draw_add_socket(row)         
+            self.draw_add_socket(row)     
+    
+    # def is_linked(self, socket):
+    #     if socket.is_output:
+    #         for link in socket.links:
+    #             if link.to_node.bl_idname != "NodeReroute":
+    #                 return True
+
+            
+    # def from_socket(self, socket):
+            
             
             
 class DynamicSocket(ScriptingSocket):
