@@ -51,7 +51,6 @@ class SN_DynamicStringSocket(bpy.types.NodeSocket, DynamicSocket):
     add_idname = "SN_StringSocket"
     
     
-    
 class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Icon"
     sn_type = "STRING"
