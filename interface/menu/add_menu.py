@@ -13,17 +13,17 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         return {"FINISHED"}
 
     def invoke(self,context,event):
-        from_node = context.space_data.node_tree.nodes.active
-        if event.shift and event.type == "LEFTMOUSE" and from_node and from_node.select:
-            context.scene.compatible_nodes.clear()
-            for category in get_node_categories():
-                for node in category.items(context):
-                    item = context.scene.compatible_nodes.add()
-                    item.category = category.name
-                    item.name = "  "+node.label
-                    item.idname = node.nodetype
+        # from_node = context.space_data.node_tree.nodes.active
+        # if event.shift and event.type == "LEFTMOUSE" and from_node and from_node.select:
+        #     context.scene.compatible_nodes.clear()
+        #     for category in get_node_categories():
+        #         for node in category.items(context):
+        #             item = context.scene.compatible_nodes.add()
+        #             item.category = category.name
+        #             item.name = "  "+node.label
+        #             item.idname = node.nodetype
             
-            bpy.ops.wm.call_menu(name="SN_MT_AddNodeMenu")
+        #     bpy.ops.wm.call_menu(name="SN_MT_AddNodeMenu")
         return {"FINISHED"}
     
     
