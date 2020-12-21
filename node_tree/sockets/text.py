@@ -7,8 +7,8 @@ from ...compiler.compiler import process_node
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
     sn_type = "STRING"
-    connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket","SN_FloatSocket", "SN_IntSocket",
-                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DataSocket","SN_DynamicStringSocket"]
+    connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket","SN_FloatSocket", "SN_IntegerSocket",
+                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DataSocket","SN_DynamicStringSocket","SN_NumberSocket"]
     
     default_value: bpy.props.StringProperty(default="",
                                             update=ScriptingSocket.socket_value_update,
@@ -20,12 +20,10 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     def get_value(self, indents=0):
         if self.is_output:
-            return "\""+process_node(self.node, self)+"\""
+            return process_node(self.node, self)
         else:
             if self.is_linked:
-                if self.links[0].from_socket.sn_type == "VARIABLE":
-                    return self.links[0].from_socket.value
-                elif self.links[0].from_socket.sn_type == "STRING":
+                if self.links[0].from_socket.sn_type in ["STRING", "VARIABLE"]:
                     return self.links[0].from_socket.value
                 else:
                     return "str(" + self.links[0].from_socket.value + ")"
@@ -46,10 +44,9 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 
 class SN_DynamicStringSocket(bpy.types.NodeSocket, DynamicSocket):
-    connects_to = ["SN_StringSocket", "SN_DataSocket","SN_BooleanSocket","SN_FloatSocket","SN_IntSocket",
-                   "SN_VariableSocket"]
+    connects_to = ["SN_StringSocket", "SN_DataSocket","SN_BooleanSocket","SN_FloatSocket","SN_IntegerSocket",
+                   "SN_VariableSocket","SN_NumberSocket"]
     add_idname = "SN_StringSocket"
-    
     
     
 class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):

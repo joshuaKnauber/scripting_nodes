@@ -7,8 +7,8 @@ from ...compiler.compiler import process_node
 class SN_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Data"
     sn_type = "DATA"
-    connects_to = ["SN_StringSocket","SN_DataSocket","SN_BooleanSocket","SN_FloatSocket", "SN_IntSocket",
-                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DynamicDataSocket","SN_DynamicStringSocket"]
+    connects_to = ["SN_StringSocket","SN_DataSocket","SN_BooleanSocket","SN_FloatSocket", "SN_IntegerSocket",
+                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DynamicDataSocket","SN_DynamicStringSocket","SN_NumberSocket"]
     
     default_value: bpy.props.StringProperty(default="",
                                             update=ScriptingSocket.socket_value_update,
@@ -16,7 +16,12 @@ class SN_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             description="Value of this socket")
 
     def get_value(self, indents=0):
-        return " "*indents*4 + self.default_value
+        if self.is_output:
+            return process_node(self.node, self)
+        else:
+            if self.is_linked:
+                return self.links[0].from_socket.get_value(indents)
+            return " "*indents*4 + "\""+self.default_value+"\""
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:
@@ -33,5 +38,5 @@ class SN_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 
 class SN_DynamicDataSocket(bpy.types.NodeSocket, DynamicSocket):
-    connects_to = ["SN_StringSocket", "SN_DataSocket","SN_BooleanSocket","SN_FloatSocket","SN_IntSocket",
-                   "SN_VariableSocket"]
+    connects_to = ["SN_StringSocket", "SN_DataSocket","SN_BooleanSocket","SN_FloatSocket","SN_IntegerSocket",
+                   "SN_VariableSocket","SN_NumberSocket"]
