@@ -36,7 +36,11 @@ class SN_ScriptingBaseNode:
     def poll(cls, ntree):
         return ntree.bl_idname == 'SN_ScriptingNodesTree'
     
+
+    def on_any_change(self): pass
+
     def update_needs_compile(self,context):
+        self.on_any_change()
         self.node_tree.set_changes(True)
         
         
@@ -80,7 +84,7 @@ class SN_ScriptingBaseNode:
 
     def init(self,context):
         self.node_tree = self.id_data
-        self.node_tree.set_changes(True)
+        self.update_needs_compile(context)
         self.addon_tree = bpy.context.scene.sn.addon_tree()
         self.uid = uuid4().hex[:5].upper()
         if "default_color" in self.node_options:
@@ -100,7 +104,7 @@ class SN_ScriptingBaseNode:
     def copy(self,node):
         self.node_tree = self.id_data
         self.uid = uuid4().hex[:5].upper()
-        self.node_tree.set_changes(True)
+        self.update_needs_compile(context)
         self.__add_self_to_property_group()
         self.on_copy(node)
 
@@ -110,7 +114,7 @@ class SN_ScriptingBaseNode:
 
 
     def free(self):
-        self.node_tree.set_changes(True)
+        self.update_needs_compile(context)
         self.__remove_self_from_property_group()
         self.on_free()
 
@@ -120,7 +124,7 @@ class SN_ScriptingBaseNode:
 
 
     def update(self):
-        self.node_tree.set_changes(True)
+        self.update_needs_compile(context)
         self.on_node_update()
 
 
@@ -129,7 +133,7 @@ class SN_ScriptingBaseNode:
 
 
     def insert_link(self,link):
-        self.node_tree.set_changes(True)
+        self.update_needs_compile(context)
         to_idname = link.to_socket.bl_idname
         from_idname = link.from_socket.bl_idname
         if from_idname in link.to_socket.connects_to and to_idname in link.from_socket.connects_to:
@@ -225,14 +229,14 @@ class SN_ScriptingBaseNode:
     
     
     def add_input(self,idname,label,removable):
-        self.node_tree.set_changes(True)
+        self.update_needs_compile(context)
         socket = self.inputs.new(idname,label)
         socket.setup_socket(removable,label)
         return socket
     
     
     def add_output(self,idname,label,removable):
-        self.node_tree.set_changes(True)
+        self.update_needs_compile(context)
         socket = self.outputs.new(idname,label)
         socket.setup_socket(removable,label)
         return socket
