@@ -21,20 +21,31 @@ class SN_PT_SelectPanelLocation_$ID$(bpy.types.Panel):
             row.scale_y = 1.5
             op = row.operator("sn.select_panel",icon="EYEDROPPER",text="Any Context")
             op.space = context.space_data.type
-            op.region = context.region_data.type
+            op.region = context.region.type
+            op.context = ""
+            op.category = ""
             op = row.operator("sn.select_panel",icon="EYEDROPPER",text=f"'{context.space_data.context.title()}' only")
+            op.space = context.space_data.type
+            op.region = context.region.type
+            op.context = context.space_data.context.lower()
+            op.category = ""
             
         else:
             row = self.layout.row()
             row.alert = True
             row.scale_y = 1.5
-            row.operator("sn.select_panel",icon="EYEDROPPER",text="Select Location")
+            op = row.operator("sn.select_panel",icon="EYEDROPPER",text="Select Location")
+            op.space = context.space_data.type
+            op.region = context.region.type
+            op.context = ""
+            op.category = "My Category"
 
 bpy.utils.register_class(SN_PT_SelectPanelLocation_$ID$)
 """
 
 
 remove_panels = []
+panel_node = None
 
 
 class SN_OT_StartPanelSelection(bpy.types.Operator):
@@ -42,6 +53,8 @@ class SN_OT_StartPanelSelection(bpy.types.Operator):
     bl_label = "Select Panel"
     bl_description = "Start Panel Selection"
     bl_options = {"REGISTER", "INTERNAL", "UNDO"}
+    
+    node: bpy.props.StringProperty()
     
     @classmethod
     def poll(cls, context):
@@ -59,15 +72,13 @@ class SN_OT_StartPanelSelection(bpy.types.Operator):
             for space in spaces:
                 locations.append({"region":region,"space":space,"category":"Select Panel"})
         return locations
-    
-    def add_to_locations(self,locations):
-        pass
 
     def execute(self, context):
+        global panel_node
         global panel_template
         global remove_panels
+        panel_node = context.space_data.node_tree.nodes[self.node]
         locations = self.get_panel_locations()
-        self.add_to_locations(locations)
         for index, location in enumerate(locations):
             panel = panel_template
             panel = panel.replace("$ID$",str(index))
@@ -104,8 +115,13 @@ class SN_OT_SelectPanel(bpy.types.Operator):
     category: bpy.props.StringProperty(options={"SKIP_SAVE"})
 
     def execute(self, context):
+        global panel_node
+        panel_node.space = self.space
+        panel_node.region = self.region
+        panel_node.context = self.context
+        panel_node.category = self.category
+        panel_node = None
         remove_registered_panels()
-        print(self.space,self.region,self.context,self.category)
         return {"FINISHED"}
 
 
@@ -123,6 +139,13 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         "starts_tree": True,
         "has_collection": True
     }
+    
+    
+    space: bpy.props.StringProperty(default="PROPERTIES")
+    region: bpy.props.StringProperty(default="WINDOW")
+    context: bpy.props.StringProperty()
+    category: bpy.props.StringProperty(name="Category",
+                                       description="The category this panel can be found in if required")
     
     
     hide_header: bpy.props.BoolProperty(default=False,
@@ -154,7 +177,9 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self,context,layout):
         row = layout.row()
         row.scale_y = 1.5
-        row.operator("sn.start_panel_selection",text="Outer Rim",icon="EYEDROPPER")
+        name = self.space.replace("_"," ").title() + " | " + self.region.replace("_"," ").title()
+        row.operator("sn.start_panel_selection",text=name,icon="EYEDROPPER").node = self.name
+        layout.prop(self, "category")
          
         layout.prop(self, "label")
         layout.prop(self, "hide_header")
@@ -170,13 +195,6 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 
 
     def code_evaluate(self, context, touched_socket):
-        
-        label = self.label
-        
-        space_type = "PROPERTIES"
-        region_type = "WINDOW"
-        context = "object"
-        category = ""
         
         option_closed = "\"DEFAULT_CLOSED\"," if self.default_closed else ""
         option_header = "\"HIDE_HEADER\"," if self.hide_header else ""
@@ -194,12 +212,12 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
                     class {self.idname()}(bpy.types.Panel):
-                        bl_label = "{label}"
+                        bl_label = "{self.label}"
                         bl_idname = "{self.idname()}"
-                        bl_space_type = "{space_type}"
-                        bl_region_type = "{region_type}"
-                        {"bl_context = '"+context+"'" if context else ""}
-                        {"bl_category = '"+category+"'" if category else ""}
+                        bl_space_type = "{self.space}"
+                        bl_region_type = "{self.region}"
+                        {"bl_context = '"+self.context+"'" if self.context else ""}
+                        {"bl_category = '"+self.category+"'" if self.category else ""}
                         {"bl_options = {"+option_closed+option_header+"}" if option_closed or option_header else ""}
                         bl_order = {0}
                         
