@@ -42,7 +42,7 @@ from .node_tree.graphs.graph_ui_lists import SN_Graph, update_graph_index
 from .node_tree.variables.variables_ui_list import SN_Variable
 from .node_tree.icons.icons_ui_list import SN_Icon
 from .node_tree.assets.assets_ui_list import SN_Asset
-from .node_tree.base_node import SN_NodeCollection
+from .node_tree.base_node import SN_NodeCollection, SN_NodePropertyGroup
 from .node_tree.node_tree import update_create_tree
 from .settings.addon_properties import SN_AddonProperties
 
@@ -101,6 +101,7 @@ def register():
 
     # addon properties
     bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties)
+    bpy.types.Scene.compatible_nodes = bpy.props.CollectionProperty(type=SN_NodePropertyGroup)
 
     # register the keymaps
     register_keymaps()
@@ -145,6 +146,7 @@ def unregister():
 
     # addon properties
     del bpy.types.Scene.sn
+    del bpy.types.Scene.compatible_nodes
 
     # unregister the keymaps
     unregister_keymaps()

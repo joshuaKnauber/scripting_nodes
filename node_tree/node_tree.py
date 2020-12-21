@@ -74,3 +74,4 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         self.set_changes(True)
         self.update_dynamic_links()
         self.update_remove_links()
+        bpy.ops.sn.run_add_menu("INVOKE_DEFAULT")

@@ -279,10 +279,17 @@ class SN_ScriptingBaseNode:
 
 
 
+class SN_NodePropertyGroup(bpy.types.PropertyGroup):
+    
+    name: bpy.props.StringProperty()
+    category: bpy.props.StringProperty()
+    idname: bpy.props.StringProperty()
+
+
+
 class SN_GenericPropertyGroup(bpy.types.PropertyGroup):
     
-    name: bpy.props.StringProperty(name="Name",
-                                    description="The ")
+    name: bpy.props.StringProperty()
     identifier: bpy.props.StringProperty()
     description: bpy.props.StringProperty()
     node_uid: bpy.props.StringProperty()
@@ -290,5 +297,6 @@ class SN_GenericPropertyGroup(bpy.types.PropertyGroup):
     
 
 class SN_NodeCollection(bpy.types.PropertyGroup):
+    
     name: bpy.props.StringProperty()
     items: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)

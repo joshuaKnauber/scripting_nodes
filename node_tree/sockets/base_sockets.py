@@ -30,6 +30,12 @@ class ScriptingSocket:
         unique_name = self.node.get_unique_python_name(self.var_name,"parameter",names)
         if not self.var_name == unique_name:
             self.var_name = unique_name
+            
+    def update_is_variable(self,context):
+        if self.is_variable:
+            self.display_shape = self.socket_shape + "_DOT"
+        else:
+            self.display_shape = self.socket_shape.replace("_DOT","")
     
     connects_to = []
     socket_shape = "CIRCLE"
@@ -40,7 +46,7 @@ class ScriptingSocket:
     taken_name: bpy.props.StringProperty(default="")
     copy_name: bpy.props.BoolProperty(default=False)
     default_text: bpy.props.StringProperty()
-    is_variable: bpy.props.BoolProperty(default=False)
+    is_variable: bpy.props.BoolProperty(default=False, update=update_is_variable)
     var_name: bpy.props.StringProperty(default="", update=update_var_name)
     dynamic_overwrite = ""
     output_limit = 9999
