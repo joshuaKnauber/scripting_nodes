@@ -8,7 +8,7 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Float"
     sn_type = "NUMBER"
     connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket", "SN_FloatSocket", "SN_IntSocket",
-                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DataSocket"]
+                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DataSocket","SN_DynamicStringSocket"]
     
     slider: bpy.props.BoolProperty(default=False)
     
@@ -54,7 +54,7 @@ class SN_IntSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Int"
     sn_type = "NUMBER"
     connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket", "SN_FloatSocket", "SN_IntSocket",
-                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DataSocket"]
+                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DataSocket","SN_DynamicStringSocket"]
 
     slider: bpy.props.BoolProperty(default=False)
 
