@@ -16,7 +16,12 @@ class SN_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             description="Value of this socket")
 
     def get_value(self, indents=0):
-        return " "*indents*4 + self.default_value
+        if self.is_output:
+            return process_node(self.node, self)
+        else:
+            if self.is_linked:
+                return self.links[0].from_socket.get_value(indents)
+            return " "*indents*4 + "\""+self.default_value+"\""
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:

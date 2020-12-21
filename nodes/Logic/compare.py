@@ -3,10 +3,10 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
 
-class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_AndOrNode"
-    bl_label = "And/Or"
+    bl_idname = "SN_CompareNode"
+    bl_label = "Compare"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 
@@ -14,11 +14,11 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
 
-    operation: bpy.props.EnumProperty(items=[(" and ", "And", "Both values have to be true"), (" or ", "Or", "Only one value has to be true")], name="Gate", description="The gate you want to use", update=SN_ScriptingBaseNode.update_needs_compile)
+    operation: bpy.props.EnumProperty(items=[("==", "=", "Equal"), ("!=", "≠", "Not equal"), ("<", "<", "Smaller than"), (">", ">", "Bigger than"), ("<=", "≤", "Smaller or equal to"), (">=", "≥", "Bigger or equal to")],name="Operation", description="The operation you want to commence", update=SN_ScriptingBaseNode.update_needs_compile)
 
     def on_create(self,context):
-        self.add_boolean_input("Boolean")
-        self.add_boolean_input("Boolean")
+        self.add_data_input("Data").copy_name=True
+        self.add_data_input("Data").copy_name=True
         self.add_boolean_output("Boolean")
     
     
