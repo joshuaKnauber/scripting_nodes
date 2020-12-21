@@ -273,7 +273,7 @@ class SN_ScriptingBaseNode:
     ### ERROR HANDLING
     
     
-    def add_error(self, title, description, fatal):
+    def add_error(self, title, description, fatal=False):
         error = bpy.context.scene.sn.addon_tree().sn_graphs[0].errors.add()
         error.title = title
         error.description = description
@@ -295,13 +295,13 @@ class SN_ScriptingBaseNode:
     
     def what_start_idname(self):
         for inp in self.inputs:
-            if inp.sn_type in ["EXECUTE","INTERFACE"] and inp.is_linked:
+            if inp.sn_type in ["EXECUTE","INTERFACE"] and len(inp.links):
                 return inp.links[0].from_node.what_start_idname()
         return self.bl_idname
     
     def what_start_node(self):
         for inp in self.inputs:
-            if inp.sn_type in ["EXECUTE","INTERFACE"] and inp.is_linked:
+            if inp.sn_type in ["EXECUTE","INTERFACE"] and len(inp.links):
                 return inp.links[0].from_node.what_start_node()
         return self
 

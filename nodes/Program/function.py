@@ -29,6 +29,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         self.item.name = self.func_name
         self.item.identifier = self.get_python_name(self.func_name, "new_function")
+        self.update_needs_compile(context)
 
 
     func_name: bpy.props.StringProperty(name="Name", description="Name of the function", update=update_name)
@@ -38,6 +39,9 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_execute_output("Function")
         self.add_dynamic_variable_output("Parameter").take_name = True
         self.update_name(None)
+
+    def on_any_change(self):
+        self.update_nodes_by_type("SN_RunFunctionNode")
 
 
     def draw_node(self,context,layout):
