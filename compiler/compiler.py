@@ -65,14 +65,9 @@ def compile_addon(addon_tree, is_export=False):
         __write_in_text(addon_data["text"], addon_data["code"]["addon_info"])
         
         # write imports
+        import_code = __get_import_code(addon_data["code"])
         __write_blockcomment(addon_data["text"], "IMPORTS")
-        __write_in_text(addon_data["text"], "import bpy")
-        __write_in_text(addon_data["text"], "import os")
-        __write_in_text(addon_data["text"], "import math")
-        for graph in addon_data["code"]["graph_code"]:
-            if addon_data["code"]["graph_code"][graph]["imports"]:
-                __write_graphcomment(addon_data["text"], graph)
-                __write_in_text(addon_data["text"], addon_data["code"]["graph_code"][graph]["imports"])
+        __write_in_text(addon_data["text"], import_code)
                 
         # write serpens functions
         __write_blockcomment(addon_data["text"], "SERPENS FUNCTIONS")
@@ -241,6 +236,23 @@ def __write_graphcomment(txt_file,text,indents=0):
     __write_paragraphs(txt_file, 1)
     txt_file.write(" "*indents*4 + "#######   " + text)
     __write_paragraphs(txt_file, 1)
+    
+    
+def __remove_duplicate_lines(text):
+    text = text.split("\n")
+    text = list(dict.fromkeys(text))
+    return "\n".join(text)
+    
+
+def __get_import_code(code):
+    import_code = ""
+    import_code += "import bpy\n"
+    import_code += "import os\n"
+    import_code += "import math\n"
+    for graph in code["graph_code"]:
+        if code["graph_code"][graph]["imports"]:
+            import_code += code["graph_code"][graph]["imports"]
+    return __remove_duplicate_lines(import_code)
     
     
 def __get_license_block():

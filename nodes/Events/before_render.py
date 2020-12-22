@@ -33,7 +33,9 @@ class SN_BeforeRenderNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_imports(self, context):
         return {
-            "code": f"""from bpy.app.handlers import persistent"""
+            "code": f"""
+                    from bpy.app.handlers import persistent
+                    """
         }
 
 
