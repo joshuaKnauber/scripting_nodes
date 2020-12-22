@@ -16,26 +16,80 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
     recursion_warning: bpy.props.BoolProperty()
+    func_uid: bpy.props.StringProperty()
 
     def on_outside_update(self, node):
-        pass
+        if node == self:
+            for graph in self.addon_tree.sn_graphs:
+                for graph_node in graph.node_tree.nodes:
+                    if graph_node.uid == self.func_uid:
+                        node = graph_node
+        else:
+            if self.func_uid == node.uid:
+                self.func_name = node.func_name
+            if not self.func_name in self.addon_tree.sn_nodes["SN_FunctionNode"].items and self.func_name != "":
+                self.func_name = ""
+            
+        if node.uid == self.func_uid:
+            parameters = []
+            for out in node.outputs[1:]:
+                if out.bl_idname != "SN_DynamicVariableSocket":
+                    parameters.append([out.var_name, out.bl_idname])
+
+            if len(parameters) != len(self.inputs[1:]):
+                if len(parameters) > len(self.inputs[1:]):
+                    input_len = len(self.inputs)-1
+                    for x, parameter in enumerate(parameters):
+                        if x >= input_len:
+                            self.add_input(parameter[1],parameter[0],False)
+
+                else:
+                    removed = False
+                    for x, parameter in enumerate(parameters):
+                        if parameter[0] != self.inputs[x+1].name:
+                            removed = True
+                            self.inputs.remove(self.inputs[x+1])
+                    if not removed:
+                        self.inputs.remove(self.inputs[-1])
+
+
+            for x, parameter in enumerate(parameters):
+                self.inputs[x+1].name = parameter[0]
+
 
     def update_name(self, context):
         self.recursion_warning = False
         if self.func_name in self.addon_tree.sn_nodes["SN_FunctionNode"].items:
             item = self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name]
+            if item.node_uid != self.func_uid:
+                for inp in self.inputs[1:]:
+                    try: self.inputs.remove(inp)
+                    except: pass
+                self.func_uid = item.node_uid
+
             if self.what_start_idname() == "SN_FunctionNode":
                 if self.func_name == self.what_start_node().func_name:
                     self.recursion_warning = True
+            self.on_outside_update(self)
+        else:
+            self.func_uid = ""
+            for inp in self.inputs[1:]:
+                try: self.inputs.remove(inp)
+                except: pass
+
+        self.update_needs_compile(context)
 
 
     func_name: bpy.props.StringProperty(name="Name", description="Name of the function", update=update_name)
 
     def on_node_update(self):
-        self.update_name(None)
+        self.recursion_warning = False
+        if self.what_start_idname() == "SN_FunctionNode":
+            if self.func_name == self.what_start_node().func_name:
+                self.recursion_warning = True
 
     def on_create(self,context):
-        self.add_execute_input("Function")
+        self.add_execute_input("Execute")
         self.add_execute_output("Execute")
 
 
@@ -48,12 +102,24 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         if self.func_name in self.addon_tree.sn_nodes["SN_FunctionNode"].items:
-            return {
-                "code": f"""
-                    {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}()
-                    {self.outputs[0].block(5)}
-                    """
-            }
+            parameters = []
+            for inp in self.inputs[1:]:
+                parameters.append(inp.value + ", ")
+
+            if touched_socket == self.inputs[0]:
+                return {
+                    "code": f"""
+                        {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_blocks(parameters, 0)})
+                        {self.outputs[0].block(5)}
+                        """
+                }
+
+            else:
+                return {
+                    "code": f"""
+                        {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_blocks(parameters, 0)})[{self.outputs.find(touched_socket.name)-1}]
+                        """
+                }
 
         else:
             self.add_error("No function", "No valid function selected")
