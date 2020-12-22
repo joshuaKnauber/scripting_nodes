@@ -113,7 +113,7 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
     
     
-    panel: bpy.props.StringProperty(default="RENDER_PT_Context")
+    panel: bpy.props.StringProperty(default="RENDER_PT_context")
     
     
     position: bpy.props.EnumProperty(items=[("PREPEND","Beginning","Prepend"), ("APPEND","End","Append")],
