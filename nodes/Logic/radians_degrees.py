@@ -6,9 +6,9 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_RadiansNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RadiansNode"
-    bl_label = "Radians - Degrees"
+    bl_label = "Convert Radians/Degrees"
     # bl_icon = "GRAPH"
-    bl_width_default = 135
+    bl_width_default = 160
 
     node_options = {
         "default_color": (0.3,0.3,0.3),

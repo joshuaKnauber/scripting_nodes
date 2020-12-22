@@ -112,10 +112,53 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
             col.prop(var,"attach_property_to",text="Attach To")
             col.separator()
             
+            if var.var_type in ["BOOLEAN","FLOAT","INTEGER"]:
+                col.prop(var,"is_vector")
+                if var.is_vector:
+                    col.prop(var,"vector_size")
+                col.separator()
+            
             if var.var_type == "STRING":
                 col.prop(var,"str_default")
+                
             elif var.var_type == "INTEGER":
-                col.prop(var,"int_default")
+                if not var.is_vector:
+                    col.prop(var,"int_default")
+                elif var.vector_size == 3:
+                    col.prop(var,"int_three_default")
+                elif var.vector_size == 4:
+                    col.prop(var,"int_four_default")
+                    
+            elif var.var_type == "FLOAT":
+                if not var.is_vector:
+                    col.prop(var,"float_default")
+                elif var.vector_size == 3:
+                    col.prop(var,"float_three_default")
+                elif var.vector_size == 4:
+                    col.prop(var,"float_four_default")
+                
+            elif var.var_type == "BOOLEAN":
+                if not var.is_vector:
+                    col.prop(var,"bool_default",toggle=True)
+                elif var.vector_size == 3:
+                    col.prop(var,"bool_three_default",toggle=True)
+                elif var.vector_size == 4:
+                    col.prop(var,"bool_four_default",toggle=True)
+                    
+            elif var.var_type == "ENUM":
+                for index, item in enumerate(var.enum_items):
+                    box = col.box()
+                    header_row = box.row(align=True)
+                    header_row.prop(item,"name",text="")
+                    op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_UP")
+                    op.index = index
+                    op.down = False
+                    op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_DOWN")
+                    op.index = index
+                    op.down = True
+                    header_row.operator("sn.remove_enum_item",text="",icon="PANEL_CLOSE")
+                    box.prop(item,"description")
+                col.operator("sn.add_enum_item",text="Add Enum Item", icon="ADD")
             
             row.label(text="",icon="BLANK1")
 

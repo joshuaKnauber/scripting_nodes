@@ -70,3 +70,56 @@ class SN_OT_AddPropertySetter(bpy.types.Operator):
 
         node = graph_tree.nodes.new("SN_TestNode")
         return {"FINISHED"}
+    
+    
+
+class SN_OT_AddEnumItem(bpy.types.Operator):
+    bl_idname = "sn.add_enum_item"
+    bl_label = "Add Enum Item"
+    bl_description = "Adds an item to this enum property"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    def execute(self, context):
+        addon_tree = context.scene.sn.addon_tree()
+
+        prop = addon_tree.sn_properties[addon_tree.sn_property_index]
+        prop.enum_items.add()
+        return {"FINISHED"}
+    
+    
+
+class SN_OT_RemoveEnumItem(bpy.types.Operator):
+    bl_idname = "sn.remove_enum_item"
+    bl_label = "Remove Enum Item"
+    bl_description = "Removes this item from this enum property"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+    
+    index: bpy.props.IntProperty()
+
+    def execute(self, context):
+        addon_tree = context.scene.sn.addon_tree()
+
+        prop = addon_tree.sn_properties[addon_tree.sn_property_index]
+        prop.enum_items.remove(self.index)
+        return {"FINISHED"}
+    
+    
+
+class SN_OT_MoveEnumItem(bpy.types.Operator):
+    bl_idname = "sn.move_enum_item"
+    bl_label = "Move Enum Item"
+    bl_description = "Moves this item in this enum property"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+    
+    index: bpy.props.IntProperty()
+    down: bpy.props.BoolProperty()
+
+    def execute(self, context):
+        addon_tree = context.scene.sn.addon_tree()
+
+        prop = addon_tree.sn_properties[addon_tree.sn_property_index]
+        if self.down and self.index < len(prop.enum_items)-1:
+            prop.enum_items.move(self.index, self.index+1)
+        elif not self.down and self.index > 0:
+            prop.enum_items.move(self.index, self.index-1)
+        return {"FINISHED"}

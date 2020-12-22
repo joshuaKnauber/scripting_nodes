@@ -16,11 +16,11 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_execute_input("Execute")
-        self.add_boolean_input("Value")
+        self.add_boolean_input("Condition")
 
         self.add_execute_output("Continue")
-        self.add_execute_output("Do")
-        self.add_execute_output("Else")
+        self.add_execute_output("Condition True")
+        self.add_execute_output("Condition False")
 
     def code_evaluate(self, context, touched_socket):
 

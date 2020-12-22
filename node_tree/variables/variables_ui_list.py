@@ -26,10 +26,24 @@ def get_unique_name(collection, base_name):
 
 
 variable_icons = {
-    "STRING": "SORTALPHA",
-    "INTEGER": "LINENUMBERS_ON",
-    "LIST": "PRESET"
+    "STRING": "SYNTAX_OFF",
+    "INTEGER": "DRIVER_TRANSFORM",
+    "FLOAT": "CON_TRANSLIKE",
+    "BOOLEAN": "FORCE_CHARGE",
+    "ENUM": "COLLAPSEMENU"
 }
+
+
+
+class SN_EnumItem(bpy.types.PropertyGroup):
+
+    name: bpy.props.StringProperty(name="Name",
+                                   description="The displayed name of your enum entry",
+                                   default="My Item")
+    
+    description: bpy.props.StringProperty(name="Description",
+                                   description="The tooltip of your enum entry",
+                                   default="This is my enum item")
 
 
 
@@ -63,14 +77,20 @@ class SN_Variable(bpy.types.PropertyGroup):
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
 
     def get_var_types(self,context):
-        items = [("STRING","String","String",variable_icons["STRING"],0),
-                 ("INTEGER","Integer","Integer",variable_icons["INTEGER"],1)]
-        if not self.is_property:
-            items += [("LIST","List","List",variable_icons["LIST"],2)]
+        if self.is_property:
+            items = [("STRING","String","String",variable_icons["STRING"],0),
+                    ("INTEGER","Integer","Integer",variable_icons["INTEGER"],1),
+                    ("FLOAT","Float","Float",variable_icons["FLOAT"],2),
+                    ("BOOLEAN","Boolean","Boolean",variable_icons["BOOLEAN"],3),
+                    ("ENUM","Enum","Enum",variable_icons["ENUM"],4)]
+        else:
+            items = [("STRING","String","String",variable_icons["STRING"],0),
+                    ("INTEGER","Integer","Integer",variable_icons["INTEGER"],1)]
         return items
     
     def update_var_type(self,context):
         self.make_property = False
+        self.is_vector = False
     
     var_type: bpy.props.EnumProperty(items=get_var_types,
                                      update=update_var_type,
@@ -81,9 +101,18 @@ class SN_Variable(bpy.types.PropertyGroup):
         self.attach_property_to = "Scene"
     
     is_property: bpy.props.BoolProperty(default=False,
-                                          update=update_make_property,
-                                        name="Make Property",
+                                        update=update_make_property,
+                                        name="Is Property",
                                         description="Make this variable into a property that can be attached to ID objects")
+    
+    is_vector: bpy.props.BoolProperty(default=False,
+                                      name="Make Vector",
+                                      description="Makes this property into a vector containing multiple of this property")
+    
+    vector_size: bpy.props.IntProperty(default=3,
+                                       min=3,max=4,
+                                       name="Vector Size",
+                                       description="The size of the vector")
 
     def get_attach_items(self,context):
         options = ["Action", "Armature", "Brush", "CacheFile", "Camera", "Collection", "Curve", "FreestyleLineStyle",
@@ -107,6 +136,46 @@ class SN_Variable(bpy.types.PropertyGroup):
     int_default: bpy.props.IntProperty(default=0,
                                         name="Default Value",
                                         description="The default value of this variable")
+    
+    int_three_default: bpy.props.IntVectorProperty(default=(0,0,0),
+                                                   size=3,
+                                                    name="Default Value",
+                                                    description="The default value of this variable")
+    
+    int_four_default: bpy.props.IntVectorProperty(default=(0,0,0,0),
+                                                    size=4,
+                                                    name="Default Value",
+                                                    description="The default value of this variable")
+    
+    float_default: bpy.props.FloatProperty(default=0,
+                                        name="Default Value",
+                                        description="The default value of this variable")
+    
+    float_three_default: bpy.props.FloatVectorProperty(default=(0,0,0),
+                                                   size=3,
+                                                    name="Default Value",
+                                                    description="The default value of this variable")
+    
+    float_four_default: bpy.props.FloatVectorProperty(default=(0,0,0,0),
+                                                    size=4,
+                                                    name="Default Value",
+                                                    description="The default value of this variable")
+    
+    bool_default: bpy.props.BoolProperty(default=True,
+                                        name="Default Value",
+                                        description="The default value of this variable")
+    
+    bool_three_default: bpy.props.BoolVectorProperty(default=(True,True,True),
+                                                   size=3,
+                                                    name="Default Value",
+                                                    description="The default value of this variable")
+    
+    bool_four_default: bpy.props.BoolVectorProperty(default=(True,True,True,True),
+                                                    size=4,
+                                                    name="Default Value",
+                                                    description="The default value of this variable")
+    
+    enum_items: bpy.props.CollectionProperty(type=SN_EnumItem)
 
 
 
