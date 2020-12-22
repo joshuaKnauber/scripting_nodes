@@ -46,6 +46,9 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_node(self,context,layout):
         layout.prop(self, "func_name")
+    
+    def on_free(self):
+        self.update_nodes_by_type("SN_RunFunctionNode")
 
 
     def code_evaluate(self, context, touched_socket):
