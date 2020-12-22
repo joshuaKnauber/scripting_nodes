@@ -23,37 +23,65 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 for graph_node in graph.node_tree.nodes:
                     if graph_node.uid == self.func_uid:
                         node = graph_node
+
         else:
             if self.func_uid == node.uid:
                 self.func_name = node.func_name
             if not self.func_name in self.addon_tree.sn_nodes["SN_FunctionNode"].items and self.func_name != "":
                 self.func_name = ""
-            
-        if node.uid == self.func_uid:
-            parameters = []
-            for out in node.outputs[1:]:
-                if out.bl_idname != "SN_DynamicVariableSocket":
-                    parameters.append([out.var_name, out.bl_idname])
-
-            if len(parameters) != len(self.inputs[1:]):
-                if len(parameters) > len(self.inputs[1:]):
-                    input_len = len(self.inputs)-1
-                    for x, parameter in enumerate(parameters):
-                        if x >= input_len:
-                            self.add_input(parameter[1],parameter[0],False)
-
-                else:
-                    removed = False
-                    for x, parameter in enumerate(parameters):
-                        if parameter[0] != self.inputs[x+1].name:
-                            removed = True
-                            self.inputs.remove(self.inputs[x+1])
-                    if not removed:
-                        self.inputs.remove(self.inputs[-1])
 
 
-            for x, parameter in enumerate(parameters):
-                self.inputs[x+1].name = parameter[0]
+        if node.bl_idname == "SN_ReturnNode":
+            start_node = node.what_start_node()
+            if start_node.bl_idname == "SN_FunctionNode":
+                if start_node.uid == self.func_uid:
+                    return_types = []
+                    for inp in node.inputs[1:]:
+                        if inp.bl_idname != "SN_DynamicDataSocket":
+                            return_types.append([inp.name, inp.bl_idname])
+
+                    if len(return_types) > len(self.outputs[1:]):
+                        output_len = len(self.outputs)-1
+                        for x, return_type in enumerate(return_types):
+                            if x >= input_len:
+                                self.add_output(return_type[1],return_type[0],False)
+                    
+                    elif len(return_types) < len(self.outputs[1:]):
+                        removed = False
+                        for x, return_type in enumerate(return_types):
+                            if return_type[0] != self.outputs[x+1].name:
+                                removed = True
+                                self.outputs.remove(self.outputs[x+1])
+                        if not removed:
+                            self.outputs.remove(self.outputs[-1])
+
+
+        else:
+            if node.uid == self.func_uid:
+                parameters = []
+                for out in node.outputs[1:]:
+                    if out.bl_idname != "SN_DynamicVariableSocket":
+                        parameters.append([out.var_name, out.bl_idname])
+
+                if len(parameters) != len(self.inputs[1:]):
+                    if len(parameters) > len(self.inputs[1:]):
+                        input_len = len(self.inputs)-1
+                        for x, parameter in enumerate(parameters):
+                            if x >= input_len:
+                                self.add_input(parameter[1],parameter[0],False)
+
+                    else:
+                        removed = False
+                        for x, parameter in enumerate(parameters):
+                            if parameter[0] != self.inputs[x+1].name:
+                                removed = True
+                                self.inputs.remove(self.inputs[x+1])
+                        if not removed:
+                            self.inputs.remove(self.inputs[-1])
+
+
+                for x, parameter in enumerate(parameters):
+                    self.inputs[x+1].name = parameter[0]
 
 
     def update_name(self, context):
@@ -63,6 +91,9 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             if item.node_uid != self.func_uid:
                 for inp in self.inputs[1:]:
                     try: self.inputs.remove(inp)
+                    except: pass
+                for out in self.outputs[1:]:
+                    try: self.outputs.remove(out)
                     except: pass
                 self.func_uid = item.node_uid
 
@@ -74,6 +105,9 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.func_uid = ""
             for inp in self.inputs[1:]:
                 try: self.inputs.remove(inp)
+                except: pass
+            for out in self.outputs[1:]:
+                try: self.outputs.remove(out)
                 except: pass
 
         self.update_needs_compile(context)
@@ -115,9 +149,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             else:
                 return {
-                    "code": f"""
-                            {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_blocks(parameters, 0)})[{self.outputs.find(touched_socket.name)-1}]
-                            """
+                    "code": f"""{self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_blocks(parameters, 0)})[{self.outputs.find(touched_socket.name)-1}]"""
                 }
 
         else:
