@@ -116,6 +116,8 @@ def compile_addon(addon_tree, is_export=False):
         # register module
         success = __register_module(module)
         if success == True:
+            if is_export:
+                return txt
             return success
         else:
             raise success
@@ -137,8 +139,8 @@ def compile_addon(addon_tree, is_export=False):
     
 def compile_export(addon_tree):
     text = compile_addon(addon_tree,True)
-    if text != False:
-        return result
+    if text:
+        return text
     return False
 
 
@@ -298,9 +300,9 @@ def __create_icon_register(addon_tree):
     icon_list = ""
     img_list = ""
     for icon in addon_tree.sn_icons:
-        if icon.image and icon.image in bpy.data.images:
+        if icon.image:
             icon_list += "\""+icon.name+"\","
-            img_list += "\""+icon.image+"\","
+            img_list += "\""+icon.image.name+"\","
     
     if addon_tree.doing_export:
         return f"""
@@ -308,7 +310,7 @@ def __create_icon_register(addon_tree):
                     icons = [{icon_list}]
                     bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons = bpy.utils.previews.new()
                 
-                    icons_dir = os.path.join( os.path.dirname( __file__ ), "icons" )
+                    icons_dir = os.path.join( os.path.dirname( os.getcwd() ), "icons" )
                     for icon in icons:
                         bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
                         
