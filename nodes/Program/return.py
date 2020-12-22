@@ -20,6 +20,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_execute_input("Return")
         self.add_dynamic_data_input("Content")
 
+
     def on_node_update(self):
         if len(self.inputs[0].links):
             if self.what_start_idname() == "SN_FunctionNode":
@@ -28,8 +29,9 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.connected_function = False
         else:
             self.connected_function = True
+        self.update_nodes_by_type("SN_RunFunctionNode")
 
-    
+
     def draw_node(self, context, layout):
         if not self.connected_function:
             layout.label(text="Please connect to a function")
