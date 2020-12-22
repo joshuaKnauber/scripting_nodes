@@ -35,7 +35,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.update_name(None)
 
     def on_create(self,context):
-        self.add_execute_input("Execute")
+        self.add_execute_input("Function")
         self.add_execute_output("Execute")
 
 

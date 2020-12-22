@@ -11,7 +11,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_BeforeRenderNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_BeforeRenderNode"
-    bl_label = "Before Render Events"
+    bl_label = "Before Render"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 

@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_FrameChangeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_FrameChangeNode"
-    bl_label = "Frame Change Event"
+    bl_label = "On Frame Change"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 

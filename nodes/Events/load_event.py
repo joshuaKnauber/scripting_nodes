@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_LoadNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_LoadNode"
-    bl_label = "Load Event"
+    bl_label = "On Load"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 
