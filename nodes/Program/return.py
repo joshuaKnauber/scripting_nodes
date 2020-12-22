@@ -17,7 +17,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
     connected_function: bpy.props.BoolProperty(default=True)
 
     def on_create(self,context):
-        self.add_execute_input("Execute")
+        self.add_execute_input("Return")
         self.add_dynamic_data_input("Content")
 
     def on_node_update(self):
