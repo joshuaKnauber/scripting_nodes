@@ -149,8 +149,7 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
                 for index, item in enumerate(var.enum_items):
                     box = col.box()
                     header_row = box.row(align=True)
-                    # header_row.alignment = "RIGHT"
-                    header_row.prop(item,"name")
+                    header_row.prop(item,"name",text="")
                     op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_UP")
                     op.index = index
                     op.down = False
