@@ -53,10 +53,12 @@ class SN_Icon(bpy.types.PropertyGroup):
                                    update=update_name)
     
     def udpate_image(self,context):
-        if self.image and self.image in bpy.data.images:
-            bpy.data.images[self.image].preview.reload()
+        if self.image:
+            self.image.preview.reload()
 
-    image: bpy.props.StringProperty(name="Icon Image",
+    image: bpy.props.PointerProperty(type=bpy.types.Image,
+                                    update=udpate_image,
+                                    name="Icon Image",
                                     description="Image for this icon")
 
 
@@ -65,8 +67,8 @@ class SN_UL_IconList(bpy.types.UIList):
     
     def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index):
         row = layout.row()
-        if item.image and item.image in bpy.data.images:
-            row.label(text="", icon_value=bpy.data.images[item.image].preview.icon_id)
+        if item.image:
+            row.label(text="", icon_value=item.image.preview.icon_id)
         else:
             row.label(text="", icon="ERROR")
             

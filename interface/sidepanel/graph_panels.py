@@ -149,7 +149,7 @@ class SN_PT_IconPanel(bpy.types.Panel):
             col = layout.column()
             row = col.row()
             icon = addon_tree.sn_icons[addon_tree.sn_icon_index]
-            row.prop_search(icon, "image", bpy.data, "images", text="")
+            row.template_ID(icon, "image", new="image.new", open="image.open")
             row.label(icon="BLANK1")
             
             

@@ -87,8 +87,9 @@ class SN_OT_SelectAddToPanel(bpy.types.Operator):
 
     def execute(self, context):
         global panel_node
-        panel_node.panel = self.panel
-        panel_node.position = "APPEND" if self.append else "PREPEND"
+        if panel_node:
+            panel_node.panel = self.panel
+            panel_node.position = "APPEND" if self.append else "PREPEND"
         panel_node = None
         remove_registered_panels()
         for area in context.screen.areas:
@@ -108,10 +109,11 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.2,0.2,0.2),
         "starts_tree": True,
+        "register_order": 1
     }
     
     
-    panel: bpy.props.StringProperty(default="RENDER_PT_Context")
+    panel: bpy.props.StringProperty(default="RENDER_PT_context")
     
     
     position: bpy.props.EnumProperty(items=[("PREPEND","Beginning","Prepend"), ("APPEND","End","Append")],

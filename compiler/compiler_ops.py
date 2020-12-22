@@ -99,29 +99,30 @@ class SN_OT_ExportAddon(bpy.types.Operator):
             addon_tree = context.scene.sn.addon_tree()
             dir_name = addon_tree.sn_graphs[0].name.lower().replace(" ","_").replace("-","_")
             dir_path = os.path.join(os.path.dirname(self.filepath),dir_name)
-            os.mkdir(dir_path)
-            os.mkdir(os.path.join(dir_path,"icons"))
-            os.mkdir(os.path.join(dir_path,"assets"))
-            
-            with open(os.path.join(dir_path,"__init__.py"), "w", encoding="utf-8") as py_file:
-                py_file.write(text.as_string())
+            if os.path.exists(dir_path):
+                self.report({"ERROR"},message="A file with this name already exists in this location!")
+            else:
+                os.mkdir(dir_path)
+                os.mkdir(os.path.join(dir_path,"icons"))
+                os.mkdir(os.path.join(dir_path,"assets"))
                 
-            for icon in addon_tree.sn_icons:
-                if icon.image and icon.image in bpy.data.images:
-                    save_img = bpy.data.images[icon.image].copy()
-                    save_img.file_format = "PNG"
-                    save_img.filepath = os.path.join(dir_path, "icons", icon.name+".png")
-                    save_img.save()
-                    bpy.data.images.remove(save_img)
+                with open(os.path.join(dir_path,"__init__.py"), "w", encoding="utf-8") as py_file:
+                    py_file.write(text.as_string())
+                    
+                for icon in addon_tree.sn_icons:
+                    if icon.image:
+                        icon.image.filepath = os.path.join(dir_path, "icons", icon.name+".png")
+                        icon.image.file_format = "PNG"
+                        icon.image.save()
 
-            for asset in addon_tree.sn_assets:
-                if asset.path and os.path.exists(asset.path):
-                    shutil.copyfile(asset.path, os.path.join(dir_path, "assets", os.path.basename(asset.path)))
+                for asset in addon_tree.sn_assets:
+                    if asset.path and os.path.exists(asset.path):
+                        shutil.copyfile(asset.path, os.path.join(dir_path, "assets", os.path.basename(asset.path)))
+                    
+                # self.make_archive(dir_path, self.filepath)
+                # shutil.rmtree(dir_path)
                 
-            self.make_archive(dir_path, self.filepath)
-            shutil.rmtree(dir_path)
-            
-            bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
+                bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
         else:
             self.report({"ERROR"},message="Your addon could not be compiled properly! Please debug before exporting.")
         return {"FINISHED"}

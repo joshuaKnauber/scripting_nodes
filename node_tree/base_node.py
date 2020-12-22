@@ -19,6 +19,7 @@ class SN_ScriptingBaseNode:
         "default_color": (0.3,0.3,0.3),
         "has_collection": False,
         "starts_tree": False,
+        "register_order": 0,
         "import_once": False,
         "evaluate_once": False,
         "register_once": False,
