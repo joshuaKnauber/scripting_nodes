@@ -102,12 +102,24 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         if self.func_name in self.addon_tree.sn_nodes["SN_FunctionNode"].items:
-            return {
-                "code": f"""
-                    {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}()
-                    {self.outputs[0].block(5)}
-                    """
-            }
+            parameters = []
+            for inp in self.inputs[1:]:
+                parameters.append(inp.value + ", ")
+
+            if touched_socket == self.inputs[0]:
+                return {
+                    "code": f"""
+                        {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_blocks(parameters, 0)})
+                        {self.outputs[0].block(5)}
+                        """
+                }
+
+            else:
+                return {
+                    "code": f"""
+                        {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_blocks(parameters, 0)})[{self.outputs.find(touched_socket.name)-1}]
+                        """
+                }
 
         else:
             self.add_error("No function", "No valid function selected")
