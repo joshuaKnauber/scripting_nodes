@@ -87,8 +87,9 @@ class SN_OT_SelectAddToPanel(bpy.types.Operator):
 
     def execute(self, context):
         global panel_node
-        panel_node.panel = self.panel
-        panel_node.position = "APPEND" if self.append else "PREPEND"
+        if panel_node:
+            panel_node.panel = self.panel
+            panel_node.position = "APPEND" if self.append else "PREPEND"
         panel_node = None
         remove_registered_panels()
         for area in context.screen.areas:

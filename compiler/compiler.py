@@ -93,22 +93,16 @@ def compile_addon(addon_tree, is_export=False):
 
         __write_blockcomment(addon_data["text"], "REGISTER ADDON")
         __write_in_text(addon_data["text"], "def register():")
-        __write_in_text(addon_data["text"], "    \"\"\" registers this addon \"\"\"")
         __write_in_text(addon_data["text"], "    sn_register_icons()")
-        for graph in addon_data["code"]["graph_code"]:
-            if addon_data["code"]["graph_code"][graph]["register"]:
-                __write_graphcomment(addon_data["text"], graph, 1)
-                __write_in_text(addon_data["text"], __normalize_code(addon_data["code"]["graph_code"][graph]["register"],1))
+        register_code = __get_register_code(addon_data["code"]["graph_code"])
+        __write_in_text(addon_data["text"], register_code)
         
         # write unregister function
         __write_blockcomment(addon_data["text"], "UNREGISTER ADDON")
         __write_in_text(addon_data["text"], "def unregister():")
-        __write_in_text(addon_data["text"], "    \"\"\" removes this addon \"\"\"")
         __write_in_text(addon_data["text"], "    sn_unregister_icons()")
-        for graph in addon_data["code"]["graph_code"]:
-            if addon_data["code"]["graph_code"][graph]["unregister"]:
-                __write_graphcomment(addon_data["text"], graph, 1)
-                __write_in_text(addon_data["text"], __normalize_code(addon_data["code"]["graph_code"][graph]["unregister"],1))
+        unregister_code = __get_unregister_code(addon_data["code"]["graph_code"])
+        __write_in_text(addon_data["text"], unregister_code)
         
         # make module
         module = addon_data["text"].as_module()
@@ -253,6 +247,43 @@ def __get_import_code(code):
         if code["graph_code"][graph]["imports"]:
             import_code += code["graph_code"][graph]["imports"]
     return __remove_duplicate_lines(import_code)
+
+
+def __get_keyed_list(graph_code, key):
+    register = []
+    for graph in graph_code:
+        if graph_code[graph][key]:
+            for block in graph_code[graph][key]:
+                register.append((__normalize_code(block[0],1),block[1]))
+    return register
+
+
+def __remove_empty_lines(text):
+    text = text.split("\n")
+    new_text = ""
+    for line in text:
+        if not line.isspace():
+            new_text += line + "\n"
+    return new_text
+
+
+def __get_register_code(graph_code):
+    register = __get_keyed_list(graph_code,"register")
+    register.sort(key=lambda x: x[1])
+    register_code = ""
+    for code in register:
+        register_code += code[0]
+    return __remove_empty_lines(register_code)
+
+
+def __get_unregister_code(graph_code):
+    unregister = __get_keyed_list(graph_code,"unregister")
+    unregister.sort(key=lambda x: x[1])
+    unregister.reverse()
+    unregister_code = ""
+    for code in unregister:
+        unregister_code += code[0]
+    return __remove_empty_lines(unregister_code)
     
     
 def __get_license_block():
@@ -398,7 +429,7 @@ def __should_imperative(node, imperative_list):
 
 
 def __evaluate_graph(graph, addon_tree, addon_did_once):
-    graph_code = { "imports":"", "imperative":"", "evaluated":"", "register":"", "unregister":"" }
+    graph_code = { "imports":"", "imperative":"", "evaluated":"", "register":[], "unregister":[] }
     graph_did_once = { "imports":[], "imperative":[], "evaluated":[], "register":[], "unregister":[] }
 
     for node in graph.node_tree.nodes:
@@ -417,11 +448,17 @@ def __evaluate_graph(graph, addon_tree, addon_did_once):
                 if not node.bl_idname in graph_did_once["imperative"]: graph_did_once["imperative"].append(node.bl_idname)
                 
             if __should_register(node, {**addon_did_once, **graph_did_once}["register"]):
-                graph_code["register"] += process_returned(node, node.code_register(bpy.context))
+                order = 0
+                if "register_order" in node.node_options:
+                    order = node.node_options["register_order"]
+                graph_code["register"].append((process_returned(node, node.code_register(bpy.context)),order))
                 if not node.bl_idname in graph_did_once["register"]: graph_did_once["register"].append(node.bl_idname)
                 
             if __should_unregister(node, {**addon_did_once, **graph_did_once}["unregister"]):
-                graph_code["unregister"] += process_returned(node, node.code_unregister(bpy.context))
+                order = 0
+                if "register_order" in node.node_options:
+                    order = node.node_options["register_order"]
+                graph_code["unregister"].append((process_returned(node, node.code_unregister(bpy.context)),order))
                 if not node.bl_idname in graph_did_once["unregister"]: graph_did_once["unregister"].append(node.bl_idname)
             
     return graph_code, graph_did_once
