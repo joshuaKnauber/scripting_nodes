@@ -170,6 +170,11 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="The label of this panel",
                                     update=SN_ScriptingBaseNode.update_needs_compile)
     
+    order: bpy.props.IntProperty(default=0,
+                                 min=0,
+                                 name="Order",
+                                 description="This defines the order of the panels")
+    
 
     def on_create(self,context):
         self.add_interface_output("Panel",True)
@@ -189,6 +194,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "label")
         layout.prop(self, "hide_header")
         layout.prop(self, "default_closed")
+        layout.prop(self, "order")
         
         
     def what_layout(self, socket):
@@ -224,7 +230,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {"bl_context = '"+self.context+"'" if self.context else ""}
                         {"bl_category = '"+self.category+"'" if self.category else ""}
                         {"bl_options = {"+option_closed+option_header+"}" if option_closed or option_header else ""}
-                        bl_order = {0}
+                        bl_order = {self.order}
                         
                         @classmethod
                         def poll(cls, context):

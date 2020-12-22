@@ -109,6 +109,7 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.2,0.2,0.2),
         "starts_tree": True,
+        "register_order": 1
     }
     
     
