@@ -37,6 +37,7 @@ from . import auto_load
 from .keymaps.keymap import register_keymaps, unregister_keymaps
 from .node_tree.node_categories import get_node_categories
 from .interface.header.header import prepend_header, append_header
+from .interface.menu.rightclick import serpens_right_click
 
 from .node_tree.graphs.graph_ui_lists import SN_Graph, update_graph_index
 from .node_tree.variables.variables_ui_list import SN_Variable
@@ -117,6 +118,10 @@ def register():
     # add the node tree header
     bpy.types.NODE_HT_header.append(append_header)
     bpy.types.NODE_HT_header.prepend(prepend_header)
+    
+    # add right click menu
+    try: bpy.types.WM_MT_button_context.append(serpens_right_click)
+    except: pass
 
     # app handlers
     bpy.app.handlers.load_post.append(load_handler)
@@ -131,6 +136,10 @@ def unregister():
     # remove the node tree header
     bpy.types.NODE_HT_header.remove(append_header)
     bpy.types.NODE_HT_header.remove(prepend_header)
+    
+    # remove right click menu
+    try: bpy.types.WM_MT_button_context.remove(serpens_right_click)
+    except: pass
 
     # unregister the graph properties
     del bpy.types.NodeTree.sn_graphs
