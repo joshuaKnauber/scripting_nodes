@@ -91,9 +91,15 @@ def compile_addon(addon_tree, is_export=False):
         __write_blockcomment(addon_data["text"], "REGISTER ICONS")
         __write_in_text(addon_data["text"], __normalize_code(__create_icon_register(addon_tree),0))
 
+        __write_blockcomment(addon_data["text"], "REGISTER PROPERTIES")
+        __write_in_text(addon_data["text"], __normalize_code(__create_property_register(addon_tree),0))
+        __write_paragraphs(addon_data["text"], 1)
+        __write_in_text(addon_data["text"], __normalize_code(__create_property_unregister(addon_tree),0))
+
         __write_blockcomment(addon_data["text"], "REGISTER ADDON")
         __write_in_text(addon_data["text"], "def register():")
         __write_in_text(addon_data["text"], "    sn_register_icons()")
+        __write_in_text(addon_data["text"], "    sn_register_properties()")
         register_code = __get_register_code(addon_data["code"]["graph_code"])
         __write_in_text(addon_data["text"], register_code)
         
@@ -101,6 +107,7 @@ def compile_addon(addon_tree, is_export=False):
         __write_blockcomment(addon_data["text"], "UNREGISTER ADDON")
         __write_in_text(addon_data["text"], "def unregister():")
         __write_in_text(addon_data["text"], "    sn_unregister_icons()")
+        __write_in_text(addon_data["text"], "    sn_unregister_properties()")
         unregister_code = __get_unregister_code(addon_data["code"]["graph_code"])
         __write_in_text(addon_data["text"], unregister_code)
         
@@ -330,6 +337,35 @@ def __create_icon_register(addon_tree):
                 def sn_unregister_icons():
                     del bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons
                 """
+                
+                
+def __create_property_register(addon_tree):
+    properties = "def sn_register_properties():\n"
+    if not len(addon_tree.sn_properties):
+        properties += " "*4 + "pass"
+    else:
+        prop_names = {"STRING":"String","INTEGER":"Int","FLOAT":"Float","BOOLEAN":"Bool","ENUM":"Enum"}
+        for prop in addon_tree.sn_properties:
+            properties += " "*4 + f"bpy.types.{prop.attach_property_to}.{prop.identifier} = bpy.props.{prop_names[prop.var_type]}"
+            properties += f"{'Vector' if prop.is_vector else ''}Property("
+            properties += f"name='{prop.name}',description='{prop.description}',"
+            if prop.property_subtype != "NO_SUBTYPES":
+                properties += f"subtype='{prop.property_subtype}',"
+            if prop.property_unit != "NO_UNITS":
+                properties += f"unit='{prop.property_unit}',"
+            properties += f"{prop.property_default()}"
+            properties += f"{prop.property_min_max()})\n"
+    return properties
+
+
+def __create_property_unregister(addon_tree):
+    properties = "def sn_unregister_properties():\n"
+    if not len(addon_tree.sn_properties):
+        properties += " "*4 + "pass"
+    else:
+        for prop in addon_tree.sn_properties:
+            properties += " "*4 + f"del bpy.types.{prop.attach_property_to}.{prop.identifier}\n"
+    return properties
 
 
 def __create_addon_info(addon_tree):

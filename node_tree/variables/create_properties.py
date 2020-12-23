@@ -13,7 +13,7 @@ class SN_OT_CreateProperty(bpy.types.Operator):
         variable = addon_tree.sn_properties.add()
         variable.is_property = True
         variable.node_tree = addon_tree
-        variable.name = "new_property"
+        variable.name = "New Property"
         
         addon_tree.sn_property_index = len(addon_tree.sn_properties)-1
         return {"FINISHED"}
