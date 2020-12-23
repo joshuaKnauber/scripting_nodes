@@ -26,9 +26,32 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         else:
             if node.bl_idname == "SN_ReturnNode" and parameter == "ON_FREE":
-                for index, out in enumerate(self.outputs):
-                    if index > 0:
-                        self.outputs.remove(out)
+                different_node = False
+                for x, inp in enumerate(node.inputs):
+                    if inp.bl_idname != "SN_DynamicVariableSocket":
+                        if inp.var_name != self.outputs[x+1].name:
+                            different_node = True
+                if not different_node:
+                    for i, out in enumerate(self.outputs):
+                        if i:
+                            try: self.outputs.remove(out)
+                            except: pass
+                return
+            elif node.bl_idname == "SN_ReturnNode":
+                if node.what_start_node().bl_idname != "SN_FunctionNode":
+                    different_node = False
+                for x, inp in enumerate(node.inputs):
+                    if not inp.bl_idname in ["SN_DynamicVariableSocket", "SN_ExecuteSocket"]:
+                        if x+1 < len(self.outputs):
+                            if inp.var_name != self.outputs[x+1].name:
+                                different_node = True
+                        else:
+                            different_node = True
+                if not different_node:
+                    for i, out in enumerate(self.outputs):
+                        if i:
+                            try: self.outputs.remove(out)
+                            except: pass
                 return
             else:
                 if self.func_uid == node.uid:
@@ -99,12 +122,14 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.func_name in self.addon_tree.sn_nodes["SN_FunctionNode"].items:
             item = self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name]
             if item.node_uid != self.func_uid:
-                for inp in self.inputs[1:]:
-                    try: self.inputs.remove(inp)
-                    except: pass
-                for out in self.outputs[1:]:
-                    try: self.outputs.remove(out)
-                    except: pass
+                for i, inp in enumerate(self.inputs):
+                    if i:
+                        try: self.inputs.remove(inp)
+                        except: pass
+                for i, out in enumerate(self.outputs):
+                    if i:
+                        try: self.outputs.remove(out)
+                        except: pass
                 self.func_uid = item.node_uid
 
             if self.what_start_idname() == "SN_FunctionNode":
@@ -114,12 +139,14 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.update_nodes_by_type("SN_ReturnNode")
         else:
             self.func_uid = ""
-            for inp in self.inputs[1:]:
-                try: self.inputs.remove(inp)
-                except: pass
-            for out in self.outputs[1:]:
-                try: self.outputs.remove(out)
-                except: pass
+            for i, inp in enumerate(self.inputs):
+                if i:
+                    try: self.inputs.remove(inp)
+                    except: pass
+            for i, out in enumerate(self.outputs):
+                if i:
+                    try: self.outputs.remove(out)
+                    except: pass
 
         self.update_needs_compile(context)
 

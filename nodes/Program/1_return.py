@@ -24,6 +24,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_dynamic_variable_input("Content")
 
     def on_free(self):
+        self.inputs.remove(self.inputs[0])
         self.update_nodes_by_type("SN_RunFunctionNode", "ON_FREE")
 
     def on_node_update(self):
