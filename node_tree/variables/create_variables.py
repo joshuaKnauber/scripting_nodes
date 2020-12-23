@@ -13,7 +13,7 @@ class SN_OT_CreateVariable(bpy.types.Operator):
 
         variable = graph_tree.sn_variables.add()
         variable.node_tree = graph_tree
-        variable.name = "new_variable"
+        variable.name = "New Variable"
         
         graph_tree.sn_variable_index = len(graph_tree.sn_variables)-1
         return {"FINISHED"}

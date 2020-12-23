@@ -108,15 +108,25 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
             
             col.prop(var,"var_type",text="Type")
             col.separator()
-            
+
             col.prop(var,"attach_property_to",text="Attach To")
             col.separator()
+            
+            if var.property_subtype != "NO_SUBTYPES":
+                col.prop(var,"property_subtype",text="Subtype")
+                col.separator()
+            if var.property_unit != "NO_UNITS":
+                col.prop(var,"property_unit",text="Unit")
+                col.separator()
             
             if var.var_type in ["BOOLEAN","FLOAT","INTEGER"]:
                 col.prop(var,"is_vector")
                 if var.is_vector:
                     col.prop(var,"vector_size")
                 col.separator()
+
+            col.prop(var,"description")
+            col.separator()
             
             if var.var_type == "STRING":
                 col.prop(var,"str_default")
@@ -128,6 +138,32 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
                     col.prop(var,"int_three_default")
                 elif var.vector_size == 4:
                     col.prop(var,"int_four_default")
+                
+                col.separator()
+                
+                sub_row = col.row()
+                sub_row.prop(var,"use_min",text="")
+                sub_col = sub_row.column()
+                sub_col.enabled = var.use_min
+                sub_col.prop(var,"int_min")
+                
+                sub_row = col.row()
+                sub_row.prop(var,"use_max",text="")
+                sub_col = sub_row.column()
+                sub_col.enabled = var.use_max
+                sub_col.prop(var,"int_max")
+                
+                sub_row = col.row()
+                sub_row.prop(var,"use_soft_min",text="")
+                sub_col = sub_row.column()
+                sub_col.enabled = var.use_soft_min
+                sub_col.prop(var,"int_soft_min")
+                
+                sub_row = col.row()
+                sub_row.prop(var,"use_soft_max",text="")
+                sub_col = sub_row.column()
+                sub_col.enabled = var.use_soft_max
+                sub_col.prop(var,"int_soft_max")
                     
             elif var.var_type == "FLOAT":
                 if not var.is_vector:
@@ -136,6 +172,32 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
                     col.prop(var,"float_three_default")
                 elif var.vector_size == 4:
                     col.prop(var,"float_four_default")
+                
+                col.separator()
+                
+                sub_row = col.row()
+                sub_row.prop(var,"use_min",text="")
+                sub_col = sub_row.column()
+                sub_col.enabled = var.use_min
+                sub_col.prop(var,"float_min")
+                
+                sub_row = col.row()
+                sub_row.prop(var,"use_max",text="")
+                sub_col = sub_row.column()
+                sub_col.enabled = var.use_max
+                sub_col.prop(var,"float_max")
+                
+                sub_row = col.row()
+                sub_row.prop(var,"use_soft_min",text="")
+                sub_col = sub_row.column()
+                sub_col.enabled = var.use_soft_min
+                sub_col.prop(var,"float_soft_min")
+                
+                sub_row = col.row()
+                sub_row.prop(var,"use_soft_max",text="")
+                sub_col = sub_row.column()
+                sub_col.enabled = var.use_soft_max
+                sub_col.prop(var,"float_soft_max")
                 
             elif var.var_type == "BOOLEAN":
                 if not var.is_vector:

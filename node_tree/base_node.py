@@ -164,6 +164,8 @@ class SN_ScriptingBaseNode:
         python_name = re.sub(r'\W+', '', name.replace(" ","_").lower())
         if not python_name:
             python_name = empty_name
+        if python_name and python_name[0].isnumeric():
+            python_name = "sn_" + python_name
         return python_name
 
 
