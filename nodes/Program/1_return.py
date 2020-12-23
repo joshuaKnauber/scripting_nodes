@@ -14,12 +14,17 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
 
+    def on_outside_update(self,node,parameter=""):
+        self.update_nodes_by_type("SN_RunFunctionNode")
+
     connected_function: bpy.props.BoolProperty(default=True)
 
     def on_create(self,context):
         self.add_execute_input("Return")
-        self.add_dynamic_data_input("Content")
+        self.add_dynamic_variable_input("Content")
 
+    def on_free(self):
+        self.update_nodes_by_type("SN_RunFunctionNode", "ON_FREE")
 
     def on_node_update(self):
         if len(self.inputs[0].links):
@@ -29,6 +34,9 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.connected_function = False
         else:
             self.connected_function = True
+        self.update_nodes_by_type("SN_RunFunctionNode")
+    
+    def on_any_change(self):
         self.update_nodes_by_type("SN_RunFunctionNode")
 
 
@@ -54,6 +62,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
                         return {self.list_blocks(contents, 0)}
                         """
             }
+
         else:
             self.add_error("No function", "This node has to be connected to a function", False)
             return {"code": {self.list_blocks(contents, 0)}}
