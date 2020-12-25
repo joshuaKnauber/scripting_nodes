@@ -34,14 +34,59 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
     
     
+    output_types = {
+        "STRING": "SN_StringSocket",
+        "BOOLEAN": "SN_BooleanSocket",
+        "FLOAT": "SN_FloatSocket",
+        "INT": "SN_IntegerSocket",
+        "ENUM": "SN_StringSocket"
+    }
+    
+    
+    def add_prop_output(self,path):
+        try:
+            if "[" in path[-1] and "]" in path[-1]:
+                path[-1] = path[-1].split("[")[0]
+            prop_path = ".".join(path)
+            prop_name = prop_path.split(".")[-1]
+            prop_path = (".").join(prop_path.split(".")[:-1])
+            idname = "SN_DataSocket"
+            if eval(prop_path+".bl_rna.properties['"+prop_name+"'].type") in self.output_types:
+                idname = self.output_types[eval(prop_path+".bl_rna.properties['"+prop_name+"'].type")]
+            self.add_output(idname,eval(prop_path+".bl_rna.properties['"+prop_name+"'].name"),False)
+        except:
+            self.reset_node()
+    
+    
     def update_path(self,context):
-        path = self.copied_path.split(".")
-        for part in path:
-            pass
+        if self.copied_path:
+            try:
+                path = self.copied_path.split(".")
+                path_combined = ""
+                for index, part in enumerate(path):
+                    path_combined += "."+part if path_combined else part
+                    if "[" and "]" in part and not index == len(path)-1:
+                        name = eval(path_combined+".bl_rna.name")
+                        if not eval(path_combined+".bl_rna.base.name") in [name, "ID"]:
+                            name += f" ({eval(path_combined+'.bl_rna.base.name')})"
+                        self.add_blend_data_input(name)
+                self.add_prop_output(path)
+            except:
+                self.reset_node()
     
     
     copied_path: bpy.props.StringProperty(update=update_path)
-
+    
+    
+    def reset_node(self):
+        self.copied_path = ""
+        self.inputs.clear()
+        self.outputs.clear()
+    
+    
+    def on_copy(self,node):
+        self.reset_node()
+        
 
     def draw_node(self,context,layout):
         if not self.copied_path:
