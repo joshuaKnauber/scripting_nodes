@@ -30,7 +30,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         text = self.inputs['Label'].value
         emboss = self.inputs['Emboss'].value
         depress = self.inputs['Depress'].value
-        icon = self.inputs['Icon'].value
+        icon = self.inputs['Icon'].icon_line()
         
         operator = "object.add"
         

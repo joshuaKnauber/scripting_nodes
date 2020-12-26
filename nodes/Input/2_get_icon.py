@@ -56,15 +56,22 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_GetIconNode"
     bl_label = "Icon"
     # bl_icon = "GRAPH"
-    bl_width_default = 200
+    bl_width_default = 160
     
     node_options = {
         "default_color": (0.3,0.3,0.3),
         "imperative_once": True
     }
     
+    def update_source(self,context):
+        SN_ScriptingBaseNode().update_needs_compile()
+        if self.icon_source == "BLENDER":
+            self.outputs[0].is_icon_value = False
+        else:
+            self.outputs[0].is_icon_value = True
+    
     icon_source: bpy.props.EnumProperty(name="Icon Source",
-                                        update=SN_ScriptingBaseNode.update_needs_compile,
+                                        update=update_source,
                                         description="The source of the icons",
                                         items=[("BLENDER","Blender","Blender","BLENDER",0),
                                                 ("CUSTOM","Custom","Custom","FILE_SCRIPT",1)])
@@ -100,13 +107,11 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         icon = f"\"{self.icon}\""
-        icon_prefix = "icon="
         if self.icon_source == "CUSTOM":
             if self.custom_icon and self.custom_icon in self.addon_tree.sn_icons and self.addon_tree.sn_icons[self.custom_icon].image:
-                icon = f"bpy.context.scene.{self.addon_tree.sn_graphs[0].short()}_icons['{self.custom_icon}'].icon_id,"
-                icon_prefix = "icon_value="
+                icon = f"bpy.context.scene.{self.addon_tree.sn_graphs[0].short()}_icons['{self.custom_icon}'].icon_id"
             else:
                 icon = "\"ERROR\""
         return {
-            "code": f"{icon_prefix}{icon}"
+            "code": icon
         }

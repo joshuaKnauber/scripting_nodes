@@ -34,7 +34,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
             row.prop(self, "default_value", text=text)
 
     def draw_color(self, context, node):
-        c = (1, 0.1, 0.75)
+        c = (0.3, 1, 0.3)
         if self.is_linked:
             return (c[0], c[1], c[2], 1)
         return (c[0], c[1], c[2], 0.5)
@@ -43,31 +43,3 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 class SN_DynamicStringSocket(bpy.types.NodeSocket, DynamicSocket):
     add_idname = "SN_StringSocket"
-    
-    
-class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_label = "Icon"
-    sn_type = "STRING"
-    
-    allow_value: bpy.props.BoolProperty(default=True)
-    
-    def get_value(self, indents=0):
-        if self.is_linked:
-            if self.is_output:
-                return process_node(self.node, self)
-            else:
-                value = self.links[0].from_socket.value
-                if "icon_value" in value and not self.allow_value:
-                    return "icon=\"ERROR\""
-                else:
-                    return value
-        return ""
-
-    def draw_socket(self, context, layout, row, node, text):
-        row.label(text=text)
-
-    def draw_color(self, context, node):
-        c = (1, 0.1, 0.75)
-        if self.is_linked:
-            return (c[0], c[1], c[2], 1)
-        return (c[0], c[1], c[2], 0.5)
