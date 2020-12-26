@@ -43,7 +43,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
     
     
-    def add_prop_output(self,path):#bpy.data.screens["Layout"].dopesheet.filter_text
+    def add_prop_output(self,path):
         try:
             if "[" in path[-1] and "]" in path[-1]:
                 path[-1] = path[-1].split("[")[0]
