@@ -17,6 +17,59 @@ def get_socket_index(socket):
 
 
 
+SOCKET_CONNECTIONS = {
+    "SHORT": {
+        "SN_ExecuteSocket":             "E",
+        "SN_DynamicExecuteSocket":      "DE",
+
+        "SN_InterfaceSocket":           "I",
+        "SN_DynamicInterfaceSocket":    "DI",
+
+        "SN_BlendDataSocket":           "BD",    
+        
+        "SN_DataSocket":                "D",
+        "SN_DynamicDataSocket":         "DD",
+                
+        "SN_IntegerSocket":             "IN",
+        "SN_FloatSocket":               "FN",  
+        "SN_NumberSocket":              "N",
+        
+        "SN_BooleanSocket":             "B",
+        
+        "SN_StringSocket":              "S",
+        "SN_DynamicStringSocket":       "DS",
+        "SN_IconSocket":                "IC",
+        
+        "SN_DynamicVariableSocket":     "DV"
+    },
+    
+    "VALUES": {"COLUMNS":   ["E","DE","I","DI","BD","D","DD","IN","FN","N","B","S","DS","IC","DV"],
+                     "E":   [ 1,  1,   0,  0,   0,   0,   0,   0,   0,  0,  0,  0,   0,   0,   0 ],
+                    "DE":   [ 1,  0,   0,  0,   0,   0,   0,   0,   0,  0,  0,  0,   0,   0,   0 ],
+                     "I":   [ 0,  0,   1,  1,   0,   0,   0,   0,   0,  0,  0,  0,   0,   0,   0 ],
+                    "DI":   [ 0,  0,   1,  0,   0,   0,   0,   0,   0,  0,  0,  0,   0,   0,   0 ],
+                    "BD":   [ 0,  0,   0,  0,   1,   0,   0,   0,   0,  0,  0,  0,   0,   0,   1 ],
+                     "D":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,  1,   1,   1,   1 ],
+                    "DD":   [ 0,  0,   0,  0,   0,   1,   0,   1,   1,  1,  1,  1,   0,   1,   0 ],
+                    "IN":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,  1,   1,   1,   1 ],
+                    "FN":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,  1,   1,   1,   1 ],
+                     "N":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,  1,   1,   1,   1 ],
+                     "B":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,  1,   1,   1,   1 ],
+                     "S":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,  1,   1,   1,   1 ],
+                    "DS":   [ 0,  0,   0,  0,   0,   1,   0,   1,   1,  1,  1,  1,   0,   1,   0 ],
+                    "IC":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,  1,   1,   1,   1 ],
+                    "DV":   [ 0,  0,   0,  0,   1,   1,   0,   1,   1,  1,  1,  1,   0,   1,   0 ],}
+    
+}
+
+def can_connect(idname1,idname2):
+    id1 = SOCKET_CONNECTIONS["SHORT"][idname1]
+    id2 = SOCKET_CONNECTIONS["SHORT"][idname2]
+    col = SOCKET_CONNECTIONS["VALUES"]["COLUMNS"].index(id2)
+    return bool(SOCKET_CONNECTIONS["VALUES"][id1][col])
+
+
+
 class ScriptingSocket:
     
     def update_var_name(self,context):
@@ -41,7 +94,6 @@ class ScriptingSocket:
             self.display_shape = self.socket_shape.replace("_DOT","")
         self.node.update_needs_compile(context)
     
-    connects_to = []
     socket_shape = "CIRCLE"
     sn_type = ""
     removable: bpy.props.BoolProperty(default=False)

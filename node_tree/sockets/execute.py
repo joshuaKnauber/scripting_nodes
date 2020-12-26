@@ -7,7 +7,6 @@ from ...compiler.compiler import process_node
 class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Execute"
     sn_type = "EXECUTE"
-    connects_to = ["SN_ExecuteSocket", "SN_DynamicExecuteSocket"]
     socket_shape = "DIAMOND"
     output_limit = 1
 
@@ -32,5 +31,4 @@ class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 class SN_DynamicExecuteSocket(bpy.types.NodeSocket, DynamicSocket):
     socket_shape = "DIAMOND"
-    connects_to = ["SN_ExecuteSocket"]
     add_idname = "SN_ExecuteSocket"

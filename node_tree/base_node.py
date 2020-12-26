@@ -1,6 +1,6 @@
 import bpy
 import re
-from .sockets.base_sockets import add_to_remove_links
+from .sockets.base_sockets import add_to_remove_links, can_connect
 from ..compiler.compiler import combine_blocks
 from uuid import uuid4
 
@@ -149,7 +149,7 @@ class SN_ScriptingBaseNode:
         self.update_needs_compile(bpy.context)
         to_idname = link.to_socket.bl_idname
         from_idname = link.from_socket.bl_idname
-        if from_idname in link.to_socket.connects_to and to_idname in link.from_socket.connects_to:
+        if can_connect(from_idname,to_idname):
             if self == link.to_node:
                 link.to_socket.update_socket(self,link)
             else:

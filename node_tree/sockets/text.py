@@ -7,8 +7,6 @@ from ...compiler.compiler import process_node
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
     sn_type = "STRING"
-    connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket","SN_FloatSocket", "SN_IntegerSocket",
-                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DataSocket","SN_DynamicStringSocket","SN_NumberSocket"]
     
     default_value: bpy.props.StringProperty(default="",
                                             update=ScriptingSocket.socket_value_update,
@@ -44,15 +42,12 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 
 class SN_DynamicStringSocket(bpy.types.NodeSocket, DynamicSocket):
-    connects_to = ["SN_StringSocket", "SN_DataSocket","SN_BooleanSocket","SN_FloatSocket","SN_IntegerSocket",
-                   "SN_VariableSocket","SN_NumberSocket"]
     add_idname = "SN_StringSocket"
     
     
 class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Icon"
     sn_type = "STRING"
-    connects_to = ["SN_IconSocket"]
     
     allow_value: bpy.props.BoolProperty(default=True)
     

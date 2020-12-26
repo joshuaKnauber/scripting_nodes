@@ -7,8 +7,6 @@ from ...compiler.compiler import process_node
 class SN_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Data"
     sn_type = "DATA"
-    connects_to = ["SN_StringSocket","SN_DataSocket","SN_BooleanSocket","SN_FloatSocket", "SN_IntegerSocket",
-                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DynamicDataSocket","SN_DynamicStringSocket","SN_NumberSocket"]
     
     default_value: bpy.props.StringProperty(default="",
                                             update=ScriptingSocket.socket_value_update,
@@ -38,5 +36,4 @@ class SN_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 
 class SN_DynamicDataSocket(bpy.types.NodeSocket, DynamicSocket):
-    connects_to = ["SN_StringSocket", "SN_DataSocket","SN_BooleanSocket","SN_FloatSocket","SN_IntegerSocket",
-                   "SN_VariableSocket","SN_NumberSocket"]
+    pass

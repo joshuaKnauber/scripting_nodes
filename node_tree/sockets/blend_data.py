@@ -8,7 +8,6 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Blend Data"
     sn_type = "BLEND_DATA"
     socket_shape = "SQUARE"
-    connects_to = ["SN_VariableSocket","SN_DynamicVariableSocket","SN_BlendDataSocket"]
     
     data_type: bpy.props.StringProperty(default="",
                                         update=ScriptingSocket.socket_value_update,

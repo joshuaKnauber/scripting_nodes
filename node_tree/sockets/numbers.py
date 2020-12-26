@@ -7,8 +7,6 @@ from ...compiler.compiler import process_node
 class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Float"
     sn_type = "NUMBER"
-    connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket", "SN_FloatSocket", "SN_IntegerSocket",
-                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DataSocket","SN_DynamicStringSocket","SN_NumberSocket"]
     
     slider: bpy.props.BoolProperty(default=False)
     
@@ -57,8 +55,6 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
 class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Integer"
     sn_type = "NUMBER"
-    connects_to = ["SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket", "SN_FloatSocket", "SN_IntegerSocket",
-                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DataSocket","SN_DynamicStringSocket", "SN_NumberSocket"]
 
     slider: bpy.props.BoolProperty(default=False)
 
@@ -107,8 +103,6 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
 class SN_NumberSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Number"
     sn_type = "NUMBER"
-    connects_to = ["SN_NumberSocket", "SN_StringSocket","SN_DynamicDataSocket","SN_BooleanSocket", "SN_FloatSocket", "SN_IntegerSocket",
-                   "SN_VariableSocket","SN_DynamicVariableSocket","SN_DataSocket","SN_DynamicStringSocket"]
 
     slider: bpy.props.BoolProperty(default=False)
 
