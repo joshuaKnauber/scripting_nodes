@@ -43,7 +43,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
     
     
-    def add_prop_output(self,path):
+    def add_prop_output(self,path):#bpy.data.screens["Layout"].dopesheet.filter_text
         try:
             if "[" in path[-1] and "]" in path[-1]:
                 path[-1] = path[-1].split("[")[0]
@@ -54,7 +54,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             if eval(prop_path+".bl_rna.properties['"+prop_name+"'].type") in self.output_types:
                 idname = self.output_types[eval(prop_path+".bl_rna.properties['"+prop_name+"'].type")]
             self.add_output(idname,eval(prop_path+".bl_rna.properties['"+prop_name+"'].name"),False)
-        except:
+        except ValueError:
             self.reset_node()
     
     
@@ -67,11 +67,14 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     path_combined += "."+part if path_combined else part
                     if "[" and "]" in part and not index == len(path)-1:
                         name = eval(path_combined+".bl_rna.name")
-                        if not eval(path_combined+".bl_rna.base.name") in [name, "ID"]:
-                            name += f" ({eval(path_combined+'.bl_rna.base.name')})"
-                        self.add_blend_data_input(name)
+                        if part.split("[")[-1].split("]")[0].isnumeric():
+                            self.add_integer_input("Index - "+name)
+                        else:
+                            if not eval(path_combined+".bl_rna.base.name") in [name, "ID"]:
+                                name += f" ({eval(path_combined+'.bl_rna.base.name')})"
+                            self.add_blend_data_input(name)
                 self.add_prop_output(path)
-            except:
+            except ValueError:
                 self.reset_node()
     
     
