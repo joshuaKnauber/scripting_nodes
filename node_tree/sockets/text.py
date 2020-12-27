@@ -12,20 +12,12 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             update=ScriptingSocket.socket_value_update,
                                             name="Value",
                                             description="Value of this socket")
-    
-    def default(self, value):
+     
+    def set_default(self, value):
         self.default_value = value
-
-    def get_value(self, indents=0):
-        if self.is_output:
-            return process_node(self.node, self)
-        else:
-            if self.is_linked:
-                if self.links[0].from_socket.sn_type in ["STRING", "VARIABLE"]:
-                    return self.links[0].from_socket.value
-                else:
-                    return "str(" + self.links[0].from_socket.value + ")"
-            return " "*indents*4 + "\""+self.default_value+"\""
+        
+    def get_return_value(self):
+        return f"\"{self.default_value}\""
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:

@@ -20,9 +20,9 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_output("Row",True)
         self.add_dynamic_interface_output("Row")
 
-        self.add_boolean_input("Align").default(False)
+        self.add_boolean_input("Align").set_default(False)
         self.add_boolean_input("Enabled")
-        self.add_boolean_input("Alert").default(False)
+        self.add_boolean_input("Alert").set_default(False)
         self.add_float_input("Scale X")
         self.add_float_input("Scale Y")
 

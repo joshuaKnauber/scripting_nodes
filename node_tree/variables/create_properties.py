@@ -52,8 +52,10 @@ class SN_OT_AddPropertyGetter(bpy.types.Operator):
     def execute(self, context):
         addon_tree = context.scene.sn.addon_tree()
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
+        prop = addon_tree.sn_properties[addon_tree.sn_property_index]
 
-        node = graph_tree.nodes.new("SN_TestNode")
+        node = graph_tree.nodes.new("SN_GetPropertyNode")
+        # node.
         return {"FINISHED"}
     
     

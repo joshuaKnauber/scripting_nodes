@@ -7,18 +7,39 @@ from ...compiler.compiler import process_node
 class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Float"
     sn_type = "NUMBER"
-    
-    slider: bpy.props.BoolProperty(default=False)
-    
+        
     default_value: bpy.props.FloatProperty(default=0,
                                             update=ScriptingSocket.socket_value_update,
                                             name="Value",
                                             description="Value of this socket")
     
-    def default(self, value):
+    array_three_value: bpy.props.FloatVectorProperty(default=(0,0,0),
+                                                     size=3,
+                                                     update=ScriptingSocket.socket_value_update,
+                                                     name="Value",
+                                                     description="Value of this socket")
+    
+    array_four_value: bpy.props.FloatVectorProperty(default=(0,0,0,0),
+                                                     size=4,
+                                                     update=ScriptingSocket.socket_value_update,
+                                                     name="Value",
+                                                     description="Value of this socket")
+    
+    def set_default(self, value):
         self.default_value = value
-
-    def get_value(self, indents=0):
+        self.array_three_value = (value,value,value)
+        self.array_four_value = (value,value,value,value)
+        
+    def return_value(self):
+        if self.is_array:
+            if self.array_size == 3:
+                value = self.array_three_value
+                return str((value[0],value[1],value[2]))
+            value = self.array_four_value
+            return str((value[0],value[1],value[2],value[3]))
+        return str(self.default_value)
+                
+    def get_value(self, indents=0):       
         if self.is_output:
             return process_node(self.node, self)
         else:
@@ -36,13 +57,20 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
                     if value.isnumeric():
                         return "float(" + value + ")"
                     return "float(bool(" + value + "))"
-            return " "*indents*4 + str(self.default_value)
+            return " "*indents*4 + self.return_value()
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:
             row.label(text=text)
         else:
-            row.prop(self, "default_value", text=text, slider=self.slider)
+            if self.is_array:
+                col = row.column()
+                if self.array_size == 3:
+                    col.prop(self, "array_three_value", text=text)
+                else:
+                    col.prop(self, "array_four_value", text=text)
+            else:
+                row.prop(self, "default_value", text=text)
 
     def draw_color(self, context, node):
         c = (0.3, 0.7, 1)
@@ -63,7 +91,7 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             name="Value",
                                             description="Value of this socket")
 
-    def default(self, value):
+    def set_default(self, value):
         self.default_value = value
 
     def get_value(self, indents=0):

@@ -13,7 +13,7 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             name="Value",
                                             description="Value of this socket")
     
-    def default(self, value):
+    def set_default(self, value):
         self.default_value = value
 
     def get_value(self, indents=0):

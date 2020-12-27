@@ -18,10 +18,14 @@ class SN_FloatNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_float_output("Float").copy_name = True
+        self.add_float_input("Float").is_array = True
 
 
     def draw_node(self,context,layout):
         layout.prop(self, "value", text="")
+        layout.prop(self.outputs[0],"is_array")
+        if self.outputs[0].is_array:
+            layout.prop(self.outputs[0],"array_size")
 
 
     def code_evaluate(self, context, touched_socket):

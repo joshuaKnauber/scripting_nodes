@@ -10,13 +10,13 @@ class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
     socket_shape = "DIAMOND"
     output_limit = 1
 
-    def get_value(self, indents=0):
-        if self.is_linked:
-            if self.is_output:
-                return self.links[0].to_socket.get_value(indents)
-            else:
-                return process_node(self.node, self, indents)
-        return "pass\n"
+    # def get_value(self, indents=0):
+    #     if self.is_linked:
+    #         if self.is_output:
+    #             return self.links[0].to_socket.get_value(indents)
+    #         else:
+    #             return process_node(self.node, self, indents)
+    #     return "pass\n"
     
     def draw_socket(self, context, layout, row, node, text):
         row.label(text=text)

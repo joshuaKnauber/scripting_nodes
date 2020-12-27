@@ -244,6 +244,22 @@ class SN_ScriptingBaseNode:
     def add_dynamic_interface_input(self,label): return self.add_input("SN_DynamicInterfaceSocket",label,False)
     def add_dynamic_interface_output(self,label): return self.add_output("SN_DynamicInterfaceSocket",label,False)
     
+    prop_types = {
+        "STRING": "SN_StringSocket",
+        "BOOLEAN": "SN_BooleanSocket",
+        "FLOAT": "SN_FloatSocket",
+        "INT": "SN_IntegerSocket",
+        "ENUM": "SN_StringSocket"
+    }
+    
+    def add_input_from_type(self,prop_type,label):
+        if prop_type in self.prop_types:
+            self.add_input(self.prop_types[prop_type],label,False)
+    
+    def add_output_from_type(self,prop_type,label):
+        if prop_type in self.prop_types:
+            self.add_output(self.prop_types[prop_type],label,False)
+    
     
     def add_input(self,idname,label,removable):
         self.update_needs_compile(bpy.context)

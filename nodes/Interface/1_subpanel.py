@@ -150,7 +150,7 @@ class SN_SubpanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_dynamic_interface_output("Panel")
         self.add_dynamic_interface_output("Header")
 
-        self.add_boolean_input("Poll").default(True)
+        self.add_boolean_input("Poll").set_default(True)
 
 
     def draw_node(self,context,layout):

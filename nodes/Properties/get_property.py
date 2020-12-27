@@ -34,15 +34,6 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
     
     
-    output_types = {
-        "STRING": "SN_StringSocket",
-        "BOOLEAN": "SN_BooleanSocket",
-        "FLOAT": "SN_FloatSocket",
-        "INT": "SN_IntegerSocket",
-        "ENUM": "SN_StringSocket"
-    }
-    
-    
     def add_prop_output(self,path):
         try:
             if "[" in path[-1] and "]" in path[-1]:
@@ -50,10 +41,9 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             prop_path = ".".join(path)
             prop_name = prop_path.split(".")[-1]
             prop_path = (".").join(prop_path.split(".")[:-1])
-            idname = "SN_DataSocket"
-            if eval(prop_path+".bl_rna.properties['"+prop_name+"'].type") in self.output_types:
-                idname = self.output_types[eval(prop_path+".bl_rna.properties['"+prop_name+"'].type")]
-            self.add_output(idname,eval(prop_path+".bl_rna.properties['"+prop_name+"'].name"),False)
+            prop_type = eval(prop_path+".bl_rna.properties['"+prop_name+"'].type")
+            prop_name = eval(prop_path+".bl_rna.properties['"+prop_name+"'].name")
+            self.add_output_from_type(prop_type,prop_name)
         except ValueError:
             self.reset_node()
     
