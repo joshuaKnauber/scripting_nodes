@@ -20,7 +20,7 @@ class SN_SplitNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_output("First Part")
         self.add_interface_output("Second Part")
 
-        self.add_float_input("Factor")
+        self.add_float_input("Factor").use_factor = True
         self.add_boolean_input("Align").set_default(False)
         self.add_boolean_input("Enabled")
         self.add_boolean_input("Alert").set_default(False)
