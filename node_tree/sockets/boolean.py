@@ -8,18 +8,18 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Boolean"
     sn_type = "BOOLEAN"
     
-    default_value: bpy.props.BoolProperty(default=False,
+    default_value: bpy.props.BoolProperty(default=True,
                                             update=ScriptingSocket.socket_value_update,
                                             name="Value",
                                             description="Value of this socket")
     
-    array_three_value: bpy.props.BoolVectorProperty(default=(False,False,False),
+    array_three_value: bpy.props.BoolVectorProperty(default=(True,True,True),
                                                      size=3,
                                                      update=ScriptingSocket.socket_value_update,
                                                      name="Value",
                                                      description="Value of this socket")
     
-    array_four_value: bpy.props.BoolVectorProperty(default=(False,False,False,False),
+    array_four_value: bpy.props.BoolVectorProperty(default=(True,True,True,True),
                                                      size=4,
                                                      update=ScriptingSocket.socket_value_update,
                                                      name="Value",
@@ -70,7 +70,8 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
             if not self.is_array:
                 value = str(real_value[0])
         else:
-            value = str(bool(value))
+            if not value in ["True","False"]:
+                value = str(bool(value))
         return value
 
     def draw_socket(self, context, layout, row, node, text):
