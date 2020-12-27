@@ -39,18 +39,20 @@ class SN_BoolVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self,context,layout):
         layout.prop(self, "use_four")
 
-        col = layout.column()
+        col = layout.column(align = True)
         if self.use_four:
-            col.prop(self, "value_four", text="", toggle=True)
+            for i in range(4):
+                col.prop(self, "value_four", toggle=True, text=str(self.value_four[i]), index=i)
         else:
-            col.prop(self, "value", text="", toggle=True)
+            for i in range(3):
+                col.prop(self, "value", toggle=True, text=str(self.value[i]), index=i)
 
 
     def code_evaluate(self, context, touched_socket):
 
         value = str((self.value[0],self.value[1],self.value[2]))
         if self.use_four:
-            value = str((self.value_four[0],self.value_four[1],self.value_four[2],self.value_four[3]))
+            value = str((self.value_four[0][0],self.value_four[1],self.value_four[2],self.value_four[3]))
 
         return {
             "code": f"{value}"

@@ -203,10 +203,14 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
                 if not var.is_vector:
                     col.prop(var,"bool_default",toggle=True)
                 elif var.vector_size == 3:
-                    col.prop(var,"bool_three_default",toggle=True)
+                    column = col.column(align=True)
+                    for i in range(3):
+                        column.prop(var,"bool_three_default",toggle=True,text=str(var.bool_three_default[i]),index=i)
                 elif var.vector_size == 4:
-                    col.prop(var,"bool_four_default",toggle=True)
-                    
+                    column = col.column(align=True)
+                    for i in range(4):
+                        column.prop(var,"bool_four_default",toggle=True,text=str(var.bool_four_default[i]),index=i)
+
             elif var.var_type == "ENUM":
                 for index, item in enumerate(var.enum_items):
                     box = col.box()
