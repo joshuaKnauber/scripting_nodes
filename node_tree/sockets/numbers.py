@@ -24,6 +24,8 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
                                                      update=ScriptingSocket.socket_value_update,
                                                      name="Value",
                                                      description="Value of this socket")
+    is_array: bpy.props.BoolProperty(default=False)
+    array_size: bpy.props.IntProperty(default=3,min=3,max=4)
     
     def set_default(self, value):
         self.default_value = value

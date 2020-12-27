@@ -91,12 +91,6 @@ class ScriptingSocket:
     addable: bpy.props.BoolProperty(default=False)
     
     
-    ### ARRAYS
-    
-    is_array: bpy.props.BoolProperty(default=False)
-    array_size: bpy.props.IntProperty(default=3,min=3,max=4)
-    
-    
     ### SETUP SOCKET
         
     def setup(self): pass

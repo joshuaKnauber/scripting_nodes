@@ -3,10 +3,10 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
 
-class SN_InverseBooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_InvertBooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_InverseBooleanNode"
-    bl_label = "Inverse Boolean"
+    bl_idname = "SN_InvertBooleanNode"
+    bl_label = "Invert Boolean"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 
@@ -17,7 +17,7 @@ class SN_InverseBooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_boolean_input("Boolean")
-        self.add_boolean_output("Inversed Boolean")
+        self.add_boolean_output("Inverted Boolean")
 
 
     def code_evaluate(self, context, touched_socket):

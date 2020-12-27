@@ -3,10 +3,10 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
 
-class SN_CombineTextNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_CombineStringsNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_CombineTextNode"
-    bl_label = "Combine Text"
+    bl_idname = "SN_CombineStringsNode"
+    bl_label = "Combine Strings"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 
