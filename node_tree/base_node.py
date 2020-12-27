@@ -252,13 +252,19 @@ class SN_ScriptingBaseNode:
         "ENUM": "SN_StringSocket"
     }
     
-    def add_input_from_type(self,prop_type,label):
+    def add_input_from_type(self,prop_type,label,array_size=0):
         if prop_type in self.prop_types:
-            self.add_input(self.prop_types[prop_type],label,False)
+            inp = self.add_input(self.prop_types[prop_type],label,False)
+            if array_size:
+                inp.is_array = True
+                inp.array_size = array_size
     
-    def add_output_from_type(self,prop_type,label):
+    def add_output_from_type(self,prop_type,label,array_size=0):
         if prop_type in self.prop_types:
-            self.add_output(self.prop_types[prop_type],label,False)
+            out = self.add_output(self.prop_types[prop_type],label,False)
+            if array_size:
+                out.is_array = True
+                out.array_size = array_size
     
     
     def add_input(self,idname,label,removable):

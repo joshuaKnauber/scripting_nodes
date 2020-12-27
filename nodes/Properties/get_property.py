@@ -42,8 +42,11 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             prop_name = prop_path.split(".")[-1]
             prop_path = (".").join(prop_path.split(".")[:-1])
             prop_type = eval(prop_path+".bl_rna.properties['"+prop_name+"'].type")
+            prop_array_size = 0
+            if eval(prop_path+".bl_rna.properties['"+prop_name+"'].is_array"):
+                prop_array_size = eval(prop_path+".bl_rna.properties['"+prop_name+"'].array_length")
             prop_name = eval(prop_path+".bl_rna.properties['"+prop_name+"'].name")
-            self.add_output_from_type(prop_type,prop_name)
+            self.add_output_from_type(prop_type,prop_name,prop_array_size)
         except ValueError:
             self.reset_node()
     

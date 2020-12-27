@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_ReturnNode"
-    bl_label = "Return"
+    bl_label = "Function Return"
     # bl_icon = "GRAPH"
     bl_width_default = 180
 
