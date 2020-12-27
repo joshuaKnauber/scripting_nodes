@@ -81,7 +81,6 @@ class ScriptingSocket:
 
     sn_type = ""
     output_limit = 9999
-    dynamic_overwrite = ""
 
 
     ### SOCKET APPEARANCE
@@ -240,23 +239,27 @@ class ScriptingSocket:
         # handle variable sockets
         if self.is_variable:
             return self.node.get_python_name(self.var_name,"parameter")
-        
+                
         # handle program sockets
         if self.sn_type in ["EXECUTE","INTERFACE"]:
             if self.is_output:
-                if self.is_linked:
+                if len(self.links):
                     return self.links[0].to_socket.make_code(indents)
                 else:
                     return "pass\n"
             else:
                 return process_node(self.node, self, indents)
         
+        # handle dynamic sockets
+        if self.sn_type == "DYNAMIC":
+            return ""
+        
         # handle any data socket
         if self.is_output:
             return process_node(self.node, self, indents)
             
         else:
-            if self.is_linked:
+            if len(self.links):
                 value = self.links[0].from_socket.make_code(indents=indents)
                 if self.links[0].from_socket.is_variable:
                     return value
@@ -297,9 +300,11 @@ class ScriptingSocket:
             
 class DynamicSocket(ScriptingSocket):
     bl_label = "Dynamic"
+    sn_type = "DYNAMIC"
     make_variable = False
     addable: bpy.props.BoolProperty(default=True)
     add_idname = ""
+    copy_type = False
     
     def get_socket_index(self,collection):
         for i, socket in enumerate(collection):
@@ -310,7 +315,10 @@ class DynamicSocket(ScriptingSocket):
     def update_input(self,node,link):
         from_socket = link.from_socket
         pos = self.get_socket_index(node.inputs)
-        inp = node.add_input(from_socket.bl_idname,self.default_text,True)
+        if self.copy_type:
+            inp = node.add_input(from_socket.bl_idname,self.default_text,True)
+        else:
+            inp = node.add_input(self.add_idname,self.default_text,True)
         inp.is_variable = self.make_variable
         inp.var_name = link.from_socket.default_text
         inp.copy_name = self.copy_name
@@ -323,7 +331,10 @@ class DynamicSocket(ScriptingSocket):
     def update_output(self,node,link):
         to_socket = link.to_socket
         pos = self.get_socket_index(node.outputs)
-        out = node.add_output(to_socket.bl_idname,self.default_text,True)
+        if self.copy_type:
+            out = node.add_output(to_socket.bl_idname,self.default_text,True)
+        else:
+            out = node.add_output(self.add_idname,self.default_text,True)
         out.is_variable = self.make_variable
         out.var_name = link.to_socket.default_text
         out.copy_name = self.copy_name

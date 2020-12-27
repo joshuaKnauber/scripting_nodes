@@ -14,7 +14,7 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
 
-    value: bpy.props.BoolProperty(name="Boolean Value")
+    value: bpy.props.BoolProperty(name="Value")
 
     def on_create(self,context):
         self.add_boolean_output("Boolean").copy_name = True

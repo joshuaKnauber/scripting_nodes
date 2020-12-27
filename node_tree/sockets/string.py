@@ -7,28 +7,37 @@ from ...compiler.compiler import process_node
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
     sn_type = "STRING"
-    
+
     def make_absolute(self,context):
-        self.node.socket_value_update(context)
         if self.file_path and not self.file_path == bpy.path.abspath(self.file_path):
             self.file_path = bpy.path.abspath(self.file_path)
         if self.dir_path and not self.dir_path == bpy.path.abspath(self.dir_path):
             self.dir_path = bpy.path.abspath(self.dir_path)
     
+    def update_all(self,context):
+        self.node.socket_value_update(context)
+        self.make_absolute(context)
+        if '"' in self.default_value:
+            self.default_value = self.default_value.replace('"',"'")
+        if '"' in self.file_path:
+            self.file_path = self.file_path.replace('"',"'")
+        if '"' in self.dir_path:
+            self.dir_path = self.dir_path.replace('"',"'")
+    
     default_value: bpy.props.StringProperty(default="",
-                                            update=ScriptingSocket.socket_value_update,
+                                            update=update_all,
                                             name="Value",
                                             description="Value of this socket")
     
     file_path: bpy.props.StringProperty(default="",
                                         subtype="FILE_PATH",
-                                        update=make_absolute,
+                                        update=update_all,
                                         name="Value",
                                         description="Value of this socket")
     
     dir_path: bpy.props.StringProperty(default="",
                                         subtype="DIR_PATH",
-                                        update=make_absolute,
+                                        update=update_all,
                                         name="Value",
                                         description="Value of this socket")
     
@@ -42,13 +51,15 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         
     def get_return_value(self):
         if self.is_file_path:
-            return f"\"{self.file_path}\""
+            return self.file_path
         elif self.is_dir_path:
-            return f"\"{self.dir_path}\""
-        return f"\"{self.default_value}\""
+            return self.dir_path
+        return self.default_value
     
     def process_value(self,value):
-        return value
+        if value and value[0] == '"' and value[-1] == '"':
+            value = value[1:-1]
+        return f"\"{value}\""
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:

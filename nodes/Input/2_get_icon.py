@@ -66,9 +66,9 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_source(self,context):
         SN_ScriptingBaseNode().update_needs_compile()
         if self.icon_source == "BLENDER":
-            self.outputs[0].is_icon_value = False
-        else:
-            self.outputs[0].is_icon_value = True
+            self.outputs[0].is_variable = False
+        elif self.custom_icon != "" and self.custom_icon in self.addon_tree.sn_icons:
+            self.outputs[0].is_variable = True
     
     icon_source: bpy.props.EnumProperty(name="Icon Source",
                                         update=update_source,
@@ -78,7 +78,7 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     
     icon: bpy.props.StringProperty(default="ERROR",update=SN_ScriptingBaseNode.update_needs_compile)
-    custom_icon: bpy.props.StringProperty(default="",update=SN_ScriptingBaseNode.update_needs_compile)
+    custom_icon: bpy.props.StringProperty(default="",update=update_source)
 
 
     def on_create(self,context):

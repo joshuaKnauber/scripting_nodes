@@ -9,32 +9,20 @@ class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
     sn_type = "ICON"
     socket_shape = "SQUARE"
     
-    allow_value: bpy.props.BoolProperty(default=True)
-    is_icon_value: bpy.props.BoolProperty(default=False)
-    
-    def get_value(self, indents=0):
-        if self.is_linked:
-            if self.is_output:
-                return process_node(self.node, self)
-            else:
-                value = self.links[0].from_socket.value
-                if hasattr(self.links[0].from_socket,"is_icon_value"):
-                    if self.links[0].from_socket.is_icon_value and not self.allow_value:
-                        return "\"ERROR\""
-                return value
+    def get_return_value(self):
         return ""
     
+    
     def icon_line(self):
-        value = self.get_value()
-        if value:
-            if not value.isupper():
-                value = f"icon_value={value},"
+        value = ""
+        if self.is_linked and not self.is_output:
+            value = process_node(self.links[0].from_node,self.links[0].from_socket,0)
+            if '"' in value:
+                value = f"icon={value},"
             else:
-                if "'" in value or "\"" in value:
-                    value = f"icon={value},"
-                else:
-                    value = f"icon='{value}',"
+                value = f"icon_value={value},"
         return value
+            
 
     def draw_socket(self, context, layout, row, node, text):
         row.label(text=text)
