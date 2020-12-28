@@ -16,17 +16,25 @@ class SN_OT_CopyProperty(bpy.types.Operator):
     
     def process_data_part(self,part,path_progress):
         part_details = {"is_numeric":False}
+
+        suffix = "(" + eval(path_progress + ".bl_rna.base.name") + ")"
+        if suffix == "(ID)":
+            suffix = ""
         
         if part.split("[")[-1].split("]")[0].isnumeric():
+            suffix = ""
             part_details["is_numeric"] = True
             part_details["index"] = int(part.split("[")[-1].split("]")[0])
-        part_details["name"] = eval(path_progress + ".bl_rna.name")
+
+        part_details["name"] = eval(path_progress + ".bl_rna.name") + suffix
         return part_details
 
     def process_part(self,part,index,path_progress):
         if not ("[" in part and "]" in part):
             return part
-        else:
+        elif "areas[" in part:
+            return {"is_numeric":False,"name":"Area"}
+        elif not "spaces[0]" in part:
             if index == len(self.path.split("."))-1:
                 return part.split("[")[0]
             else:
@@ -39,8 +47,21 @@ class SN_OT_CopyProperty(bpy.types.Operator):
             path_progress = part if not path_progress else path_progress + "." + part
             parts.append(self.process_part(part,index,path_progress))
         return parts
+    
+    def area_index(self):
+        for index, a in enumerate(bpy.context.screen.areas):
+            if a == bpy.context.area:
+                return index
+        return 0
+    
+    def handle_screen_props(self):
+        if "bpy.data.screens[" in self.path:
+            new_path = ".".join(self.path.split(".")[3:])
+            new_path = f"bpy.context.screen.areas[{self.area_index()}].spaces[0]."
+            self.path = new_path
 
     def execute(self, context):
+        self.handle_screen_props()
         path_details = {
             "path": self.path,
             "prop_name": self.prop_name,

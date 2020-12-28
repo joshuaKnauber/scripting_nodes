@@ -47,7 +47,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         for part in path_details["path_parts"]:
             if type(part) == dict:
                 if part["is_numeric"]:
-                    self.add_integer_input(part["name"]).default(part["index"])
+                    self.add_integer_input(part["name"] + " Index").set_default(part["index"])
                 else:
                     self.add_blend_data_input(part["name"])
         self.add_output_from_type(path_details["prop_type"],path_details["prop_name"],path_details["prop_array_length"])
