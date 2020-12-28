@@ -180,6 +180,7 @@ class ScriptingSocket:
 
 
     is_variable: bpy.props.BoolProperty(default=False, update=update_is_variable)
+    editable_var_name: bpy.props.BoolProperty(default=True)
     var_name: bpy.props.StringProperty(default="", update=update_var_name)
     
     
@@ -218,8 +219,10 @@ class ScriptingSocket:
             self.draw_remove_socket(row)
         elif self.addable and not self.is_output:
             self.draw_add_socket(row)
-        if self.is_variable:
+        if self.is_variable and self.editable_var_name:
             row.prop(self,"var_name",text="")
+        elif self.is_variable:
+            row.label(text=self.var_name)
         else:
             self.draw_socket(context,layout,row,node,self.get_text(text))
         if self.removable and self.is_output:

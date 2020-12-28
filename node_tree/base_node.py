@@ -47,14 +47,14 @@ class SN_ScriptingBaseNode:
         
         
     ### UPDATE FROM NODE PER TYPE
-    def on_outside_update(self,node,parameter=""): pass
+    def on_outside_update(self,node): pass
     
     
-    def update_nodes_by_type(self, idname, parameter=""):
+    def update_nodes_by_type(self, idname):
         for graph in self.addon_tree.sn_graphs:
             for node in graph.node_tree.nodes:
                 if node.bl_idname == idname:
-                    node.on_outside_update(self, parameter)
+                    node.on_outside_update(self)
         
         
     ### PROPERTY GROUP

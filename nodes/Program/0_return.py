@@ -12,38 +12,37 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     node_options = {
         "default_color": (0.3,0.3,0.3),
+        "has_collection": True
     }
 
-    def on_outside_update(self,node,parameter=""):
-        self.update_nodes_by_type("SN_RunFunctionNode")
+    connected_function: bpy.props.StringProperty(default="")
 
-    connected_function: bpy.props.BoolProperty(default=True)
+    def on_outside_update(self, node):
+        self.on_any_change()
+
 
     def on_create(self,context):
         self.add_execute_input("Return")
         self.add_dynamic_variable_input("Content")
 
-    def on_free(self):
-        self.inputs.remove(self.inputs[0])
-        self.update_nodes_by_type("SN_RunFunctionNode", "ON_FREE")
 
-    def on_node_update(self):
-        if len(self.inputs[0].links):
-            if self.what_start_idname() == "SN_FunctionNode":
-                self.connected_function = True
-            else:
-                self.connected_function = False
-        else:
-            self.connected_function = True
-        self.update_nodes_by_type("SN_RunFunctionNode")
-    
     def on_any_change(self):
+        if len(self.inputs):
+            if len(self.inputs[0].links):
+                if self.what_start_idname() == "SN_FunctionNode":
+                    self.connected_function = self.what_start_node().func_name
+                else:
+                    self.connected_function = ""
+            else:
+                self.connected_function = "None"
         self.update_nodes_by_type("SN_RunFunctionNode")
 
 
     def draw_node(self, context, layout):
         if not self.connected_function:
             layout.label(text="Please connect to a function")
+        elif self.connected_function != "None":
+            layout.label(text="Function: " + self.connected_function)
 
 
     def code_evaluate(self, context, touched_socket):

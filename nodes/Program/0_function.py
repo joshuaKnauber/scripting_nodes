@@ -29,6 +29,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         self.item.name = self.func_name
         self.item.identifier = self.get_python_name(self.func_name, "new_function")
+        self.update_nodes_by_type("SN_ReturnNode")
         self.update_needs_compile(context)
 
 
