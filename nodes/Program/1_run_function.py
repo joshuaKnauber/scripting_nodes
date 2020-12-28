@@ -14,10 +14,83 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.2,0.2,0.2),
     }
 
+    def update_return(self, context):
+        if not self.search_value:
+            for i, out in enumerate(self.outputs):
+                if i:
+                    try: self.outputs.remove(out)
+                    except: pass
+
+        if self.search_value in self.return_collection:
+            for graph in self.addon_tree.sn_graphs:
+                for node in graph.node_tree.nodes:
+                    if node.bl_idname == "SN_ReturnNode":
+                        if node.uid == self.return_collection[self.search_value].node_uid:
+                            if len(self.outputs) != len(node.inputs)-1:
+                                for i, out in enumerate(self.outputs):
+                                    if i:
+                                        try: self.outputs.remove(out)
+                                        except: pass
+                                self.make_collection("NAME_CHANGE")
+
+
+    def make_collection(self, parameter=""):
+        self.return_collection.clear()
+        for graph in self.addon_tree.sn_graphs:
+            for node in graph.node_tree.nodes:
+                if node.bl_idname == "SN_ReturnNode":
+                    if node.connected_function == self.func_name:
+                        item = self.return_collection.add()
+                        item.name = node.name
+                        item.node_uid = node.uid
+        
+        if self.search_value in self.return_collection:
+            for graph in self.addon_tree.sn_graphs:
+                for node in graph.node_tree.nodes:
+                    if node.bl_idname == "SN_ReturnNode":
+                        if node.uid == self.return_collection[self.search_value].node_uid:
+                            parameters = []
+                            for inp in node.inputs[1:]:
+                                if inp.bl_idname != "SN_DynamicVariableSocket":
+                                    parameters.append([inp.var_name, inp.bl_idname])
+
+                            if len(parameters) != len(self.outputs[1:]):
+                                if len(parameters) > len(self.outputs[1:]):
+                                    output_len = len(self.outputs)-1
+                                    for x, parameter in enumerate(parameters):
+                                        if x >= output_len:
+                                            out = self.add_output(parameter[1],parameter[0],False)
+                                            out.is_variable = True
+                                            out.editable_var_name = False
+                                            out.var_name = parameter[0]
+
+                                else:
+                                    removed = False
+                                    for x, parameter in enumerate(parameters):
+                                        if parameter[0] != self.outputs[x+1].name:
+                                            removed = True
+                                            self.outputs.remove(self.outputs[x+1])
+                                    if not removed:
+                                        self.outputs.remove(self.outputs[-1])
+
+                            for x, parameter in enumerate(parameters):
+                                self.outputs[x+1].name = parameter[0]
+                                self.outputs[x+1].var_name = parameter[0]
+        else:
+            for i, out in enumerate(self.outputs):
+                if i:
+                    try: self.outputs.remove(out)
+                    except: pass
+        if parameter != "NAME_CHANGE":
+            self.update_return(None)
+
+
     recursion_warning: bpy.props.BoolProperty()
     func_uid: bpy.props.StringProperty()
+    search_value: bpy.props.StringProperty(name="Search value", update=update_return)
+    return_collection: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)
 
-    def on_outside_update(self,node,parameter=""):
+    def on_outside_update(self,node):
         if node == self:
             for graph in self.addon_tree.sn_graphs:
                 for graph_node in graph.node_tree.nodes:
@@ -25,71 +98,14 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                         node = graph_node
 
         else:
-            if node.bl_idname == "SN_ReturnNode" and parameter == "ON_FREE":
-                different_node = False
-                for x, inp in enumerate(node.inputs):
-                    if inp.bl_idname != "SN_DynamicVariableSocket":
-                        if inp.var_name != self.outputs[x+1].name:
-                            different_node = True
-                if not different_node:
-                    for i, out in enumerate(self.outputs):
-                        if i:
-                            try: self.outputs.remove(out)
-                            except: pass
-                return
-            elif node.bl_idname == "SN_ReturnNode":
-                if node.what_start_node().bl_idname != "SN_FunctionNode":
-                    different_node = False
-                for x, inp in enumerate(node.inputs):
-                    if not inp.bl_idname in ["SN_DynamicVariableSocket", "SN_ExecuteSocket"]:
-                        if x+1 < len(self.outputs):
-                            if inp.var_name != self.outputs[x+1].name:
-                                different_node = True
-                        else:
-                            different_node = True
-                if not different_node:
-                    for i, out in enumerate(self.outputs):
-                        if i:
-                            try: self.outputs.remove(out)
-                            except: pass
-                return
-            else:
+            if node.bl_idname == "SN_FunctionNode":
                 if self.func_uid == node.uid:
                     self.func_name = node.func_name
                 if not self.func_name in self.addon_tree.sn_nodes["SN_FunctionNode"].items and self.func_name != "":
                     self.func_name = ""
 
 
-        if node.bl_idname == "SN_ReturnNode" and parameter != "ON_FREE":
-            start_node = node.what_start_node()
-            if start_node.bl_idname == "SN_FunctionNode":
-                if start_node.uid == self.func_uid:
-                    return_types = []
-                    for inp in node.inputs[1:]:
-                        if inp.bl_idname != "SN_DynamicVariableSocket":
-                            return_types.append([inp.var_name, inp.bl_idname])
-
-                    if len(return_types) > len(self.outputs[1:]):
-                        output_len = len(self.outputs)-1
-                        for x, return_type in enumerate(return_types):
-                            if x >= output_len:
-                                out = self.add_output(return_type[1],return_type[0],False)
-
-                    elif len(return_types) < len(self.outputs[1:]):
-                        removed = False
-                        for x, return_type in enumerate(return_types):
-                            if return_type[0] != self.outputs[x+1].name:
-                                removed = True
-                                self.outputs.remove(self.outputs[x+1])
-                        if not removed:
-                            self.outputs.remove(self.outputs[-1])
-
-
-                    for x, return_type in enumerate(return_types):
-                        self.outputs[x+1].name = return_type[0]
-
-
-        else:
+        if node.bl_idname == "SN_FunctionNode":
             if node.uid == self.func_uid:
                 parameters = []
                 for out in node.outputs[1:]:
@@ -101,7 +117,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                         input_len = len(self.inputs)-1
                         for x, parameter in enumerate(parameters):
                             if x >= input_len:
-                                self.add_input(parameter[1],parameter[0],False)
+                                inp = self.add_input(parameter[1],parameter[0],False)
+                                inp.is_variable = True
+                                inp.editable_var_name = False
+                                inp.var_name = parameter[0]
 
                     else:
                         removed = False
@@ -115,6 +134,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                 for x, parameter in enumerate(parameters):
                     self.inputs[x+1].name = parameter[0]
+                    self.inputs[x+1].var_name = parameter[0]
+
+        else:
+            self.make_collection()
 
 
     def update_name(self, context):
@@ -126,27 +149,20 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if i:
                         try: self.inputs.remove(inp)
                         except: pass
-                for i, out in enumerate(self.outputs):
-                    if i:
-                        try: self.outputs.remove(out)
-                        except: pass
+                self.make_collection()
                 self.func_uid = item.node_uid
 
             if self.what_start_idname() == "SN_FunctionNode":
                 if self.func_name == self.what_start_node().func_name:
                     self.recursion_warning = True
             self.on_outside_update(self)
-            self.update_nodes_by_type("SN_ReturnNode")
         else:
             self.func_uid = ""
             for i, inp in enumerate(self.inputs):
                 if i:
                     try: self.inputs.remove(inp)
                     except: pass
-            for i, out in enumerate(self.outputs):
-                if i:
-                    try: self.outputs.remove(out)
-                    except: pass
+            self.make_collection()
 
         self.update_needs_compile(context)
 
@@ -163,12 +179,13 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_execute_input("Execute")
         self.add_execute_output("Execute")
 
-
     def draw_node(self,context,layout):
         if self.recursion_warning:
             layout.label(text="Be careful when using recursion!")
 
         layout.prop_search(self, "func_name", self.addon_tree.sn_nodes["SN_FunctionNode"], "items")
+        if len(self.return_collection):
+            layout.prop_search(self, "search_value", self, "return_collection", text="")
 
 
     def code_evaluate(self, context, touched_socket):

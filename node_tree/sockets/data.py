@@ -12,8 +12,7 @@ class SN_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
         return "\"\""
 
     def draw_socket(self, context, layout, row, node, text):
-        if self.is_output or self.is_linked:
-            row.label(text=text)
+        row.label(text=text)
 
     def draw_color(self, context, node):
         c = (0.5,0.5,0.5)
