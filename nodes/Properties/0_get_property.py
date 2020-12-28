@@ -17,7 +17,7 @@ class SN_PastePropertyPath(bpy.types.Operator):
         if "bpy." in clipboard and not ".ops." in clipboard:
             context.space_data.node_tree.nodes[self.node].copied_path = clipboard
         else:
-            self.report({"WARNING"},message="Right-Click any property and click 'Copy Property' to get a correct property")
+            self.report({"WARNING"},message="Right-Click any property and click 'Copy Property' to get a valid property")
         return {"FINISHED"}
 
 
@@ -44,13 +44,16 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         
     def setup_sockets(self,path_details):
+        data_input = None
         for part in path_details["path_parts"]:
             if type(part) == dict:
                 if part["is_numeric"]:
                     self.add_integer_input(part["name"] + " Index").set_default(part["index"])
                 else:
-                    inp = self.add_blend_data_input(part["name"])
-                    inp.data_type = part["data_type"]
+                    data_input = part
+        if data_input:
+            inp = self.add_blend_data_input(data_input["name"])
+            inp.data_type = data_input["data_type"]
         self.add_output_from_type(path_details["prop_type"],path_details["prop_name"],path_details["prop_array_length"])
                          
                 
