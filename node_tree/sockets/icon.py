@@ -28,7 +28,7 @@ class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
         row.label(text=text)
 
     def draw_color(self, context, node):
-        c = (0.3, 1, 0.3)
+        c = (0.78, 0.78, 0.16)
         if self.is_linked:
             return (c[0], c[1], c[2], 1)
         return (c[0], c[1], c[2], 0.5)
