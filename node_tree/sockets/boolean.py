@@ -79,11 +79,13 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
             row.label(text=text)
         else:
             if self.is_array:
-                col = row.column()
+                col = row.column(align=True)
                 if self.array_size == 3:
-                    col.prop(self, "array_three_value", text=text,toggle=True)
+                    for i in range(3):
+                        col.prop(self, "array_three_value", text=str(self.array_three_value[i]),toggle=True, index=i)
                 else:
-                    col.prop(self, "array_four_value", text=text,toggle=True)
+                    for i in range(4):
+                        col.prop(self, "array_four_value", text=str(self.array_four_value[i]),toggle=True, index=i)
             else:
                 row.prop(self, "default_value", text=text)
 
