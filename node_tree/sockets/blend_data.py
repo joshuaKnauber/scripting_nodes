@@ -10,17 +10,10 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
     socket_shape = "SQUARE"
     
     data_type: bpy.props.StringProperty(default="",
-                                        update=ScriptingSocket.socket_value_update,
-                                        name="Path",
-                                        description="Path of this socket")
-
-    def get_value(self, indents=0):
-        if self.is_output:
-            return process_node(self.node, self)
-        else:
-            if self.is_linked:
-                return self.links[0].from_socket.get_value(indents)
-            return " "*indents*4 + "\""+self.default_value+"\""
+                                        update=ScriptingSocket.socket_value_update)
+    
+    data_path: bpy.props.StringProperty(default="",
+                                        update=ScriptingSocket.socket_value_update)
 
     def draw_socket(self, context, layout, row, node, text):
         row.label(text=text)

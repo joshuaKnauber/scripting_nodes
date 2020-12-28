@@ -1,6 +1,5 @@
 import bpy
-import os
-from bpy_extras.io_utils import ImportHelper
+
 
 
 class SN_OT_CreateIcon(bpy.types.Operator):

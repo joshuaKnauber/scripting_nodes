@@ -22,6 +22,7 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         row.template_list("SN_UL_GraphList", "Graphs", addon_tree, "sn_graphs", addon_tree, "sn_graph_index",rows=3)
         col = row.column(align=True)
         col.operator("sn.add_graph", text="", icon="ADD")
+        col.operator("sn.append_graph", text="", icon="APPEND_BLEND")
         col.operator("sn.remove_graph", text="", icon="REMOVE").index = addon_tree.sn_graph_index
 
 
