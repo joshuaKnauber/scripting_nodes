@@ -25,6 +25,9 @@ class SN_OT_CopyProperty(bpy.types.Operator):
             suffix = ""
             part_details["is_numeric"] = True
             part_details["index"] = int(part.split("[")[-1].split("]")[0])
+            
+        else:
+            part_details["data_type"] = "bpy.types." + eval(path_progress + ".bl_rna.name")
 
         part_details["name"] = eval(path_progress + ".bl_rna.name") + suffix
         return part_details
@@ -33,7 +36,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
         if not ("[" in part and "]" in part):
             return part
         elif "areas[" in part:
-            return {"is_numeric":False,"name":"Area"}
+            return {"is_numeric":False,"name":"Area", "data_type": "bpy.types.Area"}
         elif not "spaces[0]" in part:
             if index == len(self.path.split("."))-1:
                 return part.split("[")[0]

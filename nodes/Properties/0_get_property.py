@@ -49,7 +49,8 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if part["is_numeric"]:
                     self.add_integer_input(part["name"] + " Index").set_default(part["index"])
                 else:
-                    self.add_blend_data_input(part["name"])
+                    inp = self.add_blend_data_input(part["name"])
+                    inp.data_type = part["data_type"]
         self.add_output_from_type(path_details["prop_type"],path_details["prop_name"],path_details["prop_array_length"])
                          
                 

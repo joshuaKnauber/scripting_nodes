@@ -212,8 +212,6 @@ class ScriptingSocket:
         row = layout.row(align=True)
         if self.is_output:
             row.alignment = "RIGHT"
-        else:
-            row.alignment = "LEFT"
         if self.removable and not self.is_output:
             self.draw_remove_socket(row)
         elif self.addable and not self.is_output:
