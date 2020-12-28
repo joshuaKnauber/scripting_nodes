@@ -41,13 +41,23 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             return path_details
         except:
             return None
+        
+        
+    def setup_sockets(self,path_details):
+        for part in path_details["path_parts"]:
+            if type(part) == dict:
+                if part["is_numeric"]:
+                    self.add_integer_input(part["name"]).default(part["index"])
+                else:
+                    self.add_blend_data_input(part["name"])
+        self.add_output_from_type(path_details["prop_type"],path_details["prop_name"],path_details["prop_array_length"])
                          
                 
     def get_copied(self,context):
         if self.copied_path:
             path_details = self.get_details()
             if path_details:
-                pass
+                self.setup_sockets(path_details)
     
     
     copied_path: bpy.props.StringProperty(update=get_copied)
@@ -57,10 +67,6 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.copied_path = ""
         self.inputs.clear()
         self.outputs.clear()
-    
-    
-    def on_copy(self,node):
-        self.reset_node()
         
 
     def draw_node(self,context,layout):
