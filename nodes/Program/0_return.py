@@ -31,18 +31,19 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
             if len(self.inputs[0].links):
                 if self.what_start_idname() == "SN_FunctionNode":
                     self.connected_function = self.what_start_node().func_name
+                    self.label = self.connected_function
                 else:
                     self.connected_function = ""
+                    self.label = "Function Return"
             else:
                 self.connected_function = "None"
+                self.label = "Function Return"
         self.update_nodes_by_type("SN_RunFunctionNode")
 
 
     def draw_node(self, context, layout):
         if not self.connected_function:
             layout.label(text="Please connect to a function")
-        elif self.connected_function != "None":
-            layout.label(text="Function: " + self.connected_function)
 
 
     def code_evaluate(self, context, touched_socket):
