@@ -1,4 +1,5 @@
 import bpy
+import json
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
@@ -33,45 +34,23 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
     
-    
-    def add_prop_output(self,path):
+        
+    def get_details(self):
         try:
-            if "[" in path[-1] and "]" in path[-1]:
-                path[-1] = path[-1].split("[")[0]
-            prop_path = ".".join(path)
-            prop_name = prop_path.split(".")[-1]
-            prop_path = (".").join(prop_path.split(".")[:-1])
-            prop_type = eval(prop_path+".bl_rna.properties['"+prop_name+"'].type")
-            prop_array_size = 0
-            if eval(prop_path+".bl_rna.properties['"+prop_name+"'].is_array"):
-                prop_array_size = eval(prop_path+".bl_rna.properties['"+prop_name+"'].array_length")
-            prop_name = eval(prop_path+".bl_rna.properties['"+prop_name+"'].name")
-            self.add_output_from_type(prop_type,prop_name,prop_array_size)
-        except ValueError:
-            self.reset_node()
-    
-    
-    def update_path(self,context):
+            path_details = json.loads(self.copied_path)
+            return path_details
+        except:
+            return None
+                         
+                
+    def get_copied(self,context):
         if self.copied_path:
-            try:
-                path = self.copied_path.split(".")
-                path_combined = ""
-                for index, part in enumerate(path):
-                    path_combined += "."+part if path_combined else part
-                    if "[" and "]" in part and not index == len(path)-1:
-                        name = eval(path_combined+".bl_rna.name")
-                        if part.split("[")[-1].split("]")[0].isnumeric():
-                            self.add_integer_input("Index - "+name)
-                        else:
-                            if not eval(path_combined+".bl_rna.base.name") in [name, "ID"]:
-                                name += f" ({eval(path_combined+'.bl_rna.base.name')})"
-                            self.add_blend_data_input(name)
-                self.add_prop_output(path)
-            except ValueError:
-                self.reset_node()
+            path_details = self.get_details()
+            if path_details:
+                pass
     
     
-    copied_path: bpy.props.StringProperty(update=update_path)
+    copied_path: bpy.props.StringProperty(update=get_copied)
     
     
     def reset_node(self):
