@@ -219,13 +219,8 @@ class ScriptingSocket:
             self.draw_add_socket(row)
         if self.is_expression and self.editable_var_name:
             row.prop(self,"var_name",text="")
-<<<<<<< HEAD
-        elif self.is_variable:
-            row.label(text=self.name)
-=======
         elif self.is_expression:
             row.label(text=self.var_name)
->>>>>>> 9b7e55e178984dc7efe9a50dad28ff66b186f847
         else:
             self.draw_socket(context,layout,row,node,self.get_text(text))
         if self.removable and self.is_output:
