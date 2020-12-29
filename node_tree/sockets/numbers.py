@@ -93,14 +93,14 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
             return str(self.factor_value)
         return str(self.default_value)
     
-    def is_number(self,value):
+    def value_is_number(self,value):
         try:
             float(value)
             return True
         except:
             return False
     
-    def is_vector(self,value):
+    def value_is_vector(self,value):
         try:
             value = eval(value)
             if type(value) == tuple:
@@ -113,17 +113,42 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
             return False
     
     def process_value(self,value):
-        if self.is_number(value):
+        real_value = eval(value)
+        if type(real_value) == tuple:
+            if not self.is_array:
+                value = str(real_value[0])
+            else:
+                if self.array_size != len(real_value):
+                    if self.array_size == 3:
+                        value = str((real_value[0],real_value[1],real_value[2])) 
+                    else:
+                        value = str((real_value[0],real_value[1],real_value[2],1))
+        else:
+            if self.is_array:
+                if self.array_size == 3:
+                    value = str((real_value,real_value,real_value)) 
+                else:
+                    value = str((real_value,real_value,real_value,real_value)) 
+        return value
+    
+    def cast_value(self,value):
+        value = value.replace('"',"")
+        if self.value_is_number(value):
             real_value = float(value)
             if self.is_array:
                 if self.array_size == 3:
                     value = str((real_value,real_value,real_value))
                 else:
                     value = str((real_value,real_value,real_value,real_value))
-        elif self.is_vector(value):
+        elif self.value_is_vector(value):
             real_value = eval(value)
             if not self.is_array:
                 value = str(real_value[0])
+            elif len(self.array_size) != len(real_value):
+                if self.array_size == 3:
+                    value = str((real_value[0],real_value[1],real_value[2]))
+                else:
+                    value = str((real_value[0],real_value[1],real_value[2],1))
         else:
             value = str(float(bool(value)))
         return value
@@ -213,16 +238,16 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
             return str((value[0],value[1],value[2],value[3]))
         return str(self.default_value)
     
-    def is_number(self,value):
+    def value_is_number(self,value):
         try:
             float(value)
             return True
         except:
             return False
     
-    def is_vector(self,value):
+    def value_is_vector(self,value):
         try:
-            value = eval(value)
+            value_value = eval(value)
             if type(value) == tuple:
                 for el in value:
                     if not type(el) == float and not type(el) == int:
@@ -233,17 +258,42 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
             return False
     
     def process_value(self,value):
-        if self.is_number(value):
-            real_value = int(value)
+        real_value = eval(value)
+        if type(real_value) == tuple:
+            if not self.is_array:
+                value = str(real_value[0])
+            else:
+                if self.array_size != len(real_value):
+                    if self.array_size == 3:
+                        value = str((real_value[0],real_value[1],real_value[2])) 
+                    else:
+                        value = str((real_value[0],real_value[1],real_value[2],1))
+        else:
+            if self.is_array:
+                if self.array_size == 3:
+                    value = str((real_value,real_value,real_value)) 
+                else:
+                    value = str((real_value,real_value,real_value,real_value)) 
+        return value
+    
+    def cast_value(self,value):
+        value = value.replace('"',"")
+        if self.value_is_number(value):
+            real_value = int(float(value))
             if self.is_array:
                 if self.array_size == 3:
                     value = str((real_value,real_value,real_value))
                 else:
                     value = str((real_value,real_value,real_value,real_value))
-        elif self.is_vector(value):
+        elif self.value_is_vector(value):
             real_value = eval(value)
             if not self.is_array:
                 value = str(real_value[0])
+            elif len(self.array_size) != len(real_value):
+                if self.array_size == 3:
+                    value = str((real_value[0],real_value[1],real_value[2]))
+                else:
+                    value = str((real_value[0],real_value[1],real_value[2],1))
         else:
             value = str(int(bool(value)))
         return value

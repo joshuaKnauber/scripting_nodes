@@ -22,8 +22,8 @@ class SN_BoxNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.add_boolean_input("Enabled")
         self.add_boolean_input("Alert").set_default(False)
-        self.add_float_input("Scale X")
-        self.add_float_input("Scale Y")
+        self.add_float_input("Scale X").set_default(1)
+        self.add_float_input("Scale Y").set_default(1)
 
         
     def what_layout(self, socket):

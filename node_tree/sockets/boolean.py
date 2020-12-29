@@ -52,12 +52,19 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
             return str((value[0],value[1],value[2],value[3]))
         return str(self.default_value)
     
-    def is_vector(self,value):
+    def value_is_number(self,value):
+        try:
+            float(value)
+            return True
+        except:
+            return False
+    
+    def value_is_vector(self,value,types=[bool]):
         try:
             value = eval(value)
             if type(value) == tuple:
                 for el in value:
-                    if not type(el) == float and not type(el) == int:
+                    if not type(el) in types:
                         return False
                 return True
             return False
@@ -65,13 +72,37 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
             return False
     
     def process_value(self,value):
-        if self.is_vector(value):
-            real_value = eval(value)
+        real_value = eval(value)
+        if self.value_is_vector(value):
             if not self.is_array:
                 value = str(real_value[0])
-        else:
-            if not value in ["True","False"]:
+            elif self.array_size != len(real_value):
+                if self.array_size == 3:
+                    value = str((real_value[0],real_value[1],real_value[2]))
+                else:
+                    value = str((real_value[0],real_value[1],real_value[2],True))
+        elif self.is_array:
+            if self.array_size == 3:
+                value = str((real_value,real_value,real_value))
+            else:
+                value = str((real_value,real_value,real_value,real_value))
+        return value
+    
+    def cast_value(self,value):
+        if not value in ["True","False"]:
+            if value == '""':
+                value = "False"
+            elif self.value_is_number(value.replace('"',"")):
+                value = bool(float(value.replace('"',"")))
+            elif self.value_is_vector(value,[int,float]):
+                value = bool(eval(value)[0])
+            else:
                 value = str(bool(value))
+        if self.is_array:
+            if self.array_size == 3:
+                value = str((bool(value),bool(value),bool(value)))
+            else:
+                value = str((bool(value),bool(value),bool(value),bool(value)))
         return value
 
     def draw_socket(self, context, layout, row, node, text):

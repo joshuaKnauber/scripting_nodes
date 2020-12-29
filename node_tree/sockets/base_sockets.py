@@ -267,9 +267,10 @@ class ScriptingSocket:
             else:
                 value = self.get_return_value()
             
-            value = self.process_value(value)
-            
-            # value = " "*indents*4 + value
+            if len(self.links) and self.links[0].from_socket.bl_label != self.bl_label:
+                value = self.cast_value(value)
+            else:
+                value = self.process_value(value)
             
             return value
 
@@ -282,7 +283,11 @@ class ScriptingSocket:
         pass
     
     def process_value(self, value):
-        """ overwrite this to modify the value to match the socket type """
+        """ overwrite this to modify the value coming from the same socket type """
+        return value
+    
+    def cast_value(self, value):
+        """ overwrite this to modify the value coming from a different socket type """
         return value
     
     @property
