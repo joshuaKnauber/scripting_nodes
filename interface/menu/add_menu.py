@@ -11,19 +11,31 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
 
     def execute(self, context):
         return {"FINISHED"}
+    
+    def is_valid_node(self,context,from_node,idname,add_to_inputs):
+        # temp_node = context.space_data.node_tree.nodes.new(idname)
+        print(add_to_inputs)
+        
+        
+    def moving_left(self,event):
+        print(event.mouse_prev_x,event.mouse_x,event.value)
+        return event.mouse_prev_x > event.mouse_x
+        
 
     def invoke(self,context,event):
-        # from_node = context.space_data.node_tree.nodes.active
-        # if event.shift and event.type == "LEFTMOUSE" and from_node and from_node.select:
-        #     context.scene.compatible_nodes.clear()
-        #     for category in get_node_categories():
-        #         for node in category.items(context):
-        #             item = context.scene.compatible_nodes.add()
-        #             item.category = category.name
-        #             item.name = "  "+node.label
-        #             item.idname = node.nodetype
-            
-        #     bpy.ops.wm.call_menu(name="SN_MT_AddNodeMenu")
+        from_node = context.space_data.node_tree.nodes.active
+        add_to_inputs = self.moving_left(event)
+        if event.shift and event.type == "LEFTMOUSE" and from_node and from_node.select:
+            context.scene.compatible_nodes.clear()
+            for category in get_node_categories():
+                for node in category.items(context):
+                    if self.is_valid_node(context, from_node, node.nodetype,add_to_inputs):
+                        item = context.scene.compatible_nodes.add()
+                        item.category = category.name
+                        item.name = "  "+node.label
+                        item.idname = node.nodetype
+
+            bpy.ops.wm.call_menu(name="SN_MT_AddNodeMenu")
         return {"FINISHED"}
     
     

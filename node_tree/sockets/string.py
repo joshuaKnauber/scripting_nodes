@@ -63,7 +63,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         return f"\"{value}\""
     
     def cast_value(self,value):
-        return self.process_value(value.replace('"',"'"))
+        return f"str({value})"
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:
