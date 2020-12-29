@@ -171,15 +171,15 @@ class ScriptingSocket:
         self.node.update_needs_compile(context)
 
 
-    def update_is_variable(self,context):
-        if self.is_variable:
+    def update_is_expression(self,context):
+        if self.is_expression:
             self.display_shape = self.socket_shape + "_DOT"
         else:
             self.display_shape = self.socket_shape.replace("_DOT","")
         self.node.update_needs_compile(context)
 
 
-    is_variable: bpy.props.BoolProperty(default=False, update=update_is_variable)
+    is_expression: bpy.props.BoolProperty(default=False, update=update_is_expression)
     editable_var_name: bpy.props.BoolProperty(default=True)
     var_name: bpy.props.StringProperty(default="", update=update_var_name)
     
@@ -217,10 +217,15 @@ class ScriptingSocket:
             self.draw_remove_socket(row)
         elif self.addable and not self.is_output:
             self.draw_add_socket(row)
-        if self.is_variable and self.editable_var_name:
+        if self.is_expression and self.editable_var_name:
             row.prop(self,"var_name",text="")
+<<<<<<< HEAD
         elif self.is_variable:
             row.label(text=self.name)
+=======
+        elif self.is_expression:
+            row.label(text=self.var_name)
+>>>>>>> 9b7e55e178984dc7efe9a50dad28ff66b186f847
         else:
             self.draw_socket(context,layout,row,node,self.get_text(text))
         if self.removable and self.is_output:
@@ -238,7 +243,7 @@ class ScriptingSocket:
     
     def make_code(self,indents=0):
         # handle variable sockets
-        if self.is_variable:
+        if self.is_expression:
             return self.node.get_python_name(self.var_name,"parameter")
             
         # handle program sockets
@@ -262,7 +267,7 @@ class ScriptingSocket:
         else:
             if len(self.links):
                 value = self.links[0].from_socket.make_code(indents=indents)
-                if self.links[0].from_socket.is_variable:
+                if self.links[0].from_socket.is_expression:
                     return value
             else:
                 value = self.get_return_value()
@@ -320,7 +325,7 @@ class DynamicSocket(ScriptingSocket):
             inp = node.add_input(from_socket.bl_idname,self.default_text,True)
         else:
             inp = node.add_input(self.add_idname,self.default_text,True)
-        inp.is_variable = self.make_variable
+        inp.is_expression = self.make_variable
         inp.var_name = link.from_socket.default_text
         inp.copy_name = self.copy_name
         inp.taken_name = self.taken_name
@@ -336,7 +341,7 @@ class DynamicSocket(ScriptingSocket):
             out = node.add_output(to_socket.bl_idname,self.default_text,True)
         else:
             out = node.add_output(self.add_idname,self.default_text,True)
-        out.is_variable = self.make_variable
+        out.is_expression = self.make_variable
         out.var_name = link.to_socket.default_text
         out.copy_name = self.copy_name
         out.taken_name = self.taken_name
@@ -406,7 +411,7 @@ class SN_AddSocket(bpy.types.Operator):
             socket = node.add_input(self.idname,add_socket.default_text,True)
             node.inputs.move(len(node.inputs)-1,self.index)
 
-        socket.is_variable = add_socket.make_variable
+        socket.is_expression = add_socket.make_variable
         socket.var_name = add_socket.default_text
         socket.copy_name = add_socket.copy_name
         socket.taken_name = add_socket.taken_name
