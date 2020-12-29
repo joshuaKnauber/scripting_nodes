@@ -17,7 +17,7 @@ bl_info = {
     "author" : "Joshua Knauber, Finn Knauber", 
     "description" : "Adds a node editor for building addons with nodes",
     "blender" : (2, 80, 0),
-    "version" : (1, 1, 0),
+    "version" : (1, 1, 1),
     "location" : "Editors -> Visual Scripting",
     "wiki_url": "", 
     "category" : "Node" 
@@ -46,6 +46,7 @@ from .node_tree.assets.assets_ui_list import SN_Asset
 from .node_tree.base_node import SN_NodeCollection, SN_NodePropertyGroup
 from .node_tree.node_tree import update_create_tree
 from .settings.addon_properties import SN_AddonProperties
+from .settings.updates import check_serpens_updates
 
 from .compiler.compiler import handle_file_load, handle_file_unload
 
@@ -57,6 +58,7 @@ auto_load.init()
 def load_handler(dummy):
     handle_file_unload()
     handle_file_load()
+    check_serpens_updates(bl_info["version"])
 
 
 def unload_handler(dummy=None):
