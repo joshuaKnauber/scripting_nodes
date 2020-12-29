@@ -57,9 +57,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             self.links.remove(link[0])
             new_links.append( self.links.new(link[1],link[2]) )
         dynamic_links.clear()
-        # for link in new_links:
-        #     link.from_node.insert_link(link)
-        #     link.to_node.insert_link(link)
         
         
     def update_remove_links(self):
@@ -76,4 +73,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         self.set_changes(True)
         self.update_dynamic_links()
         self.update_remove_links()
-        bpy.ops.sn.run_add_menu("INVOKE_DEFAULT")
+        op = bpy.context.active_operator
+        if op and op.bl_idname == "NODE_OT_select":
+            bpy.ops.sn.run_add_menu("INVOKE_DEFAULT",x=op.properties["mouse_x"],y=op.properties["mouse_y"])

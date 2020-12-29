@@ -41,6 +41,8 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
                                         name="Value",
                                         description="Value of this socket")
     
+    #TODO add enum socket
+    
     is_file_path: bpy.props.BoolProperty(default=False)
     is_dir_path: bpy.props.BoolProperty(default=False)
      
