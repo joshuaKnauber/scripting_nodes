@@ -60,10 +60,6 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     for x, parameter in enumerate(parameters):
                                         if x >= output_len:
                                             out = self.add_output(parameter[1],parameter[0],False)
-                                            out.is_expression = True
-                                            out.editable_var_name = False
-                                            out.return_var_name = False
-                                            out.var_name = parameter[0]
 
                                 else:
                                     removed = False
@@ -76,7 +72,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                             for x, parameter in enumerate(parameters):
                                 self.outputs[x+1].name = parameter[0]
-                                self.outputs[x+1].var_name = parameter[0]
+                                
         else:
             for i, out in enumerate(self.outputs):
                 if i:
@@ -119,9 +115,6 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                         for x, parameter in enumerate(parameters):
                             if x >= input_len:
                                 inp = self.add_input(parameter[1],parameter[0],False)
-                                inp.is_expression = True
-                                inp.editable_var_name = False
-                                inp.var_name = parameter[0]
 
                     else:
                         removed = False
@@ -135,7 +128,6 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                 for x, parameter in enumerate(parameters):
                     self.inputs[x+1].name = parameter[0]
-                    self.inputs[x+1].var_name = parameter[0]
 
         else:
             self.make_collection()
