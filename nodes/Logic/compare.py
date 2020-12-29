@@ -20,8 +20,8 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_data_input("Data").copy_name=True
         self.add_data_input("Data").copy_name=True
         self.add_boolean_output("Boolean")
-    
-    
+
+
     def draw_node(self, context, layout):
         layout.prop(self, "operation", expand=True)
 

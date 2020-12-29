@@ -240,7 +240,7 @@ class ScriptingSocket:
         # handle variable sockets
         if self.is_expression:
             return self.node.get_python_name(self.var_name,"parameter")
-                
+            
         # handle program sockets
         if self.sn_type in ["EXECUTE","INTERFACE"]:
             if self.is_output:
