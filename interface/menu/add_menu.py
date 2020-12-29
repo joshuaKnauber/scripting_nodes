@@ -13,8 +13,8 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
     bl_description = "Opens the add menu"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
     
-    x: bpy.props.IntProperty()
-    y: bpy.props.IntProperty()
+    x: bpy.props.IntProperty(options={"SKIP_SAVE"})
+    y: bpy.props.IntProperty(options={"SKIP_SAVE"})
 
     def execute(self, context):
         return {"FINISHED"}
@@ -25,6 +25,10 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         dim = from_node.dimensions
         # self.x & self.y -> region coords
         # loc -> view coords
+        mouse_region = (event.mouse_region_x,event.mouse_region_y)
+        node_region = context.region.view2d.view_to_region(loc[0],loc[1])
+        print(node_region,(self.x,self.y))
+        # from_node.location = mouse_view
         
         from_socket = from_node.outputs[0]
         
@@ -76,12 +80,29 @@ class SN_OT_AddNode(bpy.types.Operator):
     bl_options = {"REGISTER","UNDO","INTERNAL"}
     
     idname: bpy.props.StringProperty()
+    
+    def link_nodes(self,tree,node,from_socket):
+        if from_socket.is_output:
+            for inp in node.inputs:
+                if can_connect(from_socket.bl_idname,inp.bl_idname):
+                    tree.links.new(from_socket,inp)
+                    break
+        else:
+            for out in node.outputs:
+                if can_connect(out.bl_idname,from_socket.bl_idname):
+                    tree.links.new(out,from_socket)
+                    break
 
     def execute(self, context):
-        from_node = context.space_data.node_tree.nodes.active
-        bpy.ops.node.add_node(type=self.idname)
-        node = context.space_data.node_tree.nodes.active
-        node.location = (node.location[0],node.location[1])
+        global from_socket
+        
+        if from_socket:
+            from_node = context.space_data.node_tree.nodes.active
+            bpy.ops.node.add_node(type=self.idname)
+            node = context.space_data.node_tree.nodes.active
+            node.location = (node.location[0],node.location[1])
+            self.link_nodes(context.space_data.node_tree,node,from_socket)
+        from_socket = None
         
         return {"FINISHED"}
     
