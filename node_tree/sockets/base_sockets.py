@@ -220,7 +220,7 @@ class ScriptingSocket:
         if self.is_variable and self.editable_var_name:
             row.prop(self,"var_name",text="")
         elif self.is_variable:
-            row.label(text=self.var_name)
+            row.label(text=self.name)
         else:
             self.draw_socket(context,layout,row,node,self.get_text(text))
         if self.removable and self.is_output:
@@ -240,7 +240,7 @@ class ScriptingSocket:
         # handle variable sockets
         if self.is_variable:
             return self.node.get_python_name(self.var_name,"parameter")
-                
+            
         # handle program sockets
         if self.sn_type in ["EXECUTE","INTERFACE"]:
             if self.is_output:

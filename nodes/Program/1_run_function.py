@@ -62,6 +62,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             out = self.add_output(parameter[1],parameter[0],False)
                                             out.is_variable = True
                                             out.editable_var_name = False
+                                            out.return_var_name = False
                                             out.var_name = parameter[0]
 
                                 else:
