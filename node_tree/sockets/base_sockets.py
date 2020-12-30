@@ -48,29 +48,29 @@ SOCKET_CONNECTIONS = {
         "SN_DynamicVariableSocket":     "DV"
     },
     
-    "VALUES": {"COLUMNS":   ["E","DE","I","DI","BD","D","DD","IN","FN","B","S","DS","IC","DV"],
+    "VALUES": {"OUTPUTS":   ["E","DE","I","DI","BD","D","DD","IN","FN","B","S","DS","IC","DV"],
                      "E":   [ 1,  1,   0,  0,   0,   0,   0,   0,   0,  0,  0,   0,   0,   0 ],
                     "DE":   [ 1,  0,   0,  0,   0,   0,   0,   0,   0,  0,  0,   0,   0,   0 ],
                      "I":   [ 0,  0,   1,  1,   0,   0,   0,   0,   0,  0,  0,   0,   0,   0 ],
                     "DI":   [ 0,  0,   1,  0,   0,   0,   0,   0,   0,  0,  0,   0,   0,   0 ],
                     "BD":   [ 0,  0,   0,  0,   1,   0,   0,   0,   0,  0,  0,   0,   0,   1 ],
-                     "D":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
-                    "DD":   [ 0,  0,   0,  0,   0,   1,   0,   1,   1,  1,  1,   0,   0,   0 ],
-                    "IN":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
-                    "FN":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
-                     "B":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
-                     "S":   [ 0,  0,   0,  0,   0,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
-                    "DS":   [ 0,  0,   0,  0,   0,   1,   0,   1,   1,  1,  1,   0,   0,   0 ],
+                     "D":   [ 0,  0,   0,  0,   1,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
+                    "DD":   [ 0,  0,   0,  0,   1,   1,   0,   1,   1,  1,  1,   0,   0,   0 ],
+                    "IN":   [ 0,  0,   0,  0,   1,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
+                    "FN":   [ 0,  0,   0,  0,   1,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
+                     "B":   [ 0,  0,   0,  0,   1,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
+                     "S":   [ 0,  0,   0,  0,   1,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
+                    "DS":   [ 0,  0,   0,  0,   1,   1,   0,   1,   1,  1,  1,   0,   0,   0 ],
                     "IC":   [ 0,  0,   0,  0,   0,   0,   0,   0,   0,  0,  0,   0,   1,   0 ],
                     "DV":   [ 0,  0,   0,  0,   1,   1,   0,   1,   1,  1,  1,   0,   0,   0 ],}
     
 }
 
-def can_connect(idname1,idname2):
-    id1 = SOCKET_CONNECTIONS["SHORT"][idname1]
-    id2 = SOCKET_CONNECTIONS["SHORT"][idname2]
-    col = SOCKET_CONNECTIONS["VALUES"]["COLUMNS"].index(id2)
-    return bool(SOCKET_CONNECTIONS["VALUES"][id1][col])
+def can_connect(inp_idname,out_idname):
+    inp = SOCKET_CONNECTIONS["SHORT"][inp_idname]
+    out = SOCKET_CONNECTIONS["SHORT"][out_idname]
+    out_col = SOCKET_CONNECTIONS["VALUES"]["OUTPUTS"].index(out)
+    return bool(SOCKET_CONNECTIONS["VALUES"][inp][out_col])
 
 
 ### THE MAIN SCRIPTING SOCKET

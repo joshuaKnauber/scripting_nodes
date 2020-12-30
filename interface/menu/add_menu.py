@@ -42,12 +42,12 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         is_valid = False
         if from_socket.is_output:
             for inp in temp_node.inputs:
-                if can_connect(from_socket.bl_idname,inp.bl_idname):
+                if can_connect(inp.bl_idname,from_socket.bl_idname):
                     is_valid = True
                     break
         else:
             for out in temp_node.outputs:
-                if can_connect(out.bl_idname,from_socket.bl_idname):
+                if can_connect(from_socket.bl_idname,out.bl_idname):
                     is_valid = True
                     break
                 
@@ -84,12 +84,12 @@ class SN_OT_AddNode(bpy.types.Operator):
     def link_nodes(self,tree,node,from_socket):
         if from_socket.is_output:
             for inp in node.inputs:
-                if can_connect(from_socket.bl_idname,inp.bl_idname):
+                if can_connect(inp.bl_idname,from_socket.bl_idname):
                     tree.links.new(from_socket,inp)
                     break
         else:
             for out in node.outputs:
-                if can_connect(out.bl_idname,from_socket.bl_idname):
+                if can_connect(from_socket.bl_idname,out.bl_idname):
                     tree.links.new(out,from_socket)
                     break
 

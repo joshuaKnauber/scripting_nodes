@@ -149,7 +149,7 @@ class SN_ScriptingBaseNode:
         self.update_needs_compile(bpy.context)
         to_idname = link.to_socket.bl_idname
         from_idname = link.from_socket.bl_idname
-        if can_connect(from_idname,to_idname):
+        if can_connect(to_idname,from_idname):
             if self == link.to_node:
                 link.to_socket.update_socket(self,link)
             else:
