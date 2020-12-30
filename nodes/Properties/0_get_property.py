@@ -30,11 +30,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             if path_details:
                 setup_sockets(self, path_details)
                 out = self.add_output_from_type(path_details["prop_type"],path_details["prop_name"],path_details["prop_array_length"])
-                # out.is_expression = True
-                # out.editable_var_name = False
-                # out.var_name = path_details["prop_name"]
 
-    
     
     copied_path: bpy.props.StringProperty(update=get_copied)
     

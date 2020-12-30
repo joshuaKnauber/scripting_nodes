@@ -3,10 +3,10 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
 
-class SN_GetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_GetBlendDataNode"
-    bl_label = "Get Blend Data"
+    bl_idname = "SN_GetDataCollectionNode"
+    bl_label = "Get Data Collections"
     # bl_icon = "GRAPH"
     bl_width_default = 160
     
@@ -43,7 +43,6 @@ class SN_GetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.outputs.clear()
         elif socket.collection:
             self.current_data_type = ""
-            self.outputs.clear()
             self.collection_error = True
         else:
             self.current_data_type = socket.data_type
