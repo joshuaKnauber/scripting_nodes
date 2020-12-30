@@ -1,4 +1,5 @@
 import bpy
+from .. import bl_info
 
 
 class SN_AddonPreferences(bpy.types.AddonPreferences):
@@ -54,17 +55,45 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     
     def draw_package_market(self,layout):
         pass
+    
+    
+    def draw_navigation(self,layout):
+        row = layout.row(align=True)
+        row.scale_y = 1.2
+        row.prop_enum(self,"navigation",value="DEV")
+        row.separator()
+        row.prop_enum(self,"navigation",value="SETTINGS")
+        row.prop_enum(self,"navigation",value="ADDONS")
+        row.prop_enum(self,"navigation",value="PACKAGES")
+
+
+    def draw_changelog(self,layout):
+        changelog = [
+            "Rewrite of the entire addon",
+            "Added multiple node trees for one addon",
+            "Separated Properties and Variables",
+            "Added custom icons",
+            "Export as .zip file to allow for addon assets",
+            "And much more..."
+        ]
+        if changelog:
+            box = layout.box()
+            version = str(bl_info['version'])[1:-1].replace(",",".").replace(" ","")
+            box.label(text=f"Changelog for v{version}:")
+            col = box.column(align=True)
+            col.enabled = False
+            for entry in changelog:
+                col.label(text="   • " + entry)
         
 
     def draw(self, context):
         layout = self.layout
-        row = layout.row()
-        row.scale_y = 1.2
-        row.prop(self, "navigation", expand=True)
+        self.draw_navigation(layout)
         if self.navigation == "DEV":
             self.draw_dev_prefs(layout)
         elif self.navigation == "SETTINGS":
             self.draw_serpens_settings(layout)
+            self.draw_changelog(layout)
         elif self.navigation == "ADDONS":
             self.draw_addon_market(layout)
         elif self.navigation == "PACKAGES":
