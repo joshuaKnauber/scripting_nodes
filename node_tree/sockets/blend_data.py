@@ -12,8 +12,14 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
     data_type: bpy.props.StringProperty(default="",
                                         update=ScriptingSocket.socket_value_update)
     
-    data_path: bpy.props.StringProperty(default="",
+    relative_path: bpy.props.StringProperty(default="",
                                         update=ScriptingSocket.socket_value_update)
+    
+    collection: bpy.props.BoolProperty(default=False,
+                                       update=ScriptingSocket.socket_value_update)
+    
+    def get_return_value(self):
+        return "None"
 
     def draw_socket(self, context, layout, row, node, text):
         row.label(text=text)

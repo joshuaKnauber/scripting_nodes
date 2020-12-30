@@ -19,14 +19,19 @@ class SN_ObjectsNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.return_type == "ALL" and len(self.inputs):
             self.inputs.clear()
             self.outputs[0].name = "All Objects"
+            self.outputs[0].collection = True
         elif self.return_type == "INDEX" and (not len(self.inputs) or self.inputs[0].sn_type != "NUMBER"):
             self.inputs.clear()
             self.add_integer_input("Index")
             self.outputs[0].name = "Indexed Object"
+            self.outputs[0].collection = False
         elif self.return_type == "NAME" and (not len(self.inputs) or self.inputs[0].sn_type != "STRING"):
             self.inputs.clear()
             self.add_string_input("Name")
             self.outputs[0].name = "Named Object"
+            self.outputs[0].collection = False
+        if self.outputs[0].is_linked:
+            self.outputs[0].links[0].to_node.on_link_insert(self.outputs[0].links[0])
     
     
     return_type: bpy.props.EnumProperty(items=[("ALL","All","All Objects"),
@@ -38,7 +43,9 @@ class SN_ObjectsNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def on_create(self,context):
-        self.add_blend_data_output("All Objects")
+        out = self.add_blend_data_output("All Objects")
+        out.data_type = "Object"
+        out.collection = True
         
         
     def draw_node(self,context,layout):
@@ -47,8 +54,10 @@ class SN_ObjectsNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
 
-        return {
-            "code": f"""
+        limiter = ""
+        if self.return_type != "ALL":
+            limiter = f"[{self.inputs[0].value}]"
 
-                    """
+        return {
+            "code": f"bpy.data.objects{limiter}"
         }

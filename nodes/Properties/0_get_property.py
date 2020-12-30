@@ -29,7 +29,10 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             path_details = self.get_details()
             if path_details:
                 setup_sockets(self, path_details)
-                self.add_output_from_type(path_details["prop_type"],path_details["prop_name"],path_details["prop_array_length"])
+                out = self.add_output_from_type(path_details["prop_type"],path_details["prop_name"],path_details["prop_array_length"])
+                # out.is_expression = True
+                # out.editable_var_name = False
+                # out.var_name = path_details["prop_name"]
 
     
     
@@ -51,6 +54,5 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         return {
-            "code": f"""
-                    """
+            "code": f"{self.inputs[0].value}.{self.get_details()['prop_identifier']}"
         }

@@ -10,6 +10,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
     bl_options = {"REGISTER","UNDO","INTERNAL"}
 
     prop_name: bpy.props.StringProperty(options={"HIDDEN"})
+    prop_identifier: bpy.props.StringProperty(options={"HIDDEN"})
     prop_type: bpy.props.StringProperty(options={"HIDDEN"})
     prop_array_length: bpy.props.IntProperty(options={"HIDDEN"})
     path: bpy.props.StringProperty(options={"HIDDEN"})
@@ -68,6 +69,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
         path_details = {
             "path": self.path,
             "prop_name": self.prop_name,
+            "prop_identifier": self.prop_identifier,
             "prop_type": self.prop_type,
             "prop_array_length": self.prop_array_length,
             "path_parts": self.construct_path_parts()
@@ -99,6 +101,7 @@ def serpens_right_click(self, context):
         op = layout.operator("sn.copy_space_property",text="Serpens | Copy Property",icon="COPYDOWN")
         op.prop_name = property_value.name
         op.prop_type = property_value.type
+        op.prop_identifier = property_value.identifier
         if hasattr(property_value,"array_length"):
             op.prop_array_length = property_value.array_length
         else:

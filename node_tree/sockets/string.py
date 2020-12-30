@@ -53,16 +53,14 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         
     def get_return_value(self):
         if self.is_file_path:
-            return self.file_path
+            return f"\"{self.file_path}\""
         elif self.is_dir_path:
-            return self.dir_path
-        return self.default_value
+            return f"\"{self.dir_path}\""
+        return f"\"{self.default_value}\""
     
     def process_value(self,value):
-        if value and value[0] == '"' and value[-1] == '"':
-            value = value[1:-1]
         value = value.replace('"',"'")
-        return f"\"{value}\""
+        return value
     
     def cast_value(self,value):
         return f"str({value})"

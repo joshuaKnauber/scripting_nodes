@@ -259,6 +259,7 @@ class SN_ScriptingBaseNode:
             if array_size:
                 inp.is_array = True
                 inp.array_size = array_size
+            return inp
     
     def add_output_from_type(self,prop_type,label,array_size=0):
         if prop_type in self.prop_types:
@@ -266,6 +267,7 @@ class SN_ScriptingBaseNode:
             if array_size:
                 out.is_array = True
                 out.array_size = array_size
+            return out
     
     
     def add_input(self,idname,label,removable):
