@@ -103,7 +103,8 @@ def serpens_right_click(self, context):
             op.prop_array_length = property_value.array_length
         else:
             op.prop_array_length = 0
-        op.path = property_pointer.path_resolve(property_value.identifier,False).__repr__()
+        op.path = property_pointer.__repr__()
+        op.path += "." + property_value.identifier
     
     if button_value:
         layout.operator("ui.copy_python_command_button",text="Serpens | Copy Button",icon="COPYDOWN")

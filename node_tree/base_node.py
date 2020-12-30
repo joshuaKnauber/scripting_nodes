@@ -249,7 +249,8 @@ class SN_ScriptingBaseNode:
         "BOOLEAN": "SN_BooleanSocket",
         "FLOAT": "SN_FloatSocket",
         "INT": "SN_IntegerSocket",
-        "ENUM": "SN_StringSocket"
+        "ENUM": "SN_StringSocket",
+        "POINTER": "SN_BlendDataSocket"
     }
     
     def add_input_from_type(self,prop_type,label,array_size=0):
