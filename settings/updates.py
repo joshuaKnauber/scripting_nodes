@@ -14,8 +14,7 @@ class SN_OT_MessageUpdate(bpy.types.Operator):
     bl_options = {"REGISTER","UNDO","INTERNAL"}
 
     def execute(self, context): 
-        with open(os.path.join(os.path.dirname(__file__),"update_log.json"),"w") as update_log:
-            update_log.write(json.dumps({"last_check":str(date.today())},indent=4))       
+        update_log()
         return {"FINISHED"}
     
     def draw(self,context):
@@ -34,6 +33,12 @@ class SN_OT_MessageUpdate(bpy.types.Operator):
     
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
+
+
+
+def update_log():
+    with open(os.path.join(os.path.dirname(__file__),"update_log.json"),"w") as update_log:
+        update_log.write(json.dumps({"last_check":str(date.today())},indent=4))  
 
 
 
@@ -71,6 +76,8 @@ def check_serpens_updates(current_version):
             if exists_newer_version(version, current_version):
                 message = content["content"]
                 bpy.ops.sn.update_message("INVOKE_DEFAULT")
+            else:
+                update_log()
 
         except ValueError:
             print("Couldn't check for Serpens updates!")
