@@ -182,6 +182,7 @@ class ScriptingSocket:
     is_expression: bpy.props.BoolProperty(default=False, update=update_is_expression)
     editable_var_name: bpy.props.BoolProperty(default=True)
     var_name: bpy.props.StringProperty(default="", update=update_var_name)
+    use_var_name: bpy.props.BoolProperty(default=True)
     
     
     ### DRAW SOCKET
@@ -217,9 +218,9 @@ class ScriptingSocket:
             self.draw_remove_socket(row)
         elif self.addable and not self.is_output:
             self.draw_add_socket(row)
-        if self.is_expression and self.editable_var_name:
+        if self.is_expression and self.editable_var_name and self.use_var_name:
             row.prop(self,"var_name",text="")
-        elif self.is_expression:
+        elif self.is_expression and self.use_var_name:
             row.label(text=self.var_name)
         else:
             self.draw_socket(context,layout,row,node,self.get_text(text))
@@ -238,7 +239,7 @@ class ScriptingSocket:
     
     def make_code(self,indents=0):
         # handle variable sockets
-        if self.is_expression:
+        if self.is_expression and self.use_var_name:
             return self.node.get_python_name(self.var_name,"parameter")
             
         # handle program sockets

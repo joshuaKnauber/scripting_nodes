@@ -30,13 +30,14 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             if path_details:
                 setup_sockets(self, path_details)
                 out = self.add_output_from_type(path_details["prop_type"],path_details["prop_name"],path_details["prop_array_length"])
+        else:
+            self.reset_node()
 
     
     copied_path: bpy.props.StringProperty(update=get_copied)
     
     
     def reset_node(self):
-        self.copied_path = ""
         self.inputs.clear()
         self.outputs.clear()
         
@@ -46,6 +47,8 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             row = layout.row()
             row.scale_y = 1.5
             row.operator("sn.paste_property_path",text="Paste Property",icon="PASTEDOWN").node = self.name
+        else:
+            layout.operator("sn.reset_node",icon="UNLINKED").node = self.name
     
 
     def code_evaluate(self, context, touched_socket):

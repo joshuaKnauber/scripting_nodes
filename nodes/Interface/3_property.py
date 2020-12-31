@@ -57,6 +57,10 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.label = "Property (" + path_details["prop_name"] + ")"
                 self.setup_inputs(path_details["prop_type"], path_details["prop_name"])
                 setup_sockets(self, path_details)
+        else:
+            for i in range(len(self.inputs)-1,-1,-1):
+                if i:
+                    self.inputs.remove(self.inputs[i])
     
     
     copied_path: bpy.props.StringProperty(update=get_copied)
@@ -67,12 +71,33 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             row = layout.row()
             row.scale_y = 1.5
             row.operator("sn.paste_property_path",text="Paste Property",icon="PASTEDOWN").node = self.name
+        else:
+            layout.operator("sn.reset_node",icon="UNLINKED").node = self.name
                     
 
     def code_evaluate(self, context, touched_socket):
+
+        layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
+
+        icon = self.inputs['Icon'].icon_line()
+        
+        values = ""
+        for inp in self.inputs:
+            if inp.name == "Text":
+                values += f"text={inp.value},"
+            elif inp.name == "Toggle":
+                values += f"toggle={inp.value},"
+            elif inp.name == "Emboss":
+                values += f"emboss={inp.value},"
+            elif inp.name == "Invert Checkbox":
+                values += f"invert_checkbox={inp.value},"
+            elif inp.name == "Expand":
+                values += f"expand={inp.value},"
+            elif inp.name == "Slider":
+                values += f"slider={inp.value},"
         
         return {
             "code": f"""
-                    
+                    {layout}.prop({self.inputs[-1].value},"{self.get_details()["prop_identifier"]}",{icon}{values})
                     """
         }

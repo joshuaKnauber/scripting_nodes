@@ -237,12 +237,19 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                             return {self.inputs["Poll"].value}
 
                         def draw_header(self, context):
-                            layout = self.layout
-                            {self.list_blocks(header_layouts, 7)}
+                            try:
+                                layout = self.layout
+                                {self.list_blocks(header_layouts, 8)}
+                            except Exception as exc:
+                                print(str(exc) + " | Error in {self.label} panel header")
                         
                         def draw(self, context):
-                            layout = self.layout
-                            {self.list_blocks(panel_layouts, 7)}
+                            try:
+                                layout = self.layout
+                                {self.list_blocks(panel_layouts, 8)}
+                            except Exception as exc:
+                                print(str(exc) + " | Error in {self.label} panel")
+                                
                     """
         }
         

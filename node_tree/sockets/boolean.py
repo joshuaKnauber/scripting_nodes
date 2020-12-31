@@ -118,7 +118,7 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
                     for i in range(4):
                         col.prop(self, "array_four_value", text=str(self.array_four_value[i]),toggle=True, index=i)
             else:
-                row.prop(self, "default_value", text=text)
+                row.prop(self, "default_value", text=text, toggle=False)
 
     def draw_color(self, context, node):
         if self.is_array:

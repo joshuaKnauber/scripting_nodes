@@ -150,12 +150,19 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         for out in self.outputs:
             if out.name == "Panel":
                 panel_layouts.append(out.block(0))
+                
+        name = self.panel
+        if "_" in name:
+            name = name.replace("_PT_"," ").replace("_"," ").title()
         
         return {
             "code": f"""
                     def {self.function_name()}(self,context):
-                        layout = self.layout
-                        {self.list_blocks(panel_layouts,6)}
+                        try:
+                            layout = self.layout
+                            {self.list_blocks(panel_layouts,7)}
+                        except Exception as exc:
+                            print(str(exc) + " | Error in {name} when adding to panel")
                     """
         }
         

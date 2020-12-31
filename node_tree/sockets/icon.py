@@ -10,11 +10,11 @@ class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
     socket_shape = "SQUARE"
     
     def get_return_value(self):
-        return ""
+        return "icon=\"NONE\","
     
     
     def icon_line(self):
-        value = ""
+        value = self.get_return_value()
         if self.is_linked and not self.is_output:
             value = process_node(self.links[0].from_node,self.links[0].from_socket,0)
             if '"' in value:

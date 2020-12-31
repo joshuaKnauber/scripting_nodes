@@ -20,6 +20,20 @@ class SN_PastePropertyPath(bpy.types.Operator):
 
 
 
+class SN_ResetNode(bpy.types.Operator):
+    bl_idname = "sn.reset_node"
+    bl_label = "Reset Node"
+    bl_description = "Resets this node"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+    
+    node: bpy.props.StringProperty()
+
+    def execute(self, context):
+        context.space_data.node_tree.nodes[self.node].copied_path = ""
+        return {"FINISHED"}
+
+
+
 def setup_sockets(node,path_details):
     data_input = None
     for part in path_details["path_parts"]:

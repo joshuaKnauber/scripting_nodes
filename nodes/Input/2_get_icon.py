@@ -73,8 +73,8 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
     icon_source: bpy.props.EnumProperty(name="Icon Source",
                                         update=update_source,
                                         description="The source of the icons",
-                                        items=[("BLENDER","Blender","Blender","BLENDER",0),
-                                                ("CUSTOM","Custom","Custom","FILE_SCRIPT",1)])
+                                        items=[("BLENDER","Blender","Blender",0),
+                                                ("CUSTOM","Custom","Custom",1)])
 
     
     icon: bpy.props.StringProperty(default="ERROR",update=SN_ScriptingBaseNode.update_needs_compile)
@@ -87,7 +87,7 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_node(self,context,layout):
         row = layout.row()
-        row.scale_y = 1.5
+        row.scale_y = 1.2
         row.prop(self,"icon_source",expand=True)
         
         row = layout.row()
