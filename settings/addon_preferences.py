@@ -16,6 +16,10 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     use_suggestion_menu: bpy.props.BoolProperty(name="Use Suggestion Menu",
                                     description="Opens a menu with suggestions when draggin a link from a selected node and holding shift",
                                     default=True)
+    
+    show_all_compatible: bpy.props.BoolProperty(name="Show All Compatible",
+                                    description="Shows all compatible nodes instead of only those with the same socket type",
+                                    default=False)
 
     check_for_updates: bpy.props.BoolProperty(name="Check For Updates",
                                     description="Checks for Serpens updates when opening blender",
@@ -43,6 +47,9 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         col = row.column()
         col.label(text="Node Editor:")
         col.prop(self, "use_suggestion_menu")
+        subrow = col.row()
+        subrow.enabled = self.use_suggestion_menu
+        subrow.prop(self, "show_all_compatible")
         
         col = row.column()
         col.label(text="Updates:")

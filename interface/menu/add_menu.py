@@ -19,7 +19,7 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
     def execute(self, context):
         return {"FINISHED"}
     
-    def guess_socket(self,context,from_node,event):
+    def get_socket(self,context,from_node,event):
         global from_socket
         loc = from_node.location
         dim = from_node.dimensions
@@ -27,7 +27,7 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         # loc -> view coords
         mouse_region = (event.mouse_region_x,event.mouse_region_y)
         node_region = context.region.view2d.view_to_region(loc[0],loc[1])
-        print(node_region,(self.x,self.y))
+        # print(node_region,(self.x,self.y))
         # from_node.location = mouse_view
         
         from_socket = from_node.outputs[0]
@@ -35,6 +35,7 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
     
     def is_valid_node(self,context,from_node,idname):
         global from_socket
+        addon_prefs = context.preferences.addons[__name__.partition('.')[0]].preferences
         if idname in ["NodeReroute","NodeFrame"]: return False
         
         temp_node = context.space_data.node_tree.nodes.new(idname)
@@ -42,14 +43,24 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         is_valid = False
         if from_socket.is_output:
             for inp in temp_node.inputs:
-                if can_connect(inp.bl_idname,from_socket.bl_idname):
-                    is_valid = True
-                    break
+                if addon_prefs.show_all_compatible:
+                    if can_connect(inp.bl_idname,from_socket.bl_idname):
+                        is_valid = True
+                        break
+                else:
+                    if inp.bl_idname == from_socket.bl_idname:
+                        is_valid = True
+                        break
         else:
             for out in temp_node.outputs:
-                if can_connect(from_socket.bl_idname,out.bl_idname):
-                    is_valid = True
-                    break
+                if addon_prefs.show_all_compatible:
+                    if can_connect(from_socket.bl_idname,out.bl_idname):
+                        is_valid = True
+                        break
+                else:
+                    if from_socket.bl_idname == out.bl_idname:
+                        is_valid = True
+                        break
                 
         context.space_data.node_tree.nodes.remove(temp_node)
         return is_valid
@@ -59,7 +70,7 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         from_node = context.space_data.node_tree.nodes.active
         if event.shift and event.type == "LEFTMOUSE" and from_node and from_node.select:
             context.scene.compatible_nodes.clear()
-            self.guess_socket(context,from_node,event)
+            self.get_socket(context,from_node,event)
             for category in get_node_categories():
                 for node in category.items(context):
                     if self.is_valid_node(context, from_node, node.nodetype):
