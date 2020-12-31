@@ -190,14 +190,14 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             if touched_socket == self.inputs[0]:
                 return {
                     "code": f"""
-                            {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_blocks(parameters, 0)})
+                            {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_values(parameters, 0)})
                             {self.outputs[0].block(7)}
                             """
                 }
 
             else:
                 return {
-                    "code": f"""{self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_blocks(parameters, 0)})[{self.outputs.find(touched_socket.name)-1}]"""
+                    "code": f"""{self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_values(parameters, 0)})[{self.outputs.find(touched_socket.name)-1}]"""
                 }
 
         else:

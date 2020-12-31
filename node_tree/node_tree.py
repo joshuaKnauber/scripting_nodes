@@ -73,6 +73,3 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         self.set_changes(True)
         self.update_dynamic_links()
         self.update_remove_links()
-        op = bpy.context.active_operator
-        if op and op.bl_idname == "NODE_OT_select":
-            bpy.ops.sn.run_add_menu("INVOKE_DEFAULT",x=op.properties["mouse_x"],y=op.properties["mouse_y"])

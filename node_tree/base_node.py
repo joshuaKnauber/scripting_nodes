@@ -134,10 +134,17 @@ class SN_ScriptingBaseNode:
 
     ### NODE UPDATE
     def on_node_update(self): pass
+    
+    
+    def update_link_drop(self):
+        op = bpy.context.active_operator
+        if op and op.bl_idname == "NODE_OT_select":
+            bpy.ops.sn.run_add_menu("INVOKE_DEFAULT",node=self.name)
 
 
     def update(self):
         self.update_needs_compile(bpy.context)
+        self.update_link_drop()
         self.on_node_update()
 
 
@@ -223,6 +230,8 @@ class SN_ScriptingBaseNode:
     def add_dynamic_string_output(self,label): return self.add_output("SN_DynamicStringSocket",label,False)
     def add_boolean_input(self,label,removable=False): return self.add_input("SN_BooleanSocket",label,removable)
     def add_boolean_output(self,label,removable=False): return self.add_output("SN_BooleanSocket",label,removable)
+    def add_dynamic_boolean_input(self,label): return self.add_input("SN_DynamicBooleanSocket",label,False)
+    def add_dynamic_boolean_output(self,label): return self.add_output("SN_DynamicBooleanSocket",label,False)
     def add_float_input(self,label,removable=False): return self.add_input("SN_FloatSocket",label,removable)
     def add_float_output(self,label,removable=False): return self.add_output("SN_FloatSocket",label,removable)
     def add_integer_input(self,label,removable=False): return self.add_input("SN_IntegerSocket",label,removable)
@@ -290,10 +299,8 @@ class SN_ScriptingBaseNode:
     def list_values(self, value_list, indents):
         code = ""
         for value in value_list:
-            code += " "*indents*4 + value + "\n"
-        if len(code) >= indents*4:
-            return code[indents*4:]
-        return code
+            code += value
+        return " "*indents*4 + code
     
     
     def list_blocks(self, block_list, indents):

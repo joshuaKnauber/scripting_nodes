@@ -19,6 +19,7 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         self.add_boolean_input("Boolean")
         self.add_boolean_input("Boolean")
+        self.add_dynamic_boolean_input("Boolean")
         self.add_boolean_output("Boolean")
     
     
@@ -27,7 +28,15 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_evaluate(self, context, touched_socket):
-
+        
+        values = []
+        for inp in self.inputs:
+            if inp != self.inputs[-1]:
+                if inp == self.inputs[-2]:
+                    values.append(inp.value)
+                else:
+                    values.append(inp.value + self.operation)
+                    
         return {
-            "code": f"""{self.inputs[0].value}{self.operation}{self.inputs[1].value}"""
+            "code": f"{self.list_values(values,0)}"
         }

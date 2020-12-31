@@ -128,3 +128,8 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
         if self.is_linked:
             return (c[0], c[1], c[2], 1)
         return (c[0], c[1], c[2], 0.5)
+    
+
+
+class SN_DynamicBooleanSocket(bpy.types.NodeSocket, DynamicSocket):
+    add_idname = "SN_BooleanSocket"

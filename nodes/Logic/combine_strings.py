@@ -29,5 +29,5 @@ class SN_CombineStringsNode(bpy.types.Node, SN_ScriptingBaseNode):
                 values.append(inp.value + " + ")
 
         return {
-            "code": f"""{self.list_blocks(values, 0)}"""
+            "code": f"{self.list_values(values, 0)}"
         }

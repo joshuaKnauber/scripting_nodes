@@ -134,7 +134,7 @@ def compile_addon(addon_tree, is_export=False):
             for a in bpy.context.screen.areas:
                 a.tag_redraw()
     
-    except Exception as exc:
+    except ValueError as exc:
         addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
         if txt and not addon_prefs.keep_after_error:
             bpy.data.texts.remove(txt)

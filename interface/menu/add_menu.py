@@ -13,8 +13,7 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
     bl_description = "Opens the add menu"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
     
-    x: bpy.props.IntProperty(options={"SKIP_SAVE"})
-    y: bpy.props.IntProperty(options={"SKIP_SAVE"})
+    node: bpy.props.StringProperty()
 
     def execute(self, context):
         return {"FINISHED"}
@@ -49,7 +48,7 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
                         break
                 else:
                     if inp.bl_idname == from_socket.bl_idname:
-                        is_valid = True
+                        is_valid = True 
                         break
         else:
             for out in temp_node.outputs:
@@ -67,8 +66,8 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         
 
     def invoke(self,context,event):
-        from_node = context.space_data.node_tree.nodes.active
-        if event.shift and event.type == "LEFTMOUSE" and from_node and from_node.select:
+        from_node = context.space_data.node_tree.nodes[self.node]
+        if event.shift and event.type == "LEFTMOUSE" and from_node:
             context.scene.compatible_nodes.clear()
             self.get_socket(context,from_node,event)
             for category in get_node_categories():

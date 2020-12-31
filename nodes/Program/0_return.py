@@ -60,10 +60,10 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         if len(self.inputs[0].links) and self.connected_function:
             return {
                 "code": f"""
-                        return {self.list_blocks(contents, 0)}
+                        return {self.list_values(contents, 0)}
                         """
             }
 
         else:
             self.add_error("No function", "This node has to be connected to a function", False)
-            return {"code": {self.list_blocks(contents, 0)}}
+            return {"code": f"{self.list_values(contents, 0)}"}
