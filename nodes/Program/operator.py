@@ -54,7 +54,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_execute_output("Operator")
-        self.add_boolean_input("Should Run")
+        self.add_boolean_input("Poll")
         self.update_name(None)
 
 
