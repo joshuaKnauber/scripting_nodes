@@ -1,5 +1,6 @@
 import bpy
 from .. import bl_info
+from ..compiler.compiler import current_module
 
 
 class SN_AddonPreferences(bpy.types.AddonPreferences):
@@ -34,7 +35,12 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
 
     def draw_dev_prefs(self,layout):
-        pass
+        module = current_module()
+        if module and "sn_draw_addon_prefs" in dir(module):
+            module.sn_draw_addon_prefs(self)
+        else:
+            layout.label(text="No active addon preferences node",icon="ERROR")
+            
 
 
     def draw_serpens_settings(self,layout):

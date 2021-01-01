@@ -134,7 +134,7 @@ def compile_addon(addon_tree, is_export=False):
             for a in bpy.context.screen.areas:
                 a.tag_redraw()
     
-    except ValueError as exc:
+    except Exception as exc:
         addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
         if txt and not addon_prefs.keep_after_error:
             bpy.data.texts.remove(txt)
@@ -142,6 +142,14 @@ def compile_addon(addon_tree, is_export=False):
         print(exc)
         print("# # # # # # # # # # # # # # # # # # # # # # # # # # # # #")
         return False
+    
+    
+def current_module():
+    addon_tree = bpy.context.scene.sn.addon_tree()
+    if addon_tree:
+        compiled = __find_compiled_addon(addon_tree)
+        if compiled:
+            return compiled["module"]
     
     
 def compile_export(addon_tree):
