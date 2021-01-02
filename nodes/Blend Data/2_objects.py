@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 class SN_ObjectsNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_ObjectsNode"
-    bl_label = "Objects"
+    bl_label = "Scene Objects"
     # bl_icon = "GRAPH"
     bl_width_default = 160
     

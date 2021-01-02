@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_GetDataCollectionNode"
-    bl_label = "Get Data Collections"
+    bl_label = "Get Data"
     # bl_icon = "GRAPH"
     bl_width_default = 160
     
