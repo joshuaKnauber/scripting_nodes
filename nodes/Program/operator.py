@@ -1,6 +1,71 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
+from ...node_tree.variables.variables_ui_list import SN_Variable
+from ...interface.sidepanel.graph_panels import draw_property
 
+
+class SN_OT_AddOperatorProperty(bpy.types.Operator):
+    bl_idname = "sn.add_operator_property"
+    bl_label = "Add Operator Property"
+    bl_description = "Adds a new property to this operator"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    node_name: bpy.props.StringProperty()
+
+    def execute(self, context):
+        addon_tree = context.space_data.node_tree
+        node = addon_tree.nodes[self.node_name]
+
+        variable = node.operator_properties.add()
+        variable.is_property = True
+        variable.use_self = True
+        variable.node_tree = addon_tree
+        variable.name = "New Property"
+        node.property_index = len(node.operator_properties)-1
+
+        return {"FINISHED"}
+
+
+class SN_OT_RemoveOperatorProperty(bpy.types.Operator):
+    bl_idname = "sn.remove_operator_property"
+    bl_label = "Remove Operator Property"
+    bl_description = "Remove a property from this operator"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    node_name: bpy.props.StringProperty()
+
+    def execute(self, context):
+        addon_tree = context.space_data.node_tree
+        node = addon_tree.nodes[self.node_name]
+
+        node.operator_properties.remove(node.property_index)
+        if len(node.operator_properties):
+            node.property_index = len(node.operator_properties)-1
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_confirm(self, event)
+
+
+class SN_OT_EditOperatorProperty(bpy.types.Operator):
+    bl_idname = "sn.edit_operator_property"
+    bl_label = "Edit Operator Property"
+    bl_description = "Edit a property from this operator"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    node_name: bpy.props.StringProperty()
+
+    def execute(self, context):
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_popup(self)
+
+    def draw(self, context):
+        addon_tree = context.space_data.node_tree
+        node = addon_tree.nodes[self.node_name]
+        variable = node.operator_properties[node.property_index]
+        draw_property(context, variable, self.layout)
 
 
 class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -63,7 +128,8 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     operator_name: bpy.props.StringProperty(name="Name", description="Name of the operator", update=update_name)
     operator_description: bpy.props.StringProperty(name="Description", description="Description of the operator", update=update_description)
     invoke_option: bpy.props.EnumProperty(name="Popup",items=[("none","None","None"),("invoke_confirm","Confirm","You need to confirm the operator"),("invoke_props_dialog","Property Dialog","Opens a customizable property dialog"), ("invoke_popup", "Popup", "Shows a customizable popup"), ("invoke_props_popup", "Property Popup", "Show operator properties and execute it automatically on changes"), ("invoke_search_popup", "Search Popup", "Opens a search menu from an enum property")],update=update_popup)
-
+    operator_properties: bpy.props.CollectionProperty(type=SN_Variable)
+    property_index: bpy.props.IntProperty()
 
     def on_create(self,context):
         self.add_execute_output("Operator")
@@ -77,6 +143,16 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.label(text="Description: ")
         layout.prop(self, "operator_description", text="")
         layout.prop(self, "invoke_option")
+
+        row = layout.row(align=False)
+        row.template_list("SN_UL_VariableList", "Properties", self, "operator_properties", self, "property_index",rows=3)
+        col = row.column(align=True)
+        col.operator("sn.add_operator_property", text="", icon="ADD").node_name = self.name
+        col = col.column(align=True)
+        col.enabled = bool(len(self.operator_properties))
+        col.operator("sn.remove_operator_property", text="", icon="REMOVE").node_name = self.name
+        col.operator("sn.edit_operator_property", text="", icon="GREASEPENCIL").node_name = self.name
+
 
     def what_layout(self, socket):
         return "layout"
