@@ -64,11 +64,14 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         for out in self.outputs[1:-1]:
             parameter_string+=out.value+", "
 
-        code = self.outputs[0].block(6)
+        code = self.outputs[0].block(7)
 
         return {
             "code": f"""
                     def {self.item.identifier}({parameter_string}):
-                        {code if code else "pass"}
+                        try:
+                            {code if code else "pass"}
+                        except Exception as exc:
+                            print(str(exc) + " | Error in function {self.func_name}")
                     """
         }

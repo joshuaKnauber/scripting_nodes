@@ -193,16 +193,27 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 return {self.inputs[0].value}
 
                             def execute(self, context):
-                                {self.outputs[0].block(8)}
+                                try:
+                                    {self.outputs[0].block(9) if self.outputs[0].block(9) else "pass"}
+                                except Exception as exc:
+                                    print(str(exc) + " | Error in execute function of {self.operator_name}")
+
                                 return {{"FINISHED"}}
 
                             def invoke(self, context, event):
-                                {self.outputs[1].block(8)}
+                                try:
+                                    {self.outputs[1].block(9) if self.outputs[1].block(9) else "pass"}
+                                except Exception as exc:
+                                    print(str(exc) + " | Error in invoke function of {self.operator_name}")
+
                                 return {return_invoke}
 
                             def draw(self, context):
                                 layout = self.layout
-                                {self.list_blocks(layouts, 8)}
+                                try:
+                                    {self.list_blocks(layouts, 9) if self.list_blocks(layouts, 9) else "pass"}
+                                except Exception as exc:
+                                    print(str(exc) + " | Error in draw function of {self.operator_name}")
                         """
             }
 
@@ -230,12 +241,19 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 return {{"FINISHED"}}
 
                             def invoke(self, context, event):
-                                {self.outputs[0].block(8)}
+                                try:
+                                    {self.outputs[0].block(9) if self.outputs[0].block(9) else "pass"}
+                                except Exception as exc:
+                                    print(str(exc) + " | Error in invoke function of {self.operator_name}")
+
                                 return context.window_manager.invoke_popup(self, width={self.inputs[1].value})
 
                             def draw(self, context):
                                 layout = self.layout
-                                {self.list_blocks(layouts, 8)}
+                                try:
+                                    {self.list_blocks(layouts, 9) if self.list_blocks(layouts, 9) else "pass"}
+                                except Exception as exc:
+                                    print(str(exc) + " | Error in draw function of {self.operator_name}")
                         """
             }
 
