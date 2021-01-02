@@ -82,8 +82,9 @@ def draw_property(context,var,layout):
     col.prop(var,"var_type",text="Type")
     col.separator()
 
-    col.prop(var,"attach_property_to",text="Attach To")
-    col.separator()
+    if not var.use_self:
+        col.prop(var,"attach_property_to",text="Attach To")
+        col.separator()
     
     if var.property_subtype != "NO_SUBTYPES":
         col.prop(var,"property_subtype",text="Subtype")

@@ -51,24 +51,22 @@ class SN_EnumItem(bpy.types.PropertyGroup):
 class SN_Variable(bpy.types.PropertyGroup):
 
     def update_name(self,context):
-        node_instance = SN_ScriptingBaseNode()
-        
         key = "variable"
         if self.is_property:
             key = "property"
         if not self.name:
             self.name = f"New {key.title()}"
             
-        self.identifier = node_instance.get_python_name(self.name, f"new_{key}")
+        self.identifier = SN_ScriptingBaseNode().get_python_name(self.name, f"new_{key}")
 
         if self.is_property:
-            unique_name = node_instance.get_unique_name(self.name, self.node_tree.sn_properties, " ")
+            unique_name = SN_ScriptingBaseNode().get_unique_name(self.name, self.node_tree.sn_properties, " ")
         else:
-            unique_name = node_instance.get_unique_name(self.name, self.node_tree.sn_variables, " ")
+            unique_name = SN_ScriptingBaseNode().get_unique_name(self.name, self.node_tree.sn_variables, " ")
         if unique_name != self.name:
             self.name = unique_name
         
-        self.identifier = node_instance.get_python_name(self.name, f"new_{key}")
+        self.identifier = SN_ScriptingBaseNode().get_python_name(self.name, f"new_{key}")
     
     name: bpy.props.StringProperty(name="Name",
                                    description="The name of this variable",
@@ -78,7 +76,9 @@ class SN_Variable(bpy.types.PropertyGroup):
     identifier: bpy.props.StringProperty()
 
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
-
+    
+    use_self: bpy.props.BoolProperty(default=False)
+    
     def get_var_types(self,context):
         if self.is_property:
             items = [("STRING","String","String",variable_icons["STRING"],0),
