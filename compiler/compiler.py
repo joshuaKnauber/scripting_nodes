@@ -353,7 +353,7 @@ def __create_property_register(addon_tree):
         properties += " "*4 + "pass"
     else:
         for prop in addon_tree.sn_properties:
-            properties += " "*4 + prop.property_register() + "\n"
+            properties += " "*4 + prop.property_register()
             
     return properties
 
@@ -364,7 +364,7 @@ def __create_property_unregister(addon_tree):
         properties += " "*4 + "pass"
     else:
         for prop in addon_tree.sn_properties:
-            properties += " "*4 + prop.property_unregister() + "\n"
+            properties += " "*4 + prop.property_unregister()
     return properties
 
 
