@@ -352,17 +352,9 @@ def __create_property_register(addon_tree):
     if not len(addon_tree.sn_properties):
         properties += " "*4 + "pass"
     else:
-        prop_names = {"STRING":"String","INTEGER":"Int","FLOAT":"Float","BOOLEAN":"Bool","ENUM":"Enum"}
         for prop in addon_tree.sn_properties:
-            properties += " "*4 + f"bpy.types.{prop.attach_property_to}.{prop.identifier} = bpy.props.{prop_names[prop.var_type]}"
-            properties += f"{'Vector' if prop.is_vector else ''}Property("
-            properties += f"name='{prop.name}',description='{prop.description}',"
-            if prop.property_subtype != "NO_SUBTYPES":
-                properties += f"subtype='{prop.property_subtype}',"
-            if prop.property_unit != "NO_UNITS":
-                properties += f"unit='{prop.property_unit}',"
-            properties += f"{prop.property_default()}"
-            properties += f"{prop.property_min_max()})\n"
+            properties += " "*4 + prop.property_register() + "\n"
+            
     return properties
 
 
@@ -372,7 +364,7 @@ def __create_property_unregister(addon_tree):
         properties += " "*4 + "pass"
     else:
         for prop in addon_tree.sn_properties:
-            properties += " "*4 + f"del bpy.types.{prop.attach_property_to}.{prop.identifier}\n"
+            properties += " "*4 + prop.property_unregister() + "\n"
     return properties
 
 

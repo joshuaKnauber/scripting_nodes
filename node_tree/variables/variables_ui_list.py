@@ -325,6 +325,22 @@ class SN_Variable(bpy.types.PropertyGroup):
             if self.use_soft_min: min_max += ",soft_min="+str(self.float_soft_min)
             if self.use_soft_max: min_max += ",soft_max="+str(self.float_soft_min)
         return min_max
+    
+    def property_register(self):
+        prop_names = {"STRING":"String","INTEGER":"Int","FLOAT":"Float","BOOLEAN":"Bool","ENUM":"Enum"}
+        property_line = f"bpy.types.{self.attach_property_to}.{self.identifier} = bpy.props.{prop_names[self.var_type]}"
+        property_line += f"{'Vector' if self.is_vector else ''}Property("
+        property_line += f"name='{self.name}',description='{self.description}',"
+        if self.property_subtype != "NO_SUBTYPES":
+            property_line += f"subtype='{self.property_subtype}',"
+        if self.property_unit != "NO_UNITS":
+            properties += f"unit='{self.property_unit}',"
+        property_line += f"{self.property_default()}"
+        property_line += f"{self.property_min_max()})"
+        return property_line
+    
+    def property_unregister(self):
+        return f"del bpy.types.{self.attach_property_to}.{self.identifier}"
 
 
 
