@@ -329,7 +329,7 @@ class SN_Variable(bpy.types.PropertyGroup):
     def property_register(self):
         prop_names = {"STRING":"String","INTEGER":"Int","FLOAT":"Float","BOOLEAN":"Bool","ENUM":"Enum"}
         if self.use_self:
-            property_line = f"{self.attach_property_to}.{self.identifier} : bpy.props.{prop_names[self.var_type]}"
+            property_line = f"{self.identifier} : bpy.props.{prop_names[self.var_type]}"
         else:
             property_line = f"bpy.types.{self.attach_property_to}.{self.identifier} = bpy.props.{prop_names[self.var_type]}"
         property_line += f"{'Vector' if self.is_vector else ''}Property("
