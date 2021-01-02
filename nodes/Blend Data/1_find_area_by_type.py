@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_FindAreaNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_FindAreaNode"
-    bl_label = "Find Area"
+    bl_label = "Find Area By Type"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 

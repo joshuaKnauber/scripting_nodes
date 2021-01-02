@@ -144,6 +144,14 @@ def compile_addon(addon_tree, is_export=False):
         return False
     
     
+def current_module():
+    addon_tree = bpy.context.scene.sn.addon_tree()
+    if addon_tree:
+        compiled = __find_compiled_addon(addon_tree)
+        if compiled:
+            return compiled["module"]
+    
+    
 def compile_export(addon_tree):
     text = compile_addon(addon_tree,True)
     if text:

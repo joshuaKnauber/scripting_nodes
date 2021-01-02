@@ -72,6 +72,132 @@ class SN_PT_VariablePanel(bpy.types.Panel):
                 col.prop(var,"int_default")
             
             row.label(text="",icon="BLANK1")
+
+
+def draw_property(context,var,layout):
+    col = layout.column()
+    col.use_property_split = True
+    col.use_property_decorate = False
+    
+    col.prop(var,"var_type",text="Type")
+    col.separator()
+
+    col.prop(var,"attach_property_to",text="Attach To")
+    col.separator()
+    
+    if var.property_subtype != "NO_SUBTYPES":
+        col.prop(var,"property_subtype",text="Subtype")
+        col.separator()
+    if var.property_unit != "NO_UNITS":
+        col.prop(var,"property_unit",text="Unit")
+        col.separator()
+    
+    if var.var_type in ["BOOLEAN","FLOAT","INTEGER"]:
+        col.prop(var,"is_vector")
+        if var.is_vector:
+            col.prop(var,"vector_size")
+        col.separator()
+
+    col.prop(var,"description")
+    col.separator()
+    
+    if var.var_type == "STRING":
+        col.prop(var,"str_default")
+        
+    elif var.var_type == "INTEGER":
+        if not var.is_vector:
+            col.prop(var,"int_default")
+        elif var.vector_size == 3:
+            col.prop(var,"int_three_default")
+        elif var.vector_size == 4:
+            col.prop(var,"int_four_default")
+        
+        col.separator()
+        
+        sub_row = col.row()
+        sub_row.prop(var,"use_min",text="")
+        sub_col = sub_row.column()
+        sub_col.enabled = var.use_min
+        sub_col.prop(var,"int_min")
+        
+        sub_row = col.row()
+        sub_row.prop(var,"use_max",text="")
+        sub_col = sub_row.column()
+        sub_col.enabled = var.use_max
+        sub_col.prop(var,"int_max")
+        
+        sub_row = col.row()
+        sub_row.prop(var,"use_soft_min",text="")
+        sub_col = sub_row.column()
+        sub_col.enabled = var.use_soft_min
+        sub_col.prop(var,"int_soft_min")
+        
+        sub_row = col.row()
+        sub_row.prop(var,"use_soft_max",text="")
+        sub_col = sub_row.column()
+        sub_col.enabled = var.use_soft_max
+        sub_col.prop(var,"int_soft_max")
+            
+    elif var.var_type == "FLOAT":
+        if not var.is_vector:
+            col.prop(var,"float_default")
+        elif var.vector_size == 3:
+            col.prop(var,"float_three_default")
+        elif var.vector_size == 4:
+            col.prop(var,"float_four_default")
+        
+        col.separator()
+        
+        sub_row = col.row()
+        sub_row.prop(var,"use_min",text="")
+        sub_col = sub_row.column()
+        sub_col.enabled = var.use_min
+        sub_col.prop(var,"float_min")
+        
+        sub_row = col.row()
+        sub_row.prop(var,"use_max",text="")
+        sub_col = sub_row.column()
+        sub_col.enabled = var.use_max
+        sub_col.prop(var,"float_max")
+        
+        sub_row = col.row()
+        sub_row.prop(var,"use_soft_min",text="")
+        sub_col = sub_row.column()
+        sub_col.enabled = var.use_soft_min
+        sub_col.prop(var,"float_soft_min")
+        
+        sub_row = col.row()
+        sub_row.prop(var,"use_soft_max",text="")
+        sub_col = sub_row.column()
+        sub_col.enabled = var.use_soft_max
+        sub_col.prop(var,"float_soft_max")
+        
+    elif var.var_type == "BOOLEAN":
+        if not var.is_vector:
+            col.prop(var,"bool_default",toggle=True)
+        elif var.vector_size == 3:
+            column = col.column(align=True)
+            for i in range(3):
+                column.prop(var,"bool_three_default",toggle=True,text=str(var.bool_three_default[i]),index=i)
+        elif var.vector_size == 4:
+            column = col.column(align=True)
+            for i in range(4):
+                column.prop(var,"bool_four_default",toggle=True,text=str(var.bool_four_default[i]),index=i)
+
+    elif var.var_type == "ENUM":
+        for index, item in enumerate(var.enum_items):
+            box = col.box()
+            header_row = box.row(align=True)
+            header_row.prop(item,"name",text="")
+            op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_UP")
+            op.index = index
+            op.down = False
+            op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_DOWN")
+            op.index = index
+            op.down = True
+            header_row.operator("sn.remove_enum_item",text="",icon="PANEL_CLOSE")
+            box.prop(item,"description")
+        col.operator("sn.add_enum_item",text="Add Enum Item", icon="ADD")
             
             
 class SN_PT_PropertyPanel(bpy.types.Panel):
@@ -82,6 +208,7 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_order = 2
+    
 
     def draw(self, context):
         layout = self.layout
@@ -102,131 +229,7 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
         if len(addon_tree.sn_properties):
             layout.separator()
             row = layout.row()
-            col = row.column()
-            col.use_property_split = True
-            col.use_property_decorate = False
-            var = addon_tree.sn_properties[addon_tree.sn_property_index]
-            
-            col.prop(var,"var_type",text="Type")
-            col.separator()
-
-            col.prop(var,"attach_property_to",text="Attach To")
-            col.separator()
-            
-            if var.property_subtype != "NO_SUBTYPES":
-                col.prop(var,"property_subtype",text="Subtype")
-                col.separator()
-            if var.property_unit != "NO_UNITS":
-                col.prop(var,"property_unit",text="Unit")
-                col.separator()
-            
-            if var.var_type in ["BOOLEAN","FLOAT","INTEGER"]:
-                col.prop(var,"is_vector")
-                if var.is_vector:
-                    col.prop(var,"vector_size")
-                col.separator()
-
-            col.prop(var,"description")
-            col.separator()
-            
-            if var.var_type == "STRING":
-                col.prop(var,"str_default")
-                
-            elif var.var_type == "INTEGER":
-                if not var.is_vector:
-                    col.prop(var,"int_default")
-                elif var.vector_size == 3:
-                    col.prop(var,"int_three_default")
-                elif var.vector_size == 4:
-                    col.prop(var,"int_four_default")
-                
-                col.separator()
-                
-                sub_row = col.row()
-                sub_row.prop(var,"use_min",text="")
-                sub_col = sub_row.column()
-                sub_col.enabled = var.use_min
-                sub_col.prop(var,"int_min")
-                
-                sub_row = col.row()
-                sub_row.prop(var,"use_max",text="")
-                sub_col = sub_row.column()
-                sub_col.enabled = var.use_max
-                sub_col.prop(var,"int_max")
-                
-                sub_row = col.row()
-                sub_row.prop(var,"use_soft_min",text="")
-                sub_col = sub_row.column()
-                sub_col.enabled = var.use_soft_min
-                sub_col.prop(var,"int_soft_min")
-                
-                sub_row = col.row()
-                sub_row.prop(var,"use_soft_max",text="")
-                sub_col = sub_row.column()
-                sub_col.enabled = var.use_soft_max
-                sub_col.prop(var,"int_soft_max")
-                    
-            elif var.var_type == "FLOAT":
-                if not var.is_vector:
-                    col.prop(var,"float_default")
-                elif var.vector_size == 3:
-                    col.prop(var,"float_three_default")
-                elif var.vector_size == 4:
-                    col.prop(var,"float_four_default")
-                
-                col.separator()
-                
-                sub_row = col.row()
-                sub_row.prop(var,"use_min",text="")
-                sub_col = sub_row.column()
-                sub_col.enabled = var.use_min
-                sub_col.prop(var,"float_min")
-                
-                sub_row = col.row()
-                sub_row.prop(var,"use_max",text="")
-                sub_col = sub_row.column()
-                sub_col.enabled = var.use_max
-                sub_col.prop(var,"float_max")
-                
-                sub_row = col.row()
-                sub_row.prop(var,"use_soft_min",text="")
-                sub_col = sub_row.column()
-                sub_col.enabled = var.use_soft_min
-                sub_col.prop(var,"float_soft_min")
-                
-                sub_row = col.row()
-                sub_row.prop(var,"use_soft_max",text="")
-                sub_col = sub_row.column()
-                sub_col.enabled = var.use_soft_max
-                sub_col.prop(var,"float_soft_max")
-                
-            elif var.var_type == "BOOLEAN":
-                if not var.is_vector:
-                    col.prop(var,"bool_default",toggle=True)
-                elif var.vector_size == 3:
-                    column = col.column(align=True)
-                    for i in range(3):
-                        column.prop(var,"bool_three_default",toggle=True,text=str(var.bool_three_default[i]),index=i)
-                elif var.vector_size == 4:
-                    column = col.column(align=True)
-                    for i in range(4):
-                        column.prop(var,"bool_four_default",toggle=True,text=str(var.bool_four_default[i]),index=i)
-
-            elif var.var_type == "ENUM":
-                for index, item in enumerate(var.enum_items):
-                    box = col.box()
-                    header_row = box.row(align=True)
-                    header_row.prop(item,"name",text="")
-                    op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_UP")
-                    op.index = index
-                    op.down = False
-                    op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_DOWN")
-                    op.index = index
-                    op.down = True
-                    header_row.operator("sn.remove_enum_item",text="",icon="PANEL_CLOSE")
-                    box.prop(item,"description")
-                col.operator("sn.add_enum_item",text="Add Enum Item", icon="ADD")
-            
+            draw_property(context, addon_tree.sn_properties[addon_tree.sn_property_index], row)
             row.label(text="",icon="BLANK1")
 
 
