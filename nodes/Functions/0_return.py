@@ -15,7 +15,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         "has_collection": True
     }
 
-    connected_function: bpy.props.StringProperty(default="")
+    connected_function: bpy.props.StringProperty()
 
     def on_outside_update(self, node):
         self.on_any_change()
@@ -23,7 +23,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_execute_input("Return")
-        self.add_dynamic_variable_input("Content")
+        self.add_dynamic_variable_input("Content").use_var_name = False
 
 
     def on_any_change(self):

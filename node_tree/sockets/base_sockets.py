@@ -333,6 +333,7 @@ class DynamicSocket(ScriptingSocket):
 
         else:
             inp = node.add_input(self.add_idname,self.default_text,True)
+        inp.use_var_name = self.use_var_name
         inp.is_expression = self.make_variable
         inp.var_name = link.from_socket.default_text
         inp.copy_name = self.copy_name
