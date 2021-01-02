@@ -326,6 +326,11 @@ class DynamicSocket(ScriptingSocket):
         pos = self.get_socket_index(node.inputs)
         if self.copy_type:
             inp = node.add_input(from_socket.bl_idname,self.default_text,True)
+            attr_list = ["is_array", "array_size", "is_color", "use_factor", "is_file_path", "is_dir_path"]
+            for attr in attr_list:
+                if hasattr(inp, attr):
+                    setattr(inp, attr, getattr(from_socket, attr))
+
         else:
             inp = node.add_input(self.add_idname,self.default_text,True)
         inp.is_expression = self.make_variable
@@ -342,6 +347,10 @@ class DynamicSocket(ScriptingSocket):
         pos = self.get_socket_index(node.outputs)
         if self.copy_type:
             out = node.add_output(to_socket.bl_idname,self.default_text,True)
+            attr_list = ["is_array", "array_size", "is_color", "use_factor", "is_file_path", "is_dir_path"]
+            for attr in attr_list:
+                if hasattr(out, attr):
+                    setattr(out, attr, getattr(to_socket, attr))
         else:
             out = node.add_output(self.add_idname,self.default_text,True)
         out.is_expression = self.make_variable
