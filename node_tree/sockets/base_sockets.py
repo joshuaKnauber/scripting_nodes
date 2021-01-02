@@ -247,8 +247,10 @@ class ScriptingSocket:
             if self.is_output:
                 if len(self.links):
                     return self.links[0].to_socket.make_code(indents)
-                else:
+                elif self.sn_type == "EXECUTE":
                     return "pass\n"
+                else:
+                    return ""
             else:
                 return process_node(self.node, self, indents)
         

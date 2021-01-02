@@ -167,7 +167,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                     layouts.append(out.block(0))
 
 
-            return_invoke = """{"Finished"}"""
+            return_invoke = """self.execute(context)"""
             if self.invoke_option != "none":
                 return_invoke = "context.window_manager." + self.invoke_option
             if self.invoke_option == "invoke_confirm":

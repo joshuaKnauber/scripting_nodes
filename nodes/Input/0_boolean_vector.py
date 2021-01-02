@@ -52,7 +52,7 @@ class SN_BoolVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         value = str((self.value[0],self.value[1],self.value[2]))
         if self.use_four:
-            value = str((self.value_four[0][0],self.value_four[1],self.value_four[2],self.value_four[3]))
+            value = str((self.value_four[0],self.value_four[1],self.value_four[2],self.value_four[3]))
 
         return {
             "code": f"{value}"
