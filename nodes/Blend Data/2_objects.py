@@ -1,63 +1,134 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
+from .base_scene_data import SN_SceneDataBase
 
 
 
-class SN_ObjectsNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_ObjectsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
 
     bl_idname = "SN_ObjectsNode"
-    bl_label = "Scene Objects"
-    # bl_icon = "GRAPH"
-    bl_width_default = 160
+    bl_label = "Objects"
     
-    node_options = {
-        "default_color": (0.3,0.3,0.3),
-    }
+    data_type = "Object"
+    data_identifier = "objects"
     
     
-    def update_return(self,context):
-        if self.return_type == "ALL" and len(self.inputs):
-            self.inputs.clear()
-            self.outputs[0].name = "All Objects"
-            self.outputs[0].collection = True
-        elif self.return_type == "INDEX" and (not len(self.inputs) or self.inputs[0].sn_type != "NUMBER"):
-            self.inputs.clear()
-            self.add_integer_input("Index")
-            self.outputs[0].name = "Indexed Object"
-            self.outputs[0].collection = False
-        elif self.return_type == "NAME" and (not len(self.inputs) or self.inputs[0].sn_type != "STRING"):
-            self.inputs.clear()
-            self.add_string_input("Name")
-            self.outputs[0].name = "Named Object"
-            self.outputs[0].collection = False
-        if self.outputs[0].is_linked:
-            self.outputs[0].links[0].to_node.on_link_insert(self.outputs[0].links[0])
     
-    
-    return_type: bpy.props.EnumProperty(items=[("ALL","All","All Objects"),
-                                               ("INDEX","Index","Object by name"),
-                                               ("NAME","Name","Object by name")],
-                                        name="Return Type",
-                                        description="The type of returned object",
-                                        update=update_return)
-    
+class SN_ActionsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
 
-    def on_create(self,context):
-        out = self.add_blend_data_output("All Objects")
-        out.data_type = "Object"
-        out.collection = True
-        
-        
-    def draw_node(self,context,layout):
-        layout.prop(self,"return_type",expand=True)
+    bl_idname = "SN_ActionsNode"
+    bl_label = "Actions"
+    
+    data_type = "Action"
+    data_identifier = "actions"
+    
+    
+    
+class SN_ArmaturesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
 
+    bl_idname = "SN_ArmaturesNode"
+    bl_label = "Armatures"
+    
+    data_type = "Armature"
+    data_identifier = "armatures"
+    
+    
+    
+class SN_CollectionsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
 
-    def code_evaluate(self, context, touched_socket):
+    bl_idname = "SN_CollectionsNode"
+    bl_label = "Collections"
+    
+    data_type = "Collection"
+    data_identifier = "collections"
+    
+    
+    
+class SN_ImagesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
 
-        limiter = ""
-        if self.return_type != "ALL":
-            limiter = f"[{self.inputs[0].value}]"
+    bl_idname = "SN_ImagesNode"
+    bl_label = "Images"
+    
+    data_type = "Image"
+    data_identifier = "images"
+    
+    
+    
+class SN_LightsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
 
-        return {
-            "code": f"bpy.data.objects{limiter}"
-        }
+    bl_idname = "SN_LightsNode"
+    bl_label = "Lights"
+    
+    data_type = "Light"
+    data_identifier = "lights"
+    
+    
+    
+class SN_MaterialsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
+
+    bl_idname = "SN_MaterialsNode"
+    bl_label = "Materials"
+    
+    data_type = "Material"
+    data_identifier = "materials"
+    
+    
+    
+class SN_MeshesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
+
+    bl_idname = "SN_MeshesNode"
+    bl_label = "Meshes"
+    
+    data_type = "Mesh"
+    data_identifier = "meshes"
+    
+    
+    
+class SN_NodeGroupsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
+
+    bl_idname = "SN_NodeGroupsNode"
+    bl_label = "Node Groups"
+    
+    data_type = "NodeGroup"
+    data_identifier = "node_groups"
+    
+    
+    
+class SN_TextsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
+
+    bl_idname = "SN_TextsNode"
+    bl_label = "Texts"
+    
+    data_type = "Text"
+    data_identifier = "texts"
+    
+    
+    
+class SN_TexturesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
+
+    bl_idname = "SN_TexturesNode"
+    bl_label = "Textures"
+    
+    data_type = "Texture"
+    data_identifier = "textures"
+    
+    
+    
+class SN_WorkspacesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
+
+    bl_idname = "SN_WorkspacesNode"
+    bl_label = "Workspaces"
+    
+    data_type = "Workspace"
+    data_identifier = "workspaces"
+    data_identifier = "textures"
+    
+    
+    
+class SN_WorldsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
+
+    bl_idname = "SN_WorldsNode"
+    bl_label = "Worlds"
+    
+    data_type = "World"
+    data_identifier = "worlds"

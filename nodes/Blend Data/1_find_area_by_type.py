@@ -12,6 +12,7 @@ class SN_FindAreaNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     node_options = {
         "default_color": (0.3,0.3,0.3),
+        "imperative_once": True
     }
     
     
@@ -31,16 +32,27 @@ class SN_FindAreaNode(bpy.types.Node, SN_ScriptingBaseNode):
                                       items=area_items)
     
     def on_create(self,context):
-        self.add_blend_data_output("Area").data_type = "bpy.types.Area"
+        self.add_blend_data_output("Area").data_type = "Area"
         self.add_boolean_output("Area exists")
     
 
     def draw_node(self,context,layout):
         layout.prop(self,"area_type",text="")
+        
+        
+    def code_imperative(self, context):
+        return {
+            "code": f"""
+                    def sn_find_area_by_type(area_type, boolean=False):
+                        for area in bpy.context.screen.areas:
+                            if area.type == area_type:
+                                return area if not boolean else True
+                        return None if not boolean else False
+                    """
+        }
     
 
     def code_evaluate(self, context, touched_socket):
         return {
-            "code": f"""
-                    """
+            "code": f"sn_find_area_by_type(\"{self.area_type}\",{touched_socket == self.outputs[1]})"
         }
