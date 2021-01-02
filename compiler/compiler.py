@@ -111,6 +111,9 @@ def compile_addon(addon_tree, is_export=False):
         unregister_code = __get_unregister_code(addon_data["code"]["graph_code"])
         __write_in_text(addon_data["text"], unregister_code)
         
+        # auto format
+        __auto_format_text(addon_data["text"])
+        
         # make module
         module = addon_data["text"].as_module()
         addon_data["module"] = module
@@ -189,6 +192,23 @@ def remove_addon(addon_tree):
             addon["addon_tree"].sn_graphs[0].errors.clear()
             __remove_addon(addon)
             break
+        
+        
+def __auto_format_text(text):
+    new_lines = [" "]
+    for line in text.as_string().split("\n"):
+        if line and not line.isspace():
+            if (line[0] == "#" or "@" in line) and not new_lines[-1][0] == "#":
+                new_lines += ["",""]
+            elif "class " in line and not new_lines[-1][0] == "#":
+                new_lines += ["",""]
+            elif "def " in line and not (new_lines[-1][0] == "#" or "@" in new_lines[-1]):
+                new_lines += [""]
+            elif "bl_info" in line:
+                new_lines += ["",""]
+            new_lines.append(line)
+    text.clear()
+    text.write("\n".join(new_lines[3:]))
 
 
 def __find_compiled_addon(addon_tree):
