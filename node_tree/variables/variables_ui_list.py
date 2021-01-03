@@ -94,6 +94,10 @@ class SN_Variable(bpy.types.PropertyGroup):
     def update_var_type(self,context):
         self.make_property = False
         self.is_vector = False
+        try: self.property_subtype = "NONE"
+        except: self.property_subtype = "NO_SUBTYPES"
+        try: self.property_unit = "NONE"
+        except: self.property_unit = "NO_UNITS"
     
     var_type: bpy.props.EnumProperty(items=get_var_types,
                                      update=update_var_type,
@@ -146,8 +150,7 @@ class SN_Variable(bpy.types.PropertyGroup):
                             'MATRIX', 'EULER', 'QUATERNION', 'AXISANGLE', 'XYZ', 'XYZ_LENGTH',
                             'COLOR_GAMMA', 'COORDINATES', 'LAYER', 'LAYER_MEMBER']
             else:
-                subtypes = ['NONE', 'PIXEL', 'UNSIGNED', 'PERCENTAGE', 'FACTOR', 'ANGLE', 'TIME', 'DISTANCE',
-                            'DISTANCE_CAMERA', 'POWER', 'TEMPERATURE']
+                subtypes = ["NO_SUBTYPES"]
         else:
             subtypes = ["NO_SUBTYPES"]
         for subtype in subtypes:
