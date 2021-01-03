@@ -1,5 +1,7 @@
 import bpy
 from time import time
+from datetime import datetime
+import logging
 from .txt_blocks import license_block, serpens_functions
 
 
@@ -137,13 +139,18 @@ def compile_addon(addon_tree, is_export=False):
             for a in bpy.context.screen.areas:
                 a.tag_redraw()
     
-    except ValueError as exc:
+    except BaseException as exc:
         addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
         if txt and not addon_prefs.keep_after_error:
             bpy.data.texts.remove(txt)
-        print("# # # # # # # # # ERROR WHILE COMPILING # # # # # # # # #")
-        print(exc)
-        print("# # # # # # # # # # # # # # # # # # # # # # # # # # # # #")
+        print(f"\n\nSERPENS EXCEPTION | Time: {datetime.now().hour}:{datetime.now().minute} |  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -")
+        print("\n| SIMPLIFIED:")
+        print(exc, "\n")
+        print("| FULL ERROR:")
+        logging.exception("")
+        print("\n| INFO:")
+        print("If you don't understand this error please post it in the discord server.")
+        print("\n-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -\n\n")
         return False
     
     

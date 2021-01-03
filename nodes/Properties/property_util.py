@@ -37,6 +37,7 @@ class SN_ResetNode(bpy.types.Operator):
 def setup_sockets(node,path_details):
     data_input = None
     for part in path_details["path_parts"]:
+        print(part)
         if type(part) == dict:
             if part["is_numeric"]:
                 node.add_integer_input(part["name"] + " Index").set_default(part["index"])

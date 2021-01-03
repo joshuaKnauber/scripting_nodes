@@ -94,6 +94,10 @@ class SN_Variable(bpy.types.PropertyGroup):
     def update_var_type(self,context):
         self.make_property = False
         self.is_vector = False
+        try: self.property_subtype = "NONE"
+        except: self.property_subtype = "NO_SUBTYPES"
+        try: self.property_unit = "NONE"
+        except: self.property_unit = "NO_UNITS"
     
     var_type: bpy.props.EnumProperty(items=get_var_types,
                                      update=update_var_type,
@@ -146,8 +150,7 @@ class SN_Variable(bpy.types.PropertyGroup):
                             'MATRIX', 'EULER', 'QUATERNION', 'AXISANGLE', 'XYZ', 'XYZ_LENGTH',
                             'COLOR_GAMMA', 'COORDINATES', 'LAYER', 'LAYER_MEMBER']
             else:
-                subtypes = ['NONE', 'PIXEL', 'UNSIGNED', 'PERCENTAGE', 'FACTOR', 'ANGLE', 'TIME', 'DISTANCE',
-                            'DISTANCE_CAMERA', 'POWER', 'TEMPERATURE']
+                subtypes = ["NO_SUBTYPES"]
         else:
             subtypes = ["NO_SUBTYPES"]
         for subtype in subtypes:
@@ -175,8 +178,8 @@ class SN_Variable(bpy.types.PropertyGroup):
     def get_attach_items(self,context):
         options = ["Action", "Armature", "Brush", "CacheFile", "Camera", "Collection", "Curve", "FreestyleLineStyle",
                    "GreasePencil", "Image", "Key", "Lattice", "Library", "Light", "LightProbe", "Mask", "Material",
-                   "Mesh", "MetaBall", "MovieClip", "NodeTree", "Object", "PaintCurve", "Palette", "ParticleSettings",
-                   "Scene", "Screen", "Sound", "Speaker", "Text", "Texture", "VectorFont", "Volume", "WindowManager",
+                   "Mesh", "MetaBall", "MovieClip", "NodeTree", "Object", "Palette", "ParticleSettings",
+                   "Scene", "Screen", "Sound", "Speaker", "Text", "Texture", "Volume", "WindowManager",
                    "WorkSpace", "World"]
         items = []
         for option in options:
@@ -337,7 +340,7 @@ class SN_Variable(bpy.types.PropertyGroup):
         if self.property_subtype != "NO_SUBTYPES":
             property_line += f"subtype='{self.property_subtype}',"
         if self.property_unit != "NO_UNITS":
-            properties += f"unit='{self.property_unit}',"
+            property_line += f"unit='{self.property_unit}',"
         property_line += f"{self.property_default()}"
         property_line += f"{self.property_min_max()})\n"
         return property_line
