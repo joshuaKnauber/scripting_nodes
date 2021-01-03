@@ -144,7 +144,7 @@ class SN_ScriptingBaseNode:
 
     def update(self):
         self.update_needs_compile(bpy.context)
-        self.update_link_drop()
+        # self.update_link_drop()
         self.on_node_update()
 
 

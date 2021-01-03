@@ -181,8 +181,9 @@ class ScriptingSocket:
 
     is_expression: bpy.props.BoolProperty(default=False, update=update_is_expression)
     editable_var_name: bpy.props.BoolProperty(default=True)
-    var_name: bpy.props.StringProperty(default="", update=update_var_name)
     use_var_name: bpy.props.BoolProperty(default=True)
+    show_var_name: bpy.props.BoolProperty(default=True)
+    var_name: bpy.props.StringProperty(default="", update=update_var_name)
     
     
     ### DRAW SOCKET
@@ -218,9 +219,9 @@ class ScriptingSocket:
             self.draw_remove_socket(row)
         elif self.addable and not self.is_output:
             self.draw_add_socket(row)
-        if self.is_expression and self.editable_var_name and self.use_var_name:
+        if self.is_expression and self.editable_var_name and self.show_var_name:
             row.prop(self,"var_name",text="")
-        elif self.is_expression and self.use_var_name:
+        elif self.is_expression and self.show_var_name:
             row.label(text=self.var_name)
         else:
             self.draw_socket(context,layout,row,node,self.get_text(text))
@@ -241,7 +242,7 @@ class ScriptingSocket:
         # handle variable sockets
         if self.is_expression and self.use_var_name:
             return self.node.get_python_name(self.var_name,"parameter")
-            
+
         # handle program sockets
         if self.sn_type in ["EXECUTE","INTERFACE"]:
             if self.is_output:
@@ -333,6 +334,7 @@ class DynamicSocket(ScriptingSocket):
 
         else:
             inp = node.add_input(self.add_idname,self.default_text,True)
+
         inp.use_var_name = self.use_var_name
         inp.is_expression = self.make_variable
         inp.var_name = link.from_socket.default_text
@@ -354,6 +356,8 @@ class DynamicSocket(ScriptingSocket):
                     setattr(out, attr, getattr(to_socket, attr))
         else:
             out = node.add_output(self.add_idname,self.default_text,True)
+
+        out.use_var_name = self.use_var_name
         out.is_expression = self.make_variable
         out.var_name = link.to_socket.default_text
         out.copy_name = self.copy_name
