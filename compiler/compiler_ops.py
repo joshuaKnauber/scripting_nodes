@@ -32,8 +32,6 @@ class SN_OT_Compile(bpy.types.Operator):
                 self.report({"WARNING"},message="Check the N-Panel for errors in '"+addon_tree.sn_graphs[0].name+"'!")
         else:
             self.report({"ERROR"},message="Your addon could not be compiled properly! Check the console for more information.")
-            print("If you don't understand where this error is coming from, you can report it in the discord server to get more information.")
-            print("Please provide your compiled addon file if possible. You can get this by checking 'Show Python File' in the Serpens preferences.")
         for a in context.screen.areas: a.tag_redraw()
         return {"FINISHED"}
 

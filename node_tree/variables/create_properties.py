@@ -1,4 +1,5 @@
 import bpy
+import json
 
 
 class SN_OT_CreateProperty(bpy.types.Operator):
@@ -55,7 +56,16 @@ class SN_OT_AddPropertyGetter(bpy.types.Operator):
         prop = addon_tree.sn_properties[addon_tree.sn_property_index]
 
         node = graph_tree.nodes.new("SN_GetPropertyNode")
-        # node.
+        path_details = {
+            "path": f"{prop.attach_property_to}[\"\"].{prop.identifier}",
+            "prop_name": prop.name,
+            "prop_identifier": prop.identifier,
+            "prop_type": prop.var_type,
+            "prop_array_length": prop.vector_size if prop.is_vector else -1,
+            "path_parts": [f"{{\"is_numeric\"=False,\"data_type\"=\"bpy.types.{prop.attach_property_to}\",\"name\"=\"{prop.name}\"}}",
+                           prop.identifier]
+        }
+        node.copied_path = json.dumps(path_details)
         return {"FINISHED"}
     
     

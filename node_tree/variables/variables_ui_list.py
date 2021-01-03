@@ -175,8 +175,8 @@ class SN_Variable(bpy.types.PropertyGroup):
     def get_attach_items(self,context):
         options = ["Action", "Armature", "Brush", "CacheFile", "Camera", "Collection", "Curve", "FreestyleLineStyle",
                    "GreasePencil", "Image", "Key", "Lattice", "Library", "Light", "LightProbe", "Mask", "Material",
-                   "Mesh", "MetaBall", "MovieClip", "NodeTree", "Object", "PaintCurve", "Palette", "ParticleSettings",
-                   "Scene", "Screen", "Sound", "Speaker", "Text", "Texture", "VectorFont", "Volume", "WindowManager",
+                   "Mesh", "MetaBall", "MovieClip", "NodeTree", "Object", "Palette", "ParticleSettings",
+                   "Scene", "Screen", "Sound", "Speaker", "Text", "Texture", "Volume", "WindowManager",
                    "WorkSpace", "World"]
         items = []
         for option in options:
