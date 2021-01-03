@@ -337,7 +337,7 @@ class SN_Variable(bpy.types.PropertyGroup):
         if self.property_subtype != "NO_SUBTYPES":
             property_line += f"subtype='{self.property_subtype}',"
         if self.property_unit != "NO_UNITS":
-            properties += f"unit='{self.property_unit}',"
+            property_line += f"unit='{self.property_unit}',"
         property_line += f"{self.property_default()}"
         property_line += f"{self.property_min_max()})\n"
         return property_line

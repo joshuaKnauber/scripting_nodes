@@ -49,24 +49,39 @@ class SN_OT_AddPropertyGetter(bpy.types.Operator):
     bl_label = "Add Getter"
     bl_description = "Adds a node which gives you the value of this variable"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+    
+    getter_type: bpy.props.EnumProperty(items=[("PROPERTY","Property","Normal property getter"),
+                                                ("INTERFACE","Interface","Interface property")],
+                                        options={"SKIP_SAVE"},
+                                        name="Getter Type",
+                                        description="The getter type for your property")
 
     def execute(self, context):
         addon_tree = context.scene.sn.addon_tree()
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
         prop = addon_tree.sn_properties[addon_tree.sn_property_index]
 
-        node = graph_tree.nodes.new("SN_GetPropertyNode")
+        if self.getter_type == "PROPERTY":
+            node = graph_tree.nodes.new("SN_GetPropertyNode")
+        elif self.getter_type == "INTERFACE":
+            node = graph_tree.nodes.new("SN_DisplayPropertyNode")
         path_details = {
             "path": f"{prop.attach_property_to}[\"\"].{prop.identifier}",
             "prop_name": prop.name,
             "prop_identifier": prop.identifier,
             "prop_type": prop.var_type,
             "prop_array_length": prop.vector_size if prop.is_vector else -1,
-            "path_parts": [f"{{\"is_numeric\"=False,\"data_type\"=\"bpy.types.{prop.attach_property_to}\",\"name\"=\"{prop.name}\"}}",
+            "path_parts": [{"is_numeric":False,"data_type":"bpy.types."+prop.attach_property_to,"name":prop.attach_property_to},
                            prop.identifier]
         }
         node.copied_path = json.dumps(path_details)
         return {"FINISHED"}
+    
+    def draw(self,context):
+        self.layout.prop(self,"getter_type",expand=True)
+    
+    def invoke(self,context,event):
+        return context.window_manager.invoke_props_dialog(self)
     
     
 
