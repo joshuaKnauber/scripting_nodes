@@ -22,7 +22,19 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             return path_details
         except:
             return None
-                         
+        
+        
+    def get_path_end(self):
+        path_end = ""
+        for part in self.get_details()["path_parts"]:
+            if type(part) == dict:
+                path_end = ""
+            elif path_end:
+                path_end += "." + part                         
+            else:
+                path_end += part
+        return path_end########### numerics
+    
                 
     def get_copied(self,context):
         if self.copied_path:
@@ -30,6 +42,8 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             if path_details:
                 setup_sockets(self, path_details)
                 out = self.add_output_from_type(path_details["prop_type"],path_details["prop_name"],path_details["prop_array_length"])
+                if hasattr(out,"is_color"):
+                    out.is_color = path_details["is_color"]
         else:
             self.reset_node()
 
@@ -53,5 +67,5 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         return {
-            "code": f"{self.inputs[0].value}.{self.get_details()['prop_identifier']}"
+            "code": f"{self.inputs[0].value}.{self.get_path_end()}"
         }
