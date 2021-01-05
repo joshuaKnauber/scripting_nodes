@@ -4,6 +4,7 @@ from ..compiler.compiler import current_module
 
 
 class SN_AddonPreferences(bpy.types.AddonPreferences):
+    
     bl_idname = __name__.partition('.')[0]
 
     show_txt: bpy.props.BoolProperty(name="Show Python File",
@@ -32,6 +33,10 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                                                 ("PACKAGES","Packages","Serpens Package Market","NONE",3)],
                                        name="SETTINGS",
                                        description="Navigation")
+    
+    
+    addon_search: bpy.props.StringProperty(default="",name="Search")
+    package_search: bpy.props.StringProperty(default="",name="Search")
 
 
     def draw_dev_prefs(self,layout):
@@ -39,7 +44,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         if module and "sn_draw_addon_prefs" in dir(module):
             module.sn_draw_addon_prefs(self)
         else:
-            layout.label(text="No active addon preferences node",icon="ERROR")
+            layout.label(text="No active addon preferences node",icon="QUESTION")
             
 
 
@@ -60,14 +65,83 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         col = row.column()
         col.label(text="Updates:")
         col.prop(self, "check_for_updates")
+        
+        
+    def draw_package(self,layout,package):
+        box = layout.box()
+        row = box.row()
+        subrow = row.row()
+        subrow.scale_y = 1.2
+        subrow.alignment = "LEFT"
+        subrow.label(text=package.name)
+        subrow = row.row()
+        subrow.alignment = "RIGHT"
+        subrow.enabled = False
+        subrow.label(text=package.author)
+        col = box.column(align=True)
+        for line in package.description.split("\n"):
+            col.label(text=line)
+        box.operator("wm.url_open",text=package.price).url = package.url
+    
+    
+    def draw_addon(self,layout,addon):
+        box = layout.box()
+        row = box.row()
+        subrow = row.row()
+        subrow.scale_y = 1.2
+        subrow.alignment = "LEFT"
+        subrow.prop(addon,"show_addon",text=addon.name,icon="DISCLOSURE_TRI_DOWN" if addon.show_addon else "DISCLOSURE_TRI_RIGHT",emboss=False)
+        subrow = row.row()
+        subrow.alignment = "RIGHT"
+        subrow.enabled = False
+        subrow.label(text=addon.category)
+        if addon.show_addon:
+            col = box.column(align=True)
+            col.label(text="Description: ".ljust(15) + addon.description)
+            col.label(text="Author: ".ljust(15) + addon.author)
+            col.label(text="Version: ".ljust(15) + f"{addon.addon_version[0]}.{addon.addon_version[1]}.{addon.addon_version[2]}")
+            col.label(text="Blender: ".ljust(15) + f"{addon.blender_version[0]}.{addon.blender_version[1]}.{addon.blender_version[2]}")
+            row = col.row()
+            row.operator("wm.url_open",text="Addon" if not addon.is_external else addon.price).url = addon.addon_url
+            if addon.has_blend:
+                row.operator("wm.url_open",text=".blend File").url = addon.blend_url
+                
 
 
     def draw_addon_market(self,layout):
-        pass
+        addons = bpy.context.scene.sn.addons
+        if not len(addons):
+            row = layout.row()
+            row.scale_y = 1.2
+            row.operator("sn.load_addons", text="Load Addons", icon="FILE_REFRESH")
+        elif len(addons) == 1:
+            layout.label(text="There are no addons available just yet", icon="INFO")
+        else:
+            row = layout.row()
+            row.prop(self,"addon_search",text="",icon="VIEWZOOM")
+            row.operator("sn.load_addons",text="",emboss=False,icon="FILE_REFRESH")
+            for addon in addons:
+                if not addon.name == "placeholder":
+                    if self.addon_search.lower() in addon.name.lower() or self.addon_search.lower() in addon.author.lower():
+                        self.draw_addon(layout,addon)
     
     
     def draw_package_market(self,layout):
-        pass
+        packages = bpy.context.scene.sn.packages
+        if not len(packages):
+            row = layout.row()
+            row.scale_y = 1.2
+            row.operator("sn.load_packages", text="Load Packages", icon="FILE_REFRESH")
+        elif len(packages) == 1:
+            layout.label(text="There are no packages available just yet", icon="INFO")
+        else:
+            row = layout.row()
+            row.prop(self,"package_search",text="",icon="VIEWZOOM")
+            row.operator("sn.load_packages",text="",emboss=False,icon="FILE_REFRESH")
+            for package in packages:
+                if not package.name == "placeholder":
+                    if self.package_search.lower() in package.name.lower() or self.package_search.lower() in package.author.lower():
+                        self.draw_package(layout,package)
     
     
     def draw_navigation(self,layout):
