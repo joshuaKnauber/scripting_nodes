@@ -312,11 +312,13 @@ class SN_ScriptingBaseNode:
         if socket.is_output:
             new_socket = self.__change_socket(self.outputs,socket,idname)
             for link in links:
-                self.node_tree.links.new(new_socket,link.to_socket)
+                if can_connect(link.to_socket.bl_idname,new_socket.bl_idname):
+                    self.node_tree.links.new(new_socket,link.to_socket)
         else:
             new_socket = self.__change_socket(self.inputs,socket)
             for link in links:
-                self.node_tree.links.new(link.from_socket,new_socket)
+                if can_connect(new_socket.bl_idname,link.from_socket.bl_idname):
+                    self.node_tree.links.new(link.from_socket,new_socket)
             
     
     ### EVALUATE CODE
