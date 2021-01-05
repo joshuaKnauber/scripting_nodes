@@ -293,6 +293,32 @@ class SN_ScriptingBaseNode:
         return socket
     
     
+    def __change_socket(sockets, socket):
+        for i, sock in enumerate(sockets):
+            if sock == socket:
+                if socket.is_output:
+                    new_socket = self.add_output(idname,socket.name,socket.removable)
+                else:
+                    new_socket = self.add_input(idname,socket.name,socket.removable)
+                sockets.remove(socket)
+                sockets.move(len(sockets)-1, i)
+                return new_socket
+    
+    
+    def change_socket_type(self,socket,idname):
+        links = []
+        for link in socket.links:
+            links.append(link)
+        if socket.is_output:
+            new_socket = self.__change_socket(self.outputs,socket)
+            for link in links:
+                self.node_tree.links.new(new_socket,link.to_socket)
+        else:
+            new_socket = self.__change_socket(self.inputs,socket)
+            for link in links:
+                self.node_tree.links.new(link.from_socket,new_socket)
+            
+    
     ### EVALUATE CODE
     
     
