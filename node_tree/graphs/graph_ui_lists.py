@@ -1,5 +1,6 @@
 import bpy
 import re
+from ..base_node import SN_ScriptingBaseNode
 
 
 def update_graph_index(self, context):
@@ -61,6 +62,9 @@ class SN_Graph(bpy.types.PropertyGroup):
     
     def short(self):
         return re.sub(r'\W+', '', self.name.replace(" ","_")).lower()
+
+    def get_python_name(self, name, empty_name=""):
+        return SN_ScriptingBaseNode().get_python_name(name, empty_name)
 
     main_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
     

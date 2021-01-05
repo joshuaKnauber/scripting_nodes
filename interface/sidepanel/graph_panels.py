@@ -70,6 +70,13 @@ class SN_PT_VariablePanel(bpy.types.Panel):
                 col.prop(var,"str_default")
             elif var.var_type == "INTEGER":
                 col.prop(var,"int_default")
+            elif var.var_type == "FLOAT":
+                col.prop(var,"float_default")
+            elif var.var_type == "BOOLEAN":
+                col.prop(var,"bool_default")
+            elif var.var_type == "LIST":
+                col.label(text="There are no defaults for lists.", icon="QUESTION")
+
             
             row.label(text="",icon="BLANK1")
 

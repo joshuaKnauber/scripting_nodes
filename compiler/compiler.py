@@ -71,6 +71,10 @@ def compile_addon(addon_tree, is_export=False):
         __write_blockcomment(addon_data["text"], "IMPORTS")
         __write_in_text(addon_data["text"], import_code)
                 
+        # write variable define block
+        __write_blockcomment(addon_data["text"], "INITALIZE VARIABLES")
+        __write_in_text(addon_data["text"], __normalize_code(__create_variable_register(addon_tree),0))
+        
         # write serpens functions
         __write_blockcomment(addon_data["text"], "SERPENS FUNCTIONS")
         __write_in_text(addon_data["text"], addon_data["code"]["serpens_functions"])
@@ -372,8 +376,21 @@ def __create_icon_register(addon_tree):
                 def sn_unregister_icons():
                     del bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons
                 """
-                
-                
+
+
+def __create_variable_register(addon_tree):
+    variables = ""
+    for graph in addon_tree.sn_graphs:
+        if len(graph.node_tree.sn_variables):
+            variables += graph.get_python_name(graph.name) + " = {\n    "
+            for var in graph.node_tree.sn_variables:
+                variables += var.variable_register()
+                variables += "\n    "
+            variables+="}\n"
+
+    return variables
+
+
 def __create_property_register(addon_tree):
     properties = "def sn_register_properties():\n"
     if not len(addon_tree.sn_properties):

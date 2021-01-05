@@ -31,7 +31,8 @@ variable_icons = {
     "INTEGER": "DRIVER_TRANSFORM",
     "FLOAT": "CON_TRANSLIKE",
     "BOOLEAN": "FORCE_CHARGE",
-    "ENUM": "COLLAPSEMENU"
+    "ENUM": "COLLAPSEMENU",
+    "LIST": "PRESET"
 }
 
 
@@ -88,7 +89,10 @@ class SN_Variable(bpy.types.PropertyGroup):
                     ("ENUM","Enum","Enum",variable_icons["ENUM"],4)]
         else:
             items = [("STRING","String","String",variable_icons["STRING"],0),
-                    ("INTEGER","Integer","Integer",variable_icons["INTEGER"],1)]
+                    ("INTEGER","Integer","Integer",variable_icons["INTEGER"],1),
+                    ("FLOAT","Float","Float",variable_icons["FLOAT"],2),
+                    ("BOOLEAN","Boolean","Boolean",variable_icons["BOOLEAN"],3),
+                    ("LIST","List","List",variable_icons["LIST"],4)]
         return items
     
     def update_var_type(self,context):
@@ -348,6 +352,18 @@ class SN_Variable(bpy.types.PropertyGroup):
     def property_unregister(self):
         return f"del bpy.types.{self.attach_property_to}.{self.identifier}\n"
 
+    def variable_register(self):
+        value = "[]"
+        if self.var_type == "STRING":
+            value = f'"{self.str_default}"'
+        elif self.var_type == "INTEGER":
+            value = str(self.int_default)
+        elif self.var_type == "FLOAT":
+            value = str(self.float_default)
+        elif self.var_type == "BOOLEAN":
+            value = str(self.bool_default)
+
+        return f""""{self.identifier}": {value}, """
 
 
 class SN_UL_VariableList(bpy.types.UIList):
