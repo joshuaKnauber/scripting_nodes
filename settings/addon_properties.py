@@ -1,6 +1,37 @@
 import bpy
 
 
+
+class SN_PackageDisplay(bpy.types.PropertyGroup):
+    
+    name: bpy.props.StringProperty()
+    description: bpy.props.StringProperty()
+    price: bpy.props.StringProperty()
+    url: bpy.props.StringProperty()
+    author: bpy.props.StringProperty()
+
+
+
+class SN_AddonDisplay(bpy.types.PropertyGroup):
+    
+    name: bpy.props.StringProperty()
+    description: bpy.props.StringProperty()
+    category: bpy.props.StringProperty()
+    author: bpy.props.StringProperty()
+    price: bpy.props.StringProperty()
+    blender_version: bpy.props.IntVectorProperty()
+    addon_version: bpy.props.IntVectorProperty()
+
+    has_blend: bpy.props.BoolProperty()
+    is_external: bpy.props.BoolProperty()
+
+    addon_url: bpy.props.StringProperty()
+    blend_url: bpy.props.StringProperty()
+    
+    show_addon: bpy.props.BoolProperty(default=False)
+
+
+
 class SN_AddonProperties(bpy.types.PropertyGroup):
 
 
@@ -85,3 +116,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     ttp_addon_info: bpy.props.BoolProperty(default=True,
                                            name="Addon Info",
                                            description="This is the information that will be displayed in the user preferences")
+    
+    
+    packages: bpy.props.CollectionProperty(type=SN_PackageDisplay)
+    addons: bpy.props.CollectionProperty(type=SN_AddonDisplay)

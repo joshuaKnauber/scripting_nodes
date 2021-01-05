@@ -79,5 +79,5 @@ def check_serpens_updates(current_version):
             else:
                 update_log()
 
-        except ValueError:
+        except:
             print("Couldn't check for Serpens updates!")
