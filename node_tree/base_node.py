@@ -293,7 +293,7 @@ class SN_ScriptingBaseNode:
         return socket
     
     
-    def __change_socket(sockets, socket):
+    def __change_socket(self, sockets, socket, idname):
         for i, sock in enumerate(sockets):
             if sock == socket:
                 if socket.is_output:
@@ -310,7 +310,7 @@ class SN_ScriptingBaseNode:
         for link in socket.links:
             links.append(link)
         if socket.is_output:
-            new_socket = self.__change_socket(self.outputs,socket)
+            new_socket = self.__change_socket(self.outputs,socket,idname)
             for link in links:
                 self.node_tree.links.new(new_socket,link.to_socket)
         else:

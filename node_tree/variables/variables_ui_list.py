@@ -57,17 +57,24 @@ class SN_Variable(bpy.types.PropertyGroup):
             key = "property"
         if not self.name:
             self.name = f"New {key.title()}"
-            
-        self.identifier = SN_ScriptingBaseNode().get_python_name(self.name, f"new_{key}")
+
+        node = SN_ScriptingBaseNode()
+        node.addon_tree = bpy.context.scene.sn.addon_tree()
+
+        # self.identifier = node.get_python_name(self.name, f"new_{key}")
 
         if self.is_property:
-            unique_name = SN_ScriptingBaseNode().get_unique_name(self.name, self.node_tree.sn_properties, " ")
+            unique_name = node.get_unique_name(self.name, self.node_tree.sn_properties, " ")
         else:
-            unique_name = SN_ScriptingBaseNode().get_unique_name(self.name, self.node_tree.sn_variables, " ")
+            unique_name = node.get_unique_name(self.name, self.node_tree.sn_variables, " ")
         if unique_name != self.name:
             self.name = unique_name
+
+        node.update_nodes_by_type("SN_GetVariableNode")
         
-        self.identifier = SN_ScriptingBaseNode().get_python_name(self.name, f"new_{key}")
+        self.identifier = node.get_python_name(self.name, f"new_{key}")
+
+        node.update_nodes_by_type("SN_GetVariableNode")
     
     name: bpy.props.StringProperty(name="Name",
                                    description="The name of this variable",
@@ -102,7 +109,11 @@ class SN_Variable(bpy.types.PropertyGroup):
         except: self.property_subtype = "NO_SUBTYPES"
         try: self.property_unit = "NONE"
         except: self.property_unit = "NO_UNITS"
-    
+
+        node = SN_ScriptingBaseNode()
+        node.addon_tree = bpy.context.scene.sn.addon_tree()
+        node.update_nodes_by_type("SN_GetVariableNode")
+
     var_type: bpy.props.EnumProperty(items=get_var_types,
                                      update=update_var_type,
                                      name="Variable Type",

@@ -42,8 +42,7 @@ class SN_OT_RemoveVariable(bpy.types.Operator):
 
     def invoke(self, context, event):
         return context.window_manager.invoke_confirm(self, event)
-    
-    
+
     
 class SN_OT_AddVariableGetter(bpy.types.Operator):
     bl_idname = "sn.add_var_getter"
@@ -55,7 +54,8 @@ class SN_OT_AddVariableGetter(bpy.types.Operator):
         addon_tree = context.scene.sn.addon_tree()
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
 
-        node = graph_tree.nodes.new("SN_TestNode")
+        node = graph_tree.nodes.new("SN_GetVariableNode")
+        node.search_value = graph_tree.sn_variables[graph_tree.sn_variable_index].name
         return {"FINISHED"}
     
     
@@ -70,5 +70,5 @@ class SN_OT_AddVariableSetter(bpy.types.Operator):
         addon_tree = context.scene.sn.addon_tree()
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
 
-        node = graph_tree.nodes.new("SN_TestNode")
+        node = graph_tree.nodes.new("SN_SetVariableNode")
         return {"FINISHED"}
