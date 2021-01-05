@@ -61,8 +61,6 @@ class SN_Variable(bpy.types.PropertyGroup):
         node = SN_ScriptingBaseNode()
         node.addon_tree = bpy.context.scene.sn.addon_tree()
 
-        # self.identifier = node.get_python_name(self.name, f"new_{key}")
-
         if self.is_property:
             unique_name = node.get_unique_name(self.name, self.node_tree.sn_properties, " ")
         else:

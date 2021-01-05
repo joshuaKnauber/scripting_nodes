@@ -47,6 +47,11 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.outputs[0].name = var.name
 
 
+    def on_node_update(self):
+        if not len(self.outputs):
+            self.update_search(bpy.context)
+
+
     search_value: bpy.props.StringProperty(update=update_search)
     identifier: bpy.props.StringProperty()
 
@@ -54,8 +59,11 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self,context,layout):
         layout.prop_search(self, "search_value", self.node_tree, "sn_variables", text="")
 
+        if self.search_value != "" and not self.search_value in self.node_tree.sn_variables:
+            self.outputs.clear()
+
 
     def code_evaluate(self, context, touched_socket):
         return {
-            "code": self.node_tree.sn_variables[self.search_value].identifier
+            "code": self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[self.search_value].identifier + '"]'
         }
