@@ -68,6 +68,31 @@ class SN_OT_EditOperatorProperty(bpy.types.Operator):
         draw_property(context, variable, self.layout)
 
 
+class SN_OT_GetSetOperatorProperty(bpy.types.Operator):
+    bl_idname = "sn.get_set_operator_property"
+    bl_label = "Get or Set Operator Property"
+    bl_description = "Get or set a property from this operator"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    node_name: bpy.props.StringProperty()
+    getset_type: bpy.props.EnumProperty(items=[("GETTER","Getter","Property getter"),
+                                                ("INTERFACE","Interface","Interface property"),
+                                                ("SETTER","Setter","Property setter")],
+                                        options={"SKIP_SAVE"},
+                                        name="Getter/Setter Type",
+                                        description="The getter/setter type for your property")
+
+
+    def execute(self, context):
+        return {"FINISHED"}
+
+    def draw(self,context):
+        self.layout.prop(self,"getset_type",expand=True)
+    
+    def invoke(self,context,event):
+        return context.window_manager.invoke_props_dialog(self)
+
+
 class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_OperatorNode"
@@ -149,6 +174,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         col.enabled = bool(len(self.operator_properties))
         col.operator("sn.remove_operator_property", text="", icon="REMOVE").node_name = self.name
         col.operator("sn.edit_operator_property", text="", icon="GREASEPENCIL").node_name = self.name
+        col.operator("sn.get_set_operator_property", text="", icon="FORWARD").node_name = self.name
 
 
     def what_layout(self, socket):
