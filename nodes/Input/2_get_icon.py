@@ -64,7 +64,7 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
     
     def update_source(self,context):
-        SN_ScriptingBaseNode().update_needs_compile()
+        SN_ScriptingBaseNode().update_needs_compile(context)
         if self.icon_source == "BLENDER":
             self.outputs[0].is_expression = False
         elif self.custom_icon != "" and self.custom_icon in self.addon_tree.sn_icons:

@@ -130,13 +130,14 @@ def compile_addon(addon_tree, is_export=False):
         addon_tree.sn_graphs[0].last_compile_time = str(round(end_time-start_time,4))+"s"
 
         # register module
-        success = __register_module(module)
-        if success == True:
-            if is_export:
-                return txt
-            return success
+        if is_export:
+            return txt
         else:
-            raise success
+            success = __register_module(module)
+            if success == True:
+                return success
+            else:
+                raise success
         
         # redraw
         if context.screen:
@@ -289,6 +290,7 @@ def __remove_duplicate_lines(text):
 def __get_import_code(code):
     import_code = ""
     import_code += "import bpy\n"
+    import_code += "from bpy.utils import previews\n"
     import_code += "import os\n"
     import_code += "import math\n"
     for graph in code["graph_code"]:
@@ -356,7 +358,7 @@ def __create_icon_register(addon_tree):
                     icons = [{icon_list}]
                     bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons = bpy.utils.previews.new()
                 
-                    icons_dir = os.path.join( os.path.dirname( os.getcwd() ), "icons" )
+                    icons_dir = os.path.join( os.path.dirname( __file__ ), "icons" )
                     for icon in icons:
                         bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
                         
