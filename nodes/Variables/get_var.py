@@ -15,16 +15,17 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_outside_update(self, node):
         for var in self.node_tree.sn_variables:
-            if var.identifier == self.identifier:
-                self.search_value = var.name
-        
+            if self.identifier:
+                if var.identifier == self.identifier:
+                    self.search_value = var.name
+
         self.update_search(bpy.context)
 
     def update_search(self, context):
+        self.identifier = ""
         if not self.search_value in self.node_tree.sn_variables:
             self["search_value"] = ""
             self.outputs.clear()
-            self.identifier = ""
 
         else:
             var = self.node_tree.sn_variables[self.search_value]
@@ -41,7 +42,8 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.add_boolean_output(var.name)
                 elif var.var_type == "LIST":
                     self.add_string_output(var.name)
-            
+
+
             idname = {"STRING": "SN_StringSocket", "INTEGER": "SN_IntegerSocket", "FLOAT": "SN_FloatSocket", "BOOLEAN": "SN_BooleanSocket", "LIST": "SN_ExecuteSocket"}
             self.change_socket_type(self.outputs[0], idname[var.var_type])
             self.outputs[0].name = var.name
