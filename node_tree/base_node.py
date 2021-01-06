@@ -315,7 +315,7 @@ class SN_ScriptingBaseNode:
                 if can_connect(link.to_socket.bl_idname,new_socket.bl_idname):
                     self.node_tree.links.new(new_socket,link.to_socket)
         else:
-            new_socket = self.__change_socket(self.inputs,socket)
+            new_socket = self.__change_socket(self.inputs,socket,idname)
             for link in links:
                 if can_connect(new_socket.bl_idname,link.from_socket.bl_idname):
                     self.node_tree.links.new(link.from_socket,new_socket)

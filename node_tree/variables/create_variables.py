@@ -57,8 +57,7 @@ class SN_OT_AddVariableGetter(bpy.types.Operator):
         node = graph_tree.nodes.new("SN_GetVariableNode")
         node.search_value = graph_tree.sn_variables[graph_tree.sn_variable_index].name
         return {"FINISHED"}
-    
-    
+
 
 class SN_OT_AddVariableSetter(bpy.types.Operator):
     bl_idname = "sn.add_var_setter"
@@ -71,4 +70,5 @@ class SN_OT_AddVariableSetter(bpy.types.Operator):
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
 
         node = graph_tree.nodes.new("SN_SetVariableNode")
+        node.search_value = graph_tree.sn_variables[graph_tree.sn_variable_index].name
         return {"FINISHED"}
