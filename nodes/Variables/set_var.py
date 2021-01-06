@@ -72,6 +72,18 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_evaluate(self, context, touched_socket):
-        return {
-            "code": self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[self.search_value].identifier + '"]'
-        }
+        if len(self.inputs) < 2:
+            self.add_error("No variable", "No variable selected")
+            return {
+                "code": f"""
+                        {self.outputs[0].block(6)}
+                        """
+            }
+
+        else:
+            return {
+                "code": f"""
+                        {self.get_python_name(self.node_tree.name)}["{self.node_tree.sn_variables[self.search_value].identifier}"] = {self.inputs[1].value}
+                        {self.outputs[0].block(6)}
+                        """
+            }
