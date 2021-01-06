@@ -148,11 +148,12 @@ def compile_addon(addon_tree, is_export=False):
         addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
         if txt and not addon_prefs.keep_after_error:
             bpy.data.texts.remove(txt)
-        print(f"\n\nSERPENS EXCEPTION | Time: {datetime.now().hour}:{datetime.now().minute} |  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -")
+        print(f"\n\nSERPENS EXCEPTION | Occurred at {datetime.now().hour}:{datetime.now().minute} |  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -")
         print("\n| SIMPLIFIED:")
-        print(exc, "\n")
-        print("| FULL ERROR:")
-        logging.exception("")
+        print(exc)
+        if addon_prefs.show_full_errors:
+            print("\n| FULL ERROR:")
+            logging.exception("")
         print("\n| INFO:")
         print("If you don't understand this error please post it in the discord server.")
         print("\n-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -\n\n")

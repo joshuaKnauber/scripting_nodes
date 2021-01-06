@@ -34,7 +34,7 @@ def get_node_categories():
         if category_items:
             node_categories.append(SN_ScriptingNodesCategory(category.replace(" ","_").lower(), category, items=category_items))
 
-    layout_items = [NodeItem("NodeFrame"),NodeItem("NodeReroute"),NodeItem("SN_LoFiNode")]
+    layout_items = [NodeItem("NodeFrame"),NodeItem("SN_LoFiNode")]
     node_categories.append(SN_ScriptingNodesCategory("LAYOUT", "Layout", items=layout_items))
 
     return node_categories
