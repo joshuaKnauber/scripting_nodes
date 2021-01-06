@@ -109,16 +109,17 @@ class SN_OT_ExportAddon(bpy.types.Operator):
                     
                 for icon in addon_tree.sn_icons:
                     if icon.image:
-                        icon.image.filepath = os.path.join(dir_path, "icons", icon.name+".png")
-                        icon.image.file_format = "PNG"
-                        icon.image.save()
+                        copy = icon.image.copy()
+                        copy.file_format = "PNG"
+                        copy.save_render(os.path.join(dir_path, "icons", icon.name+".png"))
+                        bpy.data.images.remove(copy)
 
                 for asset in addon_tree.sn_assets:
                     if asset.path and os.path.exists(asset.path):
                         shutil.copyfile(asset.path, os.path.join(dir_path, "assets", os.path.basename(asset.path)))
                     
-                # self.make_archive(dir_path, self.filepath)
-                # shutil.rmtree(dir_path)
+                self.make_archive(dir_path, self.filepath)
+                shutil.rmtree(dir_path)
                 
                 bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
         else:

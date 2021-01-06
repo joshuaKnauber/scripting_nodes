@@ -130,13 +130,14 @@ def compile_addon(addon_tree, is_export=False):
         addon_tree.sn_graphs[0].last_compile_time = str(round(end_time-start_time,4))+"s"
 
         # register module
-        success = __register_module(module)
-        if success == True:
-            if is_export:
-                return txt
-            return success
+        if is_export:
+            return txt
         else:
-            raise success
+            success = __register_module(module)
+            if success == True:
+                return success
+            else:
+                raise success
         
         # redraw
         if context.screen:
@@ -289,6 +290,7 @@ def __remove_duplicate_lines(text):
 def __get_import_code(code):
     import_code = ""
     import_code += "import bpy\n"
+    import_code += "from bpy.utils import previews\n"
     import_code += "import os\n"
     import_code += "import math\n"
     for graph in code["graph_code"]:
@@ -356,7 +358,7 @@ def __create_icon_register(addon_tree):
                     icons = [{icon_list}]
                     bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons = bpy.utils.previews.new()
                 
-                    icons_dir = os.path.join( os.path.dirname( os.getcwd() ), "icons" )
+                    icons_dir = os.path.join( os.path.dirname( __file__ ), "icons" )
                     for icon in icons:
                         bpy.types.Scene.{addon_tree.sn_graphs[0].short()}_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
                         
@@ -516,10 +518,6 @@ def __evaluate_graph(graph, addon_tree, addon_did_once):
 
     for node in graph.node_tree.nodes:
         if not node.bl_idname in ["NodeFrame","NodeReroute"]:
-        
-            if __should_evaluate(node, {**addon_did_once, **graph_did_once}["evaluated"]):
-                graph_code["evaluated"] += process_node(node, None)
-                if not node.bl_idname in graph_did_once["evaluated"]: graph_did_once["evaluated"].append(node.bl_idname)
             
             if __should_import(node, {**addon_did_once, **graph_did_once}["imports"]):
                 graph_code["imports"] += process_returned(node, node.code_imports(bpy.context))
@@ -528,6 +526,10 @@ def __evaluate_graph(graph, addon_tree, addon_did_once):
             if __should_imperative(node, {**addon_did_once, **graph_did_once}["imperative"]):
                 graph_code["imperative"] += process_returned(node, node.code_imperative(bpy.context))
                 if not node.bl_idname in graph_did_once["imperative"]: graph_did_once["imperative"].append(node.bl_idname)
+        
+            if __should_evaluate(node, {**addon_did_once, **graph_did_once}["evaluated"]):
+                graph_code["evaluated"] += process_node(node, None)
+                if not node.bl_idname in graph_did_once["evaluated"]: graph_did_once["evaluated"].append(node.bl_idname)
                 
             if __should_register(node, {**addon_did_once, **graph_did_once}["register"]):
                 order = 0

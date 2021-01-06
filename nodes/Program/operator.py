@@ -181,7 +181,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         return "layout"
 
 
-    def code_imperative(self, context):
+    def code_evaluate(self, context, touched_socket):
         property_register = []
         for prop in self.operator_properties:
             property_register.append(prop.property_register() + "\n")
