@@ -26,6 +26,10 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     check_for_updates: bpy.props.BoolProperty(name="Check For Updates",
                                     description="Checks for Serpens updates when opening blender",
                                     default=True)
+    
+    show_full_errors: bpy.props.BoolProperty(name="Show Full Errors",
+                                             description="Show the full error messages in the console",
+                                             default=False)
 
     navigation: bpy.props.EnumProperty(items=[  ("DEV","Development","Development Preferences","NONE",0),
                                                 ("SETTINGS","Settings","Serpens Settings","NONE",1),
@@ -52,6 +56,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         row = layout.row()
         col = row.column()
         col.label(text="Development:")
+        col.prop(self, "show_full_errors")
         col.prop(self, "show_txt")
         col.prop(self, "keep_after_error")
         

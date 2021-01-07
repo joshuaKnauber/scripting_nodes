@@ -70,7 +70,7 @@ class SN_OT_AddPropertyGetter(bpy.types.Operator):
             "prop_name": prop.name,
             "prop_identifier": prop.identifier,
             "prop_type": prop.var_type,
-            "prop_array_length": prop.vector_size if prop.is_vector else -1,
+            "prop_array_length": prop.vector_size if prop.is_vector else 0,
             "path_parts": [{"is_numeric":False,"data_type":"bpy.types."+prop.attach_property_to,"name":prop.attach_property_to},
                            prop.identifier]
         }
