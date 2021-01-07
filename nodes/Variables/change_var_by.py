@@ -44,7 +44,7 @@ class SN_ChangeVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.add_integer_input("")
                 elif var.var_type == "FLOAT":
                     self.add_float_input("")
-
+            
             if len(self.inputs) > 1:
                 idname = {"STRING": "SN_StringSocket", "INTEGER": "SN_IntegerSocket", "FLOAT": "SN_FloatSocket"}
                 if idname[var.var_type] != self.inputs[1].bl_idname:
@@ -79,6 +79,8 @@ class SN_ChangeVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 layout.prop(self, "add_sub", expand=True)
 
             if self.node_tree.sn_variables[self.search_value].var_type in ["BOOLEAN", "LIST"]:
+                if len(self.inputs) > 1:
+                    self.inputs.remove(self.inputs[1])
                 layout.label(text="Please use a set variable node!")
 
 
