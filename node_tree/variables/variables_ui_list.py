@@ -100,6 +100,7 @@ class SN_Variable(bpy.types.PropertyGroup):
                     ("FLOAT","Float","Float",variable_icons["FLOAT"],2),
                     ("BOOLEAN","Boolean","Boolean",variable_icons["BOOLEAN"],3),
                     ("LIST","List","List",variable_icons["LIST"],4)]
+
         return items
     
     def update_var_type(self,context):
