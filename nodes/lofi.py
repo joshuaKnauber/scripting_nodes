@@ -50,6 +50,12 @@ class SN_LoFiNode(bpy.types.Node, SN_ScriptingBaseNode):
         ]
     
     index: bpy.props.IntProperty(default=0)
+    
+    def on_create(self,context):
+        self.index = randint(0,len(self.links)-1)
+
+    def on_copy(self,node):
+        self.index = randint(0,len(self.links)-1)
 
     def draw_node(self,context,layout):
         box = layout.box()

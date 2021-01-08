@@ -1,7 +1,6 @@
 import bpy
 import re
 from .sockets.base_sockets import add_to_remove_links
-from ..compiler.compiler import combine_blocks
 from uuid import uuid4
 
 
@@ -335,15 +334,12 @@ class SN_ScriptingBaseNode:
     ### EVALUATE CODE
     
     
-    def list_values(self, value_list, indents):
+    def list_code(self, value_list, indents=0):
         code = ""
         for value in value_list:
             code += value
         return " "*indents*4 + code
     
-    
-    def list_blocks(self, block_list, indents):
-        return combine_blocks(block_list, indents)
     
     #TODO combine sockets function instead of these two with list of sockets
 

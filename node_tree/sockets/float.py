@@ -52,6 +52,21 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     copy_attributes = ["value","value_factor","value_color","value_color_alpha","value_three","value_four"]
     
     
+    def set_default(self, value):
+        if self.subtype == "NONE":
+            self.value = value
+        elif self.subtype == "FACTOR":
+            self.value_factor = value
+        elif self.subtype == "COLOR":
+            self.value_color = value
+        elif self.subtype == "COLOR_ALPHA":
+            self.value_color_alpha = value
+        elif self.subtype == "VECTOR3":
+            self.value_three = value
+        elif self.subtype == "VECTOR4":
+            self.value_four = value
+    
+    
     def default_value(self):
         if self.subtype == "NONE":
             return str(self.value)

@@ -17,8 +17,8 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
     operation: bpy.props.EnumProperty(items=[(" + ", "Add", "Add two numbers"), (" - ", "Subtract", "Subtract two numbers"), (" * ", "Multiply", "Multiply two numbers"), (" / ", "Divide", "Divide two numbers")],name="Operation", description="The operation you want to commence", update=SN_ScriptingBaseNode.auto_compile)
 
     def on_create(self,context):
-        self.add_float_input("Value").copy_name=True
-        self.add_float_input("Value").copy_name=True
+        self.add_float_input("Value").mirror_name = True
+        self.add_float_input("Value").mirror_name = True
         self.add_float_output("Result")
 
     def draw_node(self, context, layout):
@@ -27,5 +27,5 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         return {
-            "code": f"""({self.inputs[0].value}{self.operation}{self.inputs[1].value})"""
+            "code": f"""({self.inputs[0].code()}{self.operation}{self.inputs[1].code()})"""
         }

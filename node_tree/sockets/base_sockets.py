@@ -256,6 +256,11 @@ class ScriptingSocket:
         return ""
     
     
+    def set_default(self, value):
+        """ overwrite this function to set the default value of the socket """
+        pass
+    
+    
     def same_group(self):
         if self.is_output:
             return self.group == self.links[0].to_socket.group

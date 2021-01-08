@@ -31,5 +31,5 @@ class SN_RadiansNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         return {
-            "code": f"""math.{self.operation}({self.inputs[0].value})"""
+            "code": f"""math.{self.operation}({self.inputs[0].code()})"""
         }

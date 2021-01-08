@@ -19,17 +19,17 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_input("Condition")
 
         self.add_execute_output("Continue")
-        self.add_execute_output("Condition True")
-        self.add_execute_output("Condition False")
+        self.add_execute_output("True")
+        self.add_execute_output("False")
 
     def code_evaluate(self, context, touched_socket):
 
         return {
             "code": f"""
-                    if {self.inputs[1].value}:
-                        {self.outputs[1].block(6) if self.outputs[1].block(6) else "pass"}
+                    if {self.inputs[1].code()}:
+                        {self.outputs[1].code(6) if self.outputs[1].code(6) else "pass"}
                     else:
-                        {self.outputs[2].block(6) if self.outputs[2].block(6) else "pass"}
-                    {self.outputs[0].block(5)}
+                        {self.outputs[2].code(6) if self.outputs[2].code(6) else "pass"}
+                    {self.outputs[0].code(5)}
                     """
         }

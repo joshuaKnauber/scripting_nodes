@@ -38,5 +38,5 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
                     values.append(inp.value + self.operation)
                     
         return {
-            "code": f"{self.list_values(values,0)}"
+            "code": f"{self.list_code(values)}"
         }

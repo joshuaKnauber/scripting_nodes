@@ -23,5 +23,5 @@ class SN_RoundNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         return {
-            "code": f"""round({self.inputs[0].value}, abs({self.inputs[1].value}))"""
+            "code": f"""round({self.inputs[0].code()}, abs({self.inputs[1].code()}))"""
         }

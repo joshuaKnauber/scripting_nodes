@@ -229,14 +229,14 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         def draw_header(self, context):
                             try:
                                 layout = self.layout
-                                {self.list_blocks(header_layouts, 8)}
+                                {self.outputs["Header"].by_name(8)}
                             except Exception as exc:
                                 print(str(exc) + " | Error in {self.label} panel header")
                         
                         def draw(self, context):
                             try:
                                 layout = self.layout
-                                {self.list_blocks(panel_layouts, 8)}
+                                {self.outputs["Panel"].by_name(8)}
                             except Exception as exc:
                                 print(str(exc) + " | Error in {self.label} panel")
                                 

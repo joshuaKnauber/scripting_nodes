@@ -16,7 +16,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_interface_input("Interface").copy_name = True
+        self.add_interface_input("Interface").mirror_name = True
 
         self.add_string_input("Label").set_default("New Button")
         self.add_boolean_input("Emboss").set_default(True)
@@ -27,15 +27,15 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
-        text = self.inputs['Label'].value
-        emboss = self.inputs['Emboss'].value
-        depress = self.inputs['Depress'].value
-        icon = self.inputs['Icon'].icon_line()
+        text = self.inputs['Label'].code()
+        emboss = self.inputs['Emboss'].code()
+        depress = self.inputs['Depress'].code()
+        icon = self.inputs['Icon'].code()
         
         operator = "object.add"
         
         return {
             "code": f"""
-                    op = {layout}.operator("{operator}",text={text},emboss={emboss},depress={depress},{icon})
+                    op = {layout}.operator("{operator}",text={text},emboss={emboss},depress={depress},icon_value={icon})
                     """
         }

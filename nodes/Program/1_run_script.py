@@ -74,9 +74,9 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
                     pass # {self.script} Script Start
-                    {self.list_blocks(script,5)}
+                    {self.list_code(script,5)}
                     pass # {self.script} Script End
                     
-                    {self.outputs[0].block(5)}
+                    {self.outputs[0].code(5)}
                     """
         }

@@ -23,7 +23,7 @@ class SN_SwitchIconsNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         return {
-            "code": f"""{self.inputs[1].value} if {self.inputs[0].value} else {self.inputs[2].value}"""
+            "code": f"""{self.inputs[1].code()} if {self.inputs[0].code()} else {self.inputs[2].code()}"""
         }
 
 
