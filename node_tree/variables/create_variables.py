@@ -65,10 +65,31 @@ class SN_OT_AddVariableSetter(bpy.types.Operator):
     bl_description = "Adds a node which lets you set the value of this variable"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
+    set_type: bpy.props.EnumProperty(items=[("SET","Set","Variable set"),("CHANGE","Change by","Change Variable by")],
+                                        options={"SKIP_SAVE"},
+                                        name="Setter Type",
+                                        description="The setter type for your variable")
+
     def execute(self, context):
         addon_tree = context.scene.sn.addon_tree()
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
 
-        node = graph_tree.nodes.new("SN_SetVariableNode")
+        if self.set_type == "SET":
+            node = graph_tree.nodes.new("SN_SetVariableNode")
+        else:
+            node = graph_tree.nodes.new("SN_ChangeVariableNode")
+
         node.search_value = graph_tree.sn_variables[graph_tree.sn_variable_index].name
         return {"FINISHED"}
+
+    def draw(self,context):
+        self.layout.prop(self,"set_type",expand=True)
+
+    def invoke(self,context,event):
+        addon_tree = context.scene.sn.addon_tree()
+        graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
+
+        if graph_tree.sn_variables[graph_tree.sn_variable_index].var_type in ["STRING", "INTEGER", "FLOAT"]:
+            return context.window_manager.invoke_props_dialog(self)
+        else:
+            return self.execute(context)
