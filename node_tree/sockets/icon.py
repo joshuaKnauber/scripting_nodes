@@ -10,8 +10,6 @@ class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "Icon"
     socket_type = "ICON"
     
-    socket_shape = "SQUARE"
-    
     def default_value(self):
         return "0"
     
@@ -21,4 +19,4 @@ class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 
     def get_color(self, context, node):
-        return (0.78, 0.78, 0.16)
+        return (1,0.4,0.2)

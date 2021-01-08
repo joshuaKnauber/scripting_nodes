@@ -24,9 +24,10 @@ class SN_SelectIcon(bpy.types.Operator):
     bl_label = "Select Icon"
     bl_description = "Shows you a selection of all blender icons"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
+    bl_property = "icon_search"
     
     node: bpy.props.StringProperty()
-    icon_search: bpy.props.StringProperty(options={"SKIP_SAVE","TEXTEDIT_UPDATE"})
+    icon_search: bpy.props.StringProperty(name="Search", options={"SKIP_SAVE"})
 
     def execute(self, context):
         return {"FINISHED"}

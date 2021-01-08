@@ -260,6 +260,9 @@ class SN_ScriptingBaseNode:
 
     def add_icon_input(self,label): return self.add_input("SN_IconSocket",label)
     def add_icon_output(self,label): return self.add_output("SN_IconSocket",label)
+
+    def add_blend_data_input(self,label): return self.add_input("SN_BlendDataSocket",label)
+    def add_blend_data_output(self,label): return self.add_output("SN_BlendDataSocket",label)
     
     prop_types = {
         "STRING": "SN_StringSocket",
