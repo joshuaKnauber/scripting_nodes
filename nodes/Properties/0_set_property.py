@@ -70,7 +70,7 @@ class SN_SetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
         return {
             "code": f"""
-                    {self.inputs[1].value}.{self.get_path_end()} = {self.inputs[2].value}
-                    {self.outputs[0].block(5)}
+                    {self.inputs[1].code()}.{self.get_path_end()} = {self.inputs[2].code()}
+                    {self.outputs[0].code(5)}
                     """
         }

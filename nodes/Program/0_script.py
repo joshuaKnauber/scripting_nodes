@@ -23,6 +23,6 @@ class SN_ScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
         return {
             "code": f"""
-                    {self.outputs[0].block(5)}
+                    {self.outputs[0].code(5)}
                     """
         }

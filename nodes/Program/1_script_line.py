@@ -50,6 +50,6 @@ class SN_ScriptLineNode(bpy.types.Node, SN_ScriptingBaseNode):
             "code": f"""
                     try: {self.script_line if self.script_line else "pass"}
                     except Exception as exc: sn_handle_script_line_exception(exc)
-                    {self.outputs[0].block(5)}
+                    {self.outputs[0].code(5)}
                     """
         }

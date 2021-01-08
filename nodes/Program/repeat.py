@@ -28,9 +28,9 @@ class SN_RepeatProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
             return {
                 "code": f"""
                         repeat_node_{self.uid} = 0
-                        for repeat_node_{self.uid} in range({self.inputs[1].value}):
-                            {self.outputs[1].block(7) if self.outputs[1].block(7) else "pass"}
-                        {self.outputs[0].block(5)}
+                        for repeat_node_{self.uid} in range({self.inputs[1].code()}):
+                            {self.outputs[1].code(7) if self.outputs[1].code(7) else "pass"}
+                        {self.outputs[0].code(5)}
                         """
             }
         else:

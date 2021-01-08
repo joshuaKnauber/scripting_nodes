@@ -25,7 +25,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             return None
 
     def on_create(self,context):
-        self.add_interface_input("Property").copy_name = True
+        self.add_interface_input("Property").mirror_name = True
         
     def setup_inputs(self,prop_type,prop_name):
         if prop_type == "BOOLEAN":

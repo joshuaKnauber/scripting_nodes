@@ -16,11 +16,11 @@ class SN_SplitNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_interface_input("Interface").copy_name = True
+        self.add_interface_input("Interface").mirror_name = True
         self.add_interface_output("First Part")
         self.add_interface_output("Second Part")
 
-        self.add_float_input("Factor").use_factor = True
+        self.add_float_input("Factor").subtype = "FACTOR"
         self.add_boolean_input("Align").set_default(False)
         self.add_boolean_input("Enabled")
         self.add_boolean_input("Alert").set_default(False)
@@ -39,12 +39,12 @@ class SN_SplitNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
 
-                    split = {layout}.split(align={self.inputs["Align"].value},factor={self.inputs["Factor"].value})
-                    split.enabled = {self.inputs["Enabled"].value}
-                    split.alert = {self.inputs["Alert"].value}
-                    split.scale_x = {self.inputs["Scale X"].value}
-                    split.scale_y = {self.inputs["Scale Y"].value}
-                    {self.outputs[0].block(5)}
-                    {self.outputs[1].block(5)}
+                    split = {layout}.split(align={self.inputs["Align"].code()},factor={self.inputs["Factor"].code()})
+                    split.enabled = {self.inputs["Enabled"].code()}
+                    split.alert = {self.inputs["Alert"].code()}
+                    split.scale_x = {self.inputs["Scale X"].code()}
+                    split.scale_y = {self.inputs["Scale Y"].code()}
+                    {self.outputs[0].code(5)}
+                    {self.outputs[1].code(5)}
                     """
         }

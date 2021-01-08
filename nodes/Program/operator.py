@@ -190,7 +190,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             layouts = []
             if self.outputs[-1].sn_type == "DYNAMIC":
                 for out in self.outputs[2:-1]:
-                    layouts.append(out.block(0))
+                    layouts.append(out.code())
 
 
             return_invoke = """self.execute(context)"""
@@ -199,7 +199,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.invoke_option == "invoke_confirm":
                 return_invoke += "(self, event)"
             elif self.invoke_option == "invoke_props_dialog":
-                return_invoke += f"(self, width={self.inputs[1].value})"
+                return_invoke += f"(self, width={self.inputs[1].code()})"
             elif self.invoke_option == "invoke_props_popup":
                 return_invoke += "(self, event)"
 
@@ -212,15 +212,15 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                             bl_description = "{self.item.description}"
                             bl_options = {"{" + '"REGISTER", "UNDO"' + "}"}
 
-                            {self.list_blocks(property_register, 7)}
+                            {self.list_code(property_register, 7)}
 
                             @classmethod
                             def poll(cls, context):
-                                return {self.inputs[0].value}
+                                return {self.inputs[0].code()}
 
                             def execute(self, context):
                                 try:
-                                    {self.outputs[0].block(9) if self.outputs[0].block(9) else "pass"}
+                                    {self.outputs[0].code(9) if self.outputs[0].code(9) else "pass"}
                                 except Exception as exc:
                                     print(str(exc) + " | Error in execute function of {self.operator_name}")
 
@@ -228,7 +228,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                             def invoke(self, context, event):
                                 try:
-                                    {self.outputs[1].block(9) if self.outputs[1].block(9) else "pass"}
+                                    {self.outputs[1].code(9) if self.outputs[1].code(9) else "pass"}
                                 except Exception as exc:
                                     print(str(exc) + " | Error in invoke function of {self.operator_name}")
 
@@ -237,7 +237,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                             def draw(self, context):
                                 layout = self.layout
                                 try:
-                                    {self.list_blocks(layouts, 9) if self.list_blocks(layouts, 9) else "pass"}
+                                    {self.list_code(layouts, 9) if self.list_code(layouts, 9) else "pass"}
                                 except Exception as exc:
                                     print(str(exc) + " | Error in draw function of {self.operator_name}")
                         """
@@ -247,7 +247,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             layouts = []
             if self.outputs[-1].sn_type == "DYNAMIC":
                 for out in self.outputs[1:-1]:
-                    layouts.append(out.block(0))
+                    layouts.append(out.code())
 
             return {
                 "code": f"""
@@ -261,23 +261,23 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                             @classmethod
                             def poll(cls, context):
-                                return {self.inputs[0].value}
+                                return {self.inputs[0].code()}
 
                             def execute(self, context):
                                 return {{"FINISHED"}}
 
                             def invoke(self, context, event):
                                 try:
-                                    {self.outputs[0].block(9) if self.outputs[0].block(9) else "pass"}
+                                    {self.outputs[0].code(9) if self.outputs[0].code(9) else "pass"}
                                 except Exception as exc:
                                     print(str(exc) + " | Error in invoke function of {self.operator_name}")
 
-                                return context.window_manager.invoke_popup(self, width={self.inputs[1].value})
+                                return context.window_manager.invoke_popup(self, width={self.inputs[1].code()})
 
                             def draw(self, context):
                                 layout = self.layout
                                 try:
-                                    {self.list_blocks(layouts, 9) if self.list_blocks(layouts, 9) else "pass"}
+                                    {self.list_code(layouts, 9) if self.list_code(layouts, 9) else "pass"}
                                 except Exception as exc:
                                     print(str(exc) + " | Error in draw function of {self.operator_name}")
                         """

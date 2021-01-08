@@ -23,5 +23,5 @@ class SN_InvertBooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         return {
-            "code": f"""not {self.inputs[0].value}"""
+            "code": f"""not {self.inputs[0].code()}"""
         }

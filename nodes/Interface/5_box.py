@@ -16,8 +16,8 @@ class SN_BoxNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_interface_input("Interface").copy_name = True
-        self.add_interface_output("Box",True)
+        self.add_interface_input("Interface").mirror_name = True
+        self.add_interface_output("Box").removable = True
         self.add_dynamic_interface_output("Box")
 
         self.add_boolean_input("Enabled")
@@ -33,20 +33,15 @@ class SN_BoxNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
-        
-        box_layouts = []
-        for out in self.outputs:
-            if out.name == "Box":
-                box_layouts.append(out.block(0))
 
         return {
             "code": f"""
 
                     box = {layout}.box()
-                    box.enabled = {self.inputs["Enabled"].value}
-                    box.alert = {self.inputs["Alert"].value}
-                    box.scale_x = {self.inputs["Scale X"].value}
-                    box.scale_y = {self.inputs["Scale Y"].value}
-                    {self.list_blocks(box_layouts, 5)}
+                    box.enabled = {self.inputs["Enabled"].code()}
+                    box.alert = {self.inputs["Alert"].code()}
+                    box.scale_x = {self.inputs["Scale X"].code()}
+                    box.scale_y = {self.inputs["Scale Y"].code()}
+                    {self.outputs["Box"].by_name("Box")}
                     """
         }
