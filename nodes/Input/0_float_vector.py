@@ -22,9 +22,9 @@ class SN_VectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def update_size(self,context):
         if self.use_four:
-            self.outputs[0].array_size = 4
+            self.outputs[0].subtype = "VECTOR4"
         else:
-            self.outputs[0].array_size = 3
+            self.outputs[0].subtype = "VECTOR3"
 
     use_four: bpy.props.BoolProperty(default=False,
                                      name="Vector 4",
@@ -32,8 +32,8 @@ class SN_VectorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         out = self.add_float_output("Vector")
-        out.copy_name = True
-        out.is_array = True
+        out.mirror_name = True
+        out.subtype = "VECTOR3"
 
 
     def draw_node(self,context,layout):

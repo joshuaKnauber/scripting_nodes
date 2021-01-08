@@ -1,31 +1,37 @@
 import bpy
-from .base_sockets import ScriptingSocket, DynamicSocket
+from .base_sockets import ScriptingSocket
 from ...compiler.compiler import process_node
 
 
 
 class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
+    
+    group = "DATA"
     bl_label = "Blend Data"
-    sn_type = "BLEND_DATA"
-    socket_shape = "SQUARE"
+    socket_type = "BLEND_DATA"
+        
+    def update_subtype(self,context):
+        if subtype == "COLLECTION":
+            self.display_shape = "SQUARE"
+        else:
+            self.display_shape = "CIRCLE"
     
-    data_type: bpy.props.StringProperty(default="",
-                                        update=ScriptingSocket.socket_value_update)
+    data_type: bpy.props.StringProperty()
     
-    relative_path: bpy.props.StringProperty(default="",
-                                        update=ScriptingSocket.socket_value_update)
+    data_path: bpy.props.StringProperty()
     
-    collection: bpy.props.BoolProperty(default=False,
-                                       update=ScriptingSocket.socket_value_update)
+    subtype: bpy.props.EnumProperty(items=[("DATA_BLOCK","Data Block","Data Block"),
+                                           ("COLLECTION","Collection","Collection"),
+                                           ("TYPE","Type","Type")],
+                                    update=update_subtype)
+
+    copy_attributes = ["data_type","data_path"]
     
-    def get_return_value(self):
+    def default_value(self):
         return "None"
 
     def draw_socket(self, context, layout, row, node, text):
         row.label(text=text)
 
-    def draw_color(self, context, node):
-        c = (0,1,0.8)
-        if self.is_linked:
-            return (c[0], c[1], c[2], 1)
-        return (c[0], c[1], c[2], 0.5)
+    def get_color(self, context, node):
+        return (0,1,0.8)

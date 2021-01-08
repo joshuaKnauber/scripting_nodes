@@ -1,26 +1,34 @@
 import bpy
-from .base_sockets import ScriptingSocket, DynamicSocket
+from .base_sockets import ScriptingSocket
 from ...compiler.compiler import process_node
 
 
 
 class SN_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
+    
+    group = "PROGRAM"
     bl_label = "Interface"
-    sn_type = "INTERFACE"
+    socket_type = "INTERFACE"
+
     socket_shape = "DIAMOND"
-    output_limit = 1
     
     def draw_socket(self, context, layout, row, node, text):
         row.label(text=text)
 
-    def draw_color(self, context, node):
-        c = (1, 0.7, 0)
-        if self.is_linked:
-            return (c[0], c[1], c[2], 1)
-        return (c[0], c[1], c[2], 0.5)
+    def get_color(self, context, node):
+        return (1, 0.7, 0)
     
     
 
-class SN_DynamicInterfaceSocket(bpy.types.NodeSocket, DynamicSocket):
+class SN_DynamicInterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
+    group = "PROGRAM"
+    bl_label = "Interface"
+    socket_type = "INTERFACE"
+
     socket_shape = "DIAMOND"
-    add_idname = "SN_InterfaceSocket"
+    
+    dynamic = True
+    to_add_idname = "SN_InterfaceSocket"
+    
+    def setup(self):
+        self.addable = True

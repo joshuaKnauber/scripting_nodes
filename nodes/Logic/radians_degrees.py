@@ -15,7 +15,7 @@ class SN_RadiansNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
 
-    operation: bpy.props.EnumProperty(items=[("degrees", "Radians to Degrees", "Convert Radians to Degrees"), ("radians", "Degrees to Radians", "Convert Degrees to radians")],name="Operation", update=SN_ScriptingBaseNode.update_needs_compile)
+    operation: bpy.props.EnumProperty(items=[("degrees", "Radians to Degrees", "Convert Radians to Degrees"), ("radians", "Degrees to Radians", "Convert Degrees to radians")],name="Operation", update=SN_ScriptingBaseNode.auto_compile)
 
 
     def on_create(self,context):

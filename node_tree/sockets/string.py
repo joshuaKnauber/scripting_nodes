@@ -1,88 +1,96 @@
 import bpy
-from .base_sockets import ScriptingSocket, DynamicSocket
+from .base_sockets import ScriptingSocket
 from ...compiler.compiler import process_node
 
 
 
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_label = "String"
-    sn_type = "STRING"
 
-    def make_absolute(self,context):
-        if self.file_path and not self.file_path == bpy.path.abspath(self.file_path):
-            self.file_path = bpy.path.abspath(self.file_path)
-        if self.dir_path and not self.dir_path == bpy.path.abspath(self.dir_path):
-            self.dir_path = bpy.path.abspath(self.dir_path)
+    group = "DATA"
+    bl_label = "String"
+    socket_type = "STRING"
     
-    def update_all(self,context):
-        self.node.socket_value_update(context)
-        self.make_absolute(context)
-        if '"' in self.default_value:
-            self.default_value = self.default_value.replace('"',"'")
-        if '"' in self.file_path:
-            self.file_path = self.file_path.replace('"',"'")
-        if '"' in self.dir_path:
-            self.dir_path = self.dir_path.replace('"',"'")
     
-    default_value: bpy.props.StringProperty(default="",
-                                            update=update_all,
-                                            name="Value",
-                                            description="Value of this socket")
+    def enum_items(self,context):
+        items = []
+        if not items:
+            items = [("NONE","None","No items have been found for this property")]
+        return items
     
-    file_path: bpy.props.StringProperty(default="",
-                                        subtype="FILE_PATH",
-                                        update=update_all,
-                                        name="Value",
-                                        description="Value of this socket")
     
-    dir_path: bpy.props.StringProperty(default="",
-                                        subtype="DIR_PATH",
-                                        update=update_all,
-                                        name="Value",
-                                        description="Value of this socket")
+    value: bpy.props.StringProperty(name="Value",
+                                    description="Value of this socket")
     
-    #TODO add enum socket
+    value_file: bpy.props.StringProperty(name="Value",
+                                        description="Value of this socket",
+                                        subtype="FILE_PATH")
+
+    value_directory: bpy.props.StringProperty(name="Value",
+                                        description="Value of this socket",
+                                        subtype="DIR_PATH")
+
+    value_enum: bpy.props.EnumProperty(name="Value",
+                                        description="Value of this socket",
+                                        items=enum_items)
     
-    is_file_path: bpy.props.BoolProperty(default=False)
-    is_dir_path: bpy.props.BoolProperty(default=False)
-     
-    def set_default(self, value):
-        self.default_value = value
-        self.file_path = value
-        self.dir_path = value
-        
-    def get_return_value(self):
-        if self.is_file_path:
-            return f"\"{self.file_path}\""
-        elif self.is_dir_path:
-            return f"\"{self.dir_path}\""
-        return f"\"{self.default_value}\""
     
-    def process_value(self,value):
-        value = value.replace('"',"'")
-        return value
+    subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),
+                                            ("FILE","File","File"),
+                                            ("DIRECTORY","Directory","Directory"),
+                                            ("ENUM","Enum","Enum")])
     
-    def cast_value(self,value):
-        return f"str({value})"
+    copy_attributes = ["value","value_file","value_directory","value_enum"]
+    
+    
+    def default_value(self):
+        if self.subtype == "NONE":
+            return "\"" + self.value + "\""
+        elif self.subtype == "FILE":
+            return "\"" + self.value_file + "\""
+        elif self.subtype == "DIRECTORY":
+            return "\"" + self.value_directory + "\""
+        elif self.subtype == "ENUM":
+            return "\"" + self.value_enum + "\""
+    
+    
+    def convert_data(self, code):
+        return "sn_cast_string(" + code + ")"
+
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:
             row.label(text=text)
         else:
-            if self.is_file_path:
-                row.prop(self, "file_path", text=text)
-            elif self.is_dir_path:
-                row.prop(self, "dir_path", text=text)
-            else:
-                row.prop(self, "default_value", text=text)
+            if self.subtype == "NONE":
+                row.prop(self, "value", text=text)
+            elif self.subtype == "FILE":
+                row.prop(self, "value_file", text=text)
+            elif self.subtype == "DIRECTORY":
+                row.prop(self, "value_directory", text=text)
+            elif self.subtype == "ENUM":
+                row.prop(self, "value_enum", text=text)
 
-    def draw_color(self, context, node):
-        c = (0.3, 1, 0.3)
-        if self.is_linked:
-            return (c[0], c[1], c[2], 1)
-        return (c[0], c[1], c[2], 0.5)
+
+    def get_color(self, context, node):
+        return (0.3, 1, 0.3)
     
 
 
-class SN_DynamicStringSocket(bpy.types.NodeSocket, DynamicSocket):
-    add_idname = "SN_StringSocket"
+class SN_DynamicStringSocket(bpy.types.NodeSocket, ScriptingSocket):
+    group = "DATA"
+    bl_label = "String"
+    socket_type = "STRING"
+    
+    dynamic = True
+    to_add_idname = "SN_StringSocket"
+    
+    subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),
+                                            ("FILE","File","File"),
+                                            ("DIRECTORY","Directory","Directory"),
+                                            ("ENUM","Enum","Enum")])
+    
+    copy_attributes = ["value","value_file","value_directory","value_enum"]
+
+    
+    def setup(self):
+        self.addable = True

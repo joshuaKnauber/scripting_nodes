@@ -16,7 +16,7 @@ class SN_UndoNode(bpy.types.Node, SN_ScriptingBaseNode):
         "import_once": True
     }
 
-    action: bpy.props.EnumProperty(items=[("undo_pre", "Before", "On loading an undo step (before)"), ("undo_post", "After", "On loading an undo step (after)")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.update_needs_compile)
+    action: bpy.props.EnumProperty(items=[("undo_pre", "Before", "On loading an undo step (before)"), ("undo_post", "After", "On loading an undo step (after)")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.auto_compile)
 
     def on_create(self,context):
         self.add_execute_output("On Undo")
@@ -35,7 +35,7 @@ class SN_UndoNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_imperative(self, context):
-        code = self.outputs[0].block(6)
+        code = self.outputs[0].code(6)
 
         return {
             "code": f"""

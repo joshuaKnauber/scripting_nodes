@@ -4,26 +4,26 @@ from ...compiler.compiler import process_node
 
 
 
-class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
+class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     group = "DATA"
-    bl_label = "Boolean"
-    socket_type = "BOOLEAN"
+    bl_label = "Integer"
+    socket_type = "INTEGER"
     
     
-    value: bpy.props.BoolProperty(default=True,
-                                            name="Value",
-                                            description="Value of this socket")
+    value: bpy.props.IntProperty(default=1,
+                                    name="Value",
+                                    description="Value of this socket")
     
-    value_three: bpy.props.BoolVectorProperty(default=(True,True,True),
-                                                     size=3,
-                                                     name="Value",
-                                                     description="Value of this socket")
+    value_three: bpy.props.IntVectorProperty(default=(1,1,1),
+                                                size=3,
+                                                name="Value",
+                                                description="Value of this socket")
     
-    value_four: bpy.props.BoolVectorProperty(default=(True,True,True,True),
-                                                     size=4,
-                                                     name="Value",
-                                                     description="Value of this socket")
+    value_four: bpy.props.IntVectorProperty(default=(1,1,1,1),
+                                                size=4,
+                                                name="Value",
+                                                description="Value of this socket")
     
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),
@@ -44,40 +44,41 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     def convert_data(self, code):
         if self.subtype == "NONE":
-            return "sn_cast_boolean(" + code + ")"
+            return "sn_cast_int(" + code + ", False)"
         elif self.subtype == "VECTOR3":
-            return "sn_cast_boolean_vector(" + code + ", 3)"
+            return "sn_cast_int_vector(" + code + ", 3)"
         elif self.subtype == "VECTOR4":
-            return "sn_cast_boolean_vector(" + code + ", 4)"
+            return "sn_cast_int_vector(" + code + ", 4)"
 
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:
             row.label(text=text)
         else:
-            if self.subtype == "NONE":
+            if not "VECTOR" in self.subtype:
                 row.prop(self, "value", text=text)
             else:
                 col = row.column(align=True)
                 if self.subtype == "VECTOR3":
-                    for i in range(3): col.prop(self, "value_three", text=str(self.value_three[i]), index=i, toggle=True)
+                    col.prop(self, "value_three", text=text)
                 elif self.subtype == "VECTOR4":
-                    for i in range(4): col.prop(self, "value_four", text=str(self.value_four[i]), index=i, toggle=True)
+                    col.prop(self, "value_four", text=text)
     
     
     def get_color(self, context, node):
-        return (1, 0.1, 0.1)
+        return (0.3, 0.3, 1)
     
 
 
-class SN_DynamicBooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
+class SN_DynamicIntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     group = "DATA"
-    bl_label = "Boolean"
-    socket_type = "BOOLEAN"
+    bl_label = "Integer"
+    socket_type = "INTEGER"
     
     dynamic = True
-    to_add_idname = "SN_BooleanSocket"
+    to_add_idname = "SN_IntegerSocket"
+    
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),
                                             ("VECTOR3","Vector 3","Vector 3"),

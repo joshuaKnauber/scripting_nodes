@@ -156,19 +156,19 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     hide_header: bpy.props.BoolProperty(default=False,
                                         name="Hide Header",
                                         description="Hides the header of this panel",
-                                        update=SN_ScriptingBaseNode.update_needs_compile)
+                                        update=SN_ScriptingBaseNode.auto_compile)
     
     
     default_closed: bpy.props.BoolProperty(default=False,
                                         name="Default Closed",
                                         description="Closes this panel by default",
-                                        update=SN_ScriptingBaseNode.update_needs_compile)
+                                        update=SN_ScriptingBaseNode.auto_compile)
     
     
     label: bpy.props.StringProperty(default="New Panel",
                                     name="Label",
                                     description="The label of this panel",
-                                    update=SN_ScriptingBaseNode.update_needs_compile)
+                                    update=SN_ScriptingBaseNode.auto_compile)
     
     order: bpy.props.IntProperty(default=0,
                                  min=0,
@@ -177,7 +177,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def on_create(self,context):
-        self.add_interface_output("Panel",True)
+        self.add_interface_output("Panel").removable = True
         self.add_dynamic_interface_output("Panel")
         self.add_dynamic_interface_output("Header")
 
@@ -210,16 +210,6 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         option_closed = "\"DEFAULT_CLOSED\"," if self.default_closed else ""
         option_header = "\"HIDE_HEADER\"," if self.hide_header else ""
         
-        panel_layouts = []
-        for out in self.outputs:
-            if out.name == "Panel":
-                panel_layouts.append(out.block(0))
-        
-        header_layouts = []
-        for out in self.outputs:
-            if out.name == "Header":
-                header_layouts.append(out.block(0))
-        
         return {
             "code": f"""
                     class {self.idname()}(bpy.types.Panel):
@@ -234,7 +224,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         
                         @classmethod
                         def poll(cls, context):
-                            return {self.inputs["Poll"].value}
+                            return {self.inputs["Poll"].code()}
 
                         def draw_header(self, context):
                             try:

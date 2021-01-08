@@ -10,7 +10,7 @@ class SN_SetIcon(bpy.types.Operator):
     bl_options = {"REGISTER","UNDO","INTERNAL"}
 
     node: bpy.props.StringProperty()
-    icon: bpy.props.StringProperty()
+    icon: bpy.props.IntProperty()
 
     def execute(self, context):
         context.space_data.node_tree.nodes[self.node].icon = self.icon
@@ -24,9 +24,10 @@ class SN_SelectIcon(bpy.types.Operator):
     bl_label = "Select Icon"
     bl_description = "Shows you a selection of all blender icons"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
+    bl_property = "icon_search"
     
     node: bpy.props.StringProperty()
-    icon_search: bpy.props.StringProperty(options={"SKIP_SAVE"})
+    icon_search: bpy.props.StringProperty(name="Search", options={"SKIP_SAVE"})
 
     def execute(self, context):
         return {"FINISHED"}
@@ -36,7 +37,7 @@ class SN_SelectIcon(bpy.types.Operator):
     
     def draw(self,context):
         layout = self.layout
-        icons = bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items.keys()
+        icons = bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items
         node = context.space_data.node_tree.nodes[self.node]
         
         row = self.layout.row()
@@ -44,10 +45,10 @@ class SN_SelectIcon(bpy.types.Operator):
 
         grid = self.layout.grid_flow(align=True,even_columns=True, even_rows=True)
         for icon in icons:
-            if self.icon_search.lower() in icon.lower() or not self.icon_search:
-                op = grid.operator("sn.set_icon",text="", icon=icon, emboss=node.icon==icon)
+            if self.icon_search.lower() in icon.name.lower() or not self.icon_search:
+                op = grid.operator("sn.set_icon",text="", icon_value=icon.value, emboss=node.icon==icon.value)
                 op.node = self.node
-                op.icon = icon
+                op.icon = icon.value
 
 
 
@@ -64,7 +65,7 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
     
     def update_source(self,context):
-        SN_ScriptingBaseNode().update_needs_compile(context)
+        self.auto_compile(context)
         if self.icon_source == "BLENDER":
             self.outputs[0].is_expression = False
         elif self.custom_icon != "" and self.custom_icon in self.addon_tree.sn_icons:
@@ -77,7 +78,7 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
                                                 ("CUSTOM","Custom","Custom",1)])
 
     
-    icon: bpy.props.StringProperty(default="ERROR",update=SN_ScriptingBaseNode.update_needs_compile)
+    icon: bpy.props.IntProperty(default=2,update=SN_ScriptingBaseNode.auto_compile)
     custom_icon: bpy.props.StringProperty(default="",update=update_source)
 
 
@@ -101,17 +102,17 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
                 row.label(icon="ERROR")
                 row.prop_search(self,"custom_icon",addon_tree,"sn_icons",text="")                
         else:
-            op = row.operator("sn.select_icon",icon=self.icon)
+            op = row.operator("sn.select_icon",icon_value=self.icon)
             op.node = self.name
 
 
     def code_evaluate(self, context, touched_socket):
-        icon = f"\"{self.icon}\""
+        icon = str(self.icon)
         if self.icon_source == "CUSTOM":
             if self.custom_icon and self.custom_icon in self.addon_tree.sn_icons and self.addon_tree.sn_icons[self.custom_icon].image:
                 icon = f"bpy.context.scene.{self.addon_tree.sn_graphs[0].short()}_icons['{self.custom_icon}'].icon_id"
             else:
-                icon = "\"ERROR\""
+                icon = "2"
         return {
             "code": icon
         }

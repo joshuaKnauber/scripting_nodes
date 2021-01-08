@@ -21,5 +21,24 @@ def license_block():
 
 def serpens_functions(addon_tree):
     return f"""
-            
+            def sn_cast_string(value):
+                return str(value)
+                
+            def sn_cast_boolean(value):
+                return value
+
+            def sn_cast_boolean_vector(value, size):
+                return value
+
+            def sn_cast_float(value, use_factor):
+                return value
+                
+            def sn_cast_color(value, use_alpha):
+                return value
+                
+            def sn_cast_float_vector(value, size):
+                return value
+                
+            def sn_cast_int_vector(value, size):
+                return value
             """

@@ -14,7 +14,7 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
 
-    operation: bpy.props.EnumProperty(items=[(" and ", "And", "Both values have to be true"), (" or ", "Or", "Only one value has to be true")], name="Gate", description="The gate you want to use", update=SN_ScriptingBaseNode.update_needs_compile)
+    operation: bpy.props.EnumProperty(items=[(" and ", "And", "Both values have to be true"), (" or ", "Or", "Only one value has to be true")], name="Gate", description="The gate you want to use", update=SN_ScriptingBaseNode.auto_compile)
 
     def on_create(self,context):
         self.add_boolean_input("Boolean")

@@ -17,7 +17,7 @@ class SN_StringNode(bpy.types.Node, SN_ScriptingBaseNode):
     value: bpy.props.StringProperty(name="String Value")
 
     def on_create(self,context):
-        self.add_string_output("String")
+        self.add_string_output("String").mirror_name = True
 
     def draw_node(self,context,layout):
         layout.prop(self, "value", text="")
