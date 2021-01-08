@@ -2,7 +2,7 @@ import bpy
 from ...compiler.compiler import process_node
 
 
-### PROCESS LINKS THAT NEED TO BE HANDLED DYNAMIC
+### PROCESS LINKS THAT NEED TO BE HANDLED AS DYNAMIC
 
 dynamic_links = []
 def get_dynamic_links(): return dynamic_links
@@ -15,371 +15,321 @@ def get_remove_links(): return remove_links
 def add_to_remove_links(link): remove_links.append(link)
 
 
-### SOCKET INDEX BY PATH
-
-def get_socket_index(socket):
-    return int(socket.path_from_id().split("[")[-1].replace("]",""))
-
-
-### HANDLE POSSIBLE SOCKET CONNECTIONS
-
-SOCKET_CONNECTIONS = {
-    "SHORT": {
-        "SN_ExecuteSocket":             "E",
-        "SN_DynamicExecuteSocket":      "DE",
-
-        "SN_InterfaceSocket":           "I",
-        "SN_DynamicInterfaceSocket":    "DI",
-
-        "SN_BlendDataSocket":           "BD",    
-        
-        "SN_DataSocket":                "D",
-        "SN_DynamicDataSocket":         "DD",
-                
-        "SN_IntegerSocket":             "IN",
-        "SN_FloatSocket":               "FN",  
-        
-        "SN_BooleanSocket":             "B",
-        
-        "SN_StringSocket":              "S",
-        "SN_DynamicStringSocket":       "DS",
-        "SN_IconSocket":                "IC",
-        
-        "SN_DynamicVariableSocket":     "DV"
-    },
-    
-    "VALUES": {"OUTPUTS":   ["E","DE","I","DI","BD","D","DD","IN","FN","B","S","DS","IC","DV"],
-                     "E":   [ 1,  1,   0,  0,   0,   0,   0,   0,   0,  0,  0,   0,   0,   0 ],
-                    "DE":   [ 1,  0,   0,  0,   0,   0,   0,   0,   0,  0,  0,   0,   0,   0 ],
-                     "I":   [ 0,  0,   1,  1,   0,   0,   0,   0,   0,  0,  0,   0,   0,   0 ],
-                    "DI":   [ 0,  0,   1,  0,   0,   0,   0,   0,   0,  0,  0,   0,   0,   0 ],
-                    "BD":   [ 0,  0,   0,  0,   1,   0,   0,   0,   0,  0,  0,   0,   0,   1 ],
-                     "D":   [ 0,  0,   0,  0,   1,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
-                    "DD":   [ 0,  0,   0,  0,   1,   1,   0,   1,   1,  1,  1,   0,   0,   0 ],
-                    "IN":   [ 0,  0,   0,  0,   1,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
-                    "FN":   [ 0,  0,   0,  0,   1,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
-                     "B":   [ 0,  0,   0,  0,   1,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
-                     "S":   [ 0,  0,   0,  0,   1,   1,   1,   1,   1,  1,  1,   1,   0,   1 ],
-                    "DS":   [ 0,  0,   0,  0,   1,   1,   0,   1,   1,  1,  1,   0,   0,   0 ],
-                    "IC":   [ 0,  0,   0,  0,   0,   0,   0,   0,   0,  0,  0,   0,   1,   0 ],
-                    "DV":   [ 0,  0,   0,  0,   1,   1,   0,   1,   1,  1,  1,   0,   0,   0 ],}
-    
-}
-
-def can_connect(inp_idname,out_idname):
-    inp = SOCKET_CONNECTIONS["SHORT"][inp_idname]
-    out = SOCKET_CONNECTIONS["SHORT"][out_idname]
-    out_col = SOCKET_CONNECTIONS["VALUES"]["OUTPUTS"].index(out)
-    return bool(SOCKET_CONNECTIONS["VALUES"][inp][out_col])
-
 
 ### THE MAIN SCRIPTING SOCKET
 
 class ScriptingSocket:
     
-    ### SOCKET TYPE
+    ### SOCKET GENERAL
 
-    sn_type = ""
     output_limit = 9999
 
 
-    ### SOCKET APPEARANCE
+    ### SOCKET OPTIONS
     
-    socket_shape = "CIRCLE"
-    removable: bpy.props.BoolProperty(default=False)
-    addable: bpy.props.BoolProperty(default=False)
+    def update_shape(self,context):
+        real_shape = self.socket_shape
+        if self.return_var_name or self.show_var_name:
+            real_shape += "_DOT"
+        if not self.display_shape == real_shape:
+            self.display_shape = real_shape
     
+    
+    group = "" # DATA | PROGRAM
+    socket_type = "" # Required if group is DATA
+    
+    socket_shape = "CIRCLE" # CIRCLE | SQUARE | DIAMOND
+    
+    subtype: bpy.props.EnumProperty(items=[("NONE","None","None")]) # The subtype of this socket
+    
+    dynamic = False # True if this is a dynamic socket
+    copy_socket = False # True if the dynamic socket should copy the connected socket
+    
+
+    removable: bpy.props.BoolProperty(default=False) # Shows a remove button on the socket
+
+    addable: bpy.props.BoolProperty(default=False) # Shows an add button on the socket
+    to_add_idname = "" # Required if addable or dynamic is true
+    
+    default_text: bpy.props.StringProperty() # The default text of this socket
+    mirror_name: bpy.props.BoolProperty(default=False) # Mirrors the name of the connected socket
+    take_name: bpy.props.BoolProperty(default=False) # Takes the name of the first connected socket
+    
+    variable_name: bpy.props.StringProperty() # The name of the variable if is_variable is True
+    return_var_name: bpy.props.BoolProperty(default=False,update=update_shape) # Always return the var name instead of running make_code
+    show_var_name: bpy.props.BoolProperty(default=False,update=update_shape) # Shows the variable name instead of the draw function
+    edit_var_name: bpy.props.BoolProperty(default=False) # Defines if the variable name is shown as editable
+    
+    # general socket attributes that need to be copied
+    copy_props = ["default_text","mirror_name","variable_name","return_var_name",
+                  "show_var_name","edit_var_name","subtype"]
+    copy_attributes = [] # set this to the attributes that should be copied for each socket
     
     ### SETUP SOCKET
         
     def setup(self): pass
 
 
-    def setup_socket(self,removable,label):
+    def setup_socket(self,default_text):
         self.display_shape = self.socket_shape
-        self.removable = removable
-        self.default_text = label
+        self.default_text = default_text
         self.setup()
-        
-    
-    def get_socket_index(self,collection):
-        for i, socket in enumerate(collection):
-            if socket == self:
-                return i
-        return 0
     
         
     ### UPDATE SOCKET
-    
+        
     def update(self,node,link): pass
 
+
+    def update_take_name(self, link):
+        if self.take_name:
+            if self.is_output: self.default_text = link.to_socket.default_text
+            else: self.default_text = link.from_socket.default_text
+            self.take_name = False
     
     def update_socket(self,node,link):
         if self.is_output and len(node.outputs[self.get_socket_index(node.outputs)].links)+1 > self.output_limit:
             add_to_remove_links(link)
+        elif link.to_socket.group != link.from_socket.group:
+            add_to_remove_links(link)
         else:
-            if self.take_name and not self.taken_name:
-                if self.is_output:
-                    self.taken_name = link.to_socket.name
-                else:
-                    self.taken_name = link.from_socket.name
+            self.update_take_name(link)
+            self.update_dynamic(node, link)
             self.update(node,link)
     
     
-    def socket_value_update(self,context):
+    def auto_compile(self,context):
         self.node.node_tree.set_changes(True)
-    
-    
-    ### SOCKET TEXT
-
-    default_text: bpy.props.StringProperty()
-    take_name: bpy.props.BoolProperty(default=False)
-    taken_name: bpy.props.StringProperty(default="")
-    copy_name: bpy.props.BoolProperty(default=False)
         
         
-    def get_text(self,text):
-        if self.taken_name:
-            return self.taken_name
-        elif self.is_linked and self.copy_name:
-            if self.is_output and not self.links[0].to_socket.copy_name:
-                return self.links[0].to_socket.get_text(self.links[0].to_socket.name)
-            elif self.is_output and self.links[0].to_socket.copy_name:
-                return self.links[0].to_socket.name
-            elif not self.is_output and not self.links[0].from_socket.copy_name:
-                return self.links[0].from_socket.get_text(self.links[0].from_socket.name)
-            elif not self.is_output and self.links[0].from_socket.copy_name:
-                return self.links[0].from_socket.name
-        return text
+    ### DYNAMIC SOCKET
     
-    
-    ### HANDLE VARIABLE SOCKETS
-    
-    def update_var_name(self,context):
-        if not self.var_name:
-            self["var_name"] = "Parameter"
-        names = []
-        if self.is_output:
-            for out in self.node.outputs:
-                names.append(out.var_name)
+    def update_dynamic_output(self,node,link):
+        index = self.get_socket_index(node.outputs)
+
+        if self.copy_socket:
+            out = node.add_output(link.to_socket.bl_idname, self.default_text)
         else:
-            for inp in self.node.inputs:
-                names.append(inp.var_name)
-        unique_name = self.node.get_unique_name(self.var_name, names, " ")
-        if not self.var_name == unique_name:
-            self.var_name = unique_name
-        self.node.update_needs_compile(context)
+            out = node.add_output(self.to_add_idname, self.default_text)
+
+        out.removable = True
+        for attr in self.copy_props + self.copy_attributes:
+            setattr(link.to_socket, attr, getattr(self, attr))
+
+        node.outputs.move(len(node.outputs)-1, index)
+        dynamic_links.append((link, link.to_socket, out))
 
 
-    def update_is_expression(self,context):
-        if self.is_expression:
-            self.display_shape = self.socket_shape + "_DOT"
+    def update_dynamic_input(self,node,link):
+        index = self.get_socket_index(node.inputs)
+
+        if self.copy_socket:
+            inp = node.add_input(link.to_socket.bl_idname, self.default_text)
         else:
-            self.display_shape = self.socket_shape.replace("_DOT","")
-        self.node.update_needs_compile(context)
+            inp = node.add_input(self.to_add_idname, self.default_text)
 
+        inp.removable = True
+        for attr in self.copy_props + self.copy_attributes:
+            setattr(link.from_socket, attr, getattr(self, attr))
 
-    is_expression: bpy.props.BoolProperty(default=False, update=update_is_expression)
-    editable_var_name: bpy.props.BoolProperty(default=True)
-    use_var_name: bpy.props.BoolProperty(default=True)
-    show_var_name: bpy.props.BoolProperty(default=True)
-    var_name: bpy.props.StringProperty(default="", update=update_var_name)
+        node.inputs.move(len(node.inputs)-1, index)
+        dynamic_links.append((link, link.from_socket, inp))
+    
+    
+    def update_dynamic(self,node,link):
+        if self.dynamic:
+            if self.is_output: self.update_dynamic_output(node,link)
+            else: self.update_dynamic_input(node,link)
     
     
     ### DRAW SOCKET
         
     def draw_remove_socket(self,layout):
         op = layout.operator("sn.remove_socket", text="",icon="REMOVE", emboss=False)
-        op.index = get_socket_index(self)
+        op.index = self.get_socket_index()
         op.tree_name = self.node.node_tree.name
         op.node_name = self.node.name
         op.is_output = self.is_output
         
         
     def draw_add_socket(self,layout):
-        if self.add_idname:
-            op = layout.operator("sn.add_socket", text="",icon="ADD", emboss=False)
-            op.index = get_socket_index(self)
-            op.tree_name = self.node.node_tree.name
-            op.node_name = self.node.name
-            op.is_output = self.is_output
-            op.idname = self.add_idname
+        op = layout.operator("sn.add_socket", text="",icon="ADD", emboss=False)
+        op.index = self.get_socket_index()
+        op.tree_name = self.node.node_tree.name
+        op.node_name = self.node.name
+        op.is_output = self.is_output
+        op.idname = self.to_add_idname
+        
+        
+    def draw_as_input(self,row):
+        if self.removable and not self.is_output:
+            self.draw_remove_socket(row)
+        elif self.addable and not self.is_output:
+            self.draw_add_socket(row)
+        
+        
+    def draw_as_output(self,row):
+        if self.removable and self.is_output:
+            self.draw_remove_socket(row)   
+        elif self.addable and self.is_output:
+            self.draw_add_socket(row)
+    
+    
+    def draw_variable(self, row):
+        if self.edit_var_name:
+            row.prop(self,"variable_name",text="")
+        else:
+            row.label(text=self.variable_name)
+            
+            
+    def get_text(self):
+        if self.mirror_name and self.is_linked:
+            if self.is_output: return self.links[0].to_socket.default_text
+            else: return self.links[0].from_socket.default_text
+        return self.default_text
         
         
     def draw_socket(self,context,layout,row,node,text):
-        """ overwrite this to draw the socket """
-        pass
+        """ overwrite this to draw the sockets property """
+        row.label(text=text)
         
         
     def draw(self, context, layout, node, text):
         row = layout.row(align=True)
         if self.is_output:
             row.alignment = "RIGHT"
-        if self.removable and not self.is_output:
-            self.draw_remove_socket(row)
-        elif self.addable and not self.is_output:
-            self.draw_add_socket(row)
-        if self.is_expression and self.editable_var_name and self.show_var_name:
-            row.prop(self,"var_name",text="")
-        elif self.is_expression and self.show_var_name:
-            row.label(text=self.var_name)
-        else:
-            self.draw_socket(context,layout,row,node,self.get_text(text))
-        if self.removable and self.is_output:
-            self.draw_remove_socket(row)   
-        elif self.addable and self.is_output:
-            self.draw_add_socket(row)
             
+        self.draw_as_input(row)
+        if self.show_var_name: self.draw_variable(row)
+        else: self.draw_socket(context,layout,row,node,self.get_text())
+        self.draw_as_output(row)
+            
+            
+    ### SOCKET COLOR
+            
+            
+    def get_color(self, context, node):
+        """ overwrite this to set the sockets basic color """
+        return (0,0,0)
+
 
     def draw_color(self, context, node):
-        """ overwrite this to draw the socket color """
-        return (0,0,0,0)
-            
-            
-    ### SOCKET RETURN VALUES
+        c = self.get_color(context, node)
+        if "VECTOR" in self.subtype or "COLOR" in self.subtype: c = (0.39, 0.39, 0.78)
+        
+        if self.is_linked: alpha = 1
+        else: alpha = 0.5
+        if self.dynamic: alpha = 0
+        
+        return (c[0], c[1], c[2], alpha)
     
-    def make_code(self,indents=0):
-        # handle variable sockets
-        if self.is_expression and self.use_var_name:
-            return self.node.get_python_name(self.var_name,"parameter")
-
-        # handle program sockets
-        if self.sn_type in ["EXECUTE","INTERFACE"]:
+    
+    ### UTILITY
+        
+    
+    def get_socket_index(self,collection=None):
+        if not collection:
+            collection = self.node.inputs
             if self.is_output:
-                if len(self.links):
-                    return self.links[0].to_socket.make_code(indents)
-                elif self.sn_type == "EXECUTE":
-                    return "pass\n"
-                else:
-                    return ""
-            else:
-                return process_node(self.node, self, indents)
-        
-        # handle dynamic sockets
-        if self.sn_type == "DYNAMIC":
-            return ""
-        
-        # handle any data socket
-        if self.is_output:
-            return process_node(self.node, self, indents)
-            
-        else:
-            if len(self.links):
-                value = self.links[0].from_socket.make_code(indents=indents)
-                if self.links[0].from_socket.is_expression:
-                    return value
-            else:
-                value = self.get_return_value()
-            
-            if len(self.links) and self.links[0].from_socket.bl_label != self.bl_label:
-                value = self.cast_value(value)
-            else:
-                value = self.process_value(value)
-            
-            return value
-
-    def get_return_value(self):
-        """ overwrite this to get the correct return value of the socket as a string """
-        return ""
-
-    def set_default(self, value):
-        """ overwrite this to set the default value of the socket """
-        pass
-    
-    def process_value(self, value):
-        """ overwrite this to modify the value coming from the same socket type """
-        return value
-    
-    def cast_value(self, value):
-        """ overwrite this to modify the value coming from a different socket type """
-        return value
-    
-    @property
-    def value(self):
-        """ call this for getting inline code """
-        return self.make_code(indents=0)
-
-    def block(self, indents):
-        """ call this for getting a block of code """
-        code = self.make_code(indents=indents)
-        return code[indents*4:]
-    
-    
-    
-### DYNAMIC SOCKET BASE        
-            
-class DynamicSocket(ScriptingSocket):
-    bl_label = "Dynamic"
-    sn_type = "DYNAMIC"
-    make_variable = False
-    addable: bpy.props.BoolProperty(default=True)
-    add_idname = ""
-    copy_type = False
-    
-    def get_socket_index(self,collection):
+                collection = self.node.outputs
         for i, socket in enumerate(collection):
             if socket == self:
                 return i
         return 0
+            
+            
+    ### SOCKET RETURN VALUES
     
-    def update_input(self,node,link):
-        from_socket = link.from_socket
-        pos = self.get_socket_index(node.inputs)
-        if self.copy_type:
-            inp = node.add_input(from_socket.bl_idname,self.default_text,True)
-            attr_list = ["is_array", "array_size", "is_color", "use_factor", "is_file_path", "is_dir_path"]
-            for attr in attr_list:
-                if hasattr(inp, attr):
-                    setattr(inp, attr, getattr(from_socket, attr))
-
-        else:
-            inp = node.add_input(self.add_idname,self.default_text,True)
-
-        inp.use_var_name = self.use_var_name
-        inp.is_expression = self.make_variable
-        inp.var_name = link.from_socket.default_text
-        inp.copy_name = self.copy_name
-        inp.taken_name = self.taken_name
-        inp.take_name = self.take_name
-        self.taken_name = ""
-        node.inputs.move(len(node.inputs)-1,pos)
-        dynamic_links.append((link, from_socket, node.inputs[pos]))
     
-    def update_output(self,node,link):
-        to_socket = link.to_socket
-        pos = self.get_socket_index(node.outputs)
-        if self.copy_type:
-            out = node.add_output(to_socket.bl_idname,self.default_text,True)
-            attr_list = ["is_array", "array_size", "is_color", "use_factor", "is_file_path", "is_dir_path"]
-            for attr in attr_list:
-                if hasattr(out, attr):
-                    setattr(out, attr, getattr(to_socket, attr))
-        else:
-            out = node.add_output(self.add_idname,self.default_text,True)
-
-        out.use_var_name = self.use_var_name
-        out.is_expression = self.make_variable
-        out.var_name = link.to_socket.default_text
-        out.copy_name = self.copy_name
-        out.taken_name = self.taken_name
-        out.take_name = self.take_name
-        self.taken_name = ""
-        node.outputs.move(len(node.outputs)-1,pos)
-        dynamic_links.append((link, to_socket, node.outputs[pos]))
+    def convert_data(self, code):
+        """ overwrite this function to return the code with a conversion function for different socket types """
+        return code
     
-    def update(self,node,link):
-        if self == link.to_socket:
-            self.update_input(node,link)
+    
+    def convert_subtype(self, code):
+        """ overwrite this function to return the code with a conversion function for different subtypes """
+        return code
+    
+    
+    def default_value(self):
+        """ overwrite this function to return the proper socket value for this node """
+        return ""
+    
+    
+    def same_group(self):
+        if self.is_output:
+            return self.group == self.links[0].to_socket.group
+        return self.group == self.links[0].from_socket.group
+        
+    
+    def program_code(self, indents):
+        # handle wrongly connected program outputs
+        if not self.socket_type == self.links[0].to_socket.socket_type:
+            self.node.add_error("Wrong Connection!","These sockets can't be connected",True)
+            return self.default_value()
+        
+        # handle correct program outputs
+        return process_node(self.links[0].to_node, self.links[0].to_socket, indents)
+    
+    
+    def data_code(self, indents):
+        code = process_node(self.links[0].from_node, self.links[0].from_socket)
+        
+        # handle different data types
+        if not self.socket_type == self.links[0].from_socket.socket_type:
+            return " "*indents*4 + self.convert_data( code )
+
+        # handle different subtypes
+        elif not self.subtype == self.links[0].from_socket.subtype:
+            return " "*indents*4 + self.convert_subtype( code )
+        
+        # handle the same data types
+        return " "*indents*4 + code
+    
+    
+    def make_code(self, indents=0):
+        # return the variable name of the socket
+        if self.return_var_name:
+            return self.variable_name
+        
         else:
-            self.update_output(node,link)
+            # throw an error if the connection is invalid
+            if self.is_linked and not self.same_group():
+                self.node.add_error("Wrong Connection!","These sockets can't be connected",True)
+                return " "*indents*4 + self.default_value()
+            
+            else:
+                # handle program sockets (these are guaranteed to be outputs)
+                if self.group == "PROGRAM":
+                    if self.is_linked:
+                        return self.program_code(indents)
+                    else:
+                        return " "*indents*4 + self.default_value()
+                
+                # handle data sockets (these are guaranteed to be inputs)
+                elif self.group == "DATA":
+                    if self.is_linked:
+                        return self.data_code(indents)
+                    return " "*indents*4 + self.default_value()
+    
 
-    def draw_socket(self, context, layout, row, node, text):
-        row.label(text=text)
-
-    def draw_color(self, context, node):
-        return (0,0,0,0)
-
-
+    def code(self, indents=0):
+        """ call this for getting the sockets code """
+        code = self.make_code(indents=indents)
+        if "\n" in code: code = code[indents*4:]
+        return code
+        
+        
+    def by_name(self, indents=0):
+        """ return the code for all sockets with this name """
+        code = ""
+        collection = self.node.inputs
+        if self.is_output: collection = self.node.outputs
+        for socket in collection:
+            if socket.default_text == self.default_text:
+                code += socket.code(indents)
+        return code
+                
 
 
 class SN_RemoveSocket(bpy.types.Operator):
@@ -399,9 +349,7 @@ class SN_RemoveSocket(bpy.types.Operator):
             node.outputs.remove(node.outputs[self.index])
         else:
             node.inputs.remove(node.inputs[self.index])
-        return {"FINISHED"}
-    
-    
+        return {"FINISHED"}  
 
 
 
@@ -421,17 +369,15 @@ class SN_AddSocket(bpy.types.Operator):
         node = bpy.data.node_groups[self.tree_name].nodes[self.node_name]
         if self.is_output:
             add_socket = node.outputs[self.index]
-            socket = node.add_output(self.idname,add_socket.default_text,True)
-            node.outputs.move(len(node.outputs)-1,self.index)
+            socket = node.add_output(self.idname, add_socket.default_text)
+            node.outputs.move(len(node.outputs)-1, self.index)
         else:
             add_socket = node.inputs[self.index]
-            socket = node.add_input(self.idname,add_socket.default_text,True)
-            node.inputs.move(len(node.inputs)-1,self.index)
-
-        socket.is_expression = add_socket.make_variable
-        socket.var_name = add_socket.default_text
-        socket.copy_name = add_socket.copy_name
-        socket.taken_name = add_socket.taken_name
-        socket.take_name = add_socket.take_name
+            socket = node.add_input(self.idname, add_socket.default_text)
+            node.inputs.move(len(node.inputs)-1, self.index)
+            
+        socket.removable = True
+        for attr in add_socket.copy_props + add_socket.copy_attributes:
+            setattr(socket, attr, getattr(add_socket, attr))
         return {"FINISHED"}
 

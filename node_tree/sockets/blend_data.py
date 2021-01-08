@@ -1,5 +1,5 @@
 import bpy
-from .base_sockets import ScriptingSocket, DynamicSocket
+from .base_sockets import ScriptingSocket
 from ...compiler.compiler import process_node
 
 
@@ -10,13 +10,13 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
     socket_shape = "SQUARE"
     
     data_type: bpy.props.StringProperty(default="",
-                                        update=ScriptingSocket.socket_value_update)
+                                        update=ScriptingSocket.auto_compile)
     
     relative_path: bpy.props.StringProperty(default="",
-                                        update=ScriptingSocket.socket_value_update)
+                                        update=ScriptingSocket.auto_compile)
     
     collection: bpy.props.BoolProperty(default=False,
-                                       update=ScriptingSocket.socket_value_update)
+                                       update=ScriptingSocket.auto_compile)
     
     def get_return_value(self):
         return "None"

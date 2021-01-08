@@ -14,7 +14,7 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
 
-    operation: bpy.props.EnumProperty(items=[(" + ", "Add", "Add two numbers"), (" - ", "Subtract", "Subtract two numbers"), (" * ", "Multiply", "Multiply two numbers"), (" / ", "Divide", "Divide two numbers")],name="Operation", description="The operation you want to commence", update=SN_ScriptingBaseNode.update_needs_compile)
+    operation: bpy.props.EnumProperty(items=[(" + ", "Add", "Add two numbers"), (" - ", "Subtract", "Subtract two numbers"), (" * ", "Multiply", "Multiply two numbers"), (" / ", "Divide", "Divide two numbers")],name="Operation", description="The operation you want to commence", update=SN_ScriptingBaseNode.auto_compile)
 
     def on_create(self,context):
         self.add_float_input("Value").copy_name=True

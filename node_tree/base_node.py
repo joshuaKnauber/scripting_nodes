@@ -1,6 +1,6 @@
 import bpy
 import re
-from .sockets.base_sockets import add_to_remove_links, can_connect
+from .sockets.base_sockets import add_to_remove_links
 from ..compiler.compiler import combine_blocks
 from uuid import uuid4
 
@@ -41,7 +41,7 @@ class SN_ScriptingBaseNode:
     def on_any_change(self): pass
 
 
-    def update_needs_compile(self,context):
+    def auto_compile(self,context):
         self.on_any_change()
         self.node_tree.set_changes(True)
         
@@ -96,7 +96,7 @@ class SN_ScriptingBaseNode:
 
 
     def init(self,context):
-        self.node_tree = self.id_data
+        self.node_tree = bpy.context.space_data.node_tree
         self.addon_tree = bpy.context.scene.sn.addon_tree()
         self.uid = uuid4().hex[:5].upper()
         if "default_color" in self.node_options:
@@ -106,7 +106,7 @@ class SN_ScriptingBaseNode:
         self.use_custom_color = True
         self.__create_property_group()
         self.__add_self_to_property_group()
-        self.update_needs_compile(context)
+        self.auto_compile(context)
         self.on_create(context)
 
 
@@ -115,9 +115,9 @@ class SN_ScriptingBaseNode:
 
 
     def copy(self,node):
-        self.node_tree = self.id_data
+        self.node_tree = bpy.context.space_data.node_tree
         self.uid = uuid4().hex[:5].upper()
-        self.update_needs_compile(bpy.context)
+        self.auto_compile(bpy.context)
         self.__add_self_to_property_group()
         self.on_copy(node)
 
@@ -127,7 +127,7 @@ class SN_ScriptingBaseNode:
 
 
     def free(self):
-        self.update_needs_compile(bpy.context)
+        self.auto_compile(bpy.context)
         self.__remove_self_from_property_group()
         self.on_free()
 
@@ -143,7 +143,7 @@ class SN_ScriptingBaseNode:
 
 
     def update(self):
-        self.update_needs_compile(bpy.context)
+        self.auto_compile(bpy.context)
         # self.update_link_drop()
         self.on_node_update()
 
@@ -153,10 +153,8 @@ class SN_ScriptingBaseNode:
 
 
     def insert_link(self,link):
-        self.update_needs_compile(bpy.context)
-        to_idname = link.to_socket.bl_idname
-        from_idname = link.from_socket.bl_idname
-        if can_connect(to_idname,from_idname):
+        self.auto_compile(bpy.context)
+        if link.to_socket.group == link.from_socket.group:
             if self == link.to_node:
                 link.to_socket.update_socket(self,link)
             else:
@@ -222,36 +220,46 @@ class SN_ScriptingBaseNode:
         
 
     ### CREATE SOCKETS
-    def add_blend_data_input(self,label,removable=False): return self.add_input("SN_BlendDataSocket",label,removable)
-    def add_blend_data_output(self,label,removable=False): return self.add_output("SN_BlendDataSocket",label,removable)
-    def add_string_input(self,label,removable=False): return self.add_input("SN_StringSocket",label,removable)
-    def add_string_output(self,label,removable=False): return self.add_output("SN_StringSocket",label,removable)
-    def add_dynamic_string_input(self,label): return self.add_input("SN_DynamicStringSocket",label,False)
-    def add_dynamic_string_output(self,label): return self.add_output("SN_DynamicStringSocket",label,False)
-    def add_boolean_input(self,label,removable=False): return self.add_input("SN_BooleanSocket",label,removable)
-    def add_boolean_output(self,label,removable=False): return self.add_output("SN_BooleanSocket",label,removable)
-    def add_dynamic_boolean_input(self,label): return self.add_input("SN_DynamicBooleanSocket",label,False)
-    def add_dynamic_boolean_output(self,label): return self.add_output("SN_DynamicBooleanSocket",label,False)
-    def add_float_input(self,label,removable=False): return self.add_input("SN_FloatSocket",label,removable)
-    def add_float_output(self,label,removable=False): return self.add_output("SN_FloatSocket",label,removable)
-    def add_integer_input(self,label,removable=False): return self.add_input("SN_IntegerSocket",label,removable)
-    def add_integer_output(self,label,removable=False): return self.add_output("SN_IntegerSocket",label,removable)
-    def add_icon_input(self,label,removable=False): return self.add_input("SN_IconSocket",label,removable)
-    def add_icon_output(self,label,removable=False): return self.add_output("SN_IconSocket",label,removable)
-    def add_dynamic_variable_input(self,label): return self.add_input("SN_DynamicVariableSocket",label,False)
-    def add_dynamic_variable_output(self,label): return self.add_output("SN_DynamicVariableSocket",label,False)
-    def add_data_input(self,label,removable=False): return self.add_input("SN_DataSocket",label,removable)
-    def add_data_output(self,label,removable=False): return self.add_output("SN_DataSocket",label,removable)
-    def add_dynamic_data_input(self,label): return self.add_input("SN_DynamicDataSocket",label,False)
-    def add_dynamic_data_output(self,label): return self.add_output("SN_DynamicDataSocket",label,False)
-    def add_execute_input(self,label,removable=False): return self.add_input("SN_ExecuteSocket",label,removable)
-    def add_execute_output(self,label,removable=False): return self.add_output("SN_ExecuteSocket",label,removable)
-    def add_dynamic_execute_input(self,label): return self.add_input("SN_DynamicExecuteSocket",label,False)
-    def add_dynamic_execute_output(self,label): return self.add_output("SN_DynamicExecuteSocket",label,False)
-    def add_interface_input(self,label,removable=False): return self.add_input("SN_InterfaceSocket",label,removable)
-    def add_interface_output(self,label,removable=False): return self.add_output("SN_InterfaceSocket",label,removable)
-    def add_dynamic_interface_input(self,label): return self.add_input("SN_DynamicInterfaceSocket",label,False)
-    def add_dynamic_interface_output(self,label): return self.add_output("SN_DynamicInterfaceSocket",label,False)
+    def add_interface_input(self,label): return self.add_input("SN_InterfaceSocket",label)
+    def add_interface_output(self,label): return self.add_output("SN_InterfaceSocket",label)
+    def add_dynamic_interface_input(self,label): return self.add_input("SN_DynamicInterfaceSocket",label)
+    def add_dynamic_interface_output(self,label): return self.add_output("SN_DynamicInterfaceSocket",label)
+
+    def add_execute_input(self,label): return self.add_input("SN_ExecuteSocket",label)
+    def add_execute_output(self,label): return self.add_output("SN_ExecuteSocket",label)
+    def add_dynamic_execute_input(self,label): return self.add_input("SN_DynamicExecuteSocket",label)
+    def add_dynamic_execute_output(self,label): return self.add_output("SN_DynamicExecuteSocket",label)
+
+    def add_string_input(self,label): return self.add_input("SN_StringSocket",label)
+    def add_string_output(self,label): return self.add_output("SN_StringSocket",label)
+    def add_dynamic_string_input(self,label): return self.add_input("SN_DynamicStringSocket",label)
+    def add_dynamic_string_output(self,label): return self.add_output("SN_DynamicStringSocket",label)
+
+    def add_boolean_input(self,label): return self.add_input("SN_BooleanSocket",label)
+    def add_boolean_output(self,label): return self.add_output("SN_BooleanSocket",label)
+    def add_dynamic_boolean_input(self,label): return self.add_input("SN_DynamicBooleanSocket",label)
+    def add_dynamic_boolean_output(self,label): return self.add_output("SN_DynamicBooleanSocket",label)
+
+    def add_float_input(self,label): return self.add_input("SN_FloatSocket",label)
+    def add_float_output(self,label): return self.add_output("SN_FloatSocket",label)
+    def add_dynamic_float_input(self,label): return self.add_input("SN_DynamicFloatSocket",label)
+    def add_dynamic_float_output(self,label): return self.add_output("SN_DynamicFloatSocket",label)
+
+    def add_integer_input(self,label): return self.add_input("SN_IntegerSocket",label)
+    def add_integer_output(self,label): return self.add_output("SN_IntegerSocket",label)
+    def add_dynamic_integer_input(self,label): return self.add_input("SN_DynamicIntegerSocket",label)
+    def add_dynamic_integer_output(self,label): return self.add_output("SN_DynamicIntegerSocket",label)
+
+    def add_data_input(self,label): return self.add_input("SN_DataSocket",label)
+    def add_data_output(self,label): return self.add_output("SN_DataSocket",label)
+    def add_dynamic_data_input(self,label): return self.add_input("SN_DynamicDataSocket",label)
+    def add_dynamic_data_output(self,label): return self.add_output("SN_DynamicDataSocket",label)
+
+    def add_dynamic_variable_input(self,label): return self.add_input("SN_DynamicVariableSocket",label)
+    def add_dynamic_variable_output(self,label): return self.add_output("SN_DynamicVariableSocket",label)
+
+    def add_icon_input(self,label): return self.add_input("SN_IconSocket",label)
+    def add_icon_output(self,label): return self.add_output("SN_IconSocket",label)
     
     prop_types = {
         "STRING": "SN_StringSocket",
@@ -264,7 +272,7 @@ class SN_ScriptingBaseNode:
     
     def add_input_from_type(self,prop_type,label,array_size=0):
         if prop_type in self.prop_types:
-            inp = self.add_input(self.prop_types[prop_type],label,False)
+            inp = self.add_input(self.prop_types[prop_type],label)
             if array_size:
                 inp.is_array = True
                 inp.array_size = array_size
@@ -272,24 +280,24 @@ class SN_ScriptingBaseNode:
     
     def add_output_from_type(self,prop_type,label,array_size=0):
         if prop_type in self.prop_types:
-            out = self.add_output(self.prop_types[prop_type],label,False)
+            out = self.add_output(self.prop_types[prop_type],label)
             if array_size:
                 out.is_array = True
                 out.array_size = array_size
             return out
     
     
-    def add_input(self,idname,label,removable):
-        self.update_needs_compile(bpy.context)
+    def add_input(self,idname,label):
+        self.auto_compile(bpy.context)
         socket = self.inputs.new(idname,label)
-        socket.setup_socket(removable,label)
+        socket.setup_socket(label)
         return socket
     
     
-    def add_output(self,idname,label,removable):
-        self.update_needs_compile(bpy.context)
+    def add_output(self,idname,label):
+        self.auto_compile(bpy.context)
         socket = self.outputs.new(idname,label)
-        socket.setup_socket(removable,label)
+        socket.setup_socket(label)
         return socket
     
     
@@ -312,12 +320,12 @@ class SN_ScriptingBaseNode:
         if socket.is_output:
             new_socket = self.__change_socket(self.outputs,socket,idname)
             for link in links:
-                if can_connect(link.to_socket.bl_idname,new_socket.bl_idname):
+                if link.to_socket.group == new_socket.group:
                     self.node_tree.links.new(new_socket,link.to_socket)
         else:
             new_socket = self.__change_socket(self.inputs,socket,idname)
             for link in links:
-                if can_connect(new_socket.bl_idname,link.from_socket.bl_idname):
+                if new_socket.group == link.from_socket.group:
                     self.node_tree.links.new(link.from_socket,new_socket)
             
     
@@ -333,6 +341,9 @@ class SN_ScriptingBaseNode:
     
     def list_blocks(self, block_list, indents):
         return combine_blocks(block_list, indents)
+    
+    #TODO combine sockets function instead of these two with list of sockets
+
     
     
     ### ERROR HANDLING

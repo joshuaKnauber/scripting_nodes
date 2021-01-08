@@ -157,7 +157,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     except: pass
             self.make_collection()
 
-        self.update_needs_compile(context)
+        self.auto_compile(context)
 
 
     func_name: bpy.props.StringProperty(name="Name", description="Name of the function", update=update_name)

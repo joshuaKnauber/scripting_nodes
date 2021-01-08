@@ -16,7 +16,7 @@ class SN_DephsgraphUpdateNode(bpy.types.Node, SN_ScriptingBaseNode):
         "import_once": True
     }
 
-    action: bpy.props.EnumProperty(items=[("depsgraph_update_pre", "Before", "On depsgraph update (before)"), ("depsgraph_update_post", "After", "On depsgraph update (after)")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.update_needs_compile)
+    action: bpy.props.EnumProperty(items=[("depsgraph_update_pre", "Before", "On depsgraph update (before)"), ("depsgraph_update_post", "After", "On depsgraph update (after)")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.auto_compile)
 
     def on_create(self,context):
         self.add_execute_output("On Dephsgraph Update")

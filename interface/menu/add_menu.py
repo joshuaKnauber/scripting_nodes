@@ -1,6 +1,5 @@
 import bpy
 from ...node_tree.node_categories import get_node_categories
-from ...node_tree.sockets.base_sockets import can_connect
 
         
         

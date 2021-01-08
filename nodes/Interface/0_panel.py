@@ -156,19 +156,19 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     hide_header: bpy.props.BoolProperty(default=False,
                                         name="Hide Header",
                                         description="Hides the header of this panel",
-                                        update=SN_ScriptingBaseNode.update_needs_compile)
+                                        update=SN_ScriptingBaseNode.auto_compile)
     
     
     default_closed: bpy.props.BoolProperty(default=False,
                                         name="Default Closed",
                                         description="Closes this panel by default",
-                                        update=SN_ScriptingBaseNode.update_needs_compile)
+                                        update=SN_ScriptingBaseNode.auto_compile)
     
     
     label: bpy.props.StringProperty(default="New Panel",
                                     name="Label",
                                     description="The label of this panel",
-                                    update=SN_ScriptingBaseNode.update_needs_compile)
+                                    update=SN_ScriptingBaseNode.auto_compile)
     
     order: bpy.props.IntProperty(default=0,
                                  min=0,

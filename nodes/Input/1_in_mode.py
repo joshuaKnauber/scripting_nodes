@@ -25,7 +25,7 @@ class SN_InModeNode(bpy.types.Node, SN_ScriptingBaseNode):
         return items
 
     modes: bpy.props.EnumProperty(items=get_modes,
-                                    update=SN_ScriptingBaseNode.update_needs_compile,
+                                    update=SN_ScriptingBaseNode.auto_compile,
                                     name="Mode",
                                     description="The mode which the active mode is compared to")
 

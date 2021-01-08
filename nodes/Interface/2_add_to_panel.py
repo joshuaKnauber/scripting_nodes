@@ -122,7 +122,7 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def on_create(self,context):
-        self.add_interface_output("Panel",True)
+        self.add_interface_output("Panel")
         self.add_dynamic_interface_output("Panel")
 
 
@@ -146,11 +146,6 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
 
-        panel_layouts = []
-        for out in self.outputs:
-            if out.name == "Panel":
-                panel_layouts.append(out.block(0))
-                
         name = self.panel
         if "_" in name:
             name = name.replace("_PT_"," ").replace("_"," ").title()
@@ -160,7 +155,7 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                     def {self.function_name()}(self,context):
                         try:
                             layout = self.layout
-                            {self.list_blocks(panel_layouts,7)}
+                            {self.outputs[0].by_name(7)}
                         except Exception as exc:
                             print(str(exc) + " | Error in {name} when adding to panel")
                     """

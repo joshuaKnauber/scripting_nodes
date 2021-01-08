@@ -16,7 +16,7 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_interface_input("Interface").copy_name = True
+        self.add_interface_input("Interface").mirror_name = True
 
         self.add_string_input("Text")
         self.add_icon_input("Icon")
@@ -25,11 +25,9 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
-
-        icon = self.inputs['Icon'].icon_line()
         
         return {
             "code": f"""
-                    {layout}.label(text={self.inputs['Text'].value},{icon})
+                    {layout}.label(text={self.inputs["Text"].code()},icon_value={self.inputs["Icon"].code()})
                     """
         }
