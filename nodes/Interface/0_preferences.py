@@ -27,11 +27,6 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         
-        pref_layouts = []
-        for out in self.outputs:
-            if out.name == "Preferences":
-                pref_layouts.append(out.block(0))
-        
         if self.addon_tree.doing_export:
             return {
                 "code": f"""
@@ -41,7 +36,7 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
                             def draw(self, context):
                                 try:
                                     layout = self.layout
-                                    {self.list_blocks(pref_layouts, 9)}
+                                    {self.outputs["Preferences"].by_name(9)}
                                 except Exception as exc:
                                     print(str(exc) + " | Error in {self.label} addon preferences")
                         """
@@ -53,7 +48,7 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
                         def sn_draw_addon_prefs(self):
                             try:
                                 layout = self.layout
-                                {self.list_blocks(pref_layouts, 8)}
+                                {self.outputs["Preferences"].by_name(8)}
                             except Exception as exc:
                                 print(str(exc) + " | Error in {self.label} addon preferences")
                         """

@@ -42,6 +42,17 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     copy_attributes = ["value","value_file","value_directory","value_enum"]
     
     
+    def set_default(self,value):
+        if self.subtype == "NONE":
+            self.value = value
+        elif self.subtype == "FILE":
+            self.value_file = value
+        elif self.subtype == "DIRECTORY":
+            self.value_directory = value
+        elif self.subtype == "ENUM":
+            self.value_enum = value
+    
+    
     def default_value(self):
         if self.subtype == "NONE":
             return "\"" + self.value + "\""

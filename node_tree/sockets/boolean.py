@@ -33,6 +33,15 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
     copy_attributes = ["value","value_three","value_four"]
     
     
+    def set_default(self,value):
+        if self.subtype == "NONE":
+            self.value = value
+        elif self.subtype == "VECTOR3":
+            self.value_three = value
+        elif self.subtype == "VECTOR4":
+            self.value_four = value
+    
+    
     def default_value(self):
         if self.subtype == "NONE":
             return str(self.value)
