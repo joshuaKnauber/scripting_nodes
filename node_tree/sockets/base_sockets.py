@@ -261,6 +261,11 @@ class ScriptingSocket:
         pass
     
     
+    def indent_line(self, code, indents):
+        if not code: return code
+        return " "*indents*4 + code
+    
+    
     def same_group(self):
         if self.is_output:
             return self.group == self.links[0].to_socket.group
@@ -271,7 +276,7 @@ class ScriptingSocket:
         # handle wrongly connected program outputs
         if not self.socket_type == self.links[0].to_socket.socket_type:
             self.node.add_error("Wrong Connection!","These sockets can't be connected",True)
-            return self.default_value()
+            return self.indent_line(self.default_value(),indents)
         
         # handle correct program outputs
         return process_node(self.links[0].to_node, self.links[0].to_socket, indents)
@@ -282,14 +287,14 @@ class ScriptingSocket:
         
         # handle different data types
         if not self.socket_type == self.links[0].from_socket.socket_type:
-            return " "*indents*4 + self.convert_data( code )
+            return self.indent_line(self.convert_data( code ),indents)
 
         # handle different subtypes
         elif not self.subtype == self.links[0].from_socket.subtype:
-            return " "*indents*4 + self.convert_subtype( code )
+            return self.indent_line(self.convert_subtype( code ),indents)
         
         # handle the same data types
-        return " "*indents*4 + code
+        return self.indent_line(code,indents)
     
     
     def make_code(self, indents=0):
@@ -301,7 +306,7 @@ class ScriptingSocket:
             # throw an error if the connection is invalid
             if self.is_linked and not self.same_group():
                 self.node.add_error("Wrong Connection!","These sockets can't be connected",True)
-                return " "*indents*4 + self.default_value()
+                return self.indent_line(self.default_value(),indents)
             
             else:
                 # handle program sockets (these are guaranteed to be outputs)
@@ -309,13 +314,13 @@ class ScriptingSocket:
                     if self.is_linked:
                         return self.program_code(indents)
                     else:
-                        return " "*indents*4 + self.default_value()
+                        return self.indent_line(self.default_value(),indents)
                 
                 # handle data sockets (these are guaranteed to be inputs)
                 elif self.group == "DATA":
                     if self.is_linked:
                         return self.data_code(indents)
-                    return " "*indents*4 + self.default_value()
+                    return self.indent_line(self.default_value(),indents)
     
 
     def code(self, indents=0):
