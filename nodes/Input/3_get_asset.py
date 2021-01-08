@@ -31,5 +31,5 @@ class SN_GetAssetNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.asset and self.asset in self.addon_tree.sn_assets:
             asset_path = self.addon_tree.sn_assets[self.asset].path
         return {
-            "code": f"{asset_path}"
+            "code": f"\"{asset_path}\""
         }

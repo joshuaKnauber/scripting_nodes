@@ -35,7 +35,7 @@ class SN_RedoNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_imperative(self, context):
-        code = self.outputs[0].block(6)
+        code = self.outputs[0].code(6)
 
         return {
             "code": f"""

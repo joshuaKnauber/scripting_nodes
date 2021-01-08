@@ -26,3 +26,4 @@ class SN_PropertyChangeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_node(self,context,layout):
         layout.prop_search(self,"selected",self.addon_tree,"sn_properties",text="")
+#TODO

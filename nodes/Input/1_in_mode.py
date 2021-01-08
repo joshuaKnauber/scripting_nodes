@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_InModeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_InModeNode"
-    bl_label = "Is In Mode"
+    bl_label = "In Mode"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 
@@ -30,7 +30,7 @@ class SN_InModeNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="The mode which the active mode is compared to")
 
     def on_create(self,context):
-        self.add_boolean_output("Is In Mode")
+        self.add_boolean_output("In Mode")
 
     def draw_node(self,context,layout):
         layout.prop(self, "modes", text="")

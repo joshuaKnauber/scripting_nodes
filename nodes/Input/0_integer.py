@@ -17,7 +17,7 @@ class SN_IntegerNode(bpy.types.Node, SN_ScriptingBaseNode):
     value: bpy.props.IntProperty(name="Integer Value")
 
     def on_create(self,context):
-        self.add_integer_output("Integer").copy_name = True
+        self.add_integer_output("Integer").mirror_name = True
 
 
     def draw_node(self,context,layout):
