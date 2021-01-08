@@ -271,7 +271,7 @@ class ScriptingSocket:
         # handle wrongly connected program outputs
         if not self.socket_type == self.links[0].to_socket.socket_type:
             self.node.add_error("Wrong Connection!","These sockets can't be connected",True)
-            return self.default_value()
+            return ""
         
         # handle correct program outputs
         return process_node(self.links[0].to_node, self.links[0].to_socket, indents)
@@ -301,7 +301,7 @@ class ScriptingSocket:
             # throw an error if the connection is invalid
             if self.is_linked and not self.same_group():
                 self.node.add_error("Wrong Connection!","These sockets can't be connected",True)
-                return " "*indents*4 + self.default_value()
+                return ""
             
             else:
                 # handle program sockets (these are guaranteed to be outputs)
@@ -309,7 +309,7 @@ class ScriptingSocket:
                     if self.is_linked:
                         return self.program_code(indents)
                     else:
-                        return " "*indents*4 + self.default_value()
+                        return ""
                 
                 # handle data sockets (these are guaranteed to be inputs)
                 elif self.group == "DATA":
