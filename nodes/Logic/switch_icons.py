@@ -25,7 +25,7 @@ class SN_SwitchIconsNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""{self.inputs[1].value} if {self.inputs[0].value} else {self.inputs[2].value}"""
         }
-        
-        
+
+
 #TODO convert selected nodes to function
 #TODO take expected input with 0 index as default in blend data inputs

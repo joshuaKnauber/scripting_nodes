@@ -45,7 +45,8 @@ class SN_LoFiNode(bpy.types.Node, SN_ScriptingBaseNode):
         ("Coffee Shop Radio", "https://www.youtube.com/watch?v=-5KAN9_CzSA&ab_channel=STEEZYASFUCK"),
         ("Old Songs LoFi", "https://www.youtube.com/watch?v=bPPiuludHKg&ab_channel=Lo-fiMusic"),
         ("Mind On Clouds", "https://www.youtube.com/watch?v=Hdncb04CdWw&ab_channel=TunableMusic"),
-        ("Chill Beats", "https://www.youtube.com/watch?v=rA56B4JyTgI&ab_channel=WillSmith")
+        ("Chill Beats", "https://www.youtube.com/watch?v=rA56B4JyTgI&ab_channel=WillSmith"),
+        ("ibr Beats", "https://soundcloud.com/i-b-r/popular-tracks")
         ]
     
     index: bpy.props.IntProperty(default=0)
