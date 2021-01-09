@@ -15,8 +15,6 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
     
     
-    
-    
     def data_items(self,context):
         types = ["brushes","cache_files","cameras", "curves","fonts","grease_pencils",
                 "lattices","libraries","lightprobes","linestyles","masks","metaballs",
@@ -30,6 +28,9 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def update_type(self,context):
         self.outputs[0].data_type = self.get_type()
+        self.outputs[0].data_path = "bpy.data." + self.data_type
+        if self.outputs[0].is_linked:
+            self.outputs[0].links[0].to_node.on_link_insert(self.outputs[0].links[0])
     
     
     data_type: bpy.props.EnumProperty(items=data_items,
@@ -43,18 +44,18 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_return(self,context):
         if self.return_type == "ALL" and len(self.inputs):
             self.inputs.clear()
-            self.outputs[0].name = "All"
-            self.outputs[0].collection = True
-        elif self.return_type == "INDEX" and (not len(self.inputs) or self.inputs[0].sn_type != "NUMBER"):
+            self.outputs[0].default_text = "All"
+            self.outputs[0].subtype = "COLLECTION"
+        elif self.return_type == "INDEX" and (not len(self.inputs) or self.inputs[0].socket_type != "INTEGER"):
             self.inputs.clear()
-            self.add_integer_input("Index")
-            self.outputs[0].name = "By Index"
-            self.outputs[0].collection = False
-        elif self.return_type == "NAME" and (not len(self.inputs) or self.inputs[0].sn_type != "STRING"):
+            self.add_integer_input("Index").set_default(0)
+            self.outputs[0].default_text = "By Index"
+            self.outputs[0].subtype = "DATA_BLOCK"
+        elif self.return_type == "NAME" and (not len(self.inputs) or self.inputs[0].socket_type != "STRING"):
             self.inputs.clear()
             self.add_string_input("Name")
-            self.outputs[0].name = "By Name"
-            self.outputs[0].collection = False
+            self.outputs[0].default_text = "By Name"
+            self.outputs[0].subtype = "DATA_BLOCK"
         if self.outputs[0].is_linked:
             self.outputs[0].links[0].to_node.on_link_insert(self.outputs[0].links[0])
     
@@ -70,7 +71,8 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         out = self.add_blend_data_output("All")
         out.data_type = self.get_type()
-        out.collection = True
+        out.data_path = "bpy.data." + self.data_type
+        out.subtype = "COLLECTION"
         
         
     def draw_node(self,context,layout):
@@ -82,8 +84,8 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         limiter = ""
         if self.return_type != "ALL":
-            limiter = f"[{self.inputs[0].value}]"
+            limiter = f"[{self.inputs[0].code()}]"
 
         return {
-            "code": f"bpy.data.{self.data_type}{limiter}"
+            "code": f"{self.outputs[0].data_path}{limiter}"
         }
