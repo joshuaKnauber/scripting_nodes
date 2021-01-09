@@ -92,6 +92,8 @@ class ScriptingSocket:
             add_to_remove_links(link)
         elif link.to_socket.group != link.from_socket.group:
             add_to_remove_links(link)
+        elif link.to_socket.dynamic and link.from_socket.dynamic:
+            add_to_remove_links(link)
         else:
             self.update_take_name(link)
             self.update_dynamic(node, link)
@@ -119,6 +121,8 @@ class ScriptingSocket:
 
         node.outputs.move(len(node.outputs)-1, index)
         dynamic_links.append((link, link.to_socket, out))
+        
+        node.on_dynamic_add(out)
 
 
     def update_dynamic_input(self,node,link):
@@ -135,6 +139,8 @@ class ScriptingSocket:
 
         node.inputs.move(len(node.inputs)-1, index)
         dynamic_links.append((link, link.from_socket, inp))
+
+        node.on_dynamic_add(inp)
     
     
     def update_dynamic(self,node,link):
@@ -201,7 +207,7 @@ class ScriptingSocket:
             row.alignment = "RIGHT"
             
         self.draw_as_input(row)
-        if self.show_var_name: self.draw_variable(row)
+        if self.show_var_name and not self.dynamic: self.draw_variable(row)
         else: self.draw_socket(context,layout,row,node,self.get_text())
         self.draw_as_output(row)
             
@@ -360,6 +366,8 @@ class SN_RemoveSocket(bpy.types.Operator):
             node.outputs.remove(node.outputs[self.index])
         else:
             node.inputs.remove(node.inputs[self.index])
+            
+        node.on_dynamic_remove(self.is_output)
         return {"FINISHED"}  
 
 
@@ -391,5 +399,7 @@ class SN_AddSocket(bpy.types.Operator):
         for attr in add_socket.copy_props + add_socket.copy_attributes:
             if hasattr(socket, attr):
                 setattr(socket, attr, getattr(add_socket, attr))
+                
+        node.on_dynamic_add(socket)
         return {"FINISHED"}
 

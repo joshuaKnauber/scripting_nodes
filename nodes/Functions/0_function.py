@@ -39,8 +39,19 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         self.add_execute_output("Function")
         out = self.add_dynamic_variable_output("Parameter")
+        out.show_var_name = True
+        out.edit_var_name = True
+        out.return_var_name = True
         self.update_name(None)
+        
+        
+    def on_dynamic_add(self,socket):
+        print(socket)
 
+
+    def on_dynamic_remove(self,is_output):
+        print(is_output)
+    
 
     def on_any_change(self):
         self.update_nodes_by_type("SN_RunFunctionNode")

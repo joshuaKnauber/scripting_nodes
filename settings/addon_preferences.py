@@ -35,6 +35,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                                                 ("SETTINGS","Settings","Serpens Settings","NONE",1),
                                                 ("ADDONS","Addons","Serpens Addon Market","NONE",2),
                                                 ("PACKAGES","Packages","Serpens Package Market","NONE",3)],
+                                       default = "SETTINGS",
                                        name="SETTINGS",
                                        description="Navigation")
     
