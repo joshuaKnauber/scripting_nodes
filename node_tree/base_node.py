@@ -296,6 +296,41 @@ class SN_ScriptingBaseNode:
                 out.is_array = True
                 out.array_size = array_size
             return out
+        
+        
+    def enum_items_as_string(self,prop):
+        items = "["
+        for item in prop.enum_items:
+            items += f"('{item.identifier}','{item.name}','{item.description}'),"
+        return items + "]"
+        
+        
+    def match_socket_to_prop(self,socket,prop):
+        if prop.type == "ENUM":
+            if prop.enum_items:
+                socket.subtype = "ENUM"
+                socket.enum_values = self.enum_items_as_string(prop)
+        if hasattr(prop,"is_array") and prop.is_array:
+            if prop.array_length == 3:
+                socket.subtype = "VECTOR3"
+                if prop.subtype == "COLOR": socket.subtype = "COLOR"
+            elif prop.array_length == 4: 
+                socket.subtype = "VECTOR4"
+                if prop.subtype == "COLOR": socket.subtype = "COLOR_ALPHA"
+        if hasattr(prop,"default"):
+            socket.set_default(prop.default)
+        if hasattr(prop,"subtype"):
+            if prop.subtype == "FACTOR": socket.subtype = "FACTOR"
+            if prop.subtype == "FILEPATH": socket.subtype = "FILE"
+            if prop.subtype == "DIRPATH": socket.subtype = "DIRECTORY"
+            
+        
+    def add_input_from_prop(self,prop):
+        if prop.type in self.prop_types:
+            inp = self.add_input(self.prop_types[prop.type], prop.name)
+            self.match_socket_to_prop(inp,prop)
+        else:
+            print(prop,prop.type)
     
     
     def add_input(self,idname,label):

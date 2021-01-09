@@ -11,11 +11,22 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     socket_type = "STRING"
     
     
+    enum_values: bpy.props.StringProperty()
+    
     def enum_items(self,context):
         items = []
+        if self.enum_values:
+            items = eval(self.enum_values)
         if not items:
             items = [("NONE","None","No items have been found for this property")]
         return items
+    
+    
+    def make_absolute(self,context):
+        if not self.value_directory == bpy.path.abspath(self.value_directory):
+            self.value_directory = bpy.path.abspath(self.value_directory)
+        if not self.value_file == bpy.path.abspath(self.value_file):
+            self.value_file = bpy.path.abspath(self.value_file)
     
     
     value: bpy.props.StringProperty(name="Value",
@@ -23,11 +34,13 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     value_file: bpy.props.StringProperty(name="Value",
                                         description="Value of this socket",
-                                        subtype="FILE_PATH")
+                                        subtype="FILE_PATH",
+                                        update=make_absolute)
 
     value_directory: bpy.props.StringProperty(name="Value",
                                         description="Value of this socket",
-                                        subtype="DIR_PATH")
+                                        subtype="DIR_PATH",
+                                        update=make_absolute)
 
     value_enum: bpy.props.EnumProperty(name="Value",
                                         description="Value of this socket",

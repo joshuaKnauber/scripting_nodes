@@ -116,4 +116,4 @@ def serpens_right_click(self, context):
         op.path += "." + property_value.identifier
     
     if button_value:
-        layout.operator("ui.copy_python_command_button",text="Serpens | Copy Button",icon="COPYDOWN")
+        layout.operator("ui.copy_python_command_button",text="Serpens | Copy Operator",icon="COPYDOWN")
