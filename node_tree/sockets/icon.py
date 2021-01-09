@@ -13,6 +13,10 @@ class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
     def default_value(self):
         return "0"
     
+    
+    def convert_data(self, code):
+        return "sn_cast_int(" + code + ")"
+    
 
     def draw_socket(self, context, layout, row, node, text):
         row.label(text=text)

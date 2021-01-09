@@ -43,20 +43,17 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_outputs(self,socket):
         self.collection_error = False
         self.no_data_error = False
-        if socket.subtype == "COLLECTION":
-            self.outputs.clear()
-            self.current_data_type = ""
-            self.collection_error = True
-        elif socket.subtype == "SELF":
-            self.outputs.clear()
-            self.current_data_type = ""
-        else:
+        if socket.subtype == "DATA_BLOCK":
             if socket.data_type == self.current_data_type and not len(self.outputs):
                 self.add_data_outputs(socket.data_type)
             elif socket.data_type != self.current_data_type:
                 self.outputs.clear()
                 self.add_data_outputs(socket.data_type)
             self.current_data_type = socket.data_type
+        else:
+            self.outputs.clear()
+            self.current_data_type = ""
+            self.collection_error = True
         
         
     def on_link_insert(self,link):

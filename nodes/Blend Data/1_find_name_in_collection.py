@@ -19,18 +19,21 @@ class SN_FindInDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     def on_link_insert(self,link):
-        self.collection_error = False
         if link.to_socket == self.inputs[0]:
-            if link.from_socket.collection:
+            self.collection_error = False
+            if link.from_socket.subtype == "COLLECTION":
                 self.outputs[0].data_type = link.from_socket.data_type
+                self.outputs[0].data_path = link.from_socket.data_path
             else:
                 self.collection_error = True
 
 
     def on_create(self,context):
-        self.add_blend_data_input("Blend Data").copy_name = True
+        inp = self.add_blend_data_input("Blend Data")
+        inp.mirror_name = True
+        inp.subtype = "COLLECTION"
         self.add_string_input("Name")
-        self.add_blend_data_output("Data Block")
+        out = self.add_blend_data_output("Data Block")
         self.add_integer_output("Data Block Index").set_default(-1)
         self.add_boolean_output("Data Block Exists").set_default(False)
         
@@ -43,13 +46,13 @@ class SN_FindInDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         if touched_socket == self.outputs[0]: # data block
-            return {"code": f"{self.inputs[0].value}[{self.inputs[1].value}]"}
+            return {"code": f"{self.inputs[0].code()}[{self.inputs[1].code()}]"}
 
         elif touched_socket == self.outputs[1]: # index int
-            return {"code": f"{self.inputs[0].value}.find({self.inputs[1].value})"}
+            return {"code": f"{self.inputs[0].code()}.find({self.inputs[1].code()})"}
             
         else: # exists bool
-            return {"code": f"{self.inputs[0].value}.find({self.inputs[1].value}) != -1"}
+            return {"code": f"{self.inputs[0].code()}.find({self.inputs[1].code()}) != -1"}
 
         
 #TODO function for node to choose one value based on bool | like if but inline with function

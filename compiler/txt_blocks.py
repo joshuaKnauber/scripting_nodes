@@ -39,6 +39,12 @@ def serpens_functions(addon_tree):
             def sn_cast_float_vector(value, size):
                 return value
                 
+            def sn_cast_int(value):
+                return value
+                
             def sn_cast_int_vector(value, size):
+                return value
+                
+            def sn_cast_blend_data(value):
                 return value
             """

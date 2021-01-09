@@ -27,6 +27,9 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     copy_attributes = ["data_type","data_path"]
     
+    def convert_data(self, code):
+        return "sn_cast_blend_data(" + code + ")"
+    
     def default_value(self):
         return "None"
 

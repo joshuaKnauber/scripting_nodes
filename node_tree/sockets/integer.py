@@ -42,7 +42,6 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
             self.value_four = value
     
     
-    
     def default_value(self):
         if self.subtype == "NONE":
             return str(self.value)
@@ -54,7 +53,7 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     def convert_data(self, code):
         if self.subtype == "NONE":
-            return "sn_cast_int(" + code + ", False)"
+            return "sn_cast_int(" + code + ")"
         elif self.subtype == "VECTOR3":
             return "sn_cast_int_vector(" + code + ", 3)"
         elif self.subtype == "VECTOR4":

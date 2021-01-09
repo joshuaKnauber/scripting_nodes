@@ -39,10 +39,6 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         self.add_execute_output("Function")
         out = self.add_dynamic_variable_output("Parameter")
-        out.take_name = True
-        out.return_var_name = True
-        out.show_var_name = True
-        out.edit_var_name = True
         self.update_name(None)
 
 
