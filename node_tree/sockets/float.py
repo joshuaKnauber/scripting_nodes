@@ -95,6 +95,10 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
             return "sn_cast_float_vector(" + code + ", 3)"
         elif self.subtype == "VECTOR4":
             return "sn_cast_float_vector(" + code + ", 4)"
+        
+        
+    def convert_subtype(self, code):
+        return self.convert_data(code)
 
 
     def draw_socket(self, context, layout, row, node, text):
