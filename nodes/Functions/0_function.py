@@ -52,6 +52,10 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_dynamic_remove(self,is_output):
         print(is_output)
     
+    
+    def on_var_name_update(self,socket):
+        print(socket)
+    
 
     def on_any_change(self):
         self.update_nodes_by_type("SN_RunFunctionNode")

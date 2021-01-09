@@ -33,6 +33,10 @@ class ScriptingSocket:
             real_shape += "_DOT"
         if not self.display_shape == real_shape:
             self.display_shape = real_shape
+            
+            
+    def update_var_name(self,context):
+        self.node.on_var_name_update(self)
     
     
     group = "" # DATA | PROGRAM
@@ -55,7 +59,7 @@ class ScriptingSocket:
     mirror_name: bpy.props.BoolProperty(default=False) # Mirrors the name of the connected socket
     take_name: bpy.props.BoolProperty(default=False) # Takes the name of the first connected socket
     
-    variable_name: bpy.props.StringProperty() # The name of the variable if is_variable is True
+    variable_name: bpy.props.StringProperty(update=update_var_name) # The name of the variable if is_variable is True
     return_var_name: bpy.props.BoolProperty(default=False,update=update_shape) # Always return the var name instead of running make_code
     show_var_name: bpy.props.BoolProperty(default=False,update=update_shape) # Shows the variable name instead of the draw function
     edit_var_name: bpy.props.BoolProperty(default=False) # Defines if the variable name is shown as editable

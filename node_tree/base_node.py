@@ -59,6 +59,10 @@ class SN_ScriptingBaseNode:
     ### DYNAMIC SOCKET ADD
     def on_dynamic_add(self,socket): pass
     def on_dynamic_remove(self,is_output): pass
+    
+    
+    ### VAR NAME UPDATE
+    def on_var_name_update(self,socket): pass
         
         
     ### PROPERTY GROUP
