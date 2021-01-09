@@ -44,6 +44,8 @@ class SN_CollectionsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode)
     data_type = "Collection"
     data_identifier = "collections"
     
+    active_data = "bpy.context.scene.collection"
+    
     
     
 class SN_ImagesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
@@ -83,6 +85,8 @@ class SN_MeshesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     
     data_type = "Mesh"
     data_identifier = "meshes"
+    
+    active_data = "bpy.context.scene.object.data"
     
     
     
@@ -125,6 +129,8 @@ class SN_WorkspacesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     data_identifier = "workspaces"
     data_identifier = "textures"
     
+    active_data = "bpy.context.workspace"
+    
     
     
 class SN_WorldsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
@@ -134,3 +140,5 @@ class SN_WorldsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     
     data_type = "World"
     data_identifier = "worlds"
+    
+    active_data = "bpy.context.scene.world"
