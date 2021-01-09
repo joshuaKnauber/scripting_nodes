@@ -13,3 +13,6 @@ class SN_DynamicVariableSocket(bpy.types.NodeSocket, ScriptingSocket):
     dynamic = True
     copy_socket = True
     to_add_idname = "SN_DataSocket"
+
+    def setup(self):
+        self.addable = True

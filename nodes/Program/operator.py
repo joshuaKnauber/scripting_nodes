@@ -117,7 +117,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         unique_name = self.get_unique_name(self.operator_name, self.collection.items, " ")
         if unique_name != self.operator_name:
             self.operator_name = unique_name
-        
+
         self.item.name = self.operator_name
         self.item.identifier = self.get_python_name(self.operator_name, "new_operator")
         self.auto_compile(context)
@@ -153,6 +153,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     operator_properties: bpy.props.CollectionProperty(type=SN_Variable)
     property_index: bpy.props.IntProperty()
 
+
     def on_create(self,context):
         self.add_execute_output("Operator")
         self.add_execute_output("Invoke")
@@ -187,10 +188,9 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             property_register.append(prop.property_register() + "\n")
 
         if not self.invoke_option in ["invoke_popup", "invoke_search_popup"]:
-            layouts = []
-            if self.outputs[-1].sn_type == "DYNAMIC":
-                for out in self.outputs[2:-1]:
-                    layouts.append(out.code())
+            layouts = ""
+            if self.outputs[-1].dynamic:
+                layouts = self.outputs[-1].by_name(9)
 
 
             return_invoke = """self.execute(context)"""
@@ -220,7 +220,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                             def execute(self, context):
                                 try:
-                                    {self.outputs[0].code(9) if self.outputs[0].code(9) else "pass"}
+                                    {self.outputs[0].code(9) if self.outputs[0].code() else "pass"}
                                 except Exception as exc:
                                     print(str(exc) + " | Error in execute function of {self.operator_name}")
 
@@ -228,7 +228,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                             def invoke(self, context, event):
                                 try:
-                                    {self.outputs[1].code(9) if self.outputs[1].code(9) else "pass"}
+                                    {self.outputs[1].code(9) if self.outputs[1].code() else "pass"}
                                 except Exception as exc:
                                     print(str(exc) + " | Error in invoke function of {self.operator_name}")
 
@@ -237,17 +237,16 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                             def draw(self, context):
                                 layout = self.layout
                                 try:
-                                    {self.list_code(layouts, 9) if self.list_code(layouts, 9) else "pass"}
+                                    {layouts if layouts else "pass"}
                                 except Exception as exc:
                                     print(str(exc) + " | Error in draw function of {self.operator_name}")
                         """
             }
 
         elif self.invoke_option == "invoke_popup":
-            layouts = []
-            if self.outputs[-1].sn_type == "DYNAMIC":
-                for out in self.outputs[1:-1]:
-                    layouts.append(out.code())
+            layouts = ""
+            if self.outputs[-1].dynamic:
+                layouts = self.outputs[-1].by_name(9)
 
             return {
                 "code": f"""
@@ -257,7 +256,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                             bl_description = "{self.item.description}"
                             bl_options = {"{" + '"REGISTER", "UNDO"' + "}"}
 
-                            {self.list_blocks(property_register, 7)}
+                            {self.list_code(property_register, 7)}
 
                             @classmethod
                             def poll(cls, context):
@@ -268,7 +267,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                             def invoke(self, context, event):
                                 try:
-                                    {self.outputs[0].code(9) if self.outputs[0].code(9) else "pass"}
+                                    {self.outputs[0].code(9) if self.outputs[0].code(0) else "pass"}
                                 except Exception as exc:
                                     print(str(exc) + " | Error in invoke function of {self.operator_name}")
 
@@ -277,7 +276,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                             def draw(self, context):
                                 layout = self.layout
                                 try:
-                                    {self.list_code(layouts, 9) if self.list_code(layouts, 9) else "pass"}
+                                    {layouts if layouts else "pass"}
                                 except Exception as exc:
                                     print(str(exc) + " | Error in draw function of {self.operator_name}")
                         """

@@ -35,13 +35,11 @@ class SN_LoadNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_imperative(self, context):
-        code = self.outputs[0].code(6)
-
         return {
             "code": f"""
                     @persistent
                     def {self.action}_handler_{self.uid}(dummy):
-                        {code if code else "pass"}
+                        {self.outputs[0].code(6) if self.outputs[0].code() else "pass"}
                     """
         }
 

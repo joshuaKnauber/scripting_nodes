@@ -34,11 +34,7 @@ class SN_ColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
-        
-        column_layouts = []
-        for out in self.outputs:
-            if out.name == "Column":
-                column_layouts.append(out.code())
+
 
         return {
             "code": f"""
