@@ -21,13 +21,7 @@ class SN_CombineStringsNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_evaluate(self, context, touched_socket):
-        values = []
-        for inp in self.inputs[:-1]:
-            if inp == self.inputs[-2]:
-                values.append(inp.value)
-            else:
-                values.append(inp.value + " + ")
-
+        
         return {
-            "code": f"{self.list_code(values)}"
+            "code": f"{self.inputs[0].by_name(separator=' + ')}"
         }

@@ -22,13 +22,10 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_evaluate(self, context, touched_socket):
-        contents = []
-        for inp in self.inputs[1:-1]:
-            contents.append(inp.code() + ", ")
 
         return {
             "code": f"""
-                    print({self.list_code(contents, 0)})
+                    print({self.inputs["Content"].by_name(separator=", ")})
                     {self.outputs[0].code(5)}
                     """
         }

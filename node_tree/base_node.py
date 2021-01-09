@@ -341,12 +341,9 @@ class SN_ScriptingBaseNode:
     
     def list_code(self, value_list, indents=0):
         code = ""
-        for value in value_list:
+        for i, value in enumerate(value_list):
             code += value
         return " "*indents*4 + code
-    
-    
-    #TODO combine sockets function instead of these two with list of sockets
 
     
     

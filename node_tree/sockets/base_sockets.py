@@ -202,7 +202,7 @@ class ScriptingSocket:
         
         
     def draw(self, context, layout, node, text):
-        row = layout.row(align=True)
+        row = layout.row(align=False)
         if self.is_output:
             row.alignment = "RIGHT"
             
@@ -335,17 +335,30 @@ class ScriptingSocket:
         code = self.make_code(indents=indents)
         if "\n" in code: code = code[indents*4:]
         return code
-        
-        
-    def by_name(self, indents=0):
-        """ return the code for all sockets with this name """
+    
+    
+    def by_attr(self, indents, separator, attr):
         code = ""
         collection = self.node.inputs
         if self.is_output: collection = self.node.outputs
         for socket in collection:
-            if socket.default_text == self.default_text:
-                code += socket.code(indents)
+            if getattr(socket, attr) == getattr(self, attr):
+                new_code = socket.code(indents)
+                code += new_code
+                if new_code and not new_code.isspace():
+                    code += separator
+        if code: code = code[:-len(separator)]
         return code
+        
+        
+    def by_name(self, indents=0, separator=""):
+        """ return the code for all sockets with this name """
+        return self.by_attr(indents,separator,"default_text")
+    
+    
+    def by_type(self, indents=0, separator=""):
+        """ return the code for all sockets with this type """
+        return self.by_attr(indents,separator,"socket_type")
                 
 
 
