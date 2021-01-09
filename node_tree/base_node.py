@@ -57,7 +57,7 @@ class SN_ScriptingBaseNode:
                     
                     
     ### DYNAMIC SOCKET ADD
-    def on_dynamic_add(self,socket): pass
+    def on_dynamic_add(self,socket,connected_socket): pass
     def on_dynamic_remove(self,is_output): pass
     
     

@@ -43,19 +43,21 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         out.edit_var_name = True
         out.return_var_name = True
         self.update_name(None)
-        
-        
-    def on_dynamic_add(self,socket):
-        print(socket)
 
 
-    def on_dynamic_remove(self,is_output):
-        print(is_output)
-    
-    
+    def on_dynamic_add(self,socket, connected_socket):
+        if connected_socket and connected_socket.name != "":
+            socket.variable_name = connected_socket.name
+        else:
+            socket.variable_name = "Parameter"
+
     def on_var_name_update(self,socket):
-        print(socket)
-    
+        names = []
+        for out in self.outputs[1:-1]:
+            names.append(out.variable_name)
+
+        socket["variable_name"] = self.get_unique_name(socket.variable_name, names, separator=" ")
+
 
     def on_any_change(self):
         self.update_nodes_by_type("SN_RunFunctionNode")

@@ -24,7 +24,7 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     expression: bpy.props.StringProperty(default="a + b")
     
-    def on_dynamic_add(self,socket):
+    def on_dynamic_add(self,socket, connected_socket):
         alphabet = list(string.ascii_lowercase)
         self.inputs[-1].default_text = alphabet[min(len(alphabet)-1,alphabet.index(self.inputs[-1].default_text)+1)]
 
