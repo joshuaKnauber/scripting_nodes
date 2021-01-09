@@ -27,9 +27,9 @@ class SN_IfProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
                     if {self.inputs[1].code()}:
-                        {self.outputs[1].code(6) if self.outputs[1].code(6) else "pass"}
+                        {self.outputs[1].code(6) if self.outputs[1].code(0) else "pass"}
                     else:
-                        {self.outputs[2].code(6) if self.outputs[2].code(6) else "pass"}
+                        {self.outputs[2].code(6) if self.outputs[2].code(0) else "pass"}
                     {self.outputs[0].code(5)}
                     """
         }

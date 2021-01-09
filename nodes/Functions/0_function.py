@@ -19,14 +19,14 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_name(self, context):
         if not self.func_name:
             self.func_name = "New Function"
-            
+
         self.item.name = self.func_name
         self.item.identifier = self.get_python_name(self.func_name, "new_function")
 
         unique_name = self.get_unique_name(self.func_name, self.collection.items, " ")
         if unique_name != self.func_name:
             self.func_name = unique_name
-        
+
         self.item.name = self.func_name
         self.item.identifier = self.get_python_name(self.func_name, "new_function")
         self.update_nodes_by_type("SN_ReturnNode")
@@ -38,8 +38,13 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_execute_output("Function")
-        self.add_dynamic_variable_output("Parameter").take_name = True
+        out = self.add_dynamic_variable_output("Parameter")
+        out.take_name = True
+        out.return_var_name = True
+        out.show_var_name = True
+        out.edit_var_name = True
         self.update_name(None)
+
 
     def on_any_change(self):
         self.update_nodes_by_type("SN_RunFunctionNode")
@@ -47,7 +52,8 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_node(self,context,layout):
         layout.prop(self, "func_name")
-    
+
+
     def on_free(self):
         self.update_nodes_by_type("SN_RunFunctionNode")
 
@@ -55,22 +61,21 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
         if touched_socket:
             return {
-                "code": f"""{touched_socket.value}"""
+                "code": f"""{touched_socket.code()}"""
             }
 
 
     def code_imperative(self, context):
         parameter_string = ""
         for out in self.outputs[1:-1]:
-            parameter_string+=out.value+", "
+            parameter_string+=out.code()+", "
 
-        code = self.outputs[0].block(7)
 
         return {
             "code": f"""
                     def {self.item.identifier}({parameter_string}):
                         try:
-                            {code if code else "pass"}
+                            {self.outputs[0].code(7) if self.outputs[0].code() else "pass"}
                         except Exception as exc:
                             print(str(exc) + " | Error in function {self.func_name}")
                     """

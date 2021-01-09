@@ -16,8 +16,8 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_interface_input("Interface").copy_name = True
-        self.add_interface_output("Row",True)
+        self.add_interface_input("Interface").mirror_name = True
+        self.add_interface_output("Row")
         self.add_dynamic_interface_output("Row")
 
         self.add_boolean_input("Align").set_default(False)
@@ -34,11 +34,7 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
-        
-        row_layouts = []
-        for out in self.outputs:
-            if out.name == "Row":
-                row_layouts.append(out.block(0))
+
 
         return {
             "code": f"""
@@ -48,6 +44,6 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
                     row.alert = {self.inputs["Alert"].value}
                     row.scale_x = {self.inputs["Scale X"].value}
                     row.scale_y = {self.inputs["Scale Y"].value}
-                    {self.list_blocks(row_layouts, 5)}
+                    {self.outputs[0].by_name(5)}
                     """
         }
