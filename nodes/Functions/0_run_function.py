@@ -39,11 +39,17 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         for graph in self.addon_tree.sn_graphs:
             for node in graph.node_tree.nodes:
                 if node.bl_idname == "SN_ReturnNode":
-                    if node.connected_function == self.func_name:
+                    if self.addon_tree.sn_nodes["SN_FunctionNode"].items[node.connected_function].node_uid == self.func_uid:
                         item = self.return_collection.add()
                         item.name = node.name
                         item.node_uid = node.uid
-        
+
+                    elif node.connected_function == self.func_name:
+                        item = self.return_collection.add()
+                        item.name = node.name
+                        item.node_uid = node.uid
+
+
         if self.search_value in self.return_collection:
             for graph in self.addon_tree.sn_graphs:
                 for node in graph.node_tree.nodes:
@@ -52,27 +58,28 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                             parameters = []
                             for inp in node.inputs[1:]:
                                 if inp.bl_idname != "SN_DynamicVariableSocket":
-                                    parameters.append([inp.var_name, inp.bl_idname])
+                                    parameters.append([inp.variable_name, inp.bl_idname])
 
                             if len(parameters) != len(self.outputs[1:]):
                                 if len(parameters) > len(self.outputs[1:]):
                                     output_len = len(self.outputs)-1
                                     for x, parameter in enumerate(parameters):
                                         if x >= output_len:
-                                            out = self.add_output(parameter[1],parameter[0],False)
+                                            out = self.add_output(parameter[1],parameter[0])
 
                                 else:
                                     removed = False
                                     for x, parameter in enumerate(parameters):
-                                        if parameter[0] != self.outputs[x+1].name:
+                                        if parameter[0] != self.outputs[x+1].default_text:
                                             removed = True
                                             self.outputs.remove(self.outputs[x+1])
                                     if not removed:
                                         self.outputs.remove(self.outputs[-1])
 
                             for x, parameter in enumerate(parameters):
-                                self.outputs[x+1].name = parameter[0]
-                                
+                                self.outputs[x+1].default_text = parameter[0]
+
+
         else:
             for i, out in enumerate(self.outputs):
                 if i:
@@ -107,19 +114,19 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 parameters = []
                 for out in node.outputs[1:]:
                     if out.bl_idname != "SN_DynamicVariableSocket":
-                        parameters.append([out.var_name, out.bl_idname])
+                        parameters.append([out.variable_name, out.bl_idname])
 
                 if len(parameters) != len(self.inputs[1:]):
                     if len(parameters) > len(self.inputs[1:]):
                         input_len = len(self.inputs)-1
                         for x, parameter in enumerate(parameters):
                             if x >= input_len:
-                                inp = self.add_input(parameter[1],parameter[0],False)
+                                inp = self.add_input(parameter[1],parameter[0])
 
                     else:
                         removed = False
                         for x, parameter in enumerate(parameters):
-                            if parameter[0] != self.inputs[x+1].name:
+                            if parameter[0] != self.inputs[x+1].default_text:
                                 removed = True
                                 self.inputs.remove(self.inputs[x+1])
                         if not removed:
@@ -127,7 +134,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
                 for x, parameter in enumerate(parameters):
-                    self.inputs[x+1].name = parameter[0]
+                    self.inputs[x+1].default_text = parameter[0]
 
         else:
             self.make_collection()
@@ -151,6 +158,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.on_outside_update(self)
         else:
             self.func_uid = ""
+            self.search_value = ""
             for i, inp in enumerate(self.inputs):
                 if i:
                     try: self.inputs.remove(inp)

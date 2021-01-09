@@ -57,6 +57,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             names.append(out.variable_name)
 
         socket["variable_name"] = self.get_unique_name(socket.variable_name, names, separator=" ")
+        self.update_nodes_by_type("SN_RunFunctionNode")
 
 
     def on_any_change(self):

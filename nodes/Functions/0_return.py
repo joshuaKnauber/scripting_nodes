@@ -40,6 +40,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
             names.append(inp.variable_name)
 
         socket["variable_name"] = self.get_unique_name(socket.variable_name, names, separator=" ")
+        self.update_nodes_by_type("SN_RunFunctionNode")
 
 
     def on_any_change(self):
@@ -54,6 +55,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 self.connected_function = "None"
                 self.label = "Function Return"
+
         self.update_nodes_by_type("SN_RunFunctionNode")
 
 
