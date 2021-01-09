@@ -307,9 +307,9 @@ class SN_ScriptingBaseNode:
         for i, sock in enumerate(sockets):
             if sock == socket:
                 if socket.is_output:
-                    new_socket = self.add_output(idname,socket.name,socket.removable)
+                    new_socket = self.add_output(idname,socket.name)
                 else:
-                    new_socket = self.add_input(idname,socket.name,socket.removable)
+                    new_socket = self.add_input(idname,socket.name)
                 sockets.remove(socket)
                 sockets.move(len(sockets)-1, i)
                 return new_socket

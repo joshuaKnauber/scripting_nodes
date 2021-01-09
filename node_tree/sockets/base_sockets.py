@@ -104,6 +104,7 @@ class ScriptingSocket:
         
     ### DYNAMIC SOCKET
     
+    
     def update_dynamic_output(self,node,link):
         index = self.get_socket_index(node.outputs)
 
@@ -114,7 +115,7 @@ class ScriptingSocket:
 
         out.removable = True
         for attr in self.copy_props + self.copy_attributes:
-            setattr(link.to_socket, attr, getattr(self, attr))
+            setattr(out, attr, getattr(self,attr))
 
         node.outputs.move(len(node.outputs)-1, index)
         dynamic_links.append((link, link.to_socket, out))
@@ -130,7 +131,7 @@ class ScriptingSocket:
 
         inp.removable = True
         for attr in self.copy_props + self.copy_attributes:
-            setattr(link.from_socket, attr, getattr(self, attr))
+            setattr(inp, attr, getattr(self,attr))
 
         node.inputs.move(len(node.inputs)-1, index)
         dynamic_links.append((link, link.from_socket, inp))
@@ -388,6 +389,7 @@ class SN_AddSocket(bpy.types.Operator):
             
         socket.removable = True
         for attr in add_socket.copy_props + add_socket.copy_attributes:
-            setattr(socket, attr, getattr(add_socket, attr))
+            if hasattr(socket, attr):
+                setattr(socket, attr, getattr(add_socket, attr))
         return {"FINISHED"}
 

@@ -12,6 +12,8 @@ class SN_ObjectsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     data_type = "Object"
     data_identifier = "objects"
     
+    active_data = "bpy.context.object"
+    
     
     
 class SN_ActionsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):

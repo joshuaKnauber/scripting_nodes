@@ -7,6 +7,8 @@ class SN_SceneDataBase():
     # bl_icon = "GRAPH"
     bl_width_default = 160
     
+    active_data = ""
+    
     node_options = {
         "default_color": (0.3,0.3,0.3),
     }
@@ -14,18 +16,18 @@ class SN_SceneDataBase():
     def update_return(self,context):
         if self.return_type == "ALL" and len(self.inputs):
             self.inputs.clear()
-            self.outputs[0].name = "All"
-            self.outputs[0].collection = True
-        elif self.return_type == "INDEX" and (not len(self.inputs) or self.inputs[0].sn_type != "NUMBER"):
+            self.outputs[0].default_text = "All"
+            self.outputs[0].subtype = "COLLECTION"
+        elif self.return_type == "INDEX" and (not len(self.inputs) or self.inputs[0].socket_type != "INTEGER"):
             self.inputs.clear()
-            self.add_integer_input("Index")
-            self.outputs[0].name = "Indexed"
-            self.outputs[0].collection = False
-        elif self.return_type == "NAME" and (not len(self.inputs) or self.inputs[0].sn_type != "STRING"):
+            self.add_integer_input("Index").set_default(0)
+            self.outputs[0].default_text = "Indexed"
+            self.outputs[0].subtype = "DATA_BLOCK"
+        elif self.return_type == "NAME" and (not len(self.inputs) or self.inputs[0].socket_type != "STRING"):
             self.inputs.clear()
             self.add_string_input("Name")
-            self.outputs[0].name = "Named"
-            self.outputs[0].collection = False
+            self.outputs[0].default_text = "Named"
+            self.outputs[0].subtype = "DATA_BLOCK"
         if self.outputs[0].is_linked:
             self.outputs[0].links[0].to_node.on_link_insert(self.outputs[0].links[0])
     
@@ -34,14 +36,21 @@ class SN_SceneDataBase():
                                                ("INDEX","Index","By index"),
                                                ("NAME","Name","By name")],
                                         name="Return Type",
-                                        description="The type of returned",
+                                        description="The type of returned blend data",
                                         update=update_return)
     
 
     def on_create(self,context):
         out = self.add_blend_data_output("All")
+        out.subtype = "COLLECTION"
         out.data_type = self.data_type
-        out.collection = True
+        out.data_path = "bpy.data." + self.data_identifier
+        
+        if self.active_data:
+            out = self.add_blend_data_output("Active")
+            out.subtype = "DATA_BLOCK"
+            out.data_type = self.data_type
+            out.data_path = self.active_data
         
         
     def draw_node(self,context,layout):
@@ -50,10 +59,16 @@ class SN_SceneDataBase():
 
     def code_evaluate(self, context, touched_socket):
 
-        limiter = ""
-        if self.return_type != "ALL":
-            limiter = f"[{self.inputs[0].value}]"
+        if touched_socket == self.outputs[0]:
+            limiter = ""
+            if self.return_type != "ALL":
+                limiter = f"[{self.inputs[0].code()}]"
 
-        return {
-            "code": f"bpy.data.{self.data_identifier}{limiter}"
-        }
+            return {
+                "code": f"{self.outputs[0].data_path}{limiter}"
+            }
+            
+        else:
+            return {
+                "code": f"{self.outputs[1].data_path}"
+            }

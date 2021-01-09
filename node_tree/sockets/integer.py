@@ -94,7 +94,6 @@ class SN_DynamicIntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             ("VECTOR3","Vector 3","Vector 3"),
                                             ("VECTOR4","Vector 4","Vector 4")])
     
-    copy_attributes = ["value","value_three","value_four"]
 
     
     def setup(self):

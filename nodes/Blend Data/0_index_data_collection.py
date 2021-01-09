@@ -16,18 +16,17 @@ class SN_IndexDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     collection_error: bpy.props.BoolProperty(default=False)
-    
         
     
     def update_return(self,context):
-        if self.return_type == "INDEX" and (not len(self.inputs) or self.inputs[1].sn_type != "NUMBER"):
+        if self.return_type == "INDEX" and (not len(self.inputs) or self.inputs[1].socket_type != "INTEGER"):
             self.inputs.remove(self.inputs[1])
-            self.add_integer_input("Index")
-            self.outputs[0].name = "Indexed Data Block"
-        elif self.return_type == "NAME" and (not len(self.inputs) or self.inputs[0].sn_type != "STRING"):
+            self.add_integer_input("Index").set_default(0)
+            self.outputs[0].default_text = "Indexed Data Block"
+        elif self.return_type == "NAME" and (not len(self.inputs) or self.inputs[0].socket_type != "STRING"):
             self.inputs.remove(self.inputs[1])
             self.add_string_input("Name")
-            self.outputs[0].name = "Named Data Block"
+            self.outputs[0].default_text = "Named Data Block"
         if self.outputs[0].is_linked:
             self.outputs[0].links[0].to_node.on_link_insert(self.outputs[0].links[0])
     
@@ -40,18 +39,21 @@ class SN_IndexDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     def on_link_insert(self,link):
-        self.collection_error = False
         if link.to_socket == self.inputs[0]:
-            if link.from_socket.collection:
+            self.collection_error = False
+            if link.from_socket.subtype == "COLLECTION":
                 self.outputs[0].data_type = link.from_socket.data_type
+                self.outputs[0].data_path = link.from_socket.data_path
             else:
                 self.collection_error = True
 
 
     def on_create(self,context):
-        self.add_blend_data_input("Blend Data").copy_name = True
+        inp = self.add_blend_data_input("Blend Data")
+        inp.mirror_name = True
+        inp.subtype = "COLLECTION"
         out = self.add_blend_data_output("Indexed Data Block")
-        self.add_integer_input("Index")
+        self.add_integer_input("Index").set_default(0)
         
         
     def draw_node(self,context,layout):
@@ -63,5 +65,5 @@ class SN_IndexDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         return {
-            "code": f"{self.inputs[0].value}[{self.inputs[1].value}]"
+            "code": f"{self.inputs[0].code()}[{self.inputs[1].code()}]"
         }

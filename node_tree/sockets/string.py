@@ -100,8 +100,6 @@ class SN_DynamicStringSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             ("DIRECTORY","Directory","Directory"),
                                             ("ENUM","Enum","Enum")])
     
-    copy_attributes = ["value","value_file","value_directory","value_enum"]
-
     
     def setup(self):
         self.addable = True

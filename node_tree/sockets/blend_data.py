@@ -11,7 +11,7 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
     socket_type = "BLEND_DATA"
         
     def update_subtype(self,context):
-        if subtype == "COLLECTION":
+        if self.subtype == "COLLECTION":
             self.display_shape = "SQUARE"
         else:
             self.display_shape = "CIRCLE"
@@ -22,7 +22,7 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     subtype: bpy.props.EnumProperty(items=[("DATA_BLOCK","Data Block","Data Block"),
                                            ("COLLECTION","Collection","Collection"),
-                                           ("TYPE","Type","Type")],
+                                           ("SELF","Self","Self")],
                                     update=update_subtype)
 
     copy_attributes = ["data_type","data_path"]

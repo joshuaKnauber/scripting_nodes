@@ -134,7 +134,6 @@ class SN_DynamicFloatSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             ("VECTOR3","Vector 3","Vector 3"),
                                             ("VECTOR4","Vector 4","Vector 4")])
     
-    copy_attributes = ["value","value_factor","value_color","value_color_alpha","value_three","value_four"]
 
     
     def setup(self):
