@@ -351,7 +351,8 @@ class ScriptingSocket:
                 code += new_code
                 if new_code and not new_code.isspace():
                     code += separator
-        if code: code = code[:-len(separator)]
+        if separator and code:
+            code = code[:-len(separator)]
         return code
         
         

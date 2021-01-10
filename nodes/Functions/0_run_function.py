@@ -193,25 +193,25 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.func_name in self.addon_tree.sn_nodes["SN_FunctionNode"].items:
             parameters = []
             for inp in self.inputs[1:]:
-                parameters.append(inp.value + ", ")
+                parameters.append(inp.code() + ", ")
 
             if touched_socket == self.inputs[0]:
                 return {
                     "code": f"""
-                            {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_values(parameters, 0)})
-                            {self.outputs[0].block(7)}
+                            {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_code(parameters)})
+                            {self.outputs[0].code(7)}
                             """
                 }
 
             else:
                 return {
-                    "code": f"""{self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_values(parameters, 0)})[{self.outputs.find(touched_socket.name)-1}]"""
+                    "code": f"""{self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_code(parameters)})[{self.outputs.find(touched_socket.name)-1}]"""
                 }
 
         else:
             self.add_error("No function", "No valid function selected")
             return {
                 "code": f"""
-                        {self.outputs[0].block(6)}
+                        {self.outputs[0].code(6)}
                         """
             }
