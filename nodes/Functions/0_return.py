@@ -59,6 +59,11 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.update_nodes_by_type("SN_RunFunctionNode")
 
 
+    def on_free(self):
+        self.connected_function = ""
+        self.update_nodes_by_type("SN_RunFunctionNode")
+
+
     def draw_node(self, context, layout):
         if not self.connected_function:
             layout.label(text="Please connect to a function")
