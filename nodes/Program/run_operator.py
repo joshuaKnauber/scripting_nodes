@@ -63,8 +63,18 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
 
+        operator = ""
+        if self.current_operator:
+            operator = self.current_operator.split("(")[0] + "("
+        
+            for inp in self.inputs:
+                if inp.group == "DATA":
+                    operator += f"{inp.variable_name}={inp.code()},"
+
+            operator += ")"
+
         return {
             "code": f"""
-
+                    {operator}
                     """
         }

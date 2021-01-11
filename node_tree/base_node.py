@@ -1,6 +1,7 @@
 import bpy
 import re
 from .sockets.base_sockets import add_to_remove_links
+from ..compiler.compiler import combine_blocks
 from uuid import uuid4
 
 
@@ -280,23 +281,7 @@ class SN_ScriptingBaseNode:
         "ENUM": "SN_StringSocket",
         "POINTER": "SN_BlendDataSocket"
     }
-    
-    def add_input_from_type(self,prop_type,label,array_size=0):
-        if prop_type in self.prop_types:
-            inp = self.add_input(self.prop_types[prop_type],label)
-            if array_size:
-                inp.is_array = True
-                inp.array_size = array_size
-            return inp
-    
-    def add_output_from_type(self,prop_type,label,array_size=0):
-        if prop_type in self.prop_types:
-            out = self.add_output(self.prop_types[prop_type],label)
-            if array_size:
-                out.is_array = True
-                out.array_size = array_size
-            return out
-        
+
         
     def enum_items_as_string(self,prop):
         items = "["
@@ -328,6 +313,7 @@ class SN_ScriptingBaseNode:
     def add_input_from_prop(self,prop):
         if prop.type in self.prop_types:
             inp = self.add_input(self.prop_types[prop.type], prop.name)
+            inp.variable_name = prop.identifier
             self.match_socket_to_prop(inp,prop)
         else:
             print(prop,prop.type)
@@ -379,6 +365,7 @@ class SN_ScriptingBaseNode:
     
     
     def list_code(self, value_list, indents=0):
+        return combine_blocks(value_list, indents)
         code = ""
         for i, value in enumerate(value_list):
             code += value

@@ -127,36 +127,51 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.item.description = self.operator_description.replace("\"", "'")
 
     def update_popup(self,context):
-        if len(self.inputs) != 2:
-            self.add_integer_input("Width").set_default(300)
-        if self.outputs[0].name != "Operator":
-            self.add_execute_output("Operator")
-            self.outputs.move(len(self.outputs)-1, 0)
-        if len(self.outputs) < 3:
-            self.add_dynamic_interface_output("Popup")
-
-
+        # width input
         if self.invoke_option in ["none", "invoke_confirm"]:
-            self.inputs.remove(self.inputs[1])
-            for i, out in enumerate(self.outputs):
-                if i > 1:
-                    self.outputs.remove(out)
-        elif self.invoke_option == "invoke_popup":
-            self.outputs.remove(self.outputs[0])
-        elif self.invoke_option == "invoke_props_popup":
-            self.inputs.remove(self.inputs[1])
+            if len(self.inputs) > 1: self.inputs.remove(self.inputs[1])
+        else:
+            if len(self.inputs) == 1: self.add_integer_input("Width").set_default(300)
+        
+        # execute output
+        if self.invoke_option in ["invoke_popup"]:
+            if "Operator" in self.outputs: self.outputs.remove(self.outputs["Operator"])
+        
+        else:
+            if not "Operator" in self.outputs:
+                self.add_execute_output("Operator")
+                self.outputs.move(len(self.outputs)-1,1)
+        
+        # interface output
+        if self.invoke_option in ["none","invoke_confirm","invoke_popup"]:
+            for i in range(len(self.outputs)-1,-1,-1):
+                if self.outputs[i].socket_type == "INTERFACE":
+                    self.outputs.remove(self.outputs[i])
+        
+        else:
+            if not "Popup" in self.outputs:
+                self.add_dynamic_interface_output("Popup")
 
 
     operator_name: bpy.props.StringProperty(name="Name", description="Name of the operator", update=update_name)
     operator_description: bpy.props.StringProperty(name="Description", description="Description of the operator", update=update_description)
-    invoke_option: bpy.props.EnumProperty(name="Popup",items=[("none","None","None"),("invoke_confirm","Confirm","You need to confirm the operator"),("invoke_props_dialog","Property Dialog","Opens a customizable property dialog"), ("invoke_popup", "Popup", "Shows a customizable popup"), ("invoke_props_popup", "Property Popup", "Show operator properties and execute it automatically on changes"), ("invoke_search_popup", "Search Popup", "Opens a search menu from an enum property")],update=update_popup)
+    invoke_option: bpy.props.EnumProperty(name="Popup",items=[("none","None","None"),
+                                                            ("invoke_confirm","Confirm","You need to confirm the operator"),
+                                                            ("invoke_props_dialog","Popup","Opens a customizable property dialog"),
+                                                            ("invoke_popup", "Show Properties", "Shows a property popup"),
+                                                            ("invoke_props_popup", "Property Popup", "Show operator properties and execute it automatically on changes"),
+                                                            ("invoke_search_popup", "Search Popup", "Opens a search menu from an enum property")],update=update_popup)
     operator_properties: bpy.props.CollectionProperty(type=SN_Variable)
     property_index: bpy.props.IntProperty()
 
 
     def on_create(self,context):
-        self.add_execute_output("Operator")
         self.add_execute_output("Invoke")
+        self.add_execute_output("Operator")
+        out = self.add_blend_data_output("Properties")
+        out.subtype = "SELF"
+        out.data_type = "Operator"
+        out.data_path = "self"
         self.add_boolean_input("Poll")
         self.update_name(None)
 
@@ -185,102 +200,80 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
         property_register = []
         for prop in self.operator_properties:
-            property_register.append(prop.property_register() + "\n")
+            property_register.append(prop.property_register())
+            
+        if touched_socket == self.outputs["Properties"]:
+            return "self"
+        
+        execute_code = "pass"
+        if "Operator" in self.outputs:
+            execute_code = self.outputs["Operator"].code(8)
 
-        if not self.invoke_option in ["invoke_popup", "invoke_search_popup"]:
-            layouts = ""
-            if self.outputs[-1].dynamic:
-                layouts = self.outputs[-1].by_name(9)
+        invoke_code = self.outputs["Invoke"].code(8)
+        inline_invoke = ""
+                
+        if self.invoke_option in ["invoke_confirm"]:
+            return_invoke = "context.window_manager." + self.invoke_option + "(self, event)"
+            
+        elif self.invoke_option in ["invoke_props_dialog","invoke_popup"]:
+            return_invoke = "context.window_manager." + self.invoke_option + f"(self, width={self.inputs[1].code()})"
+            
+        else:
+            return_invoke = "self.execute(context)"
+            if not self.invoke_option == "none":
+                inline_invoke = "context.window_manager." + self.invoke_option + "(self, event)"
+            
+        if self.invoke_option in ["none","invoke_confirm","invoke_popup"]:
+            draw_function = ""
+            
+        else:
+            layout_code = ""
+            if "Popup" in self.outputs:
+                layout_code = self.outputs["Popup"].by_name(8)
 
+            draw_function = f"""
+                        def draw(self, context):
+                            layout = self.layout
+                            try:
+                                {layout_code if layout_code else "pass"}
+                            except Exception as exc:
+                                print(str(exc) + " | Error in draw function of {self.operator_name}")
+                            """
 
-            return_invoke = """self.execute(context)"""
-            if self.invoke_option != "none":
-                return_invoke = "context.window_manager." + self.invoke_option
-            if self.invoke_option == "invoke_confirm":
-                return_invoke += "(self, event)"
-            elif self.invoke_option == "invoke_props_dialog":
-                return_invoke += f"(self, width={self.inputs[1].code()})"
-            elif self.invoke_option == "invoke_props_popup":
-                return_invoke += "(self, event)"
+        return {
+            "code": f"""
+                    class SNA_OT_{self.item.identifier.title()}(bpy.types.Operator):
+                        bl_idname = "sna.{self.item.identifier}"
+                        bl_label = "{self.item.name}"
+                        bl_description = "{self.item.description}"
+                        bl_options = {"{" + '"REGISTER", "UNDO"' + "}"}
 
+                        {self.list_code(property_register, 6)}
 
-            return {
-                "code": f"""
-                        class SNA_OT_{self.item.identifier.title()}(bpy.types.Operator):
-                            bl_idname = "sna.{self.item.identifier}"
-                            bl_label = "{self.item.name}"
-                            bl_description = "{self.item.description}"
-                            bl_options = {"{" + '"REGISTER", "UNDO"' + "}"}
+                        @classmethod
+                        def poll(cls, context):
+                            return {self.inputs[0].code()}
 
-                            {self.list_code(property_register, 7)}
+                        def execute(self, context):
+                            try:
+                                {execute_code if execute_code else "pass"}
+                            except Exception as exc:
+                                print(str(exc) + " | Error in execute function of {self.operator_name}")
 
-                            @classmethod
-                            def poll(cls, context):
-                                return {self.inputs[0].code()}
+                            return {{"FINISHED"}}
 
-                            def execute(self, context):
-                                try:
-                                    {self.outputs[0].code(9) if self.outputs[0].code() else "pass"}
-                                except Exception as exc:
-                                    print(str(exc) + " | Error in execute function of {self.operator_name}")
+                        def invoke(self, context, event):
+                            try:
+                                {invoke_code if invoke_code else "pass"}
+                                {inline_invoke}
+                            except Exception as exc:
+                                print(str(exc) + " | Error in invoke function of {self.operator_name}")
 
-                                return {{"FINISHED"}}
+                            return {return_invoke}
 
-                            def invoke(self, context, event):
-                                try:
-                                    {self.outputs[1].code(9) if self.outputs[1].code() else "pass"}
-                                except Exception as exc:
-                                    print(str(exc) + " | Error in invoke function of {self.operator_name}")
-
-                                return {return_invoke}
-
-                            def draw(self, context):
-                                layout = self.layout
-                                try:
-                                    {layouts if layouts else "pass"}
-                                except Exception as exc:
-                                    print(str(exc) + " | Error in draw function of {self.operator_name}")
-                        """
-            }
-
-        elif self.invoke_option == "invoke_popup":
-            layouts = ""
-            if self.outputs[-1].dynamic:
-                layouts = self.outputs[-1].by_name(9)
-
-            return {
-                "code": f"""
-                        class SNA_OT_{self.item.identifier.title()}(bpy.types.Operator):
-                            bl_idname = "sna.{self.item.identifier}"
-                            bl_label = "{self.item.name}"
-                            bl_description = "{self.item.description}"
-                            bl_options = {"{" + '"REGISTER", "UNDO"' + "}"}
-
-                            {self.list_code(property_register, 7)}
-
-                            @classmethod
-                            def poll(cls, context):
-                                return {self.inputs[0].code()}
-
-                            def execute(self, context):
-                                return {{"FINISHED"}}
-
-                            def invoke(self, context, event):
-                                try:
-                                    {self.outputs[0].code(9) if self.outputs[0].code(0) else "pass"}
-                                except Exception as exc:
-                                    print(str(exc) + " | Error in invoke function of {self.operator_name}")
-
-                                return context.window_manager.invoke_popup(self, width={self.inputs[1].code()})
-
-                            def draw(self, context):
-                                layout = self.layout
-                                try:
-                                    {layouts if layouts else "pass"}
-                                except Exception as exc:
-                                    print(str(exc) + " | Error in draw function of {self.operator_name}")
-                        """
-            }
+                        {draw_function}
+                    """
+        }
 
 
     def code_register(self, context):

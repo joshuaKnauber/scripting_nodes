@@ -73,13 +73,13 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
         elif self.subtype == "FACTOR":
             return str(self.value_factor)
         elif self.subtype == "COLOR":
-            return str(self.value_color)
+            return str((self.value_color[0],self.value_color[1],self.value_color[2]))
         elif self.subtype == "COLOR_ALPHA":
-            return str(self.value_color_alpha)
+            return str((self.value_color_alpha[0],self.value_color_alpha[1],self.value_color_alpha[2],self.value_color_alpha[2]))
         elif self.subtype == "VECTOR3":
-            return str(self.value_three)
+            return str((self.value_three[0],self.value_three[1],self.value_three[2]))
         elif self.subtype == "VECTOR4":
-            return str(self.value_four)
+            return str((self.value_four[0],self.value_four[1],self.value_four[2],self.value_four[2]))
     
     
     def convert_data(self, code):
