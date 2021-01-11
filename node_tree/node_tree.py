@@ -67,9 +67,26 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             except:
                 pass
         remove_links.clear()
-
+        
+        
+    def remove_reroutes(self):
+        if bpy.context and hasattr(bpy.context,"space_data"):
+            if bpy.context.space_data and hasattr(bpy.context.space_data,"node_tree"):
+                tree = bpy.context.space_data.node_tree
+                if tree:
+                    for node in tree.nodes:
+                        if node.bl_idname == "NodeReroute":
+                            left, right = None, None
+                            if node.inputs[0].is_linked and node.outputs[0].is_linked:
+                                left = node.inputs[0].links[0].from_socket
+                                right = node.outputs[0].links[0].to_socket
+                            tree.nodes.remove(node)
+                            if left and right:
+                                tree.links.new(left, right)
+                            
 
     def update(self):
+        self.remove_reroutes()
         self.set_changes(True)
         self.update_dynamic_links()
         self.update_remove_links()
