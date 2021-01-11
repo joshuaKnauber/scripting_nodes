@@ -34,8 +34,7 @@ class SN_AddToListNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             if var.var_type == "LIST":
                 if not len(self.inputs) > 1:
-                    self.add_data_input(var.name)
-                self.inputs[1].default_text = var.name
+                    self.add_data_input("Value")
             else:
                 if len(self.inputs) > 1:
                     self.inputs.remove(self.inputs[1])

@@ -46,7 +46,7 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             idname = {"STRING": "SN_StringSocket", "INTEGER": "SN_IntegerSocket", "FLOAT": "SN_FloatSocket", "BOOLEAN": "SN_BooleanSocket", "LIST": "SN_ListSocket"}
             self.change_socket_type(self.outputs[0], idname[var.var_type])
-            self.outputs[0].name = var.name
+            self.outputs[0].default_text = var.name
 
 
     def on_node_update(self):
