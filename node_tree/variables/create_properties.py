@@ -105,11 +105,18 @@ class SN_OT_AddEnumItem(bpy.types.Operator):
     bl_label = "Add Enum Item"
     bl_description = "Adds an item to this enum property"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
-
+    
+    node: bpy.props.StringProperty(options={"SKIP_SAVE"},default="")
+    node_attr: bpy.props.StringProperty(options={"SKIP_SAVE"},default="")
+    node_index: bpy.props.IntProperty(options={"SKIP_SAVE"},default=0)
+    
     def execute(self, context):
-        addon_tree = context.scene.sn.addon_tree()
+        if self.node:
+            prop = getattr(context.space_data.node_tree.nodes[self.node],self.node_attr)[self.node_index]
+        else:
+            addon_tree = context.scene.sn.addon_tree()
+            prop = addon_tree.sn_properties[addon_tree.sn_property_index]
 
-        prop = addon_tree.sn_properties[addon_tree.sn_property_index]
         prop.enum_items.add()
         return {"FINISHED"}
     
@@ -121,12 +128,19 @@ class SN_OT_RemoveEnumItem(bpy.types.Operator):
     bl_description = "Removes this item from this enum property"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
     
+    node: bpy.props.StringProperty(options={"SKIP_SAVE"},default="")
+    node_attr: bpy.props.StringProperty(options={"SKIP_SAVE"},default="")
+    node_index: bpy.props.IntProperty(options={"SKIP_SAVE"},default=0)
+    
     index: bpy.props.IntProperty()
 
     def execute(self, context):
-        addon_tree = context.scene.sn.addon_tree()
-
-        prop = addon_tree.sn_properties[addon_tree.sn_property_index]
+        if self.node:
+            prop = getattr(context.space_data.node_tree.nodes[self.node],self.node_attr)[self.node_index]
+        else:
+            addon_tree = context.scene.sn.addon_tree()
+            prop = addon_tree.sn_properties[addon_tree.sn_property_index]
+            
         prop.enum_items.remove(self.index)
         return {"FINISHED"}
     
@@ -138,13 +152,20 @@ class SN_OT_MoveEnumItem(bpy.types.Operator):
     bl_description = "Moves this item in this enum property"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
     
+    node: bpy.props.StringProperty(options={"SKIP_SAVE"},default="")
+    node_attr: bpy.props.StringProperty(options={"SKIP_SAVE"},default="")
+    node_index: bpy.props.IntProperty(options={"SKIP_SAVE"},default=0)
+    
     index: bpy.props.IntProperty()
     down: bpy.props.BoolProperty()
 
     def execute(self, context):
-        addon_tree = context.scene.sn.addon_tree()
-
-        prop = addon_tree.sn_properties[addon_tree.sn_property_index]
+        if self.node:
+            prop = getattr(context.space_data.node_tree.nodes[self.node],self.node_attr)[self.node_index]
+        else:
+            addon_tree = context.scene.sn.addon_tree()
+            prop = addon_tree.sn_properties[addon_tree.sn_property_index]
+            
         if self.down and self.index < len(prop.enum_items)-1:
             prop.enum_items.move(self.index, self.index+1)
         elif not self.down and self.index > 0:

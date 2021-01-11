@@ -81,7 +81,7 @@ class SN_PT_VariablePanel(bpy.types.Panel):
             row.label(text="",icon="BLANK1")
 
 
-def draw_property(context,var,layout):
+def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
     col = layout.column()
     col.use_property_split = True
     col.use_property_decorate = False
@@ -200,12 +200,24 @@ def draw_property(context,var,layout):
             op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_UP")
             op.index = index
             op.down = False
+            op.node = from_node
+            op.node_attr = node_attr
+            op.node_index = node_index
             op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_DOWN")
             op.index = index
             op.down = True
-            header_row.operator("sn.remove_enum_item",text="",icon="PANEL_CLOSE")
+            op.node = from_node
+            op.node_attr = node_attr
+            op.node_index = node_index
+            op = header_row.operator("sn.remove_enum_item",text="",icon="PANEL_CLOSE")
+            op.node = from_node
+            op.node_attr = node_attr
+            op.node_index = node_index
             box.prop(item,"description")
-        col.operator("sn.add_enum_item",text="Add Enum Item", icon="ADD")
+        op = col.operator("sn.add_enum_item",text="Add Enum Item", icon="ADD")
+        op.node = from_node
+        op.node_attr = node_attr
+        op.node_index = node_index
             
             
 class SN_PT_PropertyPanel(bpy.types.Panel):
