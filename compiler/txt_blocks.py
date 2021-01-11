@@ -47,4 +47,7 @@ def serpens_functions(addon_tree):
                 
             def sn_cast_blend_data(value):
                 return value
+                
+            def sn_cast_list(value):
+                return value
             """

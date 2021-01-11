@@ -1,82 +1,58 @@
 import bpy
 import json
 
-
+#TODO options for properties especially in operators
 
 class SN_OT_CopyProperty(bpy.types.Operator):
     bl_idname = "sn.copy_space_property"
     bl_label = "Copy Space Property"
     bl_description = "Copy the property from this space"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
-
-    prop_name: bpy.props.StringProperty(options={"HIDDEN"})
-    prop_identifier: bpy.props.StringProperty(options={"HIDDEN"})
-    prop_type: bpy.props.StringProperty(options={"HIDDEN"})
-    prop_array_length: bpy.props.IntProperty(options={"HIDDEN"})
+    
+    origin: bpy.props.EnumProperty(items=[("DEFAULT","DEFAULT","DEFAULT"),
+                                          ("SPACE_DATA","SPACE_DATA","SPACE_DATA"),
+                                          ("PREFERENCES","PREFERENCES","PREFERENCES")],
+                                   options={"HIDDEN"})
+    
     path: bpy.props.StringProperty(options={"HIDDEN"})
-    is_color: bpy.props.BoolProperty(options={"HIDDEN"})
+    identifier: bpy.props.StringProperty(options={"HIDDEN"})
     
-    def process_data_part(self,part,path_progress):
-        part_details = {"is_numeric":False}
-
-        suffix = "(" + eval(path_progress + ".bl_rna.base.name") + ")"
-        if suffix == "(ID)":
-            suffix = ""
+    
+    def copy(self,data):
+        bpy.context.window_manager.clipboard = data
+    
         
-        if part.split("[")[-1].split("]")[0].isnumeric():
-            suffix = ""
-            part_details["is_numeric"] = True
-            part_details["index"] = int(part.split("[")[-1].split("]")[0])
+    def construct(self,data_block_type,data_block_path,identifier):
+        data = {
+            "data_block": {
+                "type": data_block_type,
+                "path": data_block_path
+            },
             
-        else:
-            part_details["data_type"] = "bpy.types." + eval(path_progress + ".bl_rna.name")
-
-        part_details["name"] = eval(path_progress + ".bl_rna.name") + suffix
-        return part_details
-
-    def process_part(self,part,index,path_progress):
-        if not ("[" in part and "]" in part):
-            return part
-        elif "areas[" in part:
-            return {"is_numeric":False,"name":"Area", "data_type": "bpy.types.Area"}
-        elif not "spaces[0]" in part:
-            if index == len(self.path.split("."))-1:
-                return part.split("[")[0]
-            else:
-                return self.process_data_part(part,path_progress)
-
-    def construct_path_parts(self):
-        parts = []
-        path_progress = ""
-        for index, part in enumerate(self.path.split(".")):
-            path_progress = part if not path_progress else path_progress + "." + part
-            parts.append(self.process_part(part,index,path_progress))
-        return parts
+            "identifier": identifier
+        }
+        return json.dumps(data)
     
-    def area_index(self):
-        for index, a in enumerate(bpy.context.screen.areas):
-            if a == bpy.context.area:
-                return index
-        return 0
     
-    def handle_screen_props(self):
-        if "bpy.data.screens[" in self.path:
-            new_path = ".".join(self.path.split(".")[3:])
-            new_path = f"bpy.context.screen.areas[{self.area_index()}].spaces[0]."
-            self.path = new_path
+    def space_data(self):
+        return self.construct(self.path,self.identifier)
+
+
+    def preferences(self):
+        return self.construct(self.path,self.identifier)
+
+        
+    def default(self):
+        return self.construct(self.path,self.identifier)
+
 
     def execute(self, context):
-        self.handle_screen_props()
-        path_details = {
-            "path": self.path,
-            "prop_name": self.prop_name,
-            "prop_identifier": self.prop_identifier,
-            "prop_type": self.prop_type,
-            "prop_array_length": self.prop_array_length,
-            "is_color": self.is_color,
-            "path_parts": self.construct_path_parts()
-        }
-        bpy.context.window_manager.clipboard = json.dumps(path_details)
+        if self.origin == "SPACE_DATA":
+            self.copy(self.space_data())
+        elif self.origin == "PREFERENCES":
+            self.copy(self.preferences())
+        elif self.origin == "DEFAULT":
+            self.copy(self.default())
         return {"FINISHED"}
 
 
@@ -87,6 +63,7 @@ class WM_MT_button_context(bpy.types.Menu):
 
     def draw(self, context):
         pass
+    
 
 
 def serpens_right_click(self, context):
@@ -101,19 +78,16 @@ def serpens_right_click(self, context):
     
     if property_value and property_pointer:
         op = layout.operator("sn.copy_space_property",text="Serpens | Copy Property",icon="COPYDOWN")
-        op.prop_name = property_value.name
-        op.prop_type = property_value.type
-        op.prop_identifier = property_value.identifier
-        if hasattr(property_value,"array_length"):
-            op.prop_array_length = property_value.array_length
+        
+        if "Preferences" in property_pointer.bl_rna.identifier:
+            op.origin = "PREFERENCES"
+        elif "bpy.data.screens[" in property_pointer.__repr__():
+            op.origin = "SPACE_DATA"
         else:
-            op.prop_array_length = 0
-        if hasattr(property_value,"subtype"):
-            op.is_color = property_value.subtype == "COLOR"
-        else:
-            op.is_color = False
+            op.origin = "DEFAULT"
+            
         op.path = property_pointer.__repr__()
-        op.path += "." + property_value.identifier
-    
+        op.identifier = property_value.identifier
+            
     if button_value:
         layout.operator("ui.copy_python_command_button",text="Serpens | Copy Operator",icon="COPYDOWN")

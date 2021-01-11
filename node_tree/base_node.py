@@ -264,6 +264,11 @@ class SN_ScriptingBaseNode:
     def add_dynamic_data_input(self,label): return self.add_input("SN_DynamicDataSocket",label)
     def add_dynamic_data_output(self,label): return self.add_output("SN_DynamicDataSocket",label)
 
+    def add_list_input(self,label): return self.add_input("SN_ListSocket",label)
+    def add_list_output(self,label): return self.add_output("SN_ListSocket",label)
+    def add_dynamic_list_input(self,label): return self.add_input("SN_DynamicListSocket",label)
+    def add_dynamic_list_output(self,label): return self.add_output("SN_DynamicListSocket",label)
+
     def add_dynamic_variable_input(self,label): return self.add_input("SN_DynamicVariableSocket",label)
     def add_dynamic_variable_output(self,label): return self.add_output("SN_DynamicVariableSocket",label)
 
