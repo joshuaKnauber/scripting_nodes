@@ -34,7 +34,7 @@ class SN_AddToListNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             if var.var_type == "LIST":
                 if not len(self.inputs) > 1:
-                    self.add_list_input(var.name)
+                    self.add_data_input(var.name)
                 self.inputs[1].default_text = var.name
             else:
                 if len(self.inputs) > 1:
@@ -78,7 +78,7 @@ class SN_AddToListNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             return {
                 "code": f"""
-                        {self.get_python_name(self.node_tree.name)}["{self.node_tree.sn_variables[self.search_value].identifier}"] = {self.inputs[1].code()}
+                        {self.get_python_name(self.node_tree.name)}["{self.node_tree.sn_variables[self.search_value].identifier}"].append({self.inputs[1].code()})
                         {self.outputs[0].code(6)}
                         """
             }
