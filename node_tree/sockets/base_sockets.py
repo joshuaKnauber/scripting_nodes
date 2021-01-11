@@ -133,7 +133,7 @@ class ScriptingSocket:
         index = self.get_socket_index(node.inputs)
 
         if self.copy_socket:
-            inp = node.add_input(link.to_socket.bl_idname, self.default_text)
+            inp = node.add_input(link.from_socket.bl_idname, self.default_text)
         else:
             inp = node.add_input(self.to_add_idname, self.default_text)
 

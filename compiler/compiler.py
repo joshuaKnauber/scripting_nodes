@@ -453,6 +453,10 @@ def __normalize_code(code, indents):
     return "\n".join(new_code)
 
 
+def combine_blocks(block_list, indents):
+    return __normalize_code("".join(block_list), indents)[indents*4:]
+
+
 def process_node(node, touched_socket, indents=0):
     node_result = node.code_evaluate(bpy.context, touched_socket)
     if node_result:

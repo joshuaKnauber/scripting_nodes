@@ -46,9 +46,9 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
         if self.subtype == "NONE":
             return str(self.value)
         elif self.subtype == "VECTOR3":
-            return str(self.value_three)
+            return str((self.value_three[0],self.value_three[1],self.value_three[2]))
         elif self.subtype == "VECTOR4":
-            return str(self.value_four)
+            return str((self.value_four[0],self.value_four[1],self.value_four[2],self.value_four[2]))
     
     
     def convert_data(self, code):

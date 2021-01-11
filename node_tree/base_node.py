@@ -1,6 +1,7 @@
 import bpy
 import re
 from .sockets.base_sockets import add_to_remove_links
+from ..compiler.compiler import combine_blocks
 from uuid import uuid4
 
 
@@ -263,6 +264,11 @@ class SN_ScriptingBaseNode:
     def add_dynamic_data_input(self,label): return self.add_input("SN_DynamicDataSocket",label)
     def add_dynamic_data_output(self,label): return self.add_output("SN_DynamicDataSocket",label)
 
+    def add_list_input(self,label): return self.add_input("SN_ListSocket",label)
+    def add_list_output(self,label): return self.add_output("SN_ListSocket",label)
+    def add_dynamic_list_input(self,label): return self.add_input("SN_DynamicListSocket",label)
+    def add_dynamic_list_output(self,label): return self.add_output("SN_DynamicListSocket",label)
+
     def add_dynamic_variable_input(self,label): return self.add_input("SN_DynamicVariableSocket",label)
     def add_dynamic_variable_output(self,label): return self.add_output("SN_DynamicVariableSocket",label)
 
@@ -280,22 +286,42 @@ class SN_ScriptingBaseNode:
         "ENUM": "SN_StringSocket",
         "POINTER": "SN_BlendDataSocket"
     }
-    
-    def add_input_from_type(self,prop_type,label,array_size=0):
-        if prop_type in self.prop_types:
-            inp = self.add_input(self.prop_types[prop_type],label)
-            if array_size:
-                inp.is_array = True
-                inp.array_size = array_size
-            return inp
-    
-    def add_output_from_type(self,prop_type,label,array_size=0):
-        if prop_type in self.prop_types:
-            out = self.add_output(self.prop_types[prop_type],label)
-            if array_size:
-                out.is_array = True
-                out.array_size = array_size
-            return out
+
+        
+    def enum_items_as_string(self,prop):
+        items = "["
+        for item in prop.enum_items:
+            items += f"('{item.identifier}','{item.name}','{item.description}'),"
+        return items + "]"
+        
+        
+    def match_socket_to_prop(self,socket,prop):
+        if prop.type == "ENUM":
+            if prop.enum_items:
+                socket.subtype = "ENUM"
+                socket.enum_values = self.enum_items_as_string(prop)
+        if hasattr(prop,"is_array") and prop.is_array:
+            if prop.array_length == 3:
+                socket.subtype = "VECTOR3"
+                if prop.subtype == "COLOR": socket.subtype = "COLOR"
+            elif prop.array_length == 4: 
+                socket.subtype = "VECTOR4"
+                if prop.subtype == "COLOR": socket.subtype = "COLOR_ALPHA"
+        if hasattr(prop,"default"):
+            socket.set_default(prop.default)
+        if hasattr(prop,"subtype"):
+            if prop.subtype == "FACTOR": socket.subtype = "FACTOR"
+            if prop.subtype == "FILEPATH": socket.subtype = "FILE"
+            if prop.subtype == "DIRPATH": socket.subtype = "DIRECTORY"
+            
+        
+    def add_input_from_prop(self,prop):
+        if prop.type in self.prop_types:
+            inp = self.add_input(self.prop_types[prop.type], prop.name)
+            inp.variable_name = prop.identifier
+            self.match_socket_to_prop(inp,prop)
+        else:
+            print(prop,prop.type)
     
     
     def add_input(self,idname,label):
@@ -344,6 +370,7 @@ class SN_ScriptingBaseNode:
     
     
     def list_code(self, value_list, indents=0):
+        return combine_blocks(value_list, indents)
         code = ""
         for i, value in enumerate(value_list):
             code += value

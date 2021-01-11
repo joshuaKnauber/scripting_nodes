@@ -107,10 +107,11 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             col.label(text="Author: ".ljust(15) + addon.author)
             col.label(text="Version: ".ljust(15) + f"{addon.addon_version[0]}.{addon.addon_version[1]}.{addon.addon_version[2]}")
             col.label(text="Blender: ".ljust(15) + f"{addon.blender_version[0]}.{addon.blender_version[1]}.{addon.blender_version[2]}")
+            col.separator()
             row = col.row()
-            row.operator("wm.url_open",text="Addon" if not addon.is_external else addon.price).url = addon.addon_url
+            row.operator("wm.url_open",text="Get Addon" if not addon.is_external else addon.price).url = addon.addon_url
             if addon.has_blend:
-                row.operator("wm.url_open",text=".blend File").url = addon.blend_url
+                row.operator("wm.url_open",text="Get .blend").url = addon.blend_url
                 
 
 

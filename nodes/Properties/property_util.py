@@ -29,7 +29,11 @@ class SN_ResetNode(bpy.types.Operator):
     node: bpy.props.StringProperty()
 
     def execute(self, context):
-        context.space_data.node_tree.nodes[self.node].copied_path = ""
+        node = context.space_data.node_tree.nodes[self.node]
+        if hasattr(node,"copied_path"):
+            node.copied_path = ""
+        if hasattr(node,"current_operator"):
+            node.current_operator = ""
         return {"FINISHED"}
 
 

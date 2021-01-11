@@ -24,6 +24,9 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
         out = self.add_blend_data_output("Active Camera")
         out.data_type = "Camera"
         out.data_path = "bpy.context.scene.camera"
+        out = self.add_blend_data_output("Window Manager")
+        out.data_type = "WindowManager"
+        out.data_path = "bpy.context.window_manager"
         self.add_string_output("Engine")
         self.add_string_output("Mode")
         self.add_integer_output("Current Frame")
@@ -34,6 +37,7 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
             "Active Scene": "bpy.context.scene",
             "Active Area": "bpy.context.area",
             "Active Camera": "bpy.context.scene.camera",
+            "Window Manager": "bpy.context.window_manager",
             "Engine": "bpy.context.engine",
             "Mode": "bpy.context.mode",
             "Current Frame": "bpy.context.scene.frame_current"
