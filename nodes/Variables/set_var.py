@@ -76,14 +76,14 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.add_error("No variable", "No variable selected")
             return {
                 "code": f"""
-                        {self.outputs[0].block(6)}
+                        {self.outputs[0].code(6)}
                         """
             }
 
         else:
             return {
                 "code": f"""
-                        {self.get_python_name(self.node_tree.name)}["{self.node_tree.sn_variables[self.search_value].identifier}"] = {self.inputs[1].value}
-                        {self.outputs[0].block(6)}
+                        {self.get_python_name(self.node_tree.name)}["{self.node_tree.sn_variables[self.search_value].identifier}"] = {self.inputs[1].code()}
+                        {self.outputs[0].code(6)}
                         """
             }

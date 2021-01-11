@@ -23,7 +23,24 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_execute_input("Return")
-        self.add_dynamic_variable_input("Content").use_var_name = False
+        inp = self.add_dynamic_variable_input("Value")
+        inp.show_var_name = True
+        inp.edit_var_name = True
+
+
+    def on_dynamic_add(self,socket, connected_socket):
+        if connected_socket and connected_socket.name != "":
+            socket.variable_name = connected_socket.name
+        else:
+            socket.variable_name = "Parameter"
+
+    def on_var_name_update(self,socket):
+        names = []
+        for inp in self.inputs[1:-1]:
+            names.append(inp.variable_name)
+
+        socket["variable_name"] = self.get_unique_name(socket.variable_name, names, separator=" ")
+        self.update_nodes_by_type("SN_RunFunctionNode")
 
 
     def on_any_change(self):
@@ -38,6 +55,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 self.connected_function = "None"
                 self.label = "Function Return"
+
         self.update_nodes_by_type("SN_RunFunctionNode")
 
 
@@ -49,7 +67,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
         contents = []
         for inp in self.inputs[1:-1]:
-            contents.append(inp.value + ", ")
+            contents.append(inp.code() + ", ")
 
         if not contents:
             self.add_error("No return", "Nothing will be returned from this function", False)
@@ -60,10 +78,10 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         if len(self.inputs[0].links) and self.connected_function:
             return {
                 "code": f"""
-                        return {self.list_values(contents, 0)}
+                        return {self.list_code(contents, 0)}
                         """
             }
 
         else:
             self.add_error("No function", "This node has to be connected to a function", False)
-            return {"code": f"{self.list_values(contents, 0)}"}
+            return {"code": ""}

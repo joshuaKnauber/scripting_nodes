@@ -93,23 +93,17 @@ class SN_ChangeVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             return {
                 "code": f"""
-                        {self.outputs[0].block(6)}
+                        {self.outputs[0].code(6)}
                         """
             }
 
         else:
             if self.node_tree.sn_variables[self.search_value].var_type == "STRING":
-                return {
-                    "code": f"""
-                            {self.get_python_name(self.node_tree.name)}["{self.node_tree.sn_variables[self.search_value].identifier}"] += {self.inputs[1].value}
-                            {self.outputs[0].block(6)}
-                            """
-                }
+                self.add_sub = "+="
 
-            else:
-                return {
-                    "code": f"""
-                            {self.get_python_name(self.node_tree.name)}["{self.node_tree.sn_variables[self.search_value].identifier}"] {self.add_sub} {self.inputs[1].value}
-                            {self.outputs[0].block(6)}
-                            """
-                }
+            return {
+                "code": f"""
+                        {self.get_python_name(self.node_tree.name)}["{self.node_tree.sn_variables[self.search_value].identifier}"] {self.add_sub} {self.inputs[1].code()}
+                        {self.outputs[0].code(6)}
+                        """
+            }

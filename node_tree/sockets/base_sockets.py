@@ -126,7 +126,7 @@ class ScriptingSocket:
         node.outputs.move(len(node.outputs)-1, index)
         dynamic_links.append((link, link.to_socket, out))
         
-        node.on_dynamic_add(out)
+        node.on_dynamic_add(out, link.to_socket)
 
 
     def update_dynamic_input(self,node,link):
@@ -144,7 +144,7 @@ class ScriptingSocket:
         node.inputs.move(len(node.inputs)-1, index)
         dynamic_links.append((link, link.from_socket, inp))
 
-        node.on_dynamic_add(inp)
+        node.on_dynamic_add(inp, link.from_socket)
     
     
     def update_dynamic(self,node,link):
@@ -311,8 +311,8 @@ class ScriptingSocket:
     def make_code(self, indents=0):
         # return the variable name of the socket
         if self.return_var_name:
-            return self.variable_name
-        
+            return self.node.get_python_name(self.variable_name, "variable")
+
         else:
             # throw an error if the connection is invalid
             if self.is_linked and not self.same_group():
@@ -351,7 +351,8 @@ class ScriptingSocket:
                 code += new_code
                 if new_code and not new_code.isspace():
                     code += separator
-        if code: code = code[:-len(separator)]
+        if separator and code:
+            code = code[:-len(separator)]
         return code
         
         
@@ -417,6 +418,6 @@ class SN_AddSocket(bpy.types.Operator):
             if hasattr(socket, attr):
                 setattr(socket, attr, getattr(add_socket, attr))
                 
-        node.on_dynamic_add(socket)
+        node.on_dynamic_add(socket, None)
         return {"FINISHED"}
 
