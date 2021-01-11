@@ -55,8 +55,15 @@ class SN_ScriptingBaseNode:
             for node in graph.node_tree.nodes:
                 if node.bl_idname == idname:
                     node.on_outside_update(self)
-                    
-                    
+
+
+    def update_nodes_by_types(self, idname_list):
+        for graph in self.addon_tree.sn_graphs:
+            for node in graph.node_tree.nodes:
+                if node.bl_idname in idname_list:
+                    node.on_outside_update(self)
+
+
     ### DYNAMIC SOCKET ADD
     def on_dynamic_add(self,socket,connected_socket): pass
     def on_dynamic_remove(self,is_output): pass

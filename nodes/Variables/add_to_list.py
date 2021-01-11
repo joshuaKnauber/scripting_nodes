@@ -2,10 +2,10 @@ import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
-class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_AddToListNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_SetVariableNode"
-    bl_label = "Set Variable"
+    bl_idname = "SN_AddToListNode"
+    bl_label = "Add to List"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 
@@ -32,30 +32,17 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             var = self.node_tree.sn_variables[self.search_value]
             self.identifier = var.identifier
 
-            if not len(self.inputs) > 1:
-                if var.var_type == "STRING":
-                    self.add_string_input("")
-                elif var.var_type == "INTEGER":
-                    self.add_integer_input("")
-                elif var.var_type == "FLOAT":
-                    self.add_float_input("")
-                elif var.var_type == "BOOLEAN":
-                    self.add_boolean_input("")
-                elif var.var_type == "LIST":
-                    self.add_list_input("")
+            if var.var_type == "LIST":
+                if not len(self.inputs) > 1:
+                    self.add_list_input(var.name)
+                self.inputs[1].default_text = var.name
+            else:
+                if len(self.inputs) > 1:
+                    self.inputs.remove(self.inputs[1])
 
-
-            idname = {"STRING": "SN_StringSocket", "INTEGER": "SN_IntegerSocket", "FLOAT": "SN_FloatSocket", "BOOLEAN": "SN_BooleanSocket", "LIST": "SN_ListSocket"}
-            if idname[var.var_type] != self.inputs[1].bl_idname:
-                self.change_socket_type(self.inputs[1], idname[var.var_type])
-
-
-    def on_node_update(self):
-        if not len(self.inputs) > 1:
-            self.update_search(bpy.context)
 
     def on_create(self, context):
-        self.add_execute_input("Set Variable")
+        self.add_execute_input("Add To List")
         self.add_execute_output("Execute")
 
 
@@ -69,11 +56,19 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.search_value != "" and not self.search_value in self.node_tree.sn_variables:
             if len(self.inputs) > 1:
                 self.inputs.remove(self.inputs[1])
+        elif self.search_value != "" and self.node_tree.sn_variables[self.search_value].var_type != "LIST":
+            layout.label(text="Please use a list variable!")
+            if len(self.inputs) > 1:
+                self.inputs.remove(self.inputs[1])
 
 
     def code_evaluate(self, context, touched_socket):
         if len(self.inputs) < 2:
-            self.add_error("No variable", "No variable selected")
+            if self.search_value != "":
+                self.add_error("Wrong variable", "You need to select a list variable selected")
+            else:
+                self.add_error("No variable", "No variable selected")
+
             return {
                 "code": f"""
                         {self.outputs[0].code(6)}
