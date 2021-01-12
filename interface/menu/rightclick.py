@@ -14,36 +14,46 @@ class SN_OT_CopyProperty(bpy.types.Operator):
                                           ("PREFERENCES","PREFERENCES","PREFERENCES")],
                                    options={"HIDDEN"})
     
-    path: bpy.props.StringProperty(options={"HIDDEN"})
+    full_path: bpy.props.StringProperty(options={"HIDDEN"})
     identifier: bpy.props.StringProperty(options={"HIDDEN"})
+    name: bpy.props.StringProperty(options={"HIDDEN"})
+    data_type: bpy.props.StringProperty(options={"HIDDEN"})
     
     
     def copy(self,data):
         bpy.context.window_manager.clipboard = data
     
         
-    def construct(self,data_block_type,data_block_path,identifier):
+    def construct(self, data_block_path, data_block_type, data_block_name):
         data = {
             "data_block": {
                 "type": data_block_type,
+                "name": data_block_name,
                 "path": data_block_path
             },
-            
-            "identifier": identifier
+            "full_path": self.full_path,
+            "identifier": self.identifier,
+            "name": self.name,
+            "type": self.data_type
         }
         return json.dumps(data)
     
     
     def space_data(self):
-        return self.construct(self.path,self.identifier)
+        return self.construct("bpy.context.screen.areas[\"My Area\"].spaces[0]", "SpaceData", "Area")
 
 
     def preferences(self):
-        return self.construct(self.path,self.identifier)
+        suffix = ""
+        return self.construct("bpy.context.preferences" + suffix)
 
         
     def default(self):
-        return self.construct(self.path,self.identifier)
+        db_path = self.full_path.split("[")[:-1]
+        db_path = "[".join(db_path)
+        db_as_prop_path = ".".join(db_path.split(".")[:-1])
+        data_block = eval(f"{db_as_prop_path}.bl_rna.properties[\"{db_path.split('.')[-1]}\"]")
+        return self.construct(db_path, data_block.fixed_type.identifier, data_block.fixed_type.name)
 
 
     def execute(self, context):
@@ -86,8 +96,10 @@ def serpens_right_click(self, context):
         else:
             op.origin = "DEFAULT"
             
-        op.path = property_pointer.__repr__()
+        op.full_path = property_pointer.__repr__()
         op.identifier = property_value.identifier
+        op.name = property_value.name
+        op.data_type = property_value.type
             
     if button_value:
         layout.operator("ui.copy_python_command_button",text="Serpens | Copy Operator",icon="COPYDOWN")

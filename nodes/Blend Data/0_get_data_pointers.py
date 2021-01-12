@@ -3,10 +3,10 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
 
-class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_GetDataCollectionNode"
-    bl_label = "Get Data Collections"
+    bl_idname = "SN_GetDataPointersNode"
+    bl_label = "Get Data"
     # bl_icon = "GRAPH"
     bl_width_default = 160
     
@@ -27,16 +27,15 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def add_data_outputs(self,data_type):
         try:
             for prop in eval(f"bpy.types.{data_type}.bl_rna.properties"):
-                if prop.type == "COLLECTION":
-                    if hasattr(prop, "fixed_type"):
+                if prop.type == "POINTER":
+                    if hasattr(prop, "identifier") and not prop.name == "RNA":
                         out = self.add_blend_data_output(prop.name)
                         out.removable = True
-                        out.subtype = "COLLECTION"
                         out.data_type = prop.fixed_type.identifier
-                        out.data_path = prop.identifier
+                        out.data_path = prop.name
             if not len(self.outputs):
                 self.no_data_error = True
-        except:
+        except ValueError:
             self.outputs.clear()
         
         

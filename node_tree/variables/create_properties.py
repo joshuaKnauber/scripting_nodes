@@ -44,6 +44,14 @@ class SN_OT_RemoveProperty(bpy.types.Operator):
     
     
     
+def place_center(context,node):
+    for region in context.area.regions:
+        if region.type == "WINDOW":
+            loc = region.view2d.region_to_view(region.width//2,region.height//2)
+            node.location = loc
+    
+    
+    
 class SN_OT_AddPropertyGetter(bpy.types.Operator):
     bl_idname = "sn.add_prop_getter"
     bl_label = "Add Getter"
@@ -65,16 +73,18 @@ class SN_OT_AddPropertyGetter(bpy.types.Operator):
             node = graph_tree.nodes.new("SN_GetPropertyNode")
         elif self.getter_type == "INTERFACE":
             node = graph_tree.nodes.new("SN_DisplayPropertyNode")
-        path_details = {
-            "path": f"{prop.attach_property_to}[\"\"].{prop.identifier}",
-            "prop_name": prop.name,
-            "prop_identifier": prop.identifier,
-            "prop_type": prop.var_type,
-            "prop_array_length": prop.vector_size if prop.is_vector else 0,
-            "path_parts": [{"is_numeric":False,"data_type":"bpy.types."+prop.attach_property_to,"name":prop.attach_property_to},
-                           prop.identifier]
-        }
-        node.copied_path = json.dumps(path_details)
+        # path_details = {
+        #     "path": f"{prop.attach_property_to}[\"\"].{prop.identifier}",
+        #     "prop_name": prop.name,
+        #     "prop_identifier": prop.identifier,
+        #     "prop_type": prop.var_type,
+        #     "prop_array_length": prop.vector_size if prop.is_vector else 0,
+        #     "path_parts": [{"is_numeric":False,"data_type":"bpy.types."+prop.attach_property_to,"name":prop.attach_property_to},
+        #                    prop.identifier]
+        # }
+        # node.copied_path = json.dumps(path_details)
+        
+        place_center(context, node)
         return {"FINISHED"}
     
     def draw(self,context):

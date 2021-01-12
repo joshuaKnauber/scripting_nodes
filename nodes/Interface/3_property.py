@@ -1,7 +1,7 @@
 import bpy
 import json
 from ...node_tree.base_node import SN_ScriptingBaseNode
-from ..Properties.property_util import setup_sockets
+from ..Properties.property_util import get_data, setup_data_socket
 
 
 
@@ -16,54 +16,52 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
     
-    
-    def get_details(self):
-        try:
-            path_details = json.loads(self.copied_path)
-            return path_details
-        except:
-            return None
 
     def on_create(self,context):
         self.add_interface_input("Property").mirror_name = True
+        self.add_string_input("Text")
+        self.add_boolean_input("Emboss")
         
-    def setup_inputs(self,prop_type,prop_name):
+        
+    def setup_inputs(self,prop_type):
         if prop_type == "BOOLEAN":
-            self.add_string_input("Text").set_default(prop_name)
             self.add_boolean_input("Toggle").set_default(False)
-            self.add_boolean_input("Emboss")
             self.add_boolean_input("Invert Checkbox").set_default(False)
-            self.add_icon_input("Icon")
-        elif prop_type == "STRING":
-            self.add_string_input("Text").set_default(prop_name)
-            self.add_boolean_input("Emboss")
-            self.add_icon_input("Icon")
         elif prop_type == "ENUM":
-            self.add_string_input("Text").set_default(prop_name)
             self.add_boolean_input("Expand").set_default(False)
-            self.add_boolean_input("Emboss")
-            self.add_icon_input("Icon")
         elif prop_type in ["FLOAT","INT"]:
-            self.add_string_input("Text").set_default(prop_name)
             self.add_boolean_input("Slider").set_default(False)
-            self.add_boolean_input("Emboss")
-            self.add_icon_input("Icon")
+        self.add_icon_input("Icon")
             
 
-    def get_copied(self,context):
+    def update_copied(self,context):
+        labels = {
+            "STRING": "Text Input",
+            "BOOLEAN": "Checkbox",
+            "FLOAT": "Number Input",
+            "INT": "Number Input",
+            "ENUM": "Dropdown"
+        }
+        
         if self.copied_path:
-            path_details = self.get_details()
-            if path_details:
-                self.label = "Property (" + path_details["prop_name"] + ")"
-                self.setup_inputs(path_details["prop_type"], path_details["prop_name"])
-                setup_sockets(self, path_details)
+            data = get_data(self.copied_path)
+            if data:
+                self.label = labels[data["type"]]
+                self.setup_inputs(data["type"])
+                self.inputs["Text"].set_default(data["name"])
+                self.prop_name = data["name"]
+                setup_data_socket(self, data)
+                
         else:
-            for i in range(len(self.inputs)-1,-1,-1):
-                if i:
-                    self.inputs.remove(self.inputs[i])
+            self.label = "Property"
+            self.prop_name = ""
+            self.inputs["Text"].set_default("")
+            for i in range(len(self.inputs)-1,2,-1):
+                self.inputs.remove(self.inputs[i])
     
     
-    copied_path: bpy.props.StringProperty(update=get_copied)
+    copied_path: bpy.props.StringProperty(update=update_copied)
+    prop_name: bpy.props.StringProperty()
         
 
     def draw_node(self,context,layout):
@@ -72,32 +70,26 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             row.scale_y = 1.5
             row.operator("sn.paste_property_path",text="Paste Property",icon="PASTEDOWN").node = self.name
         else:
-            layout.operator("sn.reset_node",icon="UNLINKED").node = self.name
+            layout.operator("sn.reset_property_node",icon="UNLINKED",text=self.prop_name).node = self.name
                     
 
     def code_evaluate(self, context, touched_socket):
+        
+        if not self.copied_path: return {"code": ""}
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
-
-        icon = self.inputs['Icon'].icon_line()
         
         values = ""
         for inp in self.inputs:
-            if inp.name == "Text":
-                values += f"text={inp.value},"
-            elif inp.name == "Toggle":
-                values += f"toggle={inp.value},"
-            elif inp.name == "Emboss":
-                values += f"emboss={inp.value},"
-            elif inp.name == "Invert Checkbox":
-                values += f"invert_checkbox={inp.value},"
-            elif inp.name == "Expand":
-                values += f"expand={inp.value},"
-            elif inp.name == "Slider":
-                values += f"slider={inp.value},"
+            if not inp.socket_type in ["BLEND_DATA","ICON","INTERFACE"]:
+                values += inp.name.lower().replace("_"," ") + "=" + inp.code() + ","
+            
+        data = get_data(self.copied_path)
+
+        data_path = self.inputs[-1].code() + data["full_path"].split("]")[-1]
         
         return {
             "code": f"""
-                    {layout}.prop({self.inputs[-1].value},"{self.get_details()["prop_identifier"]}",{icon}{values})
+                    {layout}.prop({data_path},"{data["identifier"]}",icon_value={self.inputs['Icon'].code()},{values})
                     """
         }

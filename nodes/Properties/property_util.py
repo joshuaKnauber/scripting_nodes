@@ -1,4 +1,5 @@
 import bpy
+import json
 
 
 
@@ -12,7 +13,7 @@ class SN_PastePropertyPath(bpy.types.Operator):
 
     def execute(self, context):
         clipboard = bpy.context.window_manager.clipboard
-        if "bpy." in clipboard and not ".ops." in clipboard:
+        if "data_block" in clipboard and "identifier" in clipboard:
             context.space_data.node_tree.nodes[self.node].copied_path = clipboard
         else:
             self.report({"WARNING"},message="Right-Click any property and click 'Copy Property' to get a valid property")
@@ -20,8 +21,8 @@ class SN_PastePropertyPath(bpy.types.Operator):
 
 
 
-class SN_ResetNode(bpy.types.Operator):
-    bl_idname = "sn.reset_node"
+class SN_ResetPropertyNode(bpy.types.Operator):
+    bl_idname = "sn.reset_property_node"
     bl_label = "Reset Node"
     bl_description = "Resets this node"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
@@ -35,17 +36,19 @@ class SN_ResetNode(bpy.types.Operator):
         if hasattr(node,"current_operator"):
             node.current_operator = ""
         return {"FINISHED"}
+    
+    
+    
+def get_data(data):
+    try:
+        data = json.loads(data)
+        return data
+    except:
+        return None
 
 
 
-def setup_sockets(node,path_details):
-    data_input = None
-    for part in path_details["path_parts"]:
-        if type(part) == dict:
-            if part["is_numeric"]:
-                node.add_integer_input(part["name"] + " Index").set_default(part["index"])
-            else:
-                data_input = part
-    if data_input:
-        inp = node.add_blend_data_input(data_input["name"])
-        inp.data_type = data_input["data_type"]
+def setup_data_socket(node, details):
+    inp = node.add_blend_data_input(details["data_block"]["name"])
+    inp.data_type = details["data_block"]["type"]
+    inp.data_path = details["data_block"]["path"]
