@@ -18,7 +18,6 @@ class SN_BeforeRenderNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.2,0.2,0.2),
         "starts_tree": True,
-        "import_once": True
     }
 
     action: bpy.props.EnumProperty(items=[("render_init", "Init", "On initialization of a render job"), ("render_pre", "Before", "On render (before)")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.auto_compile)

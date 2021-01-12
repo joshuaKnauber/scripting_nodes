@@ -20,7 +20,7 @@ class SN_ScriptingBaseNode:
         "has_collection": False,
         "starts_tree": False,
         "register_order": 0,
-        "import_once": False,
+        "import_once": True,
         "evaluate_once": False,
         "register_once": False,
         "unregister_once": False,

@@ -13,7 +13,6 @@ class SN_RedoNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.2,0.2,0.2),
         "starts_tree": True,
-        "import_once": True
     }
 
     action: bpy.props.EnumProperty(items=[("redo_pre", "Before", "On loading a redo step (before)"), ("redo_post", "After", "On loading a redo step (after)")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.auto_compile)

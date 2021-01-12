@@ -13,7 +13,6 @@ class SN_FrameChangeNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.2,0.2,0.2),
         "starts_tree": True,
-        "import_once": True
     }
 
     action: bpy.props.EnumProperty(items=[("frame_change_pre", "Before", "Called after frame change for playback and rendering, before any data is evaluated for the new frame"), ("frame_change_post", "After", "Called after frame change for playback and rendering, after the data has been evaluated for the new frame")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.auto_compile)

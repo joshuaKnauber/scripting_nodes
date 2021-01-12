@@ -13,7 +13,6 @@ class SN_UndoNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.2,0.2,0.2),
         "starts_tree": True,
-        "import_once": True
     }
 
     action: bpy.props.EnumProperty(items=[("undo_pre", "Before", "On loading an undo step (before)"), ("undo_post", "After", "On loading an undo step (after)")],name="Time of Action", description="When you want your event handler to run", update=SN_ScriptingBaseNode.auto_compile)
