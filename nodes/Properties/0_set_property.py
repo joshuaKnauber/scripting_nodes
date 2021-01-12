@@ -28,8 +28,11 @@ class SN_SetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             if data:
                 self.label = "Set " + data["name"]
                 self.prop_name = data["name"]
-                setup_data_socket(self, data)
-                self.add_input_from_type(data["data_block"]["type"],data["identifier"])
+                if not data["full_path"] == "self":
+                    setup_data_socket(self, data)
+                    self.add_input_from_type(data["data_block"]["type"],data["identifier"])
+                else:
+                    self.add_input_from_data(data["data_block"])
                 
         else:
             self.label = "Set Property"
@@ -54,9 +57,22 @@ class SN_SetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
         
         if len(self.inputs) > 1:
-            return {
-                "code": f"{self.inputs[1].code()}.{self.inputs[2].variable_name} = {self.inputs[2].code()}"
-            }
+            if not get_data(self.copied_path)["full_path"] == "self":
+                return {
+                    "code": f"""
+                            {self.inputs[1].code()}.{self.inputs[2].variable_name} = {self.inputs[2].code()}
+                            {self.outputs[0].code(7)}
+                            """
+                }
+            else:
+                return {
+                    "code": f"""
+                            self.{self.inputs[1].variable_name} = {self.inputs[1].code()}
+                            {self.outputs[0].code(7)}
+                            """
+                }
             
         else:
-            return {"code":""}
+            return {"code":f"""
+                            {self.outputs[0].code(7)}
+                            """}

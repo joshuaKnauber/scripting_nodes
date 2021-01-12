@@ -350,6 +350,18 @@ class SN_ScriptingBaseNode:
         return self.add_output_from_prop(prop)
     
     
+    def add_input_from_data(self,data):
+        inp = self.add_input(self.prop_types[data["socket_type"]],data["name"])
+        inp.subtype = data["subtype"]
+        inp.variable_name = data["identifier"]
+    
+    
+    def add_output_from_data(self,data):
+        out = self.add_output(self.prop_types[data["socket_type"]],data["name"])
+        out.subtype = data["subtype"]
+        out.variable_name = data["identifier"]
+    
+    
     def add_input(self,idname,label):
         self.auto_compile(bpy.context)
         socket = self.inputs.new(idname,label)

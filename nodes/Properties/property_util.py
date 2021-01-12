@@ -49,6 +49,7 @@ def get_data(data):
 
 
 def setup_data_socket(node, details):
-    inp = node.add_blend_data_input(details["data_block"]["name"])
-    inp.data_type = details["data_block"]["type"]
-    inp.data_identifier = details["data_block"]["identifier"]
+    if details["full_path"] != "self":
+        inp = node.add_blend_data_input(details["data_block"]["name"])
+        inp.data_type = details["data_block"]["type"]
+        inp.data_identifier = details["data_block"]["identifier"]

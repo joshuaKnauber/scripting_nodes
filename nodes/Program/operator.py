@@ -97,11 +97,12 @@ class SN_OT_GetSetOperatorProperty(bpy.types.Operator):
         prop = node.operator_properties[node.property_index]
         data = {
             "data_block": {
-                "type": "Operator",
-                "name": "Operator Properties",
-                "identifier": "self"
+                "socket_type": prop.var_type,
+                "subtype": prop.get_socket_subtype(),
+                "name": prop.name,
+                "identifier": prop.identifier
             },
-            "full_path": "",
+            "full_path": "self",
             "identifier": prop.identifier,
             "name": prop.name,
             "type": prop.var_type
@@ -196,9 +197,6 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         self.add_execute_output("Invoke")
         self.add_execute_output("Operator")
-        out = self.add_blend_data_output("Operator Properties")
-        out.data_type = "Operator"
-        out.data_identifier = "self"
         self.add_boolean_input("Poll")
         self.update_name(None)
 
@@ -224,7 +222,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         elif self.invoke_option != "none" and self.invoke_option != "invoke_confirm":
             layout.prop_search(self,"select_property",self,"operator_properties",text="Selected")
 
-#TODO blend data variable
+
     def what_layout(self, socket):
         return "layout"
 
@@ -234,9 +232,6 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         for prop in self.operator_properties:
             property_register.append(prop.property_register())
             
-        if touched_socket == self.outputs["Operator Properties"]:
-            return {"code":"self"}
-        
         execute_code = "pass"
         if "Operator" in self.outputs:
             execute_code = self.outputs["Operator"].code(8)
