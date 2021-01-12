@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_BreakNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_BreakNode"
-    bl_label = "Break loop early"
+    bl_label = "Break Loop Early"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 
