@@ -1,7 +1,6 @@
 import bpy
 import json
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
-from .property_util import setup_sockets
 
 
 class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -40,7 +39,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.copied_path:
             path_details = self.get_details()
             if path_details:
-                setup_sockets(self, path_details)
+                # setup_sockets(self, path_details)
                 out = self.add_output_from_type(path_details["prop_type"],path_details["prop_name"],path_details["prop_array_length"])
                 if hasattr(out,"is_color"):
                     out.is_color = path_details["is_color"]
