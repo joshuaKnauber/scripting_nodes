@@ -49,5 +49,5 @@ def serpens_functions(addon_tree):
                 return value
                 
             def sn_cast_list(value):
-                return value
+                return list(value)
             """
