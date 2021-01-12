@@ -34,7 +34,7 @@ class SN_FindAreaNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         out = self.add_blend_data_output("Area")
         out.data_type = "Area"
-        out.data_path = "bpy.context.screen.areas"
+        out.data_identifier = "areas"
         self.add_boolean_output("Area exists")
     
 

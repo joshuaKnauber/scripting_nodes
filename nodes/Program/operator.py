@@ -174,7 +174,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         out = self.add_blend_data_output("Properties")
         out.subtype = "SELF"
         out.data_type = "Operator"
-        out.data_path = "self"
+        out.data_identifier = "self"
         self.add_boolean_input("Poll")
         self.update_name(None)
 

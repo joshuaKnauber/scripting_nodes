@@ -33,7 +33,7 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
                         out.removable = True
                         out.subtype = "COLLECTION"
                         out.data_type = prop.fixed_type.identifier
-                        out.data_path = prop.identifier
+                        out.data_identifier = prop.identifier
             if not len(self.outputs):
                 self.no_data_error = True
         except:
@@ -71,5 +71,5 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         return {
-            "code": f"{self.inputs[0].code()}.{touched_socket.data_path}"
+            "code": f"{self.inputs[0].code()}.{touched_socket.data_identifier}"
         }

@@ -51,4 +51,4 @@ def get_data(data):
 def setup_data_socket(node, details):
     inp = node.add_blend_data_input(details["data_block"]["name"])
     inp.data_type = details["data_block"]["type"]
-    inp.data_path = details["data_block"]["path"]
+    inp.data_identifier = details["data_block"]["identifier"]

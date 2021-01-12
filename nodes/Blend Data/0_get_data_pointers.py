@@ -32,10 +32,10 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
                         out = self.add_blend_data_output(prop.name)
                         out.removable = True
                         out.data_type = prop.fixed_type.identifier
-                        out.data_path = prop.name
+                        out.data_identifier = prop.identifier
             if not len(self.outputs):
                 self.no_data_error = True
-        except ValueError:
+        except:
             self.outputs.clear()
         
         
@@ -70,5 +70,5 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         return {
-            "code": f"{self.inputs[0].code()}.{touched_socket.data_path}"
+            "code": f"{self.inputs[0].code()}.{touched_socket.data_identifier}"
         }

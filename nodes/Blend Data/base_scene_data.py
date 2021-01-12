@@ -44,13 +44,13 @@ class SN_SceneDataBase():
         out = self.add_blend_data_output("All")
         out.subtype = "COLLECTION"
         out.data_type = self.data_type
-        out.data_path = "bpy.data." + self.data_identifier
+        out.data_identifier = self.data_identifier
         
         if self.active_data:
             out = self.add_blend_data_output("Active")
             out.subtype = "DATA_BLOCK"
             out.data_type = self.data_type
-            out.data_path = self.active_data
+            out.data_identifier = self.active_data.split(".")[-1]
         
         
     def draw_node(self,context,layout):
@@ -65,10 +65,10 @@ class SN_SceneDataBase():
                 limiter = f"[{self.inputs[0].code()}]"
 
             return {
-                "code": f"{self.outputs[0].data_path}{limiter}"
+                "code": f"bpy.data.{self.outputs[0].data_identifier}{limiter}"
             }
             
         else:
             return {
-                "code": f"{self.outputs[1].data_path}"
+                "code": f"{self.active_data}"
             }

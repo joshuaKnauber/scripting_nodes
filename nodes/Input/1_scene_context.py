@@ -17,16 +17,16 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         out = self.add_blend_data_output("Active Scene")
         out.data_type = "Scene"
-        out.data_path = "bpy.context.scene"
+        out.data_identifier = "scene"
         out = self.add_blend_data_output("Active Area")
         out.data_type = "Area"
-        out.data_path = "bpy.context.area"
+        out.data_identifier = "area"
         out = self.add_blend_data_output("Active Camera")
         out.data_type = "Camera"
-        out.data_path = "bpy.context.scene.camera"
+        out.data_identifier = "camera"
         out = self.add_blend_data_output("Window Manager")
         out.data_type = "WindowManager"
-        out.data_path = "bpy.context.window_manager"
+        out.data_identifier = "window_manager"
         self.add_string_output("Engine")
         self.add_string_output("Mode")
         self.add_integer_output("Current Frame")

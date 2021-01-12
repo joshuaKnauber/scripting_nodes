@@ -314,7 +314,9 @@ class SN_ScriptingBaseNode:
             elif prop.array_length == 4: 
                 socket.subtype = "VECTOR4"
                 if prop.subtype == "COLOR": socket.subtype = "COLOR_ALPHA"
-        if hasattr(prop,"default"):
+            if hasattr(prop,"default"):
+                socket.set_default(tuple([prop.default]*prop.array_length))
+        elif hasattr(prop,"default"):
             socket.set_default(prop.default)
         if hasattr(prop,"subtype"):
             if prop.subtype == "FACTOR": socket.subtype = "FACTOR"
@@ -327,8 +329,25 @@ class SN_ScriptingBaseNode:
             inp = self.add_input(self.prop_types[prop.type], prop.name)
             inp.variable_name = prop.identifier
             self.match_socket_to_prop(inp,prop)
-        else:
-            print(prop,prop.type)
+            return inp
+            
+        
+    def add_output_from_prop(self,prop):
+        if prop.type in self.prop_types:
+            out = self.add_output(self.prop_types[prop.type], prop.name)
+            out.variable_name = prop.identifier
+            self.match_socket_to_prop(out,prop)
+            return out
+            
+            
+    def add_input_from_type(self,data_block_type,prop_identifier):
+        prop = getattr(bpy.types,data_block_type).bl_rna.properties[prop_identifier]
+        return self.add_input_from_prop(prop)
+            
+            
+    def add_output_from_type(self,data_block_type,prop_identifier):
+        prop = getattr(bpy.types,data_block_type).bl_rna.properties[prop_identifier]
+        return self.add_output_from_prop(prop)
     
     
     def add_input(self,idname,label):
