@@ -86,7 +86,10 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             
         data = get_data(self.copied_path)
 
-        data_path = self.inputs[-1].code() + data["full_path"].split("]")[-1]
+        if self.inputs[-1].socket_type == "BLEND_DATA":
+            data_path = self.inputs[-1].code() + data["full_path"].split("]")[-1]
+        else:
+            data_path = "self"
         
         return {
             "code": f"""

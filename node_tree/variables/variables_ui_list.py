@@ -178,6 +178,29 @@ class SN_Variable(bpy.types.PropertyGroup):
     property_subtype: bpy.props.EnumProperty(items=subtype_items,
                                              name="Subtype",
                                              description="The subtype of this property")
+    
+    def get_socket_subtype(self):
+        if self.var_type == "STRING":
+            if self.property_subtype == "FILE_PATH": return "FILE"
+            if self.property_subtype == "DIR_PATH": return "DIRECTORY"
+        elif self.var_type == "ENUM":
+            return "ENUM"
+        elif self.var_type == "INTEGER":
+            if self.is_vector:
+                if self.vector_size == 3: return "VECTOR3"
+                if self.vector_size == 4: return "VECTOR4"
+        elif self.var_type == "FLOAT":
+            if self.is_vector:
+                if self.property_subtype == "COLOR":
+                    if self.vector_size == 3: return "COLOR"
+                    if self.vector_size == 4: return "COLOR_ALPHA"
+                if self.vector_size == 3: return "VECTOR3"
+                if self.vector_size == 4: return "VECTOR4"
+        elif self.var_type == "BOOLEAN":
+            if self.is_vector:
+                if self.vector_size == 3: return "VECTOR3"
+                if self.vector_size == 4: return "VECTOR4"
+        return "NONE"
 
     def unit_items(self, context):
         units = ["NONE", "LENGTH", "AREA", "VOLUME", "ROTATION", "TIME", "VELOCITY",

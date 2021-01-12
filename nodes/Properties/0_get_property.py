@@ -23,8 +23,11 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             if data:
                 self.label = "Get " + data["name"]
                 self.prop_name = data["name"]
-                setup_data_socket(self, data)
-                self.add_output_from_type(data["data_block"]["type"],data["identifier"])
+                if not data["full_path"] == "self":
+                    setup_data_socket(self, data)
+                    self.add_output_from_type(data["data_block"]["type"],data["identifier"])
+                else:
+                    self.add_output_from_data(data["data_block"])
                 
         else:
             self.label = "Get Property"
@@ -48,6 +51,10 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         
+        data_path = "self"
+        if len(self.inputs):
+            data_path = self.inputs[0].code()
+        
         return {
-            "code": f"{self.inputs[0].code()}.{self.outputs[0].variable_name}"
+            "code": f"{data_path}.{self.outputs[0].variable_name}"
         }
