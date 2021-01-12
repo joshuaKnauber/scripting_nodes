@@ -68,16 +68,13 @@ class SN_Variable(bpy.types.PropertyGroup):
         if unique_name != self.name:
             self.name = unique_name
 
-        node.update_nodes_by_type("SN_GetVariableNode")
-        node.update_nodes_by_type("SN_SetVariableNode")
-        node.update_nodes_by_type("SN_ChangeVariableNode")
-        
+        node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode"])
+
         self.identifier = node.get_python_name(self.name, f"new_{key}")
 
-        node.update_nodes_by_type("SN_GetVariableNode")
-        node.update_nodes_by_type("SN_SetVariableNode")
-        node.update_nodes_by_type("SN_ChangeVariableNode")
-    
+        node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode"])
+
+
     name: bpy.props.StringProperty(name="Name",
                                    description="The name of this variable",
                                    default="new_variable",
@@ -115,9 +112,8 @@ class SN_Variable(bpy.types.PropertyGroup):
 
         node = SN_ScriptingBaseNode()
         node.addon_tree = bpy.context.scene.sn.addon_tree()
-        node.update_nodes_by_type("SN_GetVariableNode")
-        node.update_nodes_by_type("SN_SetVariableNode")
-        node.update_nodes_by_type("SN_ChangeVariableNode")
+        node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode"])
+
 
     var_type: bpy.props.EnumProperty(items=get_var_types,
                                      update=update_var_type,

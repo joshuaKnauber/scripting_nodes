@@ -38,7 +38,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.return_collection.clear()
         for graph in self.addon_tree.sn_graphs:
             for node in graph.node_tree.nodes:
-                if node.bl_idname == "SN_ReturnNode":
+                if node.bl_idname == "SN_ReturnNode" and not node.connected_function in ["None", ""]:
                     if self.addon_tree.sn_nodes["SN_FunctionNode"].items[node.connected_function].node_uid == self.func_uid:
                         item = self.return_collection.add()
                         item.name = node.name
