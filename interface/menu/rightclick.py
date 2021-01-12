@@ -3,6 +3,7 @@ import json
 
 #TODO options for properties especially in operators
 
+
 class SN_OT_CopyProperty(bpy.types.Operator):
     bl_idname = "sn.copy_space_property"
     bl_label = "Copy Space Property"

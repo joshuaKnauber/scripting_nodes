@@ -22,8 +22,7 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
     data_identifier: bpy.props.StringProperty()
     
     subtype: bpy.props.EnumProperty(items=[("DATA_BLOCK","Data Block","Data Block"),
-                                           ("COLLECTION","Collection","Collection"),
-                                           ("SELF","Self","Self")],
+                                           ("COLLECTION","Collection","Collection")],
                                     update=update_subtype)
 
     copy_attributes = ["data_type","data_path","data_identifier"]

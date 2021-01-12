@@ -390,6 +390,7 @@ class SN_ScriptingBaseNode:
             for link in links:
                 if new_socket.group == link.from_socket.group:
                     self.node_tree.links.new(link.from_socket,new_socket)
+        return new_socket
             
     
     ### EVALUATE CODE
