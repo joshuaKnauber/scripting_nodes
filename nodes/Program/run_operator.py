@@ -50,7 +50,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     current_operator: bpy.props.StringProperty(update=update_operator)
 
     def on_create(self,context):
-        self.add_execute_input("Execute")
+        self.add_execute_input("Run Operator")
         self.add_execute_output("Execute")
         
     def draw_node(self,context,layout):

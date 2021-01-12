@@ -16,7 +16,7 @@ class SN_BreakNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_execute_input("Execute")
+        self.add_execute_input("Break")
 
 
     def code_evaluate(self, context, touched_socket):

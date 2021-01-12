@@ -20,7 +20,7 @@ class SN_ScriptLineNode(bpy.types.Node, SN_ScriptingBaseNode):
                                           description="The python line you want to run")
 
     def on_create(self,context):
-        self.add_execute_input("Execute")
+        self.add_execute_input("Script Line")
         self.add_execute_output("Execute")
 
 
