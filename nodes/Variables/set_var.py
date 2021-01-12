@@ -43,11 +43,22 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.add_boolean_input("")
                 elif var.var_type == "LIST":
                     self.add_list_input("")
+                elif var.var_type == "BLEND_DATA":
+                    self.add_blend_data_input("")
 
 
-            idname = {"STRING": "SN_StringSocket", "INTEGER": "SN_IntegerSocket", "FLOAT": "SN_FloatSocket", "BOOLEAN": "SN_BooleanSocket", "LIST": "SN_ListSocket"}
+            idname = {"STRING": "SN_StringSocket",
+                      "INTEGER": "SN_IntegerSocket",
+                      "FLOAT": "SN_FloatSocket",
+                      "BOOLEAN": "SN_BooleanSocket",
+                      "LIST": "SN_ListSocket",
+                      "BLEND_DATA": "SN_BlendDataSocket"}
+            inp = self.inputs[1]
             if idname[var.var_type] != self.inputs[1].bl_idname:
-                self.change_socket_type(self.inputs[1], idname[var.var_type])
+                inp = self.change_socket_type(self.inputs[1], idname[var.var_type])
+            if var.var_type == "BLEND_DATA":
+                if var.is_data_collection: inp.subtype = "COLLECTION"
+                else: inp.subtype = "DATA_BLOCK"
 
 
     def on_node_update(self):

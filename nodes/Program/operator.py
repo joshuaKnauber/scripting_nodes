@@ -1,4 +1,5 @@
 import bpy
+import json
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 from ...node_tree.variables.variables_ui_list import SN_Variable
 from ...interface.sidepanel.graph_panels import draw_property
@@ -79,11 +80,35 @@ class SN_OT_GetSetOperatorProperty(bpy.types.Operator):
                                                 ("INTERFACE","Interface","Interface property"),
                                                 ("SETTER","Setter","Property setter")],
                                         options={"SKIP_SAVE"},
-                                        name="Getter/Setter Type",
-                                        description="The getter/setter type for your property")
+                                        name="Getter/Setter",
+                                        description="Add a getter/setter for your property")
+
+
+    def add_node(self,tree):
+        nodes = {"GETTER":"SN_GetPropertyNode",
+                 "INTERFACE":"SN_DisplayPropertyNode",
+                 "SETTER":"SN_SetPropertyNode"}
+        return tree.nodes.new(nodes[self.getset_type])
 
 
     def execute(self, context):
+        tree = context.space_data.node_tree
+        node = tree.nodes[self.node_name]
+        prop = node.operator_properties[node.property_index]
+        data = {
+            "data_block": {
+                "type": "Operator",
+                "name": "Operator Properties",
+                "identifier": "self"
+            },
+            "full_path": "",
+            "identifier": prop.identifier,
+            "name": prop.name,
+            "type": prop.var_type
+        }
+        new_node = self.add_node(tree)
+        new_node.copied_path = json.dumps(data)
+        new_node.location = (node.location[0]+300,node.location[1]-200)
         return {"FINISHED"}
 
     def draw(self,context):
@@ -171,10 +196,9 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         self.add_execute_output("Invoke")
         self.add_execute_output("Operator")
-        out = self.add_blend_data_output("Properties")
-        out.subtype = "SELF"
+        out = self.add_blend_data_output("Operator Properties")
         out.data_type = "Operator"
-        out.data_path = "self"
+        out.data_identifier = "self"
         self.add_boolean_input("Poll")
         self.update_name(None)
 
@@ -200,7 +224,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         elif self.invoke_option != "none" and self.invoke_option != "invoke_confirm":
             layout.prop_search(self,"select_property",self,"operator_properties",text="Selected")
 
-
+#TODO blend data variable
     def what_layout(self, socket):
         return "layout"
 
@@ -210,8 +234,8 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         for prop in self.operator_properties:
             property_register.append(prop.property_register())
             
-        if touched_socket == self.outputs["Properties"]:
-            return "self"
+        if touched_socket == self.outputs["Operator Properties"]:
+            return {"code":"self"}
         
         execute_code = "pass"
         if "Operator" in self.outputs:

@@ -32,7 +32,8 @@ variable_icons = {
     "FLOAT": "CON_TRANSLIKE",
     "BOOLEAN": "FORCE_CHARGE",
     "ENUM": "COLLAPSEMENU",
-    "LIST": "PRESET"
+    "LIST": "PRESET",
+    "BLEND_DATA": "MONKEY"
 }
 
 
@@ -98,7 +99,8 @@ class SN_Variable(bpy.types.PropertyGroup):
                     ("INTEGER","Integer","Integer",variable_icons["INTEGER"],1),
                     ("FLOAT","Float","Float",variable_icons["FLOAT"],2),
                     ("BOOLEAN","Boolean","Boolean",variable_icons["BOOLEAN"],3),
-                    ("LIST","List","List",variable_icons["LIST"],4)]
+                    ("LIST","List","List",variable_icons["LIST"],4),
+                    ("BLEND_DATA","Blend Data","Blend Data",variable_icons["BLEND_DATA"],5)]
 
         return items
     
@@ -201,6 +203,10 @@ class SN_Variable(bpy.types.PropertyGroup):
         for option in options:
             items.append((option,option,option))
         return items
+    
+    is_data_collection: bpy.props.BoolProperty(name="Data Collection",
+                                               description="Holds a data collection instead of a single data block",
+                                               update=update_var_type)
     
     attach_property_to: bpy.props.EnumProperty(items=get_attach_items,
                                                name="Attach To",
@@ -330,6 +336,10 @@ class SN_Variable(bpy.types.PropertyGroup):
             if not items:
                 items = [("None","None","None")]
             return "items="+str(items)
+        elif self.var_type == "LIST":
+            return "[]"
+        elif self.var_type == "BLEND_DATA":
+            return "None"
         
     def property_min_max(self):
         min_max = ""

@@ -76,6 +76,8 @@ class SN_PT_VariablePanel(bpy.types.Panel):
                 col.prop(var,"bool_default")
             elif var.var_type == "LIST":
                 col.label(text="There are no defaults for lists.", icon="QUESTION")
+            elif var.var_type == "BLEND_DATA":
+                col.prop(var,"is_data_collection")
 
             
             row.label(text="",icon="BLANK1")

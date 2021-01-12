@@ -28,7 +28,7 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def update_type(self,context):
         self.outputs[0].data_type = self.get_type()
-        self.outputs[0].data_path = "bpy.data." + self.data_type
+        self.outputs[0].data_identifier = self.data_type
         if self.outputs[0].is_linked:
             self.outputs[0].links[0].to_node.on_link_insert(self.outputs[0].links[0])
     
@@ -71,7 +71,7 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         out = self.add_blend_data_output("All")
         out.data_type = self.get_type()
-        out.data_path = "bpy.data." + self.data_type
+        out.data_identifier = self.data_type
         out.subtype = "COLLECTION"
         
         
@@ -87,5 +87,5 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
             limiter = f"[{self.inputs[0].code()}]"
 
         return {
-            "code": f"{self.outputs[0].data_path}{limiter}"
+            "code": f"bpy.data.{self.outputs[0].data_identifier}{limiter}"
         }

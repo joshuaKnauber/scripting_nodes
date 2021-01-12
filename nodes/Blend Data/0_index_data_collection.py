@@ -43,7 +43,7 @@ class SN_IndexDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.collection_error = False
             if link.from_socket.subtype == "COLLECTION":
                 self.outputs[0].data_type = link.from_socket.data_type
-                self.outputs[0].data_path = link.from_socket.data_path
+                self.outputs[0].data_identifier = link.from_socket.data_identifier
             else:
                 self.collection_error = True
 

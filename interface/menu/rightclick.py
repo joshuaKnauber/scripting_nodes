@@ -3,6 +3,7 @@ import json
 
 #TODO options for properties especially in operators
 
+
 class SN_OT_CopyProperty(bpy.types.Operator):
     bl_idname = "sn.copy_space_property"
     bl_label = "Copy Space Property"
@@ -24,12 +25,12 @@ class SN_OT_CopyProperty(bpy.types.Operator):
         bpy.context.window_manager.clipboard = data
     
         
-    def construct(self, data_block_path, data_block_type, data_block_name):
+    def construct(self, data_block_identifier, data_block_type, data_block_name):
         data = {
             "data_block": {
                 "type": data_block_type,
                 "name": data_block_name,
-                "path": data_block_path
+                "identifier": data_block_identifier
             },
             "full_path": self.full_path,
             "identifier": self.identifier,
@@ -53,7 +54,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
         db_path = "[".join(db_path)
         db_as_prop_path = ".".join(db_path.split(".")[:-1])
         data_block = eval(f"{db_as_prop_path}.bl_rna.properties[\"{db_path.split('.')[-1]}\"]")
-        return self.construct(db_path, data_block.fixed_type.identifier, data_block.fixed_type.name)
+        return self.construct(db_path.split(".")[-1], data_block.fixed_type.identifier, data_block.fixed_type.name)
 
 
     def execute(self, context):
