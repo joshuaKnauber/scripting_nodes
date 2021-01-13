@@ -177,7 +177,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.recursion_warning = True
 
     def on_create(self,context):
-        self.add_execute_input("Execute")
+        self.add_execute_input("Run Function")
         self.add_execute_output("Execute")
 
     def draw_node(self,context,layout):

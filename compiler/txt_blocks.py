@@ -25,13 +25,13 @@ def serpens_functions(addon_tree):
                 return str(value)
                 
             def sn_cast_boolean(value):
-                return value
+                return bool(value)
 
             def sn_cast_boolean_vector(value, size):
                 return value
 
             def sn_cast_float(value, use_factor):
-                return value
+                return float(value)
                 
             def sn_cast_color(value, use_alpha):
                 return value
@@ -40,7 +40,7 @@ def serpens_functions(addon_tree):
                 return value
                 
             def sn_cast_int(value):
-                return value
+                return int(value)
                 
             def sn_cast_int_vector(value, size):
                 return value
@@ -49,5 +49,5 @@ def serpens_functions(addon_tree):
                 return value
                 
             def sn_cast_list(value):
-                return value
+                return list(value)
             """

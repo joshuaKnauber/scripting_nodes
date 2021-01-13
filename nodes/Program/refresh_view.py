@@ -16,7 +16,7 @@ class SN_RefreshViewNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
     def on_create(self,context):
-        self.add_execute_input("Execute")
+        self.add_execute_input("Refresh View")
         self.add_execute_output("Execute")
         
         

@@ -3,10 +3,10 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
 
-class SN_IsInListNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_ListLengthNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_IsInListNode"
-    bl_label = "Is In List"
+    bl_idname = "SN_ListLengthNode"
+    bl_label = "List Length"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 
@@ -18,12 +18,10 @@ class SN_IsInListNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_list_input("List")
-        self.add_data_input("Element")
-        self.add_boolean_output("Is In List")
+        self.add_integer_output("List Length")
 
 
     def code_evaluate(self, context, touched_socket):
-
         return {
-            "code": f"""{self.inputs[1].code()} in {self.inputs[0].code()}"""
+            "code": f"""len({self.inputs[0].code()})"""
         }
