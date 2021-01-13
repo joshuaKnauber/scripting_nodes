@@ -52,6 +52,10 @@ class SN_StartInterfacePicker(bpy.types.Operator):
     bl_options = {"REGISTER","UNDO","INTERNAL"}
     
     node: bpy.props.StringProperty()
+    selection: bpy.props.EnumProperty(items=[("ALL","ALL","ALL"),
+                                             ("PANELS","PANELS","PANELS"),
+                                             ("MENUS","MENUS","MENUS")],
+                                      options={"SKIP_SAVE"})
     
     @classmethod
     def poll(cls, context):
@@ -62,10 +66,12 @@ class SN_StartInterfacePicker(bpy.types.Operator):
         interfaces = []
         for name in dir(bpy.types):
             interface = eval("bpy.types."+name)
-            if hasattr(interface.bl_rna.base,"identifier") and interface.bl_rna.base.identifier == "Menu":
-                interfaces.append(name)
-            elif hasattr(interface.bl_rna.base,"identifier") and interface.bl_rna.base.identifier == "Panel":
-                interfaces.append(name)
+            if self.selection != "PANELS":
+                if hasattr(interface.bl_rna.base,"identifier") and interface.bl_rna.base.identifier == "Menu":
+                    interfaces.append(name)
+            if self.selection != "MENUS":
+                if hasattr(interface.bl_rna.base,"identifier") and interface.bl_rna.base.identifier == "Panel":
+                    interfaces.append(name)
         return interfaces
 
     def execute(self, context):
@@ -238,17 +244,19 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"repeat")
         layout.separator()
 
-        row = layout.row()
+        row = layout.row(align=True)
         row.prop(self,"action",text="")
         if self.use_internal:
-            row.prop(self,"use_internal",text="",icon="BLENDER",emboss=False)
+            row.prop(self,"use_internal",text="",icon="BLENDER",invert_checkbox=True)
         else:
-            row.prop(self,"use_internal",text="",icon_value=bpy.context.scene.sn_icons[ "serpens" ].icon_id,emboss=False)
+            row.prop(self,"use_internal",text="",icon_value=bpy.context.scene.sn_icons[ "serpens" ].icon_id)
 
         if self.action == "PANEL":
             if self.use_internal:
                 name = self.panel.replace("_"," ").title() if self.panel else "Select Panel"
-                op = layout.operator("sn.pick_interface",text=name,icon="EYEDROPPER").node = self.name
+                op = layout.operator("sn.pick_interface",text=name,icon="EYEDROPPER")
+                op.node = self.name
+                op.selection = "PANELS"
             elif "SN_PanelNode" in self.addon_tree.sn_nodes:
                 layout.prop_search(self,"panel",self.addon_tree.sn_nodes["SN_PanelNode"],"items",text="",icon="VIEWZOOM")
                 layout.prop(self,"keep_open")
@@ -256,14 +264,18 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         elif self.action == "MENU":
             if self.use_internal:
                 name = self.menu.replace("_"," ").title() if self.menu else "Select Menu"
-                op = layout.operator("sn.pick_interface",text=name,icon="EYEDROPPER").node = self.name
+                op = layout.operator("sn.pick_interface",text=name,icon="EYEDROPPER")
+                op.node = self.name
+                op.selection = "MENUS"
             elif "SN_MenuNode" in self.addon_tree.sn_nodes:
                 layout.prop_search(self,"menu",self.addon_tree.sn_nodes["SN_MenuNode"],"items",text="",icon="VIEWZOOM")
 
         elif self.action == "PIE_MENU":
             if self.use_internal:
                 name = self.pie.replace("_"," ").title() if self.pie else "Select Pie Menu"
-                op = layout.operator("sn.pick_interface",text=name,icon="EYEDROPPER").node = self.name
+                op = layout.operator("sn.pick_interface",text=name,icon="EYEDROPPER")
+                op.node = self.name
+                op.selection = "MENUS"
             elif "SN_PieMenuNode" in self.addon_tree.sn_nodes:
                 layout.prop_search(self,"pie",self.addon_tree.sn_nodes["SN_PieMenuNode"],"items",text="",icon="VIEWZOOM")
 
