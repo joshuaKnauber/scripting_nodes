@@ -43,7 +43,7 @@ class SN_OT_StartAddToPanelSelection(bpy.types.Operator):
         panels = []
         for panel_name in dir(bpy.types):
             panel = eval("bpy.types."+panel_name)
-            if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type"):
+            if hasattr(panel.bl_rna.base,"identifier") and panel.bl_rna.base.identifier == "Panel":
                 panels.append(panel_name)
         return panels
 
@@ -82,8 +82,8 @@ class SN_OT_SelectAddToPanel(bpy.types.Operator):
     bl_description = "Select this location for your panel"
     bl_options = {"REGISTER", "INTERNAL", "UNDO"}
     
-    panel: bpy.props.StringProperty(options={"SKIP_SAVE"})
-    append: bpy.props.BoolProperty(options={"SKIP_SAVE"})
+    panel: bpy.props.StringProperty(options={"SKIP_SAVE","HIDDEN"})
+    append: bpy.props.BoolProperty(options={"SKIP_SAVE","HIDDEN"})
 
     def execute(self, context):
         global panel_node
