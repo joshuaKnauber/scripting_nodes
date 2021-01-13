@@ -18,7 +18,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
     connected_function: bpy.props.StringProperty()
 
     def on_outside_update(self, node):
-        self.on_any_change()
+        self.on_node_update()
 
 
     def on_create(self,context):
@@ -43,7 +43,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.update_nodes_by_type("SN_RunFunctionNode")
 
 
-    def on_any_change(self):
+    def on_node_update(self):
         if len(self.inputs):
             if len(self.inputs[0].links):
                 if self.what_start_idname() == "SN_FunctionNode":

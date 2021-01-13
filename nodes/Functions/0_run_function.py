@@ -33,6 +33,13 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                                         except: pass
                                 self.make_collection("NAME_CHANGE")
 
+                            parameters = []
+                            for inp in node.inputs[1:]:
+                                if inp.bl_idname != "SN_DynamicVariableSocket":
+                                    parameters.append([inp.variable_name, inp.bl_idname])
+                            for x, parameter in enumerate(parameters):
+                                self.outputs[x+1].default_text = parameter[0]
+
 
     def make_collection(self, parameter=""):
         self.return_collection.clear()
@@ -104,7 +111,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             if node.bl_idname == "SN_FunctionNode":
                 if self.func_uid == node.uid:
-                    self.func_name = node.func_name
+                    self["func_name"] = node.func_name
                 if not self.func_name in self.addon_tree.sn_nodes["SN_FunctionNode"].items and self.func_name != "":
                     self.func_name = ""
 
@@ -149,13 +156,14 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if i:
                         try: self.inputs.remove(inp)
                         except: pass
-                self.make_collection()
                 self.func_uid = item.node_uid
 
             if self.what_start_idname() == "SN_FunctionNode":
                 if self.func_name == self.what_start_node().func_name:
                     self.recursion_warning = True
+
             self.on_outside_update(self)
+            self.make_collection()
         else:
             self.func_uid = ""
             self.search_value = ""

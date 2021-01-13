@@ -13,28 +13,25 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.2,0.2,0.2),
         "starts_tree": True,
+        "collection_name_attr": "func_name",
         "has_collection": True
     }
 
     def update_name(self, context):
         if not self.func_name:
-            self.func_name = "New Function"
+            self["func_name"] = "New Function"
 
-        self.item.name = self.func_name
+        self.update_item_name()
         self.item.identifier = self.get_python_name(self.func_name, "new_function")
+        self["func_name"] = self.get_unique_name(self.func_name, self.collection.items, " ")
 
-        unique_name = self.get_unique_name(self.func_name, self.collection.items, " ")
-        if unique_name != self.func_name:
-            self.func_name = unique_name
-
-        self.item.name = self.func_name
         self.item.identifier = self.get_python_name(self.func_name, "new_function")
-        self.update_nodes_by_type("SN_ReturnNode")
         self.auto_compile(context)
 
+        self.update_nodes_by_type("SN_ReturnNode")
+        self.update_nodes_by_type("SN_RunFunctionNode")
 
     func_name: bpy.props.StringProperty(name="Name", description="Name of the function", update=update_name)
-
 
     def on_create(self,context):
         self.add_execute_output("Function")
@@ -44,12 +41,14 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         out.return_var_name = True
         self.update_name(None)
 
-
     def on_dynamic_add(self,socket, connected_socket):
         if connected_socket and connected_socket.name != "":
             socket.variable_name = connected_socket.name
         else:
             socket.variable_name = "Parameter"
+
+    def on_dynamic_remove(self,is_output):
+        self.update_nodes_by_type("SN_RunFunctionNode")
 
     def on_var_name_update(self,socket):
         names = []
@@ -60,17 +59,11 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.update_nodes_by_type("SN_RunFunctionNode")
 
 
-    def on_any_change(self):
-        self.update_nodes_by_type("SN_RunFunctionNode")
-
-
     def draw_node(self,context,layout):
         layout.prop(self, "func_name")
 
-
     def on_free(self):
         self.update_nodes_by_type("SN_RunFunctionNode")
-
 
     def code_evaluate(self, context, touched_socket):
         if touched_socket:
