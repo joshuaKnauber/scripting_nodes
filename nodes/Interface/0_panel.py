@@ -142,7 +142,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.2,0.2,0.2),
         "starts_tree": True,
-        "has_collection": True
+        "has_collection": True,
+        "collection_name_attr": "label"
     }
     
     
@@ -198,10 +199,12 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.prop(self, "category")
          
         layout.prop(self, "label")
-        layout.prop(self, "hide_header")
-        layout.prop(self, "default_closed")
         layout.prop(self, "shortcut_only")
-        layout.prop(self, "order")
+        col = layout.column()
+        col.enabled = not self.shortcut_only
+        col.prop(self, "hide_header")
+        col.prop(self, "default_closed")
+        col.prop(self, "order")
         
         
     def what_layout(self, socket):

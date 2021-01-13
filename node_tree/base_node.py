@@ -18,6 +18,7 @@ class SN_ScriptingBaseNode:
     node_options = {
         "default_color": (0.3,0.3,0.3),
         "has_collection": False,
+        "collection_name_attr": "name",
         "starts_tree": False,
         "register_order": 0,
         "import_once": False,
@@ -44,6 +45,7 @@ class SN_ScriptingBaseNode:
     def auto_compile(self,context):
         self.on_any_change()
         self.node_tree.set_changes(True)
+        self.update_item_name()
         
         
     ### UPDATE FROM NODE PER TYPE
@@ -95,8 +97,8 @@ class SN_ScriptingBaseNode:
     def __add_self_to_property_group(self):
         if "has_collection" in self.node_options and self.node_options["has_collection"]:
             item = self.addon_tree.sn_nodes[self.bl_idname].items.add()
-            item.name = self.name
             item.node_uid = self.uid
+            self.update_item_name(item)
 
 
     def __remove_self_from_property_group(self):
@@ -105,6 +107,16 @@ class SN_ScriptingBaseNode:
                 if item.node_uid == self.uid:
                     self.addon_tree.sn_nodes[self.bl_idname].items.remove(index)
                     break
+                
+                
+    def update_item_name(self,item=None):
+        if "has_collection" in self.node_options and self.node_options["has_collection"]:
+            if not item:
+                item = self.item
+            if "collection_name_attr" in self.node_options:
+                item.name = getattr(self,self.node_options["collection_name_attr"])
+            else:
+                item.name = self.name
 
 
     ### INIT NODE
@@ -133,8 +145,8 @@ class SN_ScriptingBaseNode:
     def copy(self,node):
         self.node_tree = bpy.context.space_data.node_tree
         self.uid = uuid4().hex[:5].upper()
-        self.auto_compile(bpy.context)
         self.__add_self_to_property_group()
+        self.auto_compile(bpy.context)
         self.on_copy(node)
 
 
