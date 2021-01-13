@@ -65,6 +65,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_use_internal(self,context):
         self.panel = ""
         self.menu = ""
+        self.pie = ""
     
     
     key: bpy.props.StringProperty(name="Key",default="Y")
@@ -122,6 +123,9 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     menu: bpy.props.StringProperty(name="Menu",
                                     description="The menu to open when the key is pressed")
     
+    pie: bpy.props.StringProperty(name="Pie Menu",
+                                    description="The pie menu to open when the key is pressed")
+    
 
     def draw_node(self,context,layout):
         row = layout.row(align=True)
@@ -154,6 +158,12 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 pass
             elif "SN_MenuNode" in self.addon_tree.sn_nodes:
                 layout.prop_search(self,"menu",self.addon_tree.sn_nodes["SN_MenuNode"],"items",text="",icon="VIEWZOOM")
+
+        elif self.action == "PIE_MENU":
+            if self.use_internal:
+                pass
+            elif "SN_PieMenuNode" in self.addon_tree.sn_nodes:
+                layout.prop_search(self,"pie",self.addon_tree.sn_nodes["SN_PieMenuNode"],"items",text="",icon="VIEWZOOM")
 
 
     def code_imperative(self, context):
@@ -205,6 +215,15 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
             elif self.menu in self.addon_tree.sn_nodes["SN_MenuNode"].items:
                 menu = self.addon_tree.sn_nodes["SN_MenuNode"].items[self.menu].node().idname()
             properties.append(f"kmi.properties.name = \"{menu}\"\n")
+
+        elif self.action == "PIE_MENU":
+            action = "wm.call_menu_pie"
+            pie = "VIEW3D_MT_shading_pie"
+            if self.use_internal:
+                pass
+            elif self.pie in self.addon_tree.sn_nodes["SN_PieMenuNode"].items:
+                pie = self.addon_tree.sn_nodes["SN_PieMenuNode"].items[self.pie].node().idname()
+            properties.append(f"kmi.properties.name = \"{pie}\"\n")
             
             
         
