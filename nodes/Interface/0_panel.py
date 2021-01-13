@@ -165,6 +165,11 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                         update=SN_ScriptingBaseNode.auto_compile)
     
     
+    shortcut_only: bpy.props.BoolProperty(default=False,
+                                          name="Shortcut Only",
+                                          description="Only display this panel with a shortcut")
+    
+    
     label: bpy.props.StringProperty(default="New Panel",
                                     name="Label",
                                     description="The label of this panel",
@@ -185,15 +190,17 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def draw_node(self,context,layout):
-        row = layout.row()
-        row.scale_y = 1.5
-        name = self.space.replace("_"," ").title() + " | " + self.region.replace("_"," ").title()
-        row.operator("sn.start_panel_selection",text=name,icon="EYEDROPPER").node = self.name
-        layout.prop(self, "category")
+        if not self.shortcut_only:
+            row = layout.row()
+            row.scale_y = 1.5
+            name = self.space.replace("_"," ").title() + " | " + self.region.replace("_"," ").title()
+            row.operator("sn.start_panel_selection",text=name,icon="EYEDROPPER").node = self.name
+            layout.prop(self, "category")
          
         layout.prop(self, "label")
         layout.prop(self, "hide_header")
         layout.prop(self, "default_closed")
+        layout.prop(self, "shortcut_only")
         layout.prop(self, "order")
         
         
@@ -210,15 +217,26 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         option_closed = "\"DEFAULT_CLOSED\"," if self.default_closed else ""
         option_header = "\"HIDE_HEADER\"," if self.hide_header else ""
         
+        space = self.space
+        region = self.region
+        context = self.context
+        category = self.category
+        
+        if self.shortcut_only:
+            space = "VIEW_3D"
+            region = "WINDOW"
+            context = ""
+            category = ""
+        
         return {
             "code": f"""
                     class {self.idname()}(bpy.types.Panel):
                         bl_label = "{self.label}"
                         bl_idname = "{self.idname()}"
-                        bl_space_type = "{self.space}"
-                        bl_region_type = "{self.region}"
-                        {"bl_context = '"+self.context+"'" if self.context else ""}
-                        {"bl_category = '"+self.category+"'" if self.category else ""}
+                        bl_space_type = "{space}"
+                        bl_region_type = "{region}"
+                        {"bl_context = '"+context+"'" if context else ""}
+                        {"bl_category = '"+category+"'" if category else ""}
                         {"bl_options = {"+option_closed+option_header+"}" if option_closed or option_header else ""}
                         bl_order = {self.order}
                         

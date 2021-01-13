@@ -457,7 +457,6 @@ class SN_ScriptingBaseNode:
 class SN_NodePropertyGroup(bpy.types.PropertyGroup):
     
     name: bpy.props.StringProperty()
-    category: bpy.props.StringProperty()
     idname: bpy.props.StringProperty()
 
 
@@ -468,6 +467,12 @@ class SN_GenericPropertyGroup(bpy.types.PropertyGroup):
     identifier: bpy.props.StringProperty()
     description: bpy.props.StringProperty()
     node_uid: bpy.props.StringProperty()
+    
+    def node(self):
+        for graph in bpy.context.scene.sn.addon_tree().sn_graphs:
+            for node in graph.node_tree.nodes:
+                if node.uid == self.node_uid:
+                    return node
     
     
 

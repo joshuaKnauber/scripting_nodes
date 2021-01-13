@@ -75,7 +75,7 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
                         item = context.scene.compatible_nodes.add()
                         item.category = category.name
                         item.name = "  "+node.label
-                        item.idname = node.nodetype
+                        item.identifier = node.nodetype
 
             bpy.ops.wm.call_menu(name="SN_MT_AddNodeMenu")
         return {"FINISHED"}

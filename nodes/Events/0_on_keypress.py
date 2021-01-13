@@ -62,6 +62,9 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
             items.append((item,item.replace("_"," ").title(),item.replace("_"," ").title()))
         return items
     
+    def update_use_internal(self,context):
+        self.panel = ""
+    
     
     key: bpy.props.StringProperty(name="Key",default="Y")
 
@@ -103,6 +106,18 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                           ("MENU","Menu","Open a menu when the key is pressed"),
                                           ("PIE_MENU","Pie","Open a pie menu when the key is pressed")])
     
+    keep_open: bpy.props.BoolProperty(name="Keep Open",
+                                      description="Keep the panel open after a property is changed",
+                                      default=True)
+    
+    use_internal: bpy.props.BoolProperty(name="Use Internal",
+                                         description="Uses the internal ones from blender instead of your custom ones",
+                                         default=False,
+                                         update=update_use_internal)
+    
+    panel: bpy.props.StringProperty(name="Panel",
+                                    description="The panel to open when the key is pressed")
+    
 
     def draw_node(self,context,layout):
         row = layout.row(align=True)
@@ -116,7 +131,15 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self,"repeat")
         layout.separator()
 
-        layout.prop(self,"action",expand=True)
+        row = layout.row()
+        row.prop(self,"action",text="")
+        if self.use_internal:
+            row.prop(self,"use_internal",text="",icon="BLENDER",emboss=False)
+        else:
+            row.prop(self,"use_internal",text="",icon_value=bpy.context.scene.sn_icons[ "serpens" ].icon_id,emboss=False)
+        if self.action == "PANEL":
+            layout.prop_search(self,"panel",self.addon_tree.sn_nodes["SN_PanelNode"],"items",text="",icon="VIEWZOOM")
+            layout.prop(self,"keep_open")
 
 
     def code_imperative(self, context):
@@ -147,19 +170,34 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
             "FILE_BROWSER": "File Browser"
         }
         
+        action = "mesh.primitive_monkey_add"
+        properties = []
+
+        if self.action == "PANEL":
+            action = "wm.call_panel"
+            panel = "RENDER_PT_dimensions"
+            if self.use_internal:
+                pass
+            elif self.action == "PANEL" and self.panel in self.addon_tree.sn_nodes["SN_PanelNode"].items:
+                panel = self.addon_tree.sn_nodes["SN_PanelNode"].items[self.panel].node().idname()
+            properties.append(f"kmi.properties.name = \"{panel}\"\n")
+            properties.append(f"kmi.properties.keep_open = {self.keep_open}\n")
+            
+        
         return {
             "code": f"""
                     def register_key_{self.uid}():
                         kc = bpy.context.window_manager.keyconfigs.addon
                         if kc:
                             km = kc.keymaps.new(name="{names[self.space]}", space_type="{self.space}")
-                            kmi = km.keymap_items.new("mesh.primitive_monkey_add",
+                            kmi = km.keymap_items.new("{action}",
                                                         type= "{self.key}",
                                                         value= "{self.value}",
                                                         repeat= {self.repeat},
                                                         ctrl={self.ctrl},
                                                         alt={self.alt},
                                                         shift={self.shift})
+                            {self.list_code(properties,7)}
                             addon_keymaps.append((km, kmi))
                     """
 
