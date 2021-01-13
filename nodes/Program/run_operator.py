@@ -59,7 +59,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             row.scale_y = 1.5
             row.operator("sn.paste_operator",text="Paste Operator",icon="PASTEDOWN").node_name = self.name
         else:
-            layout.operator("sn.reset_node",icon="UNLINKED").node = self.name
+            layout.operator("sn.reset_property_node",icon="UNLINKED").node = self.name
 
     def code_evaluate(self, context, touched_socket):
 
