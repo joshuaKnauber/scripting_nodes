@@ -64,6 +64,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def update_use_internal(self,context):
         self.panel = ""
+        self.menu = ""
     
     
     key: bpy.props.StringProperty(name="Key",default="Y")
@@ -118,6 +119,9 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     panel: bpy.props.StringProperty(name="Panel",
                                     description="The panel to open when the key is pressed")
     
+    menu: bpy.props.StringProperty(name="Menu",
+                                    description="The menu to open when the key is pressed")
+    
 
     def draw_node(self,context,layout):
         row = layout.row(align=True)
@@ -137,9 +141,19 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
             row.prop(self,"use_internal",text="",icon="BLENDER",emboss=False)
         else:
             row.prop(self,"use_internal",text="",icon_value=bpy.context.scene.sn_icons[ "serpens" ].icon_id,emboss=False)
+
         if self.action == "PANEL":
-            layout.prop_search(self,"panel",self.addon_tree.sn_nodes["SN_PanelNode"],"items",text="",icon="VIEWZOOM")
-            layout.prop(self,"keep_open")
+            if self.use_internal:
+                pass
+            elif "SN_PanelNode" in self.addon_tree.sn_nodes:
+                layout.prop_search(self,"panel",self.addon_tree.sn_nodes["SN_PanelNode"],"items",text="",icon="VIEWZOOM")
+                layout.prop(self,"keep_open")
+
+        elif self.action == "MENU":
+            if self.use_internal:
+                pass
+            elif "SN_MenuNode" in self.addon_tree.sn_nodes:
+                layout.prop_search(self,"menu",self.addon_tree.sn_nodes["SN_MenuNode"],"items",text="",icon="VIEWZOOM")
 
 
     def code_imperative(self, context):
@@ -178,10 +192,20 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
             panel = "RENDER_PT_dimensions"
             if self.use_internal:
                 pass
-            elif self.action == "PANEL" and self.panel in self.addon_tree.sn_nodes["SN_PanelNode"].items:
+            elif self.panel in self.addon_tree.sn_nodes["SN_PanelNode"].items:
                 panel = self.addon_tree.sn_nodes["SN_PanelNode"].items[self.panel].node().idname()
             properties.append(f"kmi.properties.name = \"{panel}\"\n")
             properties.append(f"kmi.properties.keep_open = {self.keep_open}\n")
+
+        elif self.action == "MENU":
+            action = "wm.call_menu"
+            menu = "VIEW3D_MT_add"
+            if self.use_internal:
+                pass
+            elif self.menu in self.addon_tree.sn_nodes["SN_MenuNode"].items:
+                menu = self.addon_tree.sn_nodes["SN_MenuNode"].items[self.menu].node().idname()
+            properties.append(f"kmi.properties.name = \"{menu}\"\n")
+            
             
         
         return {
