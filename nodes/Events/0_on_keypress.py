@@ -2,6 +2,88 @@ import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
+def sn_append_interface(self, context):
+    row = self.layout.row()
+    row.alert = True
+    op = row.operator("sn.select_interface_add",text="Select",icon="CHECKMARK")
+    op.idname = self.bl_idname
+    
+    
+    
+remove_interfaces = []
+picker_node = None
+    
+    
+
+class SN_SelectInterfaceAdd(bpy.types.Operator):
+    bl_idname = "sn.select_interface_add"
+    bl_label = "Select"
+    bl_description = "Select this element in the interface"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+    
+    idname: bpy.props.StringProperty(options={"HIDDEN"})
+    
+    def remove_registered_interfaces(self):
+        global remove_interfaces
+        for interface in remove_interfaces:
+            try:
+                interface.remove(sn_append_interface)
+            except:
+                pass
+        remove_interfaces.clear()
+
+    def execute(self, context):
+        global picker_node
+        if picker_node:
+            picker_node.picked = self.idname
+        picker_node = None
+        self.remove_registered_interfaces()
+        for area in context.screen.areas:
+            area.tag_redraw()
+        return {"FINISHED"}
+
+
+    
+
+class SN_StartInterfacePicker(bpy.types.Operator):
+    bl_idname = "sn.pick_interface"
+    bl_label = "Select"
+    bl_description = "Select an element in the interface"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+    
+    node: bpy.props.StringProperty()
+    
+    @classmethod
+    def poll(cls, context):
+        global remove_interfaces
+        return len(remove_interfaces) == 0
+    
+    def get_interfaces(self):
+        interfaces = []
+        for name in dir(bpy.types):
+            interface = eval("bpy.types."+name)
+            if hasattr(interface.bl_rna.base,"identifier") and interface.bl_rna.base.identifier == "Menu":
+                interfaces.append(name)
+            elif hasattr(interface.bl_rna.base,"identifier") and interface.bl_rna.base.identifier == "Panel":
+                interfaces.append(name)
+        return interfaces
+
+    def execute(self, context):
+        global picker_node
+        global remove_interfaces
+        picker_node = context.space_data.node_tree.nodes[self.node]
+        for interface in self.get_interfaces():
+            try:
+                eval("bpy.types."+interface+".append(sn_append_interface)")
+                remove_interfaces.append(eval("bpy.types."+interface))
+            except:
+                pass
+        for area in context.screen.areas:
+            area.tag_redraw()
+        return {"FINISHED"}
+
+
+
 
 class SN_OT_RecordKey(bpy.types.Operator):
     bl_idname = "sn.record_key"
@@ -66,6 +148,21 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.panel = ""
         self.menu = ""
         self.pie = ""
+        
+    def update_picked(self,context):
+        if self.picked:
+            elem = eval("bpy.types."+self.picked)
+            if elem.bl_rna.base.identifier == "Menu":
+                if "pie" in self.picked.lower():
+                    self.action = "PIE_MENU"
+                    self.pie = self.picked
+                else:
+                    self.action = "MENU"
+                    self.menu = self.picked
+            elif elem.bl_rna.base.identifier == "Panel":
+                self.action = "PANEL"
+                self.panel = self.picked
+            self.picked = ""
     
     
     key: bpy.props.StringProperty(name="Key",default="Y")
@@ -126,6 +223,8 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     pie: bpy.props.StringProperty(name="Pie Menu",
                                     description="The pie menu to open when the key is pressed")
     
+    picked: bpy.props.StringProperty(update=update_picked)
+    
 
     def draw_node(self,context,layout):
         row = layout.row(align=True)
@@ -148,20 +247,23 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         if self.action == "PANEL":
             if self.use_internal:
-                pass
+                name = self.panel.replace("_"," ").title() if self.panel else "Select Panel"
+                op = layout.operator("sn.pick_interface",text=name,icon="EYEDROPPER").node = self.name
             elif "SN_PanelNode" in self.addon_tree.sn_nodes:
                 layout.prop_search(self,"panel",self.addon_tree.sn_nodes["SN_PanelNode"],"items",text="",icon="VIEWZOOM")
                 layout.prop(self,"keep_open")
 
         elif self.action == "MENU":
             if self.use_internal:
-                pass
+                name = self.menu.replace("_"," ").title() if self.menu else "Select Menu"
+                op = layout.operator("sn.pick_interface",text=name,icon="EYEDROPPER").node = self.name
             elif "SN_MenuNode" in self.addon_tree.sn_nodes:
                 layout.prop_search(self,"menu",self.addon_tree.sn_nodes["SN_MenuNode"],"items",text="",icon="VIEWZOOM")
 
         elif self.action == "PIE_MENU":
             if self.use_internal:
-                pass
+                name = self.pie.replace("_"," ").title() if self.pie else "Select Pie Menu"
+                op = layout.operator("sn.pick_interface",text=name,icon="EYEDROPPER").node = self.name
             elif "SN_PieMenuNode" in self.addon_tree.sn_nodes:
                 layout.prop_search(self,"pie",self.addon_tree.sn_nodes["SN_PieMenuNode"],"items",text="",icon="VIEWZOOM")
 
@@ -201,7 +303,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
             action = "wm.call_panel"
             panel = "RENDER_PT_dimensions"
             if self.use_internal:
-                pass
+                if self.panel: panel = self.panel
             elif self.panel in self.addon_tree.sn_nodes["SN_PanelNode"].items:
                 panel = self.addon_tree.sn_nodes["SN_PanelNode"].items[self.panel].node().idname()
             properties.append(f"kmi.properties.name = \"{panel}\"\n")
@@ -211,7 +313,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
             action = "wm.call_menu"
             menu = "VIEW3D_MT_add"
             if self.use_internal:
-                pass
+                if self.menu: menu = self.menu
             elif self.menu in self.addon_tree.sn_nodes["SN_MenuNode"].items:
                 menu = self.addon_tree.sn_nodes["SN_MenuNode"].items[self.menu].node().idname()
             properties.append(f"kmi.properties.name = \"{menu}\"\n")
@@ -220,7 +322,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
             action = "wm.call_menu_pie"
             pie = "VIEW3D_MT_shading_pie"
             if self.use_internal:
-                pass
+                if self.pie: pie = self.pie
             elif self.pie in self.addon_tree.sn_nodes["SN_PieMenuNode"].items:
                 pie = self.addon_tree.sn_nodes["SN_PieMenuNode"].items[self.pie].node().idname()
             properties.append(f"kmi.properties.name = \"{pie}\"\n")

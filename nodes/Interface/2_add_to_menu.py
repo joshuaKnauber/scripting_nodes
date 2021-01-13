@@ -3,9 +3,6 @@ import re
 from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
-menu_locations = []
-
-
 def sn_append_menu(self, context):
     row = self.layout.row()
     row.alert = True
@@ -49,8 +46,6 @@ class SN_OT_StartAddToMenuSelection(bpy.types.Operator):
 
     def execute(self, context):
         global menu_node
-        global append_template
-        global prepend_template
         global remove_menus
         menu_node = context.space_data.node_tree.nodes[self.node]
         for menu in self.get_menus():
