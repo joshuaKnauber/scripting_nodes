@@ -41,7 +41,9 @@ class SN_OT_CopyProperty(bpy.types.Operator):
     
     
     def space_data(self):
-        return self.construct("bpy.context.screen.areas[\"My Area\"].spaces[0]", "SpaceData", "Area")
+        db_path = "bpy.context.screen.areas[0].spaces[0]" + "]".join(self.full_path.split("]")[1:])
+        # data_block = bpy.context.space_data.bl_rna.properties[self.full_path.split(".")[-1]]
+        return self.construct(db_path, "Area", "Area")
 
 
     def preferences(self):
