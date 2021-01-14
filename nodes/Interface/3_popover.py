@@ -3,10 +3,10 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
 
-class SN_SubmenuNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_PopoverNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_SubmenuNode"
-    bl_label = "Submenu"
+    bl_idname = "SN_PopoverNode"
+    bl_label = "Popover"
     # bl_icon = "GRAPH"
     bl_width_default = 160
     
@@ -17,14 +17,14 @@ class SN_SubmenuNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def update_picked(self,context):
         if self.picked:
-            self.menu = self.picked
+            self.panel = self.picked
             self.picked = ""
             
     def update_use_internal(self,context):
-        self.menu = ""
+        self.panel = ""
     
     
-    menu: bpy.props.StringProperty()
+    panel: bpy.props.StringProperty()
     
     picked: bpy.props.StringProperty(update=update_picked)
 
@@ -43,29 +43,29 @@ class SN_SubmenuNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self,context,layout):
         row = layout.row(align=True)
         if self.use_internal:
-            name = self.menu.replace("_"," ").title() if self.menu else "Pick Menu"
+            name = self.panel.replace("_"," ").title() if self.panel else "Pick Panel"
             op = row.operator("sn.pick_interface",text=name,icon="EYEDROPPER")
             op.node = self.name
-            op.selection = "MENUS"
+            op.selection = "PANELS"
             row.prop(self,"use_internal",text="",icon="BLENDER",invert_checkbox=True)
-        elif "SN_MenuNode" in self.addon_tree.sn_nodes:
-            row.prop_search(self,"menu",self.addon_tree.sn_nodes["SN_MenuNode"],"items",text="",icon="VIEWZOOM")
+        elif "SN_PanelNode" in self.addon_tree.sn_nodes:
+            row.prop_search(self,"panel",self.addon_tree.sn_nodes["SN_PanelNode"],"items",text="",icon="VIEWZOOM")
             row.prop(self,"use_internal",text="",icon_value=bpy.context.scene.sn_icons[ "serpens" ].icon_id)
     
 
     def code_evaluate(self, context, touched_socket):
         
-        menu = self.menu
+        panel = self.panel
         if not self.use_internal:
-            if self.menu in self.addon_tree.sn_nodes["SN_MenuNode"].items:
-                menu = self.addon_tree.sn_nodes["SN_MenuNode"].items[self.menu].node().idname()
+            if self.panel in self.addon_tree.sn_nodes["SN_PanelNode"].items:
+                panel = self.addon_tree.sn_nodes["SN_PanelNode"].items[self.panel].node().idname()
                 
-        if menu:
+        if panel:
 
             layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
 
             return {
                 "code": f"""
-                        {layout}.menu("{menu}",text={self.inputs["Text"].code()},icon_value={self.inputs["Icon"].code()})
+                        {layout}.popover("{panel}",text={self.inputs["Text"].code()},icon_value={self.inputs["Icon"].code()})
                         """
             }
