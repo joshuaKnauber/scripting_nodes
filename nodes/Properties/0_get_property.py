@@ -25,7 +25,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.prop_name = data["name"]
                 if not data["full_path"] == "self":
                     setup_data_socket(self, data)
-                    self.add_output_from_type(data["data_block"]["type"],data["identifier"])
+                    self.add_output_from_type(data["full_data_type"],data["identifier"])
                 else:
                     self.add_output_from_data(data["data_block"])
                 
@@ -54,6 +54,8 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         data_path = "self"
         if len(self.inputs):
             data_path = self.inputs[0].code()
+            suffix = get_data(self.copied_path)["full_path"].split("]")[-1]
+            if not "[" in suffix: data_path += suffix
         
         return {
             "code": f"{data_path}.{self.outputs[0].variable_name}"

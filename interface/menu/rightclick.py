@@ -33,6 +33,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
                 "identifier": data_block_identifier
             },
             "full_path": self.full_path,
+            "full_data_type": eval(self.full_path+".bl_rna.identifier"),
             "identifier": self.identifier,
             "name": self.name,
             "type": self.data_type
