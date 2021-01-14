@@ -51,29 +51,40 @@ class SN_EnumItem(bpy.types.PropertyGroup):
 
 
 class SN_Variable(bpy.types.PropertyGroup):
+    
+    def find_node(self,context):
+        for node in context.space_data.node_tree.nodes:
+            if node.uid == self.from_node_uid:
+                return node
 
     def update_name(self,context):
         key = "variable"
         if self.is_property:
             key = "property"
+            
         if not self.name:
             self.name = f"New {key.title()}"
 
         node = SN_ScriptingBaseNode()
         node.addon_tree = bpy.context.scene.sn.addon_tree()
-
+        
+        collection = self.node_tree.sn_variables
         if self.is_property:
-            unique_name = node.get_unique_name(self.name, self.node_tree.sn_properties, " ")
-        else:
-            unique_name = node.get_unique_name(self.name, self.node_tree.sn_variables, " ")
+            collection = self.node_tree.sn_properties
+        if self.use_self:
+            collection = getattr(self.find_node(context),self.from_node_collection)
+
+        unique_name = node.get_unique_name(self.name, collection, " ")
         if unique_name != self.name:
             self.name = unique_name
 
-        node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode"])
+        node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
+                                    "SN_RemoveFromListNode", "SN_ChangeVariableNode"]) # TODO improve this
 
         self.identifier = node.get_python_name(self.name, f"new_{key}")
 
-        node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode"])
+        node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
+                                    "SN_RemoveFromListNode", "SN_ChangeVariableNode"])
 
 
     name: bpy.props.StringProperty(name="Name",
@@ -86,6 +97,8 @@ class SN_Variable(bpy.types.PropertyGroup):
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
     
     use_self: bpy.props.BoolProperty(default=False)
+    from_node_uid: bpy.props.StringProperty()
+    from_node_collection: bpy.props.StringProperty()
     
     def get_var_types(self,context):
         if self.is_property:

@@ -18,6 +18,8 @@ class SN_OT_AddOperatorProperty(bpy.types.Operator):
         node = addon_tree.nodes[self.node_name]
 
         variable = node.operator_properties.add()
+        variable.from_node_uid = node.uid
+        variable.from_node_collection = "operator_properties"
         variable.is_property = True
         variable.use_self = True
         variable.node_tree = addon_tree
@@ -124,7 +126,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_OperatorNode"
     bl_label = "Operator"
     # bl_icon = "GRAPH"
-    bl_width_default = 250
+    bl_width_default = 200
 
     node_options = {
         "default_color": (0.2,0.2,0.2),
@@ -199,6 +201,11 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_execute_output("Operator")
         self.add_boolean_input("Poll")
         self.update_name(None)
+        
+        
+    def on_copy(self,node):
+        for prop in node.operator_properties:
+            prop.from_node_uid = self.uid
 
 
     def draw_node(self,context,layout):
