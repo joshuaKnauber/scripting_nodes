@@ -37,7 +37,7 @@ class SN_RunLayoutFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 parameters = []
                 for out in node.outputs:
                     if not out.bl_idname in ["SN_DynamicVariableSocket", "SN_InterfaceSocket", "SN_DynamicInterfaceSocket"]:
-                        parameters.append([out.variable_name, out.bl_idname])
+                        parameters.append([out.variable_name, out.bl_idname, out.subtype])
 
                 if len(parameters) != len(self.inputs[1:]):
                     if len(parameters) > len(self.inputs[1:]):
@@ -58,6 +58,7 @@ class SN_RunLayoutFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                 for x, parameter in enumerate(parameters):
                     self.inputs[x+1].default_text = parameter[0]
+                    self.inputs[x+1].subtype = parameter[2]
 
 
     def update_name(self, context):
