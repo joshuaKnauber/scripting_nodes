@@ -13,7 +13,7 @@ class SN_OT_PasteOperator(bpy.types.Operator):
     
     def execute(self, context):
         if "bpy.ops." in context.window_manager.clipboard:
-            context.space_data.node_tree.nodes[self.node_name].current_operator = context.window_manager.clipboard
+            context.space_data.node_tree.nodes[self.node_name].operator = context.window_manager.clipboard
         else:
             self.report({"WARNING"},message="Right-Click any button and click 'Copy Operator' to get a valid operator")
         return {"FINISHED"}
@@ -35,8 +35,8 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_operator(self,context):
         ignore_props = ["RNA"]
         
-        if self.current_operator:
-            op = eval(self.current_operator.split("(")[0])
+        if self.operator:
+            op = eval(self.operator.split("(")[0])
             
             self.label = "Operator (" + op.get_rna_type().name + ")"
             for prop in op.get_rna_type().bl_rna.properties:
@@ -46,26 +46,46 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.label = "Run Operator"
             for i in range(len(self.inputs)-1,0,-1):
                 self.inputs.remove(self.inputs[i])
+                
+    def update_custom(self,context):
+        if self.custom_operator:
+            node = self.addon_tree.sn_nodes["SN_OperatorNode"].items[self.custom_operator].node()
+            # for prop in node.operator_properties:
+            #     op += prop. + ","
+                
+    def update_use_internal(self,context):
+        self.operator = ""
+        self.custom_operator = ""
     
-    current_operator: bpy.props.StringProperty(update=update_operator)
+    operator: bpy.props.StringProperty(update=update_operator)
+    custom_operator: bpy.props.StringProperty(update=update_custom)
+    
+    use_internal: bpy.props.BoolProperty(name="Use Internal",
+                                         description="Uses the internal ones from blender instead of your custom ones",
+                                         default=True,
+                                         update=update_use_internal)
 
     def on_create(self,context):
         self.add_execute_input("Run Operator")
         self.add_execute_output("Execute")
         
     def draw_node(self,context,layout):
-        if not self.current_operator:
-            row = layout.row()
-            row.scale_y = 1.5
-            row.operator("sn.paste_operator",text="Paste Operator",icon="PASTEDOWN").node_name = self.name
-        else:
-            layout.operator("sn.reset_property_node",icon="UNLINKED").node = self.name
+        row = layout.row(align=True)
+        if self.use_internal:
+            if not self.operator:
+                row.operator("sn.paste_operator",text="Paste Operator",icon="PASTEDOWN").node_name = self.name
+            else:
+                row.operator("sn.reset_property_node",icon="UNLINKED").node = self.name
+            row.prop(self,"use_internal",text="",icon="BLENDER",invert_checkbox=True)
+        elif "SN_OperatorNode" in self.addon_tree.sn_nodes:
+            row.prop_search(self,"custom_operator",self.addon_tree.sn_nodes["SN_OperatorNode"],"items",text="",icon="VIEWZOOM")
+            row.prop(self,"use_internal",text="",icon_value=bpy.context.scene.sn_icons[ "serpens" ].icon_id)
 
     def code_evaluate(self, context, touched_socket):
 
         operator = ""
-        if self.current_operator:
-            operator = self.current_operator.split("(")[0] + "("
+        if self.operator:
+            operator = self.operator.split("(")[0] + "("
         
             for inp in self.inputs:
                 if inp.group == "DATA":

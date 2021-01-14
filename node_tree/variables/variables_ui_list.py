@@ -372,10 +372,6 @@ class SN_Variable(bpy.types.PropertyGroup):
             if not items:
                 items = [("None","None","None")]
             return "items="+str(items)
-        elif self.var_type == "LIST":
-            return "[]"
-        elif self.var_type == "BLEND_DATA":
-            return "None"
         
     def property_min_max(self):
         min_max = ""

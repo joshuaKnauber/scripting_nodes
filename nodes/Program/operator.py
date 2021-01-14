@@ -132,6 +132,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.2,0.2,0.2),
         "starts_tree": True,
         "has_collection": True,
+        "collection_name_attr": "operator_name"
     }
 
     def update_name(self, context):
