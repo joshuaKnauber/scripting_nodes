@@ -1,12 +1,14 @@
 import bpy
+from .. import bl_info
 from .sockets.base_sockets import get_dynamic_links, get_remove_links
 from ..compiler.compiler import compile_addon
+from ..settings.updates import exists_newer_version
 
 
 def update_create_tree():
     if bpy.context and hasattr(bpy.context,"space_data") and bpy.context.space_data and hasattr(bpy.context.space_data,"node_tree"):
         tree = bpy.context.space_data.node_tree
-        if tree and tree.bl_idname == "ScriptingNodesTree" and not tree.done_setup:
+        if tree and tree.bl_idname == "ScriptingNodesTree" and not tree.sn_done_setup:
             tree.setup(tree)
 
 
@@ -15,7 +17,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     bl_idname = 'ScriptingNodesTree'
     bl_label = "Visual Scripting"
     bl_icon = 'FILE_SCRIPT'
-    done_setup: bpy.props.BoolProperty(default=False)
+    
+    version: bpy.props.IntVectorProperty(default=(1,1,1))
     
     
     def set_changes(self, value):
@@ -32,7 +35,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         return addon_tree.sn_graphs[0].autocompile_delay
     
 
-    def setup(self, main_tree):
+    def setup(self, main_tree):      
         graph = main_tree.sn_graphs.add()
         graph.main_tree = main_tree
         graph.node_tree = self
@@ -47,7 +50,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
         main_tree.sn_graph_index = len(main_tree.sn_graphs)-1
 
-        self.done_setup = True
+        self.sn_version = bl_info["version"]
+        self.sn_done_setup = True
         
         
     def update_dynamic_links(self):
@@ -90,3 +94,14 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         self.set_changes(True)
         self.update_dynamic_links()
         self.update_remove_links()
+        
+        
+def upgrade_node_tree(ntree):
+    print(ntree)
+        
+
+def handle_versioning():
+    for node_tree in bpy.data.node_groups:
+        if node_tree.bl_idname == "ScriptingNodesTree":
+            if exists_newer_version(bl_info["version"],node_tree.sn_version):
+                upgrade_node_tree(node_tree)

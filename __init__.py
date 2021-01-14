@@ -17,7 +17,7 @@ bl_info = {
     "author" : "Joshua Knauber, Finn Knauber", 
     "description" : "Adds a node editor for building addons with nodes",
     "blender" : (2, 83, 0),
-    "version" : (1, 1, 0),
+    "version" : (1, 1, 1),
     "location" : "Editors -> Visual Scripting",
     "wiki_url": "", 
     "category" : "Node" 
@@ -44,7 +44,7 @@ from .node_tree.variables.variables_ui_list import SN_Variable
 from .node_tree.icons.icons_ui_list import SN_Icon
 from .node_tree.assets.assets_ui_list import SN_Asset
 from .node_tree.base_node import SN_NodeCollection, SN_GenericPropertyGroup
-from .node_tree.node_tree import update_create_tree
+from .node_tree.node_tree import update_create_tree, handle_versioning
 from .settings.addon_properties import SN_AddonProperties
 from .settings.updates import check_serpens_updates
 
@@ -57,6 +57,7 @@ auto_load.init()
 @persistent
 def load_handler(dummy):
     handle_file_unload()
+    handle_versioning()
     handle_file_load()
     check_serpens_updates(bl_info["version"])
 
@@ -100,6 +101,8 @@ def register():
     bpy.types.NodeTree.sn_assets = bpy.props.CollectionProperty(type=SN_Asset)
     bpy.types.NodeTree.sn_asset_index = bpy.props.IntProperty(default=0)
     bpy.types.NodeTree.sn_nodes = bpy.props.CollectionProperty(type=SN_NodeCollection)
+    bpy.types.NodeTree.sn_done_setup = bpy.props.BoolProperty(default=False)
+    bpy.types.NodeTree.sn_version = bpy.props.IntVectorProperty()
     
     # register the text properties
     bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False)
