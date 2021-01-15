@@ -65,7 +65,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                             parameters = []
                             for inp in node.inputs[1:]:
                                 if inp.bl_idname != "SN_DynamicVariableSocket":
-                                    parameters.append([inp.variable_name, inp.bl_idname])
+                                    parameters.append([inp.variable_name, inp.bl_idname, inp.subtype])
 
                             if len(parameters) != len(self.outputs[1:]):
                                 if len(parameters) > len(self.outputs[1:]):
@@ -85,6 +85,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                             for x, parameter in enumerate(parameters):
                                 self.outputs[x+1].default_text = parameter[0]
+                                self.outputs[x+1].subtype = parameter[2]
 
 
         else:
@@ -121,7 +122,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 parameters = []
                 for out in node.outputs[1:]:
                     if out.bl_idname != "SN_DynamicVariableSocket":
-                        parameters.append([out.variable_name, out.bl_idname])
+                        parameters.append([out.variable_name, out.bl_idname, out.subtype])
 
                 if len(parameters) != len(self.inputs[1:]):
                     if len(parameters) > len(self.inputs[1:]):
@@ -142,6 +143,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                 for x, parameter in enumerate(parameters):
                     self.inputs[x+1].default_text = parameter[0]
+                    self.inputs[x+1].subtype = parameter[2]
 
         else:
             self.make_collection()
@@ -185,6 +187,9 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.recursion_warning = True
 
     def on_create(self,context):
+        if not "SN_FunctionNode" in self.addon_tree.sn_nodes:
+            item = self.addon_tree.sn_nodes.add()
+            item.name = "SN_FunctionNode"
         self.add_execute_input("Run Function")
         self.add_execute_output("Execute")
 
