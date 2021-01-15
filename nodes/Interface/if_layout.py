@@ -34,5 +34,4 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                     """
         }
 
-# TODO if default_text changes also change text
 # TODO catch custom property right click in sidepanel

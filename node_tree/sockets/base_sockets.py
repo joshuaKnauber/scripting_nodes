@@ -37,6 +37,10 @@ class ScriptingSocket:
             
     def update_var_name(self,context):
         self.node.on_var_name_update(self)
+        
+    
+    def update_text(self,context):
+        self.name = self.default_text
     
     
     group = "" # DATA | PROGRAM
@@ -55,7 +59,7 @@ class ScriptingSocket:
     addable: bpy.props.BoolProperty(default=False) # Shows an add button on the socket
     to_add_idname = "" # Required if addable or dynamic is true
     
-    default_text: bpy.props.StringProperty() # The default text of this socket
+    default_text: bpy.props.StringProperty(update=update_text) # The default text of this socket
     mirror_name: bpy.props.BoolProperty(default=False) # Mirrors the name of the connected socket
     take_name: bpy.props.BoolProperty(default=False) # Takes the name of the first connected socket
     
