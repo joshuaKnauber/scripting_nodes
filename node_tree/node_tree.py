@@ -9,7 +9,8 @@ def update_create_tree():
     if bpy.context and hasattr(bpy.context,"space_data") and bpy.context.space_data and hasattr(bpy.context.space_data,"node_tree"):
         tree = bpy.context.space_data.node_tree
         if tree and tree.bl_idname == "ScriptingNodesTree" and not tree.sn_done_setup:
-            tree.setup(tree)
+            bpy.data.node_groups.remove(tree)
+            bpy.ops.sn.create_addon("INVOKE_DEFAULT")
 
 
 class ScriptingNodesTree(bpy.types.NodeTree):

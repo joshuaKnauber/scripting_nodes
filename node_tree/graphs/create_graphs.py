@@ -4,15 +4,36 @@ from bpy_extras.io_utils import ImportHelper
 
 
 
+class SN_OT_CreateAddon(bpy.types.Operator):
+    bl_idname = "sn.create_addon"
+    bl_label = "Create Addon"
+    bl_description = "Adds a new addon to this file"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+    bl_property = "name"
+    
+    name: bpy.props.StringProperty(name="Addon Name",description="Name of the new addon you are creating",default="New Addon")
+
+    def execute(self, context):
+        tree = bpy.data.node_groups.new(self.name, "ScriptingNodesTree")
+        tree.setup(tree)
+        tree.sn_graphs[0].name = self.name
+        context.scene.sn.editing_addon = self.name
+        return {"FINISHED"}
+    
+    def draw(self,context):
+        self.layout.prop(self,"name",text="Name")
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self)
+
+
+
 class SN_OT_CreateGraph(bpy.types.Operator):
     bl_idname = "sn.add_graph"
     bl_label = "Add Graph"
     bl_description = "Adds a new graph to this addon"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
-    @classmethod
-    def poll(cls, context):
-        return True
 
     def execute(self, context):
         tree = bpy.data.node_groups.new("New Graph", "ScriptingNodesTree")

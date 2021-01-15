@@ -34,7 +34,9 @@ def append_header(self, context):
 
         layout.prop_tabs_enum(context.scene.sn, "bookmarks")
 
-        layout.prop(context.scene.sn, "editing_addon", text="")
+        row = layout.row(align=True)
+        row.prop(context.scene.sn, "editing_addon", text="")
+        row.operator("sn.create_addon",text="",icon="ADD")
         
         row = layout.row(align=True)
         row.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id).url = "https://discord.com/invite/NK6kyae"
