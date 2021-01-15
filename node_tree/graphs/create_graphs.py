@@ -11,17 +11,25 @@ class SN_OT_CreateAddon(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
     bl_property = "name"
     
-    name: bpy.props.StringProperty(name="Addon Name",description="Name of the new addon you are creating",default="New Addon")
+    name: bpy.props.StringProperty(name="Name",
+                                   description="Name of the new addon you are creating",
+                                   default="New Addon")
+
+    author: bpy.props.StringProperty(name="Author",
+                                     description="The name of the addons author",
+                                     default="Your Name")
 
     def execute(self, context):
         tree = bpy.data.node_groups.new(self.name, "ScriptingNodesTree")
         tree.setup(tree)
         tree.sn_graphs[0].name = self.name
+        tree.sn_graphs[0].author = self.author
         context.scene.sn.editing_addon = self.name
         return {"FINISHED"}
     
     def draw(self,context):
         self.layout.prop(self,"name",text="Name")
+        self.layout.prop(self,"author",text="Author")
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
