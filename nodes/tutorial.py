@@ -49,6 +49,21 @@ class SN_OT_StartTutorial(bpy.types.Operator):
     
     
     
+class SN_OT_EndTutorial(bpy.types.Operator):
+    bl_idname = "sn.end_tutorial"
+    bl_label = "End Tutorial"
+    bl_description = "Ends the tutorial"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    node: bpy.props.StringProperty()
+
+    def execute(self, context):
+        tree = context.space_data.node_tree
+        tree.nodes.remove(tree.nodes[self.node])
+        return {"FINISHED"}
+    
+    
+    
 class SN_OT_MoveTutorial(bpy.types.Operator):
     bl_idname = "sn.move_tutorial"
     bl_label = "Move Tutorial"
@@ -237,6 +252,7 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
         op = col.operator("sn.move_tutorial",icon="TRIA_RIGHT",text="Next")
         op.node = self.name
         op.forward = True
+        row.operator("sn.end_tutorial",text="",icon="HANDLETYPE_VECTOR_VEC").node = self.name
         
         if self.index == 0:
             col = layout.column(align=True)
