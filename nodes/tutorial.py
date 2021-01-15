@@ -28,7 +28,7 @@ tutorial = [
                 ]
     },
     {
-        "image": "size_adjust.jpg",
+        "image": "test.jpg",
         "sockets": None,
         "nodes": None
     }
