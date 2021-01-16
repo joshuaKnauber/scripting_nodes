@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_GetDataCollectionNode"
-    bl_label = "Get Data Collections"
+    bl_label = "Get Blend Data Collections"
     # bl_icon = "GRAPH"
     bl_width_default = 160
     
@@ -34,6 +34,7 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
                         out.subtype = "COLLECTION"
                         out.data_type = prop.fixed_type.identifier
                         out.data_identifier = prop.identifier
+                        out.data_name = prop.fixed_type.name
             if not len(self.outputs):
                 self.no_data_error = True
         except:

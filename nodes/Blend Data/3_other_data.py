@@ -29,6 +29,7 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_type(self,context):
         self.outputs[0].data_type = self.get_type()
         self.outputs[0].data_identifier = self.data_type
+        self.outputs[0].data_name = self.data_type.replace("_"," ").title()
         if self.outputs[0].is_linked:
             self.outputs[0].links[0].to_node.on_link_insert(self.outputs[0].links[0])
     
@@ -72,6 +73,7 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         out = self.add_blend_data_output("All")
         out.data_type = self.get_type()
         out.data_identifier = self.data_type
+        out.data_name = self.data_type.replace("_"," ").title()
         out.subtype = "COLLECTION"
         
         

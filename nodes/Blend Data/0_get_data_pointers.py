@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_GetDataPointersNode"
-    bl_label = "Get Data"
+    bl_label = "Get Blend Data"
     # bl_icon = "GRAPH"
     bl_width_default = 160
     
@@ -32,6 +32,7 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
                         out = self.add_blend_data_output(prop.name)
                         out.removable = True
                         out.data_type = prop.fixed_type.identifier
+                        out.data_name = prop.fixed_type.name
                         out.data_identifier = prop.identifier
             if not len(self.outputs):
                 self.no_data_error = True

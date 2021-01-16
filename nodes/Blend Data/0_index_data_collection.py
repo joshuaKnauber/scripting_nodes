@@ -44,6 +44,7 @@ class SN_IndexDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
             if link.from_socket.subtype == "COLLECTION":
                 self.outputs[0].data_type = link.from_socket.data_type
                 self.outputs[0].data_identifier = link.from_socket.data_identifier
+                self.outputs[0].data_name = link.from_socket.data_name
             else:
                 self.collection_error = True
 
@@ -52,7 +53,7 @@ class SN_IndexDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp = self.add_blend_data_input("Blend Data")
         inp.mirror_name = True
         inp.subtype = "COLLECTION"
-        out = self.add_blend_data_output("Indexed Data Block")
+        self.add_blend_data_output("Indexed Data Block")
         self.add_integer_input("Index").set_default(0)
         
         
