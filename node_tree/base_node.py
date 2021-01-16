@@ -348,6 +348,8 @@ class SN_ScriptingBaseNode:
             if hasattr(prop,"array_length"):
                 size = prop.array_length
             inp.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
+            if prop.type == "ENUM":
+                inp.enum_values = self.enum_items_as_string(prop)
             return inp
 
 
@@ -359,6 +361,8 @@ class SN_ScriptingBaseNode:
             if hasattr(prop,"array_length"):
                 size = prop.array_length
             out.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
+            if prop.type == "ENUM":
+                out.enum_values = self.enum_items_as_string(prop)
             return out
     
     
