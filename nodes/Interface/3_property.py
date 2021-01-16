@@ -50,7 +50,8 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.setup_inputs(data["property"]["type"])
                 self.inputs["Text"].set_default(data["property"]["name"])
                 self.prop_name = data["property"]["name"]
-                setup_data_input(self, data)
+                if data["data_block"]["type"]:
+                    setup_data_input(self, data)
             else:
                 self.copied_path = ""
                 
