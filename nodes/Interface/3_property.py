@@ -1,7 +1,7 @@
 import bpy
 import json
 from ...node_tree.base_node import SN_ScriptingBaseNode
-from ..Properties.property_util import get_data, setup_data_socket
+from ..Properties.property_util import get_data, setup_data_input
 
 
 
@@ -50,7 +50,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.setup_inputs(data["type"])
                 self.inputs["Text"].set_default(data["name"])
                 self.prop_name = data["name"]
-                setup_data_socket(self, data)
+                setup_data_input(self, data)
                 
         else:
             self.label = "Property"

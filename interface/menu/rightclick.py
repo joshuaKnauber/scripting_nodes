@@ -16,48 +16,57 @@ class SN_OT_CopyProperty(bpy.types.Operator):
                                    options={"HIDDEN"})
     
     full_path: bpy.props.StringProperty(options={"HIDDEN"})
-    identifier: bpy.props.StringProperty(options={"HIDDEN"})
-    name: bpy.props.StringProperty(options={"HIDDEN"})
-    data_type: bpy.props.StringProperty(options={"HIDDEN"})
+    
+    db_name: bpy.props.StringProperty(options={"HIDDEN"})
+    db_type: bpy.props.StringProperty(options={"HIDDEN"})
+
+    prop_name: bpy.props.StringProperty(options={"HIDDEN"})
+    prop_identifier: bpy.props.StringProperty(options={"HIDDEN"})
+    prop_type: bpy.props.StringProperty(options={"HIDDEN"})
+    prop_subtype: bpy.props.StringProperty(options={"HIDDEN"})
+    prop_size: bpy.props.IntProperty(options={"HIDDEN"})
     
     
     def copy(self,data):
         bpy.context.window_manager.clipboard = data
     
         
-    def construct(self, data_block_identifier, data_block_type, data_block_name):
+    def construct(self, db_name, db_type, group_path):
         data = {
             "data_block": {
-                "type": data_block_type,
-                "name": data_block_name,
-                "identifier": data_block_identifier
+                "name": db_name,
+                "type": db_type
             },
-            "full_path": self.full_path,
-            "full_data_type": eval(self.full_path+".bl_rna.identifier"),
-            "identifier": self.identifier,
-            "name": self.name,
-            "type": self.data_type
+            "group_path": group_path,
+            "property": {
+                "name": self.prop_name,
+                "identifier": self.prop_identifier,
+                "type": self.prop_type,
+                "subtype": self.prop_subtype,
+                "size": self.prop_size
+            }
         }
         return json.dumps(data)
     
     
     def space_data(self):
-        db_path = "bpy.context.screen.areas[0].spaces[0]" + "]".join(self.full_path.split("]")[1:])
-        # data_block = bpy.context.space_data.bl_rna.properties[self.full_path.split(".")[-1]]
-        return self.construct(db_path, "Area", "Area")
+        group_path = "spaces[0]" + self.full_path.split("]")[-1]
+        return self.construct("Area","Area",group_path)
 
 
     def preferences(self):
-        suffix = ""
-        return self.construct("bpy.context.preferences" + suffix)
-
+        return self.construct(self.db_name + " Preferences",self.db_type,"")
+                        
         
     def default(self):
-        db_path = self.full_path.split("[")[:-1]
-        db_path = "[".join(db_path)
-        db_as_prop_path = ".".join(db_path.split(".")[:-1])
-        data_block = eval(f"{db_as_prop_path}.bl_rna.properties[\"{db_path.split('.')[-1]}\"]")
-        return self.construct(db_path.split(".")[-1], data_block.fixed_type.identifier, data_block.fixed_type.name)
+        db_type = self.db_type
+        db_name = self.db_name
+        group_path = self.full_path.split("]")[-1][1:]
+        if not self.full_path[-1] == "]":
+            db = eval("]".join(self.full_path.split("]")[:-1])+"]")
+            db_name = db.name
+            db_type = db.bl_rna.identifier
+        return self.construct(db_name,db_type,group_path)
 
 
     def execute(self, context):
@@ -101,9 +110,21 @@ def serpens_right_click(self, context):
             op.origin = "DEFAULT"
             
         op.full_path = property_pointer.__repr__()
-        op.identifier = property_value.identifier
-        op.name = property_value.name
-        op.data_type = property_value.type
+        
+        op.prop_name = property_value.name
+        op.prop_identifier = property_value.identifier
+        op.prop_type = property_value.type
+        op.prop_subtype = property_value.subtype
+        if hasattr(property_value,"array_length"):
+            op.prop_size = property_value.array_length
+        else:
+            op.prop_size = -1        
+        
+        op.db_type = property_pointer.bl_rna.identifier
+        if hasattr(property_pointer,"name"):
+            op.db_name = property_pointer.name
+        elif hasattr(property_pointer.bl_rna,"name"):
+            op.db_name = property_pointer.bl_rna.name
             
     if button_value:
         layout.operator("ui.copy_python_command_button",text="Serpens | Copy Operator",icon="COPYDOWN")

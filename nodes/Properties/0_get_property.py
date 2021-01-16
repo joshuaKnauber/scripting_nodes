@@ -1,7 +1,7 @@
 import bpy
 import json
 from ...node_tree.base_node import SN_ScriptingBaseNode
-from .property_util import get_data, setup_data_socket
+from .property_util import get_data, setup_data_input
 
 
 
@@ -21,13 +21,15 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.copied_path:
             data = get_data(self.copied_path)
             if data:
-                self.label = "Get " + data["name"]
-                self.prop_name = data["name"]
-                if not data["full_path"] == "self":
-                    setup_data_socket(self, data)
-                    self.add_output_from_type(data["full_data_type"],data["identifier"])
+                self.label = "Get " + data["property"]["name"]
+                self.prop_name = data["property"]["name"]
+                if not data["data_block"]["type"] == "":
+                    setup_data_input(self, data)
+                    self.add_output_from_data(data["property"])
                 else:
-                    self.add_output_from_data(data["data_block"])
+                    self.add_output_from_data(data["property"])
+            else:
+                self.copied_path = ""
                 
         else:
             self.label = "Get Property"
@@ -51,12 +53,16 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         
-        data_path = "self"
+        data = get_data(self.copied_path)
+        path = ""
         if len(self.inputs):
-            data_path = self.inputs[0].code()
-            suffix = get_data(self.copied_path)["full_path"].split("]")[-1]
-            if not "[" in suffix: data_path += suffix
+            path = self.inputs[0].code()
+        
+        if data["group_path"]:
+            path += "." + data["group_path"] if path else data["group_path"]
+            
+        path += "." + data["property"]["identifier"]
         
         return {
-            "code": f"{data_path}.{self.outputs[0].variable_name}"
+            "code": f"{path}"
         }
