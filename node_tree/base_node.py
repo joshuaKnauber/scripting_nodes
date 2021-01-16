@@ -310,7 +310,7 @@ class SN_ScriptingBaseNode:
     def enum_items_as_string(self,prop):
         items = "["
         for item in prop.enum_items:
-            items += f"('{item.identifier}','{item.name}','{item.description}'),"
+            items += f"(\"{item.identifier}\",\"{item.name}\",\"{item.description}\"),"
         return items + "]"
             
             

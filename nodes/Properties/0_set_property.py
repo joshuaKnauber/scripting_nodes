@@ -58,19 +58,23 @@ class SN_SetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         
+        set_prop = ""
         data = get_data(self.copied_path)
-        path = ""
-        if len(self.inputs):
-            path = self.inputs[1].code()
+
+        if len(self.inputs) > 1:
+            if len(self.inputs) == 3:
+                set_prop = self.inputs[1].code()
         
-        if data["group_path"]:
-            path += "." + data["group_path"] if path else data["group_path"]
+            if data["group_path"]:
+                set_prop += "." + data["group_path"] if set_prop else data["group_path"]
+                
+            set_prop += "." + data["property"]["identifier"]
             
-        path += "." + data["property"]["identifier"]
+            set_prop += " = " + self.inputs[-1].code()
         
         return {
             "code": f"""
-                    {path} = {self.inputs[2].code()}
+                    {set_prop}
                     {self.outputs[0].code(5)}
                     """
         }

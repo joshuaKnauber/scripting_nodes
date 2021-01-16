@@ -4,6 +4,33 @@ import json
 #TODO options for properties especially in operators
 
 
+def construct_from_property(path,prop):
+    size = -1
+    if prop.is_vector:
+        size = prop.vector_size
+    data = {
+        "data_block": {
+            "name": "",
+            "type": ""
+        },
+        "group_path": path,
+        "property": {
+            "name": prop.name,
+            "identifier": prop.identifier,
+            "type": prop.var_type,
+            "subtype": prop.property_subtype,
+            "size": size
+        }
+    }
+    return json.dumps(data)
+    
+
+    
+def copy_from_property(path,prop):
+    bpy.context.window_manager.clipboard = construct_from_property(path,prop)
+
+
+
 class SN_OT_CopyProperty(bpy.types.Operator):
     bl_idname = "sn.copy_space_property"
     bl_label = "Copy Space Property"
