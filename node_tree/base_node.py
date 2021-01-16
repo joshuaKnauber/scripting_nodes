@@ -338,6 +338,28 @@ class SN_ScriptingBaseNode:
         out = self.add_output(self.prop_types[prop_data["type"]],prop_data["name"])
         out.subtype = self.subtype_from_prop_subtype(prop_data["type"],prop_data["subtype"],prop_data["size"])
         out.variable_name = prop_data["identifier"]
+        
+        
+    def add_input_from_prop(self,prop):
+        if prop.type in self.prop_types:
+            inp = self.add_input(self.prop_types[prop.type], prop.name)
+            inp.variable_name = prop.identifier
+            size = -1
+            if hasattr(prop,"array_length"):
+                size = prop.array_length
+            inp.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
+            return inp
+
+
+    def add_output_from_prop(self,prop):
+        if prop.type in self.prop_types:
+            out = self.add_output(self.prop_types[prop.type], prop.name)
+            out.variable_name = prop.identifier
+            size = -1
+            if hasattr(prop,"array_length"):
+                size = prop.array_length
+            out.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
+            return out
     
     
     def add_input(self,idname,label):
