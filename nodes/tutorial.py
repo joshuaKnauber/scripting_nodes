@@ -12,7 +12,10 @@ tutorial = [
         "image": "size_adjust.jpg"
     },
     {
-        "image": "get_started.jpg",
+        "image": "get_started.jpg"
+    },
+    {
+        "image": "test.jpg",
         "sockets": ["self.add_boolean_input('Boolean')"],
         "nodes": [
                     {"idname": "SN_BooleanNode",
