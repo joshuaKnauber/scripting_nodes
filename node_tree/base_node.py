@@ -332,12 +332,16 @@ class SN_ScriptingBaseNode:
         inp = self.add_input(self.prop_types[prop_data["type"]],prop_data["name"])
         inp.subtype = self.subtype_from_prop_subtype(prop_data["type"],prop_data["subtype"],prop_data["size"])
         inp.variable_name = prop_data["identifier"]
+        if prop_data["type"] == "ENUM":
+            inp.enum_values = prop_data["items"]
     
     
     def add_output_from_data(self,prop_data):
         out = self.add_output(self.prop_types[prop_data["type"]],prop_data["name"])
         out.subtype = self.subtype_from_prop_subtype(prop_data["type"],prop_data["subtype"],prop_data["size"])
         out.variable_name = prop_data["identifier"]
+        if prop_data["type"] == "ENUM":
+            out.enum_values = prop_data["items"]
         
         
     def add_input_from_prop(self,prop):

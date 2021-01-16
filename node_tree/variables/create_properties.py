@@ -1,5 +1,6 @@
 import bpy
 import json
+from ...interface.menu.rightclick import construct_from_attached_property
 
 
 class SN_OT_CreateProperty(bpy.types.Operator):
@@ -73,16 +74,7 @@ class SN_OT_AddPropertyGetter(bpy.types.Operator):
             node = graph_tree.nodes.new("SN_GetPropertyNode")
         elif self.getter_type == "INTERFACE":
             node = graph_tree.nodes.new("SN_DisplayPropertyNode")
-        # path_details = {
-        #     "path": f"{prop.attach_property_to}[\"\"].{prop.identifier}",
-        #     "prop_name": prop.name,
-        #     "prop_identifier": prop.identifier,
-        #     "prop_type": prop.var_type,
-        #     "prop_array_length": prop.vector_size if prop.is_vector else 0,
-        #     "path_parts": [{"is_numeric":False,"data_type":"bpy.types."+prop.attach_property_to,"name":prop.attach_property_to},
-        #                    prop.identifier]
-        # }
-        # node.copied_path = json.dumps(path_details)
+        node.copied_path = construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop)
         
         place_center(context, node)
         return {"FINISHED"}
@@ -104,8 +96,11 @@ class SN_OT_AddPropertySetter(bpy.types.Operator):
     def execute(self, context):
         addon_tree = context.scene.sn.addon_tree()
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
+        prop = addon_tree.sn_properties[addon_tree.sn_property_index]
 
-        node = graph_tree.nodes.new("SN_TestNode")
+        node = graph_tree.nodes.new("SN_SetPropertyNode")
+        
+        node.copied_path = construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop)
         return {"FINISHED"}
     
     

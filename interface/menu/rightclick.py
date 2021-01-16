@@ -8,6 +8,7 @@ def construct_from_property(path,prop):
     size = -1
     if prop.is_vector:
         size = prop.vector_size
+    items = ""
     data = {
         "data_block": {
             "name": "",
@@ -19,15 +20,19 @@ def construct_from_property(path,prop):
             "identifier": prop.identifier,
             "type": prop.var_type,
             "subtype": prop.property_subtype,
-            "size": size
+            "size": size,
+            "items": prop.enum_string()
         }
     }
     return json.dumps(data)
     
 
     
-def copy_from_property(path,prop):
-    bpy.context.window_manager.clipboard = construct_from_property(path,prop)
+def construct_from_attached_property(db_name,db_type,prop):
+    data = json.loads(construct_from_property("",prop))
+    data["data_block"]["name"] = db_name
+    data["data_block"]["type"] = db_type
+    return json.dumps(data)
 
 
 
@@ -52,6 +57,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
     prop_type: bpy.props.StringProperty(options={"HIDDEN"})
     prop_subtype: bpy.props.StringProperty(options={"HIDDEN"})
     prop_size: bpy.props.IntProperty(options={"HIDDEN"})
+    prop_enum_items: bpy.props.StringProperty(options={"HIDDEN"})
     
     
     def copy(self,data):
@@ -70,7 +76,8 @@ class SN_OT_CopyProperty(bpy.types.Operator):
                 "identifier": self.prop_identifier,
                 "type": self.prop_type,
                 "subtype": self.prop_subtype,
-                "size": self.prop_size
+                "size": self.prop_size,
+                "items": self.prop_enum_items
             }
         }
         return json.dumps(data)
@@ -142,10 +149,17 @@ def serpens_right_click(self, context):
         op.prop_identifier = property_value.identifier
         op.prop_type = property_value.type
         op.prop_subtype = property_value.subtype
+        
         if hasattr(property_value,"array_length"):
             op.prop_size = property_value.array_length
         else:
-            op.prop_size = -1        
+            op.prop_size = -1
+            
+        if hasattr(property_value,"enum_items"):
+            items = "["
+            for item in property_value.enum_items:
+                items += f"(\"{item.identifier}\",\"{item.name}\",\"{item.description}\"),"
+            op.prop_enum_items = items + "]"
         
         op.db_type = property_pointer.bl_rna.identifier
         if hasattr(property_pointer,"name"):
