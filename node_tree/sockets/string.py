@@ -83,10 +83,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     def draw_socket(self, context, layout, row, node, text):
         if self.is_output or self.is_linked:
-            if self.subtype == "ENUM":
-                row.prop(self, "value_enum", text=text)
-            else:
-                row.label(text=text)
+            row.label(text=text)
         else:
             if self.subtype == "NONE":
                 row.prop(self, "value", text=text)

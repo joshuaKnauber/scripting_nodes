@@ -3,6 +3,7 @@ import json
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 from ...node_tree.variables.variables_ui_list import SN_Variable
 from ...interface.sidepanel.graph_panels import draw_property
+from ...interface.menu.rightclick import construct_from_property
 
 
 class SN_OT_AddOperatorProperty(bpy.types.Operator):
@@ -97,20 +98,10 @@ class SN_OT_GetSetOperatorProperty(bpy.types.Operator):
         tree = context.space_data.node_tree
         node = tree.nodes[self.node_name]
         prop = node.operator_properties[node.property_index]
-        data = {
-            "data_block": {
-                "socket_type": prop.var_type,
-                "subtype": prop.get_socket_subtype(),
-                "name": prop.name,
-                "identifier": prop.identifier
-            },
-            "full_path": "self",
-            "identifier": prop.identifier,
-            "name": prop.name,
-            "type": prop.var_type
-        }
+        
         new_node = self.add_node(tree)
-        new_node.copied_path = json.dumps(data)
+        new_node.copied_path = construct_from_property("self",prop)
+        
         new_node.location = (node.location[0]+300,node.location[1]-200)
         return {"FINISHED"}
 
@@ -187,7 +178,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     invoke_option: bpy.props.EnumProperty(name="Popup",items=[("none","None","None"),
                                                             ("invoke_confirm","Confirm","Shows a confirmation option for this operator"),
                                                             ("invoke_props_dialog","Popup","Opens a customizable property dialog"),
-                                                            ("invoke_popup", "Show Properties", "Shows a popup with the operators properties"),
+                                                            # ("invoke_popup", "Show Properties", "Shows a popup with the operators properties"),
                                                             ("invoke_props_popup", "Property Update", "Show a customizable dialog and execute the operator on property changes"),
                                                             ("invoke_search_popup", "Search Popup", "Opens a search menu from a selected enum property")],update=update_popup)
     operator_properties: bpy.props.CollectionProperty(type=SN_Variable)

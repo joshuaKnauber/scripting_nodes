@@ -310,68 +310,34 @@ class SN_ScriptingBaseNode:
     def enum_items_as_string(self,prop):
         items = "["
         for item in prop.enum_items:
-            items += f"('{item.identifier}','{item.name}','{item.description}'),"
+            items += f"(\"{item.identifier}\",\"{item.name}\",\"{item.description}\"),"
         return items + "]"
-        
-        
-    def match_socket_to_prop(self,socket,prop):
-        if prop.type == "ENUM":
-            if prop.enum_items:
-                socket.subtype = "ENUM"
-                socket.enum_values = self.enum_items_as_string(prop)
-        if hasattr(prop,"is_array") and prop.is_array:
-            if prop.array_length == 3:
-                socket.subtype = "VECTOR3"
-                if prop.subtype == "COLOR": socket.subtype = "COLOR"
-            elif prop.array_length == 4: 
-                socket.subtype = "VECTOR4"
-                if prop.subtype == "COLOR": socket.subtype = "COLOR_ALPHA"
-            if hasattr(prop,"default"):
-                socket.set_default(tuple([prop.default]*prop.array_length))
-        elif hasattr(prop,"default"):
-            socket.set_default(prop.default)
-        if hasattr(prop,"subtype"):
-            if prop.subtype == "FACTOR": socket.subtype = "FACTOR"
-            if prop.subtype == "FILEPATH": socket.subtype = "FILE"
-            if prop.subtype == "DIRPATH": socket.subtype = "DIRECTORY"
-            
-        
-    def add_input_from_prop(self,prop):
-        if prop.type in self.prop_types:
-            inp = self.add_input(self.prop_types[prop.type], prop.name)
-            inp.variable_name = prop.identifier
-            self.match_socket_to_prop(inp,prop)
-            return inp
-            
-        
-    def add_output_from_prop(self,prop):
-        if prop.type in self.prop_types:
-            out = self.add_output(self.prop_types[prop.type], prop.name)
-            out.variable_name = prop.identifier
-            self.match_socket_to_prop(out,prop)
-            return out
             
             
-    def add_input_from_type(self,data_block_type,prop_identifier):
-        prop = getattr(bpy.types,data_block_type).bl_rna.properties[prop_identifier]
-        return self.add_input_from_prop(prop)
-            
-            
-    def add_output_from_type(self,data_block_type,prop_identifier):
-        prop = getattr(bpy.types,data_block_type).bl_rna.properties[prop_identifier]
-        return self.add_output_from_prop(prop)
+    def subtype_from_prop_subtype(self,prop_type,prop_subtype,prop_size):
+        if prop_type == "ENUM": return "ENUM"
+        if prop_subtype == "COLOR":
+            if prop_size == 3: return "COLOR"
+            elif prop_size == 4: return "COLOR_ALPHA"
+        elif prop_size != -1:
+            if prop_size == 3: return "VECTOR3"
+            elif prop_size == 4: return "VECTOR4"
+        elif prop_subtype == "FACTOR": return "FACTOR"
+        elif prop_subtype == "FILEPATH": return "FILE"
+        elif prop_subtype == "DIRPATH": return "DIRECTORY"
+        return "NONE"
     
     
-    def add_input_from_data(self,data):
-        inp = self.add_input(self.prop_types[data["socket_type"]],data["name"])
-        inp.subtype = data["subtype"]
-        inp.variable_name = data["identifier"]
+    def add_input_from_data(self,prop_data):
+        inp = self.add_input(self.prop_types[prop_data["type"]],prop_data["name"])
+        inp.subtype = self.subtype_from_prop_subtype(prop_data["type"],prop_data["subtype"],prop_data["size"])
+        inp.variable_name = prop_data["identifier"]
     
     
-    def add_output_from_data(self,data):
-        out = self.add_output(self.prop_types[data["socket_type"]],data["name"])
-        out.subtype = data["subtype"]
-        out.variable_name = data["identifier"]
+    def add_output_from_data(self,prop_data):
+        out = self.add_output(self.prop_types[prop_data["type"]],prop_data["name"])
+        out.subtype = self.subtype_from_prop_subtype(prop_data["type"],prop_data["subtype"],prop_data["size"])
+        out.variable_name = prop_data["identifier"]
     
     
     def add_input(self,idname,label):
