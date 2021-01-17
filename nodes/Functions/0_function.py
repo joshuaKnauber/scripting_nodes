@@ -42,7 +42,8 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.update_name(None)
 
     def on_dynamic_add(self,socket, connected_socket):
-        socket.subtype = connected_socket.subtype
+        if connected_socket:
+            socket.subtype = connected_socket.subtype
         if connected_socket and connected_socket.name != "":
             socket.variable_name = connected_socket.name
         else:

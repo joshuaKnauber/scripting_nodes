@@ -303,7 +303,8 @@ class SN_ScriptingBaseNode:
         "FLOAT": "SN_FloatSocket",
         "INT": "SN_IntegerSocket",
         "ENUM": "SN_StringSocket",
-        "POINTER": "SN_BlendDataSocket"
+        "POINTER": "SN_BlendDataSocket",
+        "COLLECTION": "SN_BlendDataSocket"
     }
 
         
@@ -342,12 +343,19 @@ class SN_ScriptingBaseNode:
         
     def add_input_from_prop(self,prop):
         if prop.type in self.prop_types:
-            inp = self.add_input(self.prop_types[prop.type], prop.name)
+            name = prop.name
+            if not name:
+                name = prop.identifier.replace("_", " ").title()
+
+            inp = self.add_input(self.prop_types[prop.type], name)
             inp.variable_name = prop.identifier
             size = -1
             if hasattr(prop,"array_length"):
                 size = prop.array_length
-            inp.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
+            if not prop.type in ["POINTER", "COLLECTION"]:
+                inp.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
+            else:
+                inp.subtype = "COLLECTION" if prop.type == "COLLECTION" else "DATA_BLOCK"
             return inp
 
 

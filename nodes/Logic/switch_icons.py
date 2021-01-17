@@ -28,4 +28,3 @@ class SN_SwitchIconsNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
 #TODO convert selected nodes to function
-#TODO take expected input with 0 index as default in blend data inputs
