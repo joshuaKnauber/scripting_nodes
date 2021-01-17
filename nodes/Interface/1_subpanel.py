@@ -146,7 +146,7 @@ class SN_SubpanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def on_create(self,context):
-        self.add_interface_output("Panel",True)
+        self.add_interface_output("Panel")
         self.add_dynamic_interface_output("Panel")
         self.add_dynamic_interface_output("Header")
 
@@ -197,14 +197,14 @@ class SN_SubpanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         def draw_header(self, context):
                             try:
                                 layout = self.layout
-                                {self.inputs["Header"].by_name(8)}
+                                {self.outputs["Header"].by_name(8)}
                             except Exception as exc:
                                 print(str(exc) + " | Error in {self.label} subpanel header")
                         
                         def draw(self, context):
                             try:
                                 layout = self.layout
-                                {self.inputs["Panel"].by_name(8)}
+                                {self.outputs["Panel"].by_name(8)}
                             except Exception as exc:
                                 print(str(exc) + " | Error in {self.label} subpanel")
                     """

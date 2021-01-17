@@ -333,12 +333,16 @@ class SN_ScriptingBaseNode:
         inp = self.add_input(self.prop_types[prop_data["type"]],prop_data["name"])
         inp.subtype = self.subtype_from_prop_subtype(prop_data["type"],prop_data["subtype"],prop_data["size"])
         inp.variable_name = prop_data["identifier"]
+        if prop_data["type"] == "ENUM":
+            inp.enum_values = prop_data["items"]
     
     
     def add_output_from_data(self,prop_data):
         out = self.add_output(self.prop_types[prop_data["type"]],prop_data["name"])
         out.subtype = self.subtype_from_prop_subtype(prop_data["type"],prop_data["subtype"],prop_data["size"])
         out.variable_name = prop_data["identifier"]
+        if prop_data["type"] == "ENUM":
+            out.enum_values = prop_data["items"]
         
         
     def add_input_from_prop(self,prop):
@@ -356,6 +360,9 @@ class SN_ScriptingBaseNode:
                 inp.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
             else:
                 inp.subtype = "COLLECTION" if prop.type == "COLLECTION" else "DATA_BLOCK"
+
+            if prop.type == "ENUM":
+                inp.enum_values = self.enum_items_as_string(prop)
             return inp
 
 
@@ -367,6 +374,8 @@ class SN_ScriptingBaseNode:
             if hasattr(prop,"array_length"):
                 size = prop.array_length
             out.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
+            if prop.type == "ENUM":
+                out.enum_values = self.enum_items_as_string(prop)
             return out
     
     

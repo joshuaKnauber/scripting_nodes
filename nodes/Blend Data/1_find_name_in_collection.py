@@ -24,6 +24,7 @@ class SN_FindInDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
             if link.from_socket.subtype == "COLLECTION":
                 self.outputs[0].data_type = link.from_socket.data_type
                 self.outputs[0].data_identifier = link.from_socket.data_identifier
+                self.outputs[0].data_name = link.from_socket.data_name
             else:
                 self.collection_error = True
 
@@ -33,7 +34,7 @@ class SN_FindInDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp.mirror_name = True
         inp.subtype = "COLLECTION"
         self.add_string_input("Name")
-        out = self.add_blend_data_output("Data Block")
+        self.add_blend_data_output("Data Block")
         self.add_integer_output("Data Block Index").set_default(-1)
         self.add_boolean_output("Data Block Exists").set_default(False)
         

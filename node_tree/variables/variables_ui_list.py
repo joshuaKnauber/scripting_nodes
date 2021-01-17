@@ -322,6 +322,12 @@ class SN_Variable(bpy.types.PropertyGroup):
     
     enum_items: bpy.props.CollectionProperty(type=SN_EnumItem)
     
+    def enum_string(self):
+        items = "["
+        for item in self.enum_items:
+            items += f"(\"{item.name}\",\"{item.name}\",\"{item.description}\"),"
+        return items + "]"
+    
     def property_default(self):
         if self.var_type == "STRING":
             return f"default='{self.str_default}'"

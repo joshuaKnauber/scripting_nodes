@@ -46,11 +46,14 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.copied_path:
             data = get_data(self.copied_path)
             if data:
-                self.label = labels[data["type"]]
-                self.setup_inputs(data["type"])
-                self.inputs["Text"].set_default(data["name"])
-                self.prop_name = data["name"]
-                setup_data_input(self, data)
+                self.label = labels[data["property"]["type"]]
+                self.setup_inputs(data["property"]["type"])
+                self.inputs["Text"].set_default(data["property"]["name"])
+                self.prop_name = data["property"]["name"]
+                if data["data_block"]["type"]:
+                    setup_data_input(self, data)
+            else:
+                self.copied_path = ""
                 
         else:
             self.label = "Property"
@@ -86,13 +89,15 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             
         data = get_data(self.copied_path)
 
+        data_path = ""
         if self.inputs[-1].socket_type == "BLEND_DATA":
-            data_path = self.inputs[-1].code() + data["full_path"].split("]")[-1]
-        else:
-            data_path = "self"
+            data_path = self.inputs[-1].code()
+
+        if data["group_path"]:
+            data_path += "." + data["group_path"] if data_path else data["group_path"]
         
         return {
             "code": f"""
-                    {layout}.prop({data_path},"{data["identifier"]}",icon_value={self.inputs['Icon'].code()},{values})
+                    {layout}.prop({data_path},"{data["property"]["identifier"]}",icon_value={self.inputs['Icon'].code()},{values})
                     """
         }

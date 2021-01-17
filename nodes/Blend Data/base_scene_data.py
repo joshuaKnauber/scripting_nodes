@@ -45,12 +45,14 @@ class SN_SceneDataBase():
         out.subtype = "COLLECTION"
         out.data_type = self.data_type
         out.data_identifier = self.data_identifier
+        out.data_name = self.data_type
         
         if self.active_data:
             out = self.add_blend_data_output("Active")
             out.subtype = "DATA_BLOCK"
             out.data_type = self.data_type
             out.data_identifier = self.active_data.split(".")[-1]
+            out.data_name = self.data_type
         
         
     def draw_node(self,context,layout):
