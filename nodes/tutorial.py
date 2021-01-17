@@ -15,26 +15,119 @@ tutorial = [
         "image": "get_started.jpg"
     },
     {
-        "image": "test.jpg",
-        "sockets": ["self.add_boolean_input('Boolean')"],
-        "nodes": [
-                    {"idname": "SN_BooleanNode",
-                     "name": "Boolean Test",
-                     "offset_x":-300,
-                     "offset_y":0}
-                ],
-        "links": [
-                    {"out_name":"Boolean Test",
-                     "out_socket":0,
-                     "in_name":"self",
-                     "in_socket":0}
-                ]
+        "image": "what_is_it.jpg"
     },
     {
-        "image": "test.jpg",
-        "sockets": None,
-        "nodes": None
-    }
+        "image": "structure.jpg"
+    },
+    {
+        "image": "graphs.jpg"
+    },
+    {
+        "image": "bookmark.jpg"
+    },
+    {
+        "image": "switch_addon.jpg"
+    },
+    {
+        "image": "links.jpg"
+    },
+    {
+        "image": "compile.jpg"
+    },
+    {
+        "image": "panel_start.jpg",
+        "nodes": [
+                    {"idname": "SN_AddToPanelNode",
+                     "name": "First Add To Panel",
+                     "offset_x": 0,
+                     "offset_y": -100}
+                ],
+    },
+    {
+        "image": "label.jpg",
+        "nodes": [
+                    {"name": "First Add To Panel"},
+                    {"idname": "SN_LabelNode",
+                     "name": "First Label",
+                     "offset_x": 300,
+                     "offset_y": -100}
+                ],
+        "links": [
+                    {"out_name":"First Add To Panel",
+                    "out_socket":0,
+                    "in_name":"First Label",
+                    "in_socket":0}
+        ]
+    },
+    {
+        "image": "seeing_the_label.jpg",
+        "nodes": None,
+        "links": None
+    },
+    {
+        "image": "adventure.jpg",
+        "adventure": True
+    },
+    {
+        "image": "interface.jpg",
+        "sockets": [
+            "self.add_interface_output('Interface')",
+            "self.add_interface_input('Interface')",
+        ]
+    },
+    {
+        "image": "execute.jpg",
+        "sockets": [
+            "self.add_execute_output('Execute')",
+            "self.add_execute_input('Execute')",
+        ]
+    },
+    {
+        "image": "function.jpg"
+    },
+    {
+        "image": "data.jpg"
+    },
+    {
+        "image": "variables.jpg"
+    },
+    {
+        "image": "get_property.jpg",
+        "nodes": [
+                    {"idname": "SN_GetPropertyNode",
+                     "name": "Get First Property",
+                     "offset_x": 0,
+                     "offset_y": -100}
+                ],
+    },
+    {
+        "image": "blend_data.jpg"
+    },
+    {
+        "image": "properties.jpg"
+    },
+    {
+        "image": "operator.jpg"
+    },
+    {
+        "image": "custom_files.jpg"
+    },
+    {
+        "image": "save.jpg"
+    },
+    {
+        "image": "marketplace.jpg"
+    },
+    {
+        "image": "packages.jpg"
+    },
+    {
+        "image": "console.jpg"
+    },
+    {
+        "image": "have_fun.jpg"
+    },
 ]
 
 
@@ -80,6 +173,22 @@ class SN_OT_MoveTutorial(bpy.types.Operator):
         node = context.space_data.node_tree.nodes[self.node]
         node.index = node.index + 1 if self.forward else node.index - 1
         node.node_tree.backdrop_image = bpy.data.images[1]
+        return {"FINISHED"}
+    
+    
+    
+class SN_OT_SetTutorial(bpy.types.Operator):
+    bl_idname = "sn.set_tutorial"
+    bl_label = "Set Tutorial"
+    bl_description = "Changes the tutorial step"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    index: bpy.props.IntProperty()
+    node: bpy.props.StringProperty()
+
+    def execute(self, context):
+        node = context.space_data.node_tree.nodes[self.node]
+        node.index = self.index
         return {"FINISHED"}
 
 
@@ -139,6 +248,8 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.15,0.15,0.15),
     }
     
+    show_settings: bpy.props.BoolProperty(default=False,name="Show Settings",description="Show the settings")
+    
     
     def remove_images(self):
         for step in tutorial:
@@ -162,8 +273,12 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
                 
                 
     def remove_nodes(self):
+        next_nodes = []
+        if "nodes" in tutorial[self.index]:
+            for node in tutorial[self.index]["nodes"]:
+                next_nodes.append(node["name"])
         for node in self.node_tree.nodes:
-            if not node == self:
+            if not node == self and not node.name in next_nodes:
                 self.node_tree.nodes.remove(node)
             
     
@@ -174,9 +289,10 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.remove_nodes()
         
             for node in tutorial[self.index]["nodes"]:
-                new_node = self.node_tree.nodes.new(node["idname"])
-                new_node.name = node["name"]
-                new_node.location = (self.location[0]+node["offset_x"],self.location[1]+node["offset_y"])
+                if not node["name"] in self.node_tree.nodes:
+                    new_node = self.node_tree.nodes.new(node["idname"])
+                    new_node.name = node["name"]
+                    new_node.location = (self.location[0]+node["offset_x"],self.location[1]+node["offset_y"])
             
     
     def remove_links(self):
@@ -243,24 +359,71 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def draw_node(self,context,layout):
-        row = layout.row(align=True)
-        row.scale_y = 1.2
-        col = row.column(align=True)
-        col.enabled = self.index > 0
-        op = col.operator("sn.move_tutorial",icon="TRIA_LEFT",text="Previous")
-        op.node = self.name
-        op.forward = False
-        col = row.column(align=True)
-        col.enabled = self.index < len(tutorial)-1
-        op = col.operator("sn.move_tutorial",icon="TRIA_RIGHT",text="Next")
-        op.node = self.name
-        op.forward = True
-        row.operator("sn.end_tutorial",text="",icon="HANDLETYPE_VECTOR_VEC").node = self.name
+        if "adventure" in tutorial[self.index]:
+            col = layout.column()
+            col.scale_y = 2
+            op = col.operator("sn.move_tutorial",text="Keep Going!",icon="OUTLINER_DATA_LIGHT")
+            op.node = self.name
+            op.forward = True
+            col.operator("sn.end_tutorial",text="ADVENTURE!!!",icon="OUTLINER_DATA_ARMATURE").node = self.name
+            
+        else:
+            row = layout.row(align=True)
+            row.scale_y = 1.2
+            col = row.column(align=True)
+            col.enabled = self.index > 1
+            op = col.operator("sn.set_tutorial",text="",icon="REW")
+            op.node = self.name
+            op.index = 1
+            col = row.column(align=True)
+            col.enabled = self.index > 0
+            op = col.operator("sn.move_tutorial",icon="TRIA_LEFT",text="Previous")
+            op.node = self.name
+            op.forward = False
+            col = row.column(align=True)
+            col.enabled = self.index < len(tutorial)-1
+            op = col.operator("sn.move_tutorial",icon="TRIA_RIGHT",text="Next")
+            op.node = self.name
+            op.forward = True
+            row.operator("sn.end_tutorial",text="",icon="HANDLETYPE_VECTOR_VEC").node = self.name
+            
+            if self.index > 0:
+                layout.prop(self,"show_settings",text="Image Size",icon="TRIA_DOWN" if self.show_settings else "TRIA_RIGHT",emboss=False)
+            
+            if self.index == 0 or self.show_settings:
+                col = layout.column(align=True)
+                col.scale_y = 1.2
+                row = col.row(align=True)
+                col.prop(self,"size",text="Size")
+                row.prop(self,"x",text="X")
+                row.prop(self,"y",text="Y")
         
-        if self.index == 0:
+        if self.index == 1:
+            chapters = [
+                ("Overview", "what_is_it"),
+                ("Nodes", "panel_start"),
+                ("Interface", "interface"),
+                ("Execute", "execute"),
+                ("Functions", "function"),
+                ("Data", "data"),
+                ("Variables", "variables"),
+                ("Blend Data", "blend_data"),
+                ("Properties", "properties"),
+                ("Operators", "operator"),
+                ("Assets", "custom_files"),
+                ("Export", "save"),
+                ("Marketplace", "marketplace"),
+                ("Packages", "packages"),
+                ("Console", "console"),
+            ]
+            
+            layout.label(text="Chapters")
             col = layout.column(align=True)
             col.scale_y = 1.2
-            row = col.row(align=True)
-            col.prop(self,"size",text="Size")
-            row.prop(self,"x",text="X")
-            row.prop(self,"y",text="Y")
+            for index, chapter in enumerate(chapters):
+                op = col.operator("sn.set_tutorial",text=str(index+1) + " | " + chapter[0])
+                op.node = self.name
+                for i, step in enumerate(tutorial):
+                    if step["image"] == chapter[1] + ".jpg":
+                        op.index = i
+                        break

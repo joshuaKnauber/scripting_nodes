@@ -230,7 +230,7 @@ class ScriptingSocket:
 
     def draw_color(self, context, node):
         c = self.get_color(context, node)
-        if "VECTOR" in self.subtype or "COLOR" in self.subtype: c = (0.39, 0.39, 0.78)
+        if "VECTOR" in self.subtype: c = (0.39, 0.39, 0.78)
         
         if self.is_linked: alpha = 1
         else: alpha = 0.5
