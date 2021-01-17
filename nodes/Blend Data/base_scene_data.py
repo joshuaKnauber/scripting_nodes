@@ -22,12 +22,12 @@ class SN_SceneDataBase():
             self.inputs.clear()
             self.add_integer_input("Index").set_default(0)
             self.outputs[0].default_text = "Indexed"
-            self.outputs[0].subtype = "DATA_BLOCK"
+            self.outputs[0].subtype = "NONE"
         elif self.return_type == "NAME" and (not len(self.inputs) or self.inputs[0].socket_type != "STRING"):
             self.inputs.clear()
             self.add_string_input("Name")
             self.outputs[0].default_text = "Named"
-            self.outputs[0].subtype = "DATA_BLOCK"
+            self.outputs[0].subtype = "NONE"
         if self.outputs[0].is_linked:
             self.outputs[0].links[0].to_node.on_link_insert(self.outputs[0].links[0])
     
@@ -49,7 +49,7 @@ class SN_SceneDataBase():
         
         if self.active_data:
             out = self.add_blend_data_output("Active")
-            out.subtype = "DATA_BLOCK"
+            out.subtype = "NONE"
             out.data_type = self.data_type
             out.data_identifier = self.active_data.split(".")[-1]
             out.data_name = self.data_type
@@ -67,7 +67,7 @@ class SN_SceneDataBase():
                 limiter = f"[{self.inputs[0].code()}]"
 
             return {
-                "code": f"bpy.data.{self.outputs[0].data_identifier}{limiter}"
+                "code": f"bpy.data.{self.data_identifier}{limiter}"
             }
             
         else:

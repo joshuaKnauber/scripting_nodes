@@ -58,7 +58,7 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 inp = self.change_socket_type(self.inputs[1], idname[var.var_type])
             if var.var_type == "BLEND_DATA":
                 if var.is_data_collection: inp.subtype = "COLLECTION"
-                else: inp.subtype = "DATA_BLOCK"
+                else: inp.subtype = "NONE"
 
 
     def on_node_update(self):

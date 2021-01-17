@@ -359,7 +359,7 @@ class SN_ScriptingBaseNode:
             if not prop.type in ["POINTER", "COLLECTION"]:
                 inp.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
             else:
-                inp.subtype = "COLLECTION" if prop.type == "COLLECTION" else "DATA_BLOCK"
+                inp.subtype = "COLLECTION" if prop.type == "COLLECTION" else "NONE"
 
             if prop.type == "ENUM":
                 inp.enum_values = self.enum_items_as_string(prop)
@@ -438,12 +438,12 @@ class SN_ScriptingBaseNode:
     
     
     def add_error(self, title, description, fatal=False):
-        error = bpy.context.scene.sn.addon_tree().sn_graphs[0].errors.add()
+        error = self.addon_tree.sn_graphs[0].errors.add()
         error.title = title
         error.description = description
         error.fatal = fatal
         error.node = self.name
-        error.node_tree = self.node_tree.sn_graphs[0].name
+        error.node_tree = self.addon_tree.sn_graphs[0].name
 
 
     ### RETURNED CODE

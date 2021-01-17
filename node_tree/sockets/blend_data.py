@@ -15,6 +15,7 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
             self.display_shape = "SQUARE"
         else:
             self.display_shape = "CIRCLE"
+        self.update_shape(context)
     
     data_type: bpy.props.StringProperty()
     
@@ -22,7 +23,7 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     data_identifier: bpy.props.StringProperty() # optional
     
-    subtype: bpy.props.EnumProperty(items=[("DATA_BLOCK","Data Block","Data Block"),
+    subtype: bpy.props.EnumProperty(items=[("NONE","Data Block","Data Block"),
                                            ("COLLECTION","Collection","Collection")],
                                     update=update_subtype)
 

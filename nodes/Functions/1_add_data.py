@@ -30,25 +30,21 @@ class SN_AddDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                     for parameter in eval("bpy.data." + data.identifier).bl_rna.functions["new"].parameters[:-1]:
                         inp = self.add_input_from_prop(parameter)
-                        if parameter.type == "ENUM":
-                            enum_values = []
-                            for item in parameter.enum_items:
-                                enum_values.append((item.identifier, item.name, item.description))
-                            inp.enum_values = str(enum_values)
 
                         if not parameter.type in ["POINTER", "COLLECTION"]:
                             inp.set_default(parameter.default)
 
 
     def on_link_insert(self, link):
-        if link.to_socket == self.inputs[1] and not link.from_socket.data_type == self.current_data_type:
-            self.inputs[1].data_type = link.from_socket.data_type
-            if len(self.outputs) == 1:
-                self.add_blend_data_output("New Data")
-            out = self.outputs[1]
-            out.data_type = link.from_socket.data_type
-            self.current_data_type = link.from_socket.data_type
-            self.add_function_inputs(link.from_socket.data_type)
+        if link.to_socket == self.inputs[1] and link.from_socket.bl_idname == "SN_BlendDataSocket" and link.from_socket.subtype == "COLLECTION":
+            if link.from_socket.data_type != self.current_data_type:
+                self.inputs[1].data_type = link.from_socket.data_type
+                if len(self.outputs) == 1:
+                    self.add_blend_data_output("New Data")
+                out = self.outputs[1]
+                out.data_type = link.from_socket.data_type
+                self.current_data_type = link.from_socket.data_type
+                self.add_function_inputs(link.from_socket.data_type)
 
 
     def on_create(self,context):
@@ -67,19 +63,27 @@ class SN_AddDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
         
         if self.inputs[1].is_linked:
-            parameter = ""
-            for inp in self.inputs[2:]:
-                parameter+=inp.variable_name + "=" + inp.code() + ", "
-            return {
-                "code": f"""
-                        {self.inputs[1].code()}.new({parameter})
-                        {self.outputs[0].code(5)}
-                        """
-            }
+            if touched_socket == self.inputs[0]:
+                parameter = ""
+                for inp in self.inputs[2:]:
+                    parameter+=inp.variable_name + "=" + inp.code() + ", "
+                return {
+                    "code": f"""
+                            new_return_{self.uid} = {self.inputs[1].code()}.new({parameter})
+                            {self.outputs[0].code(7)}
+                            """
+                }
+            else:
+                return {"code": f"new_return_{self.uid}"}
 
         else:
-            return {
-                "code": f"""
-                        {self.outputs[0].code(5)}
-                        """
-            }
+            self.add_error("No blend data", "The blend data input is not connected")
+            if touched_socket == self.inputs[0]:
+                return {
+                    "code": f"""
+                            {self.outputs[0].code(7)}
+                            """
+                }
+
+            else:
+                return {"code": "None"}

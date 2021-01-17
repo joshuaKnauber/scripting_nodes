@@ -43,7 +43,7 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_outputs(self,socket):
         self.collection_error = False
         self.no_data_error = False
-        if socket.subtype == "DATA_BLOCK":
+        if socket.subtype == "NONE":
             if socket.data_type == self.current_data_type and not len(self.outputs):
                 self.add_data_outputs(socket.data_type)
             elif socket.data_type != self.current_data_type:

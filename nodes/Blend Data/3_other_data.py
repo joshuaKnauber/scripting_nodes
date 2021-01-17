@@ -51,12 +51,12 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.inputs.clear()
             self.add_integer_input("Index").set_default(0)
             self.outputs[0].default_text = "By Index"
-            self.outputs[0].subtype = "DATA_BLOCK"
+            self.outputs[0].subtype = "NONE"
         elif self.return_type == "NAME" and (not len(self.inputs) or self.inputs[0].socket_type != "STRING"):
             self.inputs.clear()
             self.add_string_input("Name")
             self.outputs[0].default_text = "By Name"
-            self.outputs[0].subtype = "DATA_BLOCK"
+            self.outputs[0].subtype = "NONE"
         if self.outputs[0].is_linked:
             self.outputs[0].links[0].to_node.on_link_insert(self.outputs[0].links[0])
     
