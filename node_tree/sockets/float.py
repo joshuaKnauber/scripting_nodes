@@ -106,7 +106,14 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
             row.label(text=text)
         else:
             if not "VECTOR" in self.subtype:
-                row.prop(self, "value", text=text)
+                if self.subtype == "NONE":
+                    row.prop(self, "value", text=text)
+                elif self.subtype == "FACTOR":
+                    row.prop(self, "value_factor", text=text)
+                elif self.subtype == "COLOR":
+                    row.prop(self, "value_color", text=text)
+                elif self.subtype == "COLOR_ALPHA":
+                    row.prop(self, "value_color_alpha", text=text)
             else:
                 col = row.column(align=True)
                 if self.subtype == "VECTOR3":

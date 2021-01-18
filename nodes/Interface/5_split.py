@@ -20,7 +20,9 @@ class SN_SplitNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_output("First Part")
         self.add_interface_output("Second Part")
 
-        self.add_float_input("Factor").subtype = "FACTOR"
+        inp = self.add_float_input("Factor")
+        inp.subtype = "FACTOR"
+        inp.set_default(0.5)
         self.add_boolean_input("Align").set_default(False)
         self.add_boolean_input("Enabled")
         self.add_boolean_input("Alert").set_default(False)
@@ -33,7 +35,6 @@ class SN_SplitNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def code_evaluate(self, context, touched_socket):
-
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
         
         return {
