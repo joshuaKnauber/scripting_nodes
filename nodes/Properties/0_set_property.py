@@ -18,8 +18,8 @@ class SN_SetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     def on_create(self,context):
-        self.add_execute_input("Execute")
-        self.add_execute_output("Execute")
+        self.add_execute_input("Set Property")
+        self.add_execute_output("Execute").mirror_name = True
     
 
     def update_copied(self,context):

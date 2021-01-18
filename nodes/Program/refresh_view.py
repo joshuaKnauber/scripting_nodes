@@ -17,7 +17,7 @@ class SN_RefreshViewNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_execute_input("Refresh View")
-        self.add_execute_output("Execute")
+        self.add_execute_output("Execute").mirror_name = True
         
         
     def code_imperative(self,context):

@@ -43,12 +43,12 @@ class SN_RemoveDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_execute_input("Execute").copy_name = True
+        self.add_execute_input("Remove Data")
         inp = self.add_blend_data_input("Blend Data")
         inp.subtype = "COLLECTION"
-        inp.copy_name = True
+        inp.mirror_name = True
         inp.collection = True
-        self.add_execute_output("Execute")
+        self.add_execute_output("Execute").mirror_name = True
 
     def draw_node(self, context, layout):
         if self.current_data_type:
