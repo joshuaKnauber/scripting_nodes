@@ -30,6 +30,12 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                 item.name = function.identifier.replace("_", " ").title()
                 item.identifier = function.identifier
 
+            functions = ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]
+            for function in functions:
+                item = self.function_collection.add()
+                item.name = function.replace("_", " ").title()
+                item.identifier = function
+
 
         if not self.search_value in self.function_collection:
             self["search_value"] = ""
@@ -51,7 +57,51 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == self.current_data_type:
                         parameters = eval("bpy.data." + data.identifier).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
             else:
-                parameters = eval("bpy.types." + self.current_data_type).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+                if self.function_collection[self.search_value].identifier in ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]:
+                    parameters = []
+                    if self.function_collection[self.search_value].identifier == "driver_add":
+                        inp = self.add_string_input("Path")
+                        inp.variable_name = "path"
+                        inp = self.add_integer_input("Index")
+                        inp.set_default(-1)
+                        inp.variable_name = "index"
+                        self.add_blend_data_output("Driver")
+
+                    elif self.function_collection[self.search_value].identifier == "driver_remove":
+                        inp = self.add_string_input("Path")
+                        inp.variable_name = "path"
+                        inp = self.add_integer_input("Index")
+                        inp.set_default(-1)
+                        inp.variable_name = "index"
+                        self.add_boolean_output("Removed")
+
+                    elif self.function_collection[self.search_value].identifier == "keyframe_insert":
+                        inp = self.add_string_input("Path")
+                        inp.variable_name = "path"
+                        inp = self.add_integer_input("Index")
+                        inp.set_default(-1)
+                        inp.variable_name = "index"
+                        inp = self.add_float_input("Frame")
+                        inp.variable_name = "frame"
+                        inp = self.add_string_input("Group")
+                        inp.variable_name = "group"
+                        self.add_boolean_output("Created")
+
+                    elif self.function_collection[self.search_value].identifier == "keyframe_delete":
+                        inp = self.add_string_input("Path")
+                        inp.variable_name = "path"
+                        inp = self.add_integer_input("Index")
+                        inp.set_default(-1)
+                        inp.variable_name = "index"
+                        inp = self.add_float_input("Frame")
+                        inp.variable_name = "frame"
+                        inp = self.add_string_input("Group")
+                        inp.variable_name = "group"
+                        self.add_boolean_output("Removed")
+
+                else:
+                    parameters = eval("bpy.types." + self.current_data_type).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+
 
             for parameter in parameters:
                 if parameter.is_output:
