@@ -15,6 +15,8 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
             self.display_shape = "SQUARE"
         else:
             self.display_shape = "CIRCLE"
+        
+        self.socket_shape = self.display_shape
         self.update_shape(context)
     
     data_type: bpy.props.StringProperty()

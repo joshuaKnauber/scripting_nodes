@@ -211,15 +211,18 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             if touched_socket == self.inputs[0]:
                 return {
                     "code": f"""
-                            {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_code(parameters)})
+                            function_return_{self.uid} = {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_code(parameters)})
                             {self.outputs[0].code(7)}
                             """
                 }
 
-            else:
+            elif self.inputs[0].is_linked:
                 return {
-                    "code": f"""{self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_code(parameters)})[{self.outputs.find(touched_socket.name)-1}]"""
+                    "code": f"""function_return_{self.uid}[{self.outputs.find(touched_socket.name)-1}]"""
                 }
+            else:
+                self.add_error("No run function", "You need to run your function first")
+                return {"code": "None"}
 
         else:
             self.add_error("No function", "No valid function selected")
