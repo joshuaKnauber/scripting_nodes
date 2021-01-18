@@ -39,9 +39,12 @@ class SN_OT_StartAddToMenuSelection(bpy.types.Operator):
     def get_menus(self):
         menus = []
         for menu_name in dir(bpy.types):
-            menu = eval("bpy.types."+menu_name)
-            if hasattr(menu.bl_rna.base,"identifier") and menu.bl_rna.base.identifier == "Menu":
-                menus.append(menu_name)
+            try:
+                menu = eval("bpy.types."+menu_name)
+                if hasattr(menu.bl_rna.base,"identifier") and menu.bl_rna.base.identifier == "Menu":
+                    menus.append(menu_name)
+            except:
+                pass
         return menus
 
     def execute(self, context):

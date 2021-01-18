@@ -66,13 +66,16 @@ class SN_StartInterfacePicker(bpy.types.Operator):
     def get_interfaces(self):
         interfaces = []
         for name in dir(bpy.types):
-            interface = eval("bpy.types."+name)
-            if self.selection != "PANELS":
-                if hasattr(interface.bl_rna.base,"identifier") and interface.bl_rna.base.identifier == "Menu":
-                    interfaces.append(name)
-            if self.selection != "MENUS":
-                if hasattr(interface.bl_rna.base,"identifier") and interface.bl_rna.base.identifier == "Panel":
-                    interfaces.append(name)
+            try:
+                interface = eval("bpy.types."+name)
+                if self.selection != "PANELS":
+                    if hasattr(interface.bl_rna.base,"identifier") and interface.bl_rna.base.identifier == "Menu":
+                        interfaces.append(name)
+                if self.selection != "MENUS":
+                    if hasattr(interface.bl_rna.base,"identifier") and interface.bl_rna.base.identifier == "Panel":
+                        interfaces.append(name)
+            except:
+                pass
         return interfaces
 
     def execute(self, context):

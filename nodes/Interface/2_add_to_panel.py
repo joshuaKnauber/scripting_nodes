@@ -42,9 +42,12 @@ class SN_OT_StartAddToPanelSelection(bpy.types.Operator):
     def get_panels(self):
         panels = []
         for panel_name in dir(bpy.types):
-            panel = eval("bpy.types."+panel_name)
-            if hasattr(panel.bl_rna.base,"identifier") and panel.bl_rna.base.identifier == "Panel":
-                panels.append(panel_name)
+            try:
+                panel = eval("bpy.types."+panel_name)
+                if hasattr(panel.bl_rna.base,"identifier") and panel.bl_rna.base.identifier == "Panel":
+                    panels.append(panel_name)
+            except:
+                pass
         return panels
 
     def execute(self, context):
