@@ -66,6 +66,26 @@ class SN_ScriptingBaseNode:
                     node.on_outside_update(self)
 
 
+    ### REMOVE SOCKETS
+
+    def remove_output_range(self, start_index, end_index=-1):
+        """Both Parameters Inclusive"""
+        if end_index == -1:
+            end_index = len(self.outputs)-1
+
+        for i in range(end_index, start_index-1, -1):
+            self.outputs.remove(self.outputs[i])
+
+
+    def remove_input_range(self, start_index, end_index=-1):
+        """Both Parameters Inclusive"""
+        if end_index == -1:
+            end_index = len(self.inputs)-1
+
+        for i in range(end_index, start_index-1, -1):
+            self.inputs.remove(self.inputs[i])
+
+
     ### DYNAMIC SOCKET ADD
     def on_dynamic_add(self,socket,connected_socket): pass
     def on_dynamic_remove(self,is_output): pass
