@@ -85,7 +85,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         values = ""
         for inp in self.inputs:
             if not inp.socket_type in ["BLEND_DATA","ICON","INTERFACE"]:
-                values += inp.name.lower().replace("_"," ") + "=" + inp.code() + ","
+                values += inp.name.lower().replace(" ","_") + "=" + inp.code() + ","
             
         data = get_data(self.copied_path)
 
