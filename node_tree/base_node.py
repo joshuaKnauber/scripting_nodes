@@ -388,12 +388,20 @@ class SN_ScriptingBaseNode:
 
     def add_output_from_prop(self,prop):
         if prop.type in self.prop_types:
-            out = self.add_output(self.prop_types[prop.type], prop.name)
+            name = prop.name
+            if not name:
+                name = prop.identifier.replace("_", " ").title()
+
+            out = self.add_output(self.prop_types[prop.type], name)
             out.variable_name = prop.identifier
             size = -1
             if hasattr(prop,"array_length"):
                 size = prop.array_length
-            out.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
+            if not prop.type in ["POINTER", "COLLECTION"]:
+                out.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
+            else:
+                out.subtype = "COLLECTION" if prop.type == "COLLECTION" else "NONE"
+
             if prop.type == "ENUM":
                 out.enum_values = self.enum_items_as_string(prop)
             return out

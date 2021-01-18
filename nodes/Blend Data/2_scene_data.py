@@ -95,7 +95,7 @@ class SN_NodeGroupsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_idname = "SN_NodeGroupsNode"
     bl_label = "Node Groups"
     
-    data_type = "NodeGroup"
+    data_type = "NodeTree"
     data_identifier = "node_groups"
     
     
