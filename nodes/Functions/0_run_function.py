@@ -191,7 +191,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             item = self.addon_tree.sn_nodes.add()
             item.name = "SN_FunctionNode"
         self.add_execute_input("Run Function")
-        self.add_execute_output("Execute")
+        self.add_execute_output("Execute").mirror_name = True
 
     def draw_node(self,context,layout):
         if self.recursion_warning:

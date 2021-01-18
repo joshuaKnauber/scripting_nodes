@@ -18,7 +18,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def on_create(self,context):
-        self.add_interface_input("Property").mirror_name = True
+        self.add_interface_input("Interface").mirror_name = True
         self.add_string_input("Text")
         self.add_boolean_input("Emboss")
         

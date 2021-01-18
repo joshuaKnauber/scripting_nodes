@@ -42,7 +42,7 @@ class SN_RemoveFromListNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_execute_input("Remove from List")
-        self.add_execute_output("Execute")
+        self.add_execute_output("Execute").mirror_name = True
 
 
     search_value: bpy.props.StringProperty(update=update_search)

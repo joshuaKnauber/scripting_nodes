@@ -18,11 +18,11 @@ class SN_SetAttributeNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     def on_create(self,context):
-        self.add_execute_input("Execute")
+        self.add_execute_input("Set Attribute")
         self.add_blend_data_input("Blend Data").mirror_name = True
         self.add_string_input("Attribute")
         self.add_data_input("Data")
-        self.add_execute_output("Execute")
+        self.add_execute_output("Execute").mirror_name = True
     
 
     def code_evaluate(self, context, touched_socket):

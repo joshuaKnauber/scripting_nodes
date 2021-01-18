@@ -135,7 +135,7 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         self.add_execute_input("Run Function On")
         self.add_blend_data_input("Blend Data/Collection")
-        self.add_execute_output("Execute")
+        self.add_execute_output("Execute").mirror_name = True
 
 
     def draw_node(self, context, layout):

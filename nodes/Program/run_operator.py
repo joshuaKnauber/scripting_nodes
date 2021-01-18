@@ -67,7 +67,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_execute_input("Run Operator")
-        self.add_execute_output("Execute")
+        self.add_execute_output("Execute").mirror_name = True
         
     def draw_node(self,context,layout):
         row = layout.row(align=True)
