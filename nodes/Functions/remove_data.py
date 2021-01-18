@@ -19,20 +19,19 @@ class SN_RemoveDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     def add_function_inputs(self, data_type):
-        for i in range(len(self.inputs)-1,-1,-1):
-            if not i < 2:
-                self.inputs.remove(self.inputs[i])
+        self.remove_input_range(2)
 
 
         for data in bpy.data.bl_rna.properties:
             if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == data_type:
                 if "remove" in eval("bpy.data." + data.identifier).bl_rna.functions:
 
-                    for parameter in eval("bpy.data." + data.identifier).bl_rna.functions["remove"].parameters[:-1]:
-                        inp = self.add_input_from_prop(parameter)
+                    for parameter in eval("bpy.data." + data.identifier).bl_rna.functions["remove"].parameters:
+                        if not parameter.is_output:
+                            inp = self.add_input_from_prop(parameter)
 
-                        if not parameter.type in ["POINTER", "COLLECTION"]:
-                            inp.set_default(parameter.default)
+                            if not parameter.type in ["POINTER", "COLLECTION"]:
+                                inp.set_default(parameter.default)
 
 
     def on_link_insert(self, link):
