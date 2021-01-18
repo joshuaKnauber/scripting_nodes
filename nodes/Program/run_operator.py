@@ -19,6 +19,42 @@ class SN_OT_PasteOperator(bpy.types.Operator):
         else:
             self.report({"WARNING"},message="Right-Click any button and click 'Copy Operator' to get a valid operator")
         return {"FINISHED"}
+    
+    
+    
+    
+def create_sockets_from_operator(node, index):
+    props = node.addon_tree.sn_nodes["SN_OperatorNode"].items[node.custom_operator].node().operator_properties
+
+    # length is higher -> at least one socket got added
+    if len(props) > len(node.inputs)-1:
+        if len(node.inputs) == 1:
+            for prop in props:
+                data = json.loads(construct_from_property("self",prop))["property"]
+                node.add_input_from_data(data).disableable = True
+        else:
+            data = json.loads(construct_from_property("self",props[-1]))["property"]
+            node.add_input_from_data(data).disableable = True
+        
+    # length is lower -> socket got removed
+    elif len(props) < len(node.inputs)-1:
+        did_remove = False
+        for i, prop in enumerate(props):
+            if not node.inputs[i+1].name == prop.name:
+                node.inputs.remove(node.inputs[i+1])
+                did_remove = True
+                break
+        if not did_remove:
+            node.inputs.remove(node.inputs[-1])
+    
+    # length is the same
+    elif index >= 0:
+        prop = props[index]
+        inp = node.inputs[index+1]
+        node.inputs.remove(inp)
+        data = json.loads(construct_from_property("self",prop))["property"]
+        node.add_input_from_data(data).disableable = True
+        node.inputs.move(len(node.inputs)-1,index+1)
 
 
 
@@ -50,36 +86,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             
             
     def update_inputs_from_operator(self, index=-1):
-        props = self.addon_tree.sn_nodes["SN_OperatorNode"].items[self.custom_operator].node().operator_properties
-
-        # length is higher -> at least one socket got added
-        if len(props) > len(self.inputs)-1:
-            if len(self.inputs) == 1:
-                for prop in props:
-                    data = json.loads(construct_from_property("self",prop))["property"]
-                    self.add_input_from_data(data).disableable = True
-            else:
-                data = json.loads(construct_from_property("self",props[-1]))["property"]
-                self.add_input_from_data(data).disableable = True
-            
-        # length is lower -> socket got removed
-        elif len(props) < len(self.inputs)-1:
-            did_remove = False
-            for i, prop in enumerate(props):
-                if not self.inputs[i+1].name == prop.name:
-                    self.inputs.remove(self.inputs[i+1])
-                    did_remove = True
-                    break
-            if not did_remove:
-                self.inputs.remove(self.inputs[-1])
-                
-        elif index >= 0:
-            prop = props[index]
-            inp = self.inputs[index+1]
-            self.inputs.remove(inp)
-            data = json.loads(construct_from_property("self",prop))["property"]
-            self.add_input_from_data(data).disableable = True
-            self.inputs.move(len(self.inputs)-1,index+1)
+        create_sockets_from_operator(self,index)
 
     
     def update_custom_operator(self,context):

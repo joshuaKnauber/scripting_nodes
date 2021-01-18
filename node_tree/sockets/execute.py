@@ -9,6 +9,7 @@ class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
     group = "PROGRAM"
     bl_label = "Execute"
     socket_type = "EXECUTE"
+    output_limit = 1
 
     socket_shape = "DIAMOND"
     
