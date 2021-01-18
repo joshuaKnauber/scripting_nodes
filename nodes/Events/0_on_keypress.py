@@ -1,5 +1,6 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
+from ..Program.run_operator import create_sockets_from_operator
 
 
 def sn_append_interface(self, context):
@@ -154,6 +155,8 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.panel = ""
         self.menu = ""
         self.pie = ""
+        self.operator = ""
+        self.custom_operator = ""
         
     def update_picked(self,context):
         if self.picked:
@@ -169,6 +172,30 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.action = "PANEL"
                 self.panel = self.picked
             self.picked = ""
+            
+    
+    def add_inputs_from_internal(self):
+        rna = eval(self.operator.split("(")[0] + ".get_rna_type()")
+        for prop in rna.properties:
+            if not prop.name == "RNA":
+                self.add_input_from_prop(prop).disableable = True
+    
+    
+    def update_operator(self,context):
+        if self.operator:
+            self.add_inputs_from_internal()
+        else:
+            self.remove_input_range(0)
+            
+            
+    def update_inputs_from_operator(self, index=-1):
+        create_sockets_from_operator(self,0,index)
+
+    
+    def update_custom_operator(self,context):
+        self.remove_input_range(0)
+        if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
+            self.update_inputs_from_operator()
     
     
     key: bpy.props.StringProperty(name="Key",default="Y")
@@ -206,6 +233,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     action: bpy.props.EnumProperty(name="Action",
                                    description="The type of action to be performed",
+                                   update=update_use_internal,
                                    items=[("OPERATOR","Operator","Run an operator when the key is pressed"),
                                           ("PANEL","Panel","Open a panel when the key is pressed"),
                                           ("MENU","Menu","Open a menu when the key is pressed"),
@@ -229,7 +257,13 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     pie: bpy.props.StringProperty(name="Pie Menu",
                                     description="The pie menu to open when the key is pressed")
     
-    picked: bpy.props.StringProperty(update=update_picked)
+    picked: bpy.props.StringProperty(update=update_picked)    
+    
+    operator: bpy.props.StringProperty(update=update_operator)
+    
+    custom_operator: bpy.props.StringProperty(name="Custom Operator",
+                                              description="Your custom operator",
+                                              update=update_custom_operator)
     
 
     def draw_node(self,context,layout):
@@ -278,6 +312,15 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op.selection = "MENUS"
             elif "SN_PieMenuNode" in self.addon_tree.sn_nodes:
                 layout.prop_search(self,"pie",self.addon_tree.sn_nodes["SN_PieMenuNode"],"items",text="",icon="VIEWZOOM")
+                
+        elif self.action == "OPERATOR":
+            if self.use_internal:
+                if not self.operator:
+                    layout.operator("sn.paste_operator",text="Paste Operator",icon="PASTEDOWN").node_name = self.name
+                else:
+                    layout.operator("sn.reset_property_node",icon="UNLINKED").node = self.name
+            elif "SN_OperatorNode" in self.addon_tree.sn_nodes:
+                layout.prop_search(self,"custom_operator",self.addon_tree.sn_nodes["SN_OperatorNode"],"items",text="",icon="VIEWZOOM")
 
 
     def on_create(self,context):
@@ -312,7 +355,6 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
             "FILE_BROWSER": "File Browser"
         }
         
-        action = "mesh.primitive_monkey_add"
         properties = []
 
         if self.action == "PANEL":
@@ -342,6 +384,19 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
             elif self.pie in self.addon_tree.sn_nodes["SN_PieMenuNode"].items:
                 pie = self.addon_tree.sn_nodes["SN_PieMenuNode"].items[self.pie].node().idname()
             properties.append(f"kmi.properties.name = \"{pie}\"\n")
+            
+        elif self.action == "OPERATOR":
+            action = "mesh.primitive_monkey_add"
+            if self.use_internal:
+                if self.operator:
+                    action = self.operator.split("(")[0].replace("bpy.ops.","")
+            else:
+                if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
+                    item = self.addon_tree.sn_nodes["SN_OperatorNode"].items[self.custom_operator]
+                    action = "sna." + item.identifier
+            for inp in self.inputs:
+                if inp.enabled:
+                    properties.append(f"kmi.properties.{inp.variable_name} = {inp.code()}\n")
             
             
         
