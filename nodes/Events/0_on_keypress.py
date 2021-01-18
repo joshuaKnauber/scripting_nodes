@@ -280,6 +280,10 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 layout.prop_search(self,"pie",self.addon_tree.sn_nodes["SN_PieMenuNode"],"items",text="",icon="VIEWZOOM")
 
 
+    def on_create(self,context):
+        self.add_required_to_collection(["SN_PanelNode","SN_MenuNode","SN_PieMenuNode","SN_OperatorNode"])
+
+
     def code_imperative(self, context):
         return {
             "code": f"""

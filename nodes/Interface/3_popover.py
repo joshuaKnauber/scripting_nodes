@@ -35,6 +35,7 @@ class SN_PopoverNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
+        self.add_required_to_collection(["SN_PanelNode"])
         self.add_interface_input("Interface").mirror_name = True
         self.add_string_input("Text")
         self.add_icon_input("Icon")

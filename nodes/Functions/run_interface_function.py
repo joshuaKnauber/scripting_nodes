@@ -96,9 +96,7 @@ class SN_RunLayoutFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.recursion_warning = True
 
     def on_create(self,context):
-        if not "SN_InterfaceFunctionNode" in self.addon_tree.sn_nodes:
-            item = self.addon_tree.sn_nodes.add()
-            item.name = "SN_InterfaceFunctionNode"
+        self.add_required_to_collection(["SN_InterfaceFunctionNode"])
         self.add_interface_input("Run Layout Function")
 
     def draw_node(self,context,layout):

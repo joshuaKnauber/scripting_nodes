@@ -117,6 +117,13 @@ class SN_ScriptingBaseNode:
                 item.name = getattr(self,self.node_options["collection_name_attr"])
             else:
                 item.name = self.name
+                
+                
+    def add_required_to_collection(self,idnames):
+        for idname in idnames:
+            if not idname in self.addon_tree.sn_nodes:
+                item = self.addon_tree.sn_nodes.add()
+                item.name = idname
 
 
     ### INIT NODE
