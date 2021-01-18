@@ -43,7 +43,7 @@ from .node_tree.graphs.graph_ui_lists import SN_Graph, update_graph_index
 from .node_tree.variables.variables_ui_list import SN_Variable
 from .node_tree.icons.icons_ui_list import SN_Icon
 from .node_tree.assets.assets_ui_list import SN_Asset
-from .node_tree.base_node import SN_NodeCollection, SN_GenericPropertyGroup
+from .node_tree.base_node import SN_NodeCollection
 from .node_tree.node_tree import update_create_tree, handle_versioning
 from .settings.addon_properties import SN_AddonProperties
 from .settings.updates import check_serpens_updates
@@ -90,26 +90,25 @@ def register():
     auto_load.register()
 
     # register the graph properties
-    bpy.types.NodeTree.sn_graphs = bpy.props.CollectionProperty(type=SN_Graph)
-    bpy.types.NodeTree.sn_graph_index = bpy.props.IntProperty(default=0, update=update_graph_index)
-    bpy.types.NodeTree.sn_variables = bpy.props.CollectionProperty(type=SN_Variable)
-    bpy.types.NodeTree.sn_variable_index = bpy.props.IntProperty(default=0)
-    bpy.types.NodeTree.sn_properties = bpy.props.CollectionProperty(type=SN_Variable)
-    bpy.types.NodeTree.sn_property_index = bpy.props.IntProperty(default=0)
-    bpy.types.NodeTree.sn_icons = bpy.props.CollectionProperty(type=SN_Icon)
-    bpy.types.NodeTree.sn_icon_index = bpy.props.IntProperty(default=0)
-    bpy.types.NodeTree.sn_assets = bpy.props.CollectionProperty(type=SN_Asset)
-    bpy.types.NodeTree.sn_asset_index = bpy.props.IntProperty(default=0)
-    bpy.types.NodeTree.sn_nodes = bpy.props.CollectionProperty(type=SN_NodeCollection)
-    bpy.types.NodeTree.sn_done_setup = bpy.props.BoolProperty(default=False)
-    bpy.types.NodeTree.sn_version = bpy.props.IntVectorProperty()
+    bpy.types.NodeTree.sn_graphs = bpy.props.CollectionProperty(type=SN_Graph,name="Scripting Graphs")
+    bpy.types.NodeTree.sn_graph_index = bpy.props.IntProperty(default=0, update=update_graph_index,name="Scripting Graph Index")
+    bpy.types.NodeTree.sn_variables = bpy.props.CollectionProperty(type=SN_Variable,name="Scripting Variables")
+    bpy.types.NodeTree.sn_variable_index = bpy.props.IntProperty(default=0,name="Scripting Variable Index")
+    bpy.types.NodeTree.sn_properties = bpy.props.CollectionProperty(type=SN_Variable,name="Scripting Properties")
+    bpy.types.NodeTree.sn_property_index = bpy.props.IntProperty(default=0,name="Scripting Property Index")
+    bpy.types.NodeTree.sn_icons = bpy.props.CollectionProperty(type=SN_Icon,name="Scripting Icons")
+    bpy.types.NodeTree.sn_icon_index = bpy.props.IntProperty(default=0,name="Scripting Icon Index")
+    bpy.types.NodeTree.sn_assets = bpy.props.CollectionProperty(type=SN_Asset,name="Scripting Assets")
+    bpy.types.NodeTree.sn_asset_index = bpy.props.IntProperty(default=0,name="Scripting Asset Index")
+    bpy.types.NodeTree.sn_nodes = bpy.props.CollectionProperty(type=SN_NodeCollection,name="Scripting Node Collections")
+    bpy.types.NodeTree.sn_done_setup = bpy.props.BoolProperty(default=False,name="Scripting Setup Done")
+    bpy.types.NodeTree.sn_version = bpy.props.IntVectorProperty(name="Serpens Version")
     
     # register the text properties
-    bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False)
+    bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False,name="Is Serpens Addon")
 
     # addon properties
-    bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties)
-    bpy.types.Scene.compatible_nodes = bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)
+    bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties,name="Serpens Properties")
 
     # register the keymaps
     register_keymaps()
@@ -162,7 +161,6 @@ def unregister():
 
     # addon properties
     del bpy.types.Scene.sn
-    del bpy.types.Scene.compatible_nodes
 
     # unregister the keymaps
     unregister_keymaps()

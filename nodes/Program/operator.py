@@ -26,6 +26,7 @@ class SN_OT_AddOperatorProperty(bpy.types.Operator):
         variable.node_tree = addon_tree
         variable.name = "New Property"
         node.property_index = len(node.operator_properties)-1
+        node.sync_inputs()
 
         return {"FINISHED"}
 
@@ -45,6 +46,7 @@ class SN_OT_RemoveOperatorProperty(bpy.types.Operator):
         node.operator_properties.remove(node.property_index)
         if len(node.operator_properties):
             node.property_index = len(node.operator_properties)-1
+        node.sync_inputs()
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -186,6 +188,22 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     select_property: bpy.props.StringProperty(name="Preselected Property",description="The property that is preselected when the popup is opened. This can only be a String or Enum Property!")
+
+
+    def sync_inputs(self,index=-1):
+        sync_to = ["SN_RunOperatorNode"]
+        this_name = self.item.name
+        for graph in self.addon_tree.sn_graphs:
+            for node in graph.node_tree.nodes:
+                if node.bl_idname in sync_to and node.custom_operator == this_name:
+                    node.update_inputs_from_operator(index)
+                    
+    
+    def update_from_collection(self,collection,item):
+        for i in range(len(self.operator_properties)):
+            if self.operator_properties[i] == item:
+                self.sync_inputs(i)
+                break
 
 
     def on_create(self,context):

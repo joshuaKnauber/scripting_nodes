@@ -1,5 +1,7 @@
 import bpy
+import json
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
+from ...interface.menu.rightclick import construct_from_property
 
 
 
@@ -17,6 +19,42 @@ class SN_OT_PasteOperator(bpy.types.Operator):
         else:
             self.report({"WARNING"},message="Right-Click any button and click 'Copy Operator' to get a valid operator")
         return {"FINISHED"}
+    
+    
+    
+    
+def create_sockets_from_operator(node, index):
+    props = node.addon_tree.sn_nodes["SN_OperatorNode"].items[node.custom_operator].node().operator_properties
+
+    # length is higher -> at least one socket got added
+    if len(props) > len(node.inputs)-1:
+        if len(node.inputs) == 1:
+            for prop in props:
+                data = json.loads(construct_from_property("self",prop))["property"]
+                node.add_input_from_data(data).disableable = True
+        else:
+            data = json.loads(construct_from_property("self",props[-1]))["property"]
+            node.add_input_from_data(data).disableable = True
+        
+    # length is lower -> socket got removed
+    elif len(props) < len(node.inputs)-1:
+        did_remove = False
+        for i, prop in enumerate(props):
+            if not node.inputs[i+1].name == prop.name:
+                node.inputs.remove(node.inputs[i+1])
+                did_remove = True
+                break
+        if not did_remove:
+            node.inputs.remove(node.inputs[-1])
+    
+    # length is the same
+    elif index >= 0:
+        prop = props[index]
+        inp = node.inputs[index+1]
+        node.inputs.remove(inp)
+        data = json.loads(construct_from_property("self",prop))["property"]
+        node.add_input_from_data(data).disableable = True
+        node.inputs.move(len(node.inputs)-1,index+1)
 
 
 
@@ -32,40 +70,52 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
     
+    
+    def add_inputs_from_internal(self):
+        rna = eval(self.operator.split("(")[0] + ".get_rna_type()")
+        for prop in rna.properties:
+            if not prop.name == "RNA":
+                self.add_input_from_prop(prop).disableable = True
+    
+    
     def update_operator(self,context):
-        ignore_props = ["RNA"]
-        
         if self.operator:
-            op = eval(self.operator.split("(")[0])
-            
-            self.label = "Operator (" + op.get_rna_type().name + ")"
-            for prop in op.get_rna_type().bl_rna.properties:
-                if not prop.name in ignore_props:
-                    self.add_input_from_prop(prop)
+            self.add_inputs_from_internal()
         else:
-            self.label = "Run Operator"
-            for i in range(len(self.inputs)-1,0,-1):
-                self.inputs.remove(self.inputs[i])
-                
-    def update_custom(self,context):
-        if self.custom_operator:
-            node = self.addon_tree.sn_nodes["SN_OperatorNode"].items[self.custom_operator].node()
-            # for prop in node.operator_properties:
-            #     op += prop. + ","
-                
+            self.remove_input_range(1)
+            
+            
+    def update_inputs_from_operator(self, index=-1):
+        create_sockets_from_operator(self,index)
+
+    
+    def update_custom_operator(self,context):
+        self.remove_input_range(1)
+        if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
+            self.update_inputs_from_operator()
+    
+    
     def update_use_internal(self,context):
         self.operator = ""
         self.custom_operator = ""
     
-    operator: bpy.props.StringProperty(update=update_operator)
-    custom_operator: bpy.props.StringProperty(update=update_custom)
     
+    operator: bpy.props.StringProperty(update=update_operator)
     use_internal: bpy.props.BoolProperty(name="Use Internal",
-                                         description="Uses the internal ones from blender instead of your custom ones",
-                                         default=True,
+                                         description="Use blenders internal operators instead of your custom ones",
                                          update=update_use_internal)
-
+    
+    custom_operator: bpy.props.StringProperty(name="Custom Operator",
+                                              description="Your custom operator",
+                                              update=update_custom_operator)
+    
+    call_invoke: bpy.props.BoolProperty(name="Call Invoke",
+                                        description="Calls the invoke function of the operator",
+                                        default=True)
+    
+    
     def on_create(self,context):
+        self.add_required_to_collection(["SN_OperatorNode"])
         self.add_execute_input("Run Operator")
         self.add_execute_output("Execute").mirror_name = True
         
@@ -80,15 +130,27 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         elif "SN_OperatorNode" in self.addon_tree.sn_nodes:
             row.prop_search(self,"custom_operator",self.addon_tree.sn_nodes["SN_OperatorNode"],"items",text="",icon="VIEWZOOM")
             row.prop(self,"use_internal",text="",icon_value=bpy.context.scene.sn_icons[ "serpens" ].icon_id)
+            
+        layout.prop(self,"call_invoke")
+
 
     def code_evaluate(self, context, touched_socket):
-
         operator = ""
-        if self.operator:
-            operator = self.operator.split("(")[0] + "("
         
+        if self.use_internal:
+            if self.operator:
+                operator = self.operator.split("(")[0] + "("
+                if self.call_invoke:
+                    operator += "\"INVOKE_DEFAULT\","
+                
+        else:
+            if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
+                item = self.addon_tree.sn_nodes["SN_OperatorNode"].items[self.custom_operator]
+                operator = "bpy.ops.sna." + item.identifier + "("
+            
+        if operator:
             for inp in self.inputs:
-                if inp.group == "DATA":
+                if inp.group == "DATA" and inp.enabled:
                     operator += f"{inp.variable_name}={inp.code()},"
 
             operator += ")"

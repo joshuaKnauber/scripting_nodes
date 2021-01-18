@@ -59,6 +59,9 @@ class ScriptingSocket:
     addable: bpy.props.BoolProperty(default=False) # Shows an add button on the socket
     to_add_idname = "" # Required if addable or dynamic is true
     
+    enabled: bpy.props.BoolProperty(default=True) # Defines if the socket is enabled
+    disableable: bpy.props.BoolProperty(default=False) # Socket can be disabled
+    
     default_text: bpy.props.StringProperty(update=update_text) # The default text of this socket
     mirror_name: bpy.props.BoolProperty(default=False) # Mirrors the name of the connected socket
     take_name: bpy.props.BoolProperty(default=False) # Takes the name of the first connected socket
@@ -176,11 +179,17 @@ class ScriptingSocket:
         op.idname = self.to_add_idname
         
         
+    def draw_disable_socket(self,layout):
+        layout.prop(self,"enabled",text="",emboss=False,icon="HIDE_OFF" if self.enabled else "HIDE_ON")
+        
+        
     def draw_as_input(self,row):
         if self.removable and not self.is_output:
             self.draw_remove_socket(row)
         elif self.addable and not self.is_output:
             self.draw_add_socket(row)
+        elif self.disableable and not self.is_output:
+            self.draw_disable_socket(row)
         
         
     def draw_as_output(self,row):
@@ -188,6 +197,8 @@ class ScriptingSocket:
             self.draw_remove_socket(row)   
         elif self.addable and self.is_output:
             self.draw_add_socket(row)
+        elif self.disableable and self.is_output:
+            self.draw_disable_socket(row)
     
     
     def draw_variable(self, row):
@@ -211,6 +222,9 @@ class ScriptingSocket:
         
     def draw(self, context, layout, node, text):
         row = layout.row(align=False)
+        if self.disableable:
+            row.enabled = self.enabled
+            
         if self.is_output:
             row.alignment = "RIGHT"
             

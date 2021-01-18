@@ -9,6 +9,7 @@ class SN_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
     group = "PROGRAM"
     bl_label = "Interface"
     socket_type = "INTERFACE"
+    output_limit = 1
 
     socket_shape = "DIAMOND"
     

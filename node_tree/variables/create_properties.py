@@ -123,6 +123,8 @@ class SN_OT_AddEnumItem(bpy.types.Operator):
             prop = addon_tree.sn_properties[addon_tree.sn_property_index]
 
         prop.enum_items.add()
+        if self.node:
+            prop.trigger_update(context)
         return {"FINISHED"}
     
     
@@ -147,6 +149,8 @@ class SN_OT_RemoveEnumItem(bpy.types.Operator):
             prop = addon_tree.sn_properties[addon_tree.sn_property_index]
             
         prop.enum_items.remove(self.index)
+        if self.node:
+            prop.trigger_update(context)
         return {"FINISHED"}
     
     
@@ -175,4 +179,7 @@ class SN_OT_MoveEnumItem(bpy.types.Operator):
             prop.enum_items.move(self.index, self.index+1)
         elif not self.down and self.index > 0:
             prop.enum_items.move(self.index, self.index-1)
+            
+        if self.node:
+            prop.trigger_update(context)
         return {"FINISHED"}
