@@ -191,7 +191,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def sync_inputs(self,index=-1):
-        sync_to = ["SN_RunOperatorNode"]
+        sync_to = ["SN_RunOperatorNode","SN_ButtonNode"]
         this_name = self.item.name
         for graph in self.addon_tree.sn_graphs:
             for node in graph.node_tree.nodes:

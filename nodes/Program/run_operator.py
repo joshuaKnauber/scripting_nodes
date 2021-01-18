@@ -23,11 +23,11 @@ class SN_OT_PasteOperator(bpy.types.Operator):
     
     
     
-def create_sockets_from_operator(node, index):
+def create_sockets_from_operator(node, offset, index):
     props = node.addon_tree.sn_nodes["SN_OperatorNode"].items[node.custom_operator].node().operator_properties
 
     # length is higher -> at least one socket got added
-    if len(props) > len(node.inputs)-1:
+    if len(props) > len(node.inputs)-offset:
         if len(node.inputs) == 1:
             for prop in props:
                 data = json.loads(construct_from_property("self",prop))["property"]
@@ -37,11 +37,11 @@ def create_sockets_from_operator(node, index):
             node.add_input_from_data(data).disableable = True
         
     # length is lower -> socket got removed
-    elif len(props) < len(node.inputs)-1:
+    elif len(props) < len(node.inputs)-offset:
         did_remove = False
         for i, prop in enumerate(props):
-            if not node.inputs[i+1].name == prop.name:
-                node.inputs.remove(node.inputs[i+1])
+            if not node.inputs[i+offset].name == prop.name:
+                node.inputs.remove(node.inputs[i+offset])
                 did_remove = True
                 break
         if not did_remove:
@@ -50,11 +50,11 @@ def create_sockets_from_operator(node, index):
     # length is the same
     elif index >= 0:
         prop = props[index]
-        inp = node.inputs[index+1]
+        inp = node.inputs[index+offset]
         node.inputs.remove(inp)
         data = json.loads(construct_from_property("self",prop))["property"]
         node.add_input_from_data(data).disableable = True
-        node.inputs.move(len(node.inputs)-1,index+1)
+        node.inputs.move(len(node.inputs)-1,index+offset)
 
 
 
@@ -86,7 +86,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             
             
     def update_inputs_from_operator(self, index=-1):
-        create_sockets_from_operator(self,index)
+        create_sockets_from_operator(self,1,index)
 
     
     def update_custom_operator(self,context):

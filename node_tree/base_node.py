@@ -364,6 +364,7 @@ class SN_ScriptingBaseNode:
         inp.variable_name = prop_data["identifier"]
         if prop_data["type"] == "ENUM":
             inp.enum_values = prop_data["items"]
+        return inp
     
     
     def add_output_from_data(self,prop_data):
@@ -372,6 +373,7 @@ class SN_ScriptingBaseNode:
         out.variable_name = prop_data["identifier"]
         if prop_data["type"] == "ENUM":
             out.enum_values = prop_data["items"]
+        return out
         
         
     def add_input_from_prop(self,prop):
