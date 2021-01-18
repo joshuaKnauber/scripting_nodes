@@ -42,6 +42,6 @@ class SN_BoxNode(bpy.types.Node, SN_ScriptingBaseNode):
                     box.alert = {self.inputs["Alert"].code()}
                     box.scale_x = {self.inputs["Scale X"].code()}
                     box.scale_y = {self.inputs["Scale Y"].code()}
-                    {self.outputs["Box"].by_name("Box")}
+                    {self.outputs["Box"].by_name(5)}
                     """
         }
