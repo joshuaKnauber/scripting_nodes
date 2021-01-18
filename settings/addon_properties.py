@@ -1,5 +1,5 @@
 import bpy
-
+from ..node_tree.base_node import SN_GenericPropertyGroup
 
 
 class SN_PackageDisplay(bpy.types.PropertyGroup):
@@ -120,3 +120,6 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     packages: bpy.props.CollectionProperty(type=SN_PackageDisplay)
     addons: bpy.props.CollectionProperty(type=SN_AddonDisplay)
+    
+    
+    compatible_nodes: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup,name="Serpens Menu ")

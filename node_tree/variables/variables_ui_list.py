@@ -56,6 +56,11 @@ class SN_Variable(bpy.types.PropertyGroup):
         for node in context.space_data.node_tree.nodes:
             if node.uid == self.from_node_uid:
                 return node
+            
+    def trigger_update(self,context):
+        if self.use_self:
+            node = self.find_node(context)
+            node.update_from_collection(self.from_node_collection,self)
 
     def update_name(self,context):
         key = "variable"
@@ -85,6 +90,8 @@ class SN_Variable(bpy.types.PropertyGroup):
 
         node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
                                     "SN_RemoveFromListNode", "SN_ChangeVariableNode"])
+        
+        self.trigger_update(context)
 
 
     name: bpy.props.StringProperty(name="Name",
@@ -129,6 +136,8 @@ class SN_Variable(bpy.types.PropertyGroup):
         node.addon_tree = bpy.context.scene.sn.addon_tree()
         node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode"])
 
+        self.trigger_update(context)
+
 
     var_type: bpy.props.EnumProperty(items=get_var_types,
                                      update=update_var_type,
@@ -136,7 +145,8 @@ class SN_Variable(bpy.types.PropertyGroup):
                                      description="The type of value that this variable can store")
 
     description: bpy.props.StringProperty(name="Description",
-                                        description="The description and tooltip of your property")
+                                        description="The description and tooltip of your property",
+                                        update=trigger_update)
     
     def update_make_property(self,context):
         self.attach_property_to = "Scene"
@@ -148,12 +158,14 @@ class SN_Variable(bpy.types.PropertyGroup):
     
     is_vector: bpy.props.BoolProperty(default=False,
                                       name="Make Vector",
-                                      description="Makes this property into a vector containing multiple of this property")
+                                      description="Makes this property into a vector containing multiple of this property",
+                                      update=trigger_update)
     
     vector_size: bpy.props.IntProperty(default=3,
                                        min=3,max=4,
                                        name="Vector Size",
-                                       description="The size of the vector")
+                                       description="The size of the vector",
+                                       update=trigger_update)
     
     def subtype_items(self,context):
         items = []
@@ -190,7 +202,8 @@ class SN_Variable(bpy.types.PropertyGroup):
         
     property_subtype: bpy.props.EnumProperty(items=subtype_items,
                                              name="Subtype",
-                                             description="The subtype of this property")
+                                             description="The subtype of this property",
+                                             update=trigger_update)
 
 
     def unit_items(self, context):
@@ -205,7 +218,8 @@ class SN_Variable(bpy.types.PropertyGroup):
     
     property_unit: bpy.props.EnumProperty(items=unit_items,
                                           name="Unit",
-                                          description="The unit of this property")
+                                          description="The unit of this property",
+                                          update=trigger_update)
 
     def get_attach_items(self,context):
         options = ["Action", "Armature", "Brush", "CacheFile", "Camera", "Collection", "Curve", "FreestyleLineStyle",
@@ -224,101 +238,124 @@ class SN_Variable(bpy.types.PropertyGroup):
     
     attach_property_to: bpy.props.EnumProperty(items=get_attach_items,
                                                name="Attach To",
-                                               description="This is the ID object which this property will be attached to")
+                                               description="This is the ID object which this property will be attached to",
+                                               update=trigger_update)
     
     str_default: bpy.props.StringProperty(default="",
                                         name="Default Value",
-                                        description="The default value of this variable")
+                                        description="The default value of this variable",
+                                        update=trigger_update)
     
     use_min: bpy.props.BoolProperty(default=False,
                                     name="Use Min",
-                                    description="Give a minimum value for the property")
+                                    description="Give a minimum value for the property",
+                                    update=trigger_update)
     
     use_max: bpy.props.BoolProperty(default=False,
                                     name="Use Max",
-                                    description="Give a maximum value for the property")
+                                    description="Give a maximum value for the property",
+                                    update=trigger_update)
     
     use_soft_min: bpy.props.BoolProperty(default=False,
                                          name="Use Soft Min",
-                                         description="Use a soft minimum which can be overwritten by typing a value")
+                                         description="Use a soft minimum which can be overwritten by typing a value",
+                                        update=trigger_update)
     
     use_soft_max: bpy.props.BoolProperty(default=False,
                                          name="Use Soft Max",
-                                         description="Use a soft maximum which can be overwritten by typing a value")
+                                         description="Use a soft maximum which can be overwritten by typing a value",
+                                        update=trigger_update)
     
     int_default: bpy.props.IntProperty(default=0,
                                         name="Default Value",
-                                        description="The default value of this variable")
+                                        description="The default value of this variable",
+                                        update=trigger_update)
     
     int_three_default: bpy.props.IntVectorProperty(default=(0,0,0),
                                                    size=3,
                                                     name="Default Value",
-                                                    description="The default value of this variable")
+                                                    description="The default value of this variable",
+                                                    update=trigger_update)
     
     int_four_default: bpy.props.IntVectorProperty(default=(0,0,0,0),
                                                     size=4,
                                                     name="Default Value",
-                                                    description="The default value of this variable")
+                                                    description="The default value of this variable",
+                                                    update=trigger_update)
     
     int_min: bpy.props.IntProperty(default=0,
                                    name="Minimum",
-                                   description="The minimum value this property can go to")
+                                   description="The minimum value this property can go to",
+                                    update=trigger_update)
     
     int_max: bpy.props.IntProperty(default=1,
                                    name="Maximum",
-                                   description="The maximum value this property can go to")
+                                   description="The maximum value this property can go to",
+                                    update=trigger_update)
     
     int_soft_min: bpy.props.IntProperty(default=0,
                                    name="Soft Minimum",
-                                   description="A soft minimum value which can be overwritten by typing")
+                                   description="A soft minimum value which can be overwritten by typing",
+                                    update=trigger_update)
     
     int_soft_max: bpy.props.IntProperty(default=1,
                                    name="Soft Maximum",
-                                   description="A soft maximum value which can be overwritten by typing")
+                                   description="A soft maximum value which can be overwritten by typing",
+                                    update=trigger_update)
     
     float_default: bpy.props.FloatProperty(default=0,
                                         name="Default Value",
-                                        description="The default value of this variable")
+                                        description="The default value of this variable",
+                                        update=trigger_update)
     
     float_three_default: bpy.props.FloatVectorProperty(default=(0,0,0),
                                                    size=3,
                                                     name="Default Value",
-                                                    description="The default value of this variable")
+                                                    description="The default value of this variable",
+                                                    update=trigger_update)
     
     float_four_default: bpy.props.FloatVectorProperty(default=(0,0,0,0),
                                                     size=4,
                                                     name="Default Value",
-                                                    description="The default value of this variable")
+                                                    description="The default value of this variable",
+                                                    update=trigger_update)
     
     float_min: bpy.props.FloatProperty(default=0,
                                    name="Minimum",
-                                   description="The minimum value this property can go to")
+                                   description="The minimum value this property can go to",
+                                    update=trigger_update)
     
     float_max: bpy.props.FloatProperty(default=1,
                                    name="Maximum",
-                                   description="The maximum value this property can go to")
+                                   description="The maximum value this property can go to",
+                                    update=trigger_update)
     
     float_soft_min: bpy.props.FloatProperty(default=0,
                                    name="Soft Minimum",
-                                   description="A soft minimum value which can be overwritten by typing")
+                                   description="A soft minimum value which can be overwritten by typing",
+                                    update=trigger_update)
     
     float_soft_max: bpy.props.FloatProperty(default=1,
                                    name="Soft Maximum",
-                                   description="A soft maximum value which can be overwritten by typing")
+                                   description="A soft maximum value which can be overwritten by typing",
+                                    update=trigger_update)
     
     bool_default: bpy.props.BoolProperty(default=True,
                                         name="Default Value",
-                                        description="The default value of this variable")
+                                        description="The default value of this variable",
+                                        update=trigger_update)
     
     bool_three_default: bpy.props.BoolVectorProperty(default=(True,True,True),
                                                    size=3,
                                                     name="Default Value",
-                                                    description="The default value of this variable")
+                                                    description="The default value of this variable",
+                                                    update=trigger_update)
     
     bool_four_default: bpy.props.BoolVectorProperty(default=(True,True,True,True),
                                                     size=4,
                                                     name="Default Value",
-                                                    description="The default value of this variable")
+                                                    description="The default value of this variable",
+                                                    update=trigger_update)
     
     enum_items: bpy.props.CollectionProperty(type=SN_EnumItem)
     

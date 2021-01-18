@@ -51,6 +51,8 @@ class SN_ScriptingBaseNode:
     ### UPDATE FROM NODE PER TYPE
     def on_outside_update(self,node): pass
     
+    def update_from_collection(self,collection,item): pass
+    
     
     def update_nodes_by_type(self, idname):
         for graph in self.addon_tree.sn_graphs:
