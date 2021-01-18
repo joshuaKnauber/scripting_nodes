@@ -41,7 +41,7 @@ tutorial = [
                     {"idname": "SN_AddToPanelNode",
                      "name": "First Add To Panel",
                      "offset_x": 0,
-                     "offset_y": -100}
+                     "offset_y": -150}
                 ],
     },
     {
@@ -51,7 +51,7 @@ tutorial = [
                     {"idname": "SN_LabelNode",
                      "name": "First Label",
                      "offset_x": 300,
-                     "offset_y": -100}
+                     "offset_y": -150}
                 ],
         "links": [
                     {"out_name":"First Add To Panel",
@@ -98,7 +98,7 @@ tutorial = [
                     {"idname": "SN_GetPropertyNode",
                      "name": "Get First Property",
                      "offset_x": 0,
-                     "offset_y": -100}
+                     "offset_y": -150}
                 ],
     },
     {
@@ -251,6 +251,25 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
     show_settings: bpy.props.BoolProperty(default=False,name="Show Settings",description="Show the settings")
     
     
+    chapters = [
+        ("Overview", "what_is_it"),
+        ("Nodes", "panel_start"),
+        ("Interface", "interface"),
+        ("Execute", "execute"),
+        ("Functions", "function"),
+        ("Data", "data"),
+        ("Variables", "variables"),
+        ("Blend Data", "blend_data"),
+        ("Properties", "properties"),
+        ("Operators", "operator"),
+        ("Assets", "custom_files"),
+        ("Export", "save"),
+        ("Marketplace", "marketplace"),
+        ("Packages", "packages"),
+        ("Console", "console"),
+    ]
+    
+    
     def remove_images(self):
         for step in tutorial:
             if step["image"] in bpy.data.images:
@@ -356,9 +375,24 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
         bpy.types.SpaceNodeEditor.draw_handler_remove(handler, 'WINDOW')
         handler = None
         self.remove_images()
+        
+        
+    def current_chapter(self):
+        current_chapter = "Tutorial"
+        for i, step in enumerate(tutorial):
+            for el in self.chapters:
+                if step["image"] == el[1] + ".jpg":
+                    current_chapter = el[0]
+            if i == self.index:
+                return current_chapter
+        return current_chapter
     
 
     def draw_node(self,context,layout):
+        row = layout.row()
+        row.alignment = "CENTER"
+        row.label(text=self.current_chapter())
+        
         if "adventure" in tutorial[self.index]:
             col = layout.column()
             col.scale_y = 2
@@ -398,32 +432,18 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
                 row.prop(self,"x",text="X")
                 row.prop(self,"y",text="Y")
         
-        if self.index == 1:
-            chapters = [
-                ("Overview", "what_is_it"),
-                ("Nodes", "panel_start"),
-                ("Interface", "interface"),
-                ("Execute", "execute"),
-                ("Functions", "function"),
-                ("Data", "data"),
-                ("Variables", "variables"),
-                ("Blend Data", "blend_data"),
-                ("Properties", "properties"),
-                ("Operators", "operator"),
-                ("Assets", "custom_files"),
-                ("Export", "save"),
-                ("Marketplace", "marketplace"),
-                ("Packages", "packages"),
-                ("Console", "console"),
-            ]
-            
+        if self.index == 1:            
             layout.label(text="Chapters")
             col = layout.column(align=True)
             col.scale_y = 1.2
-            for index, chapter in enumerate(chapters):
+            for index, chapter in enumerate(self.chapters):
                 op = col.operator("sn.set_tutorial",text=str(index+1) + " | " + chapter[0])
                 op.node = self.name
                 for i, step in enumerate(tutorial):
                     if step["image"] == chapter[1] + ".jpg":
                         op.index = i
                         break
+                    
+        elif tutorial[self.index]["image"] == "packages.jpg":
+            row = layout.row()
+            row.operator("wm.url_open",text="See Docs",icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
