@@ -167,7 +167,7 @@ def serpens_right_click(self, context):
         elif hasattr(property_pointer.bl_rna,"name"):
             op.db_name = property_pointer.bl_rna.name
             
-    if button_value:
+    else:
         if bpy.ops.ui.copy_python_command_button.poll():
             layout.operator("ui.copy_python_command_button",text="Serpens | Copy Operator",icon="COPYDOWN")
         else:

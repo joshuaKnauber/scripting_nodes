@@ -179,6 +179,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def add_inputs_from_internal(self):
         rna = eval(self.operator.split("(")[0] + ".get_rna_type()")
+        self.op_name = rna.name
         for prop in rna.properties:
             if not prop.name == "RNA":
                 self.add_input_from_prop(prop).disableable = True
@@ -262,6 +263,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     picked: bpy.props.StringProperty(update=update_picked)    
     
+    op_name: bpy.props.StringProperty()
     operator: bpy.props.StringProperty(update=update_operator)
     
     custom_operator: bpy.props.StringProperty(name="Custom Operator",
@@ -321,7 +323,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if not self.operator:
                     layout.operator("sn.paste_operator",text="Paste Operator",icon="PASTEDOWN").node_name = self.name
                 else:
-                    layout.operator("sn.reset_property_node",icon="UNLINKED").node = self.name
+                    layout.operator("sn.reset_property_node",icon="UNLINKED", text=self.op_name).node = self.name
             elif "SN_OperatorNode" in self.addon_tree.sn_nodes:
                 layout.prop_search(self,"custom_operator",self.addon_tree.sn_nodes["SN_OperatorNode"],"items",text="",icon="VIEWZOOM")
 
