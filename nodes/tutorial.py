@@ -229,12 +229,14 @@ def draw():
     global image
     
     bgl.glActiveTexture(bgl.GL_TEXTURE0)
-    bgl.glBindTexture(bgl.GL_TEXTURE_2D, image.bindcode)
+    try:
+        bgl.glBindTexture(bgl.GL_TEXTURE_2D, image.bindcode)
+        shader.bind()
+        shader.uniform_int("image", 0)
+        batch.draw(shader)
 
-    shader.bind()
-    shader.uniform_int("image", 0)
-    batch.draw(shader)
-
+    except:
+        bpy.types.SpaceNodeEditor.draw_handler_remove(handler, 'WINDOW')
 
 
 class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
