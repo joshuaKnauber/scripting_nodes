@@ -1,6 +1,6 @@
 import bpy
 from .. import bl_info
-from .sockets.base_sockets import get_dynamic_links, get_remove_links
+from .sockets.base_sockets import get_dynamic_links
 from ..compiler.compiler import compile_addon
 from ..settings.updates import exists_newer_version
 
@@ -64,15 +64,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         dynamic_links.clear()
         
         
-    def update_remove_links(self):
-        remove_links = get_remove_links()
-        for link in remove_links:
-            try:
-                self.links.remove(link)
-            except:
-                pass
-        remove_links.clear()
-        
         
     def remove_reroutes(self):
         if bpy.context and hasattr(bpy.context,"space_data"):
@@ -94,7 +85,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         self.remove_reroutes()
         self.set_changes(True)
         self.update_dynamic_links()
-        self.update_remove_links()
         
         
 def upgrade_node_tree(ntree):

@@ -16,26 +16,34 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_execute_input("For Each")
-        self.add_list_input("List/Collection")
+        self.add_blend_data_input("Collection / List").subtype = "COLLECTION"
 
         self.add_execute_output("Continue")
         self.add_execute_output("Repeat")
-        self.add_data_output("Element")
+        self.add_blend_data_output("Element")
         self.add_integer_output("Index")
 
-    def on_node_update(self):
-        if len(self.inputs) == 2:
-            if len(self.inputs[1].links):
-                if self.inputs[1].links[0].from_socket.bl_idname == "SN_BlendDataSocket":
+    def on_link_insert(self, link):
+        if link.to_socket == self.inputs[1]:
+            if link.from_socket.bl_idname == "SN_BlendDataSocket" and link.from_socket.subtype == "COLLECTION":
+                if self.inputs[1].bl_idname != "SN_BlendDataSocket":
                     self.change_socket_type(self.inputs[1], "SN_BlendDataSocket").subtype = "COLLECTION"
                     self.change_socket_type(self.outputs[2], "SN_BlendDataSocket")
-                else:
-                    self.change_socket_type(self.inputs[1], "SN_ListSocket")
-                    self.change_socket_type(self.outputs[2], "SN_DataSocket")
+                self.inputs[1].default_text = "Collection"
+
+                self.outputs[2].data_type = link.from_socket.data_type
+                self.outputs[2].data_name = link.from_socket.data_name
+                for link in self.outputs[2].links:
+                    link.to_socket.node.on_link_insert(link)
+
             else:
                 self.change_socket_type(self.inputs[1], "SN_ListSocket")
                 self.change_socket_type(self.outputs[2], "SN_DataSocket")
 
+                if link.from_socket.bl_idname == "SN_ListSocket":
+                    self.inputs[1].default_text = "List"
+                else:
+                    self.inputs[1].default_text = "Collection / List"
 
     def code_evaluate(self, context, touched_socket):
 

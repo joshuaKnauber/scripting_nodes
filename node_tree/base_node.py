@@ -1,6 +1,6 @@
 import bpy
 import re
-from .sockets.base_sockets import add_to_remove_links
+import functools
 from ..compiler.compiler import combine_blocks
 from uuid import uuid4
 
@@ -209,16 +209,22 @@ class SN_ScriptingBaseNode:
     def on_link_insert(self,link): pass
 
 
-    def insert_link(self,link):
-        self.auto_compile(bpy.context)
+    def after_link_insert(self,link):
         if link.to_socket.group == link.from_socket.group:
             if self == link.to_node:
                 link.to_socket.update_socket(self,link)
             else:
                 link.from_socket.update_socket(self,link)
+
             self.on_link_insert(link)
         else:
-            add_to_remove_links(link)
+            try: self.node_tree.links.remove(link)
+            except: pass
+        self.auto_compile(bpy.context)
+
+
+    def insert_link(self,link):
+        bpy.app.timers.register(functools.partial(self.after_link_insert, link), first_interval=0.001)
 
 
     ### NAME HANDLING

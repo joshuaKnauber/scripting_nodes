@@ -8,13 +8,6 @@ dynamic_links = []
 def get_dynamic_links(): return dynamic_links
 
 
-### PROCESS LINKS THAT NEED TO BE REMOVED
-
-remove_links = []
-def get_remove_links(): return remove_links
-def add_to_remove_links(link): remove_links.append(link)
-
-
 
 ### THE MAIN SCRIPTING SOCKET
 
@@ -99,12 +92,18 @@ class ScriptingSocket:
             self.take_name = False
     
     def update_socket(self,node,link):
-        if self.is_output and len(node.outputs[self.get_socket_index(node.outputs)].links)+1 > self.output_limit:
-            add_to_remove_links(link)
+        if self.is_output and len(node.outputs[self.get_socket_index(node.outputs)].links) > self.output_limit:
+            try: self.node_tree.links.remove(link)
+            except: pass
+
         elif link.to_socket.group != link.from_socket.group:
-            add_to_remove_links(link)
+            try: self.node_tree.links.remove(link)
+            except: pass
+
         elif link.to_socket.dynamic and link.from_socket.dynamic:
-            add_to_remove_links(link)
+            try: self.node_tree.links.remove(link)
+            except: pass
+
         else:
             self.update_take_name(link)
             self.update_dynamic(node, link)

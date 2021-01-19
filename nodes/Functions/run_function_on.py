@@ -44,6 +44,7 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.add_function_sockets(None)
         self.current_function = self.search_value
 
+
     def add_function_sockets(self, context):
         if not self.search_value in self.function_collection:
             self.remove_input_range(2)
@@ -108,7 +109,7 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.add_output_from_prop(parameter)
                 else:
                     inp = self.add_input_from_prop(parameter)
-                    if not parameter.type in ["POINTER", "COLLECTION"]:
+                    if not parameter.type in ["POINTER", "COLLECTION"] and not "VECTOR" in inp.subtype:
                         inp.set_default(parameter.default)
         
         self.current_function = self.search_value
@@ -141,7 +142,7 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self, context, layout):
         if self.current_data_type:
             layout.label(text="Current type: " + self.current_data_type)
-        
+
         if len(self.function_collection):
             layout.prop_search(self, "search_value", self, "function_collection", text="")
 
