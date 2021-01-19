@@ -168,4 +168,7 @@ def serpens_right_click(self, context):
             op.db_name = property_pointer.bl_rna.name
             
     if button_value:
-        layout.operator("ui.copy_python_command_button",text="Serpens | Copy Operator",icon="COPYDOWN")
+        if bpy.ops.ui.copy_python_command_button.poll():
+            layout.operator("ui.copy_python_command_button",text="Serpens | Copy Operator",icon="COPYDOWN")
+        else:
+            layout.label(text="You can't copy operators out of floating menus")
