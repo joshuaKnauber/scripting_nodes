@@ -18,6 +18,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def add_inputs_from_internal(self):
         rna = eval(self.operator.split("(")[0] + ".get_rna_type()")
+        self.op_name = rna.name
         for prop in rna.properties:
             if not prop.name == "RNA":
                 self.add_input_from_prop(prop).disableable = True
@@ -46,6 +47,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     operator: bpy.props.StringProperty(update=update_operator)
+    op_name: bpy.props.StringProperty()
     use_internal: bpy.props.BoolProperty(name="Use Internal",
                                          description="Use blenders internal operators instead of your custom ones",
                                          update=update_use_internal)
@@ -61,7 +63,8 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
             if not self.operator:
                 row.operator("sn.paste_operator",text="Paste Operator",icon="PASTEDOWN").node_name = self.name
             else:
-                row.operator("sn.reset_property_node",icon="UNLINKED").node = self.name
+                op = row.operator("sn.reset_property_node",icon="UNLINKED", text=self.op_name)
+                op.node = self.name
             row.prop(self,"use_internal",text="",icon="BLENDER",invert_checkbox=True)
         elif "SN_OperatorNode" in self.addon_tree.sn_nodes:
             row.prop_search(self,"custom_operator",self.addon_tree.sn_nodes["SN_OperatorNode"],"items",text="",icon="VIEWZOOM")
