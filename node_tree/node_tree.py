@@ -8,9 +8,16 @@ from ..settings.updates import exists_newer_version
 def update_create_tree():
     if bpy.context and hasattr(bpy.context,"space_data") and bpy.context.space_data and hasattr(bpy.context.space_data,"node_tree"):
         tree = bpy.context.space_data.node_tree
-        if tree and tree.bl_idname == "ScriptingNodesTree" and not tree.sn_done_setup:
-            bpy.data.node_groups.remove(tree)
-            bpy.ops.sn.create_addon("INVOKE_DEFAULT")
+        if tree and tree.bl_idname == "ScriptingNodesTree":
+            if not tree.sn_done_setup:
+                bpy.data.node_groups.remove(tree)
+                bpy.ops.sn.create_addon("INVOKE_DEFAULT")
+            else:
+                for group in bpy.data.node_groups:
+                    for i, graph in enumerate(group.sn_graphs):
+                        if graph.node_tree == tree:
+                            bpy.context.scene.sn.editing_addon = group.sn_graphs[0].name
+                            group.sn_graph_index = i
 
 
 class ScriptingNodesTree(bpy.types.NodeTree):
