@@ -97,12 +97,12 @@ class SN_OT_AppendPopup(bpy.types.Operator):
                                    items=get_graph_items)
 
     def execute(self, context):
-        if not self.graphs == "NONE":
+        if self.graphs != "NONE":
             addon_tree = context.scene.sn.addon_tree()
 
             if self.graphs in bpy.data.node_groups:
                 bpy.data.node_groups[self.graphs].name += "_1"
-                
+
             old_trees = list(bpy.data.node_groups)
             with bpy.data.libraries.load(self.path) as (data_from, data_to):
                 data_to.node_groups = [self.graphs]
@@ -114,7 +114,7 @@ class SN_OT_AppendPopup(bpy.types.Operator):
                         bpy.data.node_groups.remove(tree)
                     else:
                         keep_tree = tree
-            
+
             if keep_tree:
                 keep_tree.setup(addon_tree)
             

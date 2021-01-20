@@ -1,5 +1,15 @@
+import os
 import bpy
+import json
 from ..node_tree.base_node import SN_GenericPropertyGroup
+
+
+example_dict = {
+    "Variable": {
+        "tree_name": "Variable",
+        "icon": "DRIVER_TRANSFORM"
+    },
+}
 
 
 class SN_PackageDisplay(bpy.types.PropertyGroup):
@@ -63,10 +73,33 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         addon_tree.sn_graph_index = addon_tree.sn_graph_index
 
 
+    def get_example_items(self, context):
+        global example_dict
+        example_list = []
+        for index, key in enumerate(example_dict):
+            example = example_dict[key]
+            example_list.append((key,key,key,example["icon"],index+1))
+
+        return [("NONE", "Examples", "Choose an example", "PRESET", 0)] + example_list
+
+    def update_examples(self, context):
+        if self.example_dropdown != "NONE":
+            with bpy.data.libraries.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"examples.blend")) as (data_from, data_to):
+                data_to.node_groups = [self.example_dropdown]
+
+            context.scene.sn.editing_addon = self.example_dropdown
+            self.example_dropdown = "NONE"
+
+
     editing_addon: bpy.props.EnumProperty(items=get_addon_items,
                                         update=update_editing_addon,
                                         name="Editing Addon",
                                         description="Select the addon you want to edit")
+
+    example_dropdown: bpy.props.EnumProperty(items=get_example_items,
+                                        update=update_examples,
+                                        name="Examples",
+                                        description="Select the example you want to see")
 
 
     def get_bookmarked_items(self,context):

@@ -1,5 +1,9 @@
 import bpy
 
+def example_dropdown(self, context):
+    if context.space_data.tree_type == "ScriptingNodesTree":
+        layout = self.layout
+        layout.prop(context.scene.sn, "example_dropdown", text="")
 
 def prepend_header(self, context):
     layout = self.layout

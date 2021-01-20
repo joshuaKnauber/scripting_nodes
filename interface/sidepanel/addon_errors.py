@@ -54,7 +54,7 @@ class SN_PT_AddonErrorPanel(bpy.types.Panel):
 
         addon_tree = context.scene.sn.addon_tree()
         addon_graph = addon_tree.sn_graphs[0]
-        
+
         if context.scene.sn.show_char_control:
             layout.prop(context.scene.sn, "chars_per_line",text="Line Wrap")
         
