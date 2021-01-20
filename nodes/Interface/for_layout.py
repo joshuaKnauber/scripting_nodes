@@ -22,7 +22,7 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_blend_data_output("Element")
         self.add_integer_output("Index")
 
-    def on_node_update(self):
+    def on_link_insert(self, link):
         if link.to_socket == self.inputs[1]:
             if link.from_socket.bl_idname == "SN_BlendDataSocket" and link.from_socket.subtype == "COLLECTION":
                 if self.inputs[1].bl_idname != "SN_BlendDataSocket":

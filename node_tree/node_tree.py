@@ -66,10 +66,11 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         dynamic_links = get_dynamic_links()
         new_links = []
         for link in dynamic_links:
-            self.links.remove(link[0])
-            new_links.append( self.links.new(link[1],link[2]) )
+            try: 
+                self.links.remove(link[0])
+                new_links.append( self.links.new(link[1],link[2]) )
+            except: pass
         dynamic_links.clear()
-        
         
         
     def remove_reroutes(self):

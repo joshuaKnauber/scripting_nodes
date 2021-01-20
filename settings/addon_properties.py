@@ -5,9 +5,17 @@ from ..node_tree.base_node import SN_GenericPropertyGroup
 
 
 example_dict = {
-    "Variable": {
-        "tree_name": "Variable",
-        "icon": "DRIVER_TRANSFORM"
+    "Functions": {
+        "tree_name": "Functions",
+        "icon": ""
+    },
+    "Interface": {
+        "tree_name": "Interface",
+        "icon": ""
+    },
+    "Operator": {
+        "tree_name": "Operator",
+        "icon": ""
     },
 }
 
@@ -88,6 +96,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                 data_to.node_groups = [self.example_dropdown]
 
             context.scene.sn.editing_addon = self.example_dropdown
+            bpy.ops.sn.compile()
             self.example_dropdown = "NONE"
 
 

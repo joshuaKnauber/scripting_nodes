@@ -26,7 +26,7 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_interface_output("Menu").removable=True
+        self.add_interface_output("Menu")
         self.add_dynamic_interface_output("Menu")
         
         self.add_boolean_input("Poll").set_default(True)

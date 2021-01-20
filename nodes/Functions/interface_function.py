@@ -33,7 +33,7 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     func_name: bpy.props.StringProperty(name="Name", description="Name of the function", update=update_name)
 
     def on_create(self,context):
-        self.add_interface_output("Layout").removable = True
+        self.add_interface_output("Layout")
         self.add_dynamic_interface_output("Layout")
         out = self.add_dynamic_variable_output("Parameter")
         out.show_var_name = True
