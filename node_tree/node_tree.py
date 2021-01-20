@@ -1,6 +1,5 @@
 import bpy
 from .. import bl_info
-from .sockets.base_sockets import get_dynamic_links
 from ..compiler.compiler import compile_addon
 from ..settings.updates import exists_newer_version
 
@@ -61,18 +60,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         self.sn_version = bl_info["version"]
         self.sn_done_setup = True
         
-        
-    def update_dynamic_links(self):
-        dynamic_links = get_dynamic_links()
-        new_links = []
-        for link in dynamic_links:
-            try: 
-                self.links.remove(link[0])
-                new_links.append( self.links.new(link[1],link[2]) )
-            except: pass
-        dynamic_links.clear()
-        
-        
+
     def remove_reroutes(self):
         if bpy.context and hasattr(bpy.context,"space_data"):
             if bpy.context.space_data and hasattr(bpy.context.space_data,"node_tree"):
@@ -92,8 +80,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     def update(self):
         self.remove_reroutes()
         self.set_changes(True)
-        self.update_dynamic_links()
-        
+
         
 def upgrade_node_tree(ntree):
     print(ntree)

@@ -216,7 +216,6 @@ class SN_ScriptingBaseNode:
             else:
                 link.from_socket.update_socket(self,link)
 
-            self.on_link_insert(link)
         else:
             try: self.node_tree.links.remove(link)
             except: pass

@@ -7,15 +7,15 @@ from ..node_tree.base_node import SN_GenericPropertyGroup
 example_dict = {
     "Functions": {
         "tree_name": "Functions",
-        "icon": ""
+        "icon": "HANDLETYPE_FREE_VEC"
     },
     "Interface": {
         "tree_name": "Interface",
-        "icon": ""
+        "icon": "RESTRICT_VIEW_ON"
     },
     "Operator": {
         "tree_name": "Operator",
-        "icon": ""
+        "icon": "SEQ_CHROMA_SCOPE"
     },
 }
 
@@ -74,8 +74,8 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         if items:
             return items
         return [("NONE","NONE","NONE")]
-    
-    
+
+
     def update_editing_addon(self,context):
         addon_tree = self.addon_tree()
         addon_tree.sn_graph_index = addon_tree.sn_graph_index

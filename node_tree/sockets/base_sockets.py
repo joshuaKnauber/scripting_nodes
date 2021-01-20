@@ -2,12 +2,6 @@ import bpy
 from ...compiler.compiler import process_node
 
 
-### PROCESS LINKS THAT NEED TO BE HANDLED AS DYNAMIC
-
-dynamic_links = []
-def get_dynamic_links(): return dynamic_links
-
-
 
 ### THE MAIN SCRIPTING SOCKET
 
@@ -115,8 +109,7 @@ class ScriptingSocket:
         
         
     ### DYNAMIC SOCKET
-    
-    
+
     def update_dynamic_output(self,node,link):
         index = self.get_socket_index(node.outputs)
 
@@ -130,9 +123,11 @@ class ScriptingSocket:
             setattr(out, attr, getattr(self,attr))
 
         node.outputs.move(len(node.outputs)-1, index)
-        dynamic_links.append((link, link.to_socket, out))
-        
-        node.on_dynamic_add(out, link.to_socket)
+        socket = link.to_socket
+        node.node_tree.links.remove(link)
+        node.node_tree.links.new(socket, out)
+
+        node.on_dynamic_add(out, socket)
 
 
     def update_dynamic_input(self,node,link):
@@ -148,11 +143,13 @@ class ScriptingSocket:
             setattr(inp, attr, getattr(self,attr))
 
         node.inputs.move(len(node.inputs)-1, index)
-        dynamic_links.append((link, link.from_socket, inp))
+        socket = link.from_socket
+        node.node_tree.links.remove(link)
+        node.node_tree.links.new(inp, socket)
 
-        node.on_dynamic_add(inp, link.from_socket)
-    
-    
+        node.on_dynamic_add(inp, socket)
+
+
     def update_dynamic(self,node,link):
         if self.dynamic:
             if self.is_output: self.update_dynamic_output(node,link)
