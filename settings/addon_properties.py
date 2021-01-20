@@ -17,6 +17,10 @@ example_dict = {
         "tree_name": "Operator",
         "icon": "SEQ_CHROMA_SCOPE"
     },
+    "Interface Function": {
+        "tree_name": "Interface Function",
+        "icon": "RESTRICT_VIEW_OFF"
+    },
 }
 
 
