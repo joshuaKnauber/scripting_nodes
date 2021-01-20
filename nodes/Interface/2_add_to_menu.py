@@ -113,6 +113,8 @@ class SN_AddToMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     menu: bpy.props.StringProperty(default="VIEW3D_MT_add")
     
+    pie_menu: bpy.props.BoolProperty(default=False,name="Pie Menu",description="Add to pie menu")
+    
     
     position: bpy.props.EnumProperty(items=[("PREPEND","Beginning","Prepend"), ("APPEND","End","Append")],
                                     name="Append/Prepend",
@@ -132,6 +134,7 @@ class SN_AddToMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
             name = name.replace("_MT_"," ").replace("_"," ").title()
         row.operator("sn.start_add_to_menu_selection",text=name,icon="EYEDROPPER").node = self.name
         layout.prop(self, "position", expand=True)
+        layout.prop(self,"pie_menu")
         
         
     def what_layout(self, socket):
@@ -153,6 +156,7 @@ class SN_AddToMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
                     def {self.function_name()}(self,context):
                         try:
                             layout = self.layout
+                            {"layout = layout.menu_pie()" if self.pie_menu else ""}
                             {self.outputs[0].by_name(7)}
                         except Exception as exc:
                             print(str(exc) + " | Error in {name} when adding to menu")
