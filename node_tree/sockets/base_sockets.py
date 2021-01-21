@@ -214,25 +214,25 @@ class ScriptingSocket:
     def draw_socket(self,context,layout,row,node,text):
         """ overwrite this to draw the sockets property """
         row.label(text=text)
-        
-        
+
+
     def draw(self, context, layout, node, text):
         row = layout.row(align=False)
         if self.disableable:
             row.enabled = self.enabled
-            
+
         if self.is_output:
             row.alignment = "RIGHT"
-            
+
         self.draw_as_input(row)
         if self.show_var_name and not self.dynamic: self.draw_variable(row)
         else: self.draw_socket(context,layout,row,node,self.get_text())
         self.draw_as_output(row)
-            
-            
+
+
     ### SOCKET COLOR
-            
-            
+
+
     def get_color(self, context, node):
         """ overwrite this to set the sockets basic color """
         return (0,0,0)

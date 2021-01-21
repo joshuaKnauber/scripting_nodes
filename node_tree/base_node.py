@@ -358,8 +358,8 @@ class SN_ScriptingBaseNode:
             if prop_size == 3: return "VECTOR3"
             elif prop_size == 4: return "VECTOR4"
         elif prop_subtype == "FACTOR": return "FACTOR"
-        elif prop_subtype == "FILEPATH": return "FILE"
-        elif prop_subtype == "DIRPATH": return "DIRECTORY"
+        elif prop_subtype in ["FILE_PATH", "FILEPATH"]: return "FILE"
+        elif prop_subtype in ["DIR_PATH", "DIRPATH"]: return "DIRECTORY"
         return "NONE"
     
     

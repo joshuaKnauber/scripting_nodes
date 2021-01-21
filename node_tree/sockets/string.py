@@ -20,18 +20,26 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         if not items:
             items = [("NONE","None","No items have been found for this property")]
         return items
-    
-    
+
+
+    def update_string(self, context):
+        self["value"] = self.value
+
+
     def make_absolute(self,context):
         if not self.value_directory == bpy.path.abspath(self.value_directory):
             self.value_directory = bpy.path.abspath(self.value_directory)
         if not self.value_file == bpy.path.abspath(self.value_file):
             self.value_file = bpy.path.abspath(self.value_file)
-    
-    
+
+        self["value_directory"] = self.value_directory.replace('\\', "/")
+        self["value_file"] = self.value_file.replace('\\', "/")
+
+
     value: bpy.props.StringProperty(name="Value",
-                                    description="Value of this socket")
-    
+                                    description="Value of this socket",
+                                    update=update_string)
+
     value_file: bpy.props.StringProperty(name="Value",
                                         description="Value of this socket",
                                         subtype="FILE_PATH",

@@ -9,13 +9,33 @@ example_dict = {
         "tree_name": "Functions",
         "icon": "HANDLETYPE_FREE_VEC"
     },
+    "Operator": {
+        "tree_name": "Operator",
+        "icon": "SEQ_CHROMA_SCOPE"
+    },
+    "Events / Program": {
+        "tree_name": "Events / Program",
+        "icon": "ARMATURE_DATA"
+    },
     "Interface": {
         "tree_name": "Interface",
         "icon": "RESTRICT_VIEW_ON"
     },
-    "Operator": {
-        "tree_name": "Operator",
-        "icon": "SEQ_CHROMA_SCOPE"
+    "Blend Data": {
+        "tree_name": "Blend Data",
+        "icon": "MONKEY"
+    },
+    "Variables": {
+        "tree_name": "Variables",
+        "icon": "DRIVER_TRANSFORM"
+    },
+    "Properties": {
+        "tree_name": "Properties",
+        "icon": "MOD_SOFT"
+    },
+    "Run Function On": {
+        "tree_name": "Run Function On",
+        "icon": "MOD_SCREW"
     },
     "Interface Function": {
         "tree_name": "Interface Function",

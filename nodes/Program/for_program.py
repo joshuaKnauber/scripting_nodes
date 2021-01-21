@@ -54,7 +54,7 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                         for_node_index_{self.uid} = 0
                         for for_node_index_{self.uid}, for_node_{self.uid} in enumerate({self.inputs[1].code()}):
                             {self.outputs[1].code(7) if self.outputs[1].code() else "pass"}
-                        {self.outputs[0].code(5)}
+                        {self.outputs[0].code(6)}
                         """
             }
 
