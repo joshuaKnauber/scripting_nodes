@@ -218,16 +218,19 @@ class ScriptingSocket:
 
     def draw(self, context, layout, node, text):
         row = layout.row(align=False)
+        before = row.column()
+        socket_row = row.row()
+        after = row.column()
         if self.disableable:
-            row.enabled = self.enabled
+            socket_row.enabled = self.enabled
 
         if self.is_output:
-            row.alignment = "RIGHT"
+            socket_row.alignment = "RIGHT"
 
-        self.draw_as_input(row)
-        if self.show_var_name and not self.dynamic: self.draw_variable(row)
-        else: self.draw_socket(context,layout,row,node,self.get_text())
-        self.draw_as_output(row)
+        self.draw_as_input(before)
+        if self.show_var_name and not self.dynamic: self.draw_variable(socket_row)
+        else: self.draw_socket(context,layout,socket_row,node,self.get_text())
+        self.draw_as_output(after)
 
 
     ### SOCKET COLOR
