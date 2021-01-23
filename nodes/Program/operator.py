@@ -6,10 +6,10 @@ from ...interface.sidepanel.graph_panels import draw_property
 from ...interface.menu.rightclick import construct_from_property
 
 
-class SN_OT_AddOperatorProperty(bpy.types.Operator):
-    bl_idname = "sn.add_operator_property"
-    bl_label = "Add Operator Property"
-    bl_description = "Adds a new property to this operator"
+class SN_OT_AddNodeProperty(bpy.types.Operator):
+    bl_idname = "sn.add_node_property"
+    bl_label = "Add Node Property"
+    bl_description = "Adds a new property to this node"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
     node_name: bpy.props.StringProperty()
@@ -18,23 +18,24 @@ class SN_OT_AddOperatorProperty(bpy.types.Operator):
         addon_tree = context.space_data.node_tree
         node = addon_tree.nodes[self.node_name]
 
-        variable = node.operator_properties.add()
+        variable = node.properties.add()
         variable.from_node_uid = node.uid
-        variable.from_node_collection = "operator_properties"
+        variable.from_node_collection = "properties"
         variable.is_property = True
         variable.use_self = True
         variable.node_tree = addon_tree
         variable.name = "New Property"
-        node.property_index = len(node.operator_properties)-1
-        node.sync_inputs()
+        node.property_index = len(node.properties)-1
+        if hasattr(node,"sync_inputs"):
+            node.sync_inputs()
 
         return {"FINISHED"}
 
 
-class SN_OT_RemoveOperatorProperty(bpy.types.Operator):
-    bl_idname = "sn.remove_operator_property"
-    bl_label = "Remove Operator Property"
-    bl_description = "Remove a property from this operator"
+class SN_OT_RemoveNodeProperty(bpy.types.Operator):
+    bl_idname = "sn.remove_node_property"
+    bl_label = "Remove Node Property"
+    bl_description = "Remove a property from this node"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
     node_name: bpy.props.StringProperty()
@@ -43,20 +44,21 @@ class SN_OT_RemoveOperatorProperty(bpy.types.Operator):
         addon_tree = context.space_data.node_tree
         node = addon_tree.nodes[self.node_name]
 
-        node.operator_properties.remove(node.property_index)
-        if len(node.operator_properties):
-            node.property_index = len(node.operator_properties)-1
-        node.sync_inputs()
+        node.properties.remove(node.property_index)
+        if len(node.properties):
+            node.property_index = len(node.properties)-1
+        if hasattr(node,"sync_inputs"):
+            node.sync_inputs()
         return {"FINISHED"}
 
     def invoke(self, context, event):
         return context.window_manager.invoke_confirm(self, event)
 
 
-class SN_OT_EditOperatorProperty(bpy.types.Operator):
-    bl_idname = "sn.edit_operator_property"
-    bl_label = "Edit Operator Property"
-    bl_description = "Edit a property from this operator"
+class SN_OT_EditNodeProperty(bpy.types.Operator):
+    bl_idname = "sn.edit_node_property"
+    bl_label = "Edit Node Property"
+    bl_description = "Edit a property from this node"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
     node_name: bpy.props.StringProperty()
@@ -70,14 +72,14 @@ class SN_OT_EditOperatorProperty(bpy.types.Operator):
     def draw(self, context):
         addon_tree = context.space_data.node_tree
         node = addon_tree.nodes[self.node_name]
-        variable = node.operator_properties[node.property_index]
-        draw_property(context, variable, self.layout, self.node_name, "operator_properties", node.property_index)
+        variable = node.properties[node.property_index]
+        draw_property(context, variable, self.layout, self.node_name, "properties", node.property_index)
 
 
-class SN_OT_GetSetOperatorProperty(bpy.types.Operator):
-    bl_idname = "sn.get_set_operator_property"
-    bl_label = "Get or Set Operator Property"
-    bl_description = "Get or set a property from this operator"
+class SN_OT_GetSetNodeProperty(bpy.types.Operator):
+    bl_idname = "sn.get_set_node_property"
+    bl_label = "Get or Set Node Property"
+    bl_description = "Get or set a property from this node"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
     node_name: bpy.props.StringProperty()
@@ -99,7 +101,7 @@ class SN_OT_GetSetOperatorProperty(bpy.types.Operator):
     def execute(self, context):
         tree = context.space_data.node_tree
         node = tree.nodes[self.node_name]
-        prop = node.operator_properties[node.property_index]
+        prop = node.properties[node.property_index]
         
         new_node = self.add_node(tree)
         new_node.copied_path = construct_from_property("self",prop)
@@ -183,7 +185,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                                                             # ("invoke_popup", "Show Properties", "Shows a popup with the operators properties"),
                                                             ("invoke_props_popup", "Property Update", "Show a customizable dialog and execute the operator on property changes"),
                                                             ("invoke_search_popup", "Search Popup", "Opens a search menu from a selected enum property")],update=update_popup)
-    operator_properties: bpy.props.CollectionProperty(type=SN_Variable)
+    properties: bpy.props.CollectionProperty(type=SN_Variable)
     property_index: bpy.props.IntProperty()
     
     
@@ -200,8 +202,8 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                     
     
     def update_from_collection(self,collection,item):
-        for i in range(len(self.operator_properties)):
-            if self.operator_properties[i] == item:
+        for i in range(len(self.properties)):
+            if self.properties[i] == item:
                 self.sync_inputs(i)
                 break
 
@@ -214,7 +216,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         
     def on_copy(self,node):
-        for prop in node.operator_properties:
+        for prop in node.properties:
             prop.from_node_uid = self.uid
 
 
@@ -225,19 +227,19 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "invoke_option")
 
         row = layout.row(align=False)
-        row.template_list("SN_UL_VariableList", "Properties", self, "operator_properties", self, "property_index",rows=3)
+        row.template_list("SN_UL_VariableList", "Properties", self, "properties", self, "property_index",rows=3)
         col = row.column(align=True)
-        col.operator("sn.add_operator_property", text="", icon="ADD").node_name = self.name
+        col.operator("sn.add_node_property", text="", icon="ADD").node_name = self.name
         col = col.column(align=True)
-        col.enabled = bool(len(self.operator_properties))
-        col.operator("sn.remove_operator_property", text="", icon="REMOVE").node_name = self.name
-        col.operator("sn.edit_operator_property", text="", icon="GREASEPENCIL").node_name = self.name
-        col.operator("sn.get_set_operator_property", text="", icon="FORWARD").node_name = self.name
+        col.enabled = bool(len(self.properties))
+        col.operator("sn.remove_node_property", text="", icon="REMOVE").node_name = self.name
+        col.operator("sn.edit_node_property", text="", icon="GREASEPENCIL").node_name = self.name
+        col.operator("sn.get_set_node_property", text="", icon="FORWARD").node_name = self.name
         
         if self.invoke_option == "invoke_search_popup":
-            layout.prop_search(self,"select_property",self,"operator_properties",text="Search")
+            layout.prop_search(self,"select_property",self,"properties",text="Search")
         elif self.invoke_option != "none" and self.invoke_option != "invoke_confirm":
-            layout.prop_search(self,"select_property",self,"operator_properties",text="Selected")
+            layout.prop_search(self,"select_property",self,"properties",text="Selected")
 
 
     def what_layout(self, socket):
@@ -246,7 +248,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         property_register = []
-        for prop in self.operator_properties:
+        for prop in self.properties:
             property_register.append(prop.property_register())
             
         execute_code = "pass"
@@ -289,9 +291,9 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                             """
                             
         selected_property = ""
-        if self.select_property and self.select_property in self.operator_properties:
-            if self.operator_properties[self.select_property].var_type in ["STRING","ENUM"]:
-                selected_property = f"bl_property = \"{self.operator_properties[self.select_property].identifier}\""
+        if self.select_property and self.select_property in self.properties:
+            if self.properties[self.select_property].var_type in ["STRING","ENUM"]:
+                selected_property = f"bl_property = \"{self.properties[self.select_property].identifier}\""
 
         return {
             "code": f"""
