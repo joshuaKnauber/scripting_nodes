@@ -18,18 +18,23 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
         out = self.add_blend_data_output("Active Scene")
         out.data_type = "Scene"
         out.data_identifier = "scene"
+        out.data_name = "Scene"
         out = self.add_blend_data_output("Active Area")
         out.data_type = "Area"
         out.data_identifier = "area"
+        out.data_name = "Area"
         out = self.add_blend_data_output("Active Camera")
         out.data_type = "Camera"
         out.data_identifier = "camera"
+        out.data_name = "Camera"
         out = self.add_blend_data_output("Preferences")
         out.data_type = "Preferences"
         out.data_identifier = "preferences"
+        out.data_name = "Preferences"
         out = self.add_blend_data_output("Window Manager")
         out.data_type = "WindowManager"
         out.data_identifier = "window_manager"
+        out.data_name = "Window Manager"
         self.add_string_output("Engine")
         self.add_string_output("Mode")
         self.add_integer_output("Current Frame")
