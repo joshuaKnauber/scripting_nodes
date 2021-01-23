@@ -336,6 +336,7 @@ class SN_ScriptingBaseNode:
         "BOOLEAN": "SN_BooleanSocket",
         "FLOAT": "SN_FloatSocket",
         "INT": "SN_IntegerSocket",
+        "INTEGER": "SN_IntegerSocket",
         "ENUM": "SN_StringSocket",
         "POINTER": "SN_BlendDataSocket",
         "COLLECTION": "SN_BlendDataSocket"

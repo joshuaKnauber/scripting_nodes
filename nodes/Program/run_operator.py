@@ -28,7 +28,7 @@ def create_sockets_from_operator(node, offset, index):
 
     # length is higher -> at least one socket got added
     if len(props) > len(node.inputs)-offset:
-        if len(node.inputs) == 1:
+        if len(node.inputs) == offset:
             for prop in props:
                 data = json.loads(construct_from_property("self",prop))["property"]
                 node.add_input_from_data(data).disableable = True
