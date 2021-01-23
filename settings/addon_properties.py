@@ -29,10 +29,10 @@ example_dict = {
         "tree_name": "Variables",
         "icon": "DRIVER_TRANSFORM"
     },
-    # "Properties": {
-    #     "tree_name": "Properties",
-    #     "icon": "MOD_SOFT"
-    # },
+    "Properties": {
+        "tree_name": "Properties",
+        "icon": "MOD_SOFT"
+    },
     # "Run Function On": {
     #     "tree_name": "Run Function On",
     #     "icon": "MOD_SCREW"
