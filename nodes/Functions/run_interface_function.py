@@ -21,8 +21,9 @@ class SN_RunLayoutFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         if node == self:
             for graph in self.addon_tree.sn_graphs:
                 for graph_node in graph.node_tree.nodes:
-                    if graph_node.uid == self.func_uid:
-                        node = graph_node
+                    if not graph_node.bl_idname in ["NodeFrame","NodeReroute"]:
+                        if graph_node.uid == self.func_uid:
+                            node = graph_node
 
         else:
             if node.bl_idname == "SN_InterfaceFunctionNode":
