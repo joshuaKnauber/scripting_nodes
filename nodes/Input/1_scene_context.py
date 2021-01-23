@@ -33,6 +33,9 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_string_output("Engine")
         self.add_string_output("Mode")
         self.add_integer_output("Current Frame")
+        self.add_boolean_output("File Is Saved")
+        self.add_boolean_output("File Has Changes")
+        self.add_string_output("Filepath")
 
     def code_evaluate(self, context, touched_socket):
         
@@ -44,7 +47,10 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
             "Window Manager": "bpy.context.window_manager",
             "Engine": "bpy.context.engine",
             "Mode": "bpy.context.mode",
-            "Current Frame": "bpy.context.scene.frame_current"
+            "Current Frame": "bpy.context.scene.frame_current",
+            "File Is Saved": "bpy.data.is_saved",
+            "File Has Changes": "bpy.data.is_dirty",
+            "Filepath": "bpy.data.filepath",
         }
 
         return {
