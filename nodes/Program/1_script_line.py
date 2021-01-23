@@ -27,7 +27,6 @@ class SN_ScriptLineNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self,context,layout):
         row = layout.row(align=True)
         row.prop(self, "script_line", text="")
-        row.operator("sn.get_python_name",text="",icon="UV_SYNC_SELECT")
         
         
     def code_imperative(self, context):
