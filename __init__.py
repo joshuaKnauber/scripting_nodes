@@ -123,15 +123,14 @@ def register():
     bpy.types.NODE_HT_header.append(append_header)
     bpy.types.NODE_HT_header.prepend(prepend_header)
     bpy.types.NODE_MT_editor_menus.append(example_dropdown)
-    
-    # add right click menu
-    try: bpy.types.WM_MT_button_context.append(serpens_right_click)
-    except: pass
 
     # app handlers
     bpy.app.handlers.load_post.append(load_handler)
     bpy.app.handlers.depsgraph_update_post.append(depsgraph_handler)
     atexit.register(unload_handler)
+    
+    # add right click menu
+    bpy.types.WM_MT_button_context.append(serpens_right_click)
 
 
 def unregister():
@@ -142,10 +141,6 @@ def unregister():
     bpy.types.NODE_HT_header.remove(append_header)
     bpy.types.NODE_HT_header.remove(prepend_header)
     bpy.types.NODE_MT_editor_menus.remove(example_dropdown)
-    
-    # remove right click menu
-    try: bpy.types.WM_MT_button_context.remove(serpens_right_click)
-    except: pass
 
     # unregister the graph properties
     del bpy.types.NodeTree.sn_graphs
@@ -177,3 +172,6 @@ def unregister():
     bpy.app.handlers.load_post.remove(load_handler)
     bpy.app.handlers.depsgraph_update_post.remove(depsgraph_handler)
     atexit.unregister(unload_handler)
+    
+    # remove right click menu
+    bpy.types.WM_MT_button_context.remove(serpens_right_click)
