@@ -54,8 +54,9 @@ class SN_Variable(bpy.types.PropertyGroup):
     
     def find_node(self,context):
         for node in context.space_data.node_tree.nodes:
-            if node.uid == self.from_node_uid:
-                return node
+            if not node.bl_idname in ["NodeFrame","NodeReroute"]:
+                if node.uid == self.from_node_uid:
+                    return node
             
     def trigger_update(self,context):
         if self.use_self:

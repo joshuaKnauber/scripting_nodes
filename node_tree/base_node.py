@@ -540,8 +540,9 @@ class SN_GenericPropertyGroup(bpy.types.PropertyGroup):
     def node(self):
         for graph in bpy.context.scene.sn.addon_tree().sn_graphs:
             for node in graph.node_tree.nodes:
-                if node.uid == self.node_uid:
-                    return node
+                if not node.bl_idname in ["NodeFrame","NodeReroute"]:
+                    if node.uid == self.node_uid:
+                        return node
     
     
 
