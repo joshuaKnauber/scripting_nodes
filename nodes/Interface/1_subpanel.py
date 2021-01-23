@@ -50,9 +50,9 @@ class SN_OT_StartSubPanelSelection(bpy.types.Operator):
         for panel_name in dir(bpy.types):
             try:
                 panel = eval("bpy.types."+panel_name)
-                if hasattr(panel,"bl_space_type") and hasattr(panel,"bl_region_type") and not hasattr(panel,"bl_parent_id"):
+                if hasattr(panel.bl_rna.base,"identifier") and panel.bl_rna.base.identifier == "Panel":
                     panels.append(panel_name)
-            except:
+            except: 
                 pass
         return panels
 

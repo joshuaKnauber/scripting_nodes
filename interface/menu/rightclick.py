@@ -162,10 +162,7 @@ def serpens_right_click(self, context):
             op.prop_enum_items = items + "]"
         
         op.db_type = property_pointer.bl_rna.identifier
-        if hasattr(property_pointer,"name"):
-            op.db_name = property_pointer.name
-        elif hasattr(property_pointer.bl_rna,"name"):
-            op.db_name = property_pointer.bl_rna.name
+        op.db_name = property_pointer.bl_rna.name
             
     else:
         if bpy.ops.ui.copy_python_command_button.poll():
