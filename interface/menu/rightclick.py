@@ -142,8 +142,16 @@ def serpens_right_click(self, context):
             op.origin = "SPACE_DATA"
         else:
             op.origin = "DEFAULT"
-            
-        op.full_path = property_pointer.__repr__()
+        
+        if "ObjectBase" in property_pointer.__repr__():
+            op.full_path = "bpy.data.objects[\"My Object\"]"
+            op.db_type = "Object"
+            op.db_name = "Object"
+
+        else:
+            op.full_path = property_pointer.__repr__()
+            op.db_type = property_pointer.bl_rna.identifier
+            op.db_name = property_pointer.bl_rna.name
         
         op.prop_name = property_value.name
         op.prop_identifier = property_value.identifier
@@ -160,9 +168,6 @@ def serpens_right_click(self, context):
             for item in property_value.enum_items:
                 items += f"(\"{item.identifier}\",\"{item.name}\",\"{item.description}\"),"
             op.prop_enum_items = items + "]"
-        
-        op.db_type = property_pointer.bl_rna.identifier
-        op.db_name = property_pointer.bl_rna.name
             
     else:
         if bpy.ops.ui.copy_python_command_button.poll():
