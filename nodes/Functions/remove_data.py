@@ -28,10 +28,7 @@ class SN_RemoveDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                     for parameter in eval("bpy.data." + data.identifier).bl_rna.functions["remove"].parameters:
                         if not parameter.is_output:
-                            inp = self.add_input_from_prop(parameter)
-
-                            if not parameter.type in ["POINTER", "COLLECTION"]:
-                                inp.set_default(parameter.default)
+                            self.add_input_from_prop(parameter)
 
 
     def on_link_insert(self, link):
