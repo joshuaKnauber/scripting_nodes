@@ -21,14 +21,14 @@ example_dict = {
         "tree_name": "Interface",
         "icon": "RESTRICT_VIEW_ON"
     },
-    # "Blend Data": {
-    #     "tree_name": "Blend Data",
-    #     "icon": "MONKEY"
-    # },
-    # "Variables": {
-    #     "tree_name": "Variables",
-    #     "icon": "DRIVER_TRANSFORM"
-    # },
+    "Blend Data": {
+        "tree_name": "Blend Data",
+        "icon": "MONKEY"
+    },
+    "Variables": {
+        "tree_name": "Variables",
+        "icon": "DRIVER_TRANSFORM"
+    },
     # "Properties": {
     #     "tree_name": "Properties",
     #     "icon": "MOD_SOFT"

@@ -42,6 +42,7 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         
     def update_outputs(self,socket):
+        print(socket.data_type)
         self.collection_error = False
         self.no_data_error = False
         if socket.subtype == "NONE":
@@ -55,8 +56,8 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.outputs.clear()
             self.current_data_type = ""
             self.collection_error = True
-        
-        
+
+
     def on_link_insert(self,link):
         if link.to_socket == self.inputs[0]:
             self.update_outputs(link.from_socket)

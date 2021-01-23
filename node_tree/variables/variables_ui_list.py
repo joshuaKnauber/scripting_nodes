@@ -437,6 +437,8 @@ class SN_Variable(bpy.types.PropertyGroup):
             value = str(self.float_default)
         elif self.var_type == "BOOLEAN":
             value = str(self.bool_default)
+        elif self.var_type == "BLEND_DATA" and not self.is_data_collection:
+            value = "None"
 
         return f""""{self.identifier}": {value}, """
 
