@@ -402,11 +402,12 @@ class SN_ScriptingBaseNode:
 
             if prop.type == "ENUM":
                 inp.enum_values = self.enum_items_as_string(prop)
-            
-            if not "VECTOR" in inp.subtype and not "COLOR" in inp.subtype:
-                inp.set_default(prop.default)
-            else:
-                inp.set_default(tuple([prop.default]*prop.array_length))
+
+            if not prop.type in ["POINTER", "COLLECTION"]:
+                if not "VECTOR" in inp.subtype and not "COLOR" in inp.subtype:
+                    inp.set_default(prop.default)
+                else:
+                    inp.set_default(tuple([prop.default]*prop.array_length))
             return inp
 
 

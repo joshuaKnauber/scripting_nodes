@@ -108,10 +108,8 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if parameter.is_output:
                     self.add_output_from_prop(parameter)
                 else:
-                    inp = self.add_input_from_prop(parameter)
-                    if not parameter.type in ["POINTER", "COLLECTION"] and not "VECTOR" in inp.subtype:
-                        inp.set_default(parameter.default)
-        
+                    self.add_input_from_prop(parameter)
+
         self.current_function = self.search_value
 
 
