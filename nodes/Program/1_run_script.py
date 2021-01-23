@@ -3,34 +3,6 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
 
-class SN_OT_GetPythonName(bpy.types.Operator):
-    bl_idname = "sn.get_python_name"
-    bl_label = "Get Python Name"
-    bl_description = "Get the python name for the name of a  variable, function, etc."
-    bl_options = {"REGISTER","UNDO","INTERNAL"}
-    
-    def update_name(self,context):
-        node_instance = SN_ScriptingBaseNode()
-        self.py_name = node_instance.get_python_name(self.name)
-    
-    name: bpy.props.StringProperty(default="",options={"SKIP_SAVE"},update=update_name)
-    py_name: bpy.props.StringProperty(options={"SKIP_SAVE"})
-
-    def execute(self, context):
-        return {"FINISHED"}
-    
-    def draw(self,context):
-        self.layout.label(text="Enter name here:")
-        self.layout.prop(self,"name",text="")
-        self.layout.separator()
-        self.layout.label(text="Copy python name here:")
-        self.layout.prop(self,"py_name",text="")
-    
-    def invoke(self,context,event):
-        return context.window_manager.invoke_popup(self,width=300)
-
-
-
 
 class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
 
@@ -55,7 +27,6 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self,context,layout):
         row = layout.row(align=True)
         row.prop_search(self,"script",bpy.data,"texts",text="Script")
-        row.operator("sn.get_python_name",text="",icon="UV_SYNC_SELECT")
 
 
     def code_evaluate(self, context, touched_socket):
