@@ -190,6 +190,7 @@ def handle_file_load():
         if len(tree.sn_graphs) > 0:
             bpy.app.timers.register(tree.run_autocompile, first_interval=0.1)
             tree.sn_graphs[0].errors.clear()
+            tree.sn_graphs[0].prints.clear()
             if tree.sn_graphs[0].compile_on_start:
                 compile_addon(tree,False)
 
@@ -203,6 +204,7 @@ def remove_addon(addon_tree):
     for addon in addons:
         if addon["addon_tree"] == addon_tree:
             addon["addon_tree"].sn_graphs[0].errors.clear()
+            addon["addon_tree"].sn_graphs[0].prints.clear()
             __remove_addon(addon)
             break
         

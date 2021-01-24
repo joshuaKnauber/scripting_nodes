@@ -41,6 +41,12 @@ class SN_Error(bpy.types.PropertyGroup):
     node: bpy.props.StringProperty()
     node_tree: bpy.props.StringProperty()
     
+    
+    
+class SN_Print(bpy.types.PropertyGroup):
+    
+    value: bpy.props.StringProperty()
+    
 
 
 class SN_Graph(bpy.types.PropertyGroup):
@@ -91,6 +97,8 @@ class SN_Graph(bpy.types.PropertyGroup):
     node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
     
     errors: bpy.props.CollectionProperty(type=SN_Error)
+
+    prints: bpy.props.CollectionProperty(type=SN_Print)
     
     last_compile_time: bpy.props.StringProperty(default="0s",
                                                name="Last Time",
