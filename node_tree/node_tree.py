@@ -83,7 +83,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
         
 def upgrade_node_tree(ntree):
-    print(ntree)
+    pass
         
 
 def handle_versioning():

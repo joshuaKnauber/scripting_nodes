@@ -27,7 +27,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
             return {
                 "code": f"""
                         print({self.inputs["Content"].by_name(separator=", ")})
-                        {self.outputs[0].code(5)}
+                        {self.outputs[0].code(6)}
                         """
             }
             
@@ -35,6 +35,6 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
             return {
                 "code": f"""
                         sn_print("{self.addon_tree.name}",{self.inputs["Content"].by_name(separator=", ")})
-                        {self.outputs[0].code(5)}
+                        {self.outputs[0].code(6)}
                         """
             }

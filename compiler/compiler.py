@@ -25,11 +25,11 @@ def compile_addon(addon_tree, is_export=False):
             addon_data["code"]["license_block"] = __get_license_block()
         
         # add addon info
-        addon_data["code"]["addon_info"] = __normalize_code(__create_addon_info(addon_tree), 0)
+        addon_data["code"]["addon_info"] = normalize_code(create_addon_info(addon_tree), 0)
         
         # add serpens functions
         if not "serpens_functions" in addon_data["code"]:
-            addon_data["code"]["serpens_functions"] = __normalize_code(__get_serpens_functions(addon_tree), 0)
+            addon_data["code"]["serpens_functions"] = normalize_code(__get_serpens_functions(addon_tree), 0)
 
         # add graph code placeholder
         if not "graph_code" in addon_data["code"]:
@@ -73,7 +73,7 @@ def compile_addon(addon_tree, is_export=False):
                 
         # write variable define block
         __write_blockcomment(addon_data["text"], "INITALIZE VARIABLES")
-        __write_in_text(addon_data["text"], __normalize_code(__create_variable_register(addon_tree),0))
+        __write_in_text(addon_data["text"], normalize_code(__create_variable_register(addon_tree),0))
         
         # write serpens functions
         __write_blockcomment(addon_data["text"], "SERPENS FUNCTIONS")
@@ -95,12 +95,12 @@ def compile_addon(addon_tree, is_export=False):
         
         # write register function
         __write_blockcomment(addon_data["text"], "REGISTER ICONS")
-        __write_in_text(addon_data["text"], __normalize_code(__create_icon_register(addon_tree),0))
+        __write_in_text(addon_data["text"], normalize_code(__create_icon_register(addon_tree),0))
 
         __write_blockcomment(addon_data["text"], "REGISTER PROPERTIES")
-        __write_in_text(addon_data["text"], __normalize_code(__create_property_register(addon_tree),0))
+        __write_in_text(addon_data["text"], normalize_code(__create_property_register(addon_tree),0))
         __write_paragraphs(addon_data["text"], 1)
-        __write_in_text(addon_data["text"], __normalize_code(__create_property_unregister(addon_tree),0))
+        __write_in_text(addon_data["text"], normalize_code(__create_property_unregister(addon_tree),0))
 
         __write_blockcomment(addon_data["text"], "REGISTER ADDON")
         __write_in_text(addon_data["text"], "def register():")
@@ -159,13 +159,6 @@ def compile_addon(addon_tree, is_export=False):
         print("\n-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -\n\n")
         return False
     
-    
-def current_module():
-    addon_tree = bpy.context.scene.sn.addon_tree()
-    if addon_tree:
-        compiled = __find_compiled_addon(addon_tree)
-        if compiled:
-            return compiled["module"]
     
     
 def compile_export(addon_tree):
@@ -307,7 +300,7 @@ def __get_keyed_list(graph_code, key):
     for graph in graph_code:
         if graph_code[graph][key]:
             for block in graph_code[graph][key]:
-                register.append((__normalize_code(block[0],1),block[1]))
+                register.append((normalize_code(block[0],1),block[1]))
     return register
 
 
@@ -417,7 +410,7 @@ def __create_property_unregister(addon_tree):
     return properties
 
 
-def __create_addon_info(addon_tree):
+def create_addon_info(addon_tree):
     graph = addon_tree.sn_graphs[0]
     return f"""
             bl_info = {{
@@ -435,7 +428,7 @@ def __create_addon_info(addon_tree):
             """
 
 
-def __normalize_code(code, indents):
+def normalize_code(code, indents):
     code = code.split("\n")
     remove_indents = 999
     for line in code:
@@ -456,13 +449,13 @@ def __normalize_code(code, indents):
 
 
 def combine_blocks(block_list, indents):
-    return __normalize_code("".join(block_list), indents)[indents*4:]
+    return normalize_code("".join(block_list), indents)[indents*4:]
 
 
 def process_node(node, touched_socket, indents=0):
     node_result = node.code_evaluate(bpy.context, touched_socket)
     if node_result:
-        node_code = __normalize_code(node_result["code"], indents)
+        node_code = normalize_code(node_result["code"], indents)
         return node_code
     return ""
 
@@ -470,7 +463,7 @@ def process_node(node, touched_socket, indents=0):
 def process_returned(node, node_result):
     if node_result:
         if "code" in node_result:
-            return __normalize_code(node_result["code"], 0)
+            return normalize_code(node_result["code"], 0)
     return ""
 
 
