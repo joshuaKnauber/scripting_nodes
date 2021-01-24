@@ -123,10 +123,7 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
             if link.from_socket.data_type != self.current_data_type or self.inputs[1].subtype != link.from_socket.subtype:
                 self.inputs[1].data_type = link.from_socket.data_type
                 self.inputs[1].subtype = link.from_socket.subtype
-                if link.from_socket.subtype == "NONE":
-                    self.inputs[1].default_text = "Blend Data"
-                else:
-                    self.inputs[1].default_text = "Collection"
+                self.inputs[1].default_text = link.from_socket.data_name
                 self.current_data_type = link.from_socket.data_type
                 self.get_functions(link.from_socket.data_type, link.from_socket.subtype=="COLLECTION")
 
@@ -138,9 +135,6 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def draw_node(self, context, layout):
-        if self.current_data_type:
-            layout.label(text="Current type: " + self.current_data_type)
-
         if len(self.function_collection):
             layout.prop_search(self, "search_value", self, "function_collection", text="")
 
