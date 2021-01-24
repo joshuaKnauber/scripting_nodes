@@ -14,7 +14,11 @@ class SN_StringNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
 
-    value: bpy.props.StringProperty(name="String Value")
+    def update_value(self, context):
+        if self.value[-1] == "\\":
+            self["value"] = self.value[:-1] + "/"
+
+    value: bpy.props.StringProperty(name="String Value", update=update_value)
 
     def on_create(self,context):
         self.add_string_output("String").mirror_name = True

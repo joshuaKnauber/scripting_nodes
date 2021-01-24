@@ -23,8 +23,8 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 
     def update_string(self, context):
-        self["value"] = self.value
-
+        if self.value[-1] == "\\":
+            self["value"] = self.value[:-1] + "/"
 
     def make_absolute(self,context):
         if not self.value_directory == bpy.path.abspath(self.value_directory):
@@ -32,8 +32,10 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         if not self.value_file == bpy.path.abspath(self.value_file):
             self.value_file = bpy.path.abspath(self.value_file)
 
-        self["value_directory"] = self.value_directory.replace('\\', "/")
-        self["value_file"] = self.value_file.replace('\\', "/")
+        if self.value_directory[-1] == "\\":
+            self["value_directory"] = self.value_directory[:-1] + "/"
+        if self.value_file[-1] == "\\":
+            self["value_file"] = self.value_file[:-1] + "/"
 
 
     value: bpy.props.StringProperty(name="Value",
