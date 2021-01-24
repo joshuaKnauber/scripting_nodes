@@ -13,6 +13,26 @@ class SN_ObjectsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     data_identifier = "objects"
     
     active_data = "bpy.context.active_object"
+
+
+
+class SN_MetaballsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
+
+    bl_idname = "SN_MetaballsNode"
+    bl_label = "Metaballs"
+    
+    data_type = "MetaBall"
+    data_identifier = "metaballs"
+
+
+
+class SN_CurvesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
+
+    bl_idname = "SN_CurvesNode"
+    bl_label = "Curves"
+    
+    data_type = "Curve"
+    data_identifier = "curves"
     
     
     
