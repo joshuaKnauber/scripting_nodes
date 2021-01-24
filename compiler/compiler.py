@@ -120,6 +120,12 @@ def compile_addon(addon_tree, is_export=False):
         # auto format
         __auto_format_text(addon_data["text"])
         
+        # return export
+        if is_export:
+            for graph in addon_tree.sn_graphs:
+                graph.node_tree.has_changes = True
+            return txt
+        
         # make module
         module = addon_data["text"].as_module()
         addon_data["module"] = module
@@ -130,14 +136,11 @@ def compile_addon(addon_tree, is_export=False):
         addon_tree.sn_graphs[0].last_compile_time = str(round(end_time-start_time,4))+"s"
 
         # register module
-        if is_export:
-            return txt
+        success = __register_module(module)
+        if success == True:
+            return success
         else:
-            success = __register_module(module)
-            if success == True:
-                return success
-            else:
-                raise success
+            raise success
         
         # redraw
         if context.screen:
