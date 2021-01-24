@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_GetElementListNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_GetElementListNode"
-    bl_label = "Index List"
+    bl_label = "Get Element of List"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 
@@ -18,7 +18,7 @@ class SN_GetElementListNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_list_input("List")
-        self.add_integer_input("Index of Element")
+        self.add_integer_input("Index of Element").set_default(0)
         self.add_data_output("Element")
 
 
