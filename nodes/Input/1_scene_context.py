@@ -23,6 +23,10 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
         out.data_type = "Area"
         out.data_identifier = "area"
         out.data_name = "Area"
+        out = self.add_blend_data_output("Active View Layer")
+        out.data_type = "ViewLayer"
+        out.data_identifier = "view_layer"
+        out.data_name = "View Layer"
         out = self.add_blend_data_output("Active Camera")
         out.data_type = "Camera"
         out.data_identifier = "camera"
@@ -47,6 +51,7 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
         return_type = {
             "Active Scene": "bpy.context.scene",
             "Active Area": "bpy.context.area",
+            "Active View Layer": "bpy.context.view_layer",
             "Active Camera": "bpy.context.scene.camera",
             "Preferences": "bpy.context.preferences",
             "Window Manager": "bpy.context.window_manager",

@@ -86,7 +86,7 @@ class SN_MeshesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     data_type = "Mesh"
     data_identifier = "meshes"
     
-    active_data = "bpy.context.scene.object.data"
+    active_data = "bpy.context.active_object.data"
     
     
     
