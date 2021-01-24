@@ -85,12 +85,12 @@ class SN_Variable(bpy.types.PropertyGroup):
             self.name = unique_name
 
         node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
-                                    "SN_RemoveFromListNode", "SN_ChangeVariableNode"]) # TODO improve this
+                                    "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode"]) # TODO improve this
 
         self.identifier = node.get_python_name(self.name, f"new_{key}")
 
         node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
-                                    "SN_RemoveFromListNode", "SN_ChangeVariableNode"])
+                                    "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode"])
         
         self.trigger_update(context)
 
@@ -428,7 +428,7 @@ class SN_Variable(bpy.types.PropertyGroup):
     def property_unregister(self):
         return f"del bpy.types.{self.attach_property_to}.{self.identifier}\n"
 
-    def variable_register(self):
+    def get_variable_default(self):
         value = "[]"
         if self.var_type == "STRING":
             value = f'"{self.str_default}"'
@@ -441,7 +441,10 @@ class SN_Variable(bpy.types.PropertyGroup):
         elif self.var_type == "BLEND_DATA" and not self.is_data_collection:
             value = "None"
 
-        return f""""{self.identifier}": {value}, """
+        return value
+
+    def variable_register(self):
+        return f""""{self.identifier}": {self.get_variable_default()}, """
 
 
 class SN_UL_VariableList(bpy.types.UIList):
