@@ -1,6 +1,5 @@
 import bpy
 from .. import bl_info
-from ..compiler.compiler import current_module
 
 
 class SN_AddonPreferences(bpy.types.AddonPreferences):
@@ -31,8 +30,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                                              description="Show the full error messages in the console",
                                              default=False)
 
-    navigation: bpy.props.EnumProperty(items=[  ("DEV","Development","Development Preferences","NONE",0),
-                                                ("SETTINGS","Settings","Serpens Settings","NONE",1),
+    navigation: bpy.props.EnumProperty(items=[  ("SETTINGS","Settings","Serpens Settings","NONE",1),
                                                 ("ADDONS","Addons","Serpens Addon Market","NONE",2),
                                                 ("PACKAGES","Packages","Serpens Package Market","NONE",3)],
                                        default = "SETTINGS",
@@ -43,14 +41,6 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     addon_search: bpy.props.StringProperty(default="",name="Search")
     package_search: bpy.props.StringProperty(default="",name="Search")
 
-
-    def draw_dev_prefs(self,layout):
-        module = current_module()
-        if module and "sn_draw_addon_prefs" in dir(module):
-            module.sn_draw_addon_prefs(self)
-        else:
-            layout.label(text="No active addon preferences node",icon="QUESTION")
-            
 
 
     def draw_serpens_settings(self,layout):
@@ -154,11 +144,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_navigation(self,layout):
         row = layout.row(align=True)
         row.scale_y = 1.2
-        row.prop_enum(self,"navigation",value="DEV")
-        row.separator()
-        row.prop_enum(self,"navigation",value="SETTINGS")
-        row.prop_enum(self,"navigation",value="ADDONS")
-        row.prop_enum(self,"navigation",value="PACKAGES")
+        row.prop(self,"navigation",expand=True)
 
 
     def draw_changelog(self,layout):
@@ -183,9 +169,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw(self, context):
         layout = self.layout
         self.draw_navigation(layout)
-        if self.navigation == "DEV":
-            self.draw_dev_prefs(layout)
-        elif self.navigation == "SETTINGS":
+        if self.navigation == "SETTINGS":
             self.draw_serpens_settings(layout)
             self.draw_changelog(layout)
         elif self.navigation == "ADDONS":

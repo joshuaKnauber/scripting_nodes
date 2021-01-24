@@ -174,4 +174,5 @@ def unregister():
     atexit.unregister(unload_handler)
     
     # remove right click menu
-    bpy.types.WM_MT_button_context.remove(serpens_right_click)
+    try: bpy.types.WM_MT_button_context.remove(serpens_right_click)
+    except: pass
