@@ -2,6 +2,19 @@ import bpy
 
 
 
+class SN_OT_RemovePrint(bpy.types.Operator):
+    bl_idname = "sn.remove_print"
+    bl_label = "Remove Print Messages"
+    bl_description = "Removes all current print messages"
+    bl_options = {"REGISTER"}
+
+    def execute(self, context):
+        context.scene.sn.addon_tree().sn_graphs[0].prints.clear()
+        return {"FINISHED"}
+
+
+
+
 class SN_PT_AddonPrintPanel(bpy.types.Panel):
     bl_idname = "SN_PT_AddonPrintPanel"
     bl_label = "Print"
@@ -15,6 +28,9 @@ class SN_PT_AddonPrintPanel(bpy.types.Panel):
         if context.scene.sn.editing_addon != "NONE" and context.space_data.tree_type == "ScriptingNodesTree":
             return len(context.scene.sn.addon_tree().sn_graphs[0].prints) > 0
         return False
+    
+    def draw_header(self,contex):
+        self.layout.operator("sn.remove_print",text="",icon="TRASH")
     
     def draw(self, context):
         layout = self.layout
