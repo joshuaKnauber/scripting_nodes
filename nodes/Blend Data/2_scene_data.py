@@ -147,7 +147,6 @@ class SN_WorkspacesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     
     data_type = "Workspace"
     data_identifier = "workspaces"
-    data_identifier = "textures"
     
     active_data = "bpy.context.workspace"
     
