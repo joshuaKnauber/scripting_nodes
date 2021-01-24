@@ -30,7 +30,7 @@ class SN_TimeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         if touched_socket == self.outputs["Time"]:
-            time_func = "str(datetime.now().time())"
+            time_func = "str(datetime.now().time()).split(\".\")[0]"
         elif touched_socket == self.outputs["Hours"]:
             time_func = "datetime.now().time().hour"
         elif touched_socket == self.outputs["Minutes"]:
