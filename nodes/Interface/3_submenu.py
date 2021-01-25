@@ -70,3 +70,7 @@ class SN_SubmenuNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {layout}.menu("{menu}",text={self.inputs["Text"].code()},icon_value={self.inputs["Icon"].code()})
                         """
             }
+
+        else:
+            self.add_error("No Menu", "No menu selected")
+            return {"code": ""}

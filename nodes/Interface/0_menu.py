@@ -41,7 +41,9 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
         
 
     def code_evaluate(self, context, touched_socket):
-        
+        if not self.inputs["Poll"].value and not self.inputs["Poll"].links:
+            self.add_error("Poll False", "You poll is false and not connected and your menu won't be displayed", fatal=True)
+
         return {
             "code": f"""
                     class {self.idname()}(bpy.types.Menu):

@@ -35,7 +35,6 @@ class SN_ColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
 
-
         return {
             "code": f"""
 

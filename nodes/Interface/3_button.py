@@ -96,7 +96,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         elif self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
             item = self.addon_tree.sn_nodes["SN_OperatorNode"].items[self.custom_operator]
             operator = "sna." + item.identifier
-        
+
         if operator:
             props = []
             for i,inp in enumerate(self.inputs):
@@ -104,6 +104,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                     props.append("op." + inp.variable_name + " = " + inp.code() + "\n")
                     
         else:
+            self.add_error("No Operator", "No operator selected")
             return {"code":""}
         
         return {

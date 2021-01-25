@@ -70,3 +70,6 @@ class SN_PopoverNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {layout}.popover("{panel}",text={self.inputs["Text"].code()},icon_value={self.inputs["Icon"].code()})
                         """
             }
+        else:
+            self.add_error("No Panel", "No panel selected")
+            return {"code": ""}

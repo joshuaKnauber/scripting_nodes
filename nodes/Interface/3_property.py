@@ -77,21 +77,26 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     
 
     def code_evaluate(self, context, touched_socket):
-        
-        if not self.copied_path: return {"code": ""}
+
+        if not self.copied_path:
+            self.add_error("No property copied", "There is no property copied", True)
+            return {"code": ""}
 
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
-        
+
         values = ""
         for inp in self.inputs:
             if not inp.socket_type in ["BLEND_DATA","ICON","INTERFACE"]:
                 values += inp.name.lower().replace(" ","_") + "=" + inp.code() + ","
-            
+
         data = get_data(self.copied_path)
 
         data_path = ""
         if self.inputs[-1].socket_type == "BLEND_DATA":
             data_path = self.inputs[-1].code()
+            if not self.inputs[-1].links:
+                self.add_error("No blend data", "Blend data input is not connected", True)
+                return {"code": ""}
 
         if data["group_path"]:
             data_path += "." + data["group_path"] if data_path else data["group_path"]

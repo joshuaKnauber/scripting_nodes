@@ -51,6 +51,8 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         if touched_socket == self.inputs[0]:
+            if not self.inputs[1].links:
+                self.add_error("No input", "Nothing is connected to this for node")
             return {
                 "code": f"""
                         for_node_{self.uid} = 0

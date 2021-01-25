@@ -216,6 +216,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 
 
     def code_evaluate(self, context, touched_socket):
+        if not self.inputs["Poll"].value and not self.inputs["Poll"].links:
+            self.add_error("Poll False", "You poll is false and not connected and your panel won't be displayed", fatal=True)
         
         option_closed = "\"DEFAULT_CLOSED\"," if self.default_closed else ""
         option_header = "\"HIDE_HEADER\"," if self.hide_header else ""
