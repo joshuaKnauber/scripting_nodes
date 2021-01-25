@@ -1,4 +1,6 @@
 import bpy
+import os
+import json
 from .. import bl_info
 
 
@@ -104,7 +106,6 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                 row.operator("wm.url_open",text="Get .blend").url = addon.blend_url
                 
 
-
     def draw_addon_market(self,layout):
         addons = bpy.context.scene.sn.addons
         if not len(addons):
@@ -121,10 +122,49 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                 if not addon.name == "placeholder":
                     if self.addon_search.lower() in addon.name.lower() or self.addon_search.lower() in addon.author.lower():
                         self.draw_addon(layout,addon)
+                        
+                        
+    def draw_installed(self,layout):
+        installed_path = os.path.join(os.path.dirname(os.path.dirname(__file__)),"packages","installed.json")
+        has_installed = False
+        with open(installed_path) as installed:
+            for index, package in enumerate(json.loads(installed.read())["packages"]):
+                has_installed = True
+                box = layout.box()
+                row = box.row()
+                subrow = row.row()
+                subrow.scale_y = 1.2
+                subrow.alignment = "LEFT"
+                subrow.label(text=package["name"])
+                subrow = row.row()
+                subrow.alignment = "RIGHT"
+                v = package["package_version"]
+                subrow.label(text=f"{v[0]}.{v[1]}.{v[2]}")
+                subrow.operator("sn.uninstall_package",text="",icon="X",emboss=False).index = index
+                col = box.column(align=True)
+                col.label(text="Description: ".ljust(15) + package["description"])
+                col.label(text="Author: ".ljust(16) + package["author"])
+                if package["wiki_url"]:
+                    col.label(text="Wiki: ".ljust(18) + package["wiki_url"])
+                col.separator()
+                if not list(bl_info["version"]) in package["serpens_versions"] and len(package["serpens_versions"]):
+                    row = col.row()
+                    row.alert = True
+                    row.label(text="This package doesn't officially support this Serpens version.",icon="INFO")
+                    row = col.row()
+                    row.alert = True
+                    row.label(text="There might be issues with these nodes.",icon="BLANK1")
+                
+        if not has_installed:
+            layout.label(text="You don't have any installed packages", icon="INFO")
     
     
     def draw_package_market(self,layout):
         packages = bpy.context.scene.sn.packages
+        row = layout.row(align=True)
+        row.scale_y = 1.2
+        row.operator("sn.install_package",text="Install Package",icon="IMPORT")
+        self.draw_installed(layout)
         if not len(packages):
             row = layout.row()
             row.scale_y = 1.2
