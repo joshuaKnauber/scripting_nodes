@@ -45,12 +45,21 @@ class SN_FindInDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_evaluate(self, context, touched_socket):
+        
+        if self.inputs[0].links:
+            if touched_socket == self.outputs[0]: # data block
+                return {"code": f"{self.inputs[0].code()}[{self.inputs[1].code()}]"}
 
-        if touched_socket == self.outputs[0]: # data block
-            return {"code": f"{self.inputs[0].code()}[{self.inputs[1].code()}]"}
-
-        elif touched_socket == self.outputs[1]: # index int
-            return {"code": f"{self.inputs[0].code()}.find({self.inputs[1].code()})"}
-            
-        else: # exists bool
-            return {"code": f"{self.inputs[0].code()}.find({self.inputs[1].code()}) != -1"}
+            elif touched_socket == self.outputs[1]: # index int
+                return {"code": f"{self.inputs[0].code()}.find({self.inputs[1].code()})"}
+                
+            else: # exists bool
+                return {"code": f"{self.inputs[0].code()}.find({self.inputs[1].code()}) != -1"}
+        else:
+            self.add_error("No blend data", "Blend data input is not connected")
+            if touched_socket == self.outputs[0]: # data block
+                return {"code": "None"}
+            elif touched_socket == self.outputs[1]: # index int
+                return {"code": "0"}
+            else:
+                return {"code": "False"}

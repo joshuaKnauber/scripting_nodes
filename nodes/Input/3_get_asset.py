@@ -30,6 +30,8 @@ class SN_GetAssetNode(bpy.types.Node, SN_ScriptingBaseNode):
         asset_path = ""
         if self.asset and self.asset in self.addon_tree.sn_assets:
             asset_path = self.addon_tree.sn_assets[self.asset].path
+        else:
+            self.add_error("No Asset", "No Asset selected")
         return {
             "code": f"\"{asset_path}\""
         }

@@ -74,8 +74,11 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         set_data = []
-        for inp in self.inputs[2:]:
-            set_data.append(self.inputs[1].code() + "." + inp.data_identifier + "=" + inp.code())
+        if self.inputs[1].links:
+            for inp in self.inputs[2:]:
+                set_data.append(self.inputs[1].code() + "." + inp.data_identifier + "=" + inp.code())
+        else:
+            self.add_error("No blend data", "Blend data input is not connected")
 
         return {
             "code": f"""

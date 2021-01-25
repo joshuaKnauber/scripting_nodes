@@ -31,11 +31,22 @@ class SN_GetMaterialNodesNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def code_evaluate(self, context, touched_socket):
-        if touched_socket.socket_type == "BOOLEAN":
-            return {
-                "code": f"{self.inputs[0].code()}.use_nodes"
-            }
+        if self.inputs[0].links:
+            if touched_socket.socket_type == "BOOLEAN":
+                return {
+                    "code": f"{self.inputs[0].code()}.use_nodes"
+                }
+            else:
+                return {
+                    "code": f"{self.inputs[0].code()}.node_tree.nodes"
+                }
         else:
-            return {
-                "code": f"{self.inputs[0].code()}.node_tree.nodes"
-            }
+            self.add_error("No blend data", "Blend data input is not connected")
+            if touched_socket.socket_type == "BOOLEAN":
+                return {
+                        "code": "False"
+                }
+            else:
+                return {
+                        "code": "None"
+                }

@@ -77,6 +77,10 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
 
-        return {
-            "code": f"{self.inputs[0].code()}.{touched_socket.data_identifier}"
-        }
+        if self.inputs[0].links:
+            return {
+                "code": f"{self.inputs[0].code()}.{touched_socket.data_identifier}"
+            }
+        else:
+            self.add_error("No blend data", "Blend data input is not connected")
+            return {"code": "None"}

@@ -112,6 +112,7 @@ class SN_GetIconNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.custom_icon and self.custom_icon in self.addon_tree.sn_icons and self.addon_tree.sn_icons[self.custom_icon].image:
                 icon = f"bpy.context.scene.{self.addon_tree.sn_graphs[0].short()}_icons['{self.custom_icon}'].icon_id"
             else:
+                self.add_error("No Icon", "No Icon selected")
                 icon = "2"
         return {
             "code": icon
