@@ -104,7 +104,7 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     class SNA_AddonPreferences_{self.uid}(bpy.types.AddonPreferences):
                         bl_idname = __name__.partition('.')[0]
                         
-                        {self.list_code(property_register, 7)}
+                        {self.list_code(property_register, 6)}
                         
                         def draw(self, context):
                             try:

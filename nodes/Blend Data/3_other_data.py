@@ -16,8 +16,8 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     def data_items(self,context):
-        types = ["brushes","cache_files","cameras", "curves","fonts","grease_pencils",
-                "lattices","libraries","lightprobes","linestyles","masks","metaballs",
+        types = ["brushes","cache_files","cameras", "fonts","grease_pencils",
+                "lattices","libraries","lightprobes","linestyles","masks",
                 "movieclips","paint_curves","palettes","particles","scenes","screens","shape_keys",
                 "sounds","speakers","volumes","window_managers"]
         items = []
