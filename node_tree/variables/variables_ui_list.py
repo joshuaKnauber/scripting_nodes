@@ -206,6 +206,8 @@ class SN_Variable(bpy.types.PropertyGroup):
                                              description="The subtype of this property",
                                              update=trigger_update)
 
+    property_options: bpy.props.EnumProperty(items=[("HIDDEN", "Hide", "Hide in operator edit popup (Shift-Click to select multiple)"), ("SKIP_SAVE", "Skip Save", "Don't save this property for the next time the operator is called (Shift-Click to select multiple)"), ("ANIMATABLE", "Animatable", "Defines if this property is animatable (Shift-Click to select multiple)")], name="Options", description="Property options", options={"ENUM_FLAG"})
+
 
     def unit_items(self, context):
         units = ["NONE", "LENGTH", "AREA", "VOLUME", "ROTATION", "TIME", "VELOCITY",
@@ -421,6 +423,7 @@ class SN_Variable(bpy.types.PropertyGroup):
             property_line += f"subtype='{self.property_subtype}',"
         if self.property_unit != "NO_UNITS":
             property_line += f"unit='{self.property_unit}',"
+        property_line += f"options={self.property_options}"
         property_line += f"{self.property_default()}"
         property_line += f"{self.property_min_max()})\n"
         return property_line

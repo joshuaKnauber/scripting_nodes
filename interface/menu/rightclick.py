@@ -1,7 +1,6 @@
 import bpy
 import json
 
-#TODO options for properties especially in operators
 
 
 def construct_from_property(path,prop):

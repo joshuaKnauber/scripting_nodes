@@ -67,7 +67,7 @@ class SN_OT_EditNodeProperty(bpy.types.Operator):
         return {"FINISHED"}
 
     def invoke(self, context, event):
-        return context.window_manager.invoke_popup(self)
+        return context.window_manager.invoke_popup(self, width=350)
 
     def draw(self, context):
         addon_tree = context.space_data.node_tree
