@@ -24,7 +24,10 @@ class SN_GetAttributeNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def code_evaluate(self, context, touched_socket):
-        
+        if not self.inputs[0].links:
+            self.add_error("No blend data", "Blend data input is not connected", True)
+            return {"code": "None"}
+
         return {
             "code": f"getattr({self.inputs[0].code()},{self.inputs[1].code()})"
         }

@@ -27,6 +27,14 @@ class SN_SetCustomPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         
+        if not self.inputs[1].links:
+            self.add_error("No blend data", "Blend data input is not connected", True)
+            return {
+                "code": f"""
+                        {self.outputs[0].code(5)}
+                        """
+            }
+
         return {
             "code": f"""
                     {self.inputs[1].code()}[{self.inputs[2].code()}] = {self.inputs[3].code()}

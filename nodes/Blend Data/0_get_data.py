@@ -96,5 +96,5 @@ class SN_GetDataFromIDNode(bpy.types.Node, SN_ScriptingBaseNode):
                 "code": f"{self.inputs[0].code()}.{touched_socket.variable_name}"
             }
         else:
-            self.add_error("No blend data", "Blend data input is not connected")
+            self.add_error("No blend data", "Blend data input is not connected", True)
             return {"code": "None"}

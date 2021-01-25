@@ -41,7 +41,7 @@ class SN_GetMaterialNodesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     "code": f"{self.inputs[0].code()}.node_tree.nodes"
                 }
         else:
-            self.add_error("No blend data", "Blend data input is not connected")
+            self.add_error("No blend data", "Blend data input is not connected", True)
             if touched_socket.socket_type == "BOOLEAN":
                 return {
                         "code": "False"

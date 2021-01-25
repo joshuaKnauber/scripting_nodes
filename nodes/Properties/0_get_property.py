@@ -52,17 +52,20 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def code_evaluate(self, context, touched_socket):
-        
+
         data = get_data(self.copied_path)
         path = ""
         if len(self.inputs):
+            if not self.inputs[0].links:
+                self.add_error("No blend data", "Blend data input is not connected", True)
+                return {"code": "None"}
+
             path = self.inputs[0].code()
-        
-        if data["group_path"]:
-            path += "." + data["group_path"] if path else data["group_path"]
-            
-        path += "." + data["property"]["identifier"]
-        
+            if data["group_path"]:
+                path += "." + data["group_path"] if path else data["group_path"]
+
+            path += "." + data["property"]["identifier"]
+
         return {
             "code": f"{path}"
         }

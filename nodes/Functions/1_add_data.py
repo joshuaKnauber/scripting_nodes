@@ -73,7 +73,7 @@ class SN_AddDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                 return {"code": f"new_return_{self.uid}"}
 
         else:
-            self.add_error("No blend data", "The blend data input is not connected")
+            self.add_error("No blend data", "The blend data input is not connected", True)
             if touched_socket == self.inputs[0]:
                 return {
                     "code": f"""

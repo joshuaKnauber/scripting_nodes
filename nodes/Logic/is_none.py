@@ -26,7 +26,7 @@ class SN_IsNoneNode(bpy.types.Node, SN_ScriptingBaseNode):
                 "code": f"""{self.inputs[0].code()} == None"""
             }
         else:
-            self.add_error("No Blend Data", "Blend data input not connected")
+            self.add_error("No Blend Data", "Blend data input not connected", True)
             return {
                 "code": "True"
             }

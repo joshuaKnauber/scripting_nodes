@@ -71,7 +71,22 @@ class SN_SetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             set_prop += "." + data["property"]["identifier"]
             
             set_prop += " = " + self.inputs[-1].code()
-        
+
+            if not self.inputs[1].links:
+                self.add_error("No blend data", "Blend data input is not connected", True)
+                return {
+                    "code": f"""
+                            {self.outputs[0].code(7)}
+                            """
+                }
+        else:
+            self.add_error("No Property", "You need to paste the property you want to set", True)
+            return {
+                "code": f"""
+                        {self.outputs[0].code(6)}
+                        """
+            }
+
         return {
             "code": f"""
                     {set_prop}

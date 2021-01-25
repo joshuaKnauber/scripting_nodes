@@ -78,7 +78,7 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
             for inp in self.inputs[2:]:
                 set_data.append(self.inputs[1].code() + "." + inp.data_identifier + "=" + inp.code())
         else:
-            self.add_error("No blend data", "Blend data input is not connected")
+            self.add_error("No blend data", "Blend data input is not connected", True)
 
         return {
             "code": f"""

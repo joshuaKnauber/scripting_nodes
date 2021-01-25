@@ -56,7 +56,7 @@ class SN_FindInDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
             else: # exists bool
                 return {"code": f"{self.inputs[0].code()}.find({self.inputs[1].code()}) != -1"}
         else:
-            self.add_error("No blend data", "Blend data input is not connected")
+            self.add_error("No blend data", "Blend data input is not connected", True)
             if touched_socket == self.outputs[0]: # data block
                 return {"code": "None"}
             elif touched_socket == self.outputs[1]: # index int

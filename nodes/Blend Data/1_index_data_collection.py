@@ -70,5 +70,5 @@ class SN_IndexDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 "code": f"{self.inputs[0].code()}[{self.inputs[1].code()}]"
             }
         else:
-            self.add_error("No blend data", "Blend data input is not connected")
+            self.add_error("No blend data", "Blend data input is not connected", True)
             return {"code": "None"}
