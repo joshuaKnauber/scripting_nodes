@@ -32,7 +32,8 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_float_input("a")
         self.add_float_input("b")
         self.add_dynamic_float_input("c")
-        self.add_float_output("Result")
+        self.add_float_output("Float Result")
+        self.add_integer_output("Integer Result")
 
     def draw_node(self, context, layout):
         layout.prop(self, "operation", text="")
@@ -40,18 +41,33 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.prop(self,"expression",text="")
 
     def code_evaluate(self, context, touched_socket):
-        
+
         if not self.operation == "EXPRESSION":
-            return {
-                "code": f"""({self.inputs[0].by_type(separator=self.operation)})"""
-            }
-            
-        else:
-            
+            if touched_socket == self.outputs[0]:
+                return {
+                    "code": f"""({self.inputs[0].by_type(separator=self.operation)})"""
+                }
+            else:
+                return {
+                    "code": f"""int(({self.inputs[0].by_type(separator=self.operation)}))"""
+                }
+
+
+        elif touched_socket == self.outputs[0]:
+
             expression = self.expression
             for inp in self.inputs:
                 expression = expression.replace(inp.default_text, inp.code())
             
             return {
                 "code": f"eval(\"{expression}\")"
+            }
+
+        else:
+            expression = self.expression
+            for inp in self.inputs:
+                expression = expression.replace(inp.default_text, inp.code())
+            
+            return {
+                "code": f"int(eval(\"{expression}\"))"
             }

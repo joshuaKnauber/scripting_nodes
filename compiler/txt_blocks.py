@@ -26,6 +26,9 @@ def serpens_functions(addon_tree):
                     item = bpy.data.node_groups[tree_name].sn_graphs[0].prints.add()
                     for arg in args:
                         item.value += str(arg) + ";;;"
+
+                    for area in bpy.context.screen.areas:
+                        area.tag_redraw()
                 print(*args)
                     
             def sn_cast_string(value):
