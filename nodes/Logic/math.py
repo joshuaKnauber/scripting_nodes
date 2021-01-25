@@ -69,5 +69,5 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
                 expression = expression.replace(inp.default_text, inp.code())
             
             return {
-                "code": f"int(eval(\"{expression}\"))"
+                "code": f"sn_cast_int(eval(\"{expression}\"))"
             }
