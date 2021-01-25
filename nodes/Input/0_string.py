@@ -15,7 +15,7 @@ class SN_StringNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
     def update_value(self, context):
-        if self.value[-1] == "\\":
+        if self.value and self.value[-1] == "\\":
             self["value"] = self.value[:-1] + "/"
 
     value: bpy.props.StringProperty(name="String Value", update=update_value)
