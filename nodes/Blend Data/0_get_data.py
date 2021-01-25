@@ -74,6 +74,12 @@ class SN_GetDataFromIDNode(bpy.types.Node, SN_ScriptingBaseNode):
         if link.to_socket == self.inputs[0]:
             self.update_outputs(link.from_socket)
 
+    def on_copy(self, node):
+        self.outputs.clear()
+        self.collection_error = False
+        self.current_data_type = ""
+        self.no_data_error = False
+
 
     def draw_node(self,context,layout):
         if self.current_data_type:
