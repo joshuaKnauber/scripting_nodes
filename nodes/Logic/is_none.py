@@ -21,6 +21,12 @@ class SN_IsNoneNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
 
-        return {
-            "code": f"""{self.inputs[0].code()} == None"""
-        }
+        if self.inputs[0].links:
+            return {
+                "code": f"""{self.inputs[0].code()} == None"""
+            }
+        else:
+            self.add_error("No Blend Data", "Blend data input not connected")
+            return {
+                "code": "True"
+            }

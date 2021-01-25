@@ -24,9 +24,9 @@ class SN_ScriptLineNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_imperative(self, context):
         return {
             "code": f"""
-                    def sn_handle_script_line_exception(exc):
+                    def sn_handle_script_line_exception(exc, line):
                         print("# # # # # # # # SCRIPT LINE ERROR # # # # # # # #")
-                        print("Line:", {self.inputs[1].code()})
+                        print("Line:", line)
                         raise exc
                     """
         }
@@ -41,7 +41,7 @@ class SN_ScriptLineNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
                     try: {"exec("+code+")" if code else "pass"}
-                    except Exception as exc: sn_handle_script_line_exception(exc)
+                    except Exception as exc: sn_handle_script_line_exception(exc, {code})
                     {self.outputs[0].code(5)}
                     """
         }

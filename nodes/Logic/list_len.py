@@ -22,6 +22,12 @@ class SN_ListLengthNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_evaluate(self, context, touched_socket):
-        return {
-            "code": f"""len({self.inputs[0].code()})"""
-        }
+        if self.inputs[0].links:
+            return {
+                "code": f"""len({self.inputs[0].code()})"""
+            }
+        else:
+            self.add_error("No List", "You have to put in the list you want to use", True)
+            return {
+                "code": f"""len({self.inputs[0].code()})"""
+            }
