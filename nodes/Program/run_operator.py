@@ -24,7 +24,7 @@ class SN_OT_PasteOperator(bpy.types.Operator):
     
     
 def create_sockets_from_operator(node, offset, index):
-    props = node.addon_tree.sn_nodes["SN_OperatorNode"].items[node.custom_operator].node().operator_properties
+    props = node.addon_tree.sn_nodes["SN_OperatorNode"].items[node.custom_operator].node().properties
 
     # length is higher -> at least one socket got added
     if len(props) > len(node.inputs)-offset:
