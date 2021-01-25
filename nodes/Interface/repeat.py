@@ -29,7 +29,7 @@ class SN_RepeatLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                 "code": f"""
                         repeat_node_{self.uid} = 0
                         for repeat_node_{self.uid} in range({self.inputs[1].code()}):
-                            {self.outputs["Repeat"].by_name(7) if self.outputs["Repeat"].by_name() else "pass"}
+                            {self.outputs["Repeat"].by_name(7) if self.outputs["Repeat"].by_name().strip() else "pass"}
                         """
             }
         else:

@@ -28,8 +28,8 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
                     if {self.inputs[1].code()}:
-                        {self.outputs["True"].by_name(6) if self.outputs["True"].by_name(0) else "pass"}
+                        {self.outputs["True"].by_name(6) if self.outputs["True"].by_name().strip() else "pass"}
                     else:
-                        {self.outputs["False"].by_name(6) if self.outputs["False"].by_name(0) else "pass"}
+                        {self.outputs["False"].by_name(6) if self.outputs["False"].by_name().strip() else "pass"}
                     """
         }

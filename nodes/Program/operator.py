@@ -288,7 +288,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                         def draw(self, context):
                             layout = self.layout
                             try:
-                                {layout_code if layout_code else "pass"}
+                                {layout_code if layout_code.strip() else "pass"}
                             except Exception as exc:
                                 print(str(exc) + " | Error in draw function of {self.operator_name}")
                             """
@@ -315,7 +315,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                         def execute(self, context):
                             try:
-                                {execute_code if execute_code else "pass"}
+                                {execute_code if execute_code.strip() else "pass"}
                             except Exception as exc:
                                 print(str(exc) + " | Error in execute function of {self.operator_name}")
 
@@ -323,7 +323,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                         def invoke(self, context, event):
                             try:
-                                {invoke_code if invoke_code else "pass"}
+                                {invoke_code if invoke_code.strip() else "pass"}
                                 {inline_invoke}
                             except Exception as exc:
                                 print(str(exc) + " | Error in invoke function of {self.operator_name}")

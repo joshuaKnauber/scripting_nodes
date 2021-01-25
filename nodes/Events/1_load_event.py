@@ -38,7 +38,7 @@ class SN_LoadNode(bpy.types.Node, SN_ScriptingBaseNode):
             "code": f"""
                     @persistent
                     def {self.action}_handler_{self.uid}(dummy):
-                        {self.outputs[0].code(6) if self.outputs[0].code() else "pass"}
+                        {self.outputs[0].code(6) if self.outputs[0].code().strip() else "pass"}
                     """
         }
 

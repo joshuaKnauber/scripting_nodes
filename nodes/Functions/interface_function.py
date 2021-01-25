@@ -89,7 +89,7 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             "code": f"""
                     def {self.item.identifier}(layout, {parameter_string}):
                         try:
-                            {self.outputs["Layout"].by_name(7) if self.outputs["Layout"].by_name() else "pass"}
+                            {self.outputs["Layout"].by_name(7) if self.outputs["Layout"].by_name().strip() else "pass"}
                         except Exception as exc:
                             print(str(exc) + " | Error in function {self.func_name}")
                     """

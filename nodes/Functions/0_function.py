@@ -84,7 +84,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             "code": f"""
                     def {self.item.identifier}({parameter_string}):
                         try:
-                            {self.outputs[0].code(7) if self.outputs[0].code() else "pass"}
+                            {self.outputs[0].code(7) if self.outputs[0].code().strip() else "pass"}
                         except Exception as exc:
                             print(str(exc) + " | Error in function {self.func_name}")
                     """

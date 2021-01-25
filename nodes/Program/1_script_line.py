@@ -40,7 +40,7 @@ class SN_ScriptLineNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         return {
             "code": f"""
-                    try: {"exec("+code+")" if code else "pass"}
+                    try: {"exec("+code+")" if code.strip() else "pass"}
                     except Exception as exc: sn_handle_script_line_exception(exc, {code})
                     {self.outputs[0].code(5)}
                     """

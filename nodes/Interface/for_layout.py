@@ -58,7 +58,7 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                         for_node_{self.uid} = 0
                         for_node_index_{self.uid} = 0
                         for for_node_index_{self.uid}, for_node_{self.uid} in enumerate({self.inputs[1].code()}):
-                            {self.outputs["Repeat"].by_name(7) if self.outputs["Repeat"].by_name() else "pass"}
+                            {self.outputs["Repeat"].by_name(7) if self.outputs["Repeat"].by_name().strip() else "pass"}
                         """
             }
 
