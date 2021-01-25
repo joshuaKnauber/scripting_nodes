@@ -15,39 +15,32 @@ class SN_ScriptLineNode(bpy.types.Node, SN_ScriptingBaseNode):
         "imperative_once": True
     }
 
-    script_line: bpy.props.StringProperty(default="",
-                                          name="Script Line",
-                                          description="The python line you want to run")
-
     def on_create(self,context):
         self.add_execute_input("Script Line")
+        self.add_string_input("Script Line")
         self.add_execute_output("Execute").mirror_name = True
 
-
-    def draw_node(self,context,layout):
-        row = layout.row(align=True)
-        row.prop(self, "script_line", text="")
-        
         
     def code_imperative(self, context):
         return {
             "code": f"""
                     def sn_handle_script_line_exception(exc):
                         print("# # # # # # # # SCRIPT LINE ERROR # # # # # # # #")
-                        print("Line: {self.script_line}")
+                        print("Line:", {self.inputs[1].code()})
                         raise exc
                     """
         }
 
 
     def code_evaluate(self, context, touched_socket):
-        
-        if not self.script_line:
+        code = self.inputs[1].code()
+
+        if not code:
             self.add_error("No Script Line","You haven't entered a script line for the node")
-        
+
         return {
             "code": f"""
-                    try: {self.script_line if self.script_line else "pass"}
+                    try: {"exec("+code+")" if code else "pass"}
                     except Exception as exc: sn_handle_script_line_exception(exc)
                     {self.outputs[0].code(5)}
                     """
