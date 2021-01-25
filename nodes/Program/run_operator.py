@@ -144,12 +144,16 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                 operator = self.operator.split("(")[0] + "("
                 if self.call_invoke:
                     operator += "\"INVOKE_DEFAULT\","
-                
+            else:
+                self.add_error("No Operator", "No operator selected")
+
         else:
             if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
                 item = self.addon_tree.sn_nodes["SN_OperatorNode"].items[self.custom_operator]
                 operator = "bpy.ops.sna." + item.identifier + "("
-            
+            else:
+                self.add_error("No Operator", "No operator selected")
+
         if operator:
             for inp in self.inputs:
                 if inp.group == "DATA" and inp.enabled:

@@ -54,6 +54,3 @@ class SN_FindInDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
             
         else: # exists bool
             return {"code": f"{self.inputs[0].code()}.find({self.inputs[1].code()}) != -1"}
-
-        
-#TODO function for node to choose one value based on bool | like if but inline with function

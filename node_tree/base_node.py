@@ -61,7 +61,7 @@ class SN_ScriptingBaseNode:
                     node.on_outside_update(self)
 
 
-    def update_nodes_by_types(self, idname_list):
+    def update_nodes_by_types(self, *idname_list):
         for graph in self.addon_tree.sn_graphs:
             for node in graph.node_tree.nodes:
                 if node.bl_idname in idname_list:

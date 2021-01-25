@@ -33,5 +33,3 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {self.outputs["False"].by_name(6) if self.outputs["False"].by_name(0) else "pass"}
                     """
         }
-
-# TODO catch custom property right click in sidepanel

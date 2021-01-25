@@ -116,20 +116,21 @@ def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
     if not var.use_self:
         col.prop(var,"attach_property_to",text="Attach To")
         col.separator()
-    
+
     if var.property_subtype != "NO_SUBTYPES":
         col.prop(var,"property_subtype",text="Subtype")
         col.separator()
     if var.property_unit != "NO_UNITS":
         col.prop(var,"property_unit",text="Unit")
         col.separator()
-    
+
     if var.var_type in ["BOOLEAN","FLOAT","INTEGER"]:
         col.prop(var,"is_vector")
         if var.is_vector:
             col.prop(var,"vector_size")
         col.separator()
 
+    col.row(align=True).prop(var, "property_options")
     col.prop(var,"description")
     col.separator()
     

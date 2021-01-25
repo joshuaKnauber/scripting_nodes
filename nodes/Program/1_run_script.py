@@ -41,7 +41,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         else:
             self.add_error("No Valid Script","You do not have a valid script selected")
-            
+
         return {
             "code": f"""
                     pass # {self.script} Script Start

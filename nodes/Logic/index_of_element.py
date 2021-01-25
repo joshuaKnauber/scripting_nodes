@@ -24,6 +24,13 @@ class SN_IndexElementNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
 
-        return {
-            "code": f"""{self.inputs[0].code()}.index({self.inputs[1].code()})"""
-        }
+        if self.inputs[0].links:
+            return {
+                "code": f"""{self.inputs[0].code()}.index({self.inputs[1].code()})"""
+            }
+
+        else:
+            self.add_error("No List", "You have to put in the list you want to use", True)
+            return {
+                "code": "0"
+            }

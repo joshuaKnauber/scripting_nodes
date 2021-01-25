@@ -25,9 +25,18 @@ class SN_ListInsertNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
 
-        return {
-            "code": f"""
-                    {self.inputs[1].code()}.insert({self.inputs[2].code()}, {self.inputs[3].code()})
-                    {self.outputs[0].code(5)}
-                    """
-        }
+        if self.inputs[1].links:
+            return {
+                "code": f"""
+                        {self.inputs[1].code()}.insert({self.inputs[2].code()}, {self.inputs[3].code()})
+                        {self.outputs[0].code(6)}
+                        """
+            }
+
+        else:
+            self.add_error("No List", "You need to put in the list you want to insert into")
+            return {
+                "code": f"""
+                        {self.outputs[0].code(6)}
+                        """
+            }
