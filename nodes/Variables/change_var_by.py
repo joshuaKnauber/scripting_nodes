@@ -86,7 +86,7 @@ class SN_ChangeVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         if len(self.inputs) < 2:
-            if self.search_value != "":
+            if self.search_value:
                 self.add_error("Wrong variable", "Wrong variable selected")
             else:
                 self.add_error("No variable", "No variable selected")

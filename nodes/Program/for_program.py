@@ -48,6 +48,8 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_evaluate(self, context, touched_socket):
 
         if touched_socket == self.inputs[0]:
+            if not self.inputs[1].links:
+                self.add_error("No input", "Nothing is connected to this for node")
             return {
                 "code": f"""
                         for_node_{self.uid} = 0
@@ -59,6 +61,10 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
             }
 
         elif touched_socket == self.outputs[2]:
-            return {"code": f"""for_node_{self.uid}"""}
+            if self.inputs[0].links:
+                return {"code": f"""for_node_{self.uid}"""}
+            return {"code": "None"}
         elif touched_socket == self.outputs[3]:
-            return {"code": f"""for_node_index_{self.uid}"""}
+            if self.inputs[0].links:
+                return {"code": f"""for_node_index_{self.uid}"""}
+            return {"code": "0"}

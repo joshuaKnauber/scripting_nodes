@@ -247,6 +247,9 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_evaluate(self, context, touched_socket):
+        if not self.inputs[0].value and not self.inputs[0].links:
+            self.add_error("Poll False", "You poll is false and not connected so your operator will not run", fatal=True)
+
         property_register = []
         for prop in self.properties:
             property_register.append(prop.property_register())
@@ -257,7 +260,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         invoke_code = self.outputs["Invoke"].code(8)
         inline_invoke = ""
-                
+
         if self.invoke_option in ["invoke_confirm"]:
             return_invoke = "context.window_manager." + self.invoke_option + "(self, event)"
             

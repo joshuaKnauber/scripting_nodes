@@ -63,8 +63,8 @@ class SN_RemoveFromListNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
         if len(self.inputs) < 2:
-            if self.search_value != "":
-                self.add_error("Wrong variable", "You need to select a list variable selected")
+            if self.search_value:
+                self.add_error("Wrong variable", "You need to select a list variable")
             else:
                 self.add_error("No variable", "No variable selected")
 

@@ -34,4 +34,7 @@ class SN_RepeatProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                         """
             }
         else:
-            return {"code": f"""repeat_node_{self.uid}"""}
+            if self.inputs[0].links:
+                return {"code": f"""repeat_node_{self.uid}"""}
+            else:
+                return {"code": "0"}

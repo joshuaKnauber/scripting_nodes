@@ -35,6 +35,8 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
         return "sn_cast_blend_data(" + code + ")"
     
     def default_value(self):
+        if self.subtype == "COLLECTION":
+            return "[]"
         return "None"
 
     def draw_socket(self, context, layout, row, node, text):
