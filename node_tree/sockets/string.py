@@ -34,7 +34,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
         if self.value_directory and self.value_directory[-1] == "\\":
             self["value_directory"] = self.value_directory[:-1] + "/"
-        if self.value_file and value_file[-1] == "\\":
+        if self.value_file and self.value_file[-1] == "\\":
             self["value_file"] = self.value_file[:-1] + "/"
 
 
@@ -78,13 +78,13 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     def default_value(self):
         if self.subtype == "NONE":
-            return "\"" + self.value + "\""
+            return "r\"" + self.value + "\""
         elif self.subtype == "FILE":
-            return "\"" + self.value_file + "\""
+            return "r\"" + self.value_file + "\""
         elif self.subtype == "DIRECTORY":
-            return "\"" + self.value_directory + "\""
+            return "r\"" + self.value_directory + "\""
         elif self.subtype == "ENUM":
-            return "\"" + self.value_enum + "\""
+            return "r\"" + self.value_enum + "\""
     
     
     def convert_data(self, code):

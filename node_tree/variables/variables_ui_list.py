@@ -84,13 +84,13 @@ class SN_Variable(bpy.types.PropertyGroup):
         if unique_name != self.name:
             self.name = unique_name
 
-        node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
-                                    "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode"]) # TODO improve this
+        node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
+                                   "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
 
         self.identifier = node.get_python_name(self.name, f"new_{key}")
 
-        node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
-                                    "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode"])
+        node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
+                                   "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
         
         self.trigger_update(context)
 
@@ -135,7 +135,7 @@ class SN_Variable(bpy.types.PropertyGroup):
 
         node = SN_ScriptingBaseNode()
         node.addon_tree = bpy.context.scene.sn.addon_tree()
-        node.update_nodes_by_types(["SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode"])
+        node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode")
 
         self.trigger_update(context)
 
