@@ -40,7 +40,7 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                                       description="Data Type that will be returned")
     
     def get_type(self):
-        return eval("bpy.data.bl_rna.properties[\""+self.data_type+"\"].fixed_type.name")
+        return eval("bpy.data.bl_rna.properties[\""+self.data_type+"\"].fixed_type.identifier")
     
     def update_return(self,context):
         if self.return_type == "ALL" and len(self.inputs):
