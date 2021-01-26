@@ -32,8 +32,8 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.outputs[0].data_name = self.data_type.replace("_"," ").title()
         for link in self.outputs[0].links:
             link.to_socket.node.on_link_insert(link)
+        self.auto_compile()
 
-    
     
     data_type: bpy.props.EnumProperty(items=data_items,
                                       update=update_type,

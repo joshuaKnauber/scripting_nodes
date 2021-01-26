@@ -29,7 +29,8 @@ class SN_FindAreaNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     area_type: bpy.props.EnumProperty(name="Area Type",
                                       description="The type of area to find",
-                                      items=area_items)
+                                      items=area_items,
+                                      update=SN_ScriptingBaseNode.auto_compile)
     
     def on_create(self,context):
         out = self.add_blend_data_output("Area")
