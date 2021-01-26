@@ -67,3 +67,6 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
             return {"code": f"""for_node_{self.uid}"""}
         elif touched_socket == self.outputs["Index"]:
             return {"code": f"""for_node_index_{self.uid}"""}
+
+    def what_layout(self,socket):
+        return self.inputs[0].links[0].from_node.what_layout(self.inputs[0])

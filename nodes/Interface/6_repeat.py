@@ -34,3 +34,6 @@ class SN_RepeatLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
             }
         else:
             return {"code": f"""repeat_node_{self.uid}"""}
+
+    def what_layout(self,socket):
+        return self.inputs[0].links[0].from_node.what_layout(self.inputs[0])

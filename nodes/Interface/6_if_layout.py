@@ -33,3 +33,6 @@ class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {self.outputs["False"].by_name(6) if self.outputs["False"].by_name().strip() else "pass"}
                     """
         }
+
+    def what_layout(self,socket):
+        return self.inputs[0].links[0].from_node.what_layout(self.inputs[0])
