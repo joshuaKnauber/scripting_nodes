@@ -13,33 +13,39 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     value: bpy.props.FloatProperty(default=1,
                                     name="Value",
-                                    description="Value of this socket")
+                                    description="Value of this socket",
+                                    update=ScriptingSocket.auto_compile)
     
     value_factor: bpy.props.FloatProperty(default=1, soft_min = 0, soft_max = 1, subtype="FACTOR",
                                             name="Value",
-                                            description="Value of this socket")
+                                            description="Value of this socket",
+                                            update=ScriptingSocket.auto_compile)
     
     value_three: bpy.props.FloatVectorProperty(default=(1,1,1),
                                                 size=3,
                                                 name="Value",
-                                                description="Value of this socket")
+                                                description="Value of this socket",
+                                                update=ScriptingSocket.auto_compile)
     
     value_four: bpy.props.FloatVectorProperty(default=(1,1,1,1),
                                                 size=4,
                                                 name="Value",
-                                                description="Value of this socket")
+                                                description="Value of this socket",
+                                                update=ScriptingSocket.auto_compile)
     
     value_color: bpy.props.FloatVectorProperty(default=(0.5,0.5,0.5),
                                                     size=3, min=0, max=1,
                                                     subtype="COLOR",
                                                     name="Value",
-                                                    description="Value of this socket")
+                                                    description="Value of this socket",
+                                                    update=ScriptingSocket.auto_compile)
 
     value_color_alpha: bpy.props.FloatVectorProperty(default=(0.5,0.5,0.5,1),
                                                     size=4, min=0, max=1,
                                                     subtype="COLOR",
                                                     name="Value",
-                                                    description="Value of this socket")
+                                                    description="Value of this socket",
+                                                    update=ScriptingSocket.auto_compile)
     
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),

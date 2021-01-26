@@ -20,8 +20,8 @@ class ScriptingSocket:
             real_shape += "_DOT"
         if not self.display_shape == real_shape:
             self.display_shape = real_shape
-            
-            
+
+
     def update_var_name(self,context):
         self.node.on_var_name_update(self)
         self.auto_compile()
@@ -29,6 +29,9 @@ class ScriptingSocket:
     
     def update_text(self,context):
         self.name = self.default_text
+
+    def auto_compile(self,context=None):
+        self.node.node_tree.set_changes(True)
     
     
     group = "" # DATA | PROGRAM
@@ -47,7 +50,7 @@ class ScriptingSocket:
     addable: bpy.props.BoolProperty(default=False) # Shows an add button on the socket
     to_add_idname = "" # Required if addable or dynamic is true
     
-    enabled: bpy.props.BoolProperty(default=True) # Defines if the socket is enabled
+    enabled: bpy.props.BoolProperty(default=True, update=auto_compile) # Defines if the socket is enabled
     disableable: bpy.props.BoolProperty(default=False) # Socket can be disabled
     
     default_text: bpy.props.StringProperty(update=update_text) # The default text of this socket
@@ -103,10 +106,6 @@ class ScriptingSocket:
             self.update_take_name(link)
             self.update_dynamic(node, link)
             self.update(node,link)
-    
-    
-    def auto_compile(self,context=None):
-        self.node.node_tree.set_changes(True)
         
         
     ### DYNAMIC SOCKET

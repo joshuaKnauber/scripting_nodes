@@ -13,17 +13,20 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     value: bpy.props.BoolProperty(default=True,
                                             name="Value",
-                                            description="Value of this socket")
+                                            description="Value of this socket",
+                                            update=ScriptingSocket.auto_compile)
     
     value_three: bpy.props.BoolVectorProperty(default=(True,True,True),
                                                      size=3,
                                                      name="Value",
-                                                     description="Value of this socket")
+                                                     description="Value of this socket",
+                                                     update=ScriptingSocket.auto_compile)
     
     value_four: bpy.props.BoolVectorProperty(default=(True,True,True,True),
                                                      size=4,
                                                      name="Value",
-                                                     description="Value of this socket")
+                                                     description="Value of this socket",
+                                                     update=ScriptingSocket.auto_compile)
     
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),

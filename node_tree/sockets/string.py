@@ -26,6 +26,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         if self.value and self.value[-1] == "\\":
             self["value"] = self.value[:-1] + "/"
         self["value"] = self.value.replace("\"", "'")
+        self.auto_compile()
 
     def make_absolute(self,context):
         if not self.value_directory == bpy.path.abspath(self.value_directory):
@@ -39,6 +40,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         if self.value_file and self.value_file[-1] == "\\":
             self["value_file"] = self.value_file[:-1] + "/"
         self["value_file"] = self.value_file.replace("\"", "'")
+        self.auto_compile()
 
 
     value: bpy.props.StringProperty(name="Value",
@@ -57,7 +59,8 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     value_enum: bpy.props.EnumProperty(name="Value",
                                         description="Value of this socket",
-                                        items=enum_items)
+                                        items=enum_items,
+                                        update=ScriptingSocket.auto_compile)
     
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),

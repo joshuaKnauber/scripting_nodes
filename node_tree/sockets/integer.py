@@ -13,17 +13,20 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     value: bpy.props.IntProperty(default=1,
                                     name="Value",
-                                    description="Value of this socket")
+                                    description="Value of this socket",
+                                    update=ScriptingSocket.auto_compile)
     
     value_three: bpy.props.IntVectorProperty(default=(1,1,1),
                                                 size=3,
                                                 name="Value",
-                                                description="Value of this socket")
+                                                description="Value of this socket",
+                                                update=ScriptingSocket.auto_compile)
     
     value_four: bpy.props.IntVectorProperty(default=(1,1,1,1),
                                                 size=4,
                                                 name="Value",
-                                                description="Value of this socket")
+                                                description="Value of this socket",
+                                                update=ScriptingSocket.auto_compile)
     
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),
