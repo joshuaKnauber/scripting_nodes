@@ -15,16 +15,19 @@ class SN_BoolVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
     value: bpy.props.BoolVectorProperty(name="Vector Value",
-                                         size=3)
+                                         size=3,
+                                         update=SN_ScriptingBaseNode.auto_compile)
 
     value_four: bpy.props.BoolVectorProperty(name="Vector Value",
-                                         size=4)
+                                         size=4, 
+                                         update=SN_ScriptingBaseNode.auto_compile)
     
     def update_size(self,context):
         if self.use_four:
             self.outputs[0].subtype = "VECTOR4"
         else:
             self.outputs[0].subtype = "VECTOR3"
+        self.auto_compile()
 
     use_four: bpy.props.BoolProperty(default=False,
                                      name="Vector 4",

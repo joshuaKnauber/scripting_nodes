@@ -17,13 +17,15 @@ class SN_ColorNode(bpy.types.Node, SN_ScriptingBaseNode):
     value: bpy.props.FloatVectorProperty(name="Vector Value",
                                          size=3, min=0, max=1,
                                          default=(0.5,0.5,0.5),
-                                         subtype="COLOR")
+                                         subtype="COLOR", 
+                                         update=SN_ScriptingBaseNode.auto_compile)
 
 
     value_four: bpy.props.FloatVectorProperty(name="Vector Value",
                                          size=4, min=0, max=1,
                                          default=(0.5,0.5,0.5,0.5),
-                                         subtype="COLOR")
+                                         subtype="COLOR",
+                                         update=SN_ScriptingBaseNode.auto_compile)
 
 
     def update_size(self,context):
@@ -31,6 +33,7 @@ class SN_ColorNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.outputs[0].subtype = "COLOR_ALPHA"
         else:
             self.outputs[0].subtype = "COLOR"
+        self.auto_compile()
 
     use_four: bpy.props.BoolProperty(default=False,
                                      name="Use Alpha",

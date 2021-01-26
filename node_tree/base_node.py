@@ -42,7 +42,7 @@ class SN_ScriptingBaseNode:
     def on_any_change(self): pass
 
 
-    def auto_compile(self,context):
+    def auto_compile(self,context=None):
         self.on_any_change()
         self.node_tree.set_changes(True)
         self.update_item_name()

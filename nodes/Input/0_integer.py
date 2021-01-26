@@ -14,7 +14,7 @@ class SN_IntegerNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
 
-    value: bpy.props.IntProperty(name="Integer Value")
+    value: bpy.props.IntProperty(name="Integer Value", update=SN_ScriptingBaseNode.auto_compile)
 
     def on_create(self,context):
         self.add_integer_output("Integer").mirror_name = True

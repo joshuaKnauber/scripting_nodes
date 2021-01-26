@@ -14,7 +14,7 @@ class SN_FloatNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3),
     }
 
-    value: bpy.props.FloatProperty(name="Float Value")
+    value: bpy.props.FloatProperty(name="Float Value", update=SN_ScriptingBaseNode.auto_compile)
 
     def on_create(self,context):
         self.add_float_output("Float").mirror_name = True
