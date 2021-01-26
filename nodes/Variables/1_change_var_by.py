@@ -49,6 +49,7 @@ class SN_ChangeVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
                 idname = {"STRING": "SN_StringSocket", "INTEGER": "SN_IntegerSocket", "FLOAT": "SN_FloatSocket"}
                 if idname[var.var_type] != self.inputs[1].bl_idname:
                     self.change_socket_type(self.inputs[1], idname[var.var_type])
+        self.auto_compile()
 
 
     def on_node_update(self):

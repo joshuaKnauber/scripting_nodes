@@ -38,6 +38,7 @@ class SN_RemoveFromListNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 if len(self.inputs) > 1:
                     self.inputs.remove(self.inputs[1])
+        self.auto_compile()
 
 
     def on_create(self, context):

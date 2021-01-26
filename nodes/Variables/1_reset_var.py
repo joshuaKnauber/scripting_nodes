@@ -18,6 +18,7 @@ class SN_ResetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.identifier:
                 if var.identifier == self.identifier:
                     self.search_value = var.name
+        self.auto_compile()
 
     def update_var(self, context):
         if self.search_value in self.node_tree.sn_variables:
@@ -25,6 +26,7 @@ class SN_ResetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         else:
             self.identifier = ""
+        self.auto_compile()
 
 
     def on_create(self, context):

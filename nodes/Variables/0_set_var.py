@@ -59,6 +59,7 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode):
             if var.var_type == "BLEND_DATA":
                 if var.is_data_collection: inp.subtype = "COLLECTION"
                 else: inp.subtype = "NONE"
+        self.auto_compile()
 
 
     def on_node_update(self):
