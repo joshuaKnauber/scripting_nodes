@@ -207,21 +207,46 @@ class SN_ScriptingBaseNode:
 
     ### LINK UPDATE
     def on_link_insert(self,link): pass
+    
+    
+    def __matching_out_link(self,temp_link):
+        for out in self.outputs:
+            if out == temp_link.from_socket:
+                for link in out.links:
+                    if link.to_socket == temp_link.to_socket:
+                        return link
+                    
+                    
+    def __matching_inp_link(self,temp_link):
+        for inp in self.inputs:
+            if inp == temp_link.to_socket:
+                for link in inp.links:
+                    if link.from_socket == temp_link.from_socket:
+                        return link
+                    
+    
+    def __real_link(self, temp_link):
+        link = self.__matching_out_link(temp_link)
+        if not link:
+            link = self.__matching_inp_link(temp_link)
+        return link
 
 
     def after_link_insert(self,link):
-        if link.to_socket.group == link.from_socket.group:
-            if self == link.to_node:
-                link.to_socket.update_socket(self,link)
+        link = self.__real_link(link)
+        if link:
+            if link.to_socket.group == link.from_socket.group:
+                if self == link.to_node:
+                    link.to_socket.update_socket(self,link)
+                else:
+                    link.from_socket.update_socket(self,link)
+
+                self.on_link_insert(link)
+
             else:
-                link.from_socket.update_socket(self,link)
-
-            self.on_link_insert(link)
-
-        else:
-            try: self.node_tree.links.remove(link)
-            except: pass
-        self.auto_compile(bpy.context)
+                try: self.node_tree.links.remove(link)
+                except: pass
+            self.auto_compile(bpy.context)
 
 
     def insert_link(self,link):
