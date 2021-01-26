@@ -31,6 +31,11 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_dynamic_add(self,socket, connected_socket):
         if connected_socket:
             socket.subtype = connected_socket.subtype
+            if connected_socket.bl_idname == "SN_BlendDataSocket":
+                socket.data_type = connected_socket.data_type
+                socket.data_name = connected_socket.data_name
+                socket.data_identifier = connected_socket.data_identifier
+
         if connected_socket and connected_socket.name != "":
             socket.variable_name = connected_socket.name
         else:

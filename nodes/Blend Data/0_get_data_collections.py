@@ -58,7 +58,7 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_link_insert(self,link):
-        if link.to_socket == self.inputs[0]:
+        if link.to_socket == self.inputs[0] and link.from_socket.bl_idname == "SN_BlendDataSocket":
             self.update_outputs(link.from_socket)
 
     def on_copy(self, node):
