@@ -73,7 +73,8 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def add_inputs_from_internal(self):
         rna = eval(self.operator.split("(")[0] + ".get_rna_type()")
-        self.op_name = rna.name
+        name = eval(self.operator.split("(")[0] + ".idname_py()").split(".")[-1]
+        self.op_name = rna.name if rna.name else name.replace("_", " ").title()
         for prop in rna.properties:
             if not prop.name == "RNA":
                 self.add_input_from_prop(prop).disableable = True
