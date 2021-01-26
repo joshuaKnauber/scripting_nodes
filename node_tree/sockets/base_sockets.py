@@ -87,15 +87,15 @@ class ScriptingSocket:
     
     def update_socket(self,node,link):
         if self.is_output and len(node.outputs[self.get_socket_index(node.outputs)].links) > self.output_limit:
-            try: self.node_tree.links.remove(link)
+            try: self.node.node_tree.links.remove(link)
             except: pass
 
         elif link.to_socket.group != link.from_socket.group:
-            try: self.node_tree.links.remove(link)
+            try: self.node.node_tree.links.remove(link)
             except: pass
 
         elif link.to_socket.dynamic and link.from_socket.dynamic:
-            try: self.node_tree.links.remove(link)
+            try: self.node.node_tree.links.remove(link)
             except: pass
 
         else:
