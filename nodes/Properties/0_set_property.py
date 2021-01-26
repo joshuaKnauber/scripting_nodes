@@ -41,6 +41,7 @@ class SN_SetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.prop_name = ""
             for i in range(len(self.inputs)-1,0,-1):
                 self.inputs.remove(self.inputs[i])
+        self.auto_compile()
     
     
     copied_path: bpy.props.StringProperty(update=update_copied)

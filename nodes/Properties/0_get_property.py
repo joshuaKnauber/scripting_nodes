@@ -36,7 +36,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.prop_name = ""
             self.inputs.clear()
             self.outputs.clear()
-    
+        self.auto_compile()
     
     copied_path: bpy.props.StringProperty(update=update_copied)
     prop_name: bpy.props.StringProperty()
