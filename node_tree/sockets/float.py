@@ -84,9 +84,9 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     def convert_data(self, code):
         if self.subtype == "NONE":
-            return "sn_cast_float(" + code + ", False)"
+            return "sn_cast_float(" + code + ")"
         elif self.subtype == "FACTOR":
-            return "sn_cast_float(" + code + ", True)"
+            return "sn_cast_float(" + code + ")"
         elif self.subtype == "COLOR":
             return "sn_cast_color(" + code + ", False)"
         elif self.subtype == "COLOR_ALPHA":
