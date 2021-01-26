@@ -26,7 +26,7 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self["func_name"] = self.get_unique_name(self.func_name, self.collection.items, " ")
 
         self.item.identifier = self.get_python_name(self.func_name, "new_interface_function")
-        self.auto_compile(context)
+        self.auto_compile()
 
         self.update_nodes_by_type("SN_RunLayoutFunctionNode")
 

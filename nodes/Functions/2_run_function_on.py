@@ -18,11 +18,12 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.function_collection.clear()
         if is_collection:
             for data in bpy.data.bl_rna.properties:
-                if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == data_type:
-                    for function in eval("bpy.data." + data.identifier).bl_rna.functions:
-                        item = self.function_collection.add()
-                        item.name = function.identifier.replace("_", " ").title()
-                        item.identifier = function.identifier
+                if "bl_rna" in dir(eval("bpy.data." + data.identifier)):
+                    if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == data_type:
+                        for function in eval("bpy.data." + data.identifier).bl_rna.functions:
+                            item = self.function_collection.add()
+                            item.name = function.identifier.replace("_", " ").title()
+                            item.identifier = function.identifier
 
         else:
             for function in eval("bpy.types." + data_type).bl_rna.functions:
@@ -121,11 +122,15 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_link_insert(self, link):
         if link.to_socket == self.inputs[1] and link.from_socket.bl_idname == "SN_BlendDataSocket":
             if link.from_socket.data_type != self.current_data_type or self.inputs[1].subtype != link.from_socket.subtype:
+                function = self.search_value
+                self.search_value = ""
                 self.inputs[1].data_type = link.from_socket.data_type
                 self.inputs[1].subtype = link.from_socket.subtype
                 self.inputs[1].default_text = link.from_socket.data_name
                 self.current_data_type = link.from_socket.data_type
                 self.get_functions(link.from_socket.data_type, link.from_socket.subtype=="COLLECTION")
+                if function in self.function_collection:
+                    self.search_value = function
 
 
     def on_create(self,context):

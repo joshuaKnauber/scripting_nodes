@@ -24,6 +24,7 @@ class ScriptingSocket:
             
     def update_var_name(self,context):
         self.node.on_var_name_update(self)
+        self.auto_compile()
         
     
     def update_text(self,context):
@@ -104,7 +105,7 @@ class ScriptingSocket:
             self.update(node,link)
     
     
-    def auto_compile(self,context):
+    def auto_compile(self,context=None):
         self.node.node_tree.set_changes(True)
         
         

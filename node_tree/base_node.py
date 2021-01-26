@@ -163,7 +163,7 @@ class SN_ScriptingBaseNode:
         self.use_custom_color = True
         self.__create_property_group()
         self.__add_self_to_property_group()
-        self.auto_compile(context)
+        self.auto_compile()
         self.on_create(context)
 
 
@@ -175,7 +175,7 @@ class SN_ScriptingBaseNode:
         self.node_tree = bpy.context.space_data.node_tree
         self.uid = uuid4().hex[:5].upper()
         self.__add_self_to_property_group()
-        self.auto_compile(bpy.context)
+        self.auto_compile()
         self.on_copy(node)
 
 
@@ -184,7 +184,7 @@ class SN_ScriptingBaseNode:
 
 
     def free(self):
-        self.auto_compile(bpy.context)
+        self.auto_compile()
         self.__remove_self_from_property_group()
         self.on_free()
 
@@ -200,7 +200,7 @@ class SN_ScriptingBaseNode:
 
 
     def update(self):
-        self.auto_compile(bpy.context)
+        self.auto_compile()
         # self.update_link_drop()
         self.on_node_update()
 
@@ -246,7 +246,7 @@ class SN_ScriptingBaseNode:
             else:
                 try: self.node_tree.links.remove(link)
                 except: pass
-            self.auto_compile(bpy.context)
+            self.auto_compile()
 
 
     def insert_link(self,link):
@@ -467,14 +467,14 @@ class SN_ScriptingBaseNode:
     
     
     def add_input(self,idname,label):
-        self.auto_compile(bpy.context)
+        self.auto_compile()
         socket = self.inputs.new(idname,label)
         socket.setup_socket(label)
         return socket
     
     
     def add_output(self,idname,label):
-        self.auto_compile(bpy.context)
+        self.auto_compile()
         socket = self.outputs.new(idname,label)
         socket.setup_socket(label)
         return socket

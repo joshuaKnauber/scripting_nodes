@@ -144,7 +144,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.item.name = self.operator_name
         self.item.identifier = self.get_python_name(self.operator_name, "new_operator")
-        self.auto_compile(context)
+        self.auto_compile()
 
     def update_description(self, context):
         self["operator_description"] = self.operator_description.replace("\"", "'")

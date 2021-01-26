@@ -27,10 +27,10 @@ class SN_IndexDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.inputs.remove(self.inputs[1])
             self.add_string_input("Name")
             self.outputs[0].default_text = "Named Data Block"
-        if self.outputs[0].is_linked:
-            self.outputs[0].links[0].to_node.on_link_insert(self.outputs[0].links[0])
-    
-    
+        for link in self.outputs[0].links:
+            link.to_socket.node.on_link_insert(link)
+
+
     return_type: bpy.props.EnumProperty(items=[("INDEX","Index","Object by name"),
                                                ("NAME","Name","Object by name")],
                                         name="Return Type",
@@ -45,6 +45,8 @@ class SN_IndexDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.outputs[0].data_type = link.from_socket.data_type
                 self.outputs[0].data_identifier = link.from_socket.data_identifier
                 self.outputs[0].data_name = link.from_socket.data_name
+                for link in self.outputs[0].links:
+                    link.to_socket.node.on_link_insert(link)
             else:
                 self.collection_error = True
 

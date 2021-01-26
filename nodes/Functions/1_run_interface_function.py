@@ -85,7 +85,7 @@ class SN_RunLayoutFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     try: self.inputs.remove(inp)
                     except: pass
 
-        self.auto_compile(context)
+        self.auto_compile()
 
 
     func_name: bpy.props.StringProperty(name="Name", description="Name of the function", update=update_name)
