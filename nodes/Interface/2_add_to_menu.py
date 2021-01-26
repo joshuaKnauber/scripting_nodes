@@ -113,12 +113,13 @@ class SN_AddToMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     menu: bpy.props.StringProperty(default="VIEW3D_MT_add")
     
-    pie_menu: bpy.props.BoolProperty(default=False,name="Pie Menu",description="Add to pie menu")
+    pie_menu: bpy.props.BoolProperty(default=False,name="Pie Menu",description="Add to pie menu",update=SN_ScriptingBaseNode.auto_compile)
     
     
     position: bpy.props.EnumProperty(items=[("PREPEND","Beginning","Prepend"), ("APPEND","End","Append")],
                                     name="Append/Prepend",
-                                    description="Append or prepend the interface to the selected menu")
+                                    description="Append or prepend the interface to the selected menu",
+                                    update=SN_ScriptingBaseNode.auto_compile)
     
 
     def on_create(self,context):

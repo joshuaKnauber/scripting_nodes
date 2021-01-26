@@ -19,9 +19,11 @@ class SN_PopoverNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.picked:
             self.panel = self.picked
             self.picked = ""
+        self.auto_compile()
             
     def update_use_internal(self,context):
         self.panel = ""
+        self.auto_compile()
     
     
     panel: bpy.props.StringProperty()

@@ -46,6 +46,7 @@ class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
                         self.inputs[1].default_text = "Collection / List"
         except ReferenceError:
             pass
+        self.auto_compile()
 
 
     def code_evaluate(self, context, touched_socket):

@@ -121,7 +121,8 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     position: bpy.props.EnumProperty(items=[("PREPEND","Beginning","Prepend"), ("APPEND","End","Append")],
                                     name="Append/Prepend",
-                                    description="Append or prepend the interface to the selected panel")
+                                    description="Append or prepend the interface to the selected panel",
+                                    update=SN_ScriptingBaseNode.auto_compile)
     
 
     def on_create(self,context):

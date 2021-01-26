@@ -22,7 +22,7 @@ class SN_AppendNode(bpy.types.Node, SN_ScriptingBaseNode):
             tuple_items.append((item, item, ""))
         return tuple_items
 
-    append_type: bpy.props.EnumProperty(items=get_append_types, name="Type", description="Type of the Append object")
+    append_type: bpy.props.EnumProperty(items=get_append_types, name="Type", description="Type of the Append object", update=SN_ScriptingBaseNode.auto_compile)
 
     def on_create(self,context):
         self.add_execute_input("Append from File")

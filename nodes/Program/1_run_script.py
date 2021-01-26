@@ -16,7 +16,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
     
     
-    script: bpy.props.StringProperty()
+    script: bpy.props.StringProperty(update=SN_ScriptingBaseNode.auto_compile)
 
 
     def on_create(self,context):

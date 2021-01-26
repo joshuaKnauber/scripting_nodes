@@ -20,9 +20,10 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
                                              (" * ", "Multiply", "Multiply two numbers"),
                                              (" / ", "Divide", "Divide two numbers"),
                                              ("EXPRESSION","Expression","Enter your own expression")],
-                                      name="Operation", description="The operation you want to commence")
+                                      name="Operation", description="The operation you want to commence",
+                                      update=SN_ScriptingBaseNode.auto_compile)
     
-    expression: bpy.props.StringProperty(default="a + b")
+    expression: bpy.props.StringProperty(default="a + b", update=SN_ScriptingBaseNode.auto_compile)
     
     def on_dynamic_add(self,socket, connected_socket):
         alphabet = list(string.ascii_lowercase)

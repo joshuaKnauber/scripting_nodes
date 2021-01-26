@@ -19,9 +19,11 @@ class SN_SubmenuNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.picked:
             self.menu = self.picked
             self.picked = ""
+        self.auto_compile()
             
     def update_use_internal(self,context):
         self.menu = ""
+        self.auto_compile()
     
     
     menu: bpy.props.StringProperty()

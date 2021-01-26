@@ -22,7 +22,7 @@ class SN_AndOrNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_dynamic_boolean_input("Boolean")
         self.add_boolean_output("Boolean")
     
-    
+
     def draw_node(self, context, layout):
         layout.prop(self, "operation", expand=True)
 

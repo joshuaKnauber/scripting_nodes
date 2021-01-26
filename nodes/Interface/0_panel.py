@@ -151,7 +151,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     region: bpy.props.StringProperty(default="WINDOW")
     context: bpy.props.StringProperty()
     category: bpy.props.StringProperty(name="Category",
-                                       description="The category this panel can be found in if required")
+                                       description="The category this panel can be found in if required",
+                                       update=SN_ScriptingBaseNode.auto_compile)
     
     
     hide_header: bpy.props.BoolProperty(default=False,
@@ -168,7 +169,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     shortcut_only: bpy.props.BoolProperty(default=False,
                                           name="Shortcut Only",
-                                          description="Only display this panel with a shortcut")
+                                          description="Only display this panel with a shortcut",
+                                          update=SN_ScriptingBaseNode.auto_compile)
     
     
     label: bpy.props.StringProperty(default="New Panel",
@@ -179,7 +181,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     order: bpy.props.IntProperty(default=0,
                                  min=0,
                                  name="Order",
-                                 description="This defines the order of the panels")
+                                 description="This defines the order of the panels".
+                                 update=SN_ScriptingBaseNode.auto_compile)
     
 
     def on_create(self,context):
