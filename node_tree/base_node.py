@@ -415,6 +415,11 @@ class SN_ScriptingBaseNode:
             if not name:
                 name = prop.identifier.replace("_", " ").title()
 
+            for inp in self.inputs:
+                if inp.default_text == name:
+                    name = prop.identifier.replace("_", " ").title()
+
+
             inp = self.add_input(self.prop_types[prop.type], name)
             inp.variable_name = prop.identifier
             size = -1
@@ -441,6 +446,10 @@ class SN_ScriptingBaseNode:
             name = prop.name
             if not name:
                 name = prop.identifier.replace("_", " ").title()
+            
+            for out in self.outputs:
+                if out.default_text == name:
+                    name = prop.identifier.replace("_", " ").title()
 
             out = self.add_output(self.prop_types[prop.type], name)
             out.variable_name = prop.identifier
