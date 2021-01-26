@@ -30,8 +30,9 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.add_inputs_from_internal()
         else:
             self.remove_input_range(5)
-            
-            
+        self.auto_compile()
+
+
     def update_inputs_from_operator(self, index=-1):
         create_sockets_from_operator(self,5,index)
 
@@ -40,11 +41,13 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.remove_input_range(5)
         if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
             self.update_inputs_from_operator()
+        self.auto_compile()
     
     
     def update_use_internal(self,context):
         self.operator = ""
         self.custom_operator = ""
+        self.auto_compile()
     
     
     operator: bpy.props.StringProperty(update=update_operator)

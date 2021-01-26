@@ -74,6 +74,7 @@ class SN_OT_EditNodeProperty(bpy.types.Operator):
         node = addon_tree.nodes[self.node_name]
         variable = node.properties[node.property_index]
         draw_property(context, variable, self.layout, self.node_name, "properties", node.property_index)
+        node.auto_compile()
 
 
 class SN_OT_GetSetNodeProperty(bpy.types.Operator):
@@ -149,6 +150,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_description(self, context):
         self["operator_description"] = self.operator_description.replace("\"", "'")
         self.item.description = self.operator_description.replace("\"", "'")
+        self.auto_compile()
 
     def update_popup(self,context):
         # width input
@@ -176,6 +178,8 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             if not "Popup" in self.outputs:
                 self.add_dynamic_interface_output("Popup")
 
+        self.auto_compile()
+
 
     operator_name: bpy.props.StringProperty(name="Name", description="Name of the operator", update=update_name)
     operator_description: bpy.props.StringProperty(name="Description", description="Description of the operator", update=update_description)
@@ -189,7 +193,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     property_index: bpy.props.IntProperty()
     
     
-    select_property: bpy.props.StringProperty(name="Preselected Property",description="The property that is preselected when the popup is opened. This can only be a String or Enum Property!")
+    select_property: bpy.props.StringProperty(name="Preselected Property",description="The property that is preselected when the popup is opened. This can only be a String or Enum Property!", update=SN_ScriptingBaseNode.auto_compile)
 
 
     def sync_inputs(self,index=-1):

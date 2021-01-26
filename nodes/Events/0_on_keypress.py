@@ -160,6 +160,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.pie = ""
         self.operator = ""
         self.custom_operator = ""
+        self.auto_compile()
         
     def update_picked(self,context):
         if self.picked:
@@ -191,6 +192,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.add_inputs_from_internal()
         else:
             self.remove_input_range(0)
+        self.auto_compile()
             
             
     def update_inputs_from_operator(self, index=-1):
@@ -201,23 +203,27 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.remove_input_range(0)
         if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
             self.update_inputs_from_operator()
+        self.auto_compile()
     
     
-    key: bpy.props.StringProperty(name="Key",default="Y")
+    key: bpy.props.StringProperty(name="Key",default="Y", update=SN_ScriptingBaseNode.auto_compile)
 
     recording: bpy.props.BoolProperty(name="Recording",default=False)
 
     ctrl: bpy.props.BoolProperty(name="Ctrl",
                                   description="If the ctrl key has to be pressed",
-                                  default=False)
+                                  default=False,
+                                  update=SN_ScriptingBaseNode.auto_compile)
     
     alt: bpy.props.BoolProperty(name="Alt",
                                   description="If the alt key has to be pressed",
-                                  default=False)
+                                  default=False,
+                                  update=SN_ScriptingBaseNode.auto_compile)
     
     shift: bpy.props.BoolProperty(name="Shift",
                                   description="If the shift key has to be pressed",
-                                  default=False)
+                                  default=False,
+                                  update=SN_ScriptingBaseNode.auto_compile)
     
     value: bpy.props.EnumProperty(name="Value",
                                   description="The way the key has to be pressed",
@@ -225,15 +231,18 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                          ("RELEASE","On Release","The action is run when the key is released"),
                                          ("CLICK","On Click","The action is run when the mouse button is clicked once"),
                                          ("DOUBLE_CLICK","On Double Click","The action is run when the mouse button is clicked twice"),
-                                         ("ANY","Any","The action will run with any of the above ways")])
+                                         ("ANY","Any","The action will run with any of the above ways")],
+                                  update=SN_ScriptingBaseNode.auto_compile)
     
     repeat: bpy.props.BoolProperty(name="Repeat Key",
                                    description="Repeat the action when the key is held down",
-                                   default=False)
+                                   default=False,
+                                   update=SN_ScriptingBaseNode.auto_compile)
     
     space: bpy.props.EnumProperty(name="Space",
                                   description="The space where this shortcut is active",
-                                  items=get_spaces)
+                                  items=get_spaces,
+                                  update=SN_ScriptingBaseNode.auto_compile)
     
     
     action: bpy.props.EnumProperty(name="Action",
@@ -246,7 +255,8 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     keep_open: bpy.props.BoolProperty(name="Keep Open",
                                       description="Keep the panel open after a property is changed",
-                                      default=True)
+                                      default=True,
+                                      update=SN_ScriptingBaseNode.auto_compile)
     
     use_internal: bpy.props.BoolProperty(name="Use Internal",
                                          description="Uses the internal ones from blender instead of your custom ones",
@@ -254,13 +264,16 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                          update=update_use_internal)
     
     panel: bpy.props.StringProperty(name="Panel",
-                                    description="The panel to open when the key is pressed")
+                                    description="The panel to open when the key is pressed",
+                                    update=SN_ScriptingBaseNode.auto_compile)
     
     menu: bpy.props.StringProperty(name="Menu",
-                                    description="The menu to open when the key is pressed")
+                                    description="The menu to open when the key is pressed",
+                                    update=SN_ScriptingBaseNode.auto_compile)
     
     pie: bpy.props.StringProperty(name="Pie Menu",
-                                    description="The pie menu to open when the key is pressed")
+                                    description="The pie menu to open when the key is pressed",
+                                    update=SN_ScriptingBaseNode.auto_compile)
     
     picked: bpy.props.StringProperty(update=update_picked)    
     

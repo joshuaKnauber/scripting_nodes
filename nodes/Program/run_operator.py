@@ -85,6 +85,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.add_inputs_from_internal()
         else:
             self.remove_input_range(1)
+        self.auto_compile()
             
             
     def update_inputs_from_operator(self, index=-1):
@@ -95,11 +96,13 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.remove_input_range(1)
         if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
             self.update_inputs_from_operator()
+        self.auto_compile()
     
     
     def update_use_internal(self,context):
         self.operator = ""
         self.custom_operator = ""
+        self.auto_compile()
     
     
     op_name: bpy.props.StringProperty()

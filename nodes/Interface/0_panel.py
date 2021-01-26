@@ -181,7 +181,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     order: bpy.props.IntProperty(default=0,
                                  min=0,
                                  name="Order",
-                                 description="This defines the order of the panels".
+                                 description="This defines the order of the panels",
                                  update=SN_ScriptingBaseNode.auto_compile)
     
 
