@@ -30,6 +30,7 @@ class SN_CombineVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.add_input(self.inputs[0].bl_idname,"W")
         if not self.use_four and len(self.inputs) == 4:
             self.inputs.remove(self.inputs[-1])
+        self.auto_compile()
     
     
     vector_type: bpy.props.EnumProperty(name="Type",

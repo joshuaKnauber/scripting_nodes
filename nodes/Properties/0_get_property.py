@@ -61,10 +61,11 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                 return {"code": "None"}
 
             path = self.inputs[0].code()
-            if data["group_path"]:
-                path += "." + data["group_path"] if path else data["group_path"]
 
-            path += "." + data["property"]["identifier"]
+        if data["group_path"]:
+            path += "." + data["group_path"] if path else data["group_path"]
+
+        path += "." + data["property"]["identifier"]
 
         return {
             "code": f"{path}"

@@ -31,6 +31,7 @@ class SN_SplitVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.add_output(self.outputs[0].bl_idname,"W")
         if not self.use_four and len(self.outputs) == 4:
             self.outputs.remove(self.outputs[-1])
+        self.auto_compile()
     
     
     vector_type: bpy.props.EnumProperty(name="Type",
