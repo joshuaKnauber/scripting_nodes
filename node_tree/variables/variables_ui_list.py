@@ -72,7 +72,7 @@ class SN_Variable(bpy.types.PropertyGroup):
             self.name = f"New {key.title()}"
 
         node = SN_ScriptingBaseNode()
-        node.addon_tree = bpy.context.scene.sn.addon_tree()
+        node.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
         
         collection = self.node_tree.sn_variables
         if self.is_property:
