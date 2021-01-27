@@ -51,6 +51,31 @@ class SN_OT_CreateGraph(bpy.types.Operator):
 
 
 
+class SN_OT_MoveGraph(bpy.types.Operator):
+    bl_idname = "sn.move_graph"
+    bl_label = "Move Graph"
+    bl_description = "Moves this graph"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+    
+    up: bpy.props.BoolProperty()
+
+    @classmethod
+    def poll(cls, context):
+        addon_tree = context.scene.sn.addon_tree()
+        return addon_tree.sn_graph_index != 0
+
+    def execute(self, context):
+        addon_tree = context.scene.sn.addon_tree()
+        if (self.up):
+            addon_tree.sn_graphs.move(addon_tree.sn_graph_index,addon_tree.sn_graph_index-1)
+            addon_tree.sn_graph_index -= 1
+        else:
+            addon_tree.sn_graphs.move(addon_tree.sn_graph_index,addon_tree.sn_graph_index+1)
+            addon_tree.sn_graph_index += 1
+        return {"FINISHED"}
+    
+
+
 class SN_OT_RemoveGraph(bpy.types.Operator):
     bl_idname = "sn.remove_graph"
     bl_label = "Remove Graph"
