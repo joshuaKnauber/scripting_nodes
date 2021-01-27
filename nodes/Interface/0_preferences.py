@@ -28,7 +28,7 @@ class SN_OT_GetSetPreferencesProperty(bpy.types.Operator):
         nodes = {"GETTER":"SN_GetPropertyNode",
                  "INTERFACE":"SN_DisplayPropertyNode",
                  "SETTER":"SN_SetPropertyNode"}
-        return tree.nodes.new(nodes[self.getset_type])
+        bpy.ops.node.add_node("INVOKE_DEFAULT",type=nodes[self.getset_type],use_transform=True)
 
 
     def execute(self, context):
@@ -36,10 +36,8 @@ class SN_OT_GetSetPreferencesProperty(bpy.types.Operator):
         node = tree.nodes[self.node_name]
         prop = node.properties[node.property_index]
         
-        new_node = self.add_node(tree)
-        new_node.copied_path = construct_from_property("context.preferences.addons[__name__.partition('.')[0]].preferences",prop)
-        
-        new_node.location = (node.location[0]+300,node.location[1]-200)
+        self.add_node(tree)
+        tree.nodes.active.copied_path = construct_from_property("context.preferences.addons[__name__.partition('.')[0]].preferences",prop)
         return {"FINISHED"}
 
     def draw(self,context):
