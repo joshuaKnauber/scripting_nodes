@@ -45,14 +45,6 @@ class SN_OT_RemoveProperty(bpy.types.Operator):
     
     
     
-def place_center(context,node):
-    for region in context.area.regions:
-        if region.type == "WINDOW":
-            loc = region.view2d.region_to_view(region.width//2,region.height//2)
-            node.location = loc
-    
-    
-    
 class SN_OT_AddPropertyGetter(bpy.types.Operator):
     bl_idname = "sn.add_prop_getter"
     bl_label = "Add Getter"
@@ -71,12 +63,11 @@ class SN_OT_AddPropertyGetter(bpy.types.Operator):
         prop = addon_tree.sn_properties[addon_tree.sn_property_index]
 
         if self.getter_type == "PROPERTY":
-            node = graph_tree.nodes.new("SN_GetPropertyNode")
+            bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_GetPropertyNode",use_transform=True)
         elif self.getter_type == "INTERFACE":
-            node = graph_tree.nodes.new("SN_DisplayPropertyNode")
-        node.copied_path = construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop)
+            bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_DisplayPropertyNode",use_transform=True)
         
-        place_center(context, node)
+        graph_tree.nodes.active.copied_path = construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop)
         return {"FINISHED"}
     
     def draw(self,context):
@@ -98,9 +89,9 @@ class SN_OT_AddPropertySetter(bpy.types.Operator):
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
         prop = addon_tree.sn_properties[addon_tree.sn_property_index]
 
-        node = graph_tree.nodes.new("SN_SetPropertyNode")
+        bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_SetPropertyNode",use_transform=True)
         
-        node.copied_path = construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop)
+        graph_tree.nodes.active.copied_path = construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop)
         return {"FINISHED"}
     
     

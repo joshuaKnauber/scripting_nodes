@@ -52,7 +52,7 @@ class SN_OT_AddGetIcon(bpy.types.Operator):
         addon_tree = context.scene.sn.addon_tree()
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
 
-        node = graph_tree.nodes.new("SN_GetIconNode")
-        node.icon_source = "CUSTOM"
-        node.custom_icon = addon_tree.sn_icons[addon_tree.sn_icon_index].name
+        bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_GetIconNode",use_transform=True)
+        graph_tree.nodes.active.icon_source = "CUSTOM"
+        graph_tree.nodes.active.custom_icon = addon_tree.sn_icons[addon_tree.sn_icon_index].name
         return {"FINISHED"}
