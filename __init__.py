@@ -103,6 +103,7 @@ def register():
     bpy.types.NodeTree.sn_nodes = bpy.props.CollectionProperty(type=SN_NodeCollection,name="Scripting Node Collections")
     bpy.types.NodeTree.sn_done_setup = bpy.props.BoolProperty(default=False,name="Scripting Setup Done")
     bpy.types.NodeTree.sn_version = bpy.props.IntVectorProperty(name="Serpens Version")
+    bpy.types.NodeTree.sn_uid = bpy.props.StringProperty(name="Serpens UID")
     
     # register the text properties
     bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False,name="Is Serpens Addon")
@@ -152,6 +153,7 @@ def unregister():
     del bpy.types.NodeTree.sn_assets
     del bpy.types.NodeTree.sn_asset_index
     del bpy.types.NodeTree.sn_nodes
+    del bpy.types.NodeTree.sn_uid
 
     # unregister the text properties
     del bpy.types.Text.is_sn_addon

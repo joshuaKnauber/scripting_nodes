@@ -1,15 +1,15 @@
 
 bl_info = {
-    "name": "test",
+    "name": "Save External",
     "description": "",
-    "author": "Your Name",
+    "author": "Steven Scoot ",
     "version": (1, 0, 0),
     "blender": (2, 91, 0),
     "location": "",
     "warning": "",
-    "wiki_url": "",
+    "wiki_url": "https://www.youtube.com/channel/UCiy-QcXrvu9hhe4arymNcfw",
     "tracker_url": "",
-    "category": "3D View"
+    "category": "User Interface"
 }
 
 

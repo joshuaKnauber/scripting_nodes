@@ -28,8 +28,21 @@ class SN_ScriptingBaseNode:
         "imperative_once": False
     }
     
-    node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
-    addon_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree)
+    node_tree_uid: bpy.props.StringProperty()
+    addon_tree_uid: bpy.props.StringProperty()
+    
+    @property
+    def node_tree(self):
+        for tree in bpy.data.node_groups:
+            if tree.sn_uid == self.node_tree_uid:
+                return tree
+    
+    @property
+    def addon_tree(self):
+        for tree in bpy.data.node_groups:
+            if tree.sn_uid == self.addon_tree_uid:
+                return tree
+    
     
     uid: bpy.props.StringProperty()
 
@@ -153,8 +166,8 @@ class SN_ScriptingBaseNode:
 
 
     def init(self,context):
-        self.node_tree = bpy.context.space_data.node_tree
-        self.addon_tree = bpy.context.scene.sn.addon_tree()
+        self.node_tree_uid = bpy.context.space_data.node_tree.sn_uid
+        self.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
         self.uid = uuid4().hex[:5].upper()
         if "default_color" in self.node_options:
             self.color = self.node_options["default_color"]
@@ -172,7 +185,7 @@ class SN_ScriptingBaseNode:
 
 
     def copy(self,node):
-        self.node_tree = bpy.context.space_data.node_tree
+        self.node_tree_uid = bpy.context.space_data.node_tree.sn_uid
         self.uid = uuid4().hex[:5].upper()
         self.__add_self_to_property_group()
         self.auto_compile()

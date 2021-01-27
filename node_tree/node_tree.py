@@ -2,6 +2,8 @@ import bpy
 from .. import bl_info
 from ..compiler.compiler import compile_addon
 from ..settings.updates import exists_newer_version
+from uuid import uuid4
+
 
 
 def update_create_tree():
@@ -42,7 +44,9 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         return addon_tree.sn_graphs[0].autocompile_delay
     
 
-    def setup(self, main_tree):      
+    def setup(self, main_tree):
+        self.sn_uid = uuid4().hex[:5].upper()
+        
         graph = main_tree.sn_graphs.add()
         graph.main_tree = main_tree
         graph.node_tree = self
