@@ -39,6 +39,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                 elif data["property"]["identifier"] == node.identifier:
                     self.label = "Get " + node.name
                     self.prop_name = node.name
+                    self.outputs[0].default_text = node.name
                     data["property"]["name"] = node.name
                     self["copied_path"] = str(data).replace("'", "\"")
 

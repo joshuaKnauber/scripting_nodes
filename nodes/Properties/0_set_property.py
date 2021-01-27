@@ -40,6 +40,7 @@ class SN_SetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                 elif data["property"]["identifier"] == node.identifier:
                     self.label = "Set " + node.name
                     self.prop_name = node.name
+                    self.inputs[1].default_text = node.name
                     data["property"]["name"] = node.name
                     self["copied_path"] = str(data).replace("'", "\"")
 
