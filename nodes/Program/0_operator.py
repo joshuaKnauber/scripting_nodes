@@ -74,7 +74,6 @@ class SN_OT_EditNodeProperty(bpy.types.Operator):
         node = addon_tree.nodes[self.node_name]
         variable = node.properties[node.property_index]
         draw_property(context, variable, self.layout, self.node_name, "properties", node.property_index)
-        node.auto_compile()
 
 
 class SN_OT_GetSetNodeProperty(bpy.types.Operator):
