@@ -54,8 +54,8 @@ class SN_OT_AddVariableGetter(bpy.types.Operator):
         addon_tree = context.scene.sn.addon_tree()
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
 
-        node = graph_tree.nodes.new("SN_GetVariableNode")
-        node.search_value = graph_tree.sn_variables[graph_tree.sn_variable_index].name
+        bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_GetVariableNode",use_transform=True)
+        graph_tree.nodes.active.search_value = graph_tree.sn_variables[graph_tree.sn_variable_index].name
         return {"FINISHED"}
 
 
@@ -75,11 +75,11 @@ class SN_OT_AddVariableSetter(bpy.types.Operator):
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
 
         if self.set_type == "SET":
-            node = graph_tree.nodes.new("SN_SetVariableNode")
+            bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_SetVariableNode",use_transform=True)
         else:
-            node = graph_tree.nodes.new("SN_ChangeVariableNode")
+            bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_ChangeVariableNode",use_transform=True)
 
-        node.search_value = graph_tree.sn_variables[graph_tree.sn_variable_index].name
+        graph_tree.nodes.active.search_value = graph_tree.sn_variables[graph_tree.sn_variable_index].name
         return {"FINISHED"}
 
     def draw(self,context):
