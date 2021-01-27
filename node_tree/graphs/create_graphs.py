@@ -66,6 +66,9 @@ class SN_OT_RemoveGraph(bpy.types.Operator):
 
     def execute(self, context):
         addon_tree = context.scene.sn.addon_tree()
+        for node in addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree.nodes:
+            addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree.nodes.remove(node)
+
         bpy.data.node_groups.remove(addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree)
         addon_tree.sn_graphs.remove(addon_tree.sn_graph_index)
         addon_tree.sn_graph_index -= 1
