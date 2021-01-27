@@ -15,7 +15,31 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.3,0.3,0.3),
     }
-    
+
+
+    def on_outside_update(self, node):
+        if self.copied_path:
+            data = get_data(self.copied_path)
+            if data and data["group_path"] == "self":
+                if data["property"]["name"] == node.name:
+                    if data["property"]["identifier"] != node.identifier:
+                        data["property"]["identifier"] = node.identifier
+                        self["copied_path"] = str(data).replace("'", "\"")
+                    else:
+                        labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","ENUM": "Dropdown"}
+                        self.label = labels[node.uid]
+                        if node.uid.replace("INT", "INTEGER") != data["property"]["type"]:
+                            for i in range(len(self.inputs)-1,2,-1):
+                                self.inputs.remove(self.inputs[i])
+                            self.setup_inputs(node.uid)
+
+                elif data["property"]["identifier"] == node.identifier:
+                    labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","ENUM": "Dropdown"}
+                    self.label = labels[data["property"]["type"]]
+                    self.prop_name = node.name
+                    data["property"]["name"] = node.name
+                    self["copied_path"] = str(data).replace("'", "\"")
+
 
     def on_create(self,context):
         self.add_interface_input("Interface").mirror_name = True
@@ -29,7 +53,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.add_boolean_input("Invert Checkbox").set_default(False)
         elif prop_type == "ENUM":
             self.add_boolean_input("Expand").set_default(False)
-        elif prop_type in ["FLOAT","INT"]:
+        elif prop_type in ["FLOAT","INT", "INTEGER"]:
             self.add_boolean_input("Slider").set_default(False)
         self.add_icon_input("Icon")
             
@@ -40,9 +64,10 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             "BOOLEAN": "Checkbox",
             "FLOAT": "Number Input",
             "INT": "Number Input",
+            "INTEGER": "Number Input",
             "ENUM": "Dropdown"
         }
-        
+
         if self.copied_path:
             data = get_data(self.copied_path)
             if data:
@@ -52,6 +77,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.prop_name = data["property"]["name"]
                 if data["data_block"]["type"]:
                     setup_data_input(self, data)
+
             else:
                 self.copied_path = ""
                 

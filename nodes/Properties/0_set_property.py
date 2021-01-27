@@ -15,7 +15,34 @@ class SN_SetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.3,0.3,0.3),
     }
-    
+
+
+    def on_outside_update(self, node):
+        if self.copied_path:
+            data = get_data(self.copied_path)
+            if data and data["group_path"] == "self":
+                if data["property"]["name"] == node.name:
+                    if data["property"]["identifier"] != node.identifier:
+                        data["property"]["identifier"] = node.identifier
+                        self["copied_path"] = str(data).replace("'", "\"")
+                    else:
+                        if data["property"]["type"] != node.uid:
+                            data["property"]["type"] = node.uid
+                            self["copied_path"] = str(data).replace("'", "\"")
+                            for i in range(len(self.inputs)-1,0,-1):
+                                self.inputs.remove(self.inputs[i])
+                            self.add_input_from_data(data["property"])
+                        if data["property"]["subtype"] != node.label:
+                            data["property"]["subtype"] = node.label
+                            self["copied_path"] = str(data).replace("'", "\"")
+                            self.inputs[1].subtype = self.subtype_from_prop_subtype(data["property"]["type"],data["property"]["subtype"],data["property"]["size"])
+
+                elif data["property"]["identifier"] == node.identifier:
+                    self.label = "Set " + node.name
+                    self.prop_name = node.name
+                    data["property"]["name"] = node.name
+                    self["copied_path"] = str(data).replace("'", "\"")
+
     
     def on_create(self,context):
         self.add_execute_input("Set Property")

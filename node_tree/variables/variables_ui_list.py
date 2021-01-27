@@ -83,14 +83,23 @@ class SN_Variable(bpy.types.PropertyGroup):
         unique_name = node.get_unique_name(self.name, collection, " ")
         if unique_name != self.name:
             self.name = unique_name
-
-        node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
-                                   "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
+        
+        if self.is_property:
+            node.name = self.name
+            node.identifier = self.identifier
+            node.update_nodes_by_types("SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode")
+        else:
+            node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
+                                       "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
 
         self.identifier = node.get_python_name(self.name, f"new_{key}")
 
-        node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
-                                   "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
+        if self.is_property:
+            node.identifier = self.identifier
+            node.update_nodes_by_types("SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode")
+        else:
+            node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
+                                       "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
         
         self.trigger_update(context)
 
@@ -134,9 +143,26 @@ class SN_Variable(bpy.types.PropertyGroup):
         except: self.property_unit = "NO_UNITS"
 
         node = SN_ScriptingBaseNode()
-        node.addon_tree = bpy.context.scene.sn.addon_tree()
-        node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode")
+        node.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
+        if self.is_property:
+            node.name = self.name
+            node.identifier = self.identifier
+            node.uid = self.var_type
+            node.label = self.property_subtype
+            node.update_nodes_by_types("SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode")
+        else:
+            node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode")
 
+        self.trigger_update(context)
+
+    def update_subtype(self,context):
+        node = SN_ScriptingBaseNode()
+        node.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
+        node.name = self.name
+        node.identifier = self.identifier
+        node.uid = self.var_type
+        node.label = self.property_subtype
+        node.update_nodes_by_types("SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode")
         self.trigger_update(context)
 
 
@@ -204,7 +230,7 @@ class SN_Variable(bpy.types.PropertyGroup):
     property_subtype: bpy.props.EnumProperty(items=subtype_items,
                                              name="Subtype",
                                              description="The subtype of this property",
-                                             update=trigger_update)
+                                             update=update_subtype)
 
     property_options: bpy.props.EnumProperty(items=[("HIDDEN", "Hide", "Hide in operator edit popup (Shift-Click to select multiple)"), ("SKIP_SAVE", "Skip Save", "Don't save this property for the next time the operator is called (Shift-Click to select multiple)"), ("ANIMATABLE", "Animatable", "Defines if this property is animatable (Shift-Click to select multiple)")], name="Options", description="Property options", options={"ENUM_FLAG"})
 

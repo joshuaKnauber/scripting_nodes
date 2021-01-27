@@ -15,7 +15,33 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.3,0.3,0.3),
     }
-    
+
+
+    def on_outside_update(self, node):
+        if self.copied_path:
+            data = get_data(self.copied_path)
+            if data and data["group_path"] == "self":
+                if data["property"]["name"] == node.name:
+                    if data["property"]["identifier"] != node.identifier:
+                        data["property"]["identifier"] = node.identifier
+                        self["copied_path"] = str(data).replace("'", "\"")
+                    else:
+                        if data["property"]["type"] != node.uid:
+                            data["property"]["type"] = node.uid
+                            self["copied_path"] = str(data).replace("'", "\"")
+                            self.outputs.clear()
+                            self.add_output_from_data(data["property"])
+                        if data["property"]["subtype"] != node.label:
+                            data["property"]["subtype"] = node.label
+                            self["copied_path"] = str(data).replace("'", "\"")
+                            self.outputs[0].subtype = self.subtype_from_prop_subtype(data["property"]["type"],data["property"]["subtype"],data["property"]["size"])
+
+                elif data["property"]["identifier"] == node.identifier:
+                    self.label = "Get " + node.name
+                    self.prop_name = node.name
+                    data["property"]["name"] = node.name
+                    self["copied_path"] = str(data).replace("'", "\"")
+
 
     def update_copied(self,context):
         if self.copied_path:
