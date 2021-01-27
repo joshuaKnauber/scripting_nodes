@@ -35,11 +35,19 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         addon_tree = context.scene.sn.addon_tree()
 
         row = layout.row(align=False)
-        row.template_list("SN_UL_GraphList", "Graphs", addon_tree, "sn_graphs", addon_tree, "sn_graph_index",rows=3)
+        row.template_list("SN_UL_GraphList", "Graphs", addon_tree, "sn_graphs", addon_tree, "sn_graph_index",rows=4)
         col = row.column(align=True)
         col.operator("sn.add_graph", text="", icon="ADD")
         col.operator("sn.append_graph", text="", icon="APPEND_BLEND")
         col.operator("sn.remove_graph", text="", icon="REMOVE").index = addon_tree.sn_graph_index
+        
+        col.separator()
+        row = col.row(align=True)
+        row.enabled = addon_tree.sn_graph_index > 1
+        row.operator("sn.move_graph", text="", icon="TRIA_UP").up = True
+        row = col.row(align=True)
+        row.enabled = addon_tree.sn_graph_index < len(addon_tree.sn_graphs)-1
+        row.operator("sn.move_graph", text="", icon="TRIA_DOWN").up = False
 
 
 bpy.utils.register_class(SN_PT_GraphPanel)
@@ -73,6 +81,14 @@ class SN_PT_VariablePanel(bpy.types.Panel):
         col = row.column(align=True)
         col.operator("sn.add_variable", text="", icon="ADD")
         col.operator("sn.remove_variable", text="", icon="REMOVE")
+        
+        col.separator()
+        row = col.row(align=True)
+        row.enabled = graph_tree.sn_variable_index > 0
+        row.operator("sn.move_variable", text="", icon="TRIA_UP").up = True
+        row = col.row(align=True)
+        row.enabled = graph_tree.sn_variable_index < len(graph_tree.sn_variables)-1
+        row.operator("sn.move_variable", text="", icon="TRIA_DOWN").up = False
         
         if len(graph_tree.sn_variables):
             layout.separator()
@@ -271,6 +287,14 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
         col.operator("sn.add_property", text="", icon="ADD")
         col.operator("sn.remove_property", text="", icon="REMOVE")
         
+        col.separator()
+        row = col.row(align=True)
+        row.enabled = addon_tree.sn_property_index > 0
+        row.operator("sn.move_property", text="", icon="TRIA_UP").up = True
+        row = col.row(align=True)
+        row.enabled = addon_tree.sn_property_index < len(addon_tree.sn_properties)-1
+        row.operator("sn.move_property", text="", icon="TRIA_DOWN").up = False
+        
         if len(addon_tree.sn_properties):
             layout.separator()
             row = layout.row()
@@ -301,6 +325,14 @@ class SN_PT_IconPanel(bpy.types.Panel):
         col = row.column(align=True)
         col.operator("sn.add_icon", text="", icon="ADD")
         col.operator("sn.remove_icon", text="", icon="REMOVE")
+        
+        col.separator()
+        row = col.row(align=True)
+        row.enabled = addon_tree.sn_icon_index > 0
+        row.operator("sn.move_icon", text="", icon="TRIA_UP").up = True
+        row = col.row(align=True)
+        row.enabled = addon_tree.sn_icon_index < len(addon_tree.sn_icons)-1
+        row.operator("sn.move_icon", text="", icon="TRIA_DOWN").up = False
         
         
         if len(addon_tree.sn_icons):
@@ -334,6 +366,14 @@ class SN_PT_AssetsPanel(bpy.types.Panel):
         col = row.column(align=True)
         col.operator("sn.add_asset", text="", icon="ADD")
         col.operator("sn.remove_asset", text="", icon="REMOVE")
+        
+        col.separator()
+        row = col.row(align=True)
+        row.enabled = addon_tree.sn_asset_index > 0
+        row.operator("sn.move_asset", text="", icon="TRIA_UP").up = True
+        row = col.row(align=True)
+        row.enabled = addon_tree.sn_asset_index < len(addon_tree.sn_assets)-1
+        row.operator("sn.move_asset", text="", icon="TRIA_DOWN").up = False
         
         
         if len(addon_tree.sn_assets):

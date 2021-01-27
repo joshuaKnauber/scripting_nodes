@@ -42,6 +42,27 @@ class SN_OT_RemoveVariable(bpy.types.Operator):
 
     def invoke(self, context, event):
         return context.window_manager.invoke_confirm(self, event)
+    
+    
+class SN_OT_MoveVariable(bpy.types.Operator):
+    bl_idname = "sn.move_variable"
+    bl_label = "Move Variable"
+    bl_description = "Moves this variable"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+    
+    up: bpy.props.BoolProperty()
+
+    def execute(self, context):
+        addon_tree = context.scene.sn.addon_tree()
+        graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
+        
+        if (self.up):
+            graph_tree.sn_variables.move(graph_tree.sn_variable_index,graph_tree.sn_variable_index-1)
+            graph_tree.sn_variable_index -= 1
+        else:
+            graph_tree.sn_variables.move(graph_tree.sn_variable_index,graph_tree.sn_variable_index+1)
+            graph_tree.sn_variable_index += 1
+        return {"FINISHED"}
 
     
 class SN_OT_AddVariableGetter(bpy.types.Operator):

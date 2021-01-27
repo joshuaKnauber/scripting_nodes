@@ -53,3 +53,24 @@ class SN_OT_AddGetAsset(bpy.types.Operator):
         bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_GetAssetNode",use_transform=True)
         graph_tree.nodes.active.asset = addon_tree.sn_assets[addon_tree.sn_asset_index].name
         return {"FINISHED"}
+    
+    
+    
+class SN_OT_MoveAssets(bpy.types.Operator):
+    bl_idname = "sn.move_asset"
+    bl_label = "Move Assets"
+    bl_description = "Moves this asset"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+    
+    up: bpy.props.BoolProperty()
+
+    def execute(self, context):
+        addon_tree = context.scene.sn.addon_tree()
+        
+        if (self.up):
+            addon_tree.sn_assets.move(addon_tree.sn_asset_index,addon_tree.sn_asset_index-1)
+            addon_tree.sn_asset_index -= 1
+        else:
+            addon_tree.sn_assets.move(addon_tree.sn_asset_index,addon_tree.sn_asset_index+1)
+            addon_tree.sn_asset_index += 1
+        return {"FINISHED"}

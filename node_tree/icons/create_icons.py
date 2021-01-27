@@ -56,3 +56,24 @@ class SN_OT_AddGetIcon(bpy.types.Operator):
         graph_tree.nodes.active.icon_source = "CUSTOM"
         graph_tree.nodes.active.custom_icon = addon_tree.sn_icons[addon_tree.sn_icon_index].name
         return {"FINISHED"}
+    
+    
+    
+class SN_OT_MoveIcon(bpy.types.Operator):
+    bl_idname = "sn.move_icon"
+    bl_label = "Move Icon"
+    bl_description = "Moves this icon"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+    
+    up: bpy.props.BoolProperty()
+
+    def execute(self, context):
+        addon_tree = context.scene.sn.addon_tree()
+        
+        if (self.up):
+            addon_tree.sn_icons.move(addon_tree.sn_icon_index,addon_tree.sn_icon_index-1)
+            addon_tree.sn_icon_index -= 1
+        else:
+            addon_tree.sn_icons.move(addon_tree.sn_icon_index,addon_tree.sn_icon_index+1)
+            addon_tree.sn_icon_index += 1
+        return {"FINISHED"}

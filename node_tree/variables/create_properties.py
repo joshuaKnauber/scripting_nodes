@@ -95,6 +95,26 @@ class SN_OT_AddPropertySetter(bpy.types.Operator):
         return {"FINISHED"}
     
     
+class SN_OT_MoveProperty(bpy.types.Operator):
+    bl_idname = "sn.move_property"
+    bl_label = "Move Property"
+    bl_description = "Moves this property"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+    
+    up: bpy.props.BoolProperty()
+
+    def execute(self, context):
+        addon_tree = context.scene.sn.addon_tree()
+        
+        if (self.up):
+            addon_tree.sn_properties.move(addon_tree.sn_property_index,addon_tree.sn_property_index-1)
+            addon_tree.sn_property_index -= 1
+        else:
+            addon_tree.sn_properties.move(addon_tree.sn_property_index,addon_tree.sn_property_index+1)
+            addon_tree.sn_property_index += 1
+        return {"FINISHED"}
+    
+    
 
 class SN_OT_AddEnumItem(bpy.types.Operator):
     bl_idname = "sn.add_enum_item"

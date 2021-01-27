@@ -189,3 +189,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     
     compatible_nodes: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup,name="Serpens Menu ")
+    
+    
+    minimal_header: bpy.props.BoolProperty(default=False,name="Minimal Header",
+                                         description="Only show a minimal header")
