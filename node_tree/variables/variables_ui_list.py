@@ -55,7 +55,7 @@ class SN_EnumItem(bpy.types.PropertyGroup):
         for graph in context.scene.sn.addon_tree().sn_graphs:
             for node in graph.node_tree.nodes:
                 if node.bl_idname == "SN_SetPropertyNode":
-                    if self.is_property:
+                    if prop.is_property:
                         node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop))
                     else:
                         node.on_outside_update(construct_from_property("self",prop))
