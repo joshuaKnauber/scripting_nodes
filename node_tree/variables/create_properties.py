@@ -1,6 +1,6 @@
 import bpy
 import json
-from ...interface.menu.rightclick import construct_from_attached_property
+from ...interface.menu.rightclick import construct_from_attached_property, construct_from_property
 
 
 class SN_OT_CreateProperty(bpy.types.Operator):
@@ -35,9 +35,16 @@ class SN_OT_RemoveProperty(bpy.types.Operator):
 
     def execute(self, context):
         addon_tree = context.scene.sn.addon_tree()
+        prop = addon_tree.sn_properties[addon_tree.sn_property_index]
+        for graph in addon_tree.sn_graphs:
+            for node in graph.node_tree.nodes:
+                if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode"]:
+                    node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop, True))
+
         addon_tree.sn_properties.remove(addon_tree.sn_property_index)
         if addon_tree.sn_property_index > 0:
             addon_tree.sn_property_index -= 1
+
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -133,9 +140,13 @@ class SN_OT_AddEnumItem(bpy.types.Operator):
             addon_tree = context.scene.sn.addon_tree()
             prop = addon_tree.sn_properties[addon_tree.sn_property_index]
 
-        prop.enum_items.add()
+        item = prop.enum_items.add()
+        item.node = self.node
+        item.node_attr = self.node_attr
+        item.node_index = self.node_index
+
         if self.node:
-            prop.trigger_update(context)
+            prop.update_enum(context)
         return {"FINISHED"}
     
     
@@ -161,7 +172,7 @@ class SN_OT_RemoveEnumItem(bpy.types.Operator):
             
         prop.enum_items.remove(self.index)
         if self.node:
-            prop.trigger_update(context)
+            prop.update_enum(context)
         return {"FINISHED"}
     
     
@@ -192,5 +203,5 @@ class SN_OT_MoveEnumItem(bpy.types.Operator):
             prop.enum_items.move(self.index, self.index-1)
             
         if self.node:
-            prop.trigger_update(context)
+            prop.update_enum(context)
         return {"FINISHED"}

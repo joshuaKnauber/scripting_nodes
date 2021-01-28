@@ -1,6 +1,7 @@
 import bpy
 import re
 from ..base_node import SN_ScriptingBaseNode
+from ...interface.menu.rightclick import construct_from_property, construct_from_attached_property
 
 
 def name_is_unique(collection, name):
@@ -40,14 +41,37 @@ variable_icons = {
 
 class SN_EnumItem(bpy.types.PropertyGroup):
 
+    node: bpy.props.StringProperty(options={"SKIP_SAVE"},default="")
+    node_attr: bpy.props.StringProperty(options={"SKIP_SAVE"},default="")
+    node_index: bpy.props.IntProperty(options={"SKIP_SAVE"},default=0)
+
+    def update_enum(self, context):
+        if self.node:
+            prop = getattr(context.space_data.node_tree.nodes[self.node],self.node_attr)[self.node_index]
+        else:
+            addon_tree = context.scene.sn.addon_tree()
+            prop = addon_tree.sn_properties[addon_tree.sn_property_index]
+
+        for graph in context.scene.sn.addon_tree().sn_graphs:
+            for node in graph.node_tree.nodes:
+                if node.bl_idname == "SN_SetPropertyNode":
+                    if self.is_property:
+                        node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop))
+                    else:
+                        node.on_outside_update(construct_from_property("self",prop))
+        context.space_data.node_tree.set_changes(True)
+
+
     name: bpy.props.StringProperty(name="Name",
                                    description="The displayed name of your enum entry",
-                                   default="My Item")
+                                   default="My Item",
+                                   update=update_enum)
+
     
     description: bpy.props.StringProperty(name="Description",
                                    description="The tooltip of your enum entry",
-                                   default="This is my enum item")
-
+                                   default="This is my enum item",
+                                   update=update_enum)
 
 
 class SN_Variable(bpy.types.PropertyGroup):
@@ -62,6 +86,18 @@ class SN_Variable(bpy.types.PropertyGroup):
         if self.use_self:
             node = self.find_node(context)
             node.update_from_collection(self.from_node_collection,self)
+
+    def update_prop_nodes(self):
+        base_node = SN_ScriptingBaseNode()
+        base_node.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
+        for graph in base_node.addon_tree.sn_graphs:
+            for node in graph.node_tree.nodes:
+                if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode"]:
+                    if self.is_property:
+                        node.on_outside_update(construct_from_attached_property(self.attach_property_to,self.attach_property_to,self))
+                    else:
+                        node.on_outside_update(construct_from_property("self",self))
+
 
     def update_name(self,context):
         key = "variable"
@@ -85,9 +121,7 @@ class SN_Variable(bpy.types.PropertyGroup):
             self.name = unique_name
         
         if self.is_property:
-            node.name = self.name
-            node.identifier = self.identifier
-            node.update_nodes_by_types("SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode")
+            self.update_prop_nodes()
         else:
             node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
                                        "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
@@ -95,8 +129,7 @@ class SN_Variable(bpy.types.PropertyGroup):
         self.identifier = node.get_python_name(self.name, f"new_{key}")
 
         if self.is_property:
-            node.identifier = self.identifier
-            node.update_nodes_by_types("SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode")
+            self.update_prop_nodes()
         else:
             node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
                                        "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
@@ -145,24 +178,26 @@ class SN_Variable(bpy.types.PropertyGroup):
         node = SN_ScriptingBaseNode()
         node.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
         if self.is_property:
-            node.name = self.name
-            node.identifier = self.identifier
-            node.uid = self.var_type
-            node.label = self.property_subtype
-            node.update_nodes_by_types("SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode")
+            self.update_prop_nodes()
         else:
             node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode")
 
         self.trigger_update(context)
 
     def update_subtype(self,context):
-        node = SN_ScriptingBaseNode()
-        node.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
-        node.name = self.name
-        node.identifier = self.identifier
-        node.uid = self.var_type
-        node.label = self.property_subtype
-        node.update_nodes_by_types("SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode")
+        self.update_prop_nodes()
+        self.trigger_update(context)
+
+    def update_vector(self, context):
+        if not self.is_vector:
+            try: self.property_subtype = "NONE"
+            except: self.property_subtype = "NO_SUBTYPES"
+
+        self.update_prop_nodes()
+        self.trigger_update(context)
+
+    def update_enum(self, context):
+        self.update_prop_nodes()
         self.trigger_update(context)
 
 
@@ -186,13 +221,13 @@ class SN_Variable(bpy.types.PropertyGroup):
     is_vector: bpy.props.BoolProperty(default=False,
                                       name="Make Vector",
                                       description="Makes this property into a vector containing multiple of this property",
-                                      update=trigger_update)
+                                      update=update_vector)
     
     vector_size: bpy.props.IntProperty(default=3,
                                        min=3,max=4,
                                        name="Vector Size",
                                        description="The size of the vector",
-                                       update=trigger_update)
+                                       update=update_vector)
     
     def subtype_items(self,context):
         items = []
@@ -260,6 +295,10 @@ class SN_Variable(bpy.types.PropertyGroup):
         for option in options:
             items.append((option,option,option))
         return items
+
+    def update_attach_to(self, context):
+        self.update_prop_nodes()
+        self.trigger_update(context)
     
     is_data_collection: bpy.props.BoolProperty(name="Data Collection",
                                                description="Holds a data collection instead of a single data block",
@@ -268,7 +307,7 @@ class SN_Variable(bpy.types.PropertyGroup):
     attach_property_to: bpy.props.EnumProperty(items=get_attach_items,
                                                name="Attach To",
                                                description="This is the ID object which this property will be attached to",
-                                               update=trigger_update)
+                                               update=update_attach_to)
     
     str_default: bpy.props.StringProperty(default="",
                                         name="Default Value",

@@ -43,6 +43,11 @@ class SN_OT_RemoveNodeProperty(bpy.types.Operator):
     def execute(self, context):
         addon_tree = context.space_data.node_tree
         node = addon_tree.nodes[self.node_name]
+        
+        for graph in addon_tree.sn_graphs:
+            for graph_node in graph.node_tree.nodes:
+                if graph_node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode"]:
+                    graph_node.on_outside_update(construct_from_property("self", node.properties[node.property_index], True))
 
         node.properties.remove(node.property_index)
         if len(node.properties):

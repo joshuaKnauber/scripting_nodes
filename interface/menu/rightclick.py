@@ -3,7 +3,7 @@ import json
 
 
 
-def construct_from_property(path,prop):
+def construct_from_property(path,prop, removed=False):
     size = -1
     if prop.is_vector:
         size = prop.vector_size
@@ -20,15 +20,16 @@ def construct_from_property(path,prop):
             "type": prop.var_type,
             "subtype": prop.property_subtype,
             "size": size,
-            "items": prop.enum_string()
+            "items": prop.enum_string(),
+            "removed": removed
         }
     }
     return json.dumps(data)
     
 
     
-def construct_from_attached_property(db_name,db_type,prop):
-    data = json.loads(construct_from_property("",prop))
+def construct_from_attached_property(db_name,db_type,prop, removed=False):
+    data = json.loads(construct_from_property("test",prop, removed))
     data["data_block"]["name"] = db_name
     data["data_block"]["type"] = db_type
     return json.dumps(data)

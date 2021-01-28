@@ -17,28 +17,58 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
 
-    def on_outside_update(self, node):
+    def on_outside_update(self, string_data):
         if self.copied_path:
             data = get_data(self.copied_path)
+            new_data = get_data(string_data)
             if data and data["group_path"] == "self":
-                if data["property"]["name"] == node.name:
-                    if data["property"]["identifier"] != node.identifier:
-                        data["property"]["identifier"] = node.identifier
-                        self["copied_path"] = str(data).replace("'", "\"")
+                if data["property"]["name"] == new_data["property"]["name"]:
+                    if data["property"]["identifier"] != new_data["property"]["identifier"]:
+                        self["copied_path"] = string_data
                     else:
-                        labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","ENUM": "Dropdown"}
-                        self.label = labels[node.uid]
-                        if node.uid.replace("INT", "INTEGER") != data["property"]["type"]:
+                        labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown"}
+                        self.label = labels[new_data["property"]["type"]]
+                        if new_data["property"]["type"] != data["property"]["type"]:
                             for i in range(len(self.inputs)-1,2,-1):
                                 self.inputs.remove(self.inputs[i])
-                            self.setup_inputs(node.uid)
+                            self.setup_inputs(new_data["property"]["type"])
+                        self["copied_path"] = string_data
+                    if new_data["property"]["removed"]:
+                        self.copied_path = ""
 
-                elif data["property"]["identifier"] == node.identifier:
-                    labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","ENUM": "Dropdown"}
+                elif data["property"]["identifier"] == new_data["property"]["identifier"]:
+                    labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown"}
                     self.label = labels[data["property"]["type"]]
-                    self.prop_name = node.name
-                    data["property"]["name"] = node.name
-                    self["copied_path"] = str(data).replace("'", "\"")
+                    self.prop_name = new_data["property"]["name"]
+                    self["copied_path"] = string_data
+
+            else:
+                if data["property"]["name"] == new_data["property"]["name"]:
+                    if data["property"]["identifier"] != new_data["property"]["identifier"]:
+                        self["copied_path"] = string_data
+                    else:
+                        labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown"}
+                        self.label = labels[new_data["property"]["type"]]
+                        if new_data["property"]["type"] != data["property"]["type"]:
+                            for i in range(len(self.inputs)-1,2,-1):
+                                self.inputs.remove(self.inputs[i])
+                            self.setup_inputs(new_data["property"]["type"])
+                            setup_data_input(self, new_data)
+                        self["copied_path"] = string_data
+                    inp = self.inputs[-1]
+                    if inp.default_text != new_data["data_block"]["name"]:
+                        inp.default_text = new_data["data_block"]["name"]
+                        inp.data_type = new_data["data_block"]["type"]
+                        inp.data_name = new_data["data_block"]["name"]
+                        self["copied_path"] = string_data
+                    if new_data["property"]["removed"]:
+                        self.copied_path = ""
+
+                elif data["property"]["identifier"] == new_data["property"]["identifier"]:
+                    labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown"}
+                    self.label = labels[data["property"]["type"]]
+                    self.prop_name = new_data["property"]["name"]
+                    self["copied_path"] = string_data
 
 
     def on_create(self,context):
