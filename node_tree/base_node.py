@@ -148,10 +148,11 @@ class SN_ScriptingBaseNode:
         if "has_collection" in self.node_options and self.node_options["has_collection"]:
             if not item:
                 item = self.item
-            if "collection_name_attr" in self.node_options:
-                item.name = getattr(self,self.node_options["collection_name_attr"])
-            else:
-                item.name = self.name
+            if item:
+                if "collection_name_attr" in self.node_options:
+                    item.name = getattr(self,self.node_options["collection_name_attr"])
+                else:
+                    item.name = self.name
                 
                 
     def add_required_to_collection(self,idnames):

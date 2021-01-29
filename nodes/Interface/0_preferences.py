@@ -81,6 +81,10 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         self.add_interface_output("Preferences")
         self.add_dynamic_interface_output("Preferences")
+
+    def on_free(self):
+        for prop in self.properties:
+            bpy.ops.sn.remove_node_property(node_name=self.name)
         
         
     def draw_node(self,context,layout):

@@ -44,7 +44,7 @@ class SN_OT_RemoveNodeProperty(bpy.types.Operator):
         addon_tree = context.space_data.node_tree
         node = addon_tree.nodes[self.node_name]
         
-        for graph in addon_tree.sn_graphs:
+        for graph in node.addon_tree.sn_graphs:
             for graph_node in graph.node_tree.nodes:
                 if graph_node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode", "SN_UpdatePropertyNode"]:
                     graph_node.on_outside_update(construct_from_property("self", node.properties[node.property_index],node.uid, removed=True))
@@ -208,11 +208,12 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def sync_inputs(self,index=-1):
         sync_to = ["SN_RunOperatorNode","SN_ButtonNode","SN_OnKeypressNode"]
-        this_name = self.item.name
-        for graph in self.addon_tree.sn_graphs:
-            for node in graph.node_tree.nodes:
-                if node.bl_idname in sync_to and node.custom_operator == this_name:
-                    node.update_inputs_from_operator(index)
+        if self.item:
+            this_name = self.item.name
+            for graph in self.addon_tree.sn_graphs:
+                for node in graph.node_tree.nodes:
+                    if node.bl_idname in sync_to and node.custom_operator == this_name:
+                        node.update_inputs_from_operator(index)
                     
     
     def update_from_collection(self,collection,item):
@@ -232,6 +233,10 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_copy(self,node):
         for prop in node.properties:
             prop.from_node_uid = self.uid
+
+    def on_free(self):
+        for prop in self.properties:
+            bpy.ops.sn.remove_node_property(node_name=self.name)
 
 
     def draw_node(self,context,layout):
