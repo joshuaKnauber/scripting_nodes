@@ -78,7 +78,9 @@ class SN_OT_CopyProperty(bpy.types.Operator):
                 "type": self.prop_type,
                 "subtype": self.prop_subtype,
                 "size": self.prop_size,
-                "items": self.prop_enum_items
+                "items": self.prop_enum_items,
+                "created_from": "NONE",
+                "removed": False
             }
         }
         return json.dumps(data)

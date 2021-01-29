@@ -38,7 +38,7 @@ class SN_OT_RemoveProperty(bpy.types.Operator):
         prop = addon_tree.sn_properties[addon_tree.sn_property_index]
         for graph in addon_tree.sn_graphs:
             for node in graph.node_tree.nodes:
-                if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode"]:
+                if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode", "SN_UpdatePropertyNode"]:
                     node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop, removed=True))
 
         addon_tree.sn_properties.remove(addon_tree.sn_property_index)
@@ -57,9 +57,15 @@ class SN_OT_AddPropertyGetter(bpy.types.Operator):
     bl_label = "Add Getter"
     bl_description = "Adds a node which gives you the value of this variable"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
-    
-    getter_type: bpy.props.EnumProperty(items=[("PROPERTY","Property","Normal property getter"),
-                                                ("INTERFACE","Interface","Interface property")],
+
+    def get_items(self, context):
+        items = [("PROPERTY","Property","Normal property getter"),("INTERFACE","Interface","Interface property")]
+        addon_tree = context.scene.sn.addon_tree()
+        if not addon_tree.sn_properties[addon_tree.sn_property_index].has_update():
+            items.append(("UPDATE", "Update", "Update Function"))
+        return items
+
+    getter_type: bpy.props.EnumProperty(items=get_items,
                                         options={"SKIP_SAVE"},
                                         name="Getter Type",
                                         description="The getter type for your property")
@@ -73,7 +79,10 @@ class SN_OT_AddPropertyGetter(bpy.types.Operator):
             bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_GetPropertyNode",use_transform=True)
         elif self.getter_type == "INTERFACE":
             bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_DisplayPropertyNode",use_transform=True)
-        
+        elif self.getter_type == "UPDATE":
+            bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_UpdatePropertyNode",use_transform=True)
+            graph_tree.nodes.active.wrong_add = False
+
         graph_tree.nodes.active.copied_path = construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop)
         return {"FINISHED"}
     
@@ -152,7 +161,8 @@ class SN_OT_AddEnumItem(bpy.types.Operator):
                 for node in graph.node_tree.nodes:
                     if node.bl_idname == "SN_SetPropertyNode":
                         if prop.use_self:
-                            node.on_outside_update(construct_from_property("self",prop, prop.from_node_uid))
+                            path = "self" if prop.find_node(context) else "context.preferences.addons[__name__.partition('.')[0]].preferences"
+                            node.on_outside_update(construct_from_property(path,prop, prop.from_node_uid))
                         else:
                             node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop))
 
@@ -187,7 +197,8 @@ class SN_OT_RemoveEnumItem(bpy.types.Operator):
                 for node in graph.node_tree.nodes:
                     if node.bl_idname == "SN_SetPropertyNode":
                         if prop.use_self:
-                            node.on_outside_update(construct_from_property("self",prop, prop.from_node_uid))
+                            path = "self" if prop.find_node(context) else "context.preferences.addons[__name__.partition('.')[0]].preferences"
+                            node.on_outside_update(construct_from_property(path,prop, prop.from_node_uid))
                         else:
                             node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop))
 

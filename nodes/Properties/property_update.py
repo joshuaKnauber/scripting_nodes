@@ -5,12 +5,12 @@ from .property_util import get_data, setup_data_input
 
 
 
-class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_UpdatePropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_GetPropertyNode"
-    bl_label = "Get Property"
+    bl_idname = "SN_UpdatePropertyNode"
+    bl_label = "Update Property"
     # bl_icon = "GRAPH"
-    bl_width_default = 160
+    bl_width_default = 200
 
     node_options = {
         "default_color": (0.3,0.3,0.3),
@@ -28,17 +28,16 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     else:
                         if data["property"]["type"] != new_data["property"]["type"]:
                             self["copied_path"] = string_data
-                            self.change_socket_type(self.outputs[0], self.prop_types[new_data["property"]["type"]])
+                            self.change_socket_type(self.outputs[1], self.prop_types[new_data["property"]["type"]])
 
-                        self.outputs[0].subtype = self.subtype_from_prop_subtype(new_data["property"]["type"],new_data["property"]["subtype"],new_data["property"]["size"])
-                        self.outputs[0].variable_name = new_data["property"]["identifier"]
+                        self.outputs[1].subtype = self.subtype_from_prop_subtype(new_data["property"]["type"],new_data["property"]["subtype"],new_data["property"]["size"])
+                        self.outputs[1].variable_name = new_data["property"]["identifier"]
                     if new_data["property"]["removed"]:
                         self.copied_path = ""
 
                 elif data["property"]["identifier"] == new_data["property"]["identifier"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
-                    self.label = "Get " + new_data["property"]["name"]
-                    self.prop_name = new_data["property"]["name"]
-                    self.outputs[0].default_text = new_data["property"]["name"]
+                    self.label = "Update " + new_data["property"]["name"]
+                    self.outputs[1].default_text = new_data["property"]["name"]
                     self["copied_path"] = string_data
             elif data:
                 if data["property"]["name"] == new_data["property"]["name"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
@@ -47,10 +46,10 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     else:
                         if data["property"]["type"] != new_data["property"]["type"]:
                             self["copied_path"] = string_data
-                            self.change_socket_type(self.outputs[0], self.prop_types[new_data["property"]["type"]])
+                            self.change_socket_type(self.outputs[1], self.prop_types[new_data["property"]["type"]])
 
-                        self.outputs[0].subtype = self.subtype_from_prop_subtype(new_data["property"]["type"],new_data["property"]["subtype"],new_data["property"]["size"])
-                        self.outputs[0].variable_name = new_data["property"]["identifier"]
+                        self.outputs[1].subtype = self.subtype_from_prop_subtype(new_data["property"]["type"],new_data["property"]["subtype"],new_data["property"]["size"])
+                        self.outputs[1].variable_name = new_data["property"]["identifier"]
                     inp = self.inputs[0]
                     if inp.default_text != new_data["data_block"]["name"]:
                         inp.default_text = new_data["data_block"]["name"]
@@ -62,9 +61,8 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                         self.copied_path = ""
 
                 elif data["property"]["identifier"] == new_data["property"]["identifier"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
-                    self.label = "Get " + new_data["property"]["name"]
-                    self.prop_name = new_data["property"]["name"]
-                    self.outputs[0].default_text = new_data["property"]["name"]
+                    self.label = "Update " + new_data["property"]["name"]
+                    self.outputs[1].default_text = new_data["property"]["name"]
                     self["copied_path"] = string_data
 
 
@@ -72,8 +70,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.copied_path:
             data = get_data(self.copied_path)
             if data:
-                self.label = "Get " + data["property"]["name"]
-                self.prop_name = data["property"]["name"]
+                self.label = "Update " + data["property"]["name"]
                 if not data["data_block"]["type"] == "":
                     setup_data_input(self, data)
                     self.add_output_from_data(data["property"])
@@ -81,26 +78,31 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.add_output_from_data(data["property"])
             else:
                 self.copied_path = ""
-                
-        else:
-            self.label = "Get Property"
-            self.prop_name = ""
-            self.inputs.clear()
-            self.outputs.clear()
-        self.auto_compile()
-    
-    copied_path: bpy.props.StringProperty(update=update_copied)
-    prop_name: bpy.props.StringProperty()
-        
 
-    def draw_node(self,context,layout):
-        if not self.copied_path:
-            row = layout.row()
-            row.scale_y = 1.5
-            row.operator("sn.paste_property_path",text="Paste Property",icon="PASTEDOWN").node = self.name
         else:
-            layout.operator("sn.reset_property_node",icon="UNLINKED",text=self.prop_name).node = self.name
-    
+            self.inputs.clear()
+            self.remove_output_range(1)
+            self.wrong_add = True
+        self.auto_compile()
+
+    copied_path: bpy.props.StringProperty(update=update_copied)
+    wrong_add: bpy.props.BoolProperty(default=False)
+
+
+    def on_create(self,context):
+        self.add_execute_output("On Update")
+        self.copied_path = self.copied_path
+
+    def on_copy(self, node):
+        self.copied_path = ""
+
+
+    def draw_node(self, context, layout):
+        if self.wrong_add:
+            row = layout.row()
+            row.alert = True
+            row.label(text="You need to add this node using a getter")
+
 
     def code_evaluate(self, context, touched_socket):
 

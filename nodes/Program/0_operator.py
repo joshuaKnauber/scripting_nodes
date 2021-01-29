@@ -46,7 +46,7 @@ class SN_OT_RemoveNodeProperty(bpy.types.Operator):
         
         for graph in addon_tree.sn_graphs:
             for graph_node in graph.node_tree.nodes:
-                if graph_node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode"]:
+                if graph_node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode", "SN_UpdatePropertyNode"]:
                     graph_node.on_outside_update(construct_from_property("self", node.properties[node.property_index],node.uid, removed=True))
 
         node.properties.remove(node.property_index)
@@ -87,10 +87,15 @@ class SN_OT_GetSetNodeProperty(bpy.types.Operator):
     bl_description = "Get or set a property from this node"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
+    def get_items(self, context):
+        items = [("GETTER","Getter","Property getter"),("INTERFACE","Interface","Interface property"),("SETTER","Setter","Property setter")]
+        node = context.space_data.node_tree.nodes[self.node_name]
+        if not node.properties[node.property_index].has_update():
+            items.append(("UPDATE", "Update", "Update Function"))
+        return items
+
     node_name: bpy.props.StringProperty()
-    getset_type: bpy.props.EnumProperty(items=[("GETTER","Getter","Property getter"),
-                                                ("INTERFACE","Interface","Interface property"),
-                                                ("SETTER","Setter","Property setter")],
+    getset_type: bpy.props.EnumProperty(items=get_items,
                                         options={"SKIP_SAVE"},
                                         name="Getter/Setter",
                                         description="Add a getter/setter for your property")
@@ -99,8 +104,11 @@ class SN_OT_GetSetNodeProperty(bpy.types.Operator):
     def add_node(self,tree):
         nodes = {"GETTER":"SN_GetPropertyNode",
                  "INTERFACE":"SN_DisplayPropertyNode",
-                 "SETTER":"SN_SetPropertyNode"}
+                 "SETTER":"SN_SetPropertyNode",
+                 "UPDATE":"SN_UpdatePropertyNode"}
         bpy.ops.node.add_node("INVOKE_DEFAULT",type=nodes[self.getset_type],use_transform=True)
+        if self.getset_type == "UPDATE":
+            tree.nodes.active.wrong_add = False
 
 
     def execute(self, context):

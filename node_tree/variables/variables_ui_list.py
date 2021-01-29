@@ -56,7 +56,8 @@ class SN_EnumItem(bpy.types.PropertyGroup):
             for node in graph.node_tree.nodes:
                 if node.bl_idname == "SN_SetPropertyNode":
                     if prop.use_self:
-                        node.on_outside_update(construct_from_property("self",prop, prop.from_node_uid))
+                        path = "self" if prop.find_node(context) else "context.preferences.addons[__name__.partition('.')[0]].preferences"
+                        node.on_outside_update(construct_from_property(path,prop, prop.from_node_uid))
                     else:
                         node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop))
         context.space_data.node_tree.set_changes(True)
@@ -85,13 +86,30 @@ class SN_Variable(bpy.types.PropertyGroup):
     def trigger_update(self,context):
         context.space_data.node_tree.set_changes(True)
 
+    def has_update(self):
+        for graph in bpy.context.scene.sn.addon_tree().sn_graphs:
+            for node in graph.node_tree.nodes:
+                if node.bl_idname == "SN_UpdatePropertyNode":
+                    copied_path_pref = "NONE"
+                    if self.use_self:
+                        copied_path = construct_from_property("self",self, self.from_node_uid)
+                        copied_path_pref = construct_from_property("context.preferences.addons[__name__.partition('.')[0]].preferences",self, self.from_node_uid)
+                    else:
+                        copied_path = construct_from_attached_property(self.attach_property_to,self.attach_property_to,self)
+
+                    if node.copied_path in [copied_path, copied_path_pref]:
+                        return True
+
+        return False
+
     def update_prop_nodes(self):
         base_node = SN_ScriptingBaseNode()
         base_node.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
         for graph in base_node.addon_tree.sn_graphs:
             for node in graph.node_tree.nodes:
-                if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode"]:
+                if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode", "SN_UpdatePropertyNode"]:
                     if self.use_self:
+                        path = "self" if self.find_node(bpy.context) else "context.preferences.addons[__name__.partition('.')[0]].preferences"
                         node.on_outside_update(construct_from_property("self",self, self.from_node_uid))
                     else:
                         node.on_outside_update(construct_from_attached_property(self.attach_property_to,self.attach_property_to,self))

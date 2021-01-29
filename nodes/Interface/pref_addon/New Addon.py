@@ -4,7 +4,7 @@ bl_info = {
     "description": "",
     "author": "Your Name",
     "version": (1, 0, 0),
-    "blender": (2, 91, 0),
+    "blender": (2, 90, 1),
     "location": "",
     "warning": "",
     "wiki_url": "",

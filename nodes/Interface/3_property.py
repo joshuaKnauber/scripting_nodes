@@ -21,7 +21,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.copied_path:
             data = get_data(self.copied_path)
             new_data = get_data(string_data)
-            if data and data["group_path"] == "self":
+            if data and data["group_path"] in ["self", "context.preferences.addons[__name__.partition('.')[0]].preferences"]:
                 if data["property"]["name"] == new_data["property"]["name"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
                     if data["property"]["identifier"] != new_data["property"]["identifier"]:
                         self["copied_path"] = string_data
