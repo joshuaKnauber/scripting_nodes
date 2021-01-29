@@ -83,9 +83,7 @@ class SN_Variable(bpy.types.PropertyGroup):
                     return node
             
     def trigger_update(self,context):
-        if self.use_self:
-            node = self.find_node(context)
-            node.update_from_collection(self.from_node_collection,self)
+        context.space_data.node_tree.set_changes(True)
 
     def update_prop_nodes(self):
         base_node = SN_ScriptingBaseNode()
