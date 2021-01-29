@@ -104,6 +104,26 @@ class SN_UpdatePropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             row.label(text="You need to add this node using a getter")
 
 
+    def code_imperative(self, context):
+
+        if not self.copied_path:
+            self.add_error("No property", "You need to add this node from a property")
+            return {"code": ""}
+        
+        json = get_data(self.copied_path)
+        data = json["property"]["identifier"]
+        if json["property"]["created_from"] != "SN_CUSTOM":
+            data += "_" + json["property"]["created_from"]
+
+        code = self.outputs[0].code(6)
+        return {
+            "code": f"""
+                    def update_{data}(self, context):
+                        {code if code.strip() else "pass"}
+                    """
+        }
+
+
     def code_evaluate(self, context, touched_socket):
 
         data = get_data(self.copied_path)

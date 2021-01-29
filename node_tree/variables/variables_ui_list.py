@@ -505,10 +505,15 @@ class SN_Variable(bpy.types.PropertyGroup):
         if self.property_unit != "NO_UNITS":
             property_line += f"unit='{self.property_unit}',"
         property_line += f"options={self.property_options},"
+        if self.has_update():
+            if self.use_self:
+                property_line += f"update=update_" + self.identifier + "_" + self.from_node_uid + ","
+            else:
+                property_line += f"update=update_" + self.identifier + ","
         property_line += f"{self.property_default()}"
         property_line += f"{self.property_min_max()})\n"
         return property_line
-    
+
     def property_unregister(self):
         return f"del bpy.types.{self.attach_property_to}.{self.identifier}\n"
 
