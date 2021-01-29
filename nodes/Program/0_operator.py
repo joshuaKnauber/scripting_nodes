@@ -47,7 +47,7 @@ class SN_OT_RemoveNodeProperty(bpy.types.Operator):
         for graph in addon_tree.sn_graphs:
             for graph_node in graph.node_tree.nodes:
                 if graph_node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode"]:
-                    graph_node.on_outside_update(construct_from_property("self", node.properties[node.property_index], True))
+                    graph_node.on_outside_update(construct_from_property("self", node.properties[node.property_index],node.uid, removed=True))
 
         node.properties.remove(node.property_index)
         if len(node.properties):
@@ -109,7 +109,7 @@ class SN_OT_GetSetNodeProperty(bpy.types.Operator):
         prop = node.properties[node.property_index]
         
         self.add_node(tree)
-        tree.nodes.active.copied_path = construct_from_property("self",prop)
+        tree.nodes.active.copied_path = construct_from_property("self",prop, node.uid)
         return {"FINISHED"}
 
     def draw(self,context):

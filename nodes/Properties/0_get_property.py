@@ -22,7 +22,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             data = get_data(self.copied_path)
             new_data = get_data(string_data)
             if data and data["group_path"] == "self":
-                if data["property"]["name"] == new_data["property"]["name"]:
+                if data["property"]["name"] == new_data["property"]["name"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
                     if data["property"]["identifier"] != new_data["property"]["identifier"]:
                         self["copied_path"] = string_data
                     else:
@@ -35,13 +35,13 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if new_data["property"]["removed"]:
                         self.copied_path = ""
 
-                elif data["property"]["identifier"] == new_data["property"]["identifier"]:
+                elif data["property"]["identifier"] == new_data["property"]["identifier"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
                     self.label = "Get " + new_data["property"]["name"]
                     self.prop_name = new_data["property"]["name"]
                     self.outputs[0].default_text = new_data["property"]["name"]
                     self["copied_path"] = string_data
-            else:
-                if data["property"]["name"] == new_data["property"]["name"]:
+            elif data:
+                if data["property"]["name"] == new_data["property"]["name"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
                     if data["property"]["identifier"] != new_data["property"]["identifier"]:
                         self["copied_path"] = string_data
                     else:
@@ -61,7 +61,7 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if new_data["property"]["removed"]:
                         self.copied_path = ""
 
-                elif data["property"]["identifier"] == new_data["property"]["identifier"]:
+                elif data["property"]["identifier"] == new_data["property"]["identifier"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
                     self.label = "Get " + new_data["property"]["name"]
                     self.prop_name = new_data["property"]["name"]
                     self.outputs[0].default_text = new_data["property"]["name"]

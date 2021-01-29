@@ -22,7 +22,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             data = get_data(self.copied_path)
             new_data = get_data(string_data)
             if data and data["group_path"] == "self":
-                if data["property"]["name"] == new_data["property"]["name"]:
+                if data["property"]["name"] == new_data["property"]["name"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
                     if data["property"]["identifier"] != new_data["property"]["identifier"]:
                         self["copied_path"] = string_data
                     else:
@@ -36,14 +36,14 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if new_data["property"]["removed"]:
                         self.copied_path = ""
 
-                elif data["property"]["identifier"] == new_data["property"]["identifier"]:
+                elif data["property"]["identifier"] == new_data["property"]["identifier"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
                     labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown"}
                     self.label = labels[data["property"]["type"]]
                     self.prop_name = new_data["property"]["name"]
                     self["copied_path"] = string_data
 
             else:
-                if data["property"]["name"] == new_data["property"]["name"]:
+                if data["property"]["name"] == new_data["property"]["name"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
                     if data["property"]["identifier"] != new_data["property"]["identifier"]:
                         self["copied_path"] = string_data
                     else:
@@ -64,7 +64,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if new_data["property"]["removed"]:
                         self.copied_path = ""
 
-                elif data["property"]["identifier"] == new_data["property"]["identifier"]:
+                elif data["property"]["identifier"] == new_data["property"]["identifier"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
                     labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown"}
                     self.label = labels[data["property"]["type"]]
                     self.prop_name = new_data["property"]["name"]

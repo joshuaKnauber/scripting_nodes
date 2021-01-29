@@ -39,7 +39,7 @@ class SN_OT_RemoveProperty(bpy.types.Operator):
         for graph in addon_tree.sn_graphs:
             for node in graph.node_tree.nodes:
                 if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode"]:
-                    node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop, True))
+                    node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop, removed=True))
 
         addon_tree.sn_properties.remove(addon_tree.sn_property_index)
         if addon_tree.sn_property_index > 0:
@@ -151,7 +151,10 @@ class SN_OT_AddEnumItem(bpy.types.Operator):
             for graph in context.scene.sn.addon_tree().sn_graphs:
                 for node in graph.node_tree.nodes:
                     if node.bl_idname == "SN_SetPropertyNode":
-                        node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop))
+                        if prop.use_self:
+                            node.on_outside_update(construct_from_property("self",prop, prop.from_node_uid))
+                        else:
+                            node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop))
 
         return {"FINISHED"}
     
@@ -183,7 +186,10 @@ class SN_OT_RemoveEnumItem(bpy.types.Operator):
             for graph in context.scene.sn.addon_tree().sn_graphs:
                 for node in graph.node_tree.nodes:
                     if node.bl_idname == "SN_SetPropertyNode":
-                        node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop))
+                        if prop.use_self:
+                            node.on_outside_update(construct_from_property("self",prop, prop.from_node_uid))
+                        else:
+                            node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop))
 
         return {"FINISHED"}
     
