@@ -5,7 +5,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 class SN_OT_GetPythonName(bpy.types.Operator):
     bl_idname = "sn.get_python_name"
     bl_label = "Get Python Name"
-    bl_description = "Get the python name for this element"
+    bl_description = "Get the python name for this element (Replace 'SOMETHING_PLACEHOLDER' with the corresponding data)"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
     
     to_copy: bpy.props.StringProperty()
@@ -76,8 +76,6 @@ class SN_PT_VariablePanel(bpy.types.Panel):
             btn_row = col.row(align=True)
             btn_row.operator("sn.add_var_getter",icon="SORT_DESC", text="Getter")
             btn_row.operator("sn.add_var_setter",icon="SORT_ASC", text="Setter")
-            copy_name = f"{SN_ScriptingBaseNode().get_python_name(graph_tree.name)}[\"{var.identifier}\"]"
-            btn_row.operator("sn.get_python_name",text="",icon="UV_SYNC_SELECT").to_copy = copy_name
         col = row.column(align=True)
         col.operator("sn.add_variable", text="", icon="ADD")
         col.operator("sn.remove_variable", text="", icon="REMOVE")
@@ -97,7 +95,10 @@ class SN_PT_VariablePanel(bpy.types.Panel):
             col.use_property_split = True
             col.use_property_decorate = False
             
-            col.prop(var,"var_type",text="Type")
+            row = col.row(align=True)
+            row.prop(var,"var_type",text="Type")
+            copy_name = f"{SN_ScriptingBaseNode().get_python_name(graph_tree.name)}[\"{var.identifier}\"]"
+            row.operator("sn.get_python_name",text="",icon="COPYDOWN").to_copy = copy_name
             col.separator()
             
             if var.var_type == "STRING":
@@ -126,7 +127,7 @@ def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
     row.prop(var,"var_type",text="Type")
     copy_name = var.attach_property_to.upper() + "_PLACEHOLDER." + var.identifier
     if var.use_self: copy_name = "self." + var.identifier
-    row.operator("sn.get_python_name",text="",icon="UV_SYNC_SELECT").to_copy = copy_name
+    row.operator("sn.get_python_name",text="",icon="COPYDOWN").to_copy = copy_name
     col.separator()
 
     if not var.use_self:
