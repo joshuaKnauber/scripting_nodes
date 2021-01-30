@@ -14,7 +14,7 @@ class SN_ScriptingBaseNode:
 
     bl_icon = "NONE"
     bl_label = "Node"
-    
+
     node_options = {
         "default_color": (0.3,0.3,0.3),
         "has_collection": False,
