@@ -141,4 +141,12 @@ def serpens_functions(addon_tree):
                 else:
                     return None
 
+            def sn_cast_enum(string, enum_values):
+                for item in enum_values:
+                    if item.name == string:
+                        return item.identifier
+                    elif item.identifier == string.upper():
+                        return item.identifier
+                return string
+
             """
