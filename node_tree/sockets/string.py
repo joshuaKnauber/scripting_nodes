@@ -90,7 +90,10 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         elif self.subtype == "DIRECTORY":
             return "r\"" + self.value_directory + "\""
         elif self.subtype == "ENUM":
-            return "r\"" + self.value_enum + "\""
+            if self.enum_values:
+                return "sn_cast_enum(r\"" + self.value_enum + "\", " + self.enum_values + ")"
+            else:
+                return "r\"" + self.value_enum + "\""
     
     
     def convert_data(self, code):
@@ -108,10 +111,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
             elif self.subtype == "DIRECTORY":
                 row.prop(self, "value_directory", text=text)
             elif self.subtype == "ENUM":
-                if self.enum_values:
-                    row.prop(self, "value_enum", text=text)
-                else:
-                    row.prop(self, "value", text=text)
+                row.prop(self, "value_enum", text=text)
 
 
     def get_color(self, context, node):

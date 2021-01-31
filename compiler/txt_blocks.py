@@ -143,10 +143,10 @@ def serpens_functions(addon_tree):
 
             def sn_cast_enum(string, enum_values):
                 for item in enum_values:
-                    if item.name == string:
-                        return item.identifier
-                    elif item.identifier == string.upper():
-                        return item.identifier
+                    if item[1] == string:
+                        return item[0]
+                    elif item[0] == string.upper():
+                        return item[0]
                 return string
 
             """
