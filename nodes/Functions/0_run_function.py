@@ -130,7 +130,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 parameters = []
                 for out in node.outputs[1:]:
                     if out.bl_idname != "SN_DynamicVariableSocket":
-                        parameters.append([out.variable_name, out.bl_idname, out.subtype])
+                        if out.bl_idname == "SN_StringSocket":
+                            parameters.append([out.variable_name, out.bl_idname, out.subtype, out.enum_values])
+                        else:
+                            parameters.append([out.variable_name, out.bl_idname, out.subtype])
 
                 if len(parameters) != len(self.inputs[1:]):
                     if len(parameters) > len(self.inputs[1:]):
@@ -152,6 +155,8 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 for x, parameter in enumerate(parameters):
                     self.inputs[x+1].default_text = parameter[0]
                     self.inputs[x+1].subtype = parameter[2]
+                    if self.inputs[x+1].bl_idname == "SN_StringSocket":
+                        self.inputs[x+1].enum_values = parameter[3]
 
         else:
             self.make_collection()

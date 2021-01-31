@@ -108,7 +108,10 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
             elif self.subtype == "DIRECTORY":
                 row.prop(self, "value_directory", text=text)
             elif self.subtype == "ENUM":
-                row.prop(self, "value_enum", text=text)
+                if self.enum_values:
+                    row.prop(self, "value_enum", text=text)
+                else:
+                    row.prop(self, "value", text=text)
 
 
     def get_color(self, context, node):
