@@ -176,6 +176,13 @@ def addon_is_registered(addon_tree):
         if addon["addon_tree"] == addon_tree:
             return True
     return False
+
+
+def get_module(addon_tree):
+    for addon in addons:
+        if addon["addon_tree"] == addon_tree:
+            return addon["module"]
+    return None
     
     
 def handle_file_load():

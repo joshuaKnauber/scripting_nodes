@@ -1,5 +1,25 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
+from ...compiler.compiler import get_module
+
+
+
+class SN_OT_RunEventFunction(bpy.types.Operator):
+    bl_idname = "sn.test_event"
+    bl_label = "Test Event Function"
+    bl_description = "Runs this event function"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+
+    node: bpy.props.StringProperty()
+    func_name: bpy.props.StringProperty()
+
+    def execute(self, context):
+        node = context.space_data.node_tree.nodes[self.node]
+        module = get_module(node.addon_tree)
+        if self.func_name in dir(module):
+            exec("module."+self.func_name+"(None)")
+        return {"FINISHED"}
+
 
 
 
@@ -22,6 +42,12 @@ class SN_OnSaveNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def draw_node(self,context,layout):
+        row = layout.row()
+        row.scale_y = 1.2
+        row.enabled = get_module(self.addon_tree) != None
+        op = row.operator("sn.test_event",text="Run Event",icon="PLAY")
+        op.node = self.name
+        op.func_name = f"{self.action}_handler_{self.uid}"
         layout.prop(self, "action", expand=True)
 
 
