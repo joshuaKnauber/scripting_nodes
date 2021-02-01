@@ -21,6 +21,9 @@ def license_block():
 
 def serpens_functions(addon_tree):
     return f"""
+            def exec_line(line):
+                exec(line)
+
             def sn_print(tree_name, *args):
                 if tree_name in bpy.data.node_groups:
                     item = bpy.data.node_groups[tree_name].sn_graphs[0].prints.add()

@@ -2,6 +2,7 @@ import bpy
 import json
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 from ...interface.menu.rightclick import construct_from_property
+from ...compiler.compiler import get_module
 
 
 
@@ -136,7 +137,13 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         elif "SN_OperatorNode" in self.addon_tree.sn_nodes:
             row.prop_search(self,"custom_operator",self.addon_tree.sn_nodes["SN_OperatorNode"],"items",text="",icon="VIEWZOOM")
             row.prop(self,"use_internal",text="",icon_value=bpy.context.scene.sn_icons[ "serpens" ].icon_id)
-            
+
+        row = layout.row()
+        row.scale_y = 1.2
+        row.enabled = get_module(self.addon_tree) != None
+        op = row.operator("sn.test_function",text="Run Operator",icon="PLAY")
+        op.node = self.name
+
         layout.prop(self,"call_invoke")
 
 

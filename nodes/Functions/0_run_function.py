@@ -1,5 +1,39 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
+from ...compiler.compiler import get_module
+
+
+
+class SN_OT_RunFunction(bpy.types.Operator):
+    bl_idname = "sn.test_function"
+    bl_label = "Test Run"
+    bl_description = "Runs this node"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+
+    node: bpy.props.StringProperty()
+
+    def execute(self, context):
+        node = context.space_data.node_tree.nodes[self.node]
+        module = get_module(node.addon_tree)
+        if module:
+            try:
+                func_call = node.code_evaluate(context, node.inputs[0])["code"].split("\n")
+                func_call = func_call[1]
+
+                # Function
+                if "=" in func_call.split("(")[0]:
+                    func_call = func_call.split("=")[-1]
+                    func_call = func_call.strip()
+                    exec("module." + func_call)
+
+                # Operator
+                else:
+                    func_call = func_call.strip()
+                    exec("module.exec_line(\"\"\"" + func_call + "\"\"\")")
+            
+            except:
+                self.report({"ERROR"},message="Failed to run! This button might not work for all cases.")
+        return {"FINISHED"}
 
 
 
@@ -205,6 +239,12 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_execute_output("Execute").mirror_name = True
 
     def draw_node(self,context,layout):
+        row = layout.row()
+        row.scale_y = 1.2
+        row.enabled = get_module(self.addon_tree) != None and self.func_name != ""
+        op = row.operator("sn.test_function",text="Run Function",icon="PLAY")
+        op.node = self.name
+
         if self.recursion_warning:
             layout.label(text="Be careful when using recursion!")
 
