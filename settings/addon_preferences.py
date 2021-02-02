@@ -17,7 +17,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                                     default=False)
     
     use_suggestion_menu: bpy.props.BoolProperty(name="Use Suggestion Menu",
-                                    description="Opens a menu with suggestions when draggin a link from a selected node and holding shift",
+                                    description="When enabled, you can drag and drop a link from a socket in the node editor while holding Shift to open a menu of compatible nodes",
                                     default=True)
     
     show_all_compatible: bpy.props.BoolProperty(name="Show All Compatible",
@@ -46,19 +46,19 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
 
     def draw_serpens_settings(self,layout):
-        row = layout.row()
-        col = row.column()
-        col.label(text="Development:")
-        col.prop(self, "show_full_errors")
-        col.prop(self, "show_txt")
-        col.prop(self, "keep_after_error")
-        
+        row = layout.row()        
         col = row.column()
         col.label(text="Node Editor:")
         col.prop(self, "use_suggestion_menu")
         subrow = col.row()
         subrow.enabled = self.use_suggestion_menu
         subrow.prop(self, "show_all_compatible")
+        
+        col = row.column()
+        col.label(text="Debugging:")
+        col.prop(self, "show_full_errors")
+        col.prop(self, "show_txt")
+        col.prop(self, "keep_after_error")
         
         col = row.column()
         col.label(text="Updates:")

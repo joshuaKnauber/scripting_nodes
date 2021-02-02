@@ -81,9 +81,21 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                                 tree.links.new(left, right)
                             
 
+    def do_menu_open(self):
+        if bpy.context.preferences.addons[__name__.partition('.')[0]].preferences.use_suggestion_menu:
+            region = bpy.context.region
+            if region:
+                view = region.view2d
+                op = bpy.context.active_operator
+                if op and hasattr(op,"mouse_x") and hasattr(op,"mouse_y"):
+                    view_loc = view.region_to_view(op.mouse_x,op.mouse_y)
+                    bpy.ops.sn.run_add_menu("INVOKE_DEFAULT",start_x=view_loc[0],start_y=view_loc[1])
+
+
     def update(self):
         self.remove_reroutes()
         self.set_changes(True)
+        self.do_menu_open()
 
         
 def upgrade_node_tree(ntree):

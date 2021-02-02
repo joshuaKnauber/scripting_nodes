@@ -207,15 +207,14 @@ class SN_ScriptingBaseNode:
     def on_node_update(self): pass
     
     
-    def update_link_drop(self):
-        op = bpy.context.active_operator
-        if op and op.bl_idname == "NODE_OT_select":
-            bpy.ops.sn.run_add_menu("INVOKE_DEFAULT",node=self.name)
+    # def update_link_drop(self):
+    #     op = bpy.context.active_operator
+    #     if op and op.bl_idname == "NODE_OT_select":
+    #         bpy.ops.sn.run_add_menu("INVOKE_DEFAULT",node=self.name)
 
 
     def update(self):
         self.auto_compile()
-        # self.update_link_drop()
         self.on_node_update()
 
 

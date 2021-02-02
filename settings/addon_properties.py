@@ -1,7 +1,7 @@
 import os
 import bpy
 import json
-from ..node_tree.base_node import SN_GenericPropertyGroup
+from ..node_tree.base_node import SN_NodeCollection
 
 
 example_dict = {
@@ -188,7 +188,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     addons: bpy.props.CollectionProperty(type=SN_AddonDisplay)
     
     
-    compatible_nodes: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup,name="Serpens Menu ")
+    sn_compat_nodes: bpy.props.CollectionProperty(type=SN_NodeCollection,name="Suggestion Menu")
     
     
     minimal_header: bpy.props.BoolProperty(default=False,name="Minimal Header",

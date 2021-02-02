@@ -5,6 +5,36 @@ from ...node_tree.node_categories import get_node_categories
         
         
 from_socket = None
+
+
+
+def sockets_compatible(socket1,socket2):
+    addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
+
+    if socket1.bl_idname == socket2.bl_idname: return True
+    if socket1.bl_idname == socket2.to_add_idname: return True
+    if socket1.to_add_idname == socket2.bl_idname: return True
+    if socket1.socket_type == "DATA" and socket2.group == "DATA": return True
+
+    if addon_prefs.show_all_compatible and socket1.group == "DATA" and socket2.group == "DATA": return True
+
+    return False
+
+
+def get_compat_socket(from_socket,node):
+    if from_socket.is_output:
+        for inp in node.inputs:
+            if sockets_compatible(from_socket,inp):
+                return inp
+
+    else:
+        for out in node.outputs:
+            if sockets_compatible(from_socket,out):
+                return out
+    
+    return None
+
+
         
 class SN_OT_RunAddMenu(bpy.types.Operator):
     bl_idname = "sn.run_add_menu"
@@ -12,72 +42,82 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
     bl_description = "Opens the add menu"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
     
-    node: bpy.props.StringProperty()
+    start_x: bpy.props.FloatProperty()
+    start_y: bpy.props.FloatProperty()
 
-    def execute(self, context):
-        return {"FINISHED"}
-    
-    def get_socket(self,context,from_node,event):
+
+    def execute(self,context): return {"FINISHED"}
+
+
+    def start_loc_in_bounds(self,x1,y1,x2,y2):
+        if self.start_x >= x1 and self.start_x <= x2:
+            return self.start_y >= y1 and self.start_y <= y2
+        return False
+
+
+    def get_from_node(self,ntree):
+        for node in ntree.nodes:
+            loc = node.location
+            if self.start_loc_in_bounds(loc[0]-20, loc[1]-node.dimensions[1]-20, loc[0]+node.dimensions[0]+20, loc[1]+20):
+                return node
+        return None
+
+
+    def from_output(self,node):
+        return self.start_x > node.location[0] + node.dimensions[0]//2
+
+
+    def set_socket(self,from_node):
         global from_socket
-        loc = from_node.location
-        dim = from_node.dimensions
-        # self.x & self.y -> region coords
-        # loc -> view coords
-        mouse_region = (event.mouse_region_x,event.mouse_region_y)
-        node_region = context.region.view2d.view_to_region(loc[0],loc[1])
-        # print(node_region,(self.x,self.y))
-        # from_node.location = mouse_view
-        
-        from_socket = from_node.outputs[0]
-        
-    
+        from_socket = None
+
+        if from_node:
+            if self.from_output(from_node):
+                y_offset = abs(self.start_y - from_node.location[1])
+                index = int((y_offset - 30) // 20)
+                if index < len(from_node.outputs) and index >= 0:
+                    from_socket = from_node.outputs[index]
+                    return True
+            
+            else:
+                y_offset = abs(self.start_y - from_node.location[1] + from_node.dimensions[1])
+                index = len(from_node.inputs) - int((y_offset + 10) // 20)
+                if index < len(from_node.inputs) and index >= 0:
+                    from_socket = from_node.inputs[index]
+                    return True
+
+        return False
+
+
     def is_valid_node(self,context,from_node,idname):
         global from_socket
-        addon_prefs = context.preferences.addons[__name__.partition('.')[0]].preferences
+
         if idname in ["NodeReroute","NodeFrame"]: return False
         
         temp_node = context.space_data.node_tree.nodes.new(idname)
-        
-        is_valid = False
-        if from_socket.is_output:
-            for inp in temp_node.inputs:
-                if addon_prefs.show_all_compatible:
-                    if can_connect(inp.bl_idname,from_socket.bl_idname):
-                        is_valid = True
-                        break
-                else:
-                    if inp.bl_idname == from_socket.bl_idname:
-                        is_valid = True 
-                        break
-        else:
-            for out in temp_node.outputs:
-                if addon_prefs.show_all_compatible:
-                    if can_connect(from_socket.bl_idname,out.bl_idname):
-                        is_valid = True
-                        break
-                else:
-                    if from_socket.bl_idname == out.bl_idname:
-                        is_valid = True
-                        break
-                
+        is_valid = get_compat_socket(from_socket,temp_node) != None
         context.space_data.node_tree.nodes.remove(temp_node)
         return is_valid
-        
+
 
     def invoke(self,context,event):
-        from_node = context.space_data.node_tree.nodes[self.node]
-        if event.shift and event.type == "LEFTMOUSE" and from_node:
-            context.scene.compatible_nodes.clear()
-            self.get_socket(context,from_node,event)
+        from_node = self.get_from_node(context.space_data.node_tree)
+        found_socket = self.set_socket(from_node)
+
+        if event.shift and event.type == "LEFTMOUSE" and found_socket:
+
+            context.scene.sn.sn_compat_nodes.clear()
             for category in get_node_categories():
+                cat_item = context.scene.sn.sn_compat_nodes.add()
+                cat_item.name = category.name
+
                 for node in category.items(context):
                     if self.is_valid_node(context, from_node, node.nodetype):
-                        item = context.scene.compatible_nodes.add()
-                        item.category = category.name
-                        item.name = "  "+node.label
+                        item = cat_item.items.add()
+                        item.name = "  " + node.label
                         item.identifier = node.nodetype
 
-            bpy.ops.wm.call_menu(name="SN_MT_AddNodeMenu")
+            bpy.ops.wm.call_menu("INVOKE_DEFAULT",name="SN_MT_AddNodeMenu")
         return {"FINISHED"}
     
     
@@ -90,17 +130,16 @@ class SN_OT_AddNode(bpy.types.Operator):
     
     idname: bpy.props.StringProperty()
     
+
     def link_nodes(self,tree,node,from_socket):
-        if from_socket.is_output:
-            for inp in node.inputs:
-                if can_connect(inp.bl_idname,from_socket.bl_idname):
-                    tree.links.new(from_socket,inp)
-                    break
-        else:
-            for out in node.outputs:
-                if can_connect(from_socket.bl_idname,out.bl_idname):
-                    tree.links.new(out,from_socket)
-                    break
+        connect_socket = get_compat_socket(from_socket,node)
+
+        if connect_socket:
+            if from_socket.is_output:
+                tree.links.new(from_socket,connect_socket)
+            else:
+                tree.links.new(connect_socket,from_socket)
+
 
     def execute(self, context):
         global from_socket
@@ -109,15 +148,27 @@ class SN_OT_AddNode(bpy.types.Operator):
             from_node = context.space_data.node_tree.nodes.active
             bpy.ops.node.add_node(type=self.idname)
             node = context.space_data.node_tree.nodes.active
-            node.location = (node.location[0],node.location[1])
+
+            if not from_socket.is_output:
+                node.location = (node.location[0]-node.width,node.location[1])
+
             self.link_nodes(context.space_data.node_tree,node,from_socket)
-        from_socket = None
-        
+            from_socket = None
         return {"FINISHED"}
-    
-    def invoke(self,context,event):
-        
-        return self.execute(context)
+
+
+
+class SN_MT_AddNodeSubMenu(bpy.types.Menu):
+    bl_idname = "SN_MT_AddNodeSubMenu"
+    bl_label = "Add Compatible"
+
+
+    def draw(self, context):
+        layout = self.layout
+            
+        for item in context.category.items:
+            op = layout.operator("sn.add_node", text=item.name)
+            op.idname = item.identifier
     
 
 
@@ -125,19 +176,15 @@ class SN_MT_AddNodeMenu(bpy.types.Menu):
     bl_idname = "SN_MT_AddNodeMenu"
     bl_label = "Add Compatible"
 
+
     def draw(self, context):
         layout = self.layout
-        
-        categories = {}
-        for item in context.scene.compatible_nodes:
-            if not item.category in categories:
-                categories[item.category] = []
-            categories[item.category].append(item)
             
         layout.operator_context = "INVOKE_DEFAULT"
         layout.operator("node.add_search",text="Search...",icon="VIEWZOOM").use_transform = True
-        for category in categories:
-            layout.label(text=category)
-            for item in categories[category]:
-                op = layout.operator("sn.add_node", text=item.name)
-                op.idname = item.idname
+
+        for category in context.scene.sn.sn_compat_nodes:
+            if len(category.items):
+                row = layout.row()
+                row.context_pointer_set("category", category)
+                row.menu("SN_MT_AddNodeSubMenu",text=category.name)
