@@ -17,13 +17,25 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
     def get_functions(self, data_type, is_collection):
         self.function_collection.clear()
         if is_collection:
+            has_functions = False
             for data in bpy.data.bl_rna.properties:
                 if "bl_rna" in dir(eval("bpy.data." + data.identifier)):
                     if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == data_type:
+                        has_functions = True
                         for function in eval("bpy.data." + data.identifier).bl_rna.functions:
                             item = self.function_collection.add()
                             item.name = function.identifier.replace("_", " ").title()
                             item.identifier = function.identifier
+
+            if not has_functions:
+                try:
+                    for function in eval("bpy.types." + data_type + "s").bl_rna.functions:
+                        item = self.function_collection.add()
+                        item.name = function.identifier.replace("_", " ").title()
+                        item.identifier = function.identifier
+                except:
+                    pass
+
 
         else:
             for function in eval("bpy.types." + data_type).bl_rna.functions:
@@ -55,9 +67,18 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.remove_input_range(2)
             self.remove_output_range(1)
             if self.inputs[1].subtype == "COLLECTION":
+                has_parameters = False
                 for data in bpy.data.bl_rna.properties:
                     if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == self.current_data_type:
                         parameters = eval("bpy.data." + data.identifier).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+                        has_parameters = True
+
+                if not has_parameters:
+                    try:
+                        parameters = eval("bpy.types." + self.current_data_type + "s").bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+                    except:
+                        parameters = []
+
             else:
                 if self.function_collection[self.search_value].identifier in ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]:
                     parameters = []

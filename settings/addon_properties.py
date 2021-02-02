@@ -17,8 +17,8 @@ example_dict = {
         "tree_name": "Events / Program",
         "icon": "ARMATURE_DATA"
     },
-    "Interface": {
-        "tree_name": "Interface",
+    "Interface Example": {
+        "tree_name": "Interface Example",
         "icon": "RESTRICT_VIEW_ON"
     },
     "Blend Data": {
