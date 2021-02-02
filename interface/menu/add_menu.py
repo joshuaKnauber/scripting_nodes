@@ -136,9 +136,11 @@ class SN_OT_AddNode(bpy.types.Operator):
 
         if connect_socket:
             if from_socket.is_output:
-                tree.links.new(from_socket,connect_socket)
+                link = tree.links.new(from_socket,connect_socket)
             else:
-                tree.links.new(connect_socket,from_socket)
+                link = tree.links.new(connect_socket,from_socket)
+            from_socket.node.after_link_insert(link)
+            connect_socket.node.after_link_insert(link)
 
 
     def execute(self, context):
