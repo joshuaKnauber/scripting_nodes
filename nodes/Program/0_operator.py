@@ -200,7 +200,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                                                             ("invoke_props_popup", "Property Update", "Show a customizable dialog and execute the operator on property changes"),
                                                             ("invoke_search_popup", "Search Popup", "Opens a search menu from a selected enum property")],update=update_popup)
     properties: bpy.props.CollectionProperty(type=SN_Variable)
-    property_index: bpy.props.IntProperty()
+    property_index: bpy.props.IntProperty(name="Operator Property Index")
     
     
     select_property: bpy.props.StringProperty(name="Preselected Property",description="The property that is preselected when the popup is opened. This can only be a String or Enum Property!", update=SN_ScriptingBaseNode.auto_compile)
