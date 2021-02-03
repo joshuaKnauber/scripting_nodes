@@ -75,7 +75,7 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     properties: bpy.props.CollectionProperty(type=SN_Variable)
-    property_index: bpy.props.IntProperty()
+    property_index: bpy.props.IntProperty(name="Preferences Property Index")
 
 
     def on_create(self,context):

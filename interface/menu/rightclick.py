@@ -59,31 +59,51 @@ class SN_OT_CopyProperty(bpy.types.Operator):
     prop_subtype: bpy.props.StringProperty(options={"HIDDEN"})
     prop_size: bpy.props.IntProperty(options={"HIDDEN"})
     prop_enum_items: bpy.props.StringProperty(options={"HIDDEN"})
+    node_uid: bpy.props.StringProperty(options={"HIDDEN"})
+    node_index: bpy.props.IntProperty(options={"HIDDEN"})
     
     
     def copy(self,data):
         bpy.context.window_manager.clipboard = data
-    
-        
+
+
     def construct(self, db_name, db_type, group_path):
-        data = {
-            "data_block": {
-                "name": db_name,
-                "type": db_type
-            },
-            "group_path": group_path,
-            "property": {
-                "name": self.prop_name,
-                "identifier": self.prop_identifier,
-                "type": self.prop_type,
-                "subtype": self.prop_subtype,
-                "size": self.prop_size,
-                "items": self.prop_enum_items,
-                "created_from": "NONE",
-                "removed": False
+        if self.prop_name == "Scripting Property Index":
+            addon_tree = bpy.context.scene.sn.addon_tree()
+            prop = addon_tree.sn_properties[addon_tree.sn_property_index]
+            return construct_from_attached_property(prop.attach_property_to, prop.attach_property_to, prop)
+
+        elif self.prop_name == "Operator Property Index":
+            for graph in bpy.context.scene.sn.addon_tree().sn_graphs:
+                for node in graph.node_tree.nodes:
+                    if not node.bl_idname in ["NodeFrame","NodeReroute"] and node.uid == self.node_uid:
+                        return construct_from_property("self", node.properties[self.node_index], self.node_uid)
+
+        elif self.prop_name == "Preferences Property Index":
+            for graph in bpy.context.scene.sn.addon_tree().sn_graphs:
+                for node in graph.node_tree.nodes:
+                    if not node.bl_idname in ["NodeFrame","NodeReroute"] and node.uid == self.node_uid:
+                        return construct_from_property("context.preferences.addons[__name__.partition('.')[0]].preferences", node.properties[self.node_index], self.node_uid)
+
+        else:
+            data = {
+                "data_block": {
+                    "name": db_name,
+                    "type": db_type
+                },
+                "group_path": group_path,
+                "property": {
+                    "name": self.prop_name,
+                    "identifier": self.prop_identifier,
+                    "type": self.prop_type,
+                    "subtype": self.prop_subtype,
+                    "size": self.prop_size,
+                    "items": self.prop_enum_items,
+                    "created_from": "NONE",
+                    "removed": False
+                }
             }
-        }
-        return json.dumps(data)
+            return json.dumps(data)
     
     
     def space_data(self):
@@ -160,7 +180,10 @@ def serpens_right_click(self, context):
         op.prop_identifier = property_value.identifier
         op.prop_type = property_value.type
         op.prop_subtype = property_value.subtype
-        
+        if property_value.name in ["Operator Property Index", "Preferences Property Index"]:
+            op.node_uid = property_pointer.uid
+            op.node_index = property_pointer.property_index
+
         if hasattr(property_value,"array_length"):
             op.prop_size = property_value.array_length
         else:
