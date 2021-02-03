@@ -63,26 +63,31 @@ class SN_OT_CopyProperty(bpy.types.Operator):
     
     def copy(self,data):
         bpy.context.window_manager.clipboard = data
-    
-        
+
+
     def construct(self, db_name, db_type, group_path):
-        data = {
-            "data_block": {
-                "name": db_name,
-                "type": db_type
-            },
-            "group_path": group_path,
-            "property": {
-                "name": self.prop_name,
-                "identifier": self.prop_identifier,
-                "type": self.prop_type,
-                "subtype": self.prop_subtype,
-                "size": self.prop_size,
-                "items": self.prop_enum_items,
-                "created_from": "NONE",
-                "removed": False
+        if self.prop_name == "Scripting Property Index":
+            addon_tree = bpy.context.scene.sn.addon_tree()
+            prop = addon_tree.sn_properties[addon_tree.sn_property_index]
+            return construct_from_attached_property(prop.attach_property_to, prop.attach_property_to, prop)
+        else:
+            data = {
+                "data_block": {
+                    "name": db_name,
+                    "type": db_type
+                },
+                "group_path": group_path,
+                "property": {
+                    "name": self.prop_name,
+                    "identifier": self.prop_identifier,
+                    "type": self.prop_type,
+                    "subtype": self.prop_subtype,
+                    "size": self.prop_size,
+                    "items": self.prop_enum_items,
+                    "created_from": "NONE",
+                    "removed": False
+                }
             }
-        }
         return json.dumps(data)
     
     
