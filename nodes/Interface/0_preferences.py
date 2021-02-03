@@ -102,9 +102,17 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
         col.operator("sn.remove_node_property", text="", icon="REMOVE").node_name = self.name
         col.operator("sn.edit_node_property", text="", icon="GREASEPENCIL").node_name = self.name
         col.operator("sn.get_set_preferences_property", text="", icon="FORWARD").node_name = self.name
+
+
+    def remove_all_prefs(self):
+        for addon in bpy.context.preferences.addons:
+            if hasattr(addon.preferences, "is_sn_prefs_dev"):
+                bpy.ops.preferences.addon_remove(module=addon.module)
     
 
     def code_evaluate(self, context, touched_socket):       
+        self.remove_all_prefs()
+
         property_register = []
         for prop in self.properties:
             property_register.append(prop.property_register())
@@ -114,6 +122,7 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
                     class SNA_AddonPreferences_{self.uid}(bpy.types.AddonPreferences):
                         bl_idname = __name__.partition('.')[0]
                         
+                        {'is_sn_prefs_dev: bpy.props.BoolProperty()' if not self.addon_tree.doing_export else ''}
                         {self.list_code(property_register, 6)}
                         
                         def draw(self, context):
