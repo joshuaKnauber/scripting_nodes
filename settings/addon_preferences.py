@@ -17,7 +17,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                                     default=False)
     
     use_suggestion_menu: bpy.props.BoolProperty(name="Use Suggestion Menu",
-                                    description="When enabled, you can drag and drop a link from a socket in the node editor while holding Shift to open a menu of compatible nodes",
+                                    description="When enabled, you can drag and drop a link from a socket in the node editor while holding Shift to open a menu of compatible nodes (this might not work on some monitors)",
                                     default=True)
     
     show_all_compatible: bpy.props.BoolProperty(name="Show All Compatible",
