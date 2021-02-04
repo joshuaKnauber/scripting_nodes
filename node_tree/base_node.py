@@ -444,7 +444,10 @@ class SN_ScriptingBaseNode:
                 inp.subtype = "COLLECTION" if prop.type == "COLLECTION" else "NONE"
 
             if prop.type == "ENUM":
-                inp.enum_values = self.enum_items_as_string(prop)
+                if len(prop.enum_items):
+                    inp.enum_values = self.enum_items_as_string(prop)
+                else:
+                    inp.subtype = "NONE"
 
             if not prop.type in ["POINTER", "COLLECTION"]:
                 if not "VECTOR" in inp.subtype and not "COLOR" in inp.subtype:
