@@ -33,7 +33,6 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_data_outputs(self.define_type)
 
 
-
     current_data_type: bpy.props.StringProperty(default="")
     collection_error: bpy.props.BoolProperty(default=False)
     no_data_error: bpy.props.BoolProperty(default=False)
@@ -41,7 +40,6 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
     categories: bpy.props.StringProperty(default="[]")
     category_enum: bpy.props.EnumProperty(items=get_cats, name="Category", update=update_cats)
     define_type: bpy.props.EnumProperty(items=get_types, name="Type", description="The type of the blend data you are trying to get from", update=update_type)
-
 
 
     def on_create(self,context):
@@ -112,6 +110,13 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
         if link.to_socket == self.inputs[0] and link.from_socket.bl_idname == "SN_BlendDataSocket":
             self.update_outputs(link.from_socket)
 
+    def on_copy(self, node):
+        self.outputs.clear()
+        self.collection_error = False
+        self.current_data_type = ""
+        self.no_data_error = False
+        self.types = "[]"
+        self.categories = "[]"
 
     def draw_node(self,context,layout):
         if self.collection_error:

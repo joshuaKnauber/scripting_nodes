@@ -147,6 +147,8 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.collection_error = False
         self.current_data_type = ""
         self.no_data_error = False
+        self.types = "[]"
+        self.categories = "[]"
 
             
     def draw_node(self,context,layout):

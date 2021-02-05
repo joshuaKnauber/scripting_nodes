@@ -1,5 +1,6 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
+from .a_get_data_pointers import get_known_types
 
 
 
@@ -13,6 +14,24 @@ class SN_GetDataFromIDNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.3,0.3,0.3),
     }
+
+    def get_cats(self, context):
+        return eval(self.categories)
+
+    def update_cats(self, context):
+        types = get_known_types()[self.current_data_type][self.category_enum]
+        types.insert(0, (self.current_data_type, self.current_data_type, ""))
+        self.types = str(types)
+        self.define_type = self.current_data_type
+
+    def get_types(self, context):
+        return eval(self.types)
+
+    def update_type(self, context):
+        self.outputs.clear()
+        self.no_data_error = False
+        self.add_data_outputs(self.define_type)
+
 
     def update_data_type(self, context):
         identifiers = {"SN_StringSocket": ["STRING", "ENUM"], "SN_IntegerSocket": ["INT"], "SN_FloatSocket": ["FLOAT"], "SN_BooleanSocket": ["BOOLEAN"]}
@@ -36,6 +55,10 @@ class SN_GetDataFromIDNode(bpy.types.Node, SN_ScriptingBaseNode):
     current_data_type: bpy.props.StringProperty(default="")
     collection_error: bpy.props.BoolProperty(default=False)
     no_data_error: bpy.props.BoolProperty(default=False)
+    types: bpy.props.StringProperty(default="[]")
+    categories: bpy.props.StringProperty(default="[]")
+    category_enum: bpy.props.EnumProperty(items=get_cats, name="Category", update=update_cats)
+    define_type: bpy.props.EnumProperty(items=get_types, name="Type", description="The type of the blend data you are trying to get from", update=update_type)
 
 
     def on_create(self,context):
@@ -63,8 +86,35 @@ class SN_GetDataFromIDNode(bpy.types.Node, SN_ScriptingBaseNode):
             elif socket.data_type != self.current_data_type:
                 self.outputs.clear()
                 self.add_data_outputs(socket.data_type)
+
+                self.types = "[]"
+                self.categories = "[]"
+                types = []
+                if socket.data_type in get_known_types():
+                    if type(get_known_types()[socket.data_type]) == dict:
+                        cats = []
+                        for cat in get_known_types()[socket.data_type]:
+                            cats.append((cat, cat, ""))
+                        self.categories = str(cats)
+                        types = get_known_types()[socket.data_type][self.category_enum]
+                    else:
+                        types = get_known_types()[socket.data_type]
+
+                else:
+                    for data_type in dir(bpy.types):
+                        if eval("bpy.types." + socket.data_type) in eval("bpy.types." + data_type).__bases__:
+                            name = eval("bpy.types." + data_type).bl_rna.name if eval("bpy.types." + data_type).bl_rna.name else data_type
+                            types.append((data_type, name, eval("bpy.types." + data_type).bl_rna.description))
+
+                if types:
+                    types.insert(0, (socket.data_type, socket.data_name, ""))
+                    self.types = str(types)
+                    self.define_type = socket.data_type
+
             self.current_data_type = socket.data_type
         else:
+            self.types = "[]"
+            self.categories = "[]"
             self.outputs.clear()
             self.current_data_type = ""
             self.collection_error = True
@@ -78,10 +128,16 @@ class SN_GetDataFromIDNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.outputs.clear()
         self.collection_error = False
         self.current_data_type = ""
+        self.types = "[]"
+        self.categories = "[]"
         self.no_data_error = False
 
-
     def draw_node(self,context,layout):
+        if self.categories != "[]":
+            layout.prop(self, "category_enum", text="")
+        if self.types != "[]":
+            layout.prop(self, "define_type", text="")
+
         if self.current_data_type:
             layout.prop(self, "data_type", text="")
         if self.collection_error:
