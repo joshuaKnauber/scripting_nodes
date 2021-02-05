@@ -59,10 +59,10 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                             inp.data_type = prop.fixed_type.identifier
                             inp.data_name = prop.fixed_type.name
                             inp.data_identifier = prop.identifier
-            if not len(self.inputs)-2:
-                self.no_data_error = True
         except:
             self.remove_input_range(2)
+        if not len(self.inputs)-2:
+            self.no_data_error = True
         
         
     def update_inputs(self,socket):
@@ -89,10 +89,13 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                         types = get_known_types()[socket.data_type]
 
                 else:
-                    for data_type in dir(bpy.types):
-                        if eval("bpy.types." + socket.data_type) in eval("bpy.types." + data_type).__bases__:
-                            name = eval("bpy.types." + data_type).bl_rna.name if eval("bpy.types." + data_type).bl_rna.name else data_type
-                            types.append((data_type, name, eval("bpy.types." + data_type).bl_rna.description))
+                    try:
+                        for data_type in dir(bpy.types):
+                            if eval("bpy.types." + socket.data_type) in eval("bpy.types." + data_type).__bases__:
+                                name = eval("bpy.types." + data_type).bl_rna.name if eval("bpy.types." + data_type).bl_rna.name else data_type
+                                types.append((data_type, name, eval("bpy.types." + data_type).bl_rna.description))
+                    except:
+                        types = []
 
                 if types:
                     types.insert(0, (socket.data_type, socket.data_name, ""))
@@ -139,7 +142,10 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         set_data = []
         if self.inputs[1].links:
             for inp in self.inputs[2:]:
-                set_data.append(self.inputs[1].code() + "." + inp.data_identifier + "=" + inp.code())
+                if self.current_data_type == "Object" and self.define_type != "Object":
+                    set_data.append(self.inputs[1].code() + ".data." + inp.data_identifier + "=" + inp.code() + "\n")
+                else:
+                    set_data.append(self.inputs[1].code() + "." + inp.data_identifier + "=" + inp.code() + "\n")
         else:
             self.add_error("No blend data", "Blend data input is not connected", True)
 

@@ -71,10 +71,10 @@ class SN_GetDataFromIDNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if prop.type == self.data_type:
                     out = self.add_output_from_prop(prop)
                     out.removable = True
-            if not len(self.outputs):
-                self.no_data_error = True
         except:
             self.outputs.clear()
+        if not len(self.outputs):
+            self.no_data_error = True
 
 
     def update_outputs(self,socket):
@@ -101,10 +101,13 @@ class SN_GetDataFromIDNode(bpy.types.Node, SN_ScriptingBaseNode):
                         types = get_known_types()[socket.data_type]
 
                 else:
-                    for data_type in dir(bpy.types):
-                        if eval("bpy.types." + socket.data_type) in eval("bpy.types." + data_type).__bases__:
-                            name = eval("bpy.types." + data_type).bl_rna.name if eval("bpy.types." + data_type).bl_rna.name else data_type
-                            types.append((data_type, name, eval("bpy.types." + data_type).bl_rna.description))
+                    try:
+                        for data_type in dir(bpy.types):
+                            if eval("bpy.types." + socket.data_type) in eval("bpy.types." + data_type).__bases__:
+                                name = eval("bpy.types." + data_type).bl_rna.name if eval("bpy.types." + data_type).bl_rna.name else data_type
+                                types.append((data_type, name, eval("bpy.types." + data_type).bl_rna.description))
+                    except:
+                        types = []
 
                 if types:
                     types.insert(0, (socket.data_type, socket.data_name, ""))
@@ -147,7 +150,12 @@ class SN_GetDataFromIDNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_evaluate(self, context, touched_socket):
+
         if self.inputs[0].links:
+            if self.current_data_type == "Object" and self.define_type != "Object":
+                return {
+                    "code": f"{self.inputs[0].code()}.data.{touched_socket.variable_name}"
+                }
             return {
                 "code": f"{self.inputs[0].code()}.{touched_socket.variable_name}"
             }
