@@ -562,7 +562,7 @@ class SN_ScriptingBaseNode:
             if inp.group == "PROGRAM" and len(inp.links):
                 return inp.links[0].from_node.what_start_idname()
         return self.bl_idname
-    
+
     def what_start_node(self):
         for inp in self.inputs:
             if inp.group == "PROGRAM" and len(inp.links):
