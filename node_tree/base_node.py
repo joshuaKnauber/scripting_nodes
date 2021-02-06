@@ -410,6 +410,7 @@ class SN_ScriptingBaseNode:
         inp.variable_name = prop_data["identifier"]
         if prop_data["type"] == "ENUM":
             inp.enum_values = prop_data["items"]
+            inp.is_set = prop_data["is_set"]
         return inp
     
     
@@ -456,6 +457,7 @@ class SN_ScriptingBaseNode:
             if prop.type == "ENUM":
                 if len(prop.enum_items):
                     inp.enum_values = self.enum_items_as_string(prop)
+                    inp.is_set = prop.is_enum_flag
                 else:
                     inp.subtype = "NONE"
 
