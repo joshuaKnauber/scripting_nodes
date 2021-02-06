@@ -190,10 +190,12 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_changelog(self,layout):
         changelog = [
             "Rewrite of the entire addon",
-            "Added multiple node trees for one addon",
+            "Ability to add multiple node trees for one addon",
             "Separated Properties and Variables",
-            "Added custom icons",
+            "Ability to add custom icons",
+            "Ability to add functions",
             "Export as .zip file to allow for addon assets",
+            "Over 50 new nodes",
             "And much more..."
         ]
         if changelog:
