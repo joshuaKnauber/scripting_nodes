@@ -40,8 +40,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                                        description="Navigation")
     
     
-    addon_search: bpy.props.StringProperty(default="",name="Search")
-    package_search: bpy.props.StringProperty(default="",name="Search")
+    addon_search: bpy.props.StringProperty(default="",name="Search",options={"TEXTEDIT_UPDATE"})
+    package_search: bpy.props.StringProperty(default="",name="Search",options={"TEXTEDIT_UPDATE"})
 
 
 
@@ -101,9 +101,9 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             col.label(text="Blender: ".ljust(15) + f"{addon.blender_version[0]}.{addon.blender_version[1]}.{addon.blender_version[2]}")
             col.separator()
             row = col.row()
-            row.operator("wm.url_open",text="Get Addon" if not addon.is_external else addon.price).url = addon.addon_url
+            row.operator("wm.url_open",text="Download Addon" if not addon.is_external else addon.price).url = addon.addon_url
             if addon.has_blend:
-                row.operator("wm.url_open",text="Get .blend").url = addon.blend_url
+                row.operator("wm.url_open",text="Download .blend").url = addon.blend_url
                 
 
     def draw_addon_market(self,layout):
