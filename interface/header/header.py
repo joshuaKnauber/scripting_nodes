@@ -43,6 +43,7 @@ def append_header(self, context):
             row = layout.row(align=True)
             row.prop(context.scene.sn, "editing_addon", text="")
             row.operator("sn.create_addon",text="",icon="ADD")
+            row.operator("sn.delete_addon",text="",icon="TRASH")
             
             row = layout.row(align=True)
             row.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id).url = "https://discord.com/invite/NK6kyae"

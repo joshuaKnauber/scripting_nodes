@@ -36,6 +36,26 @@ class SN_OT_CreateAddon(bpy.types.Operator):
 
 
 
+class SN_OT_DeleteAddon(bpy.types.Operator):
+    bl_idname = "sn.delete_addon"
+    bl_label = "Delete this addon?"
+    bl_description = "This will delete the active addon"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    def execute(self, context):
+        graphs = context.scene.sn.addon_tree().sn_graphs
+        for index in range(len(graphs)-1,0,-1):
+            bpy.data.node_groups.remove(graphs[index].node_tree)
+        bpy.data.node_groups.remove(context.scene.sn.addon_tree())
+        if context.scene.sn.addon_tree():
+            context.space_data.node_tree = context.scene.sn.addon_tree()
+        return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_confirm(self,event)
+
+
+
 class SN_OT_CreateGraph(bpy.types.Operator):
     bl_idname = "sn.add_graph"
     bl_label = "Add Graph"
