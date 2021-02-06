@@ -78,7 +78,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.op_name = rna.name if rna.name else name.replace("_", " ").title()
         for prop in rna.properties:
             if not prop.name == "RNA":
-                self.add_input_from_prop(prop).disableable = True
+                self.add_input_from_prop(prop,self.operator).disableable = True
     
     
     def update_operator(self,context):
