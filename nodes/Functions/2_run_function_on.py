@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RunFunctionOnNode"
-    bl_label = "Run Function On"
+    bl_label = "Run Function On Data"
     # bl_icon = "GRAPH"
     bl_width_default = 180
 
@@ -85,41 +85,53 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if self.function_collection[self.search_value].identifier == "driver_add":
                         inp = self.add_string_input("Path")
                         inp.variable_name = "path"
+                        inp.disableable = True
                         inp = self.add_integer_input("Index")
                         inp.set_default(-1)
                         inp.variable_name = "index"
+                        inp.disableable = True
                         self.add_blend_data_output("Driver")
 
                     elif self.function_collection[self.search_value].identifier == "driver_remove":
                         inp = self.add_string_input("Path")
                         inp.variable_name = "path"
+                        inp.disableable = True
                         inp = self.add_integer_input("Index")
                         inp.set_default(-1)
                         inp.variable_name = "index"
+                        inp.disableable = True
                         self.add_boolean_output("Removed")
 
                     elif self.function_collection[self.search_value].identifier == "keyframe_insert":
                         inp = self.add_string_input("Path")
-                        inp.variable_name = "path"
+                        inp.variable_name = "data_path"
+                        inp.disableable = True
                         inp = self.add_integer_input("Index")
                         inp.set_default(-1)
                         inp.variable_name = "index"
+                        inp.disableable = True
                         inp = self.add_float_input("Frame")
                         inp.variable_name = "frame"
+                        inp.disableable = True
                         inp = self.add_string_input("Group")
                         inp.variable_name = "group"
+                        inp.disableable = True
                         self.add_boolean_output("Created")
 
                     elif self.function_collection[self.search_value].identifier == "keyframe_delete":
                         inp = self.add_string_input("Path")
-                        inp.variable_name = "path"
+                        inp.variable_name = "data_path"
+                        inp.disableable = True
                         inp = self.add_integer_input("Index")
                         inp.set_default(-1)
                         inp.variable_name = "index"
+                        inp.disableable = True
                         inp = self.add_float_input("Frame")
                         inp.variable_name = "frame"
+                        inp.disableable = True
                         inp = self.add_string_input("Group")
                         inp.variable_name = "group"
+                        inp.disableable = True
                         self.add_boolean_output("Removed")
 
                 else:
@@ -130,7 +142,8 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if parameter.is_output:
                     self.add_output_from_prop(parameter)
                 else:
-                    self.add_input_from_prop(parameter)
+                    inp = self.add_input_from_prop(parameter)
+                    inp.disableable = True
 
         self.current_function = self.search_value
 
@@ -170,7 +183,8 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
             if touched_socket == self.inputs[0]:
                 parameter = ""
                 for inp in self.inputs[2:]:
-                    parameter+=inp.variable_name + "=" + inp.code() + ", "
+                    if inp.enabled:
+                        parameter+=inp.variable_name + "=" + inp.code() + ", "
 
                 return {
                     "code": f"""
