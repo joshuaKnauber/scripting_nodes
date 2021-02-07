@@ -122,15 +122,15 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.categories = "[]"
 
     def draw_node(self,context,layout):
-        if self.collection_error:
-            layout.label(text="Connect single data block",icon="ERROR")
-        elif self.no_data_error:
-            layout.label(text="No data found",icon="ERROR")
-        
         if self.categories != "[]":
             layout.prop(self, "category_enum", text="")
         if self.types != "[]":
             layout.prop(self, "define_type", text="")
+        
+        if self.collection_error:
+            layout.label(text="Connect single data block",icon="ERROR")
+        elif self.no_data_error:
+            layout.label(text="No data found",icon="ERROR")
 
 
     def code_evaluate(self, context, touched_socket):

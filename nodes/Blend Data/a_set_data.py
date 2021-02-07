@@ -4,10 +4,10 @@ from .a_get_data_pointers import get_known_types
 
 
 
-class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_SetDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_SetBlendDataNode"
-    bl_label = "Set Blend Data"
+    bl_idname = "SN_SetDataNode"
+    bl_label = "Set Data"
     # bl_icon = "GRAPH"
     bl_width_default = 160
     
@@ -32,7 +32,25 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.no_data_error = False
         self.add_data_inputs(self.define_type)
 
+    def update_data_type(self, context):
+        identifiers = {"SN_StringSocket": ["STRING", "ENUM"], "SN_IntegerSocket": ["INT"], "SN_FloatSocket": ["FLOAT"], "SN_BooleanSocket": ["BOOLEAN"]}
+        if not len(self.inputs)-2 or not self.data_type in identifiers[self.inputs[2].bl_idname]:
+            self.no_data_error = False
+            self.remove_input_range(2)
+            self.add_data_inputs(self.current_data_type)
 
+        elif len(self.inputs)-2 and self.inputs[2].bl_idname == "SN_StringSocket":
+            if self.inputs[2].subtype == "ENUM" and self.data_type != "ENUM":
+                self.no_data_error = False
+                self.remove_input_range(2)
+                self.add_data_inputs(self.current_data_type)
+            elif self.inputs[2].subtype == "NONE" and self.data_type != "STRING":
+                self.no_data_error = False
+                self.remove_input_range(2)
+                self.add_data_inputs(self.current_data_type)
+
+
+    data_type: bpy.props.EnumProperty(items=[("STRING", "String", ""), ("INT", "Integer", ""), ("FLOAT", "Float", ""), ("BOOLEAN", "Boolean", ""), ("ENUM", "Enum", "")], name="Data Type", description="The data type you want to get", update=update_data_type)
     current_data_type: bpy.props.StringProperty(default="")
     collection_error: bpy.props.BoolProperty(default=False)
     no_data_error: bpy.props.BoolProperty(default=False)
@@ -43,7 +61,7 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_execute_input("Set Blend Data")
+        self.add_execute_input("Set Data")
         self.add_blend_data_input("Blend Data").mirror_name = True
         self.add_execute_output("Execute").mirror_name = True
         
@@ -51,20 +69,15 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def add_data_inputs(self,data_type):
         try:
             for prop in eval(f"bpy.types.{data_type}.bl_rna.properties"):
-                if prop.type == "POINTER":
-                    if hasattr(prop, "identifier") and not prop.name == "RNA":
-                        if not prop.is_readonly:
-                            inp = self.add_blend_data_input(prop.name)
-                            inp.removable = True
-                            inp.data_type = prop.fixed_type.identifier
-                            inp.data_name = prop.fixed_type.name
-                            inp.data_identifier = prop.identifier
+                if not prop.is_readonly and prop.type == self.data_type:
+                    inp = self.add_input_from_prop(prop)
+                    inp.removable = True
         except:
             self.remove_input_range(2)
         if not len(self.inputs)-2:
             self.no_data_error = True
-        
-        
+
+
     def update_inputs(self,socket):
         self.collection_error = False
         self.no_data_error = False
@@ -131,6 +144,9 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.types != "[]":
             layout.prop(self, "define_type", text="")
 
+        if self.current_data_type:
+            layout.prop(self, "data_type", text="")
+
         if self.collection_error:
             layout.label(text="Connect single data block",icon="ERROR")
         elif self.no_data_error:
@@ -143,9 +159,9 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.inputs[1].links:
             for inp in self.inputs[2:]:
                 if self.current_data_type == "Object" and self.define_type != "Object":
-                    set_data.append(self.inputs[1].code() + ".data." + inp.data_identifier + "=" + inp.code() + "\n")
+                    set_data.append(self.inputs[1].code() + ".data." + inp.variable_name + "=" + inp.code() + "\n")
                 else:
-                    set_data.append(self.inputs[1].code() + "." + inp.data_identifier + "=" + inp.code() + "\n")
+                    set_data.append(self.inputs[1].code() + "." + inp.variable_name + "=" + inp.code() + "\n")
         else:
             self.add_error("No blend data", "Blend data input is not connected", True)
 
