@@ -429,6 +429,7 @@ class SN_ScriptingBaseNode:
             if identifier+"=" in props:
                 default = props.split(identifier+"=")[-1].split(",")[0]
                 default = default.replace("\"","")
+                default = default.replace("'","")
                 return default
         return None
         
