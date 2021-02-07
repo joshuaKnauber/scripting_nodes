@@ -81,7 +81,7 @@ class SN_OT_ExportAddon(bpy.types.Operator):
         return {'RUNNING_MODAL'}
 
     def make_archive(self, source, destination):
-        shutil.make_archive(destination.split('.')[0], "zip", os.path.dirname(destination), source)
+        shutil.make_archive(destination.split('.')[0], "zip", os.path.dirname(destination), os.path.basename(source))
 
     def execute(self, context):
         if not ".zip" in self.filepath:

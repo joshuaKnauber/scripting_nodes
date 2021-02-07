@@ -17,7 +17,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                                     default=False)
     
     use_suggestion_menu: bpy.props.BoolProperty(name="Use Suggestion Menu",
-                                    description="When enabled, you can drag and drop a link from a socket in the node editor while holding Shift to open a menu of compatible nodes (this might not work on some monitors)",
+                                    description="When enabled, you can drag and drop a link from a socket in the node editor while holding Shift to open a menu of compatible nodes (only works on monitors with the scale set to 100%)",
                                     default=True)
     
     show_all_compatible: bpy.props.BoolProperty(name="Show All Compatible",
@@ -40,8 +40,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                                        description="Navigation")
     
     
-    addon_search: bpy.props.StringProperty(default="",name="Search")
-    package_search: bpy.props.StringProperty(default="",name="Search")
+    addon_search: bpy.props.StringProperty(default="",name="Search",options={"TEXTEDIT_UPDATE"})
+    package_search: bpy.props.StringProperty(default="",name="Search",options={"TEXTEDIT_UPDATE"})
 
 
 
@@ -101,9 +101,9 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             col.label(text="Blender: ".ljust(15) + f"{addon.blender_version[0]}.{addon.blender_version[1]}.{addon.blender_version[2]}")
             col.separator()
             row = col.row()
-            row.operator("wm.url_open",text="Get Addon" if not addon.is_external else addon.price).url = addon.addon_url
+            row.operator("wm.url_open",text="Download Addon" if not addon.is_external else addon.price).url = addon.addon_url
             if addon.has_blend:
-                row.operator("wm.url_open",text="Get .blend").url = addon.blend_url
+                row.operator("wm.url_open",text="Download .blend").url = addon.blend_url
                 
 
     def draw_addon_market(self,layout):
@@ -190,10 +190,12 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_changelog(self,layout):
         changelog = [
             "Rewrite of the entire addon",
-            "Added multiple node trees for one addon",
+            "Ability to add multiple node trees for one addon",
             "Separated Properties and Variables",
-            "Added custom icons",
+            "Ability to add custom icons",
+            "Ability to add functions",
             "Export as .zip file to allow for addon assets",
+            "Over 50 new nodes",
             "And much more..."
         ]
         if changelog:

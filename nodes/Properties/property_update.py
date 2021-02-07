@@ -8,7 +8,7 @@ from .property_util import get_data, setup_data_input
 class SN_UpdatePropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_UpdatePropertyNode"
-    bl_label = "Update Property"
+    bl_label = "On Property Update"
     # bl_icon = "GRAPH"
     bl_width_default = 200
 

@@ -12,6 +12,8 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     
     enum_values: bpy.props.StringProperty()
+
+    is_set: bpy.props.BoolProperty(default=False)
     
     def enum_items(self,context):
         items = []
@@ -93,9 +95,12 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
             return "r\"" + self.value_directory + "\""
         elif self.subtype == "ENUM":
             if self.enum_values:
-                return "sn_cast_enum(r\"" + self.value_enum + "\", " + self.enum_values + ")"
+                value = "sn_cast_enum(r\"" + self.value_enum + "\", " + self.enum_values + ")"
             else:
-                return "r\"" + self.value_enum + "\""
+                value = "r\"" + self.value_enum + "\""
+            if self.is_set:
+                return "{" + value + "}"
+            return value
     
     
     def convert_data(self, code):

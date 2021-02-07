@@ -410,6 +410,7 @@ class SN_ScriptingBaseNode:
         inp.variable_name = prop_data["identifier"]
         if prop_data["type"] == "ENUM":
             inp.enum_values = prop_data["items"]
+            inp.is_set = prop_data["is_set"]
         return inp
     
     
@@ -420,9 +421,20 @@ class SN_ScriptingBaseNode:
         if prop_data["type"] == "ENUM":
             out.enum_values = prop_data["items"]
         return out
+
+
+    def get_default_from_operator(self,identifier,operator_line):
+        if operator_line != None:
+            props = operator_line.split("(")[-1].split(")")[0]+","
+            if identifier+"=" in props:
+                default = props.split(identifier+"=")[-1].split(",")[0]
+                default = default.replace("\"","")
+                default = default.replace("'","")
+                return default
+        return None
         
         
-    def add_input_from_prop(self,prop):
+    def add_input_from_prop(self,prop,operator_line=None):
         if prop.type in self.prop_types:
             name = prop.name
             if not name:
@@ -446,14 +458,19 @@ class SN_ScriptingBaseNode:
             if prop.type == "ENUM":
                 if len(prop.enum_items):
                     inp.enum_values = self.enum_items_as_string(prop)
+                    inp.is_set = prop.is_enum_flag
                 else:
                     inp.subtype = "NONE"
 
             if not prop.type in ["POINTER", "COLLECTION"]:
-                if not "VECTOR" in inp.subtype and not "COLOR" in inp.subtype:
-                    inp.set_default(prop.default)
+                default = self.get_default_from_operator(prop.identifier,operator_line)
+                if default != None:
+                    inp.set_default(default)
                 else:
-                    inp.set_default(tuple([prop.default]*prop.array_length))
+                    if not "VECTOR" in inp.subtype and not "COLOR" in inp.subtype:
+                        inp.set_default(prop.default)
+                    else:
+                        inp.set_default(tuple([prop.default]*prop.array_length))
             return inp
 
 

@@ -21,6 +21,7 @@ def construct_from_property(path,prop, created_from="", removed=False):
             "subtype": prop.property_subtype,
             "size": size,
             "items": prop.enum_string(),
+            "is_set": False,
             "created_from": created_from,
             "removed": removed
         }
@@ -59,6 +60,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
     prop_subtype: bpy.props.StringProperty(options={"HIDDEN"})
     prop_size: bpy.props.IntProperty(options={"HIDDEN"})
     prop_enum_items: bpy.props.StringProperty(options={"HIDDEN"})
+    prop_is_enum_set: bpy.props.BoolProperty(default=False,options={"HIDDEN","SKIP_SAVE"})
     node_uid: bpy.props.StringProperty(options={"HIDDEN"})
     node_index: bpy.props.IntProperty(options={"HIDDEN"})
     
@@ -99,6 +101,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
                     "subtype": self.prop_subtype,
                     "size": self.prop_size,
                     "items": self.prop_enum_items,
+                    "is_set": self.prop_is_enum_set,
                     "created_from": "NONE",
                     "removed": False
                 }
@@ -194,6 +197,7 @@ def serpens_right_click(self, context):
             for item in property_value.enum_items:
                 items += f"(\"{item.identifier}\",\"{item.name}\",\"{item.description}\"),"
             op.prop_enum_items = items + "]"
+            op.prop_is_enum_set = property_value.is_enum_flag
             
     else:
         if bpy.ops.ui.copy_python_command_button.poll():
