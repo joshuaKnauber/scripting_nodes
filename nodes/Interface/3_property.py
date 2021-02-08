@@ -21,6 +21,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.copied_path:
             data = get_data(self.copied_path)
             new_data = get_data(string_data)
+            print(new_data["group_path"])
             if data and data["group_path"] in ["self", "context.preferences.addons[__name__.partition('.')[0]].preferences"]:
                 if data["property"]["name"] == new_data["property"]["name"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
                     if data["property"]["identifier"] != new_data["property"]["identifier"]:
@@ -121,7 +122,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     copied_path: bpy.props.StringProperty(update=update_copied)
     prop_name: bpy.props.StringProperty()
-        
+
 
     def draw_node(self,context,layout):
         if not self.copied_path:
@@ -130,7 +131,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             row.operator("sn.paste_property_path",text="Paste Property",icon="PASTEDOWN").node = self.name
         else:
             layout.operator("sn.reset_property_node",icon="UNLINKED",text=self.prop_name).node = self.name
-                    
+
 
     def code_evaluate(self, context, touched_socket):
 
@@ -154,6 +155,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.add_error("No blend data", "Blend data input is not connected", True)
                 return {"code": ""}
 
+        print(data["group_path"])
         if data["group_path"]:
             data_path += "." + data["group_path"] if data_path else data["group_path"]
         

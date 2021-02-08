@@ -56,7 +56,7 @@ class SN_EnumItem(bpy.types.PropertyGroup):
             for node in graph.node_tree.nodes:
                 if node.bl_idname == "SN_SetPropertyNode":
                     if prop.use_self:
-                        path = "self" if prop.find_node(context) else "context.preferences.addons[__name__.partition('.')[0]].preferences"
+                        path = "self" if prop.find_node(context).bl_idname != "SN_AddonPreferencesNode" else "context.preferences.addons[__name__.partition('.')[0]].preferences"
                         node.on_outside_update(construct_from_property(path,prop, prop.from_node_uid))
                     else:
                         node.on_outside_update(construct_from_attached_property(prop.attach_property_to,prop.attach_property_to,prop))
@@ -109,8 +109,8 @@ class SN_Variable(bpy.types.PropertyGroup):
             for node in graph.node_tree.nodes:
                 if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode", "SN_UpdatePropertyNode"]:
                     if self.use_self:
-                        path = "self" if self.find_node(bpy.context) else "context.preferences.addons[__name__.partition('.')[0]].preferences"
-                        node.on_outside_update(construct_from_property("self",self, self.from_node_uid))
+                        path = "self" if self.find_node(bpy.context).bl_idname != "SN_AddonPreferencesNode" else "context.preferences.addons[__name__.partition('.')[0]].preferences"
+                        node.on_outside_update(construct_from_property(path,self, self.from_node_uid))
                     else:
                         node.on_outside_update(construct_from_attached_property(self.attach_property_to,self.attach_property_to,self))
 
