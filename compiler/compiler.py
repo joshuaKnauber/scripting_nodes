@@ -186,6 +186,7 @@ def get_module(addon_tree):
     
     
 def handle_file_load():
+    bpy.app.timers.register(autosave)
     for txt in bpy.data.texts:
         if txt.is_sn_addon:
             bpy.data.texts.remove(txt)
@@ -552,3 +553,11 @@ def __evaluate_graph(graph, addon_tree, addon_did_once):
                 if not node.bl_idname in graph_did_once["unregister"]: graph_did_once["unregister"].append(node.bl_idname)
             
     return graph_code, graph_did_once
+
+
+
+def autosave():
+    if bpy.context.scene.sn.use_autosave:
+        if bpy.data.is_saved:
+            bpy.ops.wm.save_mainfile()
+    return bpy.context.scene.sn.autosave_delay

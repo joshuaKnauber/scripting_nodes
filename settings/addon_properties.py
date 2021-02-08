@@ -193,3 +193,8 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     minimal_header: bpy.props.BoolProperty(default=False,name="Minimal Header",
                                          description="Only show a minimal header")
+
+
+    use_autosave: bpy.props.BoolProperty(default=True,name="Auto Save",description="Save this file automatically")
+
+    autosave_delay: bpy.props.FloatProperty(default=120,name="Delay",description="Autosave delay in seconds",min=10)
