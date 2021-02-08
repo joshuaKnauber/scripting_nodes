@@ -23,10 +23,25 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         
         layout.use_property_split = True
         layout.use_property_decorate = False
+
         row = layout.row()
         row.alignment = "RIGHT"
         row.label(text="Last Compile: "+addon_graph.last_compile_time)
-        layout.prop(addon_graph, "autocompile", text="Auto Compile")
-        if addon_graph.autocompile:
-            layout.prop(addon_graph, "autocompile_delay", text="Delay")
+
         layout.prop(addon_graph, "compile_on_start", text="Compile on Startup")
+
+        layout.separator()
+
+        layout.prop(addon_graph, "autocompile", text="Auto Compile")
+        row = layout.row()
+        row.enabled = addon_graph.autocompile
+        row.prop(addon_graph, "autocompile_delay", text="Delay")
+
+        layout.separator()
+
+        col = layout.column()
+        col.enabled = bpy.data.is_saved
+        col.prop(context.scene.sn, "use_autosave")
+        row = col.row()
+        row.enabled = context.scene.sn.use_autosave
+        row.prop(context.scene.sn, "autosave_delay")
