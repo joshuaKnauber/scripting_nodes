@@ -189,7 +189,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
-            "Fixed get mesh points node outputs"
+            "Fixed get mesh points node outputs",
+            "Fixed run function on data with modifier",
         ]
         if changelog:
             box = layout.box()

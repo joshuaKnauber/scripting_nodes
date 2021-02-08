@@ -1,6 +1,17 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
+def get_known_collection_functions():
+    known_functions = {
+        "Modifier": "bpy.types.ObjectModifiers.bl_rna.functions",
+    }
+    return known_functions
+
+def get_known_functions():
+    known_functions = {
+    }
+    return known_functions
+
 
 
 class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -17,37 +28,48 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
     def get_functions(self, data_type, is_collection):
         self.function_collection.clear()
         if is_collection:
-            has_functions = False
-            for data in bpy.data.bl_rna.properties:
-                if "bl_rna" in dir(eval("bpy.data." + data.identifier)):
-                    if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == data_type:
-                        has_functions = True
-                        for function in eval("bpy.data." + data.identifier).bl_rna.functions:
+            if not data_type in get_known_collection_functions():
+                has_functions = False
+                for data in bpy.data.bl_rna.properties:
+                    if "bl_rna" in dir(eval("bpy.data." + data.identifier)):
+                        if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == data_type:
+                            has_functions = True
+                            for function in eval("bpy.data." + data.identifier).bl_rna.functions:
+                                item = self.function_collection.add()
+                                item.name = function.identifier.replace("_", " ").title()
+                                item.identifier = function.identifier
+
+                if not has_functions:
+                    try:
+                        for function in eval("bpy.types." + data_type + "s").bl_rna.functions:
                             item = self.function_collection.add()
                             item.name = function.identifier.replace("_", " ").title()
                             item.identifier = function.identifier
-
-            if not has_functions:
-                try:
-                    for function in eval("bpy.types." + data_type + "s").bl_rna.functions:
-                        item = self.function_collection.add()
-                        item.name = function.identifier.replace("_", " ").title()
-                        item.identifier = function.identifier
-                except:
-                    pass
-
+                    except:
+                        pass
+            else:
+                for function in eval(get_known_collection_functions()[data_type]):
+                    item = self.function_collection.add()
+                    item.name = function.identifier.replace("_", " ").title()
+                    item.identifier = function.identifier
 
         else:
-            for function in eval("bpy.types." + data_type).bl_rna.functions:
-                item = self.function_collection.add()
-                item.name = function.identifier.replace("_", " ").title()
-                item.identifier = function.identifier
+            if not data_type in get_known_functions():
+                for function in eval("bpy.types." + data_type).bl_rna.functions:
+                    item = self.function_collection.add()
+                    item.name = function.identifier.replace("_", " ").title()
+                    item.identifier = function.identifier
 
-            functions = ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]
-            for function in functions:
-                item = self.function_collection.add()
-                item.name = function.replace("_", " ").title()
-                item.identifier = function
+                functions = ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]
+                for function in functions:
+                    item = self.function_collection.add()
+                    item.name = function.replace("_", " ").title()
+                    item.identifier = function
+            else:
+                for function in eval(get_known_functions()[data_type]):
+                    item = self.function_collection.add()
+                    item.name = function.identifier.replace("_", " ").title()
+                    item.identifier = function.identifier
 
 
         if not self.search_value in self.function_collection:
@@ -67,75 +89,82 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.remove_input_range(2)
             self.remove_output_range(1)
             if self.inputs[1].subtype == "COLLECTION":
-                has_parameters = False
-                for data in bpy.data.bl_rna.properties:
-                    if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == self.current_data_type:
-                        parameters = eval("bpy.data." + data.identifier).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
-                        has_parameters = True
+                if not self.current_data_type in get_known_collection_functions():
+                    has_parameters = False
+                    for data in bpy.data.bl_rna.properties:
+                        if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == self.current_data_type:
+                            parameters = eval("bpy.data." + data.identifier).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+                            has_parameters = True
 
-                if not has_parameters:
-                    try:
-                        parameters = eval("bpy.types." + self.current_data_type + "s").bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
-                    except:
-                        parameters = []
+                    if not has_parameters:
+                        try:
+                            parameters = eval("bpy.types." + self.current_data_type + "s").bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+                        except:
+                            parameters = []
+                else:
+                    parameters = eval(get_known_collection_functions()[self.current_data_type])[self.function_collection[self.search_value].identifier].parameters
 
             else:
-                if self.function_collection[self.search_value].identifier in ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]:
-                    parameters = []
-                    if self.function_collection[self.search_value].identifier == "driver_add":
-                        inp = self.add_string_input("Path")
-                        inp.variable_name = "path"
-                        inp.disableable = True
-                        inp = self.add_integer_input("Index")
-                        inp.set_default(-1)
-                        inp.variable_name = "index"
-                        inp.disableable = True
-                        self.add_blend_data_output("Driver")
+                if not self.current_data_type in get_known_functions():
+                    if self.function_collection[self.search_value].identifier in ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]:
+                        parameters = []
+                        if self.function_collection[self.search_value].identifier == "driver_add":
+                            inp = self.add_string_input("Path")
+                            inp.variable_name = "path"
+                            inp.disableable = True
+                            inp = self.add_integer_input("Index")
+                            inp.set_default(-1)
+                            inp.variable_name = "index"
+                            inp.disableable = True
+                            self.add_blend_data_output("Driver")
 
-                    elif self.function_collection[self.search_value].identifier == "driver_remove":
-                        inp = self.add_string_input("Path")
-                        inp.variable_name = "path"
-                        inp.disableable = True
-                        inp = self.add_integer_input("Index")
-                        inp.set_default(-1)
-                        inp.variable_name = "index"
-                        inp.disableable = True
-                        self.add_boolean_output("Removed")
+                        elif self.function_collection[self.search_value].identifier == "driver_remove":
+                            inp = self.add_string_input("Path")
+                            inp.variable_name = "path"
+                            inp.disableable = True
+                            inp = self.add_integer_input("Index")
+                            inp.set_default(-1)
+                            inp.variable_name = "index"
+                            inp.disableable = True
+                            self.add_boolean_output("Removed")
 
-                    elif self.function_collection[self.search_value].identifier == "keyframe_insert":
-                        inp = self.add_string_input("Path")
-                        inp.variable_name = "data_path"
-                        inp.disableable = True
-                        inp = self.add_integer_input("Index")
-                        inp.set_default(-1)
-                        inp.variable_name = "index"
-                        inp.disableable = True
-                        inp = self.add_float_input("Frame")
-                        inp.variable_name = "frame"
-                        inp.disableable = True
-                        inp = self.add_string_input("Group")
-                        inp.variable_name = "group"
-                        inp.disableable = True
-                        self.add_boolean_output("Created")
+                        elif self.function_collection[self.search_value].identifier == "keyframe_insert":
+                            inp = self.add_string_input("Path")
+                            inp.variable_name = "data_path"
+                            inp.disableable = True
+                            inp = self.add_integer_input("Index")
+                            inp.set_default(-1)
+                            inp.variable_name = "index"
+                            inp.disableable = True
+                            inp = self.add_float_input("Frame")
+                            inp.variable_name = "frame"
+                            inp.disableable = True
+                            inp = self.add_string_input("Group")
+                            inp.variable_name = "group"
+                            inp.disableable = True
+                            self.add_boolean_output("Created")
 
-                    elif self.function_collection[self.search_value].identifier == "keyframe_delete":
-                        inp = self.add_string_input("Path")
-                        inp.variable_name = "data_path"
-                        inp.disableable = True
-                        inp = self.add_integer_input("Index")
-                        inp.set_default(-1)
-                        inp.variable_name = "index"
-                        inp.disableable = True
-                        inp = self.add_float_input("Frame")
-                        inp.variable_name = "frame"
-                        inp.disableable = True
-                        inp = self.add_string_input("Group")
-                        inp.variable_name = "group"
-                        inp.disableable = True
-                        self.add_boolean_output("Removed")
+                        elif self.function_collection[self.search_value].identifier == "keyframe_delete":
+                            inp = self.add_string_input("Path")
+                            inp.variable_name = "data_path"
+                            inp.disableable = True
+                            inp = self.add_integer_input("Index")
+                            inp.set_default(-1)
+                            inp.variable_name = "index"
+                            inp.disableable = True
+                            inp = self.add_float_input("Frame")
+                            inp.variable_name = "frame"
+                            inp.disableable = True
+                            inp = self.add_string_input("Group")
+                            inp.variable_name = "group"
+                            inp.disableable = True
+                            self.add_boolean_output("Removed")
+
+                    else:
+                        parameters = eval("bpy.types." + self.current_data_type).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
 
                 else:
-                    parameters = eval("bpy.types." + self.current_data_type).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+                    parameters = eval(get_known_functions()[self.current_data_type])[self.function_collection[self.search_value].identifier].parameters
 
 
             for parameter in parameters:
