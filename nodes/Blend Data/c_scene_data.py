@@ -13,6 +13,7 @@ class SN_ObjectsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     data_identifier = "objects"
     
     active_data = "bpy.context.active_object"
+    selected_data = "bpy.context.selected_objects"
 
 
 

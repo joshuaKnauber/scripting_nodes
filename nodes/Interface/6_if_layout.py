@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 class SN_IfLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_IfLayoutNode"
-    bl_label = "If/Else - Layout"
+    bl_label = "If/Else - Interface"
     # bl_icon = "GRAPH"
     bl_width_default = 160
     

@@ -192,6 +192,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Fixed get mesh points node outputs",
             "Fixed run function on data with modifier",
             "Fixed preference properties not working",
+            "Added selected output on objects node",
         ]
         if changelog:
             box = layout.box()

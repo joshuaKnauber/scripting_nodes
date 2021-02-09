@@ -6,7 +6,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 class SN_ForLayoutNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_ForLayoutNode"
-    bl_label = "For Each - Layout"
+    bl_label = "For Each - Interface"
     # bl_icon = "GRAPH"
     bl_width_default = 160
 

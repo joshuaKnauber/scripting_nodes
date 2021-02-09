@@ -9,6 +9,7 @@ class SN_SceneDataBase():
     bl_width_default = 160
     
     active_data = ""
+    selected_data = ""
     
     node_options = {
         "default_color": (0.3,0.3,0.3),
@@ -55,6 +56,13 @@ class SN_SceneDataBase():
             out.data_identifier = self.active_data.split(".")[-1]
             out.data_name = self.data_type
         
+        if self.selected_data:
+            out = self.add_blend_data_output("Selected")
+            out.subtype = "COLLECTION"
+            out.data_type = self.data_type
+            out.data_identifier = self.selected_data.split(".")[-1]
+            out.data_name = self.data_type
+
         
     def draw_node(self,context,layout):
         layout.prop(self,"return_type",expand=True)
@@ -71,7 +79,12 @@ class SN_SceneDataBase():
                 "code": f"bpy.data.{self.data_identifier}{limiter}"
             }
             
-        else:
+        elif touched_socket == self.outputs[1]:
             return {
                 "code": f"{self.active_data}"
+            }
+        
+        else:
+            return {
+                "code": f"{self.selected_data}"
             }
