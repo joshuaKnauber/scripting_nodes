@@ -172,7 +172,8 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.add_output_from_prop(parameter)
                 else:
                     inp = self.add_input_from_prop(parameter)
-                    inp.disableable = True
+                    if not parameter.is_required:
+                        inp.disableable = True
 
         self.current_function = self.search_value
 
