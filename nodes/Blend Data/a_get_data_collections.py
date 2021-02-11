@@ -51,7 +51,7 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
             for prop in eval(f"bpy.types.{data_type}.bl_rna.properties"):
                 if prop.type == "COLLECTION":
                     if hasattr(prop, "fixed_type"):
-                        out = self.add_blend_data_output(prop.name)
+                        out = self.add_blend_data_output(prop.name.replace("_", " ").title())
                         out.removable = True
                         out.subtype = "COLLECTION"
                         out.data_type = prop.fixed_type.identifier

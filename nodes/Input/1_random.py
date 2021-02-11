@@ -11,7 +11,8 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 160
 
     node_options = {
-        "default_color": (0.3,0.3,0.3)
+        "default_color": (0.3,0.3,0.3),
+        "import_once": True
     }
 
 

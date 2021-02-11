@@ -436,7 +436,7 @@ class SN_ScriptingBaseNode:
         
     def add_input_from_prop(self,prop,operator_line=None):
         if prop.type in self.prop_types:
-            name = prop.name
+            name = prop.name.replace("_", " ").title()
             if not name:
                 name = prop.identifier.replace("_", " ").title()
 
@@ -476,7 +476,7 @@ class SN_ScriptingBaseNode:
 
     def add_output_from_prop(self,prop):
         if prop.type in self.prop_types:
-            name = prop.name
+            name = prop.name.replace("_", " ").title()
             if not name:
                 name = prop.identifier.replace("_", " ").title()
             

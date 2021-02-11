@@ -83,7 +83,7 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
             for prop in eval(f"bpy.types.{data_type}.bl_rna.properties"):
                 if prop.type == "POINTER":
                     if hasattr(prop, "identifier") and not prop.name == "RNA":
-                        out = self.add_blend_data_output(prop.name)
+                        out = self.add_blend_data_output(prop.name.replace("_", " ").title())
                         out.removable = True
                         out.data_type = prop.fixed_type.identifier
                         out.data_name = prop.fixed_type.name
