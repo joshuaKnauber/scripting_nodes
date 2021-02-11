@@ -189,10 +189,11 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
+            "Added selected output on objects node",
             "Fixed get mesh points node outputs",
             "Fixed run function on data with modifier",
             "Fixed preference properties not working",
-            "Added selected output on objects node",
+            "Fixed double import with random number nodes",
         ]
         if changelog:
             box = layout.box()

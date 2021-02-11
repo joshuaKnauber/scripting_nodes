@@ -33,5 +33,5 @@ class SN_GetAssetNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             self.add_error("No Asset", "No Asset selected")
         return {
-            "code": f"\"{asset_path}\""
+            "code": f"r\"{asset_path}\""
         }

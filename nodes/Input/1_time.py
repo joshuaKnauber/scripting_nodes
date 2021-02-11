@@ -56,5 +56,7 @@ class SN_TimeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_imports(self, context):
         return {
-            "code": f"""from datetime import datetime"""
+            "code": f"""
+                    from datetime import datetime
+                    """
         }

@@ -37,5 +37,7 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_imports(self, context):
         return {
-            "code": f"""import random"""
+            "code": f"""
+                    import random
+                    """
         }
