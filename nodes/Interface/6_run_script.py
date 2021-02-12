@@ -9,7 +9,7 @@ class SN_RunScriptInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_RunScriptInterfaceNode"
     bl_label = "Run Interface Script"
     # bl_icon = "GRAPH"
-    bl_width_default = 160
+    bl_width_default = 200
 
     node_options = {
         "default_color": (0.3,0.3,0.3)
