@@ -190,6 +190,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_changelog(self,layout):
         changelog = [
             "Added Run Interface Script and Interface Script Line node",
+            "Added Use Execute option to run function on data node",
+            "Added report function to print node",
             "Added selected output on objects node",
             "Fixed get mesh points node outputs",
             "Fixed run function on data with modifier",

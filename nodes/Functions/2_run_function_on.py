@@ -82,13 +82,23 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def add_function_sockets(self, context):
         if not self.search_value in self.function_collection:
-            self.remove_input_range(2)
-            self.remove_output_range(1)
+            if self.use_execute:
+                self.remove_input_range(2)
+                self.remove_output_range(1)
+            else:
+                self.remove_input_range(1)
+                self.outputs.clear()
 
         if self.search_value in self.function_collection and self.search_value != self.current_function:
-            self.remove_input_range(2)
-            self.remove_output_range(1)
-            if self.inputs[1].subtype == "COLLECTION":
+            if self.use_execute:
+                self.remove_input_range(2)
+                self.remove_output_range(1)
+            else:
+                self.remove_input_range(1)
+                self.outputs.clear()
+
+            index = 1 if self.use_execute else 0
+            if self.inputs[index].subtype == "COLLECTION":
                 if not self.current_data_type in get_known_collection_functions():
                     has_parameters = False
                     for data in bpy.data.bl_rna.properties:
@@ -177,20 +187,32 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.current_function = self.search_value
 
+    def update_execute(self, context):
+        if self.use_execute:
+            inp = self.add_execute_input("Run Function On")
+            self.inputs.move(len(self.inputs)-1, 0)
+            out = self.add_execute_output("Execute").mirror_name = True
+            self.outputs.move(len(self.outputs)-1, 0)
+        else:
+            self.inputs.remove(self.inputs[0])
+            self.outputs.remove(self.outputs[0])
+
 
     current_data_type: bpy.props.StringProperty()
     current_function: bpy.props.StringProperty()
     search_value: bpy.props.StringProperty(name="Function", update=add_function_sockets)
     function_collection: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)
+    use_execute: bpy.props.BoolProperty(default=True, name="Use Execute", description="Function will run on every output access if disabled", update=update_execute)
 
     def on_link_insert(self, link):
-        if link.to_socket == self.inputs[1] and link.from_socket.bl_idname == "SN_BlendDataSocket":
-            if link.from_socket.data_type != self.current_data_type or self.inputs[1].subtype != link.from_socket.subtype:
+        index = 1 if self.use_execute else 0
+        if link.to_socket == self.inputs[index] and link.from_socket.bl_idname == "SN_BlendDataSocket":
+            if link.from_socket.data_type != self.current_data_type or self.inputs[index].subtype != link.from_socket.subtype:
                 function = self.search_value
                 self.search_value = ""
-                self.inputs[1].data_type = link.from_socket.data_type
-                self.inputs[1].subtype = link.from_socket.subtype
-                self.inputs[1].default_text = link.from_socket.data_name
+                self.inputs[index].data_type = link.from_socket.data_type
+                self.inputs[index].subtype = link.from_socket.subtype
+                self.inputs[index].default_text = link.from_socket.data_name
                 self.current_data_type = link.from_socket.data_type
                 self.get_functions(link.from_socket.data_type, link.from_socket.subtype=="COLLECTION")
                 if function in self.function_collection:
@@ -204,29 +226,41 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def draw_node(self, context, layout):
+        layout.prop(self, "use_execute")
         if len(self.function_collection):
             layout.prop_search(self, "search_value", self, "function_collection", text="")
 
 
     def code_evaluate(self, context, touched_socket):
         if self.search_value != "":
-            if touched_socket == self.inputs[0]:
+            if self.use_execute:
+                if touched_socket == self.inputs[0]:
+                    parameter = ""
+                    for inp in self.inputs[2:]:
+                        if inp.enabled:
+                            parameter+=inp.variable_name + "=" + inp.code() + ", "
+
+                    return {
+                        "code": f"""
+                                run_function_on_{self.uid} = {self.inputs[1].code()}.{self.function_collection[self.search_value].identifier}({parameter})
+                                {self.outputs[0].code(8)}
+                                """
+                    }
+                else:
+                    if len(self.outputs) > 2:
+                        return {"code": f"run_function_on_{self.uid}[{self.outputs.find(touched_socket.name)-1}]"}
+                    else:
+                        return {"code": f"run_function_on_{self.uid}"}
+            else:
                 parameter = ""
-                for inp in self.inputs[2:]:
+                for inp in self.inputs[1:]:
                     if inp.enabled:
                         parameter+=inp.variable_name + "=" + inp.code() + ", "
 
-                return {
-                    "code": f"""
-                            run_function_on_{self.uid} = {self.inputs[1].code()}.{self.function_collection[self.search_value].identifier}({parameter})
-                            {self.outputs[0].code(7)}
-                            """
-                }
-            else:
-                if len(self.outputs) > 2:
-                    return {"code": f"run_function_on_{self.uid}[{self.outputs.find(touched_socket.name)-1}]"}
+                if len(self.outputs) >= 2:
+                    return {"code": f"""{self.inputs[0].code()}.{self.function_collection[self.search_value].identifier}({parameter})[{self.outputs.find(touched_socket.name)}]"""}
                 else:
-                    return {"code": f"run_function_on_{self.uid}"}
+                    return {"code": f"""{self.inputs[0].code()}.{self.function_collection[self.search_value].identifier}({parameter})"""}
 
         else:
             self.add_error("No function selected", "You need to select a function")
@@ -237,5 +271,4 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                             """
                 }
 
-            else:
-                return {"code": "None"}
+        return {"code": ""}
