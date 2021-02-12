@@ -425,15 +425,23 @@ class SN_ScriptingBaseNode:
 
     def get_default_from_operator(self,identifier,operator_line):
         if operator_line != None:
-            props = operator_line.split("(")[-1].split(")")[0]+","
+            props = "(".join(operator_line.split("(")[1:])[:-1]+","
             if identifier+"=" in props:
-                default = props.split(identifier+"=")[-1].split(",")[0]
-                default = default.replace("\"","")
-                default = default.replace("'","")
-                return default
+                default = props.split(identifier+"=")[-1]
+                if "(" in default.split(",")[0]:
+                    default = ",".join(default.split(",")[:-1]).split(")")[0]+")"
+                    return eval(default)
+                else:
+                    default = default.split(",")[0]
+                    if '"' in default or "'" in default:
+                        default = default.replace("\"","")
+                        default = default.replace("'","")
+                        return default
+                    else:
+                        return eval(default)
         return None
-        
-        
+
+
     def add_input_from_prop(self,prop,operator_line=None):
         if prop.type in self.prop_types:
             name = prop.name.replace("_", " ").title()
