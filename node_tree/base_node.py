@@ -468,7 +468,10 @@ class SN_ScriptingBaseNode:
                     inp.set_default(default)
                 else:
                     if not "VECTOR" in inp.subtype and not "COLOR" in inp.subtype:
-                        inp.set_default(prop.default)
+                        if prop.type != "ENUM":
+                            inp.set_default(prop.default)
+                        elif prop.enum_items:
+                            inp.set_default(prop.default)
                     else:
                         inp.set_default(tuple([prop.default]*prop.array_length))
             return inp
