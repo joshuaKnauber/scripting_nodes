@@ -1,5 +1,8 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
+from ..Blend_Data.a_get_data_pointers import get_known_types
+
+
 
 def get_known_collection_functions():
     known_functions = {
@@ -24,6 +27,31 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.3,0.3,0.3),
     }
+
+    def get_cats(self, context):
+        return eval(self.categories)
+
+    def update_cats(self, context):
+        types = get_known_types()[self.current_data_type][self.category_enum]
+        types.insert(0, (self.current_data_type, self.current_data_type, ""))
+        self.types = str(types)
+        self.define_type = self.current_data_type
+
+    def get_types(self, context):
+        return eval(self.types)
+
+    def update_type(self, context):
+        self.search_value = ""
+        self.current_function = ""
+        if self.use_execute:
+            self.remove_input_range(2)
+            self.remove_output_range(1)
+        else:
+            self.remove_input_range(1)
+            self.outputs.clear()
+        index = 1 if self.use_execute else 0
+        self.get_functions(self.define_type, self.inputs[index].subtype == "COLLECTION")
+
 
     def get_functions(self, data_type, is_collection):
         self.function_collection.clear()
@@ -89,6 +117,10 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.remove_input_range(1)
                 self.outputs.clear()
 
+        data_type = self.current_data_type
+        if self.types != "[]":
+            data_type = self.define_type
+
         if self.search_value in self.function_collection and self.search_value != self.current_function:
             if self.use_execute:
                 self.remove_input_range(2)
@@ -99,23 +131,23 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             index = 1 if self.use_execute else 0
             if self.inputs[index].subtype == "COLLECTION":
-                if not self.current_data_type in get_known_collection_functions():
+                if not data_type in get_known_collection_functions():
                     has_parameters = False
                     for data in bpy.data.bl_rna.properties:
-                        if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == self.current_data_type:
+                        if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == data_type:
                             parameters = eval("bpy.data." + data.identifier).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
                             has_parameters = True
 
                     if not has_parameters:
                         try:
-                            parameters = eval("bpy.types." + self.current_data_type + "s").bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+                            parameters = eval("bpy.types." + data_type + "s").bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
                         except:
                             parameters = []
                 else:
-                    parameters = eval(get_known_collection_functions()[self.current_data_type])[self.function_collection[self.search_value].identifier].parameters
+                    parameters = eval(get_known_collection_functions()[data_type])[self.function_collection[self.search_value].identifier].parameters
 
             else:
-                if not self.current_data_type in get_known_functions():
+                if not data_type in get_known_functions():
                     if self.function_collection[self.search_value].identifier in ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]:
                         parameters = []
                         if self.function_collection[self.search_value].identifier == "driver_add":
@@ -171,10 +203,10 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                             self.add_boolean_output("Removed")
 
                     else:
-                        parameters = eval("bpy.types." + self.current_data_type).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+                        parameters = eval("bpy.types." + data_type).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
 
                 else:
-                    parameters = eval(get_known_functions()[self.current_data_type])[self.function_collection[self.search_value].identifier].parameters
+                    parameters = eval(get_known_functions()[data_type])[self.function_collection[self.search_value].identifier].parameters
 
 
             for parameter in parameters:
@@ -203,17 +235,51 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
     search_value: bpy.props.StringProperty(name="Function", update=add_function_sockets)
     function_collection: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)
     use_execute: bpy.props.BoolProperty(default=True, name="Use Execute", description="Function will run on every output access if disabled", update=update_execute)
+    types: bpy.props.StringProperty(default="[]")
+    categories: bpy.props.StringProperty(default="[]")
+    category_enum: bpy.props.EnumProperty(items=get_cats, name="Category", update=update_cats)
+    define_type: bpy.props.EnumProperty(items=get_types, name="Type", description="The type of the blend data you are trying to get from", update=update_type)
+
 
     def on_link_insert(self, link):
         index = 1 if self.use_execute else 0
-        if link.to_socket == self.inputs[index] and link.from_socket.bl_idname == "SN_BlendDataSocket":
-            if link.from_socket.data_type != self.current_data_type or self.inputs[index].subtype != link.from_socket.subtype:
+        socket = link.from_socket
+        if link.to_socket == self.inputs[index] and socket.bl_idname == "SN_BlendDataSocket":
+            if socket.data_type != self.current_data_type or self.inputs[index].subtype != socket.subtype:
                 function = self.search_value
                 self.search_value = ""
-                self.inputs[index].data_type = link.from_socket.data_type
-                self.inputs[index].subtype = link.from_socket.subtype
-                self.inputs[index].default_text = link.from_socket.data_name
-                self.current_data_type = link.from_socket.data_type
+                self.inputs[index].data_type = socket.data_type
+                self.inputs[index].subtype = socket.subtype
+                self.inputs[index].default_text = socket.data_name
+                self.current_data_type = socket.data_type
+
+                self.types = "[]"
+                self.categories = "[]"
+                types = []
+                if socket.data_type in get_known_types():
+                    if type(get_known_types()[socket.data_type]) == dict:
+                        cats = []
+                        for cat in get_known_types()[socket.data_type]:
+                            cats.append((cat, cat, ""))
+                        self.categories = str(cats)
+                        types = get_known_types()[socket.data_type][self.category_enum]
+                    else:
+                        types = get_known_types()[socket.data_type]
+
+                else:
+                    try:
+                        for data_type in dir(bpy.types):
+                            if eval("bpy.types." + socket.data_type) in eval("bpy.types." + data_type).__bases__:
+                                name = eval("bpy.types." + data_type).bl_rna.name if eval("bpy.types." + data_type).bl_rna.name else data_type
+                                types.append((data_type, name, eval("bpy.types." + data_type).bl_rna.description))
+                    except:
+                        types = []
+
+                if types:
+                    types.insert(0, (socket.data_type, socket.data_name, ""))
+                    self.types = str(types)
+                    self.define_type = socket.data_type
+
                 self.get_functions(link.from_socket.data_type, link.from_socket.subtype=="COLLECTION")
                 if function in self.function_collection:
                     self.search_value = function
@@ -227,6 +293,12 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_node(self, context, layout):
         layout.prop(self, "use_execute")
+
+        if self.categories != "[]":
+            layout.prop(self, "category_enum", text="")
+        if self.types != "[]":
+            layout.prop(self, "define_type", text="")
+
         if len(self.function_collection):
             layout.prop_search(self, "search_value", self, "function_collection", text="")
 
