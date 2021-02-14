@@ -200,6 +200,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Fixed run function on data with modifier",
             "Fixed preference properties not working",
             "Fixed double import with random number nodes",
+            "Fixed get asset node",
         ]
         if changelog:
             box = layout.box()
