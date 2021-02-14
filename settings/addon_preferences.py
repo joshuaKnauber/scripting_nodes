@@ -189,6 +189,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
+            "Added auto save option to node trees",
             "Added Run Interface Script and Interface Script Line node",
             "Added Use Execute option to run function on data node",
             "Added report function to print node",
