@@ -46,6 +46,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
     
     origin: bpy.props.EnumProperty(items=[("DEFAULT","DEFAULT","DEFAULT"),
                                           ("SPACE_DATA","SPACE_DATA","SPACE_DATA"),
+                                          ("SPACE","SPACE","SPACE"),
                                           ("PREFERENCES","PREFERENCES","PREFERENCES")],
                                    options={"HIDDEN"})
     
@@ -112,6 +113,10 @@ class SN_OT_CopyProperty(bpy.types.Operator):
     def space_data(self):
         group_path = "spaces[0]" + self.full_path.split("]")[-1]
         return self.construct("Area","Area",group_path)
+    
+    
+    def space(self):
+        return self.construct("Area","Area","spaces[0]")
 
 
     def preferences(self):
@@ -132,6 +137,8 @@ class SN_OT_CopyProperty(bpy.types.Operator):
     def execute(self, context):
         if self.origin == "SPACE_DATA":
             self.copy(self.space_data())
+        elif self.origin == "SPACE":
+            self.copy(self.space())
         elif self.origin == "PREFERENCES":
             self.copy(self.preferences())
         elif self.origin == "DEFAULT":
@@ -161,9 +168,11 @@ def serpens_right_click(self, context):
     
     if property_value and property_pointer:
         op = layout.operator("sn.copy_space_property",text="Serpens | Copy Property",icon="COPYDOWN")
-        
+
         if "Preferences" in property_pointer.bl_rna.identifier:
             op.origin = "PREFERENCES"
+        elif property_pointer.bl_rna.identifier in ["SpaceView3D"]:
+            op.origin = "SPACE"
         elif "bpy.data.screens[" in property_pointer.__repr__():
             op.origin = "SPACE_DATA"
         else:
