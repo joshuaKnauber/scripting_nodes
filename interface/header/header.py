@@ -1,5 +1,18 @@
 import bpy
 
+
+class SN_PT_HeaderSettings(bpy.types.Panel):
+    bl_idname = "SN_PT_HeaderSettings"
+    bl_label = "Settings"
+    bl_space_type = "NODE_EDITOR"
+    bl_region_type = "HEADER"
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(context.scene.sn,"minimal_header",text="Minimize Header",icon="FULLSCREEN_EXIT")
+        layout.prop(context.scene.sn,"insert_sockets",icon="NODE_INSERT_OFF")
+        
+
 def example_dropdown(self, context):
     if context.space_data.tree_type == "ScriptingNodesTree":
         if not context.scene.sn.minimal_header:
@@ -49,4 +62,4 @@ def append_header(self, context):
             row.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id).url = "https://discord.com/invite/NK6kyae"
             row.operator("wm.url_open",text="",icon_value=bpy.context.scene.sn_icons[ "bug" ].icon_id).url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/bugs/"
 
-        layout.prop(context.scene.sn,"minimal_header",text="",icon="FULLSCREEN_EXIT")
+        layout.popover("SN_PT_HeaderSettings",text="",icon="PREFERENCES")

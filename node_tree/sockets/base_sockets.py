@@ -166,13 +166,13 @@ class ScriptingSocket:
         op.is_output = self.is_output
         
         
-    def draw_add_socket(self,layout):
-        op = layout.operator("sn.add_socket", text="",icon="ADD", emboss=False)
+    def draw_add_socket(self,layout,icon="ADD"):
+        op = layout.operator("sn.add_socket", text="",icon=icon, emboss=False)
         op.index = self.get_socket_index()
         op.tree_name = self.node.node_tree.name
         op.node_name = self.node.name
         op.is_output = self.is_output
-        op.idname = self.to_add_idname
+        op.idname = self.to_add_idname if self.to_add_idname else self.bl_idname
         
         
     def draw_disable_socket(self,layout):
@@ -180,21 +180,29 @@ class ScriptingSocket:
         
         
     def draw_as_input(self,row):
-        if self.removable and not self.is_output:
-            self.draw_remove_socket(row)
-        elif self.addable and not self.is_output:
-            self.draw_add_socket(row)
-        elif self.disableable and not self.is_output:
-            self.draw_disable_socket(row)
+        row = row.row()
+        if not self.is_output:
+            if self.removable:
+                self.draw_remove_socket(row)
+            elif self.addable:
+                self.draw_add_socket(row)
+            elif self.disableable:
+                self.draw_disable_socket(row)
+            if self.removable and bpy.context.scene.sn.insert_sockets:
+                self.draw_add_socket(row,"MARKER")
         
         
     def draw_as_output(self,row):
-        if self.removable and self.is_output:
-            self.draw_remove_socket(row)   
-        elif self.addable and self.is_output:
-            self.draw_add_socket(row)
-        elif self.disableable and self.is_output:
-            self.draw_disable_socket(row)
+        row = row.row()
+        if self.is_output:
+            if self.removable:
+                self.draw_remove_socket(row)   
+            elif self.addable:
+                self.draw_add_socket(row)
+            elif self.disableable:
+                self.draw_disable_socket(row)
+            if self.removable and bpy.context.scene.sn.insert_sockets:
+                self.draw_add_socket(row,"MARKER")
     
     
     def draw_variable(self, row):

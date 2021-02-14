@@ -195,6 +195,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                          description="Only show a minimal header")
 
 
+    insert_sockets: bpy.props.BoolProperty(default=False,name="Show Insert Sockets",
+                                         description="Shows Add icons on removable sockets to allow inserting sockets")
+
+
     use_autosave: bpy.props.BoolProperty(default=True,name="Auto Save",description="Save this file automatically")
 
     autosave_delay: bpy.props.FloatProperty(default=120,name="Delay",description="Autosave delay in seconds",min=10)
