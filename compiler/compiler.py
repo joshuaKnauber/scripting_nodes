@@ -555,9 +555,15 @@ def __evaluate_graph(graph, addon_tree, addon_did_once):
     return graph_code, graph_did_once
 
 
+def has_serpens_trees():
+    for ntree in bpy.data.node_groups:
+        if ntree.bl_idname == "ScriptingNodesTree":
+            return True
+    return False
+
 
 def autosave():
     if bpy.context.scene.sn.use_autosave:
-        if bpy.data.is_saved:
+        if bpy.data.is_saved and has_serpens_trees():
             bpy.ops.wm.save_mainfile()
     return bpy.context.scene.sn.autosave_delay
