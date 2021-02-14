@@ -201,6 +201,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Fixed preference properties not working",
             "Fixed double import with random number nodes",
             "Fixed get asset node",
+            "Fixed 3d view properties",
         ]
         if changelog:
             box = layout.box()
