@@ -121,6 +121,21 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     call_invoke: bpy.props.BoolProperty(name="Call Invoke",
                                         description="Calls the invoke function of the operator",
                                         default=True)
+
+
+    def get_context_items(self,context):
+        items = []
+        areas = ["DEFAULT", "VIEW_3D", "IMAGE_EDITOR", "NODE_EDITOR", "SEQUENCE_EDITOR", "CLIP_EDITOR", "DOPESHEET_EDITOR",
+                "DOPESHEET_ACTION_EDITOR", "DOPESHEET_SHAPEKEY_EDITOR", "DOPESHEET_GREASE_PENCIL", "DOPESHEET_MASK_EDITOR", "DOPESHEET_CACHE_FILE",
+                "GRAPH_EDITOR", "NLA_EDITOR", "TEXT_EDITOR", "CONSOLE", "INFO", "TOPBAR", "STATUSBAR", "OUTLINER",
+                "PROPERTIES", "FILE_BROWSER", "PREFERENCES"]
+        for area in areas:
+            items.append((area,area.replace("_"," ").title(),area.replace("_"," ").title()))
+        return items
+
+
+    context: bpy.props.EnumProperty(name="Operator Context",description="The context this operator should run in",
+                                    items=get_context_items)
     
     
     def on_create(self,context):
@@ -146,11 +161,29 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         op = row.operator("sn.test_function",text="Run Operator",icon="PLAY")
         op.node = self.name
 
+        layout.prop(self,"context",text="Context")
+
         layout.prop(self,"call_invoke")
 
 
     def code_evaluate(self, context, touched_socket):
         operator = ""
+
+        context_modes = {
+            "DOPESHEET_ACTION_EDITOR": "ACTION",
+            "DOPESHEET_SHAPEKEY_EDITOR": "SHAPEKEY",
+            "DOPESHEET_GREASE_PENCIL": "GPENCIL",
+            "DOPESHEET_MASK_EDITOR": "MASK",
+            "DOPESHEET_CACHE_FILE": "CACHEFILE"
+        }
+
+        set_context_mode = ""
+        set_context = ""
+        if self.context != "DEFAULT":
+            set_context = f"bpy.context.area.type = '{self.context}'"
+            if self.context in context_modes:
+                set_context_mode = f"bpy.context.space_data.mode = '{context_modes[self.context]}'"
+                set_context = "bpy.context.area.type = 'DOPESHEET_EDITOR'"
         
         if self.use_internal:
             if self.operator:
@@ -178,7 +211,11 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         return {
             "code": f"""
+                    {"op_reset_context = bpy.context.area.type" if set_context else ""}
+                    {set_context}
+                    {set_context_mode}
                     {operator}
+                    {"bpy.context.area.type = op_reset_context" if set_context else ""}
                     {self.outputs[0].code(5)}
                     """
         }

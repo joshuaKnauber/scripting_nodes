@@ -196,6 +196,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added selected output on objects node",
             "Added define type to run function on data node",
             "Added Is Export node",
+            "Added context selection to run operator",
             "Fixed get mesh points node outputs",
             "Fixed run function on data with modifier",
             "Fixed preference properties not working",
