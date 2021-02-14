@@ -1,4 +1,5 @@
 import bpy
+import os
 from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
@@ -30,8 +31,12 @@ class SN_GetAssetNode(bpy.types.Node, SN_ScriptingBaseNode):
         asset_path = ""
         if self.asset and self.asset in self.addon_tree.sn_assets:
             asset_path = self.addon_tree.sn_assets[self.asset].path
+            if self.addon_tree.doing_export:
+                asset_path = "os.path.join(os.path.dirname(__file__),'assets','" + os.path.basename(asset_path) +"')"
+            else:
+                asset_path = f"r\"{asset_path}\""
         else:
             self.add_error("No Asset", "No Asset selected")
         return {
-            "code": f"r\"{asset_path}\""
+            "code": asset_path
         }
