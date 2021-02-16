@@ -1,4 +1,5 @@
 import bpy
+import json
 
 
 class SN_OT_CopyCommand(bpy.types.Operator):
