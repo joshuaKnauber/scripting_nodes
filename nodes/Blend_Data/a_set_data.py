@@ -124,15 +124,6 @@ class SN_SetDataNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.collection_error = True
 
 
-    def on_copy(self, node):
-        self.remove_input_range(2)
-        self.collection_error = False
-        self.current_data_type = ""
-        self.types = "[]"
-        self.categories = "[]"
-        self.no_data_error = False
-
-
     def on_link_insert(self,link):
         if link.to_socket == self.inputs[1]:
             self.update_inputs(link.from_socket)
