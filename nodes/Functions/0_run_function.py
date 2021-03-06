@@ -50,21 +50,26 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_return(self, context):
         if not self.search_value:
-            for i, out in enumerate(self.outputs):
-                if i:
-                    try: self.outputs.remove(out)
-                    except: pass
+            if self.use_execute:
+                self.remove_output_range(1)
+            else:
+                self.outputs.clear()
 
         if self.search_value in self.return_collection:
+            if self.use_execute:
+                index = 1
+            else:
+                index = 0
             for graph in self.addon_tree.sn_graphs:
                 for node in graph.node_tree.nodes:
                     if node.bl_idname == "SN_ReturnNode":
                         if node.uid == self.return_collection[self.search_value].node_uid:
-                            if len(self.outputs) != len(node.inputs)-1:
-                                for i, out in enumerate(self.outputs):
-                                    if i:
-                                        try: self.outputs.remove(out)
-                                        except: pass
+                            length = len(self.outputs) if self.use_execute else len(self.outputs)+1
+                            if length != len(node.inputs)-1:
+                                if self.use_execute:
+                                    self.remove_output_range(1)
+                                else:
+                                    self.outputs.clear()
                                 self.make_collection("NAME_CHANGE")
 
                             parameters = []
@@ -72,7 +77,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 if inp.bl_idname != "SN_DynamicVariableSocket":
                                     parameters.append([inp.variable_name, inp.bl_idname])
                             for x, parameter in enumerate(parameters):
-                                self.outputs[x+1].default_text = parameter[0]
+                                self.outputs[x+index].default_text = parameter[0]
 
 
     def make_collection(self, parameter=""):
@@ -92,6 +97,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
         if self.search_value in self.return_collection:
+            if self.use_execute:
+                index = 1
+            else:
+                index = 0
             for graph in self.addon_tree.sn_graphs:
                 for node in graph.node_tree.nodes:
                     if node.bl_idname == "SN_ReturnNode":
@@ -104,9 +113,9 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     else:
                                         parameters.append([inp.variable_name, inp.bl_idname, inp.subtype])
 
-                            if len(parameters) != len(self.outputs[1:]):
-                                if len(parameters) > len(self.outputs[1:]):
-                                    output_len = len(self.outputs)-1
+                            if len(parameters) != len(self.outputs[index:]):
+                                if len(parameters) > len(self.outputs[index:]):
+                                    output_len = len(self.outputs)-index
                                     for x, parameter in enumerate(parameters):
                                         if x >= output_len:
                                             out = self.add_output(parameter[1],parameter[0])
@@ -114,34 +123,46 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 else:
                                     removed = False
                                     for x, parameter in enumerate(parameters):
-                                        if parameter[0] != self.outputs[x+1].default_text:
+                                        if parameter[0] != self.outputs[x+index].default_text:
                                             removed = True
-                                            self.outputs.remove(self.outputs[x+1])
+                                            self.outputs.remove(self.outputs[x+index])
                                     if not removed:
                                         self.outputs.remove(self.outputs[-1])
 
                             for x, parameter in enumerate(parameters):
-                                self.outputs[x+1].default_text = parameter[0]
-                                self.outputs[x+1].subtype = parameter[2]
-                                if self.outputs[x+1].bl_idname == "SN_BlendDataSocket":
-                                    self.outputs[x+1].data_type = parameter[3]
-                                    self.outputs[x+1].data_name = parameter[4]
-                                    self.outputs[x+1].data_identifier = parameter[5]
+                                self.outputs[x+index].default_text = parameter[0]
+                                self.outputs[x+index].subtype = parameter[2]
+                                if self.outputs[x+index].bl_idname == "SN_BlendDataSocket":
+                                    self.outputs[x+index].data_type = parameter[3]
+                                    self.outputs[x+index].data_name = parameter[4]
+                                    self.outputs[x+index].data_identifier = parameter[5]
 
 
         else:
-            for i, out in enumerate(self.outputs):
-                if i:
-                    try: self.outputs.remove(out)
-                    except: pass
+            if self.use_execute:
+                self.remove_output_range(1)
+            else:
+                self.outputs.clear()
         if parameter != "NAME_CHANGE":
             self.update_return(None)
+
+    def update_execute(self, context):
+        if self.use_execute:
+            inp = self.add_execute_input("Run Function")
+            self.inputs.move(len(self.inputs)-1, 0)
+            out = self.add_execute_output("Execute").mirror_name = True
+            self.outputs.move(len(self.outputs)-1, 0)
+        else:
+            self.inputs.remove(self.inputs[0])
+            self.outputs.remove(self.outputs[0])
 
 
     recursion_warning: bpy.props.BoolProperty()
     func_uid: bpy.props.StringProperty()
     search_value: bpy.props.StringProperty(name="Search value", update=update_return)
     return_collection: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)
+    use_execute: bpy.props.BoolProperty(default=True, name="Use Execute", description="Function will run on every output access if disabled", update=update_execute)
+
 
     def on_outside_update(self,node):
         if node == self:
@@ -168,10 +189,15 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                             parameters.append([out.variable_name, out.bl_idname, out.subtype, out.enum_values])
                         else:
                             parameters.append([out.variable_name, out.bl_idname, out.subtype])
+                
+                if self.use_execute:
+                    index = 1
+                else:
+                    index = 0
 
-                if len(parameters) != len(self.inputs[1:]):
-                    if len(parameters) > len(self.inputs[1:]):
-                        input_len = len(self.inputs)-1
+                if len(parameters) != len(self.inputs[index:]):
+                    if len(parameters) > len(self.inputs[index:]):
+                        input_len = len(self.inputs)-index
                         for x, parameter in enumerate(parameters):
                             if x >= input_len:
                                 inp = self.add_input(parameter[1],parameter[0])
@@ -179,18 +205,18 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     else:
                         removed = False
                         for x, parameter in enumerate(parameters):
-                            if parameter[0] != self.inputs[x+1].default_text:
+                            if parameter[0] != self.inputs[x+index].default_text:
                                 removed = True
-                                self.inputs.remove(self.inputs[x+1])
+                                self.inputs.remove(self.inputs[x+index])
                         if not removed:
                             self.inputs.remove(self.inputs[-1])
 
 
                 for x, parameter in enumerate(parameters):
-                    self.inputs[x+1].default_text = parameter[0]
-                    self.inputs[x+1].subtype = parameter[2]
-                    if self.inputs[x+1].bl_idname == "SN_StringSocket":
-                        self.inputs[x+1].enum_values = parameter[3]
+                    self.inputs[x+index].default_text = parameter[0]
+                    self.inputs[x+index].subtype = parameter[2]
+                    if self.inputs[x+index].bl_idname == "SN_StringSocket":
+                        self.inputs[x+index].enum_values = parameter[3]
 
         else:
             self.make_collection()
@@ -201,10 +227,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.func_name in self.addon_tree.sn_nodes["SN_FunctionNode"].items:
             item = self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name]
             if item.node_uid != self.func_uid:
-                for i, inp in enumerate(self.inputs):
-                    if i:
-                        try: self.inputs.remove(inp)
-                        except: pass
+                if self.use_execute:
+                    self.remove_input_range(1)
+                else:
+                    self.inputs.clear()
                 self.func_uid = item.node_uid
 
             if self.what_start_idname() == "SN_FunctionNode":
@@ -216,10 +242,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             self.func_uid = ""
             self.search_value = ""
-            for i, inp in enumerate(self.inputs):
-                if i:
-                    try: self.inputs.remove(inp)
-                    except: pass
+            if self.use_execute:
+                self.remove_input_range(1)
+            else:
+                self.inputs.clear()
             self.make_collection()
 
         self.auto_compile()
@@ -239,6 +265,8 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_execute_output("Execute").mirror_name = True
 
     def draw_node(self,context,layout):
+        layout.prop(self, "use_execute")
+
         row = layout.row()
         row.scale_y = 1.2
         row.enabled = get_module(self.addon_tree) != None and self.func_name != ""
