@@ -228,8 +228,8 @@ class SN_ScriptingBaseNode:
                 for link in out.links:
                     if link.to_socket == temp_link.to_socket:
                         return link
-                    
-                    
+
+
     def __matching_inp_link(self,temp_link):
         for inp in self.inputs:
             if inp == temp_link.to_socket:
@@ -246,20 +246,21 @@ class SN_ScriptingBaseNode:
 
 
     def after_link_insert(self,link):
-        link = self.__real_link(link)
-        if link:
-            if link.to_socket.group == link.from_socket.group:
-                if self == link.to_node:
-                    link.to_socket.update_socket(self,link)
+        if link in list(self.node_tree.links):
+            link = self.__real_link(link)
+            if link:
+                if link.to_socket.group == link.from_socket.group:
+                    if self == link.to_node:
+                        link.to_socket.update_socket(self,link)
+                    else:
+                        link.from_socket.update_socket(self,link)
+
+                    self.on_link_insert(link)
+
                 else:
-                    link.from_socket.update_socket(self,link)
-
-                self.on_link_insert(link)
-
-            else:
-                try: self.node_tree.links.remove(link)
-                except: pass
-            self.auto_compile()
+                    try: self.node_tree.links.remove(link)
+                    except: pass
+                self.auto_compile()
 
 
     def insert_link(self,link):
@@ -538,21 +539,22 @@ class SN_ScriptingBaseNode:
     
     def change_socket_type(self,socket,idname):
         links = []
-        for link in socket.links:
-            links.append(link)
         if socket.is_output:
+            for link in socket.links:
+                links.append(link.to_socket)
             new_socket = self.__change_socket(self.outputs,socket,idname)
             for link in links:
-                if link.to_socket.group == new_socket.group:
-                    self.node_tree.links.new(new_socket,link.to_socket)
+                self.node_tree.links.new(new_socket, link)
+
         else:
+            for link in socket.links:
+                links.append(link.from_socket)
             new_socket = self.__change_socket(self.inputs,socket,idname)
             for link in links:
-                if new_socket.group == link.from_socket.group:
-                    self.node_tree.links.new(link.from_socket,new_socket)
+                self.node_tree.links.new(link, new_socket)
         return new_socket
-            
-    
+
+
     ### EVALUATE CODE
     
     
