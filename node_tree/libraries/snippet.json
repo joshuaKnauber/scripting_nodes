@@ -1,0 +1,273 @@
+{
+    "nodes": [
+        {
+            "bl_idname": "SN_ObjectsNode",
+            "properties": {
+                "name": "Objects",
+                "label": "",
+                "use_custom_color": true,
+                "color": [
+                    0.30000001192092896,
+                    0.30000001192092896,
+                    0.30000001192092896
+                ],
+                "location": [
+                    -155.48440551757812,
+                    -3.0113449096679688
+                ],
+                "return_type": "ALL",
+                "node_tree_uid": "3AF3E",
+                "addon_tree_uid": "3AF3E",
+                "uid": "BA599"
+            },
+            "inputs": [],
+            "outputs": [
+                [],
+                [
+                    {
+                        "name": "Get Data",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "bl_idname": "SN_OperatorNode",
+            "properties": {
+                "name": "Operator",
+                "label": "",
+                "use_custom_color": true,
+                "color": [
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    0.20000000298023224
+                ],
+                "location": [
+                    -25.384979248046875,
+                    424.1370849609375
+                ],
+                "node_tree_uid": "3AF3E",
+                "addon_tree_uid": "3AF3E",
+                "uid": "94306",
+                "operator_name": "my operator",
+                "operator_description": "test",
+                "invoke_option": "invoke_props_dialog",
+                "property_index": 0,
+                "select_property": ""
+            },
+            "inputs": [
+                [],
+                []
+            ],
+            "outputs": [
+                [],
+                [
+                    {
+                        "name": "Print",
+                        "index": 0
+                    }
+                ],
+                [
+                    {
+                        "name": "Label",
+                        "index": 0
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "bl_idname": "SN_GetIconNode",
+            "properties": {
+                "name": "Icon",
+                "label": "",
+                "use_custom_color": true,
+                "color": [
+                    0.30000001192092896,
+                    0.30000001192092896,
+                    0.30000001192092896
+                ],
+                "location": [
+                    255.245361328125,
+                    314.9244079589844
+                ],
+                "node_tree_uid": "3AF3E",
+                "addon_tree_uid": "3AF3E",
+                "uid": "FD25D",
+                "icon_source": "BLENDER",
+                "icon": 213,
+                "custom_icon": ""
+            },
+            "inputs": [],
+            "outputs": [
+                [
+                    {
+                        "name": "Label",
+                        "index": 2
+                    }
+                ]
+            ]
+        },
+        {
+            "bl_idname": "SN_LabelNode",
+            "properties": {
+                "name": "Label",
+                "label": "",
+                "use_custom_color": true,
+                "color": [
+                    0.30000001192092896,
+                    0.30000001192092896,
+                    0.30000001192092896
+                ],
+                "location": [
+                    456.1302490234375,
+                    381.8894958496094
+                ],
+                "node_tree_uid": "3AF3E",
+                "addon_tree_uid": "3AF3E",
+                "uid": "7B870"
+            },
+            "inputs": [
+                [
+                    {
+                        "name": "Operator",
+                        "index": 2
+                    }
+                ],
+                [],
+                [
+                    {
+                        "name": "Icon",
+                        "index": 0
+                    }
+                ]
+            ],
+            "outputs": []
+        },
+        {
+            "bl_idname": "SN_GetDataFromIDNode",
+            "properties": {
+                "name": "Get Data",
+                "label": "",
+                "use_custom_color": true,
+                "color": [
+                    0.30000001192092896,
+                    0.30000001192092896,
+                    0.30000001192092896
+                ],
+                "location": [
+                    44.84967041015625,
+                    22.59427261352539
+                ],
+                "node_tree_uid": "3AF3E",
+                "addon_tree_uid": "3AF3E",
+                "uid": "FF638",
+                "data_type": "STRING",
+                "current_data_type": "Object",
+                "collection_error": false,
+                "no_data_error": false,
+                "types": "[('Object', 'Object', ''), ('Mesh', 'Mesh', ''), ('Light', 'Light', ''), ('Camera', 'Camera', ''), ('GreasePencil', 'GPencil', ''), ('Armature', 'Armature', ''), ('BlendDataProbes', 'Probe', ''), ('Speaker', 'Speaker', ''), ('Curve', 'Curve', ''), ('BlendDataFonts', 'Font', ''), ('Volume', 'Volume', ''), ('Lattice', 'Lattice', '')]",
+                "categories": "[]",
+                "category_enum": "",
+                "define_type": "Object"
+            },
+            "inputs": [
+                [
+                    {
+                        "name": "Objects",
+                        "index": 1
+                    }
+                ]
+            ],
+            "outputs": [
+                [],
+                [
+                    {
+                        "name": "Print",
+                        "index": 1
+                    }
+                ],
+                []
+            ]
+        },
+        {
+            "bl_idname": "SN_PrintNode",
+            "properties": {
+                "name": "Print",
+                "label": "",
+                "use_custom_color": true,
+                "color": [
+                    0.30000001192092896,
+                    0.30000001192092896,
+                    0.30000001192092896
+                ],
+                "location": [
+                    268.27569580078125,
+                    88.42810821533203
+                ],
+                "node_tree_uid": "3AF3E",
+                "addon_tree_uid": "3AF3E",
+                "uid": "2A909",
+                "has_report": true,
+                "is_report": true,
+                "report_type": "INFO"
+            },
+            "inputs": [
+                [
+                    {
+                        "name": "Operator",
+                        "index": 1
+                    }
+                ],
+                [
+                    {
+                        "name": "Get Data",
+                        "index": 1
+                    }
+                ],
+                [],
+                []
+            ],
+            "outputs": [
+                []
+            ]
+        },
+        {
+            "bl_idname": "SN_BoolVectorNode",
+            "properties": {
+                "name": "Boolean Vector",
+                "label": "",
+                "use_custom_color": true,
+                "color": [
+                    0.30000001192092896,
+                    0.30000001192092896,
+                    0.30000001192092896
+                ],
+                "location": [
+                    324.751953125,
+                    -140.5734405517578
+                ],
+                "node_tree_uid": "3AF3E",
+                "addon_tree_uid": "3AF3E",
+                "uid": "ABF63",
+                "value": [
+                    false,
+                    false,
+                    false
+                ],
+                "value_four": [
+                    false,
+                    false,
+                    false,
+                    false
+                ],
+                "use_four": false
+            },
+            "inputs": [],
+            "outputs": [
+                []
+            ]
+        }
+    ]
+}

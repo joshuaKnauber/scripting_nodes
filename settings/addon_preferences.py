@@ -189,20 +189,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
-            "Added auto save option to node trees",
-            "Added Run Interface Script and Interface Script Line node",
-            "Added Use Execute option to run function on data node",
-            "Added report function to print node",
-            "Added selected output on objects node",
-            "Added define type to run function on data node",
-            "Added Is Export node",
-            "Added context selection to run operator",
-            "Fixed get mesh points node outputs",
-            "Fixed run function on data with modifier",
-            "Fixed preference properties not working",
-            "Fixed double import with random number nodes",
-            "Fixed get asset node",
-            "Fixed 3d view properties",
+            "Option to enable python tooltips in header",
         ]
         if changelog:
             box = layout.box()

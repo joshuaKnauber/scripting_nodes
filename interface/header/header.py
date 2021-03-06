@@ -11,6 +11,7 @@ class SN_PT_HeaderSettings(bpy.types.Panel):
         layout = self.layout
         layout.prop(context.scene.sn,"minimal_header",text="Minimize Header",icon="FULLSCREEN_EXIT")
         layout.prop(context.scene.sn,"insert_sockets",icon="NODE_INSERT_OFF")
+        layout.prop(context.preferences.view,"show_tooltips_python",text="Dev Tool Tips",icon="INFO")
         
 
 def example_dropdown(self, context):

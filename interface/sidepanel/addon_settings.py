@@ -45,3 +45,9 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         row = col.row()
         row.enabled = context.scene.sn.use_autosave
         row.prop(context.scene.sn, "autosave_delay")
+
+
+
+        # layout.separator()
+        # layout.operator("sn.save_snippet")
+        # layout.operator("sn.load_snippet")
