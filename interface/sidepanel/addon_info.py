@@ -39,4 +39,8 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
         
         row = layout.row()
         row.scale_y = 1.5
-        row.operator("sn.save_addon",text="Save Addon",icon="FILE_TICK")
+        col = row.column(align=True)
+        col.operator("sn.save_addon",text="Save Addon",icon="FILE_TICK")
+        row = col.row()
+        row.scale_y = 0.7
+        row.operator("sn.export_to_marketplace",text="Add to Marketplace",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id)
