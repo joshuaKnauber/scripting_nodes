@@ -189,6 +189,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
+            "Object Type Node",
             "Option to enable python tooltips in header",
             "Added use execute for run function node",
             "Fixed print node set to report with multiple inputs",
