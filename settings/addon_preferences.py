@@ -189,12 +189,13 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
-            "Object Type Node",
-            "Get/Set data for collections",
+            "Added 'Object Type' node",
+            "Added functionality to get/set properties of collections",
             "Option to enable python tooltips in header",
-            "Added use execute for run function node",
+            "Added use execute checkbox for the run function node",
             "Fixed print node set to report with multiple inputs",
-            "Fixed crash when copying blend data nodes"
+            "Fixed crash when copying blend data nodes",
+            "More smaller bugfixes"
         ]
         if changelog:
             box = layout.box()

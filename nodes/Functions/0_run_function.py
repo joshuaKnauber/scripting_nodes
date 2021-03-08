@@ -290,11 +290,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
             if not self.use_execute:
-                if len(self.outputs) >= 2:
-                    return {"code": f"""{self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_code(parameters)})[{self.outputs.find(touched_socket.name)}]"""}
-                else:
-                    return {"code": f"""{self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_code(parameters)})"""}
-
+                return {"code": f"""{self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_code(parameters)})[{self.outputs.find(touched_socket.name)}]"""}
 
             if touched_socket == self.inputs[0]:
                 return {
