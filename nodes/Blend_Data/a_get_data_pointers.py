@@ -66,7 +66,6 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     current_data_type: bpy.props.StringProperty(default="")
-    collection_error: bpy.props.BoolProperty(default=False)
     no_data_error: bpy.props.BoolProperty(default=False)
     types: bpy.props.StringProperty(default="[]")
     categories: bpy.props.StringProperty(default="[]")
@@ -85,9 +84,15 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if hasattr(prop, "identifier") and not prop.name == "RNA":
                         out = self.add_blend_data_output(prop.name.replace("_", " ").title())
                         out.removable = True
-                        out.data_type = prop.fixed_type.identifier
-                        out.data_name = prop.fixed_type.name
-                        out.data_identifier = prop.identifier
+                        if hasattr(prop, "srna") and prop.srna:
+                            out.data_type = prop.srna.identifier
+                            out.data_name = prop.fixed_type.name
+                            out.data_identifier = prop.identifier
+                        else:
+                            out.data_type = prop.fixed_type.identifier
+                            out.data_name = prop.fixed_type.name
+                            out.data_identifier = prop.identifier
+
         except:
             self.outputs.clear()
         if not len(self.outputs):
@@ -95,49 +100,41 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         
     def update_outputs(self,socket):
-        self.collection_error = False
         self.no_data_error = False
-        if socket.subtype == "NONE":
-            if socket.data_type == self.current_data_type and not len(self.outputs):
-                self.add_data_outputs(socket.data_type)
-            elif socket.data_type != self.current_data_type:
-                self.outputs.clear()
-                self.add_data_outputs(socket.data_type)
+        if socket.data_type == self.current_data_type and not len(self.outputs):
+            self.add_data_outputs(socket.data_type)
+        elif socket.data_type != self.current_data_type:
+            self.outputs.clear()
+            self.add_data_outputs(socket.data_type)
 
-                self.types = "[]"
-                self.categories = "[]"
-                types = []
-                if socket.data_type in get_known_types():
-                    if type(get_known_types()[socket.data_type]) == dict:
-                        cats = []
-                        for cat in get_known_types()[socket.data_type]:
-                            cats.append((cat, cat, ""))
-                        self.categories = str(cats)
-                        types = get_known_types()[socket.data_type][self.category_enum]
-                    else:
-                        types = get_known_types()[socket.data_type]
-
-                else:
-                    try:
-                        for data_type in dir(bpy.types):
-                            if eval("bpy.types." + socket.data_type) in eval("bpy.types." + data_type).__bases__:
-                                name = eval("bpy.types." + data_type).bl_rna.name if eval("bpy.types." + data_type).bl_rna.name else data_type
-                                types.append((data_type, name, eval("bpy.types." + data_type).bl_rna.description))
-                    except:
-                        types = []
-
-                if types:
-                    types.insert(0, (socket.data_type, socket.data_name, ""))
-                    self.types = str(types)
-                    self.define_type = socket.data_type
-
-            self.current_data_type = socket.data_type
-        else:
             self.types = "[]"
             self.categories = "[]"
-            self.outputs.clear()
-            self.current_data_type = ""
-            self.collection_error = True
+            types = []
+            if socket.data_type in get_known_types():
+                if type(get_known_types()[socket.data_type]) == dict:
+                    cats = []
+                    for cat in get_known_types()[socket.data_type]:
+                        cats.append((cat, cat, ""))
+                    self.categories = str(cats)
+                    types = get_known_types()[socket.data_type][self.category_enum]
+                else:
+                    types = get_known_types()[socket.data_type]
+
+            else:
+                try:
+                    for data_type in dir(bpy.types):
+                        if eval("bpy.types." + socket.data_type) in eval("bpy.types." + data_type).__bases__:
+                            name = eval("bpy.types." + data_type).bl_rna.name if eval("bpy.types." + data_type).bl_rna.name else data_type
+                            types.append((data_type, name, eval("bpy.types." + data_type).bl_rna.description))
+                except:
+                    types = []
+
+            if types:
+                types.insert(0, (socket.data_type, socket.data_name, ""))
+                self.types = str(types)
+                self.define_type = socket.data_type
+
+        self.current_data_type = socket.data_type
 
         
     def on_link_insert(self,link):
@@ -151,8 +148,6 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.types != "[]":
             layout.prop(self, "define_type", text="")
 
-        if self.collection_error:
-            layout.label(text="Connect single data block",icon="ERROR")
         elif self.no_data_error:
             layout.label(text="No data found",icon="ERROR")
 

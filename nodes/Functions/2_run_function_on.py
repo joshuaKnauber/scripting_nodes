@@ -69,7 +69,7 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                 if not has_functions:
                     try:
-                        for function in eval("bpy.types." + data_type + "s").bl_rna.functions:
+                        for function in eval("bpy.types." + data_type).bl_rna.functions:
                             item = self.function_collection.add()
                             item.name = function.identifier.replace("_", " ").title()
                             item.identifier = function.identifier
@@ -140,7 +140,7 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                     if not has_parameters:
                         try:
-                            parameters = eval("bpy.types." + data_type + "s").bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+                            parameters = eval("bpy.types." + data_type).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
                         except:
                             parameters = []
                 else:

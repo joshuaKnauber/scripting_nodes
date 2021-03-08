@@ -34,7 +34,6 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     current_data_type: bpy.props.StringProperty(default="")
-    collection_error: bpy.props.BoolProperty(default=False)
     no_data_error: bpy.props.BoolProperty(default=False)
     types: bpy.props.StringProperty(default="[]")
     categories: bpy.props.StringProperty(default="[]")
@@ -54,9 +53,15 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
                         out = self.add_blend_data_output(prop.name.replace("_", " ").title())
                         out.removable = True
                         out.subtype = "COLLECTION"
-                        out.data_type = prop.fixed_type.identifier
-                        out.data_identifier = prop.identifier
-                        out.data_name = prop.fixed_type.name
+                        if hasattr(prop, "srna") and prop.srna:
+                            out.data_type = prop.srna.identifier
+                            out.data_name = prop.fixed_type.name
+                            out.data_identifier = prop.identifier
+                        else:
+                            out.data_type = prop.fixed_type.identifier
+                            out.data_name = prop.fixed_type.name
+                            out.data_identifier = prop.identifier
+
         except:
             self.outputs.clear()
         if not len(self.outputs):
@@ -64,7 +69,6 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         
     def update_outputs(self,socket):
-        self.collection_error = False
         self.no_data_error = False
         if socket.subtype == "NONE":
             if socket.data_type == self.current_data_type and not len(self.outputs):
@@ -106,7 +110,6 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.categories = "[]"
             self.outputs.clear()
             self.current_data_type = ""
-            self.collection_error = True
 
 
     def on_link_insert(self,link):
@@ -119,9 +122,7 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.prop(self, "category_enum", text="")
         if self.types != "[]":
             layout.prop(self, "define_type", text="")
-        
-        if self.collection_error:
-            layout.label(text="Connect single data block",icon="ERROR")
+
         elif self.no_data_error:
             layout.label(text="No data found",icon="ERROR")
 
