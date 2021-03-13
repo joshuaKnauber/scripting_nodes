@@ -190,6 +190,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_changelog(self,layout):
         changelog = [
             "Added version number to default export name",
+            "Added color wheel option to display property node"
         ]
         if changelog:
             box = layout.box()
