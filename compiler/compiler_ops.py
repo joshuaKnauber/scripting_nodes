@@ -75,13 +75,18 @@ class SN_OT_ExportAddon(bpy.types.Operator):
         return True
 
     def invoke(self, context, event):
-        zip_name = context.scene.sn.addon_tree().sn_graphs[0].name.lower().replace(" ","_").replace("-","_") + ".zip"
+        graph = context.scene.sn.addon_tree().sn_graphs[0]
+        zip_name = graph.name.lower().replace(" ","_").replace("-","_")
+        zip_name += "_" + str(tuple(graph.version)).replace("(","").replace(")","").replace(", ",".") + ".zip"
+
         self.filepath = os.path.join(self.filepath,zip_name)
+
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
     def make_archive(self, source, destination):
-        shutil.make_archive(destination.split('.')[0], "zip", os.path.dirname(destination), os.path.basename(source))
+        destination_folder = (".").join(destination.split('.')[:-1])
+        shutil.make_archive(destination_folder, "zip", os.path.dirname(destination), os.path.basename(source))
 
     def execute(self, context):
         if not ".zip" in self.filepath:

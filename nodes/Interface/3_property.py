@@ -103,6 +103,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             if data:
                 self.label = labels[data["property"]["type"]]
                 self.setup_inputs(data["property"]["type"])
+                self.prop_type = data["property"]["type"]
                 self.inputs["Text"].set_default(data["property"]["name"])
                 self.prop_name = data["property"]["name"]
                 if data["data_block"]["type"]:
@@ -121,6 +122,17 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     copied_path: bpy.props.StringProperty(update=update_copied)
     prop_name: bpy.props.StringProperty()
+    prop_type: bpy.props.StringProperty()
+
+
+    def update_color_wheel(self,context):
+        for inp in self.inputs:
+            if not inp.socket_type in ["INTERFACE","BLEND_DATA"]:
+                inp.hide = self.color_wheel
+
+
+    color_wheel: bpy.props.BoolProperty(default=False,name="Show Color Wheel",description="Show this property as a color wheel (only for color properties)",update=update_color_wheel)
+    cw_value_slider: bpy.props.BoolProperty(default=False,name="Show Value Slider",description="Show a value slider for the color wheel")
 
 
     def draw_node(self,context,layout):
@@ -130,6 +142,11 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             row.operator("sn.paste_property_path",text="Paste Property",icon="PASTEDOWN").node = self.name
         else:
             layout.operator("sn.reset_property_node",icon="UNLINKED",text=self.prop_name).node = self.name
+
+            if self.prop_type == "FLOAT":
+                layout.prop(self,"color_wheel")
+                if self.color_wheel:
+                    layout.prop(self,"cw_value_slider")
 
 
     def code_evaluate(self, context, touched_socket):
@@ -157,8 +174,11 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         if data["group_path"]:
             data_path += "." + data["group_path"] if data_path else data["group_path"]
         
-        return {
-            "code": f"""
+        if not self.color_wheel:
+            return {"code": f"""
                     {layout}.prop({data_path},"{data["property"]["identifier"]}",icon_value={self.inputs['Icon'].code()},{values})
-                    """
-        }
+                    """}
+        else:
+            return {"code": f"""
+                    {layout}.template_color_picker({data_path},"{data["property"]["identifier"]}",value_slider={self.cw_value_slider})
+                    """}
