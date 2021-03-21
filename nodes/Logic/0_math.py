@@ -41,6 +41,21 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.operation == "EXPRESSION":
             layout.prop(self,"expression",text="")
 
+
+    def replace_in_expression(self,expression, varname, value):
+        parts = expression.split(varname)
+        
+        for char in string.ascii_lowercase:
+            if not char == varname:
+                expression = expression.replace(f"{varname}{char}", f"#{char}")
+                expression = expression.replace(f"{char}{varname}", f"{char}#")
+
+        expression = expression.replace(varname,value)
+        expression = expression.replace("#",varname)
+
+        return expression
+
+
     def code_evaluate(self, context, touched_socket):
 
         if not self.operation == "EXPRESSION":
@@ -58,7 +73,7 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             expression = self.expression
             for inp in self.inputs:
-                expression = expression.replace(inp.default_text, inp.code())
+                expression = self.replace_in_expression(expression, inp.default_text, inp.code())
             
             return {
                 "code": f"eval(\"{expression}\")"
@@ -67,7 +82,7 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             expression = self.expression
             for inp in self.inputs:
-                expression = expression.replace(inp.default_text, inp.code())
+                expression = self.replace_in_expression(expression, inp.default_text, inp.code())
             
             return {
                 "code": f"sn_cast_int(eval(\"{expression}\"))"
