@@ -195,6 +195,8 @@ def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
             col.prop(var,"float_three_default")
         elif var.vector_size == 4:
             col.prop(var,"float_four_default")
+
+        col.prop(var,"float_precision")
         
         col.separator()
         

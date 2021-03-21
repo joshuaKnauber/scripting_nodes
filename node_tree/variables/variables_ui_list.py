@@ -423,6 +423,11 @@ class SN_Variable(bpy.types.PropertyGroup):
                                    name="Soft Maximum",
                                    description="A soft maximum value which can be overwritten by typing",
                                     update=trigger_update)
+
+    float_precision: bpy.props.IntProperty(default=2,
+                                   name="Precision",
+                                   description="Number of decimal places",
+                                    update=trigger_update)
     
     bool_default: bpy.props.BoolProperty(default=True,
                                         name="Default Value",
@@ -505,11 +510,13 @@ class SN_Variable(bpy.types.PropertyGroup):
         if self.property_unit != "NO_UNITS":
             property_line += f"unit='{self.property_unit}',"
         property_line += f"options={self.property_options},"
+        if self.var_type == "FLOAT":
+            property_line += f"precision={self.float_precision}, "
         if self.has_update():
             if self.use_self:
-                property_line += f"update=update_" + self.identifier + "_" + self.from_node_uid + ","
+                property_line += f"update=update_{self.identifier}_{self.from_node_uid},"
             else:
-                property_line += f"update=update_" + self.identifier + ","
+                property_line += f"update=update_{self.identifier},"
         property_line += f"{self.property_default()}"
         property_line += f"{self.property_min_max()})\n"
         return property_line
