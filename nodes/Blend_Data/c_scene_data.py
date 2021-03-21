@@ -10,6 +10,7 @@ class SN_ObjectsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Objects"
     
     data_type = "Object"
+    data_type_collection = "BlendDataObjects"
     data_identifier = "objects"
     
     active_data = "bpy.context.active_object"
@@ -23,6 +24,7 @@ class SN_MetaballsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Metaballs"
     
     data_type = "MetaBall"
+    data_type_collection = "BlendDataMetaBalls"
     data_identifier = "metaballs"
 
 
@@ -33,6 +35,7 @@ class SN_CurvesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Curves"
     
     data_type = "Curve"
+    data_type_collection = "BlendDataCurves"
     data_identifier = "curves"
     
     
@@ -43,6 +46,7 @@ class SN_ActionsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Actions"
     
     data_type = "Action"
+    data_type_collection = "BlendDataActions"
     data_identifier = "actions"
     
     
@@ -53,6 +57,7 @@ class SN_ArmaturesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Armatures"
     
     data_type = "Armature"
+    data_type_collection = "BlendDataArmatures"
     data_identifier = "armatures"
     
     
@@ -63,6 +68,7 @@ class SN_CollectionsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode)
     bl_label = "Collections"
     
     data_type = "Collection"
+    data_type_collection = "BlendDataCollections"
     data_identifier = "collections"
     
     active_data = "bpy.context.scene.collection"
@@ -75,6 +81,7 @@ class SN_ImagesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Images"
     
     data_type = "Image"
+    data_type_collection = "BlendDataImages"
     data_identifier = "images"
     
     
@@ -85,6 +92,7 @@ class SN_LightsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Lights"
     
     data_type = "Light"
+    data_type_collection = "BlendDataLights"
     data_identifier = "lights"
     
     
@@ -95,6 +103,7 @@ class SN_MaterialsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Materials"
     
     data_type = "Material"
+    data_type_collection = "BlendDataMaterials"
     data_identifier = "materials"
     
     
@@ -105,6 +114,7 @@ class SN_MeshesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Meshes"
     
     data_type = "Mesh"
+    data_type_collection = "BlendDataMeshes"
     data_identifier = "meshes"
     
     active_data = "bpy.context.active_object.data"
@@ -117,6 +127,7 @@ class SN_NodeGroupsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Node Groups"
     
     data_type = "NodeTree"
+    data_type_collection = "BlendDataNodeTrees"
     data_identifier = "node_groups"
     
     
@@ -127,6 +138,7 @@ class SN_TextsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Texts"
     
     data_type = "Text"
+    data_type_collection = "BlendDataTexts"
     data_identifier = "texts"
     
     
@@ -137,6 +149,7 @@ class SN_TexturesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Textures"
     
     data_type = "Texture"
+    data_type_collection = "BlendDataTextures"
     data_identifier = "textures"
     
     
@@ -147,6 +160,7 @@ class SN_WorkspacesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Workspaces"
     
     data_type = "Workspace"
+    data_type_collection = "BlendDataWorkSpaces"
     data_identifier = "workspaces"
     
     active_data = "bpy.context.workspace"
@@ -159,6 +173,7 @@ class SN_WorldsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_label = "Worlds"
     
     data_type = "World"
+    data_type_collection = "BlendDataWorlds"
     data_identifier = "worlds"
     
     active_data = "bpy.context.scene.world"

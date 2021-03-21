@@ -20,6 +20,8 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
         self.update_shape(context)
     
     data_type: bpy.props.StringProperty()
+
+    data_type_collection: bpy.props.StringProperty()
     
     data_name: bpy.props.StringProperty()
 
@@ -29,7 +31,7 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
                                            ("COLLECTION","Collection","Collection")],
                                     update=update_subtype)
 
-    copy_attributes = ["data_type", "data_name", "data_identifier"]
+    copy_attributes = ["data_type", "data_type_collection", "data_name", "data_identifier"]
     
     def convert_data(self, code):
         return "sn_cast_blend_data(" + code + ")"

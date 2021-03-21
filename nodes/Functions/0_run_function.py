@@ -109,7 +109,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                             for inp in node.inputs[1:]:
                                 if inp.bl_idname != "SN_DynamicVariableSocket":
                                     if inp.bl_idname == "SN_BlendDataSocket":
-                                        parameters.append([inp.variable_name, inp.bl_idname, inp.subtype, inp.data_type, inp.data_name, inp.data_identifier])
+                                        parameters.append([inp.variable_name, inp.bl_idname, inp.subtype, inp.data_type, inp.data_name, inp.data_identifier, inp.data_type_collection])
                                     else:
                                         parameters.append([inp.variable_name, inp.bl_idname, inp.subtype])
 
@@ -134,6 +134,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 self.outputs[x+index].subtype = parameter[2]
                                 if self.outputs[x+index].bl_idname == "SN_BlendDataSocket":
                                     self.outputs[x+index].data_type = parameter[3]
+                                    self.outputs[x+index].data_type_collection = parameter[6]
                                     self.outputs[x+index].data_name = parameter[4]
                                     self.outputs[x+index].data_identifier = parameter[5]
 

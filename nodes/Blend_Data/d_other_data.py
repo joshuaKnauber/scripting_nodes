@@ -28,6 +28,7 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def update_type(self,context):
         self.outputs[0].data_type = self.get_type()
+        self.outputs[0].data_type_collection = self.get_srna()
         self.outputs[0].data_identifier = self.data_type
         self.outputs[0].data_name = self.data_type.replace("_"," ").title()
         for link in self.outputs[0].links:
@@ -42,6 +43,11 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def get_type(self):
         return eval("bpy.data.bl_rna.properties[\""+self.data_type+"\"].fixed_type.identifier")
+
+    def get_srna(self):
+        if eval("bpy.data.bl_rna.properties[\""+self.data_type+"\"].srna"):
+            return eval("bpy.data.bl_rna.properties[\""+self.data_type+"\"].srna.identifier")
+        return ""
     
     def update_return(self,context):
         if self.return_type == "ALL" and len(self.inputs):
@@ -73,6 +79,7 @@ class SN_OtherDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         out = self.add_blend_data_output("All")
         out.data_type = self.get_type()
+        out.data_type_collection = self.get_srna()
         out.data_identifier = self.data_type
         out.data_name = self.data_type.replace("_"," ").title()
         out.subtype = "COLLECTION"

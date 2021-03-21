@@ -46,6 +46,7 @@ class SN_SceneDataBase():
         out = self.add_blend_data_output("All")
         out.subtype = "COLLECTION"
         out.data_type = self.data_type
+        out.data_type_collection = self.data_type_collection
         out.data_identifier = self.data_identifier
         out.data_name = self.data_type
         
@@ -60,6 +61,7 @@ class SN_SceneDataBase():
             out = self.add_blend_data_output("Selected")
             out.subtype = "COLLECTION"
             out.data_type = self.data_type
+            out.data_type_collection = self.data_type_collection
             out.data_identifier = self.selected_data.split(".")[-1]
             out.data_name = self.data_type
 

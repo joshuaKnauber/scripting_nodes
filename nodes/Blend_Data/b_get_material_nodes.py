@@ -24,6 +24,7 @@ class SN_GetMaterialNodesNode(bpy.types.Node, SN_ScriptingBaseNode):
         out = self.add_blend_data_output("Nodes")
         out.subtype = "COLLECTION"
         out.data_type = "Node"
+        out.data_type_collection = "Nodes"
         out.data_name = "Node"
         out.data_identifier = "nodes"
         self.add_boolean_output("Use Nodes")

@@ -4,19 +4,6 @@ from ..Blend_Data.a_get_data_pointers import get_known_types
 
 
 
-def get_known_collection_functions():
-    known_functions = {
-        "Modifier": "bpy.types.ObjectModifiers.bl_rna.functions",
-    }
-    return known_functions
-
-def get_known_functions():
-    known_functions = {
-    }
-    return known_functions
-
-
-
 class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RunFunctionOnNode"
@@ -32,10 +19,12 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
         return eval(self.categories)
 
     def update_cats(self, context):
-        types = get_known_types()[self.current_data_type][self.category_enum]
-        types.insert(0, (self.current_data_type, self.current_data_type, ""))
+        index = 1 if self.use_execute else 0
+        data_type = self.inputs[index].data_type_collection if self.inputs[index].data_type_collection else self.inputs[index].data_type
+        types = get_known_types()[data_type][self.category_enum]
+        types.insert(0, (data_type, self.inputs[index].data_name, ""))
         self.types = str(types)
-        self.define_type = self.current_data_type
+        self.define_type = data_type
 
     def get_types(self, context):
         return eval(self.types)
@@ -56,49 +45,25 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
     def get_functions(self, data_type, is_collection):
         self.function_collection.clear()
         if is_collection:
-            if not data_type in get_known_collection_functions():
-                has_functions = False
-                for data in bpy.data.bl_rna.properties:
-                    if "bl_rna" in dir(eval("bpy.data." + data.identifier)):
-                        if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == data_type:
-                            has_functions = True
-                            for function in eval("bpy.data." + data.identifier).bl_rna.functions:
-                                item = self.function_collection.add()
-                                item.name = function.identifier.replace("_", " ").title()
-                                item.identifier = function.identifier
-
-                if not has_functions:
-                    try:
-                        for function in eval("bpy.types." + data_type).bl_rna.functions:
-                            item = self.function_collection.add()
-                            item.name = function.identifier.replace("_", " ").title()
-                            item.identifier = function.identifier
-                    except:
-                        pass
-            else:
-                for function in eval(get_known_collection_functions()[data_type]):
-                    item = self.function_collection.add()
-                    item.name = function.identifier.replace("_", " ").title()
-                    item.identifier = function.identifier
-
-        else:
-            if not data_type in get_known_functions():
+            try:
                 for function in eval("bpy.types." + data_type).bl_rna.functions:
                     item = self.function_collection.add()
                     item.name = function.identifier.replace("_", " ").title()
                     item.identifier = function.identifier
+            except:
+                pass
 
-                functions = ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]
-                for function in functions:
-                    item = self.function_collection.add()
-                    item.name = function.replace("_", " ").title()
-                    item.identifier = function
-            else:
-                for function in eval(get_known_functions()[data_type]):
-                    item = self.function_collection.add()
-                    item.name = function.identifier.replace("_", " ").title()
-                    item.identifier = function.identifier
+        else:
+            for function in eval("bpy.types." + data_type).bl_rna.functions:
+                item = self.function_collection.add()
+                item.name = function.identifier.replace("_", " ").title()
+                item.identifier = function.identifier
 
+            functions = ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]
+            for function in functions:
+                item = self.function_collection.add()
+                item.name = function.replace("_", " ").title()
+                item.identifier = function
 
         if not self.search_value in self.function_collection:
             self["search_value"] = ""
@@ -117,7 +82,8 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.remove_input_range(1)
                 self.outputs.clear()
 
-        data_type = self.current_data_type
+        index = 1 if self.use_execute else 0
+        data_type = self.inputs[index].data_type_collection if self.inputs[index].data_type_collection else self.inputs[index].data_type
         if self.types != "[]":
             data_type = self.define_type
 
@@ -129,84 +95,69 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.remove_input_range(1)
                 self.outputs.clear()
 
-            index = 1 if self.use_execute else 0
             if self.inputs[index].subtype == "COLLECTION":
-                if not data_type in get_known_collection_functions():
-                    has_parameters = False
-                    for data in bpy.data.bl_rna.properties:
-                        if data.type == "COLLECTION" and type(data.fixed_type).bl_rna.identifier == data_type:
-                            parameters = eval("bpy.data." + data.identifier).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
-                            has_parameters = True
-
-                    if not has_parameters:
-                        try:
-                            parameters = eval("bpy.types." + data_type).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
-                        except:
-                            parameters = []
-                else:
-                    parameters = eval(get_known_collection_functions()[data_type])[self.function_collection[self.search_value].identifier].parameters
+                try:
+                    parameters = eval("bpy.types." + data_type).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+                except:
+                    parameters = []
 
             else:
-                if not data_type in get_known_functions():
-                    if self.function_collection[self.search_value].identifier in ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]:
-                        parameters = []
-                        if self.function_collection[self.search_value].identifier == "driver_add":
-                            inp = self.add_string_input("Path")
-                            inp.variable_name = "path"
-                            inp.disableable = True
-                            inp = self.add_integer_input("Index")
-                            inp.set_default(-1)
-                            inp.variable_name = "index"
-                            inp.disableable = True
-                            self.add_blend_data_output("Driver")
+                if self.function_collection[self.search_value].identifier in ["driver_add", "driver_remove", "keyframe_insert", "keyframe_delete"]:
+                    parameters = []
+                    if self.function_collection[self.search_value].identifier == "driver_add":
+                        inp = self.add_string_input("Path")
+                        inp.variable_name = "path"
+                        inp.disableable = True
+                        inp = self.add_integer_input("Index")
+                        inp.set_default(-1)
+                        inp.variable_name = "index"
+                        inp.disableable = True
+                        self.add_blend_data_output("Driver")
 
-                        elif self.function_collection[self.search_value].identifier == "driver_remove":
-                            inp = self.add_string_input("Path")
-                            inp.variable_name = "path"
-                            inp.disableable = True
-                            inp = self.add_integer_input("Index")
-                            inp.set_default(-1)
-                            inp.variable_name = "index"
-                            inp.disableable = True
-                            self.add_boolean_output("Removed")
+                    elif self.function_collection[self.search_value].identifier == "driver_remove":
+                        inp = self.add_string_input("Path")
+                        inp.variable_name = "path"
+                        inp.disableable = True
+                        inp = self.add_integer_input("Index")
+                        inp.set_default(-1)
+                        inp.variable_name = "index"
+                        inp.disableable = True
+                        self.add_boolean_output("Removed")
 
-                        elif self.function_collection[self.search_value].identifier == "keyframe_insert":
-                            inp = self.add_string_input("Path")
-                            inp.variable_name = "data_path"
-                            inp.disableable = True
-                            inp = self.add_integer_input("Index")
-                            inp.set_default(-1)
-                            inp.variable_name = "index"
-                            inp.disableable = True
-                            inp = self.add_float_input("Frame")
-                            inp.variable_name = "frame"
-                            inp.disableable = True
-                            inp = self.add_string_input("Group")
-                            inp.variable_name = "group"
-                            inp.disableable = True
-                            self.add_boolean_output("Created")
+                    elif self.function_collection[self.search_value].identifier == "keyframe_insert":
+                        inp = self.add_string_input("Path")
+                        inp.variable_name = "data_path"
+                        inp.disableable = True
+                        inp = self.add_integer_input("Index")
+                        inp.set_default(-1)
+                        inp.variable_name = "index"
+                        inp.disableable = True
+                        inp = self.add_float_input("Frame")
+                        inp.variable_name = "frame"
+                        inp.disableable = True
+                        inp = self.add_string_input("Group")
+                        inp.variable_name = "group"
+                        inp.disableable = True
+                        self.add_boolean_output("Created")
 
-                        elif self.function_collection[self.search_value].identifier == "keyframe_delete":
-                            inp = self.add_string_input("Path")
-                            inp.variable_name = "data_path"
-                            inp.disableable = True
-                            inp = self.add_integer_input("Index")
-                            inp.set_default(-1)
-                            inp.variable_name = "index"
-                            inp.disableable = True
-                            inp = self.add_float_input("Frame")
-                            inp.variable_name = "frame"
-                            inp.disableable = True
-                            inp = self.add_string_input("Group")
-                            inp.variable_name = "group"
-                            inp.disableable = True
-                            self.add_boolean_output("Removed")
-
-                    else:
-                        parameters = eval("bpy.types." + data_type).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
+                    elif self.function_collection[self.search_value].identifier == "keyframe_delete":
+                        inp = self.add_string_input("Path")
+                        inp.variable_name = "data_path"
+                        inp.disableable = True
+                        inp = self.add_integer_input("Index")
+                        inp.set_default(-1)
+                        inp.variable_name = "index"
+                        inp.disableable = True
+                        inp = self.add_float_input("Frame")
+                        inp.variable_name = "frame"
+                        inp.disableable = True
+                        inp = self.add_string_input("Group")
+                        inp.variable_name = "group"
+                        inp.disableable = True
+                        self.add_boolean_output("Removed")
 
                 else:
-                    parameters = eval(get_known_functions()[data_type])[self.function_collection[self.search_value].identifier].parameters
+                    parameters = eval("bpy.types." + data_type).bl_rna.functions[self.function_collection[self.search_value].identifier].parameters
 
 
             for parameter in parameters:
@@ -245,10 +196,23 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
         index = 1 if self.use_execute else 0
         socket = link.from_socket
         if link.to_socket == self.inputs[index] and socket.bl_idname == "SN_BlendDataSocket":
-            if socket.data_type != self.current_data_type or self.inputs[index].subtype != socket.subtype:
+            if socket.data_type == "":
+                self.search_value = ""
+                self.function_collection.clear()
+                self.inputs[index].data_type = ""
+                self.inputs[index].data_type_collection = ""
+                self.inputs[index].subtype = "NONE"
+                self.inputs[index].default_text = "Blend Data/Collection"
+                self.current_data_type = ""
+                self.types = "[]"
+                self.categories = "[]"
+                self.add_function_sockets(None)
+
+            elif self.inputs[index].data_type != socket.data_type or self.inputs[index].subtype != socket.subtype or self.inputs[index].data_type_collection != socket.data_type_collection:
                 function = self.search_value
                 self.search_value = ""
                 self.inputs[index].data_type = socket.data_type
+                self.inputs[index].data_type_collection = socket.data_type_collection
                 self.inputs[index].subtype = socket.subtype
                 self.inputs[index].default_text = socket.data_name
                 self.current_data_type = socket.data_type
@@ -256,31 +220,32 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.types = "[]"
                 self.categories = "[]"
                 types = []
-                if socket.data_type in get_known_types():
-                    if type(get_known_types()[socket.data_type]) == dict:
+                data_type = socket.data_type_collection if socket.data_type_collection else socket.data_type
+                if data_type in get_known_types():
+                    if type(get_known_types()[data_type]) == dict:
                         cats = []
-                        for cat in get_known_types()[socket.data_type]:
+                        for cat in get_known_types()[data_type]:
                             cats.append((cat, cat, ""))
                         self.categories = str(cats)
-                        types = get_known_types()[socket.data_type][self.category_enum]
+                        types = get_known_types()[data_type][self.category_enum]
                     else:
-                        types = get_known_types()[socket.data_type]
+                        types = get_known_types()[data_type]
 
                 else:
                     try:
-                        for data_type in dir(bpy.types):
-                            if eval("bpy.types." + socket.data_type) in eval("bpy.types." + data_type).__bases__:
-                                name = eval("bpy.types." + data_type).bl_rna.name if eval("bpy.types." + data_type).bl_rna.name else data_type
-                                types.append((data_type, name, eval("bpy.types." + data_type).bl_rna.description))
+                        for bpy_type in dir(bpy.types):
+                            if eval("bpy.types." + data_type) in eval("bpy.types." + bpy_type).__bases__:
+                                name = eval("bpy.types." + bpy_type).bl_rna.name if eval("bpy.types." + bpy_type).bl_rna.name else bpy_type
+                                types.append((bpy_type, name, eval("bpy.types." + bpy_type).bl_rna.description))
                     except:
                         types = []
 
                 if types:
-                    types.insert(0, (socket.data_type, socket.data_name, ""))
+                    types.insert(0, (data_type, socket.data_name, ""))
                     self.types = str(types)
-                    self.define_type = socket.data_type
+                    self.define_type = data_type
 
-                self.get_functions(link.from_socket.data_type, link.from_socket.subtype=="COLLECTION")
+                self.get_functions(data_type, socket.subtype=="COLLECTION")
                 if function in self.function_collection:
                     self.search_value = function
 

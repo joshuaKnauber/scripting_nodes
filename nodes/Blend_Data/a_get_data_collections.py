@@ -53,22 +53,20 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
                         out = self.add_blend_data_output(prop.name.replace("_", " ").title())
                         out.removable = True
                         out.subtype = "COLLECTION"
+                        out.data_type = prop.fixed_type.identifier
+                        out.data_name = prop.fixed_type.name
+                        out.data_identifier = prop.identifier
                         if hasattr(prop, "srna") and prop.srna:
-                            out.data_type = prop.srna.identifier
-                            out.data_name = prop.fixed_type.name
-                            out.data_identifier = prop.identifier
-                        else:
-                            out.data_type = prop.fixed_type.identifier
-                            out.data_name = prop.fixed_type.name
-                            out.data_identifier = prop.identifier
+                            out.data_type_collection = prop.srna.identifier
 
         except:
             self.outputs.clear()
         if not len(self.outputs):
             self.no_data_error = True
-        
-        
+
+
     def update_outputs(self,socket):
+        self.inputs[0].subtype = socket.subtype
         self.no_data_error = False
         if socket.subtype == "NONE":
             if socket.data_type == self.current_data_type and not len(self.outputs):

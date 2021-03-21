@@ -505,6 +505,11 @@ class SN_ScriptingBaseNode:
                 out.subtype = self.subtype_from_prop_subtype(prop.type,prop.subtype,size)
             else:
                 out.subtype = "COLLECTION" if prop.type == "COLLECTION" else "NONE"
+                out.data_name = prop.fixed_type.name
+                out.data_type = prop.fixed_type.identifier
+                if prop.type == "COLLECTION":
+                    if hasattr(prop, "srna") and prop.srna:
+                        out.data_type_collection = prop.srna.identifier
 
             if prop.type == "ENUM":
                 out.enum_values = self.enum_items_as_string(prop)

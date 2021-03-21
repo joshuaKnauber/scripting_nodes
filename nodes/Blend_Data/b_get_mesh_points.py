@@ -24,16 +24,19 @@ class SN_GetMeshPointsNode(bpy.types.Node, SN_ScriptingBaseNode):
         out = self.add_blend_data_output("Vertices")
         out.subtype = "COLLECTION"
         out.data_type = "MeshVertex"
+        out.data_type_collection = "MeshVertices"
         out.data_name = "Vertices"
         out.data_identifier = "vertices"
         out = self.add_blend_data_output("Edges")
         out.subtype = "COLLECTION"
         out.data_type = "MeshEdge"
+        out.data_type_collection = "MeshEdges"
         out.data_name = "Edges"
         out.data_identifier = "edges"
         out = self.add_blend_data_output("Polygons")
         out.subtype = "COLLECTION"
         out.data_type = "MeshPolygon"
+        out.data_type_collection = "MeshPolygons"
         out.data_name = "Polygons"
         out.data_identifier = "polygons"
     

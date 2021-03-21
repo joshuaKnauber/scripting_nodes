@@ -33,6 +33,7 @@ class SN_ReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
             socket.subtype = connected_socket.subtype
             if connected_socket.bl_idname == "SN_BlendDataSocket":
                 socket.data_type = connected_socket.data_type
+                socket.data_type_collection = connected_socket.data_type_collection
                 socket.data_name = connected_socket.data_name
                 socket.data_identifier = connected_socket.data_identifier
 

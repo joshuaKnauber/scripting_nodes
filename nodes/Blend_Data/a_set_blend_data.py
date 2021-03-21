@@ -55,9 +55,6 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                         if not prop.is_readonly:
                             inp = self.add_blend_data_input(prop.name)
                             inp.removable = True
-                            inp.data_type = prop.fixed_type.identifier
-                            inp.data_name = prop.fixed_type.name
-                            inp.data_identifier = prop.identifier
         except:
             self.remove_input_range(2)
         if not len(self.inputs)-2:
@@ -65,41 +62,43 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         
     def update_inputs(self,socket):
+        self.inputs[1].subtype = socket.subtype
         self.no_data_error = False
-        if socket.data_type == self.current_data_type and not len(self.inputs)-2:
-            self.add_data_inputs(socket.data_type)
-        elif socket.data_type != self.current_data_type:
+        data_type = socket.data_type_collection if socket.data_type_collection else socket.data_type
+        if data_type == self.current_data_type and not len(self.inputs)-2:
+            self.add_data_inputs(data_type)
+        elif data_type != self.current_data_type:
             self.remove_input_range(2)
-            self.add_data_inputs(socket.data_type)
+            self.add_data_inputs(data_type)
 
             self.types = "[]"
             self.categories = "[]"
             types = []
-            if socket.data_type in get_known_types():
-                if type(get_known_types()[socket.data_type]) == dict:
+            if data_type in get_known_types():
+                if type(get_known_types()[data_type]) == dict:
                     cats = []
-                    for cat in get_known_types()[socket.data_type]:
+                    for cat in get_known_types()[data_type]:
                         cats.append((cat, cat, ""))
                     self.categories = str(cats)
-                    types = get_known_types()[socket.data_type][self.category_enum]
+                    types = get_known_types()[data_type][self.category_enum]
                 else:
-                    types = get_known_types()[socket.data_type]
+                    types = get_known_types()[data_type]
 
             else:
                 try:
-                    for data_type in dir(bpy.types):
-                        if eval("bpy.types." + socket.data_type) in eval("bpy.types." + data_type).__bases__:
-                            name = eval("bpy.types." + data_type).bl_rna.name if eval("bpy.types." + data_type).bl_rna.name else data_type
-                            types.append((data_type, name, eval("bpy.types." + data_type).bl_rna.description))
+                    for bpy_type in dir(bpy.types):
+                        if eval("bpy.types." + data_type) in eval("bpy.types." + bpy_type).__bases__:
+                            name = eval("bpy.types." + bpy_type).bl_rna.name if eval("bpy.types." + bpy_type).bl_rna.name else bpy_type
+                            types.append((bpy_type, name, eval("bpy.types." + bpy_type).bl_rna.description))
                 except:
                     types = []
 
             if types:
-                types.insert(0, (socket.data_type, socket.data_name, ""))
+                types.insert(0, (data_type, socket.data_name, ""))
                 self.types = str(types)
-                self.define_type = socket.data_type
+                self.define_type = data_type
 
-        self.current_data_type = socket.data_type
+        self.current_data_type = data_type
 
     def on_link_insert(self,link):
         if link.to_socket == self.inputs[1]:
