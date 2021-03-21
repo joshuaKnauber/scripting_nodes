@@ -19,6 +19,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_outside_update(self, string_data):
         if self.copied_path:
+            labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown", "POINTER": "Pointer"}
             data = get_data(self.copied_path)
             new_data = get_data(string_data)
             if data and data["group_path"] in ["self", "context.preferences.addons[__name__.partition('.')[0]].preferences"]:
@@ -26,7 +27,6 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if data["property"]["identifier"] != new_data["property"]["identifier"]:
                         self["copied_path"] = string_data
                     else:
-                        labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown"}
                         self.label = labels[new_data["property"]["type"]]
                         if new_data["property"]["type"] != data["property"]["type"]:
                             for i in range(len(self.inputs)-1,2,-1):
@@ -37,7 +37,6 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                         self.copied_path = ""
 
                 elif data["property"]["identifier"] == new_data["property"]["identifier"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
-                    labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown"}
                     self.label = labels[data["property"]["type"]]
                     self.prop_name = new_data["property"]["name"]
                     self["copied_path"] = string_data
@@ -47,7 +46,6 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if data["property"]["identifier"] != new_data["property"]["identifier"]:
                         self["copied_path"] = string_data
                     else:
-                        labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown"}
                         self.label = labels[new_data["property"]["type"]]
                         if new_data["property"]["type"] != data["property"]["type"]:
                             for i in range(len(self.inputs)-1,2,-1):
@@ -65,7 +63,6 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                         self.copied_path = ""
 
                 elif data["property"]["identifier"] == new_data["property"]["identifier"] and data["property"]["created_from"] == new_data["property"]["created_from"]:
-                    labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown"}
                     self.label = labels[data["property"]["type"]]
                     self.prop_name = new_data["property"]["name"]
                     self["copied_path"] = string_data
@@ -95,7 +92,8 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             "FLOAT": "Number Input",
             "INT": "Number Input",
             "INTEGER": "Number Input",
-            "ENUM": "Dropdown"
+            "ENUM": "Dropdown",
+            "POINTER": "Pointer"
         }
 
         if self.copied_path:

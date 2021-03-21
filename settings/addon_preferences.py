@@ -193,6 +193,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added color wheel option to display property node",
             "Added subtring in string node",
             "Fixed all blend data access issues",
+            "Fixed interface property node with pointer properties",
         ]
         if changelog:
             box = layout.box()
