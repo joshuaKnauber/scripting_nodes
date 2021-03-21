@@ -19,7 +19,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_outside_update(self, string_data):
         if self.copied_path:
-            labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown", "POINTER": "Pointer"}
+            labels = {"STRING": "Text Input","BOOLEAN": "Checkbox","FLOAT": "Number Input","INTEGER": "Number Input","INT": "Number Input","ENUM": "Dropdown", "POINTER": "Pointer", "COLLECTION": "Collection"}
             data = get_data(self.copied_path)
             new_data = get_data(string_data)
             if data and data["group_path"] in ["self", "context.preferences.addons[__name__.partition('.')[0]].preferences"]:
@@ -93,7 +93,8 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             "INT": "Number Input",
             "INTEGER": "Number Input",
             "ENUM": "Dropdown",
-            "POINTER": "Pointer"
+            "POINTER": "Pointer",
+            "COLLECTION": "Collection"
         }
 
         if self.copied_path:

@@ -194,6 +194,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added subtring in string node",
             "Fixed all blend data access issues",
             "Fixed interface property node with pointer properties",
+            "Fixed return and run function nodes not updating",
         ]
         if changelog:
             box = layout.box()
