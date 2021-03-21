@@ -53,7 +53,8 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             ("COLOR","Color","Color"),
                                             ("COLOR_ALPHA","Color Alpha","Color Alpha"),
                                             ("VECTOR3","Vector 3","Vector 3"),
-                                            ("VECTOR4","Vector 4","Vector 4")])
+                                            ("VECTOR4","Vector 4","Vector 4"),
+                                            ("VECTOR","Vector","Just changes appearance")])
     
     copy_attributes = ["value","value_factor","value_color","value_color_alpha","value_three","value_four"]
     
@@ -76,6 +77,8 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     def default_value(self):
         if self.subtype == "NONE":
             return str(self.value)
+        elif self.subtype == "VECTOR":
+            return str(self.value)
         elif self.subtype == "FACTOR":
             return str(self.value_factor)
         elif self.subtype == "COLOR":
@@ -90,6 +93,8 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     def convert_data(self, code):
         if self.subtype == "NONE":
+            return "sn_cast_float(" + code + ")"
+        elif self.subtype == "VECTOR":
             return "sn_cast_float(" + code + ")"
         elif self.subtype == "FACTOR":
             return "sn_cast_float(" + code + ")"
@@ -121,6 +126,8 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
                 elif self.subtype == "COLOR_ALPHA":
                     row.prop(self, "value_color_alpha", text=text)
             else:
+                if self.subtype == "VECTOR":
+                    row.prop(self, "value", text=text)
                 col = row.column(align=True)
                 if self.subtype == "VECTOR3":
                     col.prop(self, "value_three", text=text)
@@ -149,7 +156,8 @@ class SN_DynamicFloatSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             ("COLOR","Color","Color"),
                                             ("COLOR_ALPHA","Color Alpha","Color Alpha"),
                                             ("VECTOR3","Vector 3","Vector 3"),
-                                            ("VECTOR4","Vector 4","Vector 4")])
+                                            ("VECTOR4","Vector 4","Vector 4"),
+                                            ("VECTOR","Vector","Just changes appearance")])
     
 
     

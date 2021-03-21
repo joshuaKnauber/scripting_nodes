@@ -31,7 +31,8 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),
                                             ("VECTOR3","Vector 3","Vector 3"),
-                                            ("VECTOR4","Vector 4","Vector 4")])
+                                            ("VECTOR4","Vector 4","Vector 4"),
+                                            ("VECTOR","Vector","Just changes appearance")])
     
     copy_attributes = ["value","value_three","value_four"]
     
@@ -48,6 +49,8 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     def default_value(self):
         if self.subtype == "NONE":
             return str(self.value)
+        elif self.subtype == "VECTOR":
+            return str(self.value)
         elif self.subtype == "VECTOR3":
             return str((self.value_three[0],self.value_three[1],self.value_three[2]))
         elif self.subtype == "VECTOR4":
@@ -56,6 +59,8 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     def convert_data(self, code):
         if self.subtype == "NONE":
+            return "sn_cast_int(" + code + ")"
+        elif self.subtype == "VECTOR":
             return "sn_cast_int(" + code + ")"
         elif self.subtype == "VECTOR3":
             return "sn_cast_int_vector(" + code + ", 3)"
@@ -74,6 +79,8 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
             if not "VECTOR" in self.subtype:
                 row.prop(self, "value", text=text)
             else:
+                if self.subtype == "VECTOR":
+                    row.prop(self, "value", text=text)
                 col = row.column(align=True)
                 if self.subtype == "VECTOR3":
                     col.prop(self, "value_three", text=text)
@@ -98,7 +105,8 @@ class SN_DynamicIntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),
                                             ("VECTOR3","Vector 3","Vector 3"),
-                                            ("VECTOR4","Vector 4","Vector 4")])
+                                            ("VECTOR4","Vector 4","Vector 4"),
+                                            ("VECTOR","Vector","Just changes appearance")])
     
 
     
