@@ -195,6 +195,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Fixed all blend data access issues",
             "Fixed interface property node with pointer properties",
             "Fixed return and run function nodes not updating",
+            "Fixed expressions with variable names on the math node"
         ]
         if changelog:
             box = layout.box()
