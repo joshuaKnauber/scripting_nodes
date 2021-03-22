@@ -55,6 +55,7 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                         if not prop.is_readonly:
                             inp = self.add_blend_data_input(prop.name)
                             inp.removable = True
+                            inp.data_identifier = prop.identifier
         except:
             self.remove_input_range(2)
         if not len(self.inputs)-2:
