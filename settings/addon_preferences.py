@@ -191,10 +191,11 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         changelog = [
             "Added version number to default export name",
             "Added color wheel option to display property node",
-            "Added subtring in string node",
+            "Added substring in string node",
             "Fixed all blend data access issues",
             "Fixed interface property node with pointer properties",
             "Fixed return and run function nodes not updating",
+            "Fixed expressions with variable names on the math node"
         ]
         if changelog:
             box = layout.box()
