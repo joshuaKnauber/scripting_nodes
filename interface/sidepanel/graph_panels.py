@@ -14,7 +14,26 @@ class SN_OT_GetPythonName(bpy.types.Operator):
         bpy.context.window_manager.clipboard = self.to_copy
         self.report({"INFO"},message="Python path copied")
         return {"FINISHED"}
+
+
+class SN_OT_QuestionMarkName(bpy.types.Operator):
+    bl_idname = "sn.question_mark"
+    bl_label = "Questionmark"
+    bl_description = "Explaination to what this is"
+    bl_options = {"REGISTER","INTERNAL"}
     
+    to_display: bpy.props.StringProperty()
+
+    def execute(self, context):
+        return {"FINISHED"}
+
+    def draw(self,context):
+        layout = self.layout
+        for line in self.to_display.split("\n"):
+            layout.label(text=line)
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_popup(self, width=500)
 
 
 class SN_PT_GraphPanel(bpy.types.Panel):
@@ -61,6 +80,10 @@ class SN_PT_VariablePanel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_order = 1
+
+    def draw_header(self,context):
+        layout = self.layout
+        layout.operator("sn.question_mark", text="", icon="QUESTION", emboss=False).to_display = "Variables can be strings, integers, floats, booleans, lists or blend data.\nWhen your addon is loaded they store the default value that you set right here.\nThen you can use getters, setters and change by nodes to access and change the value.\n\nA getter returns the current value of the variable. A setter sets the variable to a new value,\nignoring the last. Change by nodes only works for string and numbers, since they take the\ncurrent value of the variable and add/subtract to it. \n\nThere is also a button to copy the python path for a variable. \nYou can use this to access the variable in your python scripts."
 
     def draw(self, context):
         layout = self.layout
