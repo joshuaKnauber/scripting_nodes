@@ -26,15 +26,16 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_link_insert(self, link):
         if link.to_socket == self.inputs[1]:
             if link.from_socket.bl_idname == "SN_BlendDataSocket" and link.from_socket.subtype == "COLLECTION":
-                if self.inputs[1].bl_idname != "SN_BlendDataSocket":
-                    self.change_socket_type(self.inputs[1], "SN_BlendDataSocket").subtype = "COLLECTION"
-                    self.change_socket_type(self.outputs[2], "SN_BlendDataSocket")
-                self.inputs[1].default_text = "Collection"
+                if link.from_socket.data_type != "":
+                    if self.inputs[1].bl_idname != "SN_BlendDataSocket":
+                        self.change_socket_type(self.inputs[1], "SN_BlendDataSocket").subtype = "COLLECTION"
+                        self.change_socket_type(self.outputs[2], "SN_BlendDataSocket")
+                    self.inputs[1].default_text = "Collection"
 
-                self.outputs[2].data_type = link.from_socket.data_type
-                self.outputs[2].data_name = link.from_socket.data_name
-                for link in self.outputs[2].links:
-                    link.to_socket.node.on_link_insert(link)
+                    self.outputs[2].data_type = link.from_socket.data_type
+                    self.outputs[2].data_name = link.from_socket.data_name
+                    for link in self.outputs[2].links:
+                        link.to_socket.node.on_link_insert(link)
 
             else:
                 self.change_socket_type(self.inputs[1], "SN_ListSocket")
