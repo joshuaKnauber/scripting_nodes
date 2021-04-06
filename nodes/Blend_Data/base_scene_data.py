@@ -18,16 +18,19 @@ class SN_SceneDataBase():
     def update_return(self,context):
         if self.return_type == "ALL" and len(self.inputs):
             self.inputs.clear()
+            self.outputs[0].data_type_collection = self.data_type_collection
             self.outputs[0].default_text = "All"
             self.outputs[0].subtype = "COLLECTION"
         elif self.return_type == "INDEX" and (not len(self.inputs) or self.inputs[0].socket_type != "INTEGER"):
             self.inputs.clear()
             self.add_integer_input("Index").set_default(0)
+            self.outputs[0].data_type_collection = ""
             self.outputs[0].default_text = "Indexed"
             self.outputs[0].subtype = "NONE"
         elif self.return_type == "NAME" and (not len(self.inputs) or self.inputs[0].socket_type != "STRING"):
             self.inputs.clear()
             self.add_string_input("Name")
+            self.outputs[0].data_type_collection = ""
             self.outputs[0].default_text = "Named"
             self.outputs[0].subtype = "NONE"
         for link in self.outputs[0].links:

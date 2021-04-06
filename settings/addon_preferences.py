@@ -189,13 +189,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
-            "Added version number to default export name",
-            "Added color wheel option to display property node",
-            "Added substring in string node",
-            "Fixed all blend data access issues",
-            "Fixed interface property node with pointer properties",
-            "Fixed return and run function nodes not updating",
-            "Fixed expressions with variable names on the math node"
+            "Fixed wrong properties and functions when using blend data nodes",
         ]
         if changelog:
             box = layout.box()
