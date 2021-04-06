@@ -396,7 +396,7 @@ class SN_ScriptingBaseNode:
         if prop_subtype == "COLOR":
             if prop_size == 3: return "COLOR"
             elif prop_size == 4: return "COLOR_ALPHA"
-        elif prop_size != -1:
+        elif not prop_size in [-1, 0, 1]:
             if prop_size == 3: return "VECTOR3"
             elif prop_size == 4: return "VECTOR4"
             else: return "VECTOR"

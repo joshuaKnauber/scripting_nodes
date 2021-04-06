@@ -195,20 +195,8 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_link_insert(self, link):
         index = 1 if self.use_execute else 0
         socket = link.from_socket
-        if link.to_socket == self.inputs[index] and socket.bl_idname == "SN_BlendDataSocket":
-            if socket.data_type == "":
-                self.search_value = ""
-                self.function_collection.clear()
-                self.inputs[index].data_type = ""
-                self.inputs[index].data_type_collection = ""
-                self.inputs[index].subtype = "NONE"
-                self.inputs[index].default_text = "Blend Data/Collection"
-                self.current_data_type = ""
-                self.types = "[]"
-                self.categories = "[]"
-                self.add_function_sockets(None)
-
-            elif self.inputs[index].data_type != socket.data_type or self.inputs[index].subtype != socket.subtype or self.inputs[index].data_type_collection != socket.data_type_collection:
+        if link.to_socket == self.inputs[index] and socket.bl_idname == "SN_BlendDataSocket" and socket.data_type != "":
+            if self.inputs[index].data_type != socket.data_type or self.inputs[index].subtype != socket.subtype or self.inputs[index].data_type_collection != socket.data_type_collection:
                 function = self.search_value
                 self.search_value = ""
                 self.inputs[index].data_type = socket.data_type

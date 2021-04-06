@@ -196,7 +196,7 @@ def serpens_right_click(self, context):
             op.node_uid = property_pointer.uid
             op.node_index = property_pointer.property_index
 
-        if hasattr(property_value,"array_length") and property_value.array_length != 0:
+        if hasattr(property_value,"array_length"):
             op.prop_size = property_value.array_length
         else:
             op.prop_size = -1

@@ -33,7 +33,7 @@ class SN_RemoveDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_link_insert(self, link):
-        if link.to_socket == self.inputs[1] and link.from_socket.bl_idname == "SN_BlendDataSocket" and link.from_socket.subtype == "COLLECTION":
+        if link.to_socket == self.inputs[1] and link.from_socket.bl_idname == "SN_BlendDataSocket" and link.from_socket.subtype == "COLLECTION" and link.from_socket.data_type != "":
             if link.from_socket.data_type_collection != self.inputs[1].data_type_collection or link.from_socket.data_type != self.inputs[1].data_type:
                 self.inputs[1].default_text = link.from_socket.data_name
                 self.inputs[1].data_type = link.from_socket.data_type
