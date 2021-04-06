@@ -22,11 +22,12 @@ class SN_FindInDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
         if link.to_socket == self.inputs[0]:
             self.collection_error = False
             if link.from_socket.subtype == "COLLECTION":
-                self.outputs[0].data_type = link.from_socket.data_type
-                self.outputs[0].data_identifier = link.from_socket.data_identifier
-                self.outputs[0].data_name = link.from_socket.data_name
-                for link in self.outputs[0].links:
-                    link.to_socket.node.on_link_insert(link)
+                if link.from_socket.data_type != "":
+                    self.outputs[0].data_type = link.from_socket.data_type
+                    self.outputs[0].data_identifier = link.from_socket.data_identifier
+                    self.outputs[0].data_name = link.from_socket.data_name
+                    for link in self.outputs[0].links:
+                        link.to_socket.node.on_link_insert(link)
             else:
                 self.collection_error = True
 

@@ -105,7 +105,7 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
         data_type = socket.data_type_collection if socket.data_type_collection else socket.data_type
         if data_type == self.current_data_type and not len(self.outputs):
             self.add_data_outputs(data_type)
-        elif data_type != self.current_data_type:
+        elif data_type != self.current_data_type and data_type != "":
             self.outputs.clear()
             self.add_data_outputs(data_type)
 
@@ -136,7 +136,8 @@ class SN_GetDataPointersNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.types = str(types)
                 self.define_type = data_type
 
-        self.current_data_type = data_type
+        if data_type != "":
+            self.current_data_type = data_type
 
         
     def on_link_insert(self,link):

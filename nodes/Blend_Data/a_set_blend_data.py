@@ -68,7 +68,7 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         data_type = socket.data_type_collection if socket.data_type_collection else socket.data_type
         if data_type == self.current_data_type and not len(self.inputs)-2:
             self.add_data_inputs(data_type)
-        elif data_type != self.current_data_type:
+        elif data_type != self.current_data_type and data_type != "":
             self.remove_input_range(2)
             self.add_data_inputs(data_type)
 
@@ -99,10 +99,12 @@ class SN_SetBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.types = str(types)
                 self.define_type = data_type
 
-        self.current_data_type = data_type
+        if data_type != "":
+            self.current_data_type = data_type
+
 
     def on_link_insert(self,link):
-        if link.to_socket == self.inputs[1]:
+        if link.to_socket == self.inputs[1] and link.from_socket.bl_idname == "SN_BlendDataSocket":
             self.update_inputs(link.from_socket)
             
             
