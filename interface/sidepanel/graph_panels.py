@@ -28,12 +28,12 @@ class SN_OT_QuestionMarkName(bpy.types.Operator):
         return {"FINISHED"}
 
     def draw(self,context):
-        layout = self.layout
+        col = self.layout.column(align=True)
         for line in self.to_display.split("\n"):
-            layout.label(text=line)
+            col.label(text=line)
 
     def invoke(self, context, event):
-        return context.window_manager.invoke_popup(self, width=500)
+        return context.window_manager.invoke_popup(self, width=503)
 
 
 class SN_PT_GraphPanel(bpy.types.Panel):
@@ -83,7 +83,7 @@ class SN_PT_VariablePanel(bpy.types.Panel):
 
     def draw_header(self,context):
         layout = self.layout
-        layout.operator("sn.question_mark", text="", icon="QUESTION", emboss=False).to_display = "Variables can be strings, integers, floats, booleans, lists or blend data.\nWhen your addon is loaded they store the default value that you set right here.\nThen you can use getters, setters and change by nodes to access and change the value.\n\nA getter returns the current value of the variable. A setter sets the variable to a new value,\nignoring the last. Change by nodes only works for string and numbers, since they take the\ncurrent value of the variable and add/subtract to it. \n\nThere is also a button to copy the python path for a variable. \nYou can use this to access the variable in your python scripts."
+        layout.operator("sn.question_mark", text="", icon="QUESTION", emboss=False).to_display = "Variables can be strings, integers, floats, booleans, lists or blend data.\nWhen your addon is loaded they store the default value that you set right here.\n\nThen you can use getters, setters and change by nodes to access and change the value.\nA getter returns the current value of the variable. A setter sets the variable to a new value,\nignoring the last. Change by nodes only works for string and numbers, since they take the\ncurrent value of the variable and add/subtract to it. \n\nThere is also a button to copy the python path for a variable. \nYou can use this to access the variable in your python scripts."
 
     def draw(self, context):
         layout = self.layout
@@ -296,6 +296,10 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
     bl_category = "Serpens"
     bl_order = 2
     
+
+    def draw_header(self,context):
+        layout = self.layout
+        layout.operator("sn.question_mark", text="", icon="QUESTION", emboss=False).to_display = "Properties are like variables, but they can be displayed to the user. There are strings, integers,\nfloats, booleans, and enums(Dropdowns). Properties are always attached to an ID Object.\nIf you attach it to 'Object', every object will have that property.\n\nSimilar to variables, there are getters and setters. Additionally there is also an update node, \nthat executes every time the property changes and an interface node to display the property. \nAll of the nodes have a blend data input from where it will access the property.\nIf you attach it to 'Object' this will have to be an object. If you attach it to 'Scene', \nthis will most likely be the active scene.\n\nThere is also a button to copy the python path. You will need to replace the 'PLACEHOLDER'"
 
     def draw(self, context):
         layout = self.layout

@@ -31,6 +31,14 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
         out.data_type = "Camera"
         out.data_identifier = "camera"
         out.data_name = "Camera"
+        out = self.add_blend_data_output("Active Bone")
+        out.data_type = "Bone"
+        out.data_identifier = "bone"
+        out.data_name = "Bone"
+        out = self.add_blend_data_output("Active Pose Bone")
+        out.data_type = "PoseBone"
+        out.data_identifier = "posebone"
+        out.data_name = "Pose Bone"
         out = self.add_blend_data_output("Preferences")
         out.data_type = "Preferences"
         out.data_identifier = "preferences"
@@ -53,6 +61,8 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
             "Active Area": "bpy.context.area",
             "Active View Layer": "bpy.context.view_layer",
             "Active Camera": "bpy.context.scene.camera",
+            "Active Bone": "bpy.context.active_bone",
+            "Active Pose Bone": "bpy.context.active_pose_bone",
             "Preferences": "bpy.context.preferences",
             "Window Manager": "bpy.context.window_manager",
             "Engine": "bpy.context.engine",

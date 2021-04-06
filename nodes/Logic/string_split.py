@@ -19,7 +19,7 @@ class SN_SplitStringNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self,context):
         self.add_string_input("String")
         self.add_string_input("Split On")
-        self.add_list_output("Splited List")
+        self.add_list_output("Split List")
 
     def code_evaluate(self, context, touched_socket):
 

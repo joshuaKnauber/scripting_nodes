@@ -189,6 +189,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
+            "Added Bones to Scene Context Node",
             "Fixed wrong properties and functions when using blend data nodes",
         ]
         if changelog:
