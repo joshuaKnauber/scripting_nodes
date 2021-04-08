@@ -16,6 +16,12 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
                                     description="Value of this socket",
                                     update=ScriptingSocket.auto_compile)
     
+    value_two: bpy.props.IntVectorProperty(default=(1,1),
+                                                size=2,
+                                                name="Value",
+                                                description="Value of this socket",
+                                                update=ScriptingSocket.auto_compile)
+
     value_three: bpy.props.IntVectorProperty(default=(1,1,1),
                                                 size=3,
                                                 name="Value",
@@ -30,16 +36,18 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),
+                                            ("VECTOR2","Vector 2","Vector 2"),
                                             ("VECTOR3","Vector 3","Vector 3"),
-                                            ("VECTOR4","Vector 4","Vector 4"),
-                                            ("VECTOR","Vector","Just changes appearance")])
+                                            ("VECTOR4","Vector 4","Vector 4")])
     
-    copy_attributes = ["value","value_three","value_four"]
+    copy_attributes = ["value","value_two","value_three","value_four"]
     
     
     def set_default(self, value):
         if self.subtype == "NONE":
             self.value = value
+        elif self.subtype == "VECTOR2":
+            self.value_two = value
         elif self.subtype == "VECTOR3":
             self.value_three = value
         elif self.subtype == "VECTOR4":
@@ -49,8 +57,8 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     def default_value(self):
         if self.subtype == "NONE":
             return str(self.value)
-        elif self.subtype == "VECTOR":
-            return str(self.value)
+        elif self.subtype == "VECTOR2":
+            return str((self.value_two[0],self.value_two[1]))
         elif self.subtype == "VECTOR3":
             return str((self.value_three[0],self.value_three[1],self.value_three[2]))
         elif self.subtype == "VECTOR4":
@@ -60,8 +68,8 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     def convert_data(self, code):
         if self.subtype == "NONE":
             return "sn_cast_int(" + code + ")"
-        elif self.subtype == "VECTOR":
-            return "sn_cast_int(" + code + ")"
+        elif self.subtype == "VECTOR2":
+            return "sn_cast_int(" + code + ", 2)"
         elif self.subtype == "VECTOR3":
             return "sn_cast_int_vector(" + code + ", 3)"
         elif self.subtype == "VECTOR4":
@@ -82,7 +90,9 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
                 if self.subtype == "VECTOR":
                     row.prop(self, "value", text=text)
                 col = row.column(align=True)
-                if self.subtype == "VECTOR3":
+                if self.subtype == "VECTOR2":
+                    col.prop(self, "value_two", text=text)
+                elif self.subtype == "VECTOR3":
                     col.prop(self, "value_three", text=text)
                 elif self.subtype == "VECTOR4":
                     col.prop(self, "value_four", text=text)
@@ -104,9 +114,9 @@ class SN_DynamicIntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),
+                                            ("VECTOR2","Vector 2","Vector 2"),
                                             ("VECTOR3","Vector 3","Vector 3"),
-                                            ("VECTOR4","Vector 4","Vector 4"),
-                                            ("VECTOR","Vector","Just changes appearance")])
+                                            ("VECTOR4","Vector 4","Vector 4")])
     
 
     

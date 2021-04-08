@@ -16,6 +16,12 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             description="Value of this socket",
                                             update=ScriptingSocket.auto_compile)
     
+    value_two: bpy.props.BoolVectorProperty(default=(True,True),
+                                                     size=2,
+                                                     name="Value",
+                                                     description="Value of this socket",
+                                                     update=ScriptingSocket.auto_compile)
+
     value_three: bpy.props.BoolVectorProperty(default=(True,True,True),
                                                      size=3,
                                                      name="Value",
@@ -30,15 +36,18 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),
+                                            ("VECTOR2","Vector 2","Vector 2"),
                                             ("VECTOR3","Vector 3","Vector 3"),
                                             ("VECTOR4","Vector 4","Vector 4")])
     
-    copy_attributes = ["value","value_three","value_four"]
+    copy_attributes = ["value","value_two","value_three","value_four"]
     
     
     def set_default(self,value):
         if self.subtype == "NONE":
             self.value = value
+        elif self.subtype == "VECTOR2":
+            self.value_two = value
         elif self.subtype == "VECTOR3":
             self.value_three = value
         elif self.subtype == "VECTOR4":
@@ -48,6 +57,8 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
     def default_value(self):
         if self.subtype == "NONE":
             return str(self.value)
+        elif self.subtype == "VECTOR2":
+            return str((self.value_two[0],self.value_two[1]))
         elif self.subtype == "VECTOR3":
             return str((self.value_three[0],self.value_three[1],self.value_three[2]))
         elif self.subtype == "VECTOR4":
@@ -57,6 +68,8 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
     def convert_data(self, code):
         if self.subtype == "NONE":
             return "sn_cast_boolean(" + code + ")"
+        elif self.subtype == "VECTOR2":
+            return "sn_cast_boolean_vector(" + code + ", 2)"
         elif self.subtype == "VECTOR3":
             return "sn_cast_boolean_vector(" + code + ", 3)"
         elif self.subtype == "VECTOR4":
@@ -75,7 +88,9 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
                 row.prop(self, "value", text=text)
             else:
                 col = row.column(align=True)
-                if self.subtype == "VECTOR3":
+                if self.subtype == "VECTOR2":
+                    for i in range(2): col.prop(self, "value_two", text=str(self.value_two[i]), index=i, toggle=True)
+                elif self.subtype == "VECTOR3":
                     for i in range(3): col.prop(self, "value_three", text=str(self.value_three[i]), index=i, toggle=True)
                 elif self.subtype == "VECTOR4":
                     for i in range(4): col.prop(self, "value_four", text=str(self.value_four[i]), index=i, toggle=True)
@@ -96,6 +111,7 @@ class SN_DynamicBooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
     to_add_idname = "SN_BooleanSocket"
     
     subtype: bpy.props.EnumProperty(items=[("NONE","None","None"),
+                                            ("VECTOR2","Vector 2","Vector 2"),
                                             ("VECTOR3","Vector 3","Vector 3"),
                                             ("VECTOR4","Vector 4","Vector 4")])
     

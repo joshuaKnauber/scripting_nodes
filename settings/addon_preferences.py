@@ -189,10 +189,11 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
-            "Added Bones to Scene Context Node",
+            "Added bones to 'Scene Context'",
+            "Added 2 digit vector socket",
             "Fixed wrong properties and functions when using blend data nodes",
             "Fixed blend data nodes resetting when plugging into function parameters",
-            "Fixed refresh view output",
+            "Fixed refresh view execute output",
         ]
         if changelog:
             box = layout.box()
