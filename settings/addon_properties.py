@@ -196,8 +196,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
 
     insert_sockets: bpy.props.BoolProperty(default=False,name="Show Insert Sockets",
-                                         description="Shows Add icons on removable sockets to allow inserting sockets")
+                                         description="Shows add icons on removable sockets to allow inserting sockets")
 
+    python_buttons: bpy.props.BoolProperty(default=False,name="Show Copy Python Buttons",
+                                         description="Shows copy python buttons on some sockets and on properties/variables")
 
     use_autosave: bpy.props.BoolProperty(default=True,name="Auto Save",description="Save this file automatically")
 

@@ -57,6 +57,7 @@ class ScriptingSocket:
     mirror_name: bpy.props.BoolProperty(default=False) # Mirrors the name of the connected socket
     take_name: bpy.props.BoolProperty(default=False) # Takes the name of the first connected socket
     
+    python_text: bpy.props.StringProperty() # The python text to copy (Empty String -> No button shown)
     variable_name: bpy.props.StringProperty(update=update_var_name) # The name of the variable if is_variable is True
     return_var_name: bpy.props.BoolProperty(default=False,update=update_shape) # Always return the var name instead of running make_code
     show_var_name: bpy.props.BoolProperty(default=False,update=update_shape) # Shows the variable name instead of the draw function
@@ -174,6 +175,8 @@ class ScriptingSocket:
         op.is_output = self.is_output
         op.idname = self.to_add_idname if self.to_add_idname else self.bl_idname
         
+    def draw_python_copy_socket(self,layout):
+        layout.operator("sn.get_python_name", text="",icon="COPYDOWN", emboss=False).to_copy = self.python_text
         
     def draw_disable_socket(self,layout):
         layout.prop(self,"enabled",text="",emboss=False,icon="HIDE_OFF" if self.enabled else "HIDE_ON")
@@ -190,6 +193,8 @@ class ScriptingSocket:
                 self.draw_disable_socket(row)
             if self.removable and bpy.context.scene.sn.insert_sockets:
                 self.draw_add_socket(row,"MARKER")
+            if self.python_text and bpy.context.scene.sn.python_buttons:
+                self.draw_python_copy_socket(row)
         
         
     def draw_as_output(self,row):
@@ -203,8 +208,10 @@ class ScriptingSocket:
                 self.draw_disable_socket(row)
             if self.removable and bpy.context.scene.sn.insert_sockets:
                 self.draw_add_socket(row,"MARKER")
-    
-    
+            if self.python_text and bpy.context.scene.sn.python_buttons:
+                self.draw_python_copy_socket(row)
+
+
     def draw_variable(self, row):
         if self.edit_var_name:
             row.prop(self,"variable_name",text="")

@@ -20,8 +20,8 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.add_execute_output("Continue")
         self.add_execute_output("Repeat")
-        self.add_blend_data_output("Element")
-        self.add_integer_output("Index")
+        self.add_blend_data_output("Element").python_text = f"for_node_{self.uid}"
+        self.add_integer_output("Index").python_text = f"for_node_index_{self.uid}"
 
     def on_link_insert(self, link):
         if link.to_socket == self.inputs[1]:
@@ -45,6 +45,8 @@ class SN_ForProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.inputs[1].default_text = "List"
                 else:
                     self.inputs[1].default_text = "Collection / List"
+
+        self.outputs[2].python_text = f"for_node_{self.uid}"
 
     def code_evaluate(self, context, touched_socket):
 
