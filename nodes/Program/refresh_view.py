@@ -37,5 +37,6 @@ class SN_RefreshViewNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
                     sn_redraw()
+                    {self.outputs[0].code(5)}
                     """
         }
