@@ -16,7 +16,9 @@ class SN_ScriptLineInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
     def on_create(self,context):
-        self.add_interface_input("Interface").mirror_name = True
+        inp = self.add_interface_input("Interface")
+        inp.mirror_name = True
+        inp.python_text = "sn_layout"
         self.add_string_input("Script Line")
 
 

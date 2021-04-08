@@ -51,20 +51,23 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 socket.variable_name = "Parameter"
 
+            socket.python_text = self.get_python_name(socket.variable_name, "variable")
+
     def on_dynamic_remove(self,is_output):
         self.update_nodes_by_type("SN_RunLayoutFunctionNode")
 
     def on_var_name_update(self,socket):
-        if socket.variable_name == "Layout":
-            socket.variable_name = "Layout 001"
-        names = []
-        for out in self.outputs:
-            if out.bl_idname != "SN_InterfaceSocket":
-                names.append(out.variable_name)
+        if socket.bl_idname != "SN_InterfaceSocket":
+            if socket.variable_name.lower() == "layout":
+                socket.variable_name = socket.variable_name+" 001"
+            names = []
+            for out in self.outputs:
+                if out.bl_idname != "SN_InterfaceSocket":
+                    names.append(out.variable_name)
 
-        socket["variable_name"] = self.get_unique_name(socket.variable_name, names, separator=" ")
-        self.update_nodes_by_type("SN_RunLayoutFunctionNode")
-
+            socket["variable_name"] = self.get_unique_name(socket.variable_name, names, separator=" ")
+            self.update_nodes_by_type("SN_RunLayoutFunctionNode")
+            socket.python_text = self.get_python_name(socket.variable_name, "variable")
 
     def draw_node(self,context,layout):
         layout.prop(self, "func_name")

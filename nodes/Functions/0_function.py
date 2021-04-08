@@ -52,6 +52,8 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             socket.variable_name = "Parameter"
 
+        socket.python_text = self.get_python_name(socket.variable_name, "variable")
+
     def on_dynamic_remove(self,is_output):
         self.update_nodes_by_type("SN_RunFunctionNode")
 
@@ -62,6 +64,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         socket["variable_name"] = self.get_unique_name(socket.variable_name, names, separator=" ")
         self.update_nodes_by_type("SN_RunFunctionNode")
+        socket.python_text = self.get_python_name(socket.variable_name, "variable")
 
 
     def draw_node(self,context,layout):

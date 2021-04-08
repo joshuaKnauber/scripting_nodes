@@ -20,7 +20,7 @@ class SN_RepeatProgramNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.add_execute_output("Continue")
         self.add_execute_output("Repeat")
-        self.add_integer_output("Step")
+        self.add_integer_output("Step").python_text = f"repeat_node_{self.uid}"
 
     def code_evaluate(self, context, touched_socket):
 
