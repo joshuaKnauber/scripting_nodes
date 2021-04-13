@@ -102,7 +102,7 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     self.types = str(types)
                     self.define_type = socket.data_type
 
-            if data_type != "":
+            if socket.data_type != "":
                 self.current_data_type = socket.data_type
         else:
             self.types = "[]"

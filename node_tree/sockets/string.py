@@ -81,6 +81,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         elif self.subtype == "DIRECTORY":
             self.value_directory = value
         elif self.subtype == "ENUM":
+            self.value = value
             for item in self.enum_items(bpy.context):
                 if item[0] == value:
                     self.value_enum = value
