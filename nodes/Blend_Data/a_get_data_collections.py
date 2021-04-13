@@ -71,7 +71,7 @@ class SN_GetDataCollectionNode(bpy.types.Node, SN_ScriptingBaseNode):
         if socket.subtype == "NONE":
             if socket.data_type == self.current_data_type and not len(self.outputs):
                 self.add_data_outputs(socket.data_type)
-            elif socket.data_type != self.current_data_type and data_type != "":
+            elif socket.data_type != self.current_data_type and socket.data_type != "":
                 self.outputs.clear()
                 self.add_data_outputs(socket.data_type)
 
