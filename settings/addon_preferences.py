@@ -190,6 +190,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_changelog(self,layout):
         changelog = [
             "Removed input from update property node and added self output",
+            "Fixed the button that shows the node that is causing the error",
         ]
         if changelog:
             box = layout.box()
