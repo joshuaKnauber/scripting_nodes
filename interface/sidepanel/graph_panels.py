@@ -121,8 +121,7 @@ class SN_PT_VariablePanel(bpy.types.Panel):
             row = col.row(align=True)
             row.prop(var,"var_type",text="Type")
             copy_name = f"{SN_ScriptingBaseNode().get_python_name(graph_tree.name)}[\"{var.identifier}\"]"
-            if context.scene.sn.python_buttons:
-                row.operator("sn.get_python_name",text="",icon="COPYDOWN").to_copy = copy_name
+            row.operator("sn.get_python_name",text="",icon="COPYDOWN").to_copy = copy_name
             col.separator()
             
             if var.var_type == "STRING":
@@ -151,8 +150,7 @@ def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
     row.prop(var,"var_type",text="Type")
     copy_name = var.attach_property_to.upper() + "_PLACEHOLDER." + var.identifier
     if var.use_self: copy_name = "self." + var.identifier
-    if context.scene.sn.python_buttons:
-        row.operator("sn.get_python_name",text="",icon="COPYDOWN").to_copy = copy_name
+    row.operator("sn.get_python_name",text="",icon="COPYDOWN").to_copy = copy_name
     col.separator()
 
     if not var.use_self:
