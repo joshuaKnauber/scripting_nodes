@@ -189,13 +189,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
-            "Added 'Copy Python' buttons to some nodes (Header -> Top Right -> Settings -> 'Show Copy Python Buttons', this will only work on newly added nodes)",
-            "Added get/set edit select mode nodes",
-            "Added bones to 'Scene Context'",
-            "Added 2 digit vector socket",
-            "Fixed wrong properties and functions when using blend data nodes",
-            "Fixed blend data nodes resetting when plugging into function parameters",
-            "Fixed refresh view execute output",
+            "Removed input from update property node and added self output",
         ]
         if changelog:
             box = layout.box()
