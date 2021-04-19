@@ -190,6 +190,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_changelog(self,layout):
         changelog = [
             "Fixed row node inputs with connected nodes",
+            "Removed input from update property node and added self output",
         ]
         if changelog:
             box = layout.box()

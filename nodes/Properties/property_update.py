@@ -1,7 +1,7 @@
 import bpy
 import json
 from ...node_tree.base_node import SN_ScriptingBaseNode
-from .property_util import get_data, setup_data_input
+from .property_util import get_data, setup_data_input, setup_data_output
 
 
 
@@ -71,11 +71,8 @@ class SN_UpdatePropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             data = get_data(self.copied_path)
             if data:
                 self.label = "Update " + data["property"]["name"]
-                if not data["data_block"]["type"] == "":
-                    setup_data_input(self, data)
-                    self.add_output_from_data(data["property"])
-                else:
-                    self.add_output_from_data(data["property"])
+                self.add_output_from_data(data["property"])
+                setup_data_output(self, data)
             else:
                 self.copied_path = ""
 
@@ -126,20 +123,12 @@ class SN_UpdatePropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_evaluate(self, context, touched_socket):
 
-        data = get_data(self.copied_path)
-        path = ""
-        if len(self.inputs):
-            if not self.inputs[0].links:
-                self.add_error("No blend data", "Blend data input is not connected", True)
-                return {"code": "None"}
-
-            path = self.inputs[0].code()
-
-        if data["group_path"]:
-            path += "." + data["group_path"] if path else data["group_path"]
-
-        path += "." + data["property"]["identifier"]
-
-        return {
-            "code": f"{path}"
-        }
+        if touched_socket == self.outputs[1]:
+            data = get_data(self.copied_path)
+            return {
+                "code": f"self.{data['property']['identifier']}"
+            }
+        else:
+            return {
+                "code": f"self"
+            }

@@ -52,3 +52,8 @@ def setup_data_input(node, data):
     inp = node.add_blend_data_input(data["data_block"]["name"])
     inp.data_type = data["data_block"]["type"]
     inp.data_name = data["data_block"]["name"]
+
+def setup_data_output(node, data):
+    out = node.add_blend_data_output(data["data_block"]["name"])
+    out.data_type = data["data_block"]["type"]
+    out.data_name = data["data_block"]["name"]
