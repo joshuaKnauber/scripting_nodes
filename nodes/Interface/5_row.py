@@ -38,11 +38,11 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
         return {
             "code": f"""
 
-                    row = {layout}.row(align={self.inputs["Align"].value})
-                    row.enabled = {self.inputs["Enabled"].value}
-                    row.alert = {self.inputs["Alert"].value}
-                    row.scale_x = {self.inputs["Scale X"].value}
-                    row.scale_y = {self.inputs["Scale Y"].value}
+                    row = {layout}.row(align={self.inputs["Align"].code()})
+                    row.enabled = {self.inputs["Enabled"].code()}
+                    row.alert = {self.inputs["Alert"].code()}
+                    row.scale_x = {self.inputs["Scale X"].code()}
+                    row.scale_y = {self.inputs["Scale Y"].code()}
                     {self.outputs[0].by_name(5)}
                     """
         }
