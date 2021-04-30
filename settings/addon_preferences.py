@@ -191,7 +191,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         changelog = [
             "Fixed row node inputs with connected nodes",
             "Removed input from update property node and added self output",
-            "Added Headers to Add to Menu node"
+            "Added Headers to Add to Menu node",
+            "Fill in default author name when creating new addon",
         ]
         if changelog:
             box = layout.box()

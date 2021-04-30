@@ -1,5 +1,6 @@
 import bpy
 import os
+import getpass
 from bpy_extras.io_utils import ImportHelper
 
 
@@ -32,6 +33,11 @@ class SN_OT_CreateAddon(bpy.types.Operator):
         self.layout.prop(self,"author",text="Author")
 
     def invoke(self, context, event):
+        try:
+            user = getpass.getuser()
+        except:
+            user = ""
+        self.author = user
         return context.window_manager.invoke_props_dialog(self)
 
 
