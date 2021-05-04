@@ -204,3 +204,5 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     use_autosave: bpy.props.BoolProperty(default=True,name="Auto Save",description="Save this file automatically")
 
     autosave_delay: bpy.props.FloatProperty(default=120,name="Delay",description="Autosave delay in seconds",min=10)
+
+    has_update: bpy.props.BoolProperty(default=False)
