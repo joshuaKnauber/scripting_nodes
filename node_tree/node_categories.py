@@ -29,12 +29,12 @@ def get_node_categories():
                 for line in node_file.readlines():
                     if "class" in line and "SN_ScriptingBaseNode" in line:
                         name = line.split("class ")[-1].split("(")[0]
-                        if not name in ["SN_TutorialNode"]:
+                        if not name in ["SN_TutorialNode", "SN_LoFiNode", "SN_InPortalNode","SN_OutPortalNode"]:
                             category_items.append(NodeItem(name))
         if category_items:
             node_categories.append(SN_ScriptingNodesCategory(category.replace(" ","_").lower(), category.replace("_", " "), items=category_items))
 
-    layout_items = [NodeItem("NodeFrame"),NodeItem("SN_LoFiNode")]
+    layout_items = [NodeItem("NodeFrame"),NodeItem("SN_LoFiNode"),NodeItem("SN_InPortalNode")]
     node_categories.append(SN_ScriptingNodesCategory("LAYOUT", "Layout", items=layout_items))
 
     return node_categories
