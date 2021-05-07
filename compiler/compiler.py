@@ -13,10 +13,15 @@ def compile_addon(addon_tree, is_export=False):
     txt = None
     try:
         start_time = time()
+
+        # set error state for potential recompile
+        error_graphs = []
+        for graph in addon_tree.sn_graphs:
+            if len(graph.errors) > 0:
+                error_graphs.append(graph.name)
         
         # get and/or create addon data
         addon_data = __find_compiled_addon(addon_tree)
-        had_errors = bool(len(addon_tree.sn_graphs[0].errors))
         remove_addon(addon_tree)
         txt = __create_text_file(addon_tree.sn_graphs[0].name)
         addon_data["text"] = txt
@@ -45,7 +50,7 @@ def compile_addon(addon_tree, is_export=False):
         # go through all graphs
         new_graph_code = {}
         for graph in addon_tree.sn_graphs:
-            if graph.node_tree.has_changes or not graph.name in addon_data["code"]["graph_code"] or had_errors:
+            if graph.node_tree.has_changes or not graph.name in addon_data["code"]["graph_code"] or graph.name in error_graphs:
 
                 # make graph code
                 graph_code, graph_did_once              = __evaluate_graph(graph, addon_tree, addon_did_once)
@@ -194,7 +199,8 @@ def handle_file_load():
     for tree in bpy.data.node_groups:
         if len(tree.sn_graphs) > 0:
             bpy.app.timers.register(tree.run_autocompile, first_interval=0.1)
-            tree.sn_graphs[0].errors.clear()
+            for graph in tree.sn_graphs:
+                graph.errors.clear()
             tree.sn_graphs[0].prints.clear()
             if tree.sn_graphs[0].compile_on_start:
                 compile_addon(tree,False)
@@ -208,7 +214,8 @@ def handle_file_unload():
 def remove_addon(addon_tree):
     for addon in addons:
         if addon["addon_tree"] == addon_tree:
-            addon["addon_tree"].sn_graphs[0].errors.clear()
+            for graph in addon["addon_tree"].sn_graphs:
+                graph.errors.clear()
             addon["addon_tree"].sn_graphs[0].prints.clear()
             __remove_addon(addon)
             break
