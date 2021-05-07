@@ -31,6 +31,14 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     show_full_errors: bpy.props.BoolProperty(name="Show Full Errors",
                                              description="Show the full error messages in the console",
                                              default=False)
+    
+    no_zip_export: bpy.props.BoolProperty(name="Export Unzipped",
+                                             description="Exports your addon without zipping it",
+                                             default=False)
+    
+    debug_export: bpy.props.BoolProperty(name="Debug Export",
+                                             description="Prints debug messages for the export process",
+                                             default=False)
 
     navigation: bpy.props.EnumProperty(items=[  ("SETTINGS","Settings","Serpens Settings","NONE",1),
                                                 ("ADDONS","Addons","Serpens Addon Market","NONE",2),
@@ -59,6 +67,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         col.prop(self, "show_full_errors")
         col.prop(self, "show_txt")
         col.prop(self, "keep_after_error")
+        col.prop(self, "no_zip_export")
+        col.prop(self, "debug_export")
         
         col = row.column()
         col.label(text="Updates:")
@@ -195,6 +205,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added Headers to Add to Menu node",
             "Fill in default author name when creating new addon",
             "Moved update info from popup to node editor header",
+            "Added export debug options for export",
         ]
         if changelog:
             box = layout.box()
