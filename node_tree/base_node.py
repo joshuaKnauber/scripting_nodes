@@ -577,12 +577,16 @@ class SN_ScriptingBaseNode:
     
     
     def add_error(self, title, description, fatal=False):
-        error = self.addon_tree.sn_graphs[0].errors.add()
-        error.title = title
-        error.description = description
-        error.fatal = fatal
-        error.node = self.name
-        error.node_tree = self.addon_tree.sn_graphs[0].name
+        for graph in self.addon_tree.sn_graphs:
+            if graph.node_tree == self.node_tree:
+                if not self.name in self.addon_tree.sn_graphs[0].errors:
+                    error = self.addon_tree.sn_graphs[0].errors.add()
+                    error.title = title
+                    error.description = description
+                    error.fatal = fatal
+                    error.name = self.name
+                    error.node = self.name
+                    error.node_tree = graph.name
 
 
     ### RETURNED CODE

@@ -16,6 +16,7 @@ def compile_addon(addon_tree, is_export=False):
         
         # get and/or create addon data
         addon_data = __find_compiled_addon(addon_tree)
+        had_errors = bool(len(addon_tree.sn_graphs[0].errors))
         remove_addon(addon_tree)
         txt = __create_text_file(addon_tree.sn_graphs[0].name)
         addon_data["text"] = txt
@@ -44,7 +45,7 @@ def compile_addon(addon_tree, is_export=False):
         # go through all graphs
         new_graph_code = {}
         for graph in addon_tree.sn_graphs:
-            if graph.node_tree.has_changes or not graph.name in addon_data["code"]["graph_code"]:
+            if graph.node_tree.has_changes or not graph.name in addon_data["code"]["graph_code"] or had_errors:
 
                 # make graph code
                 graph_code, graph_did_once              = __evaluate_graph(graph, addon_tree, addon_did_once)
