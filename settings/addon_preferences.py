@@ -204,6 +204,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Fixed row node inputs with connected nodes",
             "Removed input from update property node and added self output",
             "Added Headers to Add to Menu node",
+            "Added On Exit node",
             "Fill in default author name when creating new addon",
             "Moved update info from popup to node editor header",
             "Added export debug options for export",
