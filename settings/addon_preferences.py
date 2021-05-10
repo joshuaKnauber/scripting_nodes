@@ -206,6 +206,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added Headers to Add to Menu node",
             "Added On Exit node",
             "Fill in default author name when creating new addon",
+            "Fixed casting to int vector",
             "Moved update info from popup to node editor header",
             "Added export debug options for export",
         ]
