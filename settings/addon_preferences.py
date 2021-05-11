@@ -202,6 +202,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added portal nodes to transfer data wirelessly (it's the future!!!)",
             "Fixed issues with N-Panel errors in multiple graphs",
             "Fixed row node inputs with connected nodes",
+            "Fixed ability to connect interface and execute sockets",
             "Removed input from update property node and added self output",
             "Added Headers to Add to Menu node",
             "Fill in default author name when creating new addon",

@@ -249,15 +249,21 @@ class SN_ScriptingBaseNode:
         if link in list(self.node_tree.links):
             link = self.__real_link(link)
             if link:
+                remove = False
                 if link.to_socket.group == link.from_socket.group:
-                    if self == link.to_node:
-                        link.to_socket.update_socket(self,link)
+                    if link.to_socket.group == "DATA" or link.to_socket.socket_type == link.from_socket.socket_type:
+                        if self == link.to_node:
+                            link.to_socket.update_socket(self,link)
+                        else:
+                            link.from_socket.update_socket(self,link)
+
+                        self.on_link_insert(link)
                     else:
-                        link.from_socket.update_socket(self,link)
-
-                    self.on_link_insert(link)
-
+                        remove = True
                 else:
+                    remove = True
+
+                if remove:
                     try: self.node_tree.links.remove(link)
                     except: pass
                 self.auto_compile()
