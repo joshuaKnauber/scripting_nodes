@@ -57,7 +57,8 @@ class SN_OT_InstallSnippets(bpy.types.Operator, ImportHelper):
                 new_path = os.path.join(install_to, os.path.basename(filepath))
                 shutil.copy(filepath, new_path)
                 self.write_to_installed("snippets",self.snippet_data(new_path))
-            
+        
+        for area in context.screen.areas: area.tag_redraw()
         refresh_snippet_category_items(context)
         return {"FINISHED"}
 
@@ -104,6 +105,7 @@ class SN_OT_UninstallSnippet(bpy.types.Operator):
         if os.path.exists(path):
             os.remove(path)
 
+        for area in context.screen.areas: area.tag_redraw()
         refresh_snippet_category_items(context)
         return {"FINISHED"}
 
@@ -136,6 +138,7 @@ class SN_OT_UninstallSnippetCategory(bpy.types.Operator):
             installed.write(json.dumps(data,indent=4))
             installed.truncate()
         
+        for area in context.screen.areas: area.tag_redraw()
         refresh_snippet_category_items(context)
         return {"FINISHED"}
 
