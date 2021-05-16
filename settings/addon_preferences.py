@@ -240,17 +240,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
-            "Added portal nodes to transfer data wirelessly (it's the future!!!)",
-            "Fixed issues with N-Panel errors in multiple graphs",
-            "Fixed row node inputs with connected nodes",
-            "Fixed ability to connect interface and execute sockets",
-            "Removed input from update property node and added self output",
-            "Added Headers to Add to Menu node",
-            "Added On Exit node",
-            "Fill in default author name when creating new addon",
-            "Fixed casting to int vector",
-            "Moved update info from popup to node editor header",
-            "Added export debug options for export",
+            "Added snippets for creating custom nodes (see N-Panel and Preferences)",
         ]
         if changelog:
             box = layout.box()
