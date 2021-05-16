@@ -38,6 +38,7 @@ from .keymaps.keymap import register_keymaps, unregister_keymaps
 from .node_tree.node_categories import get_node_categories
 from .interface.header.header import prepend_header, append_header, example_dropdown
 from .interface.menu.rightclick import serpens_right_click
+from .interface.menu.snippets import snippet_menu
 
 from .node_tree.graphs.graph_ui_lists import SN_Graph, update_graph_index
 from .node_tree.variables.variables_ui_list import SN_Variable
@@ -125,6 +126,9 @@ def register():
     bpy.types.NODE_HT_header.prepend(prepend_header)
     bpy.types.NODE_MT_editor_menus.append(example_dropdown)
 
+    # add to the node add menu
+    bpy.types.NODE_MT_category_snippets.append(snippet_menu)
+
     # app handlers
     bpy.app.handlers.load_post.append(load_handler)
     bpy.app.handlers.depsgraph_update_post.append(depsgraph_handler)
@@ -142,6 +146,9 @@ def unregister():
     bpy.types.NODE_HT_header.remove(append_header)
     bpy.types.NODE_HT_header.remove(prepend_header)
     bpy.types.NODE_MT_editor_menus.remove(example_dropdown)
+
+    # remove from the node add menu
+    bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
 
     # unregister the graph properties
     del bpy.types.NodeTree.sn_graphs

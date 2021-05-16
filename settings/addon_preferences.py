@@ -42,7 +42,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     navigation: bpy.props.EnumProperty(items=[  ("SETTINGS","Settings","Serpens Settings","NONE",1),
                                                 ("ADDONS","Addons","Serpens Addon Market","NONE",2),
-                                                ("PACKAGES","Packages","Serpens Package Market","NONE",3)],
+                                                ("PACKAGES","Packages","Serpens Package Market","NONE",3),
+                                                ("SNIPPETS","Snippets","Serpens Snippets","NONE",4)],
                                        default = "SETTINGS",
                                        name="SETTINGS",
                                        description="Navigation")
@@ -189,6 +190,46 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                 if not package.name == "placeholder":
                     if self.package_search.lower() in package.name.lower() or self.package_search.lower() in package.author.lower():
                         self.draw_package(layout,package)
+
+
+    def draw_snippets(self,layout):
+        row = layout.row(align=True)
+        row.scale_y = 1.2
+        row.operator("sn.install_snippets",text="Install Snippets",icon="IMPORT")
+
+        installed_path = os.path.join(os.path.dirname(os.path.dirname(__file__)),"snippets","installed.json")
+        with open(installed_path) as installed:
+            data = json.loads(installed.read())
+            for cIndex, category in enumerate(data["categories"]):
+                box = layout.box()
+                row = box.row()
+                row.label(text=category["name"])
+                row.operator("sn.uninstall_snippet_category",text="",icon="TRASH",emboss=False)
+
+                col = box.column(align=True)
+                for i, snippet in enumerate(category["snippets"]):
+                    row = col.row()
+                    subcol = row.column()
+                    subcol.enabled = False
+                    subcol.label(text=snippet["name"])
+                    op = row.operator("sn.uninstall_snippet",text="",icon="X",emboss=False)
+                    op.has_category = True
+                    op.categoryIndex = cIndex
+                    op.snippetIndex = i
+
+            if len(data["snippets"]) > 0:
+                box = layout.box()
+                for i, snippet in enumerate(data["snippets"]):
+                    row = box.row()
+                    row.label(text=snippet["name"])
+                    op = row.operator("sn.uninstall_snippet",text="",icon="X",emboss=False)
+                    op.has_category = False
+                    op.snippetIndex = i
+
+            if len(data["categories"]) + len(data["snippets"]) == 0:
+                layout.label(text="No snippets installed. Export snippets in the N-Panel",icon="INFO")
+
+            
     
     
     def draw_navigation(self,layout):
@@ -231,6 +272,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             self.draw_addon_market(layout)
         elif self.navigation == "PACKAGES":
             self.draw_package_market(layout)
+        elif self.navigation == "SNIPPETS":
+            self.draw_snippets(layout)
         
         
 # addon_prefs = context.preferences.addons[__name__.partition('.')[0]].preferences

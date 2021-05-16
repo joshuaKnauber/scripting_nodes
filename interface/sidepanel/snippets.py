@@ -1,4 +1,6 @@
 import bpy
+import os
+import json
 
         
 class SN_PT_SnippetPanel(bpy.types.Panel):
@@ -8,6 +10,7 @@ class SN_PT_SnippetPanel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_order = 4
+    bl_options = {"DEFAULT_CLOSED"}
 
     @classmethod
     def poll(cls, context):
