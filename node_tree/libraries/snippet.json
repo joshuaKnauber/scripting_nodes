@@ -1,39 +1,39 @@
 {
     "nodes": [
         {
-            "bl_idname": "SN_ObjectsNode",
+            "bl_idname": "SN_RunFunctionNode",
             "properties": {
-                "name": "Objects",
+                "name": "Run Function",
                 "label": "",
                 "use_custom_color": true,
                 "color": [
-                    0.30000001192092896,
-                    0.30000001192092896,
-                    0.30000001192092896
+                    0.20000000298023224,
+                    0.20000000298023224,
+                    0.20000000298023224
                 ],
                 "location": [
-                    -155.48440551757812,
-                    -3.0113449096679688
+                    721.6891479492188,
+                    -77.59452819824219
                 ],
-                "return_type": "ALL",
-                "node_tree_uid": "3AF3E",
-                "addon_tree_uid": "3AF3E",
-                "uid": "BA599"
+                "node_tree_uid": "935D9",
+                "addon_tree_uid": "935D9",
+                "recursion_warning": false,
+                "func_uid": "0DC93",
+                "search_value": "Function Return",
+                "use_execute": true,
+                "func_name": "New Function"
             },
-            "inputs": [],
+            "inputs": [
+                [],
+                []
+            ],
             "outputs": [
                 [],
-                [
-                    {
-                        "name": "Get Data",
-                        "index": 0
-                    }
-                ],
                 []
             ]
-        },
-        {
-            "bl_idname": "SN_OperatorNode",
+        }
+    ]
+}ode",
             "properties": {
                 "name": "Operator",
                 "label": "",
