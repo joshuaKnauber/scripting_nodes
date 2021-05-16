@@ -1,6 +1,4 @@
 import bpy
-import os
-import json
 
         
 class SN_PT_SnippetPanel(bpy.types.Panel):

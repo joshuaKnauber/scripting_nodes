@@ -6,6 +6,7 @@ import shutil
 from bpy_extras.io_utils import ImportHelper
 
 
+
 class SN_OT_InstallSnippets(bpy.types.Operator, ImportHelper):
     bl_idname = "sn.install_snippets"
     bl_label = "Install Snippets"
@@ -56,6 +57,8 @@ class SN_OT_InstallSnippets(bpy.types.Operator, ImportHelper):
                 new_path = os.path.join(install_to, os.path.basename(filepath))
                 shutil.copy(filepath, new_path)
                 self.write_to_installed("snippets",self.snippet_data(new_path))
+            
+        refresh_snippet_category_items(context)
         return {"FINISHED"}
 
 
@@ -100,6 +103,8 @@ class SN_OT_UninstallSnippet(bpy.types.Operator):
         path = os.path.join(remove_from, removed_snippet["filename"])
         if os.path.exists(path):
             os.remove(path)
+
+        refresh_snippet_category_items(context)
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -130,7 +135,37 @@ class SN_OT_UninstallSnippetCategory(bpy.types.Operator):
             installed.seek(0)
             installed.write(json.dumps(data,indent=4))
             installed.truncate()
+        
+        refresh_snippet_category_items(context)
         return {"FINISHED"}
 
     def invoke(self, context, event):
         return context.window_manager.invoke_confirm(self, event)
+
+
+
+class SN_OT_AddSnippetNode(bpy.types.Operator):
+    bl_idname = "sn.add_snippet_node"
+    bl_label = "Add Snippet Node"
+    bl_description = "Adds this snippet node"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+    
+    path: bpy.props.StringProperty()
+    
+    def execute(self, context):
+        bpy.ops.node.add_node(type="SN_SnippetNode")
+        context.space_data.node_tree.nodes.active.snippet_path = self.path
+        bpy.ops.transform.translate("INVOKE_DEFAULT")
+        return {"FINISHED"}
+
+
+
+def refresh_snippet_category_items(context):
+    context.scene.sn.snippet_categories.clear()
+    with open(os.path.join(os.path.dirname(__file__),"installed.json"), "r") as data:
+        data = json.loads(data.read())
+        for category in data["categories"]:
+            item = context.scene.sn.snippet_categories.add()
+            item.name = category["name"]
+        
+        context.scene.sn.has_other_snippets = bool(len(data["snippets"]))

@@ -189,6 +189,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     
     sn_compat_nodes: bpy.props.CollectionProperty(type=SN_NodeCollection,name="Suggestion Menu")
+
+
+    snippet_categories: bpy.props.CollectionProperty(type=SN_NodeCollection, name="Installed Snippet Categories")
+
+    has_other_snippets: bpy.props.BoolProperty(default=False, name="Other snippets installed")
     
     
     minimal_header: bpy.props.BoolProperty(default=False,name="Minimal Header",

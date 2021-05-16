@@ -1,4 +1,6 @@
 import bpy
+import os
+import json
 
 
 class SN_MT_SnippetMenu(bpy.types.Menu):
@@ -7,11 +9,33 @@ class SN_MT_SnippetMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        
-        layout.label(text="test")
+        installed_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "snippets", "installed.json")
+
+        with open(installed_path, "r") as data:
+            data = json.loads(data.read())
+            file_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "snippets", "files")
+
+            if not context.snippet_category:
+                for snippet in data["snippets"]:
+                    op = layout.operator("sn.add_snippet_node", text=snippet["name"])
+                    op.path = os.path.join(file_dir, snippet["filename"])
+
+            else:
+                i = context.scene.sn.snippet_categories.find(context.snippet_category.name)
+                for snippet in data["categories"][i]["snippets"]:
+                    op = layout.operator("sn.add_snippet_node", text=snippet["name"])
+                    op.path = os.path.join(file_dir, snippet["filename"])
 
 
 def snippet_menu(self, context):
     layout = self.layout
-    row = layout.row()
-    row.menu("SN_MT_SnippetMenu",text="test")
+
+    for category in context.scene.sn.snippet_categories:
+        row = layout.row()
+        row.context_pointer_set("snippet_category", category)
+        row.menu("SN_MT_SnippetMenu", text=category.name)
+
+    if context.scene.sn.has_other_snippets:
+        row = layout.row()
+        row.context_pointer_set("snippet_category", None)
+        row.menu("SN_MT_SnippetMenu", text="Others")

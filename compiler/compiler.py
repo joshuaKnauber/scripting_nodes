@@ -3,6 +3,7 @@ from time import time
 from datetime import datetime
 import logging
 from .txt_blocks import license_block, serpens_functions
+from ..snippets.snippet_operators import refresh_snippet_category_items
 
 
 addons = []
@@ -204,6 +205,8 @@ def handle_file_load():
             tree.sn_graphs[0].prints.clear()
             if tree.sn_graphs[0].compile_on_start:
                 compile_addon(tree,False)
+                
+    refresh_snippet_category_items(bpy.context)
 
 
 def handle_file_unload():
