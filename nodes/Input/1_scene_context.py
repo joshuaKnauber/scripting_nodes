@@ -28,8 +28,8 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
         out.data_identifier = "view_layer"
         out.data_name = "View Layer"
         out = self.add_blend_data_output("Active Camera")
-        out.data_type = "Camera"
-        out.data_identifier = "camera"
+        out.data_type = "Object"
+        out.data_identifier = "object"
         out.data_name = "Camera"
         out = self.add_blend_data_output("Active Bone")
         out.data_type = "Bone"

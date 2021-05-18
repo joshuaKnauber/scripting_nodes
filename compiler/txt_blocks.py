@@ -133,7 +133,9 @@ def serpens_functions(addon_tree):
                         return [value]
 
             def sn_cast_blend_data(value):
-                if type(value) in [tuple, bool, int, float, list]:
+                if hasattr(value, "bl_rna"):
+                    return value
+                elif type(value) in [tuple, bool, int, float, list]:
                     return None
                 elif type(value) == str:
                     try:
