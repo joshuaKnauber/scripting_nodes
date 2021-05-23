@@ -32,8 +32,6 @@ import atexit
 
 import os
 
-from . import auto_load
-
 from .keymaps.keymap import register_keymaps, unregister_keymaps
 from .node_tree.node_categories import get_node_categories
 from .interface.header.header import prepend_header, append_header, example_dropdown
@@ -52,6 +50,10 @@ from .settings.updates import check_serpens_updates
 from .compiler.compiler import handle_file_load, handle_file_unload
 
 
+from . import compiler, interface, node_tree, nodes, packages, settings
+
+
+from . import auto_load
 auto_load.init()
 
 
@@ -84,11 +86,31 @@ def register_icons():
         
 def unregister_icons():
     bpy.utils.previews.remove( bpy.types.Scene.sn_icons )
+
+
+def register_classes():
+    # compiler.register()
+    # interface.register()
+    # node_tree.register()
+    # nodes.register()
+    # packages.register()
+    # settings.register()
+    auto_load.register()
+
+
+def unregister_classes():
+    # settings.unregister()
+    # packages.unregister()
+    # nodes.unregister()
+    # node_tree.unregister()
+    # interface.unregister()
+    # compiler.unregister()
+    auto_load.unregister()
     
 
 def register():
     # register the classes of the addon
-    auto_load.register()
+    register_classes()
 
     # register the graph properties
     bpy.types.NodeTree.sn_graphs = bpy.props.CollectionProperty(type=SN_Graph,name="Scripting Graphs")
@@ -139,9 +161,6 @@ def register():
 
 
 def unregister():
-    # unregister the addon classes
-    auto_load.unregister()
-
     # remove the node tree header
     bpy.types.NODE_HT_header.remove(append_header)
     bpy.types.NODE_HT_header.remove(prepend_header)
@@ -185,3 +204,6 @@ def unregister():
     # remove right click menu
     try: bpy.types.WM_MT_button_context.remove(serpens_right_click)
     except: pass
+
+    # unregister the addon classes
+    unregister_classes()

@@ -3,7 +3,7 @@ from time import time
 from datetime import datetime
 import logging
 from .txt_blocks import license_block, serpens_functions
-from ..snippets.snippet_operators import refresh_snippet_category_items
+from ..node_tree.snippets.snippet_operators import refresh_snippet_category_items
 
 
 addons = []

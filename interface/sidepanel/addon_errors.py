@@ -3,7 +3,7 @@ from textwrap import wrap
 
 
 
-class SN_SelectNode(bpy.types.Operator):
+class SN_OT_SelectNode(bpy.types.Operator):
     bl_idname = "sn.select_node"
     bl_label = "Select Node"
     bl_description = "Selects this node"

@@ -16,7 +16,7 @@ picker_node = None
     
     
 
-class SN_SelectInterfaceAdd(bpy.types.Operator):
+class SN_OT_SelectInterfaceAdd(bpy.types.Operator):
     bl_idname = "sn.select_interface_add"
     bl_label = "Select"
     bl_description = "Select this element in the interface"
@@ -46,7 +46,7 @@ class SN_SelectInterfaceAdd(bpy.types.Operator):
 
     
 
-class SN_StartInterfacePicker(bpy.types.Operator):
+class SN_OT_StartInterfacePicker(bpy.types.Operator):
     bl_idname = "sn.pick_interface"
     bl_label = "Select"
     bl_description = "Select an element in the interface"

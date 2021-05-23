@@ -36,6 +36,9 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
             script = bpy.data.texts[self.script]
             script = script.as_string()
             script = script.split("\n")
+            for i in range(len(script)-1,-1,-1):
+                if "import bpy" in script[i]:
+                    script.pop(i)
             for i in range(len(script)): 
                 script[i] = script[i] + "\n"
         

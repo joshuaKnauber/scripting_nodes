@@ -8,7 +8,7 @@ from_portal = None
 
 
 
-class SN_GetPortalReceiver(bpy.types.Operator):
+class SN_OT_GetPortalReceiver(bpy.types.Operator):
     bl_idname = "sn.get_portal"
     bl_label = "Get Portal Receiver"
     bl_description = "Gives you a portal receiver node belonging to this portal"
@@ -24,7 +24,7 @@ class SN_GetPortalReceiver(bpy.types.Operator):
 
 
 
-class SN_DuplicatePortalReceiver(bpy.types.Operator):
+class SN_OT_DuplicatePortalReceiver(bpy.types.Operator):
     bl_idname = "sn.duplicate_portal"
     bl_label = "Duplicate Portal Receiver"
     bl_description = "Gives you another portal receiver node for this portal"
@@ -40,7 +40,7 @@ class SN_DuplicatePortalReceiver(bpy.types.Operator):
 
 
 
-class SN_FindPortal(bpy.types.Operator):
+class SN_OT_FindPortal(bpy.types.Operator):
     bl_idname = "sn.find_portal"
     bl_label = "Find Portal"
     bl_description = "Finds the portal this node belongs to"
@@ -66,7 +66,7 @@ class SN_FindPortal(bpy.types.Operator):
 
 
 
-class SN_SelectPortals(bpy.types.Operator):
+class SN_OT_SelectPortals(bpy.types.Operator):
     bl_idname = "sn.select_portals"
     bl_label = "Select Portals"
     bl_description = "Finds the portals this node transfers data to"

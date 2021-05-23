@@ -9,11 +9,11 @@ class SN_MT_SnippetMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        installed_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "snippets", "installed.json")
+        installed_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "node_tree", "snippets", "installed.json")
 
         with open(installed_path, "r") as data:
             data = json.loads(data.read())
-            file_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "snippets", "files")
+            file_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "node_tree", "snippets", "files")
 
             if not context.snippet_category:
                 for snippet in data["snippets"]:

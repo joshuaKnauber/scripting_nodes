@@ -197,7 +197,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         row.scale_y = 1.2
         row.operator("sn.install_snippets",text="Install Snippets",icon="IMPORT")
 
-        installed_path = os.path.join(os.path.dirname(os.path.dirname(__file__)),"snippets","installed.json")
+        installed_path = os.path.join(os.path.dirname(os.path.dirname(__file__)),"node_tree","snippets","installed.json")
         with open(installed_path) as installed:
             data = json.loads(installed.read())
             for cIndex, category in enumerate(data["categories"]):
@@ -242,7 +242,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         changelog = [
             "Added snippets for creating custom nodes (see N-Panel and Preferences)",
             "Fixed issue with active camera output of scene context node",
-            "Fixed issue with casting to blend data from data"
+            "Fixed issue with casting to blend data from data",
+            "Automatically remove bpy import from scripts"
         ]
         if changelog:
             box = layout.box()

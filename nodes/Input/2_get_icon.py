@@ -3,7 +3,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 
 
 
-class SN_SetIcon(bpy.types.Operator):
+class SN_OT_SetIcon(bpy.types.Operator):
     bl_idname = "sn.set_icon"
     bl_label = "Set Icon"
     bl_description = "Sets this icon"
@@ -19,7 +19,7 @@ class SN_SetIcon(bpy.types.Operator):
 
 
 
-class SN_SelectIcon(bpy.types.Operator):
+class SN_OT_SelectIcon(bpy.types.Operator):
     bl_idname = "sn.select_icon"
     bl_label = "Select Icon"
     bl_description = "Shows you a selection of all blender icons"
