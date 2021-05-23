@@ -244,7 +244,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Fixed issue with active camera output of scene context node",
             "Fixed issue with casting to blend data from data",
             "Automatically remove bpy import from scripts",
-            "Added parentheses to and/or node"
+            "Added parentheses to and/or node",
+            "Fixed has custom property node error"
         ]
         if changelog:
             box = layout.box()
