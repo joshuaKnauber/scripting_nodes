@@ -25,7 +25,8 @@ class SN_ScriptingBaseNode:
         "evaluate_once": False,
         "register_once": False,
         "unregister_once": False,
-        "imperative_once": False
+        "imperative_once": False,
+        "always_recompile": False
     }
     
     node_tree_uid: bpy.props.StringProperty()

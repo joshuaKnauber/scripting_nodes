@@ -241,9 +241,9 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_changelog(self,layout):
         changelog = [
             "Added snippets for creating custom nodes (see N-Panel and Preferences)",
+            "Fixed issues with scripts not updating for compiling",
             "Fixed issue with active camera output of scene context node",
             "Fixed issue with casting to blend data from data",
-            "Automatically remove bpy import from scripts",
             "Added parentheses to and/or node",
             "Fixed has custom property node error"
         ]
