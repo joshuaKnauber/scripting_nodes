@@ -243,7 +243,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added snippets for creating custom nodes (see N-Panel and Preferences)",
             "Fixed issue with active camera output of scene context node",
             "Fixed issue with casting to blend data from data",
-            "Automatically remove bpy import from scripts"
+            "Automatically remove bpy import from scripts",
+            "Added parentheses to and/or node"
         ]
         if changelog:
             box = layout.box()
