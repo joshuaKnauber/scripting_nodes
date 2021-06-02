@@ -240,12 +240,13 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
-            "Added snippets for creating custom nodes (see N-Panel and Preferences)",
+            "Switched to 2.93 as supported release",
+            "Added snippets for creating custom nodes (see N-Panel and Preferences) [BETA]",
             "Fixed issues with scripts not updating for compiling",
             "Fixed issue with active camera output of scene context node",
             "Fixed issue with casting to blend data from data",
             "Added parentheses to and/or node",
-            "Fixed has custom property node error"
+            "Fixed has custom property node error",
         ]
         if changelog:
             box = layout.box()

@@ -3,7 +3,7 @@ import bpy
         
 class SN_PT_SnippetPanel(bpy.types.Panel):
     bl_idname = "SN_PT_SnippetPanel"
-    bl_label = "Snippets"
+    bl_label = "Snippets [BETA]"
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
