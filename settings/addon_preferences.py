@@ -247,6 +247,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Fixed issue with casting to blend data from data",
             "Added parentheses to and/or node",
             "Fixed has custom property node error",
+            "QuickFix: Fixed frames"
         ]
         if changelog:
             box = layout.box()

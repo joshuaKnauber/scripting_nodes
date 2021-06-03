@@ -46,8 +46,9 @@ def compile_addon(addon_tree, is_export=False):
         for graph in addon_tree.sn_graphs:
             if not graph.node_tree.has_changes:
                 for node in graph.node_tree.nodes:
-                    if "always_recompile" in node.node_options and node.node_options["always_recompile"]:
-                        graph.node_tree.has_changes = True
+                    if hasattr(node,"node_options"):
+                        if "always_recompile" in node.node_options and node.node_options["always_recompile"]:
+                            graph.node_tree.has_changes = True
 
         # collect existing did once lists
         addon_did_once = {} 
