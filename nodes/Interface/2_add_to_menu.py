@@ -41,7 +41,7 @@ class SN_OT_StartAddToMenuSelection(bpy.types.Operator):
         for menu_name in dir(bpy.types):
             try:
                 menu = eval("bpy.types."+menu_name)
-                if hasattr(menu.bl_rna.base,"identifier") and menu.bl_rna.base.identifier == "Menu":
+                if hasattr(menu.bl_rna.base,"identifier") and menu.bl_rna.base.identifier in ["Menu","Header"]:
                     menus.append(menu_name)
             except:
                 pass

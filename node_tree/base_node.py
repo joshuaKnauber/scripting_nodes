@@ -25,7 +25,8 @@ class SN_ScriptingBaseNode:
         "evaluate_once": False,
         "register_once": False,
         "unregister_once": False,
-        "imperative_once": False
+        "imperative_once": False,
+        "always_recompile": False
     }
     
     node_tree_uid: bpy.props.StringProperty()
@@ -249,15 +250,21 @@ class SN_ScriptingBaseNode:
         if link in list(self.node_tree.links):
             link = self.__real_link(link)
             if link:
+                remove = False
                 if link.to_socket.group == link.from_socket.group:
-                    if self == link.to_node:
-                        link.to_socket.update_socket(self,link)
+                    if link.to_socket.group == "DATA" or link.to_socket.socket_type == link.from_socket.socket_type:
+                        if self == link.to_node:
+                            link.to_socket.update_socket(self,link)
+                        else:
+                            link.from_socket.update_socket(self,link)
+
+                        self.on_link_insert(link)
                     else:
-                        link.from_socket.update_socket(self,link)
-
-                    self.on_link_insert(link)
-
+                        remove = True
                 else:
+                    remove = True
+
+                if remove:
                     try: self.node_tree.links.remove(link)
                     except: pass
                 self.auto_compile()
@@ -577,12 +584,16 @@ class SN_ScriptingBaseNode:
     
     
     def add_error(self, title, description, fatal=False):
-        error = self.addon_tree.sn_graphs[0].errors.add()
-        error.title = title
-        error.description = description
-        error.fatal = fatal
-        error.node = self.name
-        error.node_tree = self.node_tree.name
+        for graph in self.addon_tree.sn_graphs:
+            if graph.node_tree == self.node_tree:
+                if not self.name in graph.errors:
+                    error = graph.errors.add()
+                    error.title = title
+                    error.description = description
+                    error.fatal = fatal
+                    error.name = self.name
+                    error.node = self.name
+                    error.node_tree = graph.name
 
 
     ### RETURNED CODE

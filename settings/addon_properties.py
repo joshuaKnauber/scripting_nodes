@@ -189,6 +189,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     
     sn_compat_nodes: bpy.props.CollectionProperty(type=SN_NodeCollection,name="Suggestion Menu")
+
+
+    snippet_categories: bpy.props.CollectionProperty(type=SN_NodeCollection, name="Installed Snippet Categories")
+
+    has_other_snippets: bpy.props.BoolProperty(default=False, name="Other snippets installed")
     
     
     minimal_header: bpy.props.BoolProperty(default=False,name="Minimal Header",
@@ -204,3 +209,5 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     use_autosave: bpy.props.BoolProperty(default=True,name="Auto Save",description="Save this file automatically")
 
     autosave_delay: bpy.props.FloatProperty(default=120,name="Delay",description="Autosave delay in seconds",min=10)
+
+    has_update: bpy.props.BoolProperty(default=False)

@@ -89,22 +89,38 @@ class SN_OT_ExportAddon(bpy.types.Operator):
         shutil.make_archive(destination_folder, "zip", os.path.dirname(destination), os.path.basename(source))
 
     def execute(self, context):
+        prefs = context.preferences.addons[__name__.partition('.')[0]].preferences
+
         if not ".zip" in self.filepath:
             self.filepath += ".zip"
+
+        if prefs.debug_export: print("EXPORT PATH: "+self.filepath)
+
         text = compile_export(context.scene.sn.addon_tree())
         if text:
+
+            if prefs.debug_export: print("LOG: Created compiled text")
+
             addon_tree = context.scene.sn.addon_tree()
             dir_name = addon_tree.sn_graphs[0].name.lower().replace(" ","_").replace("-","_")
             dir_path = os.path.join(os.path.dirname(self.filepath),dir_name)
+
+            if prefs.debug_export: print("EXPORT DIR NAME: "+dir_name)
+            if prefs.debug_export: print("EXPORT DIR PATH: "+dir_path)
+
             if os.path.exists(dir_path):
                 self.report({"ERROR"},message="A file with this name already exists in this location!")
             else:
                 os.mkdir(dir_path)
                 os.mkdir(os.path.join(dir_path,"icons"))
                 os.mkdir(os.path.join(dir_path,"assets"))
+
+                if prefs.debug_export: print("LOG: Created folders at dir path")
                 
                 with open(os.path.join(dir_path,"__init__.py"), "w", encoding="utf-8") as py_file:
                     py_file.write(text.as_string())
+
+                if prefs.debug_export: print("LOG: Wrote __init__.py")
                     
                 for icon in addon_tree.sn_icons:
                     if icon.image:
@@ -113,12 +129,19 @@ class SN_OT_ExportAddon(bpy.types.Operator):
                         copy.save_render(os.path.join(dir_path, "icons", icon.name+".png"))
                         bpy.data.images.remove(copy)
 
+                if prefs.debug_export: print("LOG: Saved icons")
+
                 for asset in addon_tree.sn_assets:
                     if asset.path and os.path.exists(asset.path):
                         shutil.copyfile(asset.path, os.path.join(dir_path, "assets", os.path.basename(asset.path)))
+
+                if prefs.debug_export: print("LOG: Copied assets")
                     
-                self.make_archive(dir_path, self.filepath)
-                shutil.rmtree(dir_path)
+                if not prefs.no_zip_export:
+                    self.make_archive(dir_path, self.filepath)
+                    shutil.rmtree(dir_path)
+
+                    if prefs.debug_export: print("LOG: Zipped addon")
                 
                 bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
         else:

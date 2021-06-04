@@ -3,7 +3,7 @@ import os
 import json
 
 
-class SN_LoadSnippet(bpy.types.Operator):
+class SN_OT_LoadSnippet(bpy.types.Operator):
     bl_idname = "sn.load_snippet"
     bl_label = "Load Snippet"
     bl_description = "Loads the snippet"

@@ -16,8 +16,8 @@ bl_info = {
     "name" : "Serpens",
     "author" : "Joshua Knauber, Finn Knauber", 
     "description" : "Adds a node editor for building addons with nodes",
-    "blender" : (2, 83, 0),
-    "version" : (2, 0, 5),
+    "blender" : (2, 93, 0),
+    "version" : (2, 1, 0),
     "location" : "Editors -> Visual Scripting",
     "wiki_url": "", 
     "category" : "Node" 
@@ -32,12 +32,11 @@ import atexit
 
 import os
 
-from . import auto_load
-
 from .keymaps.keymap import register_keymaps, unregister_keymaps
 from .node_tree.node_categories import get_node_categories
 from .interface.header.header import prepend_header, append_header, example_dropdown
 from .interface.menu.rightclick import serpens_right_click
+from .interface.menu.snippets import snippet_menu
 
 from .node_tree.graphs.graph_ui_lists import SN_Graph, update_graph_index
 from .node_tree.variables.variables_ui_list import SN_Variable
@@ -51,6 +50,10 @@ from .settings.updates import check_serpens_updates
 from .compiler.compiler import handle_file_load, handle_file_unload
 
 
+from . import compiler, interface, node_tree, nodes, packages, settings
+
+
+from . import auto_load
 auto_load.init()
 
 
@@ -83,11 +86,31 @@ def register_icons():
         
 def unregister_icons():
     bpy.utils.previews.remove( bpy.types.Scene.sn_icons )
+
+
+def register_classes():
+    # compiler.register()
+    # interface.register()
+    # node_tree.register()
+    # nodes.register()
+    # packages.register()
+    # settings.register()
+    auto_load.register()
+
+
+def unregister_classes():
+    # settings.unregister()
+    # packages.unregister()
+    # nodes.unregister()
+    # node_tree.unregister()
+    # interface.unregister()
+    # compiler.unregister()
+    auto_load.unregister()
     
 
 def register():
     # register the classes of the addon
-    auto_load.register()
+    register_classes()
 
     # register the graph properties
     bpy.types.NodeTree.sn_graphs = bpy.props.CollectionProperty(type=SN_Graph,name="Scripting Graphs")
@@ -125,6 +148,9 @@ def register():
     bpy.types.NODE_HT_header.prepend(prepend_header)
     bpy.types.NODE_MT_editor_menus.append(example_dropdown)
 
+    # add to the node add menu
+    bpy.types.NODE_MT_category_snippets.append(snippet_menu)
+
     # app handlers
     bpy.app.handlers.load_post.append(load_handler)
     bpy.app.handlers.depsgraph_update_post.append(depsgraph_handler)
@@ -135,13 +161,13 @@ def register():
 
 
 def unregister():
-    # unregister the addon classes
-    auto_load.unregister()
-
     # remove the node tree header
     bpy.types.NODE_HT_header.remove(append_header)
     bpy.types.NODE_HT_header.remove(prepend_header)
     bpy.types.NODE_MT_editor_menus.remove(example_dropdown)
+
+    # remove from the node add menu
+    bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
 
     # unregister the graph properties
     del bpy.types.NodeTree.sn_graphs
@@ -178,3 +204,6 @@ def unregister():
     # remove right click menu
     try: bpy.types.WM_MT_button_context.remove(serpens_right_click)
     except: pass
+
+    # unregister the addon classes
+    unregister_classes()

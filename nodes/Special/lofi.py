@@ -1,6 +1,6 @@
 import bpy
 from random import randint
-from ..node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
+from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
 class SN_OT_RandomIndex(bpy.types.Operator):
@@ -60,7 +60,7 @@ class SN_LoFiNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self,context,layout):
         box = layout.box()
         col = box.column()
-        col.label(text="This node is just a joke!",icon="FUND")
+        col.label(text="This node is for your enjoyment!",icon="FUND")
         col.label(text="Have a really nice day!",icon="BLANK1")
 
         row = layout.row(align=True)

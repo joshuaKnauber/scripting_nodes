@@ -3,7 +3,7 @@ from textwrap import wrap
 
 
 
-class SN_SelectNode(bpy.types.Operator):
+class SN_OT_SelectNode(bpy.types.Operator):
     bl_idname = "sn.select_node"
     bl_label = "Select Node"
     bl_description = "Selects this node"
@@ -39,7 +39,9 @@ class SN_PT_AddonErrorPanel(bpy.types.Panel):
     @classmethod
     def poll(cls, context):
         if context.scene.sn.editing_addon != "NONE" and context.space_data.tree_type == "ScriptingNodesTree":
-            return len(context.scene.sn.addon_tree().sn_graphs[0].errors) > 0
+            for graph in context.scene.sn.addon_tree().sn_graphs:
+                if len(graph.errors) > 0:
+                    return True
         return False
     
     def draw_header(self, context):
@@ -53,12 +55,13 @@ class SN_PT_AddonErrorPanel(bpy.types.Panel):
         layout = self.layout
 
         addon_tree = context.scene.sn.addon_tree()
-        addon_graph = addon_tree.sn_graphs[0]
+
+        graph = addon_tree.sn_graphs[addon_tree.sn_graph_index]
 
         if context.scene.sn.show_char_control:
             layout.prop(context.scene.sn, "chars_per_line",text="Line Wrap")
         
-        for error in addon_graph.errors:
+        for error in graph.errors:
             box = layout.box()
             row = box.row()
             col = row.column()
@@ -71,3 +74,6 @@ class SN_PT_AddonErrorPanel(bpy.types.Panel):
             col.enabled = False
             for line in wrap(error.description, self.char_amount(context)):
                 col.label(text=line)
+
+        if len(graph.errors) == 0:
+            layout.label(text="Errors in other graphs!",icon="ERROR")

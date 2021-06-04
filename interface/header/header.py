@@ -23,6 +23,10 @@ def example_dropdown(self, context):
 
 def prepend_header(self, context):
     layout = self.layout
+    if context.scene.sn.has_update:
+        row = layout.row()
+        row.alert = True
+        row.operator("sn.update_message",text="Update Available!",icon="INFO")
 
 
 def has_nodes(addon_tree):

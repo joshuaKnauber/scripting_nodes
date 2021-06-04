@@ -399,7 +399,7 @@ class ScriptingSocket:
                 
 
 
-class SN_RemoveSocket(bpy.types.Operator):
+class SN_OT_RemoveSocket(bpy.types.Operator):
     bl_idname = "sn.remove_socket"
     bl_label = "Remove Socket"
     bl_description = "Removes this socket"
@@ -422,7 +422,7 @@ class SN_RemoveSocket(bpy.types.Operator):
 
 
 
-class SN_AddSocket(bpy.types.Operator):
+class SN_OT_AddSocket(bpy.types.Operator):
     bl_idname = "sn.add_socket"
     bl_label = "Add Socket"
     bl_description = "Adds this sockets default type"

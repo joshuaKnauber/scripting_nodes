@@ -31,10 +31,19 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     show_full_errors: bpy.props.BoolProperty(name="Show Full Errors",
                                              description="Show the full error messages in the console",
                                              default=False)
+    
+    no_zip_export: bpy.props.BoolProperty(name="Export Unzipped",
+                                             description="Exports your addon without zipping it",
+                                             default=False)
+    
+    debug_export: bpy.props.BoolProperty(name="Debug Export",
+                                             description="Prints debug messages for the export process",
+                                             default=False)
 
     navigation: bpy.props.EnumProperty(items=[  ("SETTINGS","Settings","Serpens Settings","NONE",1),
                                                 ("ADDONS","Addons","Serpens Addon Market","NONE",2),
-                                                ("PACKAGES","Packages","Serpens Package Market","NONE",3)],
+                                                ("PACKAGES","Packages","Serpens Package Market","NONE",3),
+                                                ("SNIPPETS","Snippets","Serpens Snippets","NONE",4)],
                                        default = "SETTINGS",
                                        name="SETTINGS",
                                        description="Navigation")
@@ -59,6 +68,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         col.prop(self, "show_full_errors")
         col.prop(self, "show_txt")
         col.prop(self, "keep_after_error")
+        col.prop(self, "no_zip_export")
+        col.prop(self, "debug_export")
         
         col = row.column()
         col.label(text="Updates:")
@@ -179,6 +190,46 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                 if not package.name == "placeholder":
                     if self.package_search.lower() in package.name.lower() or self.package_search.lower() in package.author.lower():
                         self.draw_package(layout,package)
+
+
+    def draw_snippets(self,layout):
+        row = layout.row(align=True)
+        row.scale_y = 1.2
+        row.operator("sn.install_snippets",text="Install Snippets",icon="IMPORT")
+
+        installed_path = os.path.join(os.path.dirname(os.path.dirname(__file__)),"node_tree","snippets","installed.json")
+        with open(installed_path) as installed:
+            data = json.loads(installed.read())
+            for cIndex, category in enumerate(data["categories"]):
+                box = layout.box()
+                row = box.row()
+                row.label(text=category["name"])
+                row.operator("sn.uninstall_snippet_category",text="",icon="TRASH",emboss=False)
+
+                col = box.column(align=True)
+                for i, snippet in enumerate(category["snippets"]):
+                    row = col.row()
+                    subcol = row.column()
+                    subcol.enabled = False
+                    subcol.label(text=snippet["name"])
+                    op = row.operator("sn.uninstall_snippet",text="",icon="X",emboss=False)
+                    op.has_category = True
+                    op.categoryIndex = cIndex
+                    op.snippetIndex = i
+
+            if len(data["snippets"]) > 0:
+                box = layout.box()
+                for i, snippet in enumerate(data["snippets"]):
+                    row = box.row()
+                    row.label(text=snippet["name"])
+                    op = row.operator("sn.uninstall_snippet",text="",icon="X",emboss=False)
+                    op.has_category = False
+                    op.snippetIndex = i
+
+            if len(data["categories"]) + len(data["snippets"]) == 0:
+                layout.label(text="No snippets installed. Export snippets in the N-Panel",icon="INFO")
+
+            
     
     
     def draw_navigation(self,layout):
@@ -189,8 +240,14 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
-            "Removed input from update property node and added self output",
-            "Fixed the button that shows the node that is causing the error",
+            "Switched to 2.93 as supported release",
+            "Added snippets for creating custom nodes (see N-Panel and Preferences) [BETA]",
+            "Fixed issues with scripts not updating for compiling",
+            "Fixed issue with active camera output of scene context node",
+            "Fixed issue with casting to blend data from data",
+            "Added parentheses to and/or node",
+            "Fixed has custom property node error",
+            "QuickFix: Fixed frames"
         ]
         if changelog:
             box = layout.box()
@@ -212,6 +269,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             self.draw_addon_market(layout)
         elif self.navigation == "PACKAGES":
             self.draw_package_market(layout)
+        elif self.navigation == "SNIPPETS":
+            self.draw_snippets(layout)
         
         
 # addon_prefs = context.preferences.addons[__name__.partition('.')[0]].preferences

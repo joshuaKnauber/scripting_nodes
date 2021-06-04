@@ -109,7 +109,7 @@ def serpens_functions(addon_tree):
                         return sn_cast_float_vector(sn_cast_float(value), size)
 
             def sn_cast_int_vector(value, size):
-                return int(sn_cast_float_vector(value, size))
+                return tuple(map(int, sn_cast_float_vector(value, size)))
 
             def sn_cast_color(value, use_alpha):
                 length = 4 if use_alpha else 3
@@ -133,7 +133,9 @@ def serpens_functions(addon_tree):
                         return [value]
 
             def sn_cast_blend_data(value):
-                if type(value) in [tuple, bool, int, float, list]:
+                if hasattr(value, "bl_rna"):
+                    return value
+                elif type(value) in [tuple, bool, int, float, list]:
                     return None
                 elif type(value) == str:
                     try:

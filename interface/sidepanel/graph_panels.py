@@ -69,9 +69,6 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         row.operator("sn.move_graph", text="", icon="TRIA_DOWN").up = False
 
 
-bpy.utils.register_class(SN_PT_GraphPanel)
-
-
 class SN_PT_VariablePanel(bpy.types.Panel):
     bl_parent_id = "SN_PT_GraphPanel"
     bl_idname = "SN_PT_VariablePanel"
@@ -411,12 +408,3 @@ class SN_PT_AssetsPanel(bpy.types.Panel):
             row = col.row()
             row.prop(addon_tree.sn_assets[addon_tree.sn_asset_index],"path",text="")
             row.label(icon="BLANK1")
-        
-        
-            
-            
-            
-bpy.utils.register_class(SN_PT_VariablePanel)
-bpy.utils.register_class(SN_PT_PropertyPanel)
-bpy.utils.register_class(SN_PT_IconPanel)
-bpy.utils.register_class(SN_PT_AssetsPanel)

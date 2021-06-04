@@ -3,7 +3,7 @@ import json
 
 
 
-class SN_PastePropertyPath(bpy.types.Operator):
+class SN_OT_PastePropertyPath(bpy.types.Operator):
     bl_idname = "sn.paste_property_path"
     bl_label = "Paste Property Path"
     bl_description = "Pastes your copies property path into this node"
@@ -21,7 +21,7 @@ class SN_PastePropertyPath(bpy.types.Operator):
 
 
 
-class SN_ResetPropertyNode(bpy.types.Operator):
+class SN_OT_ResetPropertyNode(bpy.types.Operator):
     bl_idname = "sn.reset_property_node"
     bl_label = "Reset Node"
     bl_description = "Resets this node"

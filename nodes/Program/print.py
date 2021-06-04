@@ -50,7 +50,7 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {self.outputs[0].code(6)}
                         """
             }
-        
+            
         if self.addon_tree.doing_export:
             return {
                 "code": f"""

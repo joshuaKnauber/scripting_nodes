@@ -3,6 +3,7 @@ from time import time
 from datetime import datetime
 import logging
 from .txt_blocks import license_block, serpens_functions
+from ..node_tree.snippets.snippet_operators import refresh_snippet_category_items
 
 
 addons = []
@@ -13,6 +14,12 @@ def compile_addon(addon_tree, is_export=False):
     txt = None
     try:
         start_time = time()
+
+        # set error state for potential recompile
+        error_graphs = []
+        for graph in addon_tree.sn_graphs:
+            if len(graph.errors) > 0:
+                error_graphs.append(graph.name)
         
         # get and/or create addon data
         addon_data = __find_compiled_addon(addon_tree)
@@ -35,6 +42,14 @@ def compile_addon(addon_tree, is_export=False):
         if not "graph_code" in addon_data["code"]:
             addon_data["code"]["graph_code"] = {}
 
+        # set has changes if necessary
+        for graph in addon_tree.sn_graphs:
+            if not graph.node_tree.has_changes:
+                for node in graph.node_tree.nodes:
+                    if hasattr(node,"node_options"):
+                        if "always_recompile" in node.node_options and node.node_options["always_recompile"]:
+                            graph.node_tree.has_changes = True
+
         # collect existing did once lists
         addon_did_once = {} 
         for graph in addon_tree.sn_graphs:
@@ -44,7 +59,7 @@ def compile_addon(addon_tree, is_export=False):
         # go through all graphs
         new_graph_code = {}
         for graph in addon_tree.sn_graphs:
-            if graph.node_tree.has_changes or not graph.name in addon_data["code"]["graph_code"]:
+            if graph.node_tree.has_changes or not graph.name in addon_data["code"]["graph_code"] or graph.name in error_graphs:
 
                 # make graph code
                 graph_code, graph_did_once              = __evaluate_graph(graph, addon_tree, addon_did_once)
@@ -193,10 +208,13 @@ def handle_file_load():
     for tree in bpy.data.node_groups:
         if len(tree.sn_graphs) > 0:
             bpy.app.timers.register(tree.run_autocompile, first_interval=0.1)
-            tree.sn_graphs[0].errors.clear()
+            for graph in tree.sn_graphs:
+                graph.errors.clear()
             tree.sn_graphs[0].prints.clear()
             if tree.sn_graphs[0].compile_on_start:
                 compile_addon(tree,False)
+                
+    refresh_snippet_category_items(bpy.context)
 
 
 def handle_file_unload():
@@ -207,7 +225,8 @@ def handle_file_unload():
 def remove_addon(addon_tree):
     for addon in addons:
         if addon["addon_tree"] == addon_tree:
-            addon["addon_tree"].sn_graphs[0].errors.clear()
+            for graph in addon["addon_tree"].sn_graphs:
+                graph.errors.clear()
             addon["addon_tree"].sn_graphs[0].prints.clear()
             __remove_addon(addon)
             break

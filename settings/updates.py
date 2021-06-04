@@ -15,6 +15,7 @@ class SN_OT_MessageUpdate(bpy.types.Operator):
 
     def execute(self, context): 
         update_log()
+        bpy.context.scene.sn.has_update = False
         return {"FINISHED"}
     
     def draw(self,context):
@@ -70,12 +71,13 @@ def check_serpens_updates(current_version):
     if should_update():
         url = "https://raw.githubusercontent.com/joshuaKnauber/serpens_addon_market/main/version.json"
 
+        bpy.context.scene.sn.has_update = False
         try:
             content = requests.get(url).json()
             version = tuple(content["version"])
             if exists_newer_version(version, current_version):
                 message = content["content"]
-                bpy.ops.sn.update_message("INVOKE_DEFAULT")
+                bpy.context.scene.sn.has_update = True
             else:
                 update_log()
 
