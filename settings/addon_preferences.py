@@ -240,14 +240,12 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
-            "Switched to 2.93 as supported release",
-            "Added snippets for creating custom nodes (see N-Panel and Preferences) [BETA]",
-            "Fixed issues with scripts not updating for compiling",
-            "Fixed issue with active camera output of scene context node",
-            "Fixed issue with casting to blend data from data",
-            "Added parentheses to and/or node",
-            "Fixed has custom property node error",
-            "QuickFix: Fixed frames"
+            "Fixed Is Export property and node",
+            "Fixed drag add menu with node frames",
+            "Added toggle system console button in header settings",
+            "Added screen output to scene context node",
+            "Use blender auto save as default for serpens auto save",
+            "Show message about status of auto save when creating addon",
         ]
         if changelog:
             box = layout.box()

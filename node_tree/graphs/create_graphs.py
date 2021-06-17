@@ -26,6 +26,11 @@ class SN_OT_CreateAddon(bpy.types.Operator):
         tree.sn_graphs[0].name = self.name
         tree.sn_graphs[0].author = self.author
         context.scene.sn.editing_addon = self.name
+        
+        if context.scene.sn.use_autosave:
+            self.report({"INFO"}, message="Auto-Save is enabled! (See Serpens N-Panel)")
+        else:
+            self.report({"WARNING"}, message="Auto-Save is turned off! (See Serpens N-Panel)")
         return {"FINISHED"}
     
     def draw(self,context):

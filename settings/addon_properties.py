@@ -206,7 +206,9 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     python_buttons: bpy.props.BoolProperty(default=False,name="Show Copy Python Buttons",
                                          description="Shows copy python buttons on some sockets and on properties/variables")
 
-    use_autosave: bpy.props.BoolProperty(default=True,name="Auto Save",description="Save this file automatically")
+    set_autosave_default: bpy.props.BoolProperty(default=False, name="Autosave default has been set")
+
+    use_autosave: bpy.props.BoolProperty(default=False,name="Auto Save",description="Save this file automatically")
 
     autosave_delay: bpy.props.FloatProperty(default=120,name="Delay",description="Autosave delay in seconds",min=10)
 

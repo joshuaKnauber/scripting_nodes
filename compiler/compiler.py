@@ -10,7 +10,7 @@ addons = []
 
 
 def compile_addon(addon_tree, is_export=False):
-    addon_tree.doing_export = is_export
+    addon_tree["doing_export"] = is_export
     txt = None
     try:
         start_time = time()
@@ -152,15 +152,16 @@ def compile_addon(addon_tree, is_export=False):
 
         # register module
         success = __register_module(module)
+        
+        # redraw
+        if bpy.context.screen:
+            for a in bpy.context.screen.areas:
+                a.tag_redraw()
+                
         if success == True:
             return success
         else:
             raise success
-        
-        # redraw
-        if context.screen:
-            for a in bpy.context.screen.areas:
-                a.tag_redraw()
     
     except BaseException as exc:
         addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
@@ -582,6 +583,10 @@ def has_serpens_trees():
 
 
 def autosave():
+    if not bpy.context.scene.sn.set_autosave_default:
+        bpy.context.scene.sn.set_autosave_default = True
+        bpy.context.scene.sn.use_autosave = bpy.context.preferences.filepaths.use_auto_save_temporary_files
+
     if bpy.context.scene.sn.use_autosave:
         if bpy.data.is_saved and has_serpens_trees():
             bpy.ops.wm.save_mainfile()

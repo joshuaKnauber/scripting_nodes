@@ -58,8 +58,9 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
     def get_from_node(self,ntree):
         for node in ntree.nodes:
             loc = node.location
-            if self.start_loc_in_bounds(loc[0]-20, loc[1]-node.dimensions[1]-20, loc[0]+node.dimensions[0]+20, loc[1]+20):
-                return node
+            if not node.bl_idname == "NodeFrame":
+                if self.start_loc_in_bounds(loc[0]-20, loc[1]-node.dimensions[1]-20, loc[0]+node.dimensions[0]+20, loc[1]+20):
+                    return node
         return None
 
 

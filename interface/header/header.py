@@ -13,6 +13,7 @@ class SN_PT_HeaderSettings(bpy.types.Panel):
         layout.prop(context.scene.sn,"insert_sockets",icon="NODE_INSERT_OFF")
         layout.prop(context.scene.sn,"python_buttons",icon="COPYDOWN")
         layout.prop(context.preferences.view,"show_tooltips_python",text="Dev Tool Tips",icon="INFO")
+        layout.operator("wm.console_toggle", text="Toggle System Console", icon="CONSOLE")
         
 
 def example_dropdown(self, context):
