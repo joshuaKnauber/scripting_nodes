@@ -131,7 +131,9 @@ class SN_SetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             if data["group_path"]:
                 set_prop += "." + data["group_path"] if set_prop else data["group_path"]
                 
-            set_prop += "." + data["property"]["identifier"]
+            if not '["' in data["property"]["identifier"]:
+                set_prop += "."
+            set_prop += data["property"]["identifier"]
             
             set_prop += " = " + self.inputs[-1].code()
 

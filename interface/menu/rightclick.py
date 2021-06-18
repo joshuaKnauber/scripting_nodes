@@ -165,6 +165,12 @@ def serpens_right_click(self, context):
 
     if property_value or button_value:
         layout.separator()
+        
+    # print(property_pointer, property_value, button_value, property_value.identifier)
+    # print(context.blend_data.id_data)
+    
+    # if property_pointer and property_value:
+    #     print(property_pointer.path_resolve(property_value.identifier, False).__repr__())
     
     if property_value and property_pointer:
         op = layout.operator("sn.copy_space_property",text="Serpens | Copy Property",icon="COPYDOWN")
@@ -188,8 +194,12 @@ def serpens_right_click(self, context):
             op.db_type = property_pointer.bl_rna.identifier
             op.db_name = property_pointer.bl_rna.name
         
+        if hasattr(property_pointer, f'["{property_value.identifier}"]'):
+            op.prop_identifier = f'["{property_value.identifier}"]'
+        else:
+            op.prop_identifier = property_value.identifier
+        
         op.prop_name = property_value.name
-        op.prop_identifier = property_value.identifier
         op.prop_type = property_value.type
         op.prop_subtype = property_value.subtype
         if property_value.name in ["Operator Property Index", "Preferences Property Index"]:

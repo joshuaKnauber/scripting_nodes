@@ -175,7 +175,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         if not self.color_wheel:
             return {"code": f"""
-                    {layout}.prop({data_path},"{data["property"]["identifier"]}",icon_value={self.inputs['Icon'].code()},{values})
+                    {layout}.prop({data_path},'{data["property"]["identifier"]}',icon_value={self.inputs['Icon'].code()},{values})
                     """}
         else:
             return {"code": f"""

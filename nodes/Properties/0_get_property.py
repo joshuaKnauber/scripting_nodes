@@ -116,7 +116,9 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         if data["group_path"]:
             path += "." + data["group_path"] if path else data["group_path"]
 
-        path += "." + data["property"]["identifier"]
+        if not '["' in data["property"]["identifier"]:
+            path += "."
+        path += data["property"]["identifier"]
 
         return {
             "code": f"{path}"
