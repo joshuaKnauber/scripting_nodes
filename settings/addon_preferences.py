@@ -246,6 +246,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added screen output to scene context node",
             "Use blender auto save as default for serpens auto save",
             "Show message about status of auto save when creating addon",
+            "Fixed property nodes for custom properties like geo-nodes",
         ]
         if changelog:
             box = layout.box()
