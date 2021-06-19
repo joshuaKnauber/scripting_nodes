@@ -240,6 +240,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self,layout):
         changelog = [
+            "Temporary work around for blender bug T88986 (operator properties)",
             "Fixed Is Export property and node",
             "Fixed drag add menu with node frames",
             "Added toggle system console button in header settings",

@@ -7,6 +7,7 @@ from ..node_tree.snippets.snippet_operators import refresh_snippet_category_item
 
 
 addons = []
+unreg_func = None # FOR BUG
 
 
 def compile_addon(addon_tree, is_export=False):
@@ -132,6 +133,14 @@ def compile_addon(addon_tree, is_export=False):
         unregister_code = __get_unregister_code(addon_data["code"]["graph_code"])
         __write_in_text(addon_data["text"], unregister_code)
         
+        # write do register FOR BUG
+        if not is_export:
+            __write_blockcomment(addon_data["text"], "REGISTER")
+            __write_in_text(addon_data["text"], "if __name__ == \"__main__\":")
+            __write_in_text(addon_data["text"], "   register()")
+            __write_in_text(addon_data["text"], "   import sys")
+            __write_in_text(addon_data["text"], "   sys.modules['blender_visual_scripting_addon'].compiler.compiler.unreg_func = unregister")
+        
         # auto format
         __auto_format_text(addon_data["text"])
         
@@ -151,7 +160,8 @@ def compile_addon(addon_tree, is_export=False):
         addon_tree.sn_graphs[0].last_compile_time = str(round(end_time-start_time,4))+"s"
 
         # register module
-        success = __register_module(module)
+        # success = __register_module(module)
+        success = __register_module(addon_data["text"]) # FOR BUG
         
         # redraw
         if bpy.context.screen:
@@ -260,7 +270,11 @@ def __find_compiled_addon(addon_tree):
     
 def __register_module(module):
     try:
-        module.register()
+        bpy.context.area.type = "TEXT_EDITOR" # FOR BUG
+        bpy.context.space_data.text = module
+        bpy.ops.text.run_script()
+        bpy.context.area.type = "NODE_EDITOR"
+        # module.register()
         return True
     except Exception as exc:
         return exc
@@ -273,9 +287,13 @@ def __remove_addon(addon):
     
     
 def __unregister_module(module):
-    if module:
-        module.unregister()
-
+    # if module:
+        # module.unregister()
+    global unreg_func
+    if unreg_func:
+        unreg_func()
+    unreg_func = None
+    
 
 def __create_text_file(name):
     addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
