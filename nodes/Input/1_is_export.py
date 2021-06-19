@@ -12,6 +12,7 @@ class SN_IsExportNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     node_options = {
         "default_color": (0.3,0.3,0.3),
+        "always_recompile": True,
     }
 
 
