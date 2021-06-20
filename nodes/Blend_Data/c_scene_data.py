@@ -72,6 +72,7 @@ class SN_CollectionsNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode)
     data_identifier = "collections"
     
     active_data = "bpy.context.scene.collection"
+    active_name = "Scene"
     
     
     

@@ -9,6 +9,7 @@ class SN_SceneDataBase():
     bl_width_default = 160
     
     active_data = ""
+    active_name = "Active"
     selected_data = ""
     
     node_options = {
@@ -54,7 +55,7 @@ class SN_SceneDataBase():
         out.data_name = self.data_type
         
         if self.active_data:
-            out = self.add_blend_data_output("Active")
+            out = self.add_blend_data_output(self.active_name)
             out.subtype = "NONE"
             out.data_type = self.data_type
             out.data_identifier = self.active_data.split(".")[-1]
