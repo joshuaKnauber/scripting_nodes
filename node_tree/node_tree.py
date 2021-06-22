@@ -94,7 +94,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                 if op and hasattr(op,"mouse_x") and hasattr(op,"mouse_y"):
                     ui_scale = bpy.context.preferences.system.ui_scale
                     x, y = view.region_to_view(op.mouse_x,op.mouse_y)
-                    # x, y = x / ui_scale, y / ui_scale
+                    x, y = x / ui_scale, y / ui_scale
                     bpy.ops.sn.run_add_menu("INVOKE_DEFAULT",start_x=x,start_y=y)
 
 

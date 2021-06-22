@@ -49,9 +49,12 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
     def execute(self,context): return {"FINISHED"}
 
 
-    def start_loc_in_bounds(self,x1,y1,x2,y2):
-        if self.start_x >= x1 and self.start_x <= x2:
-            return self.start_y >= y1 and self.start_y <= y2
+    def start_loc_in_bounds(self, left, bottom, right, top):
+        buffer = 20
+        print(self.start_x, self.start_y)
+        print(f"{left}/{bottom}  {right}/{top}")
+        if self.start_x >= left-buffer and self.start_x <= right+buffer:
+            return self.start_y >= bottom-buffer and self.start_y <= top+buffer
         return False
 
 
@@ -59,7 +62,7 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         for node in ntree.nodes:
             loc = node.location
             if not node.bl_idname == "NodeFrame":
-                if self.start_loc_in_bounds(loc[0]-20, loc[1]-node.dimensions[1]-20, loc[0]+node.dimensions[0]+20, loc[1]+20):
+                if self.start_loc_in_bounds(loc[0], loc[1]-node.dimensions[1], loc[0]+node.dimensions[0], loc[1]):
                     return node
         return None
 

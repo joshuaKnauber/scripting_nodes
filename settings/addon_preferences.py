@@ -242,6 +242,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         changelog = [
             "Renamed active collection to scene",
             "Fixed Is Addon Export node (again)",
+            "Fixed suggestion menu for different blender ui scales"
         ]
         if changelog:
             box = layout.box()
