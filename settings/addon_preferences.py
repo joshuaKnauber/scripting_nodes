@@ -258,7 +258,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Renamed active collection to scene",
             "Fixed Is Addon Export node (again)",
             "Fixed suggestion menu for different blender ui scales",
-            "Fixed addon preferences with temp registering"
+            "Fixed addon preferences with temp registering",
+            "Fixed check for updates"
         ]
         if changelog:
             box = layout.box()

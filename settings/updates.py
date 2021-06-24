@@ -7,53 +7,56 @@ from datetime import date
 
 message = []
 
+
 class SN_OT_MessageUpdate(bpy.types.Operator):
     bl_idname = "sn.update_message"
     bl_label = "-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -"
     bl_description = "Update Message"
-    bl_options = {"REGISTER","UNDO","INTERNAL"}
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
-    def execute(self, context): 
+    def execute(self, context):
         update_log()
         bpy.context.scene.sn.has_update = False
         return {"FINISHED"}
-    
-    def draw(self,context):
+
+    def draw(self, context):
         global message
         layout = self.layout
 
-        layout.label(text="Serpens Update available!",icon="FUND")
+        layout.label(text="Serpens Update available!", icon="FUND")
         layout.label(text="A free update is out.")
         layout.label(text="You can go and download it right now!")
-        
+
         if message:
             layout.label(text="This update includes:")
             for m in message:
                 layout.label(text="  • " + m)
         layout.label(text="-  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -")
-    
+
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)
 
 
-
 def update_log():
-    with open(os.path.join(os.path.dirname(__file__),"update_log.json"),"w") as update_log:
-        update_log.write(json.dumps({"last_check":str(date.today())},indent=4))  
-
+    with open(os.path.join(os.path.dirname(__file__), "update_log.json"), "w") as update_log:
+        update_log.write(json.dumps(
+            {"last_check": str(date.today())}, indent=4))
 
 
 def should_update():
     should_update = False
-    with open(os.path.join(os.path.dirname(__file__),"update_log.json"),"r") as update_log:
+    addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[
+        0]].preferences
+    if not addon_prefs.check_for_updates:
+        should_update = False
+    with open(os.path.join(os.path.dirname(__file__), "update_log.json"), "r") as update_log:
         update_log = json.loads(update_log.read())
         if not update_log["last_check"] == str(date.today()):
             should_update = True
     return should_update
 
-        
-        
-def exists_newer_version(version,current):
+
+def exists_newer_version(version, current):
     needs_update = False
     if version[0] > current[0]:
         needs_update = True
@@ -68,10 +71,10 @@ def exists_newer_version(version,current):
 
 def check_serpens_updates(current_version):
     global message
+    bpy.context.scene.sn.has_update = False
     if should_update():
         url = "https://raw.githubusercontent.com/joshuaKnauber/serpens_addon_market/main/version.json"
 
-        bpy.context.scene.sn.has_update = False
         try:
             content = requests.get(url).json()
             version = tuple(content["version"])
