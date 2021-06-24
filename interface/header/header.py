@@ -27,14 +27,15 @@ def example_dropdown(self, context):
 
 
 def prepend_header(self, context):
-    layout = self.layout
-    addon_prefs = context.preferences.addons[__name__.partition('.')[
-        0]].preferences
-    if context.scene.sn.has_update and addon_prefs.check_for_updates:
-        row = layout.row()
-        row.alert = True
-        row.operator("sn.update_message",
-                     text="Update Available!", icon="INFO")
+    if context.space_data.node_tree.bl_idname == "ScriptingNodesTree":
+        layout = self.layout
+        addon_prefs = context.preferences.addons[__name__.partition('.')[
+            0]].preferences
+        if context.scene.sn.has_update and addon_prefs.check_for_updates:
+            row = layout.row()
+            row.alert = True
+            row.operator("sn.update_message",
+                         text="Update Available!", icon="INFO")
 
 
 def has_nodes(addon_tree):
