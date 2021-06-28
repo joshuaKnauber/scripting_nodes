@@ -27,7 +27,7 @@ def example_dropdown(self, context):
 
 
 def prepend_header(self, context):
-    if context.space_data.node_tree.bl_idname == "ScriptingNodesTree":
+    if context.space_data.node_tree and context.space_data.node_tree.bl_idname == "ScriptingNodesTree":
         layout = self.layout
         addon_prefs = context.preferences.addons[__name__.partition('.')[
             0]].preferences
