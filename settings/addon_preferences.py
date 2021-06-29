@@ -259,7 +259,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Fixed Is Addon Export node (again)",
             "Fixed suggestion menu for different blender ui scales",
             "Fixed addon preferences with temp registering",
-            "Fixed check for updates"
+            "Fixed check for updates",
+            "Fixed icon export transparency for different render settings"
         ]
         if changelog:
             box = layout.box()
