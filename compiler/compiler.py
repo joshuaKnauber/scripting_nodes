@@ -282,7 +282,10 @@ def __register_module(module):
 
 def __remove_addon(addon):
     __unregister_module(addon["module"])
-    bpy.data.texts.remove(addon["text"])
+    try:
+        bpy.data.texts.remove(addon["text"])
+    except:
+        print("Addon file has already been removed")
     addons.remove(addon)
     
     
