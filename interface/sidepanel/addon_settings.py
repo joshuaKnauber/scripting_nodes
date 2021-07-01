@@ -1,7 +1,6 @@
 import bpy
 
 
-
 class SN_PT_AddonSettingsPanel(bpy.types.Panel):
     bl_idname = "SN_PT_AddonSettingsPanel"
     bl_label = "Settings"
@@ -20,7 +19,7 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
 
         addon_tree = context.scene.sn.addon_tree()
         addon_graph = addon_tree.sn_graphs[0]
-        
+
         layout.use_property_split = True
         layout.use_property_decorate = False
 
@@ -46,8 +45,7 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         row.enabled = context.scene.sn.use_autosave
         row.prop(context.scene.sn, "autosave_delay")
 
+        layout.separator()
 
-
-        # layout.separator()
-        # layout.operator("sn.save_snippet")
-        # layout.operator("sn.load_snippet")
+        layout.template_ID(context.scene.sn, "easy_bpy",
+                           open="text.open", text="Easy BPY")

@@ -255,12 +255,14 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self, layout):
         changelog = [
+            "Added Easy BPY support",
             "Renamed active collection to scene",
             "Fixed Is Addon Export node (again)",
-            "Fixed suggestion menu for different blender ui scales",
+            "Fixed suggestion menu for some different blender ui scales",
             "Fixed addon preferences with temp registering",
             "Fixed check for updates",
-            "Fixed icon export transparency for different render settings"
+            "Fixed icon export transparency for different render settings",
+            "Fixed error with removed text"
         ]
         if changelog:
             box = layout.box()

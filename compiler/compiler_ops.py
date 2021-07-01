@@ -160,6 +160,13 @@ class SN_OT_ExportAddon(bpy.types.Operator):
                 if prefs.debug_export:
                     print("LOG: Saved icons")
 
+                if context.scene.sn.easy_bpy and len(context.scene.sn.easy_bpy.lines):
+                    with open(os.path.join(dir_path, "easybpy.py"), "w", encoding="utf-8") as py_file:
+                        py_file.write(context.scene.sn.easy_bpy.as_string())
+
+                if prefs.debug_export:
+                    print("LOG: Saved Easy BPY")
+
                 for asset in addon_tree.sn_assets:
                     if asset.path and os.path.exists(asset.path):
                         shutil.copyfile(asset.path, os.path.join(

@@ -45,7 +45,7 @@ example_dict = {
 
 
 class SN_PackageDisplay(bpy.types.PropertyGroup):
-    
+
     name: bpy.props.StringProperty()
     description: bpy.props.StringProperty()
     price: bpy.props.StringProperty()
@@ -53,9 +53,8 @@ class SN_PackageDisplay(bpy.types.PropertyGroup):
     author: bpy.props.StringProperty()
 
 
-
 class SN_AddonDisplay(bpy.types.PropertyGroup):
-    
+
     name: bpy.props.StringProperty()
     description: bpy.props.StringProperty()
     category: bpy.props.StringProperty()
@@ -69,19 +68,16 @@ class SN_AddonDisplay(bpy.types.PropertyGroup):
 
     addon_url: bpy.props.StringProperty()
     blend_url: bpy.props.StringProperty()
-    
+
     show_addon: bpy.props.BoolProperty(default=False)
 
 
-
 class SN_AddonProperties(bpy.types.PropertyGroup):
-
 
     def addon_tree(self):
         for tree in bpy.data.node_groups:
             if len(tree.sn_graphs) and tree.sn_graphs[0].name == self.editing_addon:
                 return tree
-
 
     def active_addon_has_changes(self):
         for graph in self.addon_tree().sn_graphs:
@@ -89,53 +85,49 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                 return True
         return False
 
-
-    def get_addon_items(self,context):
+    def get_addon_items(self, context):
         items = []
         for tree in bpy.data.node_groups:
             if len(tree.sn_graphs):
-                items.append((tree.sn_graphs[0].name,tree.sn_graphs[0].name,tree.sn_graphs[0].name))
+                items.append(
+                    (tree.sn_graphs[0].name, tree.sn_graphs[0].name, tree.sn_graphs[0].name))
         if items:
             return items
-        return [("NONE","NONE","NONE")]
+        return [("NONE", "NONE", "NONE")]
 
-
-    def update_editing_addon(self,context):
+    def update_editing_addon(self, context):
         addon_tree = self.addon_tree()
         addon_tree.sn_graph_index = addon_tree.sn_graph_index
-
 
     def get_example_items(self, context):
         global example_dict
         example_list = []
         for index, key in enumerate(example_dict):
             example = example_dict[key]
-            example_list.append((key,key,key,example["icon"],index+1))
+            example_list.append((key, key, key, example["icon"], index+1))
 
         return [("NONE", "Examples", "Choose an example", "PRESET", 0)] + example_list
 
     def update_examples(self, context):
         if self.example_dropdown != "NONE":
-            with bpy.data.libraries.load(os.path.join(os.path.dirname(os.path.dirname(__file__)),"examples.blend")) as (data_from, data_to):
+            with bpy.data.libraries.load(os.path.join(os.path.dirname(os.path.dirname(__file__)), "examples.blend")) as (data_from, data_to):
                 data_to.node_groups = [self.example_dropdown]
 
             context.scene.sn.editing_addon = self.example_dropdown
             bpy.ops.sn.compile()
             self.example_dropdown = "NONE"
 
-
     editing_addon: bpy.props.EnumProperty(items=get_addon_items,
-                                        update=update_editing_addon,
-                                        name="Editing Addon",
-                                        description="Select the addon you want to edit")
+                                          update=update_editing_addon,
+                                          name="Editing Addon",
+                                          description="Select the addon you want to edit")
 
     example_dropdown: bpy.props.EnumProperty(items=get_example_items,
-                                        update=update_examples,
-                                        name="Examples",
-                                        description="Select the example you want to see")
+                                             update=update_examples,
+                                             name="Examples",
+                                             description="Select the example you want to see")
 
-
-    def get_bookmarked_items(self,context):
+    def get_bookmarked_items(self, context):
         items = []
         addon_tree = context.scene.sn.addon_tree()
         for graph in addon_tree.sn_graphs:
@@ -149,11 +141,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         full_items = []
         for item in items:
             icon = "FILE_SCRIPT" if item == self.editing_addon else "SCRIPT"
-            full_items.append((item,item,item,icon,len(full_items)))
-        
+            full_items.append((item, item, item, icon, len(full_items)))
+
         return full_items
 
-    def update_select_bookmarked(self,context):
+    def update_select_bookmarked(self, context):
         addon_tree = context.scene.sn.addon_tree()
         for i, graph in enumerate(addon_tree.sn_graphs):
             if graph.name == self.bookmarks:
@@ -162,54 +154,55 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                     break
 
     bookmarks: bpy.props.EnumProperty(items=get_bookmarked_items,
-                                        update=update_select_bookmarked,
-                                        name="Bookmarks",
-                                        description="Select a bookmarked graph")
-    
-    
+                                      update=update_select_bookmarked,
+                                      name="Bookmarks",
+                                      description="Select a bookmarked graph")
+
     show_char_control: bpy.props.BoolProperty(default=False,
                                               name="Show Line Wrap",
                                               description="Shows the control for line wrapping")
-    
-    
+
     chars_per_line: bpy.props.IntProperty(default=10,
                                           min=5,
                                           max=50,
                                           name="Line Wrap",
                                           description="Amount of characters which should go in one line")
 
-
     ttp_addon_info: bpy.props.BoolProperty(default=True,
                                            name="Addon Info",
                                            description="This is the information that will be displayed in the user preferences")
-    
-    
+
     packages: bpy.props.CollectionProperty(type=SN_PackageDisplay)
     addons: bpy.props.CollectionProperty(type=SN_AddonDisplay)
-    
-    
-    sn_compat_nodes: bpy.props.CollectionProperty(type=SN_NodeCollection,name="Suggestion Menu")
 
+    sn_compat_nodes: bpy.props.CollectionProperty(
+        type=SN_NodeCollection, name="Suggestion Menu")
 
-    snippet_categories: bpy.props.CollectionProperty(type=SN_NodeCollection, name="Installed Snippet Categories")
+    snippet_categories: bpy.props.CollectionProperty(
+        type=SN_NodeCollection, name="Installed Snippet Categories")
 
-    has_other_snippets: bpy.props.BoolProperty(default=False, name="Other snippets installed")
-    
-    
-    minimal_header: bpy.props.BoolProperty(default=False,name="Minimal Header",
-                                         description="Only show a minimal header")
+    has_other_snippets: bpy.props.BoolProperty(
+        default=False, name="Other snippets installed")
 
+    minimal_header: bpy.props.BoolProperty(default=False, name="Minimal Header",
+                                           description="Only show a minimal header")
 
-    insert_sockets: bpy.props.BoolProperty(default=False,name="Show Insert Sockets",
-                                         description="Shows add icons on removable sockets to allow inserting sockets")
+    insert_sockets: bpy.props.BoolProperty(default=False, name="Show Insert Sockets",
+                                           description="Shows add icons on removable sockets to allow inserting sockets")
 
-    python_buttons: bpy.props.BoolProperty(default=False,name="Show Copy Python Buttons",
-                                         description="Shows copy python buttons on some sockets and on properties/variables")
+    python_buttons: bpy.props.BoolProperty(default=False, name="Show Copy Python Buttons",
+                                           description="Shows copy python buttons on some sockets and on properties/variables")
 
-    set_autosave_default: bpy.props.BoolProperty(default=False, name="Autosave default has been set")
+    set_autosave_default: bpy.props.BoolProperty(
+        default=False, name="Autosave default has been set")
 
-    use_autosave: bpy.props.BoolProperty(default=False,name="Auto Save",description="Save this file automatically")
+    use_autosave: bpy.props.BoolProperty(
+        default=False, name="Auto Save", description="Save this file automatically")
 
-    autosave_delay: bpy.props.FloatProperty(default=120,name="Delay",description="Autosave delay in seconds",min=10)
+    autosave_delay: bpy.props.FloatProperty(
+        default=120, name="Delay", description="Autosave delay in seconds", min=10)
 
     has_update: bpy.props.BoolProperty(default=False)
+
+    easy_bpy: bpy.props.PointerProperty(type=bpy.types.Text, name="EasyBPY",
+                                        description="The easy bpy text file for using easy bpy in your scripts")
