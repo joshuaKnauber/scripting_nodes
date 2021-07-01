@@ -12,6 +12,11 @@ unreg_func = None  # FOR BUG
 
 def compile_addon(addon_tree, is_export=False):
     addon_tree["doing_export"] = is_export
+
+    if is_export:
+        for graph in addon_tree.sn_graphs:
+            graph.node_tree.has_changes = True
+
     txt = None
     try:
         start_time = time()
