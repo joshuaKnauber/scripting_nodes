@@ -1,10 +1,11 @@
 import bpy
 
 
-from . import load_snippet
+from . import load_snippet, save_snippet
 
 
-classes = [load_snippet.SN_OT_LoadSnippet, ]
+classes = [load_snippet.SN_OT_LoadSnippet,
+           save_snippet.SN_OT_SaveSnippet, ]
 
 
 def register():

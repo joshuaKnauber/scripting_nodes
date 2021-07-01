@@ -10,42 +10,50 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
+ 
 
-
-from . import auto_load
-from . import compiler, interface, node_tree, nodes, packages, settings
-from .compiler.compiler import handle_file_load, handle_file_unload
-from .settings.updates import check_serpens_updates
-from .settings.addon_properties import SN_AddonProperties
-from .node_tree.node_tree import update_create_tree, handle_versioning
-from .node_tree.base_node import SN_NodeCollection
-from .node_tree.assets.assets_ui_list import SN_Asset
-from .node_tree.icons.icons_ui_list import SN_Icon
-from .node_tree.variables.variables_ui_list import SN_Variable
-from .node_tree.graphs.graph_ui_lists import SN_Graph, update_graph_index
-from .interface.menu.snippets import snippet_menu
-from .interface.menu.rightclick import serpens_right_click
-from .interface.header.header import prepend_header, append_header, example_dropdown
-from .node_tree.node_categories import get_node_categories
-from .keymaps.keymap import register_keymaps, unregister_keymaps
-import os
-import atexit
-from bpy.utils import previews
-from bpy.app.handlers import persistent
-import nodeitems_utils
-import bpy
 bl_info = {
-    "name": "Serpens",
-    "author": "Joshua Knauber, Finn Knauber",
-    "description": "Adds a node editor for building addons with nodes",
-    "blender": (2, 93, 0),
-    "version": (2, 1, 3),
-    "location": "Editors -> Visual Scripting",
-    "wiki_url": "",
-    "category": "Node"
+    "name" : "Serpens",
+    "author" : "Joshua Knauber, Finn Knauber", 
+    "description" : "Adds a node editor for building addons with nodes",
+    "blender" : (2, 93, 0),
+    "version" : (2, 1, 2),
+    "location" : "Editors -> Visual Scripting",
+    "wiki_url": "", 
+    "category" : "Node" 
 }
 
 
+import bpy
+import nodeitems_utils
+from bpy.app.handlers import persistent
+from bpy.utils import previews
+import atexit
+
+import os
+
+from .keymaps.keymap import register_keymaps, unregister_keymaps
+from .node_tree.node_categories import get_node_categories
+from .interface.header.header import prepend_header, append_header, example_dropdown
+from .interface.menu.rightclick import serpens_right_click
+from .interface.menu.snippets import snippet_menu
+
+from .node_tree.graphs.graph_ui_lists import SN_Graph, update_graph_index
+from .node_tree.variables.variables_ui_list import SN_Variable
+from .node_tree.icons.icons_ui_list import SN_Icon
+from .node_tree.assets.assets_ui_list import SN_Asset
+from .node_tree.base_node import SN_NodeCollection
+from .node_tree.node_tree import update_create_tree, handle_versioning
+from .settings.addon_properties import SN_AddonProperties
+from .settings.updates import check_serpens_updates
+
+from .compiler.compiler import handle_file_load, handle_file_unload
+
+
+from . import compiler, interface, node_tree, nodes, packages, settings
+
+
+from . import auto_load
 auto_load.init()
 
 
@@ -64,21 +72,20 @@ def unload_handler(dummy=None):
 @persistent
 def depsgraph_handler(dummy):
     update_create_tree()
-
-
+    
+    
 def register_icons():
     bpy.types.Scene.sn_icons = bpy.utils.previews.new()
-    icons_dir = os.path.join(os.path.dirname(__file__), "assets", "icons")
+    icons_dir = os.path.join( os.path.dirname( __file__ ), "assets", "icons" )
 
-    icons = ["discord", "bug", "serpens"]
+    icons = [ "discord", "bug", "serpens" ]
 
     for icon in icons:
-        bpy.types.Scene.sn_icons.load(
-            icon, os.path.join(icons_dir, icon + ".png"), 'IMAGE')
-
-
+        bpy.types.Scene.sn_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
+        
+        
 def unregister_icons():
-    bpy.utils.previews.remove(bpy.types.Scene.sn_icons)
+    bpy.utils.previews.remove( bpy.types.Scene.sn_icons )
 
 
 def register_classes():
@@ -99,48 +106,33 @@ def unregister_classes():
     # interface.unregister()
     # compiler.unregister()
     auto_load.unregister()
-
+    
 
 def register():
     # register the classes of the addon
     register_classes()
 
     # register the graph properties
-    bpy.types.NodeTree.sn_graphs = bpy.props.CollectionProperty(
-        type=SN_Graph, name="Scripting Graphs")
-    bpy.types.NodeTree.sn_graph_index = bpy.props.IntProperty(
-        default=0, update=update_graph_index, name="Scripting Graph Index")
-    bpy.types.NodeTree.sn_variables = bpy.props.CollectionProperty(
-        type=SN_Variable, name="Scripting Variables")
-    bpy.types.NodeTree.sn_variable_index = bpy.props.IntProperty(
-        default=0, name="Scripting Variable Index")
-    bpy.types.NodeTree.sn_properties = bpy.props.CollectionProperty(
-        type=SN_Variable, name="Scripting Properties")
-    bpy.types.NodeTree.sn_property_index = bpy.props.IntProperty(
-        default=0, name="Scripting Property Index")
-    bpy.types.NodeTree.sn_icons = bpy.props.CollectionProperty(
-        type=SN_Icon, name="Scripting Icons")
-    bpy.types.NodeTree.sn_icon_index = bpy.props.IntProperty(
-        default=0, name="Scripting Icon Index")
-    bpy.types.NodeTree.sn_assets = bpy.props.CollectionProperty(
-        type=SN_Asset, name="Scripting Assets")
-    bpy.types.NodeTree.sn_asset_index = bpy.props.IntProperty(
-        default=0, name="Scripting Asset Index")
-    bpy.types.NodeTree.sn_nodes = bpy.props.CollectionProperty(
-        type=SN_NodeCollection, name="Scripting Node Collections")
-    bpy.types.NodeTree.sn_done_setup = bpy.props.BoolProperty(
-        default=False, name="Scripting Setup Done")
-    bpy.types.NodeTree.sn_version = bpy.props.IntVectorProperty(
-        name="Serpens Version")
+    bpy.types.NodeTree.sn_graphs = bpy.props.CollectionProperty(type=SN_Graph,name="Scripting Graphs")
+    bpy.types.NodeTree.sn_graph_index = bpy.props.IntProperty(default=0, update=update_graph_index,name="Scripting Graph Index")
+    bpy.types.NodeTree.sn_variables = bpy.props.CollectionProperty(type=SN_Variable,name="Scripting Variables")
+    bpy.types.NodeTree.sn_variable_index = bpy.props.IntProperty(default=0,name="Scripting Variable Index")
+    bpy.types.NodeTree.sn_properties = bpy.props.CollectionProperty(type=SN_Variable,name="Scripting Properties")
+    bpy.types.NodeTree.sn_property_index = bpy.props.IntProperty(default=0,name="Scripting Property Index")
+    bpy.types.NodeTree.sn_icons = bpy.props.CollectionProperty(type=SN_Icon,name="Scripting Icons")
+    bpy.types.NodeTree.sn_icon_index = bpy.props.IntProperty(default=0,name="Scripting Icon Index")
+    bpy.types.NodeTree.sn_assets = bpy.props.CollectionProperty(type=SN_Asset,name="Scripting Assets")
+    bpy.types.NodeTree.sn_asset_index = bpy.props.IntProperty(default=0,name="Scripting Asset Index")
+    bpy.types.NodeTree.sn_nodes = bpy.props.CollectionProperty(type=SN_NodeCollection,name="Scripting Node Collections")
+    bpy.types.NodeTree.sn_done_setup = bpy.props.BoolProperty(default=False,name="Scripting Setup Done")
+    bpy.types.NodeTree.sn_version = bpy.props.IntVectorProperty(name="Serpens Version")
     bpy.types.NodeTree.sn_uid = bpy.props.StringProperty(name="Serpens UID")
-
+    
     # register the text properties
-    bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(
-        default=False, name="Is Serpens Addon")
+    bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False,name="Is Serpens Addon")
 
     # addon properties
-    bpy.types.Scene.sn = bpy.props.PointerProperty(
-        type=SN_AddonProperties, name="Serpens Properties")
+    bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties,name="Serpens Properties")
 
     # register the keymaps
     register_keymaps()
@@ -149,8 +141,7 @@ def register():
     register_icons()
 
     # register node categories
-    nodeitems_utils.register_node_categories(
-        'SCRIPTING_NODES', get_node_categories())
+    nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
 
     # add the node tree header
     bpy.types.NODE_HT_header.append(append_header)
@@ -164,7 +155,7 @@ def register():
     bpy.app.handlers.load_post.append(load_handler)
     bpy.app.handlers.depsgraph_update_post.append(depsgraph_handler)
     atexit.register(unload_handler)
-
+    
     # add right click menu
     bpy.types.WM_MT_button_context.append(serpens_right_click)
 
@@ -209,12 +200,10 @@ def unregister():
     bpy.app.handlers.load_post.remove(load_handler)
     bpy.app.handlers.depsgraph_update_post.remove(depsgraph_handler)
     atexit.unregister(unload_handler)
-
+    
     # remove right click menu
-    try:
-        bpy.types.WM_MT_button_context.remove(serpens_right_click)
-    except:
-        pass
+    try: bpy.types.WM_MT_button_context.remove(serpens_right_click)
+    except: pass
 
     # unregister the addon classes
     unregister_classes()
