@@ -117,12 +117,12 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         idname = "__name__.partition('.')[0]"
         if not self.addon_tree.doing_export:
-            idname = self.addon_tree.sn_graphs[0].name
+            idname = f"'{self.addon_tree.sn_graphs[0].name}'"
 
         return {
             "code": f"""
                     class SNA_AddonPreferences_{self.uid}(bpy.types.AddonPreferences):
-                        bl_idname = "{idname}"
+                        bl_idname = {idname}
                         
                         {'is_sn_prefs_dev: bpy.props.BoolProperty()' if not self.addon_tree.doing_export else ''}
                         {self.list_code(property_register, 6)}
