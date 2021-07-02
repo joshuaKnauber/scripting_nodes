@@ -3,7 +3,7 @@ import bpy
 
 from . import base_node, node_tree, node_categories
 
-from . import assets, graphs, icons, libraries, snippets, sockets, variables
+from . import assets, graphs, icons, snippets, sockets, variables
 
 
 classes = [base_node.SN_NodePropertyGroup,
@@ -20,7 +20,6 @@ def register():
     assets.register()
     graphs.register()
     icons.register()
-    libraries.register()
     snippets.register()
     sockets.register()
     variables.register()
@@ -34,7 +33,6 @@ def unregister():
     assets.unregister()
     graphs.unregister()
     icons.unregister()
-    libraries.unregister()
     snippets.unregister()
     sockets.unregister()
     variables.unregister()
