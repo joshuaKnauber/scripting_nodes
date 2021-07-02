@@ -18,7 +18,7 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
 
     def function_node(self, context):
         node = context.space_data.node_tree.nodes.active
-        if node.bl_idname == "SN_FunctionNode":
+        if node.bl_idname == "SN_RunFunctionNode":
             return node.addon_tree.sn_nodes["SN_FunctionNode"].items[node.func_name].node()
         else:
             return node.addon_tree.sn_nodes["SN_InterfaceFunctionNode"].items[node.func_name].node()
