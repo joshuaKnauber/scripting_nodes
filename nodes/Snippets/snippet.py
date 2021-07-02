@@ -18,12 +18,17 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
 
     def function_node(self, context):
         node = context.space_data.node_tree.nodes.active
-        return node.addon_tree.sn_nodes["SN_FunctionNode"].items[node.func_name].node()
+        if node.bl_idname == "SN_FunctionNode":
+            return node.addon_tree.sn_nodes["SN_FunctionNode"].items[node.func_name].node()
+        else:
+            return node.addon_tree.sn_nodes["SN_InterfaceFunctionNode"].items[node.func_name].node()
 
     def get_snippet(self, context):
         run_node = context.space_data.node_tree.nodes.active
         node = self.function_node(context)
-        data = {"name":node.func_name ,"function":"", "func_name":node.item.identifier, "inputs":[], "outputs":[]}
+        data = { "name":node.func_name,
+                "function":"", "func_name":node.item.identifier,
+                "inputs":[], "outputs":[] }
 
         for inp in run_node.inputs:
             data["inputs"].append({"idname":inp.bl_idname, "name":inp.get_text(), "subtype":inp.subtype})
@@ -78,11 +83,13 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                         for inp_data in data["inputs"]:
                             if inp_data["idname"] == "SN_ExecuteSocket": inp_data["name"] = "Execute"
+                            if inp_data["idname"] == "SN_InterfaceSocket": inp_data["name"] = "Interface"
                             inp = self.add_input(inp_data["idname"], inp_data["name"])
                             inp.subtype = inp_data["subtype"]
 
                         for out_data in data["outputs"]:
                             if out_data["idname"] == "SN_ExecuteSocket": out_data["name"] = "Execute"
+                            if inp_data["idname"] == "SN_InterfaceSocket": inp_data["name"] = "Interface"
                             out = self.add_output(out_data["idname"], out_data["name"])
                             out.subtype = out_data["subtype"]
 
@@ -129,6 +136,11 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                 func_name = self.func_name(data["func_name"])
 
             parameters = []
+            
+            if self.inputs[0].bl_idname == "SN_InterfaceSocket":
+                layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
+                parameters.append(layout + ", ")
+            
             for inp in self.inputs[1:]:
                 parameters.append(inp.code() + ", ")
 
@@ -136,7 +148,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                 return {
                     "code": f"""
                             snippet_return_{self.uid} = {func_name}({self.list_code(parameters)})
-                            {self.outputs[0].code(7)}
+                            {self.outputs[0].code(7) if len(self.outputs) else ""}
                             """
                 }
 
@@ -151,6 +163,6 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             return {
                 "code": f"""
-                        {self.outputs[0].code(6)}
+                        {self.outputs[0].code(6) if len(self.outputs) else ""}
                         """
             }

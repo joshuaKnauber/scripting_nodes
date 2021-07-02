@@ -255,7 +255,9 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self, layout):
         changelog = [
-            "Fixed preferences for export in some cases"
+            "Added interface snippets",
+            "Fixed preferences for export in some cases",
+            "Fixed snippet export"
         ]
         if changelog:
             box = layout.box()

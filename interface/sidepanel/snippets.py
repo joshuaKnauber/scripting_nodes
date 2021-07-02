@@ -3,7 +3,7 @@ import bpy
         
 class SN_PT_SnippetPanel(bpy.types.Panel):
     bl_idname = "SN_PT_SnippetPanel"
-    bl_label = "Snippets [BETA]"
+    bl_label = "Snippets"
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
@@ -18,7 +18,7 @@ class SN_PT_SnippetPanel(bpy.types.Panel):
         layout = self.layout
 
         node = context.space_data.node_tree.nodes.active
-        if node and node.bl_idname == "SN_RunFunctionNode":
+        if node and node.bl_idname in ["SN_RunFunctionNode", "SN_RunLayoutFunctionNode"]:
             if not context.scene.sn.active_addon_has_changes():
                 row = layout.row()
                 row.scale_y = 1.25
