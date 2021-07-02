@@ -45,8 +45,10 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.has_report and self.is_report:
             return {
                 "code": f"""
+                        print("test")
                         try: self.report({"{'" + self.report_type + "'}"}, message={self.inputs["Content"].by_name(separator='+" "+')})
                         except: print("Serpens - Can't report in this context!")
+                        print("test")
                         {self.outputs[0].code(6)}
                         """
             }

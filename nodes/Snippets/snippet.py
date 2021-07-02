@@ -148,7 +148,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             return {
                 "code": f"""
                         snippet_return_{self.uid} = {func_name}({self.list_code(parameters)})
-                        {self.outputs[0].code(7) if len(self.outputs) else ""}
+                        {self.outputs[0].code(6) if len(self.outputs) else ""}
                         """
             }
 
