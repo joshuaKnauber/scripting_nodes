@@ -256,6 +256,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_changelog(self, layout):
         changelog = [
             "Added interface snippets",
+            "Added Addon Info node",
             "Fixed preferences for export in some cases",
             "Fixed snippet export",
             "Removed icon from number properties"
