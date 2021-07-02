@@ -257,7 +257,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         changelog = [
             "Added interface snippets",
             "Fixed preferences for export in some cases",
-            "Fixed snippet export"
+            "Fixed snippet export",
+            "Removed icon from number properties"
         ]
         if changelog:
             box = layout.box()

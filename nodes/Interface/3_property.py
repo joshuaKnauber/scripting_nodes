@@ -78,11 +78,14 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         if prop_type == "BOOLEAN":
             self.add_boolean_input("Toggle").set_default(False)
             self.add_boolean_input("Invert Checkbox").set_default(False)
+            self.add_icon_input("Icon")
         elif prop_type == "ENUM":
             self.add_boolean_input("Expand").set_default(False)
+            self.add_icon_input("Icon")
         elif prop_type in ["FLOAT","INT", "INTEGER"]:
             self.add_boolean_input("Slider").set_default(False)
-        self.add_icon_input("Icon")
+        else:
+            self.add_icon_input("Icon")
             
 
     def update_copied(self,context):
@@ -172,10 +175,14 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         if data["group_path"]:
             data_path += "." + data["group_path"] if data_path else data["group_path"]
+            
+        icon = ""
+        if "Icon" in self.inputs:
+            icon = f",icon_value={self.inputs['Icon'].code()}"
         
         if not self.color_wheel:
             return {"code": f"""
-                    {layout}.prop({data_path},'{data["property"]["identifier"]}',icon_value={self.inputs['Icon'].code()},{values})
+                    {layout}.prop({data_path},'{data["property"]["identifier"]}'{icon},{values})
                     """}
         else:
             return {"code": f"""
