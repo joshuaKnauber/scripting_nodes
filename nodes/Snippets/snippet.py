@@ -89,7 +89,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                         for out_data in data["outputs"]:
                             if out_data["idname"] == "SN_ExecuteSocket": out_data["name"] = "Execute"
-                            if inp_data["idname"] == "SN_InterfaceSocket": inp_data["name"] = "Interface"
+                            if out_data["idname"] == "SN_InterfaceSocket": out_data["name"] = "Interface"
                             out = self.add_output(out_data["idname"], out_data["name"])
                             out.subtype = out_data["subtype"]
 
@@ -129,40 +129,30 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_evaluate(self, context, touched_socket):
-        if len(self.inputs) > 0:
-            func_name = ""
-            with open(self.snippet_path) as snippet:
-                data = json.loads(snippet.read())
-                func_name = self.func_name(data["func_name"])
+        func_name = ""
+        with open(self.snippet_path) as snippet:
+            data = json.loads(snippet.read())
+            func_name = self.func_name(data["func_name"])
 
-            parameters = []
-            
-            if self.inputs[0].bl_idname == "SN_InterfaceSocket":
-                layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
-                parameters.append(layout + ", ")
-            
-            for inp in self.inputs[1:]:
+        parameters = []
+        
+        if len(self.inputs) > 0 and self.inputs[0].bl_idname == "SN_InterfaceSocket":
+            layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
+            parameters.append(layout + ", ")
+        
+        for inp in self.inputs:
+            if not inp.bl_idname == "SN_ExecuteSocket":
                 parameters.append(inp.code() + ", ")
 
-            if touched_socket == self.inputs[0]:
-                return {
-                    "code": f"""
-                            snippet_return_{self.uid} = {func_name}({self.list_code(parameters)})
-                            {self.outputs[0].code(7) if len(self.outputs) else ""}
-                            """
-                }
-
-            elif self.inputs[0].is_linked:
-                return {
-                    "code": f"""snippet_return_{self.uid}[{self.outputs.find(touched_socket.name)-1}]"""
-                }
-            else:
-                self.add_error("Snippet not run", "You need to execute your snippet to use an output value")
-                return {"code": "None"}
+        if len(self.inputs) > 0 and touched_socket == self.inputs[0]:
+            return {
+                "code": f"""
+                        snippet_return_{self.uid} = {func_name}({self.list_code(parameters)})
+                        {self.outputs[0].code(7) if len(self.outputs) else ""}
+                        """
+            }
 
         else:
             return {
-                "code": f"""
-                        {self.outputs[0].code(6) if len(self.outputs) else ""}
-                        """
+                "code": f"""{func_name}({self.list_code(parameters)})[{self.outputs.find(touched_socket.name)-1}]"""
             }

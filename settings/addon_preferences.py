@@ -259,6 +259,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added Addon Info node",
             "Fixed preferences for export in some cases",
             "Fixed snippet export",
+            "Allow for snippets without execute",
             "Removed icon from number properties"
         ]
         if changelog:
