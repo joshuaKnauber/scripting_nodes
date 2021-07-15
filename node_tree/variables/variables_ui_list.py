@@ -448,6 +448,10 @@ class SN_Variable(bpy.types.PropertyGroup):
     
     enum_items: bpy.props.CollectionProperty(type=SN_EnumItem)
     
+    dynamic_enum: bpy.props.BoolProperty(default=False,
+                                         name="Dynamic Items",
+                                         description="Add items dynamically instead of making them constant")
+    
     def enum_string(self):
         items = "["
         for item in self.enum_items:

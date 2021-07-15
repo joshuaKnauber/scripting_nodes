@@ -257,31 +257,36 @@ def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
                 column.prop(var,"bool_four_default",toggle=True,text=str(var.bool_four_default[i]),index=i)
 
     elif var.var_type == "ENUM":
-        for index, item in enumerate(var.enum_items):
-            box = col.box()
-            header_row = box.row(align=True)
-            header_row.prop(item,"name",text="")
-            op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_UP")
-            op.index = index
-            op.down = False
+        # col.prop(var,"dynamic_enum")
+        # col.separator()
+        
+        if not var.dynamic_enum:
+            for index, item in enumerate(var.enum_items):
+                box = col.box()
+                header_row = box.row(align=True)
+                header_row.prop(item,"name",text="")
+                op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_UP")
+                op.index = index
+                op.down = False
+                op.node = from_node
+                op.node_attr = node_attr
+                op.node_index = node_index
+                op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_DOWN")
+                op.index = index
+                op.down = True
+                op.node = from_node
+                op.node_attr = node_attr
+                op.node_index = node_index
+                op = header_row.operator("sn.remove_enum_item",text="",icon="PANEL_CLOSE")
+                op.node = from_node
+                op.node_attr = node_attr
+                op.node_index = node_index
+                box.prop(item,"description")
+                
+            op = col.operator("sn.add_enum_item",text="Add Enum Item", icon="ADD")
             op.node = from_node
             op.node_attr = node_attr
             op.node_index = node_index
-            op = header_row.operator("sn.move_enum_item",text="",icon="TRIA_DOWN")
-            op.index = index
-            op.down = True
-            op.node = from_node
-            op.node_attr = node_attr
-            op.node_index = node_index
-            op = header_row.operator("sn.remove_enum_item",text="",icon="PANEL_CLOSE")
-            op.node = from_node
-            op.node_attr = node_attr
-            op.node_index = node_index
-            box.prop(item,"description")
-        op = col.operator("sn.add_enum_item",text="Add Enum Item", icon="ADD")
-        op.node = from_node
-        op.node_attr = node_attr
-        op.node_index = node_index
             
             
 class SN_PT_PropertyPanel(bpy.types.Panel):

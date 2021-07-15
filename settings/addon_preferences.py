@@ -257,6 +257,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         changelog = [
             "Added interface snippets",
             "Added Addon Info node",
+            "Changed Call Invoke on run operator to input",
             "Fixed preferences for export in some cases",
             "Fixed snippet export",
             "Allow for snippets without execute",

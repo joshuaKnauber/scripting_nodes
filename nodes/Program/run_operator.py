@@ -87,16 +87,19 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.operator:
             self.add_inputs_from_internal()
         else:
-            self.remove_input_range(1)
+            if "Call Invoke" in self.inputs: self.remove_input_range(2)
+            else: self.remove_input_range(1)
         self.auto_compile()
             
             
     def update_inputs_from_operator(self, index=-1):
-        create_sockets_from_operator(self,1,index)
+        if "Call Invoke" in self.inputs: create_sockets_from_operator(self, 2, index)
+        else: create_sockets_from_operator(self, 1, index)
 
     
     def update_custom_operator(self,context):
-        self.remove_input_range(1)
+        if "Call Invoke" in self.inputs: self.remove_input_range(2)
+        else: self.remove_input_range(1)
         if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
             self.update_inputs_from_operator()
         self.auto_compile()
@@ -120,7 +123,8 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     call_invoke: bpy.props.BoolProperty(name="Call Invoke",
                                         description="Calls the invoke function of the operator",
-                                        default=True)
+                                        default=True,
+                                        update=SN_ScriptingBaseNode.auto_compile)
 
 
     def get_context_items(self,context):
@@ -135,11 +139,12 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     context: bpy.props.EnumProperty(name="Operator Context",description="The context this operator should run in",
-                                    items=get_context_items)
+                                    items=get_context_items, update=SN_ScriptingBaseNode.auto_compile)
     
     
     def on_create(self,context):
         self.add_required_to_collection(["SN_OperatorNode"])
+        self.add_boolean_input("Call Invoke").set_default(True)
         self.add_execute_input("Run Operator")
         self.add_execute_output("Execute").mirror_name = True
         
@@ -163,7 +168,8 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         layout.prop(self,"context",text="Context")
 
-        layout.prop(self,"call_invoke")
+        if not "Call Invoke" in self.inputs:
+            layout.prop(self,"call_invoke")
 
 
     def code_evaluate(self, context, touched_socket):
@@ -188,8 +194,14 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.use_internal:
             if self.operator:
                 operator = self.operator.split("(")[0] + "("
-                if self.call_invoke:
-                    operator += "\"INVOKE_DEFAULT\","
+                
+                if "Call Invoke" in self.inputs:
+                    operator += f"'INVOKE_DEFAULT' if {self.inputs['Call Invoke'].code()} else 'EXEC_DEFAULT',"
+                else:
+                    if self.call_invoke:
+                        operator += "\"INVOKE_DEFAULT\","
+                    else:
+                        operator += "\"EXEC_DEFAULT\","
             else:
                 self.add_error("No Operator", "No operator selected")
 
@@ -197,14 +209,20 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
                 item = self.addon_tree.sn_nodes["SN_OperatorNode"].items[self.custom_operator]
                 operator = "bpy.ops.sna." + item.identifier + "("
-                if self.call_invoke:
-                    operator += "\"INVOKE_DEFAULT\","
+
+                if "Call Invoke" in self.inputs:
+                    operator += f"'INVOKE_DEFAULT' if {self.inputs['Call Invoke'].code()} else 'EXEC_DEFAULT',"
+                else:
+                    if self.call_invoke:
+                        operator += "\"INVOKE_DEFAULT\","
+                    else:
+                        operator += "\"EXEC_DEFAULT\","
             else:
                 self.add_error("No Operator", "No operator selected")
 
         if operator:
             for inp in self.inputs:
-                if inp.group == "DATA" and inp.enabled:
+                if inp.group == "DATA" and inp.enabled and not inp.name =="Call Invoke":
                     operator += f"{inp.variable_name}={inp.code()},"
 
             operator += ")"
