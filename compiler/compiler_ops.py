@@ -79,9 +79,8 @@ class SN_OT_ExportAddon(bpy.types.Operator):
 
     def invoke(self, context, event):
         graph = context.scene.sn.addon_tree().sn_graphs[0]
-        zip_name = graph.name.lower().replace(" ", "_").replace("-", "_")
-        zip_name += "_" + str(tuple(graph.version)).replace("(",
-                                                            "").replace(")", "").replace(", ", ".") + ".zip"
+        zip_name = graph.short()
+        zip_name += "_" + str(tuple(graph.version)).replace("(","").replace(")", "").replace(", ", ".") + ".zip"
 
         self.filepath = os.path.join(self.filepath, zip_name)
 
@@ -126,8 +125,7 @@ class SN_OT_ExportAddon(bpy.types.Operator):
                 print("LOG: Created compiled text")
 
             addon_tree = context.scene.sn.addon_tree()
-            dir_name = addon_tree.sn_graphs[0].name.lower().replace(
-                " ", "_").replace("-", "_")
+            dir_name = addon_tree.sn_graphs[0].short()
             dir_path = os.path.join(os.path.dirname(self.filepath), dir_name)
 
             if prefs.debug_export:

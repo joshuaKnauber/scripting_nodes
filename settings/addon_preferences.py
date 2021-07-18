@@ -259,6 +259,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added Addon Info node",
             "Changed Call Invoke on run operator to input",
             "Fixed preferences for export in some cases",
+            "Fixed properties in preferences",
             "Fixed snippet export",
             "Allow for snippets without execute",
             "Removed icon from number properties"

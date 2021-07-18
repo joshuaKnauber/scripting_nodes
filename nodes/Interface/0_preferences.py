@@ -45,9 +45,9 @@ class SN_OT_GetSetPreferencesProperty(bpy.types.Operator):
 
         self.add_node(tree)
         
-        idname = "__name__.partition('.')[0]"
+        # idname = "__name__.partition('.')[0]"
         # if not node.addon_tree.doing_export:
-        #     idname = node.addon_tree.sn_graphs[0].name
+        idname = f"'{node.addon_tree.sn_graphs[0].short()}'"
             
         tree.nodes.active.copied_path = construct_from_property(
             f"context.preferences.addons[{idname}].preferences", prop, node.uid)
@@ -120,9 +120,9 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
         for prop in self.properties:
             property_register.append(prop.property_register())
 
-        idname = "__name__.partition('.')[0]"
-        if not self.addon_tree.doing_export:
-            idname = f"'{self.addon_tree.sn_graphs[0].name}'"
+        # idname = "__name__.partition('.')[0]"
+        # if not self.addon_tree.doing_export:
+        idname = f"'{self.addon_tree.sn_graphs[0].short()}'"
 
         return {
             "code": f"""
@@ -152,7 +152,7 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def code_register(self, context):
         filepath = os.path.join(os.path.dirname(
-            __file__), "pref_addon", f"{self.addon_tree.sn_graphs[0].name}.py")
+            __file__), "pref_addon", f"{self.addon_tree.sn_graphs[0].short()}.py")
         self.write_placeholder_file(filepath)
         if self.addon_tree.doing_export:
             return {
@@ -164,7 +164,7 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
             return {
                 "code": f"""
                         bpy.ops.preferences.addon_install(filepath=r"{filepath}")
-                        bpy.ops.preferences.addon_enable(module="{self.addon_tree.sn_graphs[0].name}")
+                        bpy.ops.preferences.addon_enable(module="{self.addon_tree.sn_graphs[0].short()}")
                         bpy.utils.register_class(SNA_AddonPreferences_{self.uid})
                         """
             }
@@ -180,7 +180,7 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             return {
                 "code": f"""
-                        try: bpy.ops.preferences.addon_remove(module=r"{self.addon_tree.sn_graphs[0].name}")
+                        try: bpy.ops.preferences.addon_remove(module=r"{self.addon_tree.sn_graphs[0].short()}")
                         except: pass
                         bpy.utils.unregister_class(SNA_AddonPreferences_{self.uid})
                         """
