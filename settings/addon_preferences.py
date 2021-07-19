@@ -255,7 +255,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self, layout):
         changelog = [
-            
+            "Fixed addon preference property updates",
         ]
         if changelog:
             box = layout.box()
