@@ -93,7 +93,7 @@ class SN_Variable(bpy.types.PropertyGroup):
                     copied_path_pref = "NONE"
                     if self.use_self:
                         copied_path = construct_from_property("self",self, self.from_node_uid)
-                        copied_path_pref = construct_from_property("context.preferences.addons[__name__.partition('.')[0]].preferences",self, self.from_node_uid)
+                        copied_path_pref = construct_from_property(f"context.preferences.addons['{bpy.context.scene.sn.addon_tree().sn_graphs[0].short()}'].preferences",self, self.from_node_uid)
                     else:
                         copied_path = construct_from_attached_property(self.attach_property_to,self.attach_property_to,self)
 
