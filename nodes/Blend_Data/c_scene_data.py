@@ -160,7 +160,7 @@ class SN_WorkspacesNode(bpy.types.Node, SN_SceneDataBase, SN_ScriptingBaseNode):
     bl_idname = "SN_WorkspacesNode"
     bl_label = "Workspaces"
     
-    data_type = "Workspace"
+    data_type = "WorkSpace"
     data_type_collection = "BlendDataWorkSpaces"
     data_identifier = "workspaces"
     

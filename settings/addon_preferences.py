@@ -257,6 +257,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         changelog = [
             "Fixed addon preference property updates",
             "Fixed suggestion menu not working",
+            "Fixed Workspace blend data node"
         ]
         if changelog:
             box = layout.box()

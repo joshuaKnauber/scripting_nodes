@@ -79,8 +79,7 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
                     return True
 
             else:
-                y_offset = abs(
-                    self.start_y - from_node.location[1] + from_node.dimensions[1])
+                y_offset = abs(self.start_y - from_node.location[1] + from_node.dimensions[1])
                 index = len(from_node.inputs) - int((y_offset + 10) // 20)
                 if index < len(from_node.inputs) and index >= 0:
                     from_socket = from_node.inputs[index]
@@ -100,23 +99,48 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         return is_valid
 
     def invoke(self, context, event):
-        from_node = self.get_from_node(context.space_data.node_tree)
-        found_socket = self.set_socket(from_node)
+        return {"FINISHED"}
+        from_socket = None
+        # print(self.start_x,self.start_y)
+        
+        # get current mouse position in view
+        ui_scale = bpy.context.preferences.system.ui_scale
+        to_x, to_y = context.region.view2d.region_to_view(event.mouse_region_x,event.mouse_region_y)
+        to_x, to_y = to_x / ui_scale, to_y / ui_scale
 
-        if event.shift and event.type == "LEFTMOUSE" and found_socket:
+        # place socket under cursor
+        node = context.space_data.node_tree.nodes.new("SN_InvertBooleanNode")
+        node.location = (to_x,to_y+67)
 
-            context.scene.sn.sn_compat_nodes.clear()
-            for category in get_node_categories():
-                cat_item = context.scene.sn.sn_compat_nodes.add()
-                cat_item.name = category.name
+        # create temp link
+        bpy.ops.node.link("INVOKE_DEFAULT", drag_start=(self.start_x, self.start_y))
 
-                for node in category.items(context):
-                    if self.is_valid_node(context, from_node, node.nodetype):
-                        item = cat_item.items.add()
-                        item.name = "  " + node.label
-                        item.identifier = node.nodetype
+        if len(node.inputs[0].links):
+            temp_link = node.inputs[0].links[0]
+            from_socket = temp_link.from_socket
+            
+        if from_socket:
+            pass
 
-            bpy.ops.wm.call_menu("INVOKE_DEFAULT", name="SN_MT_AddNodeMenu")
+        # from_node = self.get_from_node(context.space_data.node_tree)
+        # found_socket = self.set_socket(from_node)
+
+            # if event.shift and event.type == "LEFTMOUSE" and found_socket:
+            if event.shift and event.type == "LEFTMOUSE":
+
+                context.scene.sn.sn_compat_nodes.clear()
+                for category in get_node_categories():
+                    cat_item = context.scene.sn.sn_compat_nodes.add()
+                    cat_item.name = category.name
+
+                    for node in category.items(context):
+                        # if self.is_valid_node(context, from_node, node.nodetype):
+                        if self.is_valid_node(context, from_socket.node, node.nodetype):
+                            item = cat_item.items.add()
+                            item.name = "  " + node.label
+                            item.identifier = node.nodetype
+
+                bpy.ops.wm.call_menu("INVOKE_DEFAULT", name="SN_MT_AddNodeMenu")
         return {"FINISHED"}
 
 
