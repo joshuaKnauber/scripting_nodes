@@ -174,6 +174,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     packages: bpy.props.CollectionProperty(type=SN_PackageDisplay)
     addons: bpy.props.CollectionProperty(type=SN_AddonDisplay)
+    snippets: bpy.props.CollectionProperty(type=SN_PackageDisplay)
 
     sn_compat_nodes: bpy.props.CollectionProperty(
         type=SN_NodeCollection, name="Suggestion Menu")

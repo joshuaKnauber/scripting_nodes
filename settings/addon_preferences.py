@@ -139,6 +139,27 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                 if not addon.name == "placeholder":
                     if self.addon_search.lower() in addon.name.lower() or self.addon_search.lower() in addon.author.lower():
                         self.draw_addon(layout, addon)
+                        
+                        
+    def draw_snippet_market(self, layout):
+        snippets = bpy.context.scene.sn.snippets
+        if not len(snippets):
+            row = layout.row()
+            row.scale_y = 1.2
+            row.operator("sn.load_snippets", text="Load Snippets",
+                         icon="FILE_REFRESH")
+        elif len(snippets) == 1:
+            layout.label(
+                text="There are no snippets available just yet", icon="INFO")
+        else:
+            row = layout.row()
+            row.prop(self, "addon_search", text="", icon="VIEWZOOM")
+            row.operator("sn.load_snippets", text="",
+                         emboss=False, icon="FILE_REFRESH")
+            for snippet in snippets:
+                if not snippet.name == "placeholder":
+                    if self.addon_search.lower() in snippet.name.lower() or self.addon_search.lower() in snippet.author.lower():
+                        self.draw_package(layout, snippet)
 
     def draw_installed(self, layout):
         installed_path = os.path.join(os.path.dirname(
@@ -247,6 +268,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             if len(data["categories"]) + len(data["snippets"]) == 0:
                 layout.label(
                     text="No snippets installed. Export snippets in the N-Panel", icon="INFO")
+                
+        self.draw_snippet_market(layout)
 
     def draw_navigation(self, layout):
         row = layout.row(align=True)
@@ -256,6 +279,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_changelog(self, layout):
         changelog = [
             "Added Display Keymap node for custom shortcuts",
+            "Added Snippet marketplace",
             "Fixed addon preference property updates",
             "Fixed suggestion menu not working",
             "Fixed Workspace blend data node",

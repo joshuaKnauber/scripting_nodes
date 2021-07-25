@@ -65,3 +65,32 @@ class SN_OT_LoadPackages(bpy.types.Operator):
         except:
             print("Couldn't load packages!")
         return {"FINISHED"}
+
+
+
+class SN_OT_LoadSnippets(bpy.types.Operator):
+    bl_idname = "sn.load_snippets"
+    bl_label = "Load Snippets"
+    bl_description = "Loads the snippets from the marketplace"
+    bl_options = {"REGISTER","INTERNAL","UNDO"}
+
+    def execute(self, context):
+        url = "https://raw.githubusercontent.com/joshuaKnauber/serpens_addon_market/main/snippets.json"
+
+        try:
+            content = requests.get(url).json()
+            snippets = content["snippets"]
+            shuffle(snippets)
+           
+            context.scene.sn.snippets.clear()
+            for snippet in snippets:
+                item = context.scene.sn.snippets.add()
+                item.name = snippet["title"]
+                item.description = snippet["text"]
+                item.price = snippet["price"]
+                item.url = snippet["url"]
+                item.author = snippet["author"]
+
+        except:
+            print("Couldn't load snippets!")
+        return {"FINISHED"}

@@ -23,6 +23,11 @@ class SN_PT_SnippetPanel(bpy.types.Panel):
                 row = layout.row()
                 row.scale_y = 1.25
                 row.operator("sn.save_snippet",icon="EXPORT")
+                
+                row = layout.row()
+                row.operator("wm.url_open", text="",
+                        icon_value=bpy.context.scene.sn_icons["discord"].icon_id).url = "https://discord.com/invite/NK6kyae"
+                row.label(text="You can upload the snippets to discord")
             else:
                 layout.label(text="Compile addon to save snippet",icon="INFO")
         else:
