@@ -38,10 +38,7 @@ def get_compat_socket(from_socket, node):
 
     return None
 
-    
-def create_link(x, y, context):
-    bpy.ops.node.link(context, "INVOKE_DEFAULT", detach=False, has_link_picked=False, drag_start=(x, y))
-        
+
 
 class SN_OT_RunAddMenu(bpy.types.Operator):
     bl_idname = "sn.run_add_menu"
@@ -55,7 +52,7 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
     def execute(self, context): return {"FINISHED"}
 
     def start_loc_in_bounds(self, left, bottom, right, top):
-        buffer = 20
+        buffer = 10
         if self.start_x >= left-buffer and self.start_x <= right+buffer:
             return self.start_y >= bottom-buffer and self.start_y <= top+buffer
         return False
@@ -104,36 +101,17 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         return is_valid
 
     def invoke(self, context, event):
-        from_socket = None
-        # print(self.start_x,self.start_y)
-        
         # get current mouse position in view
         ui_scale = bpy.context.preferences.system.ui_scale
         to_x, to_y = context.region.view2d.region_to_view(event.mouse_region_x,event.mouse_region_y)
         to_x, to_y = to_x / ui_scale, to_y / ui_scale
 
-        # place socket under cursor
-        node = context.space_data.node_tree.nodes.new("SN_InvertBooleanNode")
-        node.location = (to_x,to_y+67)
-
-        # create temp link
-        # bpy.ops.node.link("INVOKE_DEFAULT", drag_start=(self.start_x, self.start_y))
-        bpy.app.timers.register(functools.partial(create_link, self.start_x, self.start_y, context.copy()), first_interval=0.1)
-        return {"FINISHED"}
-
-        if len(node.inputs[0].links):
-            temp_link = node.inputs[0].links[0]
-            from_socket = temp_link.from_socket
+        if event.shift and event.type == "LEFTMOUSE":
             
-        if from_socket:
-            pass
+            from_node = self.get_from_node(context.space_data.node_tree)
+            found_socket = self.set_socket(from_node)
 
-        # from_node = self.get_from_node(context.space_data.node_tree)
-        # found_socket = self.set_socket(from_node)
-
-            # if event.shift and event.type == "LEFTMOUSE" and found_socket:
-            if event.shift and event.type == "LEFTMOUSE":
-
+            if found_socket:
                 context.scene.sn.sn_compat_nodes.clear()
                 for category in get_node_categories():
                     cat_item = context.scene.sn.sn_compat_nodes.add()
