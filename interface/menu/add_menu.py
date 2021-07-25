@@ -1,4 +1,5 @@
 import bpy
+import functools
 from ...node_tree.node_categories import get_node_categories
 
 
@@ -37,6 +38,10 @@ def get_compat_socket(from_socket, node):
 
     return None
 
+    
+def create_link(x, y, context):
+    bpy.ops.node.link(context, "INVOKE_DEFAULT", detach=False, has_link_picked=False, drag_start=(x, y))
+        
 
 class SN_OT_RunAddMenu(bpy.types.Operator):
     bl_idname = "sn.run_add_menu"
@@ -99,7 +104,6 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         return is_valid
 
     def invoke(self, context, event):
-        return {"FINISHED"}
         from_socket = None
         # print(self.start_x,self.start_y)
         
@@ -113,7 +117,9 @@ class SN_OT_RunAddMenu(bpy.types.Operator):
         node.location = (to_x,to_y+67)
 
         # create temp link
-        bpy.ops.node.link("INVOKE_DEFAULT", drag_start=(self.start_x, self.start_y))
+        # bpy.ops.node.link("INVOKE_DEFAULT", drag_start=(self.start_x, self.start_y))
+        bpy.app.timers.register(functools.partial(create_link, self.start_x, self.start_y, context.copy()), first_interval=0.1)
+        return {"FINISHED"}
 
         if len(node.inputs[0].links):
             temp_link = node.inputs[0].links[0]

@@ -95,9 +95,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                     ui_scale = bpy.context.preferences.system.ui_scale
                     x, y = view.region_to_view(op.mouse_x,op.mouse_y)
                     x, y = x / ui_scale, y / ui_scale
-
-                    x,y = op.mouse_x,op.mouse_y
-                    bpy.ops.sn.run_add_menu("INVOKE_DEFAULT",start_x=x,start_y=y)
+                    # bpy.ops.sn.run_add_menu("INVOKE_DEFAULT",start_x=x,start_y=y)
 
 
     def update(self):

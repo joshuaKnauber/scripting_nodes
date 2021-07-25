@@ -47,6 +47,10 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
         out.data_type = "WindowManager"
         out.data_identifier = "window_manager"
         out.data_name = "Window Manager"
+        out = self.add_blend_data_output("Window")
+        out.data_type = "Window"
+        out.data_identifier = "window"
+        out.data_name = "Window"
         out = self.add_blend_data_output("Screen")
         out.data_type = "Screen"
         out.data_identifier = "screen"
@@ -69,6 +73,7 @@ class SN_SceneContextNode(bpy.types.Node, SN_ScriptingBaseNode):
             "Active Pose Bone": "bpy.context.active_pose_bone",
             "Preferences": "bpy.context.preferences",
             "Window Manager": "bpy.context.window_manager",
+            "Window": "bpy.context.window",
             "Screen": "bpy.context.screen",
             "Engine": "bpy.context.engine",
             "Mode": "bpy.context.mode",
