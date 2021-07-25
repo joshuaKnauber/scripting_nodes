@@ -255,9 +255,11 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self, layout):
         changelog = [
+            "Added Display Keymap node for custom shortcuts",
             "Fixed addon preference property updates",
             "Fixed suggestion menu not working",
-            "Fixed Workspace blend data node"
+            "Fixed Workspace blend data node",
+            "Changed copy python button for addon preferences"
         ]
         if changelog:
             box = layout.box()

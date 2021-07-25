@@ -13,6 +13,43 @@ def sn_append_interface(self, context):
     
 remove_interfaces = []
 picker_node = None
+
+
+space_names = {
+            "EMPTY": "Window",
+            "VIEW_3D": "3D View",
+            "IMAGE_EDITOR": "Image",
+            "NODE_EDITOR": "Node Editor",
+            "SEQUENCE_EDITOR": "Sequencer",
+            "CLIP_EDITOR": "Clip",
+            "DOPESHEET_EDITOR": "Dopesheet",
+            "GRAPH_EDITOR": "Graph Editor",
+            "NLA_EDITOR": "NLA Editor",
+            "TEXT_EDITOR": "Text",
+            "CONSOLE": "Console",
+            "INFO": "Info",
+            "OUTLINER": "Outliner",
+            "PROPERTIES": "Property Editor",
+            "FILE_BROWSER": "File Browser"
+        }
+
+
+
+class SN_AddKeymapDisplay(bpy.types.Operator):
+    bl_idname = "sn.add_keymap_display"
+    bl_label = "Add Display"
+    bl_description = "Adds the keymap display node"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+
+    keymap: bpy.props.StringProperty(options={"HIDDEN"})
+    item: bpy.props.StringProperty(options={"HIDDEN"})
+
+    def execute(self, context):
+        bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_DisplayKeymapItem",use_transform=True)
+        node = context.space_data.node_tree.nodes.active
+        node.item = self.item
+        node.keymap = self.keymap
+        return {"FINISHED"}
     
     
 
@@ -289,6 +326,10 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         row = layout.row(align=True)
         row.prop(self,"space",text="")
         row.prop(self,"value",text="")
+        op = row.operator("sn.add_keymap_display",text="",icon="FORWARD")
+        op.keymap = space_names[self.space]
+        op.item = self.code_evaluate(context, None, get_action=True)
+        
         layout.operator("sn.record_key",text=self.key,depress=self.recording).node = self.name
         row = layout.row(align=True)
         row.prop(self,"ctrl",toggle=True)
@@ -354,25 +395,9 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         }
         
         
-    def code_evaluate(self, context, touched_socket):
+    def code_evaluate(self, context, touched_socket, get_action=False):
         
-        names = {
-            "EMPTY": "Window",
-            "VIEW_3D": "3D View",
-            "IMAGE_EDITOR": "Image",
-            "NODE_EDITOR": "Node Editor",
-            "SEQUENCE_EDITOR": "Sequencer",
-            "CLIP_EDITOR": "Clip",
-            "DOPESHEET_EDITOR": "Dopesheet",
-            "GRAPH_EDITOR": "Graph Editor",
-            "NLA_EDITOR": "NLA Editor",
-            "TEXT_EDITOR": "Text",
-            "CONSOLE": "Console",
-            "INFO": "Info",
-            "OUTLINER": "Outliner",
-            "PROPERTIES": "Property Editor",
-            "FILE_BROWSER": "File Browser"
-        }
+        global space_names
         
         properties = []
 
@@ -417,14 +442,15 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if inp.enabled:
                     properties.append(f"kmi.properties.{inp.variable_name} = {inp.code()}\n")
             
-            
+        if get_action:
+            return action
         
         return {
             "code": f"""
                     def register_key_{self.uid}():
                         kc = bpy.context.window_manager.keyconfigs.addon
                         if kc:
-                            km = kc.keymaps.new(name="{names[self.space]}", space_type="{self.space}")
+                            km = kc.keymaps.new(name="{space_names[self.space]}", space_type="{self.space}")
                             kmi = km.keymap_items.new("{action}",
                                                         type= "{self.key}",
                                                         value= "{self.value}",

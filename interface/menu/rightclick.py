@@ -144,7 +144,21 @@ class SN_OT_CopyProperty(bpy.types.Operator):
         elif self.origin == "DEFAULT":
             self.copy(self.default())
         return {"FINISHED"}
+    
+    
+    
+class SN_CopyShortcut(bpy.types.Operator):
+    bl_idname = "sn.copy_shortcut"
+    bl_label = "Copy Shortcut"
+    bl_description = "Copies this shortcut"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
 
+    keymap: bpy.props.StringProperty(options={"HIDDEN"})
+    item: bpy.props.StringProperty(options={"HIDDEN"})
+
+    def execute(self, context):
+        
+        return {"FINISHED"}
 
 
 
@@ -173,50 +187,57 @@ def serpens_right_click(self, context):
     #     print(property_pointer.path_resolve(property_value.identifier, False).__repr__())
     
     if property_value and property_pointer:
-        op = layout.operator("sn.copy_space_property",text="Serpens | Copy Property",icon="COPYDOWN")
-
-        if "Preferences" in property_pointer.bl_rna.identifier:
-            op.origin = "PREFERENCES"
-        elif property_pointer.bl_rna.identifier in ["SpaceView3D"]:
-            op.origin = "SPACE"
-        elif "bpy.data.screens[" in property_pointer.__repr__():
-            op.origin = "SPACE_DATA"
-        else:
-            op.origin = "DEFAULT"
-        
-        if "ObjectBase" in property_pointer.__repr__():
-            op.full_path = "bpy.data.objects[\"My Object\"]"
-            op.db_type = "Object"
-            op.db_name = "Object"
+        if property_pointer.bl_rna.identifier == "KeyMapItem":
+            # op = layout.operator("sn.copy_shortcut",text="Serpens | Copy Shortcut",icon="COPYDOWN")
+            # op.keymap = ""
+            # op.item = property_pointer.idname
+            pass
 
         else:
-            op.full_path = property_pointer.__repr__()
-            op.db_type = property_pointer.bl_rna.identifier
-            op.db_name = property_pointer.bl_rna.name
-        
-        if hasattr(property_pointer, f'["{property_value.identifier}"]'):
-            op.prop_identifier = f'["{property_value.identifier}"]'
-        else:
-            op.prop_identifier = property_value.identifier
-        
-        op.prop_name = property_value.name
-        op.prop_type = property_value.type
-        op.prop_subtype = property_value.subtype
-        if property_value.name in ["Operator Property Index", "Preferences Property Index"]:
-            op.node_uid = property_pointer.uid
-            op.node_index = property_pointer.property_index
+            op = layout.operator("sn.copy_space_property",text="Serpens | Copy Property",icon="COPYDOWN")
 
-        if hasattr(property_value,"array_length"):
-            op.prop_size = property_value.array_length
-        else:
-            op.prop_size = -1
+            if "Preferences" in property_pointer.bl_rna.identifier:
+                op.origin = "PREFERENCES"
+            elif property_pointer.bl_rna.identifier in ["SpaceView3D"]:
+                op.origin = "SPACE"
+            elif "bpy.data.screens[" in property_pointer.__repr__():
+                op.origin = "SPACE_DATA"
+            else:
+                op.origin = "DEFAULT"
             
-        if hasattr(property_value,"enum_items"):
-            items = "["
-            for item in property_value.enum_items:
-                items += f"(\"{item.identifier}\",\"{item.name}\",\"{item.description}\"),"
-            op.prop_enum_items = items + "]"
-            op.prop_is_enum_set = property_value.is_enum_flag
+            if "ObjectBase" in property_pointer.__repr__():
+                op.full_path = "bpy.data.objects[\"My Object\"]"
+                op.db_type = "Object"
+                op.db_name = "Object"
+
+            else:
+                op.full_path = property_pointer.__repr__()
+                op.db_type = property_pointer.bl_rna.identifier
+                op.db_name = property_pointer.bl_rna.name
+            
+            if hasattr(property_pointer, f'["{property_value.identifier}"]'):
+                op.prop_identifier = f'["{property_value.identifier}"]'
+            else:
+                op.prop_identifier = property_value.identifier
+            
+            op.prop_name = property_value.name
+            op.prop_type = property_value.type
+            op.prop_subtype = property_value.subtype
+            if property_value.name in ["Operator Property Index", "Preferences Property Index"]:
+                op.node_uid = property_pointer.uid
+                op.node_index = property_pointer.property_index
+
+            if hasattr(property_value,"array_length"):
+                op.prop_size = property_value.array_length
+            else:
+                op.prop_size = -1
+                
+            if hasattr(property_value,"enum_items"):
+                items = "["
+                for item in property_value.enum_items:
+                    items += f"(\"{item.identifier}\",\"{item.name}\",\"{item.description}\"),"
+                op.prop_enum_items = items + "]"
+                op.prop_is_enum_set = property_value.is_enum_flag
             
     else:
         if bpy.ops.ui.copy_python_command_button.poll():
