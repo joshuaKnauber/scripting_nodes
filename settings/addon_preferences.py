@@ -92,6 +92,26 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             col.label(text=line)
         box.operator("wm.url_open", text=package.price).url = package.url
 
+    def draw_snippet(self, layout, snippet):
+        box = layout.box()
+        row = box.row()
+        subrow = row.row()
+        subrow.scale_y = 1.2
+        subrow.alignment = "LEFT"
+        subrow.label(text=snippet.name)
+        subrow = row.row()
+        subrow.alignment = "RIGHT"
+        subrow.enabled = False
+        subrow.label(text=snippet.author)
+        col = box.column(align=True)
+        for line in snippet.description.split("\n"):
+            col.label(text=line)
+            
+        row = box.row()
+        box.operator("wm.url_open", text=snippet.price).url = snippet.url
+        if snippet.blend_url:
+            row.operator("wm.url_open", text="Download .blend").url = snippet.blend_url
+
     def draw_addon(self, layout, addon):
         box = layout.box()
         row = box.row()

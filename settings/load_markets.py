@@ -57,7 +57,7 @@ class SN_OT_LoadPackages(bpy.types.Operator):
             for package in packages:
                 item = context.scene.sn.packages.add()
                 item.name = package["title"]
-                item.description = "\n".join(package["text"])
+                item.description = package["description"]
                 item.price = package["price"]
                 item.url = package["url"]
                 item.author = package["author"]
@@ -86,9 +86,10 @@ class SN_OT_LoadSnippets(bpy.types.Operator):
             for snippet in snippets:
                 item = context.scene.sn.snippets.add()
                 item.name = snippet["title"]
-                item.description = snippet["text"]
+                item.description = snippet["description"]
                 item.price = snippet["price"]
                 item.url = snippet["url"]
+                item.blend_url = snippet["blend_url"]
                 item.author = snippet["author"]
 
         except:

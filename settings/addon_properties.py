@@ -53,6 +53,16 @@ class SN_PackageDisplay(bpy.types.PropertyGroup):
     author: bpy.props.StringProperty()
 
 
+class SN_SnippetDisplay(bpy.types.PropertyGroup):
+
+    name: bpy.props.StringProperty()
+    description: bpy.props.StringProperty()
+    price: bpy.props.StringProperty()
+    url: bpy.props.StringProperty()
+    blend_url: bpy.props.StringProperty()
+    author: bpy.props.StringProperty()
+
+
 class SN_AddonDisplay(bpy.types.PropertyGroup):
 
     name: bpy.props.StringProperty()
@@ -174,7 +184,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     packages: bpy.props.CollectionProperty(type=SN_PackageDisplay)
     addons: bpy.props.CollectionProperty(type=SN_AddonDisplay)
-    snippets: bpy.props.CollectionProperty(type=SN_PackageDisplay)
+    snippets: bpy.props.CollectionProperty(type=SN_SnippetDisplay)
 
     sn_compat_nodes: bpy.props.CollectionProperty(
         type=SN_NodeCollection, name="Suggestion Menu")

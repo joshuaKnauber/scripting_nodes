@@ -33,8 +33,8 @@ def prepend_header(self, context):
             0]].preferences
         if context.scene.sn.has_update and addon_prefs.check_for_updates:
             row = layout.row()
-            row.alert = True
             row.operator("sn.update_message",
+                         depress=True,
                          text="Update Available!", icon="INFO")
 
 
