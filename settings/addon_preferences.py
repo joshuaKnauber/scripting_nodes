@@ -108,7 +108,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             col.label(text=line)
             
         row = box.row()
-        box.operator("wm.url_open", text=snippet.price).url = snippet.url
+        row.operator("wm.url_open", text=snippet.price).url = snippet.url
         if snippet.blend_url:
             row.operator("wm.url_open", text="Download .blend").url = snippet.blend_url
 
@@ -179,7 +179,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             for snippet in snippets:
                 if not snippet.name == "placeholder":
                     if self.addon_search.lower() in snippet.name.lower() or self.addon_search.lower() in snippet.author.lower():
-                        self.draw_package(layout, snippet)
+                        self.draw_snippet(layout, snippet)
 
     def draw_installed(self, layout):
         installed_path = os.path.join(os.path.dirname(
