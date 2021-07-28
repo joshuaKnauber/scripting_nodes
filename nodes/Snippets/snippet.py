@@ -141,7 +141,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             parameters.append(layout + ", ")
         
         for inp in self.inputs:
-            if not inp.bl_idname == "SN_ExecuteSocket":
+            if not inp.bl_idname in ["SN_ExecuteSocket", "SN_InterfaceSocket"]:
                 parameters.append(inp.code() + ", ")
 
         if len(self.inputs) > 0 and touched_socket == self.inputs[0]:
