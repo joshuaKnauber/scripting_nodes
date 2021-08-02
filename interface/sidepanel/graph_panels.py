@@ -148,7 +148,7 @@ def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
     copy_name = var.attach_property_to.upper() + "_PLACEHOLDER." + var.identifier
     if var.use_self:
         if "pref" in from_node.lower():
-            copy_name = f"context.preferences.addons['{context.scene.sn.addon_tree().sn_graphs[0].short()}'].preferences.{var.identifier}"
+            copy_name = f"bpy.context.preferences.addons['{context.scene.sn.addon_tree().sn_graphs[0].short()}'].preferences.{var.identifier}"
         else:
             copy_name = "self." + var.identifier
     row.operator("sn.get_python_name",text="",icon="COPYDOWN").to_copy = copy_name

@@ -15,7 +15,7 @@ class SN_AppendNode(bpy.types.Node, SN_ScriptingBaseNode):
     }
 
     def get_append_types(self, context):
-        items = ["Brush", "Camera", "Collection", "FreestyleLineStyle", "Image", "Light", "Material", "Mesh", "NodeTree", "Object", "Palette", "Scene", "Text", "Texture", "WorkSpace", "World"]
+        items = ["Action", "Brush", "Camera", "Collection", "FreestyleLineStyle", "Image", "Light", "Material", "Mesh", "NodeTree", "Object", "Palette", "Scene", "Text", "Texture", "WorkSpace", "World"]
 
         tuple_items = []
         for item in items:
