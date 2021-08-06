@@ -299,6 +299,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_changelog(self, layout):
         changelog = [
             "Added actions to append from file",
+            "Added register and unregister to script node",
+            "Auto Save is now off by default"
         ]
         if changelog:
             box = layout.box()

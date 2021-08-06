@@ -648,10 +648,6 @@ def has_serpens_trees():
 
 
 def autosave():
-    if not bpy.context.scene.sn.set_autosave_default:
-        bpy.context.scene.sn.set_autosave_default = True
-        bpy.context.scene.sn.use_autosave = bpy.context.preferences.filepaths.use_auto_save_temporary_files
-
     if bpy.context.scene.sn.use_autosave:
         if bpy.data.is_saved and has_serpens_trees():
             bpy.ops.wm.save_mainfile()
