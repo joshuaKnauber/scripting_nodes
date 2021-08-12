@@ -180,8 +180,11 @@ def serpens_right_click(self, context):
     if property_value or button_value:
         layout.separator()
         
+    # print(getattr(context, "button_prop", None).identifier)
+    # print(getattr(context, "button_pointer", None).bl_rna.identifier)
+    # print(context.button_pointer.id_data)
+        
     # print(property_pointer, property_value, button_value, property_value.identifier)
-    # print(context.blend_data.id_data)
     
     # if property_pointer and property_value:
     #     print(property_pointer.path_resolve(property_value.identifier, False).__repr__())
