@@ -301,6 +301,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added actions to append from file",
             "Added register and unregister to script node",
             "Added file select to run script node",
+            "Added clamp node",
             "Auto Save is now off by default",
         ]
         if changelog:
