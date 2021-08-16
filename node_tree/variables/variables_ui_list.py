@@ -240,7 +240,7 @@ class SN_Variable(bpy.types.PropertyGroup):
                                       update=update_vector)
     
     vector_size: bpy.props.IntProperty(default=3,
-                                       min=3,max=4,
+                                       min=2,max=4,
                                        name="Vector Size",
                                        description="The size of the vector",
                                        update=update_vector)
@@ -355,6 +355,12 @@ class SN_Variable(bpy.types.PropertyGroup):
                                         description="The default value of this variable",
                                         update=trigger_update)
     
+    int_two_default: bpy.props.IntVectorProperty(default=(0,0),
+                                                size=2,
+                                                name="Default Value",
+                                                description="The default value of this variable",
+                                                update=trigger_update)
+    
     int_three_default: bpy.props.IntVectorProperty(default=(0,0,0),
                                                    size=3,
                                                     name="Default Value",
@@ -391,6 +397,12 @@ class SN_Variable(bpy.types.PropertyGroup):
                                         name="Default Value",
                                         description="The default value of this variable",
                                         update=trigger_update)
+    
+    float_two_default: bpy.props.FloatVectorProperty(default=(0,0),
+                                                size=2,
+                                                name="Default Value",
+                                                description="The default value of this variable",
+                                                update=trigger_update)
     
     float_three_default: bpy.props.FloatVectorProperty(default=(0,0,0),
                                                    size=3,
@@ -434,6 +446,12 @@ class SN_Variable(bpy.types.PropertyGroup):
                                         description="The default value of this variable",
                                         update=trigger_update)
     
+    bool_two_default: bpy.props.BoolVectorProperty(default=(True,True),
+                                                size=2,
+                                                name="Default Value",
+                                                description="The default value of this variable",
+                                                update=trigger_update)
+    
     bool_three_default: bpy.props.BoolVectorProperty(default=(True,True,True),
                                                    size=3,
                                                     name="Default Value",
@@ -463,19 +481,25 @@ class SN_Variable(bpy.types.PropertyGroup):
             return f"default='{self.str_default}'"
         elif self.var_type == "INTEGER":
             if self.is_vector:
-                if self.vector_size == 3:
+                if self.vector_size == 2:
+                    return "default="+str(tuple(self.int_two_default)) + ",size=2"
+                elif self.vector_size == 3:
                     return "default="+str(tuple(self.int_three_default)) + ",size=3"
                 return "default="+str(tuple(self.int_four_default)) + ",size=4"
             return "default="+str(self.int_default)
         elif self.var_type == "FLOAT":
             if self.is_vector:
-                if self.vector_size == 3:
+                if self.vector_size == 2:
+                    return "default="+str(tuple(self.float_two_default)) + ",size=2"
+                elif self.vector_size == 3:
                     return "default="+str(tuple(self.float_three_default)) + ",size=3"
                 return "default="+str(tuple(self.float_four_default)) + ",size=4"
             return "default="+str(self.float_default)
         elif self.var_type == "BOOLEAN":
             if self.is_vector:
-                if self.vector_size == 3:
+                if self.vector_size == 2:
+                    return "default="+str(tuple(self.bool_two_default)) + ",size=2"
+                elif self.vector_size == 3:
                     return "default="+str(tuple(self.bool_three_default)) + ",size=3"
                 return "default="+str(tuple(self.bool_four_default)) + ",size=4"
             return "default="+str(self.bool_default)

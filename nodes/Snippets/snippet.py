@@ -22,18 +22,37 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
             return node.addon_tree.sn_nodes["SN_FunctionNode"].items[node.func_name].node()
         else:
             return node.addon_tree.sn_nodes["SN_InterfaceFunctionNode"].items[node.func_name].node()
-
-    def get_used_variables(self, node):
-        vars = []
+        
+    def get_all_connected(self, node, visited=[]):
+        nodes = [node]
+        visited.append(node)
         for out in node.outputs:
             for link in out.links:
-                vars += self.get_used_variables(link.to_node)
-        
-        if node.bl_idname in ["SN_GetVariableNode", "SN_SetVariableNode", "SN_ChangeVariableNode", "SN_ResetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode"]:
-            if node.search_value in node.node_tree.sn_variables:
-                vars.append(node.search_value)
+                if not link.to_node in visited:
+                    nodes += self.get_all_connected(link.to_node, visited)
+        for inp in node.inputs:
+            for link in inp.links:
+                if not link.from_node in visited:
+                    nodes += self.get_all_connected(link.from_node, visited)
+        return nodes
 
+    def get_used_variables(self, start_node):
+        vars = []
+        for node in list(set(self.get_all_connected(start_node))):
+            if node.bl_idname in ["SN_GetVariableNode", "SN_SetVariableNode", "SN_ChangeVariableNode", "SN_ResetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode"]:
+                if node.search_value in node.node_tree.sn_variables:
+                    vars.append(node.search_value)
         return vars
+    
+    def get_used_properties(self, start_node):
+        props = []
+        print(self.get_all_connected(start_node))
+        for node in list(set(self.get_all_connected(start_node))):
+            if node.bl_idname in ["SN_GetPropertyNode"]:
+                print(node.prop_name)
+                # if node.search_value in node.node_tree.sn_variables:
+                #     props.append(node.search_value)
+        return props
 
     def get_variable_code(self, node):
         used_variables = list(set(self.get_used_variables(node)))
@@ -68,6 +87,8 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
         # replace variable calls
         og_name = node.get_python_name(node.node_tree.name) + "["
         code = code.replace(og_name, "snippet_vars[")
+
+        props = self.get_used_properties(node)
         
         data["function"] = code
         data["register"] = ""

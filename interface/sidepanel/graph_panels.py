@@ -181,6 +181,8 @@ def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
     elif var.var_type == "INTEGER":
         if not var.is_vector:
             col.prop(var,"int_default")
+        elif var.vector_size == 2:
+            col.prop(var,"int_two_default")
         elif var.vector_size == 3:
             col.prop(var,"int_three_default")
         elif var.vector_size == 4:
@@ -215,6 +217,8 @@ def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
     elif var.var_type == "FLOAT":
         if not var.is_vector:
             col.prop(var,"float_default")
+        elif var.vector_size == 2:
+            col.prop(var,"float_two_default")
         elif var.vector_size == 3:
             col.prop(var,"float_three_default")
         elif var.vector_size == 4:
@@ -251,6 +255,10 @@ def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
     elif var.var_type == "BOOLEAN":
         if not var.is_vector:
             col.prop(var,"bool_default",toggle=True)
+        elif var.vector_size == 2:
+            column = col.column(align=True)
+            for i in range(2):
+                column.prop(var,"bool_two_default",toggle=True,text=str(var.bool_two_default[i]),index=i)
         elif var.vector_size == 3:
             column = col.column(align=True)
             for i in range(3):
