@@ -303,6 +303,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added file select to run script node",
             "Added clamp node",
             "Auto Save is now off by default",
+            "Variables and properties are now supported in snippets"
         ]
         if changelog:
             box = layout.box()

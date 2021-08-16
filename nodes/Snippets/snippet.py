@@ -23,7 +23,7 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
         else:
             return node.addon_tree.sn_nodes["SN_InterfaceFunctionNode"].items[node.func_name].node()
         
-    def get_all_connected(self, node, visited=[]):
+    def get_all_connected(self, node, visited):
         nodes = [node]
         visited.append(node)
         for out in node.outputs:
@@ -38,7 +38,7 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
 
     def get_used_variables(self, start_node):
         vars = []
-        for node in list(set(self.get_all_connected(start_node))):
+        for node in list(set(self.get_all_connected(start_node, []))):
             if node.bl_idname in ["SN_GetVariableNode", "SN_SetVariableNode", "SN_ChangeVariableNode", "SN_ResetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode"]:
                 if node.search_value in node.node_tree.sn_variables:
                     vars.append(node.search_value)
@@ -46,12 +46,10 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
     
     def get_used_properties(self, start_node):
         props = []
-        print(self.get_all_connected(start_node))
-        for node in list(set(self.get_all_connected(start_node))):
+        for node in list(set(self.get_all_connected(start_node, []))):
             if node.bl_idname in ["SN_GetPropertyNode"]:
-                print(node.prop_name)
-                # if node.search_value in node.node_tree.sn_variables:
-                #     props.append(node.search_value)
+                if node.prop_name in node.node_tree.sn_properties:
+                    props.append(node.node_tree.sn_properties[node.prop_name])
         return props
 
     def get_variable_code(self, node):
@@ -60,12 +58,24 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
         for var in used_variables:
             code += node.node_tree.sn_variables[var].variable_register()
         return "snippet_vars = {" + code + "}"
+    
+    def get_prop_register(self, props):
+        code = "\n"
+        for prop in props:
+            code += prop.property_register()
+        return code
+    
+    def get_prop_unregister(self, props):
+        code = "\n"
+        for prop in props:
+            code += prop.property_unregister()
+        return code
 
     def get_snippet(self, context):
         run_node = context.space_data.node_tree.nodes.active
         node = self.function_node(context)
         data = { "name":node.func_name,
-                "function":"", "register":"", "unregister":"",
+                "function":"", "register":"", "unregister":"", "properties":[],
                 "func_name":node.item.identifier,
                 "inputs":[], "outputs":[] }
 
@@ -88,11 +98,12 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
         og_name = node.get_python_name(node.node_tree.name) + "["
         code = code.replace(og_name, "snippet_vars[")
 
-        props = self.get_used_properties(node)
-        
         data["function"] = code
-        data["register"] = ""
-        data["unregister"] = ""
+        
+        props = list(set(self.get_used_properties(node)))
+        data["register"] = self.get_prop_register(props)
+        data["unregister"] = self.get_prop_unregister(props)
+        data["property_identifiers"] = [prop.identifier for prop in props]
 
         return json.dumps(data, indent=4)
 
@@ -171,8 +182,13 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             code = [""]
             with open(self.snippet_path) as snippet:
                 data = json.loads(snippet.read())
-
                 data["function"] = data["function"].replace(data["func_name"],self.func_name(data["func_name"]))
+
+                # update property names
+                if "property_identifiers" in data:
+                    for prop in data["property_identifiers"]:
+                        data["function"] = data["function"].replace(prop, prop+"_"+self.uid)
+
                 code += data["function"].split("\n")
                 for i in range(len(code)): 
                     code[i] = code[i] + "\n"
@@ -182,6 +198,23 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {self.list_code(code)}
                         """
             }
+            
+            
+    def get_reg_unreg_code(self, name):
+        with open(self.snippet_path) as snippet:
+            data = json.loads(snippet.read())
+            if name in data:
+                for prop in data["property_identifiers"]:
+                    data[name] = data[name].replace(prop, prop+"_"+self.uid)
+                return {"code": data[name]}
+            
+            
+    def code_register(self, context):
+        return self.get_reg_unreg_code("register")
+
+
+    def code_unregister(self, context):
+        return self.get_reg_unreg_code("unregister")
 
 
     def code_evaluate(self, context, touched_socket):
