@@ -25,7 +25,7 @@ class SN_RadiansNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_node(self, context, layout):
         col = layout.column()
-        col.prop(self, "operation", expand=True)
+        col.prop(self, "operation", text="")
 
 
     def code_evaluate(self, context, touched_socket):
