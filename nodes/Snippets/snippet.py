@@ -23,11 +23,31 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
         else:
             return node.addon_tree.sn_nodes["SN_InterfaceFunctionNode"].items[node.func_name].node()
 
+    def get_used_variables(self, node):
+        vars = []
+        for out in node.outputs:
+            for link in out.links:
+                vars += self.get_used_variables(link.to_node)
+        
+        if node.bl_idname in ["SN_GetVariableNode", "SN_SetVariableNode", "SN_ChangeVariableNode", "SN_ResetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode"]:
+            if node.search_value in node.node_tree.sn_variables:
+                vars.append(node.search_value)
+
+        return vars
+
+    def get_variable_code(self, node):
+        used_variables = list(set(self.get_used_variables(node)))
+        code = ""
+        for var in used_variables:
+            code += node.node_tree.sn_variables[var].variable_register()
+        return "snippet_vars = {" + code + "}"
+
     def get_snippet(self, context):
         run_node = context.space_data.node_tree.nodes.active
         node = self.function_node(context)
         data = { "name":node.func_name,
-                "function":"", "func_name":node.item.identifier,
+                "function":"", "register":"", "unregister":"",
+                "func_name":node.item.identifier,
                 "inputs":[], "outputs":[] }
 
         for inp in run_node.inputs:
@@ -36,7 +56,22 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
         for out in run_node.outputs:
             data["outputs"].append({"idname":out.bl_idname, "name":out.get_text(), "subtype":out.subtype})
 
-        data["function"] = node.code_imperative(context)["code"]
+        # get function code
+        code = node.code_imperative(context)["code"]
+
+        # add variables
+        code = code.split("\n")
+        spaces = " " * (len(code[2]) - len(code[2].lstrip()))
+        code.insert(2, spaces + self.get_variable_code(node))
+        code = ("\n").join(code)
+        
+        # replace variable calls
+        og_name = node.get_python_name(node.node_tree.name) + "["
+        code = code.replace(og_name, "snippet_vars[")
+        
+        data["function"] = code
+        data["register"] = ""
+        data["unregister"] = ""
 
         return json.dumps(data, indent=4)
 
