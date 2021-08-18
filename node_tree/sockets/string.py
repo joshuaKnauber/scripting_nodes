@@ -131,6 +131,13 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
             op.socket_index = self.get_socket_index()
             op.is_output = self.is_output
 
+        elif self.can_edit_items:
+            op = layout.operator("sn.convert_to_enum_socket", text="", icon="LOOP_BACK", emboss=False)
+            op.node = self.node.name
+            op.socket_index = self.get_socket_index()
+            op.is_output = self.is_output
+
+
 
     def get_color(self, context, node):
         return (0.3, 1, 0.3)
@@ -166,6 +173,29 @@ class SN_SimpleEnumItem(bpy.types.PropertyGroup):
     description: bpy.props.StringProperty(name="Description",
                                    description="The tooltip of your enum entry",
                                    default="This is my enum item")
+
+
+
+class SN_OT_ConvertToEnumSocketItem(bpy.types.Operator):
+    bl_idname = "sn.convert_to_enum_socket"
+    bl_label = "Conver to enum"
+    bl_description = "Converts this socket to an enum socket"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    node: bpy.props.StringProperty(options={"HIDDEN"})
+    socket_index: bpy.props.IntProperty(options={"HIDDEN"})
+    is_output: bpy.props.BoolProperty(default=True, options={"HIDDEN"})
+
+    def execute(self, context):
+        node = context.space_data.node_tree.nodes[self.node]
+        if self.is_output:
+            socket = node.outputs[self.socket_index]
+        else:
+            socket = node.inputs[self.socket_index]
+
+        socket.subtype = "ENUM"
+        socket.variable_name = socket.variable_name # trigger update
+        return {"FINISHED"}
 
 
 
