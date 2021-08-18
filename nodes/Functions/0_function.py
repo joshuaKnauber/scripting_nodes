@@ -42,6 +42,9 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.update_name(None)
 
     def on_dynamic_add(self, socket, connected_socket):
+        if socket.socket_type == "STRING":
+            socket.can_edit_items = True
+
         if connected_socket:
             socket.subtype = connected_socket.subtype
             if connected_socket.bl_idname == "SN_StringSocket":
@@ -57,7 +60,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_dynamic_remove(self,is_output):
         self.update_nodes_by_type("SN_RunFunctionNode")
 
-    def on_var_name_update(self,socket):
+    def on_var_name_update(self, socket):
         names = []
         for out in self.outputs[1:-1]:
             names.append(out.variable_name)

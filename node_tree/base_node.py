@@ -390,12 +390,22 @@ class SN_ScriptingBaseNode:
         "COLLECTION": "SN_BlendDataSocket"
     }
 
-        
-    def enum_items_as_string(self,prop):
+
+    def enum_collection_to_string(self, collection):
         items = "["
-        for item in prop.enum_items:
-            items += f"(\"{item.identifier}\",\"{item.name}\",\"{item.description}\"),"
+        for item in collection:
+            if hasattr(item, "identifier"):
+                identifier = item.identifier
+            else:
+                identifier = item.name
+            name = item.name
+            description = item.description
+            items += f"(\"{identifier}\",\"{name}\",\"{description}\"),"
         return items + "]"
+
+        
+    def enum_items_as_string(self, prop):
+        return self.enum_collection_to_string(self, prop.enum_items)
             
             
     def subtype_from_prop_subtype(self,prop_type,prop_subtype,prop_size):

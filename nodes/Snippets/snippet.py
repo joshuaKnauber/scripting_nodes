@@ -71,6 +71,12 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
             code += prop.property_unregister()
         return code
 
+    def get_socket_attributes(self, socket):
+        attributes = {}
+        for attr in socket.copy_attributes:
+            attributes[attr] = getattr(socket, attr)
+        return attributes
+
     def get_snippet(self, context):
         run_node = context.space_data.node_tree.nodes.active
         node = self.function_node(context)
@@ -80,10 +86,10 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
                 "inputs":[], "outputs":[] }
 
         for inp in run_node.inputs:
-            data["inputs"].append({"idname":inp.bl_idname, "name":inp.get_text(), "subtype":inp.subtype})
+            data["inputs"].append({"idname":inp.bl_idname, "name":inp.get_text(), "subtype":inp.subtype, "attributes":self.get_socket_attributes(inp)})
 
         for out in run_node.outputs:
-            data["outputs"].append({"idname":out.bl_idname, "name":out.get_text(), "subtype":out.subtype})
+            data["outputs"].append({"idname":out.bl_idname, "name":out.get_text(), "subtype":out.subtype, "attributes":self.get_socket_attributes(inp)})
 
         # get function code
         code = node.code_imperative(context)["code"]
@@ -154,11 +160,19 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                             inp = self.add_input(inp_data["idname"], inp_data["name"])
                             inp.subtype = inp_data["subtype"]
 
+                            if "attributes" in inp_data:
+                                for attr in inp_data["attributes"]:
+                                    setattr(inp, attr, inp_data["attributes"][attr])
+
                         for out_data in data["outputs"]:
                             if out_data["idname"] == "SN_ExecuteSocket": out_data["name"] = "Execute"
                             if out_data["idname"] == "SN_InterfaceSocket": out_data["name"] = "Interface"
                             out = self.add_output(out_data["idname"], out_data["name"])
                             out.subtype = out_data["subtype"]
+
+                            if "attributes" in out_data:
+                                for attr in out_data["attributes"]:
+                                    setattr(out, attr, out_data["attributes"][attr])
 
 
     snippet_path: bpy.props.StringProperty(subtype="FILE_PATH",name="Path",description="Path to the snippet json file", update=update_snippet)

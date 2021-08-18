@@ -217,7 +217,9 @@ class ScriptingSocket:
             row.prop(self,"variable_name",text="")
         else:
             row.label(text=self.variable_name)
-            
+
+        self.draw_variable_socket(row)
+
             
     def get_text(self):
         if self.mirror_name and self.is_linked:
@@ -226,9 +228,14 @@ class ScriptingSocket:
         return self.default_text
         
         
-    def draw_socket(self,context,layout,row,node,text):
+    def draw_socket(self, context, layout, row, node, text):
         """ overwrite this to draw the sockets property """
         row.label(text=text)
+        
+        
+    def draw_variable_socket(self, layout):
+        """ overwrite this to draw the sockets if they are used as a variable after the default setup """
+        pass
 
 
     def draw(self, context, layout, node, text):
@@ -244,7 +251,7 @@ class ScriptingSocket:
 
         self.draw_as_input(before)
         if self.show_var_name and not self.dynamic: self.draw_variable(socket_row)
-        else: self.draw_socket(context,layout,socket_row,node,self.get_text())
+        else: self.draw_socket(context, layout, socket_row, node, self.get_text())
         self.draw_as_output(after)
 
 
@@ -270,7 +277,7 @@ class ScriptingSocket:
     ### UTILITY
         
     
-    def get_socket_index(self,collection=None):
+    def get_socket_index(self, collection=None):
         if not collection:
             collection = self.node.inputs
             if self.is_output:

@@ -302,8 +302,9 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Added register and unregister to script node",
             "Added file select to run script node",
             "Added clamp node",
+            "Variables and properties are now supported in snippets",
+            "Enum sockets are now supported by snippets and can be edited on functions",
             "Auto Save is now off by default",
-            "Variables and properties are now supported in snippets"
         ]
         if changelog:
             box = layout.box()
