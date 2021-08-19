@@ -405,7 +405,7 @@ class SN_ScriptingBaseNode:
 
         
     def enum_items_as_string(self, prop):
-        return self.enum_collection_to_string(self, prop.enum_items)
+        return self.enum_collection_to_string(prop.enum_items)
             
             
     def subtype_from_prop_subtype(self,prop_type,prop_subtype,prop_size):
