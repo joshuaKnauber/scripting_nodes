@@ -74,7 +74,14 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
     def get_socket_attributes(self, socket):
         attributes = {}
         for attr in socket.copy_attributes:
-            attributes[attr] = getattr(socket, attr)
+            value = getattr(socket, attr)
+            if "array" in str(type(value)).lower() or "color" in str(type(value)).lower():
+                temp_value = value
+                value = []
+                for i in temp_value:
+                    value.append(i)
+                value = tuple(value)
+            attributes[attr] = value
         return attributes
 
     def get_snippet(self, context):
