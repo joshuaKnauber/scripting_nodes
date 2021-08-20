@@ -305,6 +305,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Variables and properties are now supported in snippets",
             "Enum sockets are now supported by snippets and can be edited on functions",
             "Auto Save is now off by default",
+            "Fixed print with no available screen"
         ]
         if changelog:
             box = layout.box()
