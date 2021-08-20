@@ -30,8 +30,9 @@ def serpens_functions(addon_tree):
                     for arg in args:
                         item.value += str(arg) + ";;;"
 
-                    for area in bpy.context.screen.areas:
-                        area.tag_redraw()
+                    if bpy.context and bpy.context.screen:
+                        for area in bpy.context.screen.areas:
+                            area.tag_redraw()
                 print(*args)
                     
             def sn_cast_string(value):
