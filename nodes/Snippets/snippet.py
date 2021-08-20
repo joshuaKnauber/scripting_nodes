@@ -57,18 +57,18 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
         code = ""
         for var in used_variables:
             code += node.node_tree.sn_variables[var].variable_register()
-        return "snippet_vars = {" + code + "}"
+        return "SNIPPET_VARS = {" + code + "}"
     
     def get_prop_register(self, props):
         code = "\n"
         for prop in props:
-            code += prop.property_register()
+            code += f"if not '{prop.identifier}' in bpy.types.{prop.attach_property_to}.bl_rna.properties: {prop.property_register()}"
         return code
     
     def get_prop_unregister(self, props):
         code = "\n"
         for prop in props:
-            code += prop.property_unregister()
+            code += f"if '{prop.identifier}' in bpy.types.{prop.attach_property_to}.bl_rna.properties: {prop.property_unregister()}"
         return code
 
     def get_socket_attributes(self, socket):
@@ -87,7 +87,7 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
     def get_snippet(self, context):
         run_node = context.space_data.node_tree.nodes.active
         node = self.function_node(context)
-        data = { "name":node.func_name,
+        data = { "name":node.func_name, "uid": run_node.uid,
                 "function":"", "register":"", "unregister":"", "properties":[],
                 "func_name":node.item.identifier,
                 "inputs":[], "outputs":[] }
@@ -101,15 +101,12 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
         # get function code
         code = node.code_imperative(context)["code"]
 
-        # add variables
-        code = code.split("\n")
-        spaces = " " * (len(code[2]) - len(code[2].lstrip()))
-        code.insert(2, spaces + self.get_variable_code(node))
-        code = ("\n").join(code)
+        # get variable definitions
+        code = " "*len(code.replace("\n","").split("def")[0]) + self.get_variable_code(node) + code
         
         # replace variable calls
         og_name = node.get_python_name(node.node_tree.name) + "["
-        code = code.replace(og_name, "snippet_vars[")
+        code = code.replace(og_name, "SNIPPET_VARS[")
 
         data["function"] = code
         
@@ -150,6 +147,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_snippet(self, context):
         self.inputs.clear()
         self.outputs.clear()
+        self.has_vars = False
 
         if self.snippet_path:
             if not self.snippet_path == bpy.path.abspath(self.snippet_path):
@@ -160,6 +158,12 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                     with open(self.snippet_path) as snippet:
                         data = json.loads(snippet.read())
                         self.label = data["name"]
+
+                        if "property_identifiers" in data and len(data["property_identifiers"]):
+                            self.has_vars = True
+                        elif "SNIPPET_VARS" in data["function"]:
+                            if len(data["function"].split("}")[0].split("{")[-1]):
+                                self.has_vars = True
 
                         for inp_data in data["inputs"]:
                             if inp_data["idname"] == "SN_ExecuteSocket": inp_data["name"] = "Execute"
@@ -180,9 +184,18 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                             if "attributes" in out_data:
                                 for attr in out_data["attributes"]:
                                     setattr(out, attr, out_data["attributes"][attr])
+        
+        self.auto_compile()
 
 
     snippet_path: bpy.props.StringProperty(subtype="FILE_PATH",name="Path",description="Path to the snippet json file", update=update_snippet)
+
+    use_independent_vars: bpy.props.BoolProperty(name="Standalone",
+                                            description="If enabled, the properties and variables used in this snippet are only used by this instance of the snippet instead of all",
+                                            default=False,
+                                            update=SN_ScriptingBaseNode.auto_compile)
+
+    has_vars: bpy.props.BoolProperty(default=False)
     
 
     def on_create(self,context):
@@ -193,9 +206,21 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.label == "Snippet":
             layout.prop(self,"snippet_path")
 
+        else:
+            if hasattr(self, "use_independent_vars"):
+                if self.has_vars:
+                    layout.prop(self, "use_independent_vars")
+
     
     def func_name(self, orginal_name):
         return orginal_name + "_snippet_" + self.uid
+
+
+    def snippet_prop_uid(self, data):
+        uid = self.uid
+        if "uid" in data and hasattr(self, "use_independent_vars") and not self.use_independent_vars:
+            uid = data["uid"]
+        return uid
 
 
     def code_imperative(self, context):
@@ -205,10 +230,15 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                 data = json.loads(snippet.read())
                 data["function"] = data["function"].replace(data["func_name"],self.func_name(data["func_name"]))
 
+                # update variable names
+                if "uid" in data:
+                    var_id = f"snippet_vars_{self.snippet_prop_uid(data)}"
+                    data["function"] = data["function"].replace("SNIPPET_VARS", var_id)
+
                 # update property names
                 if "property_identifiers" in data:
                     for prop in data["property_identifiers"]:
-                        data["function"] = data["function"].replace(prop, prop+"_"+self.uid)
+                        data["function"] = data["function"].replace(prop, prop + "_" + self.snippet_prop_uid(data))
 
                 code += data["function"].split("\n")
                 for i in range(len(code)): 
@@ -226,7 +256,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             data = json.loads(snippet.read())
             if name in data:
                 for prop in data["property_identifiers"]:
-                    data[name] = data[name].replace(prop, prop+"_"+self.uid)
+                    data[name] = data[name].replace(prop, prop + "_" + self.snippet_prop_uid(data))
                 return {"code": data[name]}
             
             
