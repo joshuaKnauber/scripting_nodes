@@ -50,11 +50,11 @@ class SN_UpdatePropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                         self.outputs[1].subtype = self.subtype_from_prop_subtype(new_data["property"]["type"],new_data["property"]["subtype"],new_data["property"]["size"])
                         self.outputs[1].variable_name = new_data["property"]["identifier"]
-                    inp = self.inputs[0]
-                    if inp.default_text != new_data["data_block"]["name"]:
-                        inp.default_text = new_data["data_block"]["name"]
-                        inp.data_type = new_data["data_block"]["type"]
-                        inp.data_name = new_data["data_block"]["name"]
+                    out = self.outputs[2]
+                    if out.default_text != new_data["data_block"]["name"]:
+                        out.default_text = new_data["data_block"]["name"]
+                        out.data_type = new_data["data_block"]["type"]
+                        out.data_name = new_data["data_block"]["name"]
                         self["copied_path"] = string_data
 
                     if new_data["property"]["removed"]:
@@ -70,14 +70,18 @@ class SN_UpdatePropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.copied_path:
             data = get_data(self.copied_path)
             if data:
-                self.label = "Update " + data["property"]["name"]
                 self.add_output_from_data(data["property"])
-                setup_data_output(self, data)
+                self.label = "Update " + data["property"]["name"]
+                if "context.preferences.addons" in data["group_path"]:
+                    setup_data_output(self, {'data_block': {'name': 'Preferences', 'type': 'Preferences'}})
+                elif data["group_path"] == "self":
+                    setup_data_output(self, {'data_block': {'name': 'Operator', 'type': 'Operator'}})
+                else:
+                    setup_data_output(self, data)
             else:
                 self.copied_path = ""
 
         else:
-            self.inputs.clear()
             self.remove_output_range(1)
             self.wrong_add = True
         self.auto_compile()

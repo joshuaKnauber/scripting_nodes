@@ -19,7 +19,6 @@ class SN_GetPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_outside_update(self, string_data):
         if self.copied_path:
-            print(self.copied_path)
             data = get_data(self.copied_path)
             new_data = get_data(string_data)
             if data and data["group_path"] in ["self", f"context.preferences.addons['{bpy.context.scene.sn.addon_tree().sn_graphs[0].short()}'].preferences"]:
