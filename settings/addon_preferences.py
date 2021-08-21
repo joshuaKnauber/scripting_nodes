@@ -331,4 +331,4 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             self.draw_snippets(layout)
 
 
-# addon_prefs = context.preferences.addons[__name__.partition('.')[0]].preferences
+# addon_prefs = context.preferences.addons[bpy.context.scene.sn.addon_tree().sn_graphs[0].short()].preferences

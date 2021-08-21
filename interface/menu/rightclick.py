@@ -86,7 +86,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
             for graph in bpy.context.scene.sn.addon_tree().sn_graphs:
                 for node in graph.node_tree.nodes:
                     if not node.bl_idname in ["NodeFrame","NodeReroute"] and node.uid == self.node_uid:
-                        return construct_from_property("context.preferences.addons[__name__.partition('.')[0]].preferences", node.properties[self.node_index], self.node_uid)
+                        return construct_from_property(f"context.preferences.addons['{bpy.context.scene.sn.addon_tree().sn_graphs[0].short()}'].preferences", node.properties[self.node_index], self.node_uid)
 
         else:
             data = {
