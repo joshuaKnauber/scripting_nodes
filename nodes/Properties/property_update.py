@@ -29,6 +29,9 @@ class SN_UpdatePropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                         if data["property"]["type"] != new_data["property"]["type"]:
                             self["copied_path"] = string_data
                             self.change_socket_type(self.outputs[1], self.prop_types[new_data["property"]["type"]])
+                        if new_data["property"]["type"] == "ENUM":
+                            if data["property"]["items"] != new_data["property"]["items"]:
+                                self["copied_path"] = string_data
 
                         self.outputs[1].subtype = self.subtype_from_prop_subtype(new_data["property"]["type"],new_data["property"]["subtype"],new_data["property"]["size"])
                         self.outputs[1].variable_name = new_data["property"]["identifier"]

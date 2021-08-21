@@ -159,7 +159,7 @@ class SN_OT_AddEnumItem(bpy.types.Operator):
         else:
             for graph in context.scene.sn.addon_tree().sn_graphs:
                 for node in graph.node_tree.nodes:
-                    if node.bl_idname == "SN_SetPropertyNode":
+                    if node.bl_idname in ["SN_SetPropertyNode", "SN_UpdatePropertyNode"]:
                         if prop.use_self:
                             path = "self" if prop.find_node(context).bl_idname != "SN_AddonPreferencesNode" else f"context.preferences.addons['{bpy.context.scene.sn.addon_tree().sn_graphs[0].short()}'].preferences"
                             node.on_outside_update(construct_from_property(path,prop, prop.from_node_uid))
@@ -195,7 +195,7 @@ class SN_OT_RemoveEnumItem(bpy.types.Operator):
         else:
             for graph in context.scene.sn.addon_tree().sn_graphs:
                 for node in graph.node_tree.nodes:
-                    if node.bl_idname == "SN_SetPropertyNode":
+                    if node.bl_idname in ["SN_SetPropertyNode", "SN_UpdatePropertyNode"]:
                         if prop.use_self:
                             path = "self" if prop.find_node(context).bl_idname != "SN_AddonPreferencesNode" else f"context.preferences.addons['{bpy.context.scene.sn.addon_tree().sn_graphs[0].short()}'].preferences"
                             node.on_outside_update(construct_from_property(path,prop, prop.from_node_uid))
