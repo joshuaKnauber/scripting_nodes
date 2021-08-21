@@ -290,6 +290,7 @@ def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
                 op.node_attr = node_attr
                 op.node_index = node_index
                 op = header_row.operator("sn.remove_enum_item",text="",icon="PANEL_CLOSE")
+                op.index = index
                 op.node = from_node
                 op.node_attr = node_attr
                 op.node_index = node_index
