@@ -1,7 +1,7 @@
 import bpy
 from ...node_tree.base_node import SN_ScriptingBaseNode
 from ..Program.run_operator import create_sockets_from_operator
-
+from ..Properties.property_util import get_data
 
 
 class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -14,8 +14,36 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.3,0.3,0.3),
     }
-    
-    
+
+    def find_op_node(self):
+        for graph in self.addon_tree.sn_graphs:
+            for node in graph.node_tree.nodes:
+                if node.bl_idname == "SN_OperatorNode" and node.operator_name == self.custom_operator:
+                    return node
+
+    def on_outside_update(self, string_data):
+        if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
+            new_data = get_data(string_data)
+            if new_data["group_path"] == "self" and self.find_op_node().uid == new_data["property"]["created_from"]:
+                for socket in self.inputs[5:]:
+                    if socket.variable_name == new_data["property"]["identifier"] and socket.default_text != new_data["property"]["name"]:
+                        socket.default_text = new_data["property"]["name"]
+                    elif socket.default_text == new_data["property"]["name"] and socket.variable_name != new_data["property"]["identifier"]:
+                        socket.variable_name = new_data["property"]["identifier"]
+                    elif socket.variable_name == new_data["property"]["identifier"] and socket.default_text == new_data["property"]["name"]:
+                        if socket.bl_idname != self.prop_types[new_data["property"]["type"]]:
+                            enabled = socket.enabled
+                            socket = self.change_socket_type(socket, self.prop_types[new_data["property"]["type"]])
+                            socket.disableable = True
+                            socket.enabled = enabled
+
+                        if socket.subtype != self.subtype_from_prop_subtype(new_data["property"]["type"],new_data["property"]["subtype"],new_data["property"]["size"]):
+                            socket.subtype = self.subtype_from_prop_subtype(new_data["property"]["type"],new_data["property"]["subtype"],new_data["property"]["size"])
+
+                        if new_data["property"]["type"] == "ENUM":
+                            socket.enum_values = new_data["property"]["items"]
+
+
     def add_inputs_from_internal(self):
         rna = eval(self.operator.split("(")[0] + ".get_rna_type()")
         name = eval(self.operator.split("(")[0] + ".idname_py()").split(".")[-1]
@@ -36,7 +64,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_inputs_from_operator(self, index=-1):
         create_sockets_from_operator(self,5,index)
 
-    
+
     def update_custom_operator(self,context):
         self.remove_input_range(5)
         if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:

@@ -298,15 +298,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self, layout):
         changelog = [
-            "Added actions to append from file",
-            "Added register and unregister to script node",
-            "Added file select to run script node",
-            "Added clamp node",
-            "Variables and properties are now supported in snippets",
-            "Enum sockets are now supported by snippets and can be edited on functions",
-            "Auto Save is now off by default",
-            "Fixed print with no available screen",
-            "Fixed preference property nodes not updating"
+            "Added action recorder node",
+            "Fixed buttons and run operator nodes not updating when changing properties"
         ]
         if changelog:
             box = layout.box()

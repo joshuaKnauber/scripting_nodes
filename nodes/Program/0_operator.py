@@ -28,7 +28,7 @@ class SN_OT_AddNodeProperty(bpy.types.Operator):
         node.property_index = len(node.properties)-1
         if hasattr(node,"sync_inputs"):
             node.sync_inputs()
-
+        
         return {"FINISHED"}
 
 

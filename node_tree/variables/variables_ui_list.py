@@ -54,10 +54,10 @@ class SN_EnumItem(bpy.types.PropertyGroup):
 
         for graph in context.scene.sn.addon_tree().sn_graphs:
             for node in graph.node_tree.nodes:
-                if node.bl_idname in ["SN_SetPropertyNode", "SN_UpdatePropertyNode"]:
+                if node.bl_idname in ["SN_SetPropertyNode", "SN_UpdatePropertyNode", "SN_ButtonNode", "SN_RunOperatorNode"]:
                     if prop.use_self:
                         path = "self"
-                        if prop.find_node(bpy.context).bl_idname != "SN_AddonPreferencesNode":
+                        if prop.find_node(bpy.context).bl_idname == "SN_AddonPreferencesNode":
                             path = f"context.preferences.addons['{bpy.context.scene.sn.addon_tree().sn_graphs[0].short()}'].preferences"
                         node.on_outside_update(construct_from_property(path,prop, prop.from_node_uid))
                     else:
@@ -70,7 +70,7 @@ class SN_EnumItem(bpy.types.PropertyGroup):
                                    default="My Item",
                                    update=update_enum)
 
-    
+
     description: bpy.props.StringProperty(name="Description",
                                    description="The tooltip of your enum entry",
                                    default="This is my enum item",
@@ -109,13 +109,17 @@ class SN_Variable(bpy.types.PropertyGroup):
         base_node.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
         for graph in base_node.addon_tree.sn_graphs:
             for node in graph.node_tree.nodes:
-                if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode", "SN_UpdatePropertyNode"]:
+                if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode", "SN_DisplayPropertyNode", "SN_UpdatePropertyNode", "SN_RunOperatorNode", "SN_ButtonNode"]:
                     if self.use_self:
                         path = "self" if self.find_node(bpy.context).bl_idname != "SN_AddonPreferencesNode" else f"context.preferences.addons['{bpy.context.scene.sn.addon_tree().sn_graphs[0].short()}'].preferences"
                         node.on_outside_update(construct_from_property(path,self, self.from_node_uid))
                     else:
                         node.on_outside_update(construct_from_attached_property(self.attach_property_to,self.attach_property_to,self))
 
+    def update_var_nodes(self):
+        base_node = SN_ScriptingBaseNode()
+        base_node.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
+        base_node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
 
     def update_name(self,context):
         key = "variable"
@@ -141,16 +145,14 @@ class SN_Variable(bpy.types.PropertyGroup):
         if self.is_property:
             self.update_prop_nodes()
         else:
-            node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
-                                       "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
+            self.update_var_nodes()
 
         self.identifier = node.get_python_name(self.name, f"new_{key}")
 
         if self.is_property:
             self.update_prop_nodes()
         else:
-            node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode",
-                                       "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
+            self.update_var_nodes()
         
         self.trigger_update(context)
 
@@ -198,7 +200,7 @@ class SN_Variable(bpy.types.PropertyGroup):
         if self.is_property:
             self.update_prop_nodes()
         else:
-            node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode")
+            self.update_var_nodes()
 
         self.trigger_update(context)
 
