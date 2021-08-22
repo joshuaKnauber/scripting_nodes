@@ -36,8 +36,6 @@ class SN_OT_ExportToOperator(bpy.types.Operator):
         graph_tree.nodes.active.operator = self.operator_string
         return {"FINISHED"}
 
-
-
 class SN_RecorderNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RecorderNode"
@@ -57,10 +55,23 @@ class SN_RecorderNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_execute_output("Execute").mirror_name = True
 
     def draw_node(self,context,layout):
-        if not self.recording_action:
-            layout.prop(self, "recording_action", text="Start Recording", toggle=True, icon="RADIOBUT_OFF")
+        if self.actions:
+            actions = ""
+            for action in self.actions:
+                actions += action.identifier + "\n"
+
+            split = layout.split(factor=0.6, align=True)
+            if not self.recording_action:
+                split.prop(self, "recording_action", text="Start Recording", toggle=True, icon="RADIOBUT_OFF")
+                split.operator("sn.get_python_name", text="Copy all",icon="COPYDOWN").to_copy = actions
+            else:
+                split.prop(self, "recording_action", text="Stop Recording", toggle=True, icon="RADIOBUT_ON")
+                split.operator("sn.get_python_name", text="Copy all",icon="COPYDOWN").to_copy = actions
         else:
-            layout.prop(self, "recording_action", text="Stop Recording", toggle=True, icon="RADIOBUT_ON")
+            if not self.recording_action:
+                layout.prop(self, "recording_action", text="Start Recording", toggle=True, icon="RADIOBUT_OFF")
+            else:
+                layout.prop(self, "recording_action", text="Stop Recording", toggle=True, icon="RADIOBUT_ON")
 
         if len(self.actions):
             box = layout.box()

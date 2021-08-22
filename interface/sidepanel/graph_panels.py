@@ -5,7 +5,7 @@ from ...node_tree.base_node import SN_ScriptingBaseNode
 class SN_OT_GetPythonName(bpy.types.Operator):
     bl_idname = "sn.get_python_name"
     bl_label = "Get Python Name"
-    bl_description = "Get the python name for this element (Replace 'SOMETHING_PLACEHOLDER' with the corresponding data)"
+    bl_description = "Get the python name for this element"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
     
     to_copy: bpy.props.StringProperty()
