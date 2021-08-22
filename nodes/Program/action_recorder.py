@@ -36,6 +36,25 @@ class SN_OT_ExportToOperator(bpy.types.Operator):
         graph_tree.nodes.active.operator = self.operator_string
         return {"FINISHED"}
 
+
+class SN_OT_RunActions(bpy.types.Operator):
+    bl_idname = "sn.run_actions"
+    bl_label = "Run the recorded actions"
+    bl_description = "Runs the recorded actions of this node"
+    bl_options = {"REGISTER","UNDO","INTERNAL"}
+
+    node: bpy.props.StringProperty()
+
+    def execute(self, context):
+        node = context.space_data.node_tree.nodes[self.node]
+        try:
+            for action in node.actions:
+                exec(action.identifier)
+        except:
+            self.report({"ERROR"},message="Failed to run! This button might not work for all cases.")
+        return {"FINISHED"}
+
+
 class SN_RecorderNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RecorderNode"
@@ -59,7 +78,6 @@ class SN_RecorderNode(bpy.types.Node, SN_ScriptingBaseNode):
             actions = ""
             for action in self.actions:
                 actions += action.identifier + "\n"
-
             split = layout.split(factor=0.6, align=True)
             if not self.recording_action:
                 split.prop(self, "recording_action", text="Start Recording", toggle=True, icon="RADIOBUT_OFF")
@@ -67,11 +85,17 @@ class SN_RecorderNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 split.prop(self, "recording_action", text="Stop Recording", toggle=True, icon="RADIOBUT_ON")
                 split.operator("sn.get_python_name", text="Copy all",icon="COPYDOWN").to_copy = actions
+
+            row = layout.row()
+            row.scale_y = 1.4
+            row.operator("sn.run_actions",text="Run Actions",icon="PLAY").node = self.name
+
         else:
             if not self.recording_action:
                 layout.prop(self, "recording_action", text="Start Recording", toggle=True, icon="RADIOBUT_OFF")
             else:
                 layout.prop(self, "recording_action", text="Stop Recording", toggle=True, icon="RADIOBUT_ON")
+
 
         if len(self.actions):
             box = layout.box()
