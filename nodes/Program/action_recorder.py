@@ -64,6 +64,7 @@ class SN_RecorderNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     node_options = {
         "default_color": (0.3,0.3,0.3),
+        "always_recompile": True
     }
 
     actions: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)
