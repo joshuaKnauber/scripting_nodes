@@ -30,7 +30,6 @@ class SN_OT_ExportToOperator(bpy.types.Operator):
     def execute(self, context):
         addon_tree = context.scene.sn.addon_tree()
         graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
-        prop = addon_tree.sn_properties[addon_tree.sn_property_index]
 
         bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_RunOperatorNode",use_transform=True)
         graph_tree.nodes.active.use_internal = True
@@ -68,7 +67,9 @@ class SN_RecorderNode(bpy.types.Node, SN_ScriptingBaseNode):
             for x, action in enumerate(self.actions):
                 row = box.row(align=True)
 
-                row.operator("sn.question_mark", text="", icon="QUESTION", emboss=False).to_display = action.identifier
+                op = row.operator("sn.question_mark", text="", icon="QUESTION", emboss=False)
+                op.to_display = action.identifier
+                op.allow_copy = True
                 row.label(text=action.name)
 
                 if "bpy.ops" in action.identifier:

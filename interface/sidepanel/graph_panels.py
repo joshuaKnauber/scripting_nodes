@@ -19,21 +19,36 @@ class SN_OT_GetPythonName(bpy.types.Operator):
 class SN_OT_QuestionMarkName(bpy.types.Operator):
     bl_idname = "sn.question_mark"
     bl_label = "Questionmark"
-    bl_description = "Explaination to what this is"
+    bl_description = "Explanation to what this is"
     bl_options = {"REGISTER","INTERNAL"}
     
     to_display: bpy.props.StringProperty()
+    allow_copy: bpy.props.BoolProperty(default=False)
 
     def execute(self, context):
         return {"FINISHED"}
 
     def draw(self,context):
-        col = self.layout.column(align=True)
-        for line in self.to_display.split("\n"):
-            col.label(text=line)
+        if "\n" in self.to_display:
+            col = self.layout.column(align=True)
+            for line in self.to_display.split("\n"):
+                col.label(text=line)
+        else:
+            row = self.layout.row(align=True)
+            if self.allow_copy:
+                row.operator("sn.get_python_name", text="",icon="COPYDOWN", emboss=False).to_copy = self.to_display
+            row.label(text=self.to_display)
 
     def invoke(self, context, event):
-        return context.window_manager.invoke_popup(self, width=503)
+        if "\n" in self.to_display:
+            longest_text = ""
+            for line in self.to_display.split("\n"):
+                if len(line) > len(longest_text):
+                    longest_text = line
+
+            return context.window_manager.invoke_popup(self, width=len(longest_text)*6)
+        else:
+            return context.window_manager.invoke_popup(self, width=len(self.to_display)*6)
 
 
 class SN_PT_GraphPanel(bpy.types.Panel):
