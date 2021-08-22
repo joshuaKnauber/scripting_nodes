@@ -35,7 +35,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_execute_input("Run Script")
         self.add_execute_output("Execute").mirror_name = True
         
-        
+
     def draw_node(self,context,layout):
         if not hasattr(self, "script_source"):
             row = layout.row(align=True)
