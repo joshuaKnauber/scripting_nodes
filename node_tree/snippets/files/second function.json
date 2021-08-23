@@ -1,0 +1,32 @@
+{
+    "name": "second function",
+    "uid": "5E26B",
+    "function": "                    SNIPPET_VARS = {}\n                    def second_function():\n                        try:\n                             sn_print(\"lol\",r\"i do something else\", sn_cast_string(first_function()[0]))\n                            function_return_200A2 = test_004()\n                            \n                            \n                            \n                        except Exception as exc:\n                            print(str(exc) + \" | Error in function second function\")\n                    ",
+    "register": "\n",
+    "unregister": "\n",
+    "properties": [],
+    "func_name": "second_function",
+    "inputs": [
+        {
+            "idname": "SN_ExecuteSocket",
+            "name": "Run Function",
+            "subtype": "NONE",
+            "attributes": {}
+        }
+    ],
+    "outputs": [
+        {
+            "idname": "SN_ExecuteSocket",
+            "name": "Execute",
+            "subtype": "NONE",
+            "attributes": {}
+        }
+    ],
+    "function_definitions": {
+        "06A59": "\n                    def first_function():\n                        try:\n                             sn_print(\"lol\",r\"i do something\")\n                            return \"\", \n                            \n                            \n                        except Exception as exc:\n                            print(str(exc) + \" | Error in function first function\")\n                    ",
+        "B1CA7": "\n                    def test_004():\n                        try:\n                             function_return_A35C7 = test_003()\n                            sn_print(\"lol\",r\"asdjn\")\n                            \n                            \n                            \n                        except Exception as exc:\n                            print(str(exc) + \" | Error in function test 004\")\n                    ",
+        "E59E2": "\n                    def test_003():\n                        try:\n                             sn_print(\"lol\",r\"tets\")\n                            function_return_5B2D0 = test_002()\n                            \n                            \n                            \n                        except Exception as exc:\n                            print(str(exc) + \" | Error in function test 003\")\n                    ",
+        "6CA77": "\n                    def test_002():\n                        try:\n                             sn_print(\"lol\",r\"kokok\")\n                            \n                            \n                        except Exception as exc:\n                            print(str(exc) + \" | Error in function test 002\")\n                    "
+    },
+    "property_identifiers": []
+}

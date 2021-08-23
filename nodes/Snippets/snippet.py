@@ -56,9 +56,13 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
         function_nodes = []
         for node in list(set(self.get_all_connected(start_node, []))):
             if node.bl_idname == "SN_RunFunctionNode" and "SN_FunctionNode" in node.addon_tree.sn_nodes and node.func_name in node.addon_tree.sn_nodes["SN_FunctionNode"].items:
-                function_nodes.append(node.addon_tree.sn_nodes["SN_FunctionNode"].items[node.func_name].node())
+                function_node = node.addon_tree.sn_nodes["SN_FunctionNode"].items[node.func_name].node()
+                function_nodes.append(function_node)
+                function_nodes += self.get_used_functions(function_node)
             elif node.bl_idname == "SN_InterfaceFunctionNode" and "SN_InterfaceFunctionNode" in node.addon_tree.sn_nodes and node.func_name in node.addon_tree.sn_nodes["SN_InterfaceFunctionNode"].items:
-                function_nodes.append(node.addon_tree.sn_nodes["SN_InterfaceFunctionNode"].items[node.func_name].node())
+                function_node = node.addon_tree.sn_nodes["SN_InterfaceFunctionNode"].items[node.func_name].node()
+                function_nodes.append(function_node)
+                function_nodes += self.get_used_functions(function_node)
         return function_nodes
 
 

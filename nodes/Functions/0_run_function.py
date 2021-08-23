@@ -154,8 +154,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             out = self.add_execute_output("Execute").mirror_name = True
             self.outputs.move(len(self.outputs)-1, 0)
         else:
-            self.inputs.remove(self.inputs[0])
-            self.outputs.remove(self.outputs[0])
+            if self.inputs and self.inputs[0].default_text == "Run Function":
+                self.inputs.remove(self.inputs[0])
+            if self.outputs and self.outputs[0].default_text == "Execute":
+                self.outputs.remove(self.outputs[0])
 
 
     recursion_warning: bpy.props.BoolProperty()
