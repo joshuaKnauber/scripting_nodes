@@ -38,18 +38,20 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
 
     def get_used_variables(self, start_node):
         vars = []
-        for node in list(set(self.get_all_connected(start_node, []))):
-            if node.bl_idname in ["SN_GetVariableNode", "SN_SetVariableNode", "SN_ChangeVariableNode", "SN_ResetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode"]:
-                if node.search_value in node.node_tree.sn_variables:
-                    vars.append(node.search_value)
+        for node in (self.get_used_functions(start_node) + [start_node]):
+            for node in list(set(self.get_all_connected(node, []))):
+                if node.bl_idname in ["SN_GetVariableNode", "SN_SetVariableNode", "SN_ChangeVariableNode", "SN_ResetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode"]:
+                    if node.search_value in node.node_tree.sn_variables:
+                        vars.append(node.search_value)
         return vars
 
     def get_used_properties(self, start_node):
         props = []
-        for node in list(set(self.get_all_connected(start_node, []))):
-            if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode"]:
-                if node.prop_name in node.node_tree.sn_properties:
-                    props.append(node.node_tree.sn_properties[node.prop_name])
+        for node in (self.get_used_functions(start_node) + [start_node]):
+            for node in list(set(self.get_all_connected(node, []))):
+                if node.bl_idname in ["SN_GetPropertyNode", "SN_SetPropertyNode"]:
+                    if node.prop_name in node.node_tree.sn_properties:
+                        props.append(node.node_tree.sn_properties[node.prop_name])
         return props
 
     def get_used_functions(self, start_node):
