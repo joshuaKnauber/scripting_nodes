@@ -3,7 +3,7 @@ from time import time
 from datetime import datetime
 import logging
 from .txt_blocks import license_block, serpens_functions
-from ..node_tree.snippets.snippet_operators import refresh_snippet_category_items
+from ..node_tree.snippets.snippet_operators import refresh_snippet_category_items, snippet_functions
 
 
 addons = []
@@ -45,6 +45,10 @@ def compile_addon(addon_tree, is_export=False):
         if not "serpens_functions" in addon_data["code"]:
             addon_data["code"]["serpens_functions"] = normalize_code(
                 __get_serpens_functions(addon_tree), 0)
+
+        # add snippet functions
+        addon_data["code"]["snippet_functions"] = normalize_code(
+            __get_snippet_functions(addon_tree), 0)
 
         # add graph code placeholder
         if not "graph_code" in addon_data["code"]:
@@ -117,6 +121,11 @@ def compile_addon(addon_tree, is_export=False):
         __write_blockcomment(addon_data["text"], "SERPENS FUNCTIONS")
         __write_in_text(addon_data["text"],
                         addon_data["code"]["serpens_functions"])
+        
+        # write snippet functions
+        __write_blockcomment(addon_data["text"], "SNIPPET FUNCTIONS")
+        __write_in_text(addon_data["text"],
+                        addon_data["code"]["snippet_functions"])
 
         # write imperative code
         __write_blockcomment(addon_data["text"], "IMPERATIVE CODE")
@@ -423,6 +432,10 @@ def __get_license_block():
 
 def __get_serpens_functions(addon_tree):
     return serpens_functions(addon_tree)
+
+
+def __get_snippet_functions(addon_tree):
+    return snippet_functions(addon_tree)
 
 
 def __create_icon_register(addon_tree):

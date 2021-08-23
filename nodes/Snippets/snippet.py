@@ -164,6 +164,13 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
         "default_color": (0.3,0.3,0.3)
     }
 
+    def get_function_definitions(self):
+        if ".json" in self.snippet_path:
+            with open(self.snippet_path) as snippet:
+                data = json.loads(snippet.read())
+                return data["function_definitions"]
+        return {}
+
 
     def update_snippet(self, context):
         self.inputs.clear()
@@ -275,7 +282,6 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                     for prop in data["property_identifiers"]:
                         data["function"] = data["function"].replace(prop, prop + "_" + self.snippet_prop_uid(data))
 
-                code += self.needed_functions(data["function_definitions"]).split("\n")
                 code += data["function"].split("\n")
                 for i in range(len(code)): 
                     code[i] = code[i] + "\n"

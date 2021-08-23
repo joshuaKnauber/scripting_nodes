@@ -6,6 +6,19 @@ import shutil
 from bpy_extras.io_utils import ImportHelper
 
 
+def snippet_functions(addon_tree):
+    code = "\n"
+    function_ids = []
+    for graph in addon_tree.sn_graphs:
+        for node in graph.node_tree.nodes:
+            if node.bl_idname == "SN_SnippetNode":
+                for function in node.get_function_definitions():
+                    if not function in function_ids:
+                        function_ids.append(function)
+                        code += node.get_function_definitions()[function]
+
+    return code
+
 
 class SN_OT_InstallSnippets(bpy.types.Operator, ImportHelper):
     bl_idname = "sn.install_snippets"
