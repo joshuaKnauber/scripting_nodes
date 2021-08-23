@@ -39,12 +39,12 @@ class SN_OT_InstallSnippets(bpy.types.Operator, ImportHelper):
 
         jsons = []
         not_json = 0
+        remove_from = os.path.join(os.path.dirname(__file__), "files")
         for name in names:
             if ".json" in name:
                 jsons.append(name)
             else:
                 not_json+=1
-                remove_from = os.path.join(os.path.dirname(__file__), "files")
                 path = os.path.join(remove_from, name)
                 if os.path.exists(path):
                     os.remove(path)
