@@ -238,6 +238,8 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         
     def on_copy(self,node):
+        self.old_operator_name = ""
+        self.update_name(None)
         for prop in node.properties:
             prop.from_node_uid = self.uid
 
