@@ -36,7 +36,22 @@ class SN_OT_InstallSnippets(bpy.types.Operator, ImportHelper):
         with zipfile.ZipFile(self.filepath, 'r') as zip_ref:
             zip_ref.extractall(snippet_directory)
             names = zip_ref.namelist()
-        return names
+
+        jsons = []
+        not_json = 0
+        for name in names:
+            if ".json" in name:
+                jsons.append(name)
+            else:
+                not_json+=1
+
+        if not jsons:
+            self.report({"WARNING"}, message="Could not find json files!")
+        elif not_json == 1:
+            self.report({"WARNING"}, message=str(not_json) + " File is not json!")
+        elif not_json > 1:
+            self.report({"WARNING"}, message=str(not_json) + " Files are not json!")
+        return jsons
     
     def write_to_installed(self, key, write_data):
         installed_path = os.path.join(os.path.dirname(__file__),"installed.json")
@@ -61,11 +76,13 @@ class SN_OT_InstallSnippets(bpy.types.Operator, ImportHelper):
 
             if extension == ".zip":
                 extracted_files = self.extract_zip()
+                if not extracted_files:
+                    return {"CANCELLED"}
                 category = {"name":os.path.basename(filename), "snippets":[]}
                 for snippet in extracted_files:
                     category["snippets"].append(self.snippet_data(os.path.join(install_to, snippet)))
                 self.write_to_installed("categories", category)
-            
+
             elif extension == ".json":
                 new_path = os.path.join(install_to, os.path.basename(filepath))
                 shutil.copy(filepath, new_path)

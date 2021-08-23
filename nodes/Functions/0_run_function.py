@@ -17,7 +17,10 @@ class SN_OT_RunFunction(bpy.types.Operator):
         module = get_module(node.addon_tree)
         if module:
             try:
+                delay = node.use_delay
+                node.use_delay = False
                 func_call = node.code_evaluate(context, node.inputs[0])["code"].split("\n")
+                node.use_delay = delay
                 func_call = func_call[1]
 
                 # Function
@@ -159,12 +162,18 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.outputs and self.outputs[0].default_text == "Execute":
                 self.outputs.remove(self.outputs[0])
 
+    def update_use_delay(self, context):
+        self.search_value = ""
+        self.auto_compile()
+
 
     recursion_warning: bpy.props.BoolProperty()
     func_uid: bpy.props.StringProperty()
     search_value: bpy.props.StringProperty(name="Search value", update=update_return)
     return_collection: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)
     use_execute: bpy.props.BoolProperty(default=True, name="Use Execute", description="Function will run on every output access if disabled", update=update_execute)
+    use_delay: bpy.props.BoolProperty(default=False, name="Use Delay", description="Function will run after the delay is over (Return won't work)", update=update_use_delay)
+    delay: bpy.props.FloatProperty(default=0.5, name="Delay", description="Function will run after this delay is over (Seconds)", update=SN_ScriptingBaseNode.auto_compile)
 
 
     def on_outside_update(self,node):
@@ -270,6 +279,20 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self,context,layout):
         layout.prop(self, "use_execute")
 
+        if self.use_execute:
+            if not self.use_delay:
+                layout.prop(self, "use_delay", toggle=True)
+            else:
+                col = layout.column(align=True)
+                col.prop(self, "use_delay", toggle=True)
+                col.prop(self, "delay")
+                if len(self.inputs) > 1:
+                    box = layout.box()
+                    row = box.row()
+                    row.alert = True
+                    row.label(text="You can't use parameters when using the delay feature!")
+
+
         row = layout.row()
         row.scale_y = 1.2
         row.enabled = get_module(self.addon_tree) != None and self.func_name != ""
@@ -280,7 +303,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.label(text="Be careful when using recursion!")
 
         layout.prop_search(self, "func_name", self.addon_tree.sn_nodes["SN_FunctionNode"], "items")
-        if len(self.return_collection):
+        if len(self.return_collection) and not self.use_delay:
             layout.prop_search(self, "search_value", self, "return_collection", text="")
 
 
@@ -296,6 +319,13 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 return {"code": f"""{self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_code(parameters)})[{self.outputs.find(touched_socket.name)}]"""}
 
             if touched_socket == self.inputs[0]:
+                if self.use_delay and self.use_execute:
+                    return {
+                        "code": f"""
+                                bpy.app.timers.register({self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}, first_interval={self.delay})
+                                {self.outputs[0].code(8)}
+                                """
+                    }
                 return {
                     "code": f"""
                             function_return_{self.uid} = {self.addon_tree.sn_nodes["SN_FunctionNode"].items[self.func_name].identifier}({self.list_code(parameters)})
