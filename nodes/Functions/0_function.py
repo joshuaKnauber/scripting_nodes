@@ -41,6 +41,9 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         out.return_var_name = True
         self.update_name(None)
 
+    def on_copy(self,context):
+        self.update_name(None)
+
     def on_dynamic_add(self, socket, connected_socket):
         if socket.socket_type == "STRING":
             socket.can_edit_items = True
