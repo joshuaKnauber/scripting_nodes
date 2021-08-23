@@ -299,7 +299,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     def draw_changelog(self, layout):
         changelog = [
             "Added action recorder node",
-            "Fixed buttons and run operator nodes not updating when changing custom properties"
+            "Fixed buttons and run operator nodes not updating when changing custom properties",
+            "You can now use functions inside snippets"
         ]
         if changelog:
             box = layout.box()
