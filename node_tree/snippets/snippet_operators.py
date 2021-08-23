@@ -44,10 +44,14 @@ class SN_OT_InstallSnippets(bpy.types.Operator, ImportHelper):
                 jsons.append(name)
             else:
                 not_json+=1
+                remove_from = os.path.join(os.path.dirname(__file__), "files")
+                path = os.path.join(remove_from, name)
+                if os.path.exists(path):
+                    os.remove(path)
 
         if not jsons:
             self.report({"WARNING"}, message="Could not find json files!")
-        elif not_json == 1:
+        if not_json == 1:
             self.report({"WARNING"}, message=str(not_json) + " File is not json!")
         elif not_json > 1:
             self.report({"WARNING"}, message=str(not_json) + " Files are not json!")
