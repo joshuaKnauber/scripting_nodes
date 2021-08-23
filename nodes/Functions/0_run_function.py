@@ -172,8 +172,8 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     search_value: bpy.props.StringProperty(name="Search value", update=update_return)
     return_collection: bpy.props.CollectionProperty(type=SN_GenericPropertyGroup)
     use_execute: bpy.props.BoolProperty(default=True, name="Use Execute", description="Function will run on every output access if disabled", update=update_execute)
-    use_delay: bpy.props.BoolProperty(default=False, name="Use Delay", description="Function will run after the delay is over (Return won't work)", update=update_use_delay)
-    delay: bpy.props.FloatProperty(default=0.5, name="Delay", description="Function will run after this delay is over (Seconds)", update=SN_ScriptingBaseNode.auto_compile)
+    use_delay: bpy.props.BoolProperty(default=False, name="Use Delay", description="Function will run after the delay is over", update=update_use_delay)
+    delay: bpy.props.FloatProperty(default=0.5, name="Delay", description="Delay in Seconds", update=SN_ScriptingBaseNode.auto_compile)
 
 
     def on_outside_update(self,node):
@@ -281,10 +281,14 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         if self.use_execute:
             if not self.use_delay:
-                layout.prop(self, "use_delay", toggle=True)
+                row = layout.row(align=True)
+                row.prop(self, "use_delay", toggle=True)
+                row.operator("sn.question_mark", text="", icon="QUESTION").to_display = "The function will run after the time has passed. Meanwhile the rest of your code will continue to run.\nYou can't use parameters or return values."
             else:
                 col = layout.column(align=True)
-                col.prop(self, "use_delay", toggle=True)
+                row = col.row(align=True)
+                row.prop(self, "use_delay", toggle=True)
+                row.operator("sn.question_mark", text="", icon="QUESTION").to_display = "The function will run after the time has passed. Meanwhile the rest of your code will continue to run.\nYou can't use parameters or return values."
                 col.prop(self, "delay")
                 if len(self.inputs) > 1:
                     box = layout.box()
