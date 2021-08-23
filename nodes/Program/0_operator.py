@@ -155,6 +155,12 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.item.name = self.operator_name
         self.item.identifier = self.get_python_name(self.operator_name, "new_operator")
+
+        for graph in self.addon_tree.sn_graphs:
+            for node in graph.node_tree.nodes:
+                if node.bl_idname in ["SN_RunOperatorNode", "SN_ButtonNode"]:
+                    node.on_outside_update(self.old_operator_name+"NAMECHANGE"+self.operator_name)
+        self.old_operator_name = self.operator_name
         self.auto_compile()
 
     def update_description(self, context):
@@ -191,6 +197,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.auto_compile()
 
 
+    old_operator_name: bpy.props.StringProperty()
     operator_name: bpy.props.StringProperty(name="Name", description="Name of the operator", update=update_name)
     operator_description: bpy.props.StringProperty(name="Description", description="Description of the operator", update=update_description)
     invoke_option: bpy.props.EnumProperty(name="Popup",items=[("none","None","None"),

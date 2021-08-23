@@ -21,7 +21,11 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if node.bl_idname == "SN_OperatorNode" and node.operator_name == self.custom_operator:
                     return node
 
-    def on_outside_update(self, string_data):
+    def on_outside_update(self, string_data=""):
+        if "NAMECHANGE" in string_data:
+            if string_data.split("NAMECHANGE")[0] == self.custom_operator:
+                self["custom_operator"] = string_data.split("NAMECHANGE")[1]
+            return
         if self.custom_operator and self.custom_operator in self.addon_tree.sn_nodes["SN_OperatorNode"].items:
             new_data = get_data(string_data)
             if new_data["group_path"] == "self" and self.find_op_node().uid == new_data["property"]["created_from"]:
