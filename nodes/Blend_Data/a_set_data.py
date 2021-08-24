@@ -80,7 +80,7 @@ class SN_SetDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_inputs(self,socket):
         self.inputs[1].subtype = socket.subtype
         self.no_data_error = False
-        data_type = socket.data_type_collection if socket.data_type_collection else socket.data_type
+        data_type = socket.data_type_collection if socket.subtype == "COLLECTION" else socket.data_type
         if data_type == self.current_data_type and not len(self.inputs)-2:
             self.add_data_inputs(data_type)
         elif data_type != self.current_data_type and data_type != "":
