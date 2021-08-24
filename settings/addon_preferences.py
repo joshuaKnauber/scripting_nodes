@@ -303,6 +303,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Run function now has a delay feature"
             "Fixed buttons and run operator nodes not updating when changing custom properties",
             "Fixed buttons and run operator nodes not updating on operator name change",
+            "Fixed data nodes not working on other data node"
         ]
         if changelog:
             box = layout.box()

@@ -208,7 +208,7 @@ class SN_RunFunctionOnNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.types = "[]"
                 self.categories = "[]"
                 types = []
-                data_type = socket.data_type_collection if socket.data_type_collection else socket.data_type
+                data_type = socket.data_type_collection if socket.subtype == "COLLECTION" else socket.data_type
                 if data_type in get_known_types():
                     if type(get_known_types()[data_type]) == dict:
                         cats = []
