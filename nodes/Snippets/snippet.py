@@ -173,18 +173,19 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
         if ".json" in self.snippet_path:
             with open(self.snippet_path) as snippet:
                 data = json.loads(snippet.read())
-                if "property_identifiers" in data:
-                    for prop in data["property_identifiers"]:
+                if "function_definitions" in data:
+                    if "property_identifiers" in data:
+                        for prop in data["property_identifiers"]:
+                            functions = data["function_definitions"]
+                            for function in functions:
+                                data["function_definitions"][function] = data["function_definitions"][function].replace("." + prop, "." + prop + "_" + self.uid)
+                    if "uid" in data:
+                        var_id = f"snippet_vars_{self.uid}"
                         functions = data["function_definitions"]
                         for function in functions:
-                            data["function_definitions"][function] = data["function_definitions"][function].replace("." + prop, "." + prop + "_" + self.uid)
-                if "uid" in data:
-                    var_id = f"snippet_vars_{self.uid}"
-                    functions = data["function_definitions"]
-                    for function in functions:
-                        data["function_definitions"][function] = data["function_definitions"][function].replace("SNIPPET_VARS", var_id)
+                            data["function_definitions"][function] = data["function_definitions"][function].replace("SNIPPET_VARS", var_id)
 
-                return data["function_definitions"]
+                    return data["function_definitions"]
         return {}
 
 

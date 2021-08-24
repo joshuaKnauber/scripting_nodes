@@ -1,0 +1,29 @@
+{
+    "name": "Move to Collection",
+    "function": "\n                    def move_to_collection(objects, collection, ):\n                        try:\n                             run_function_on_23BB4 = sn_cast_blend_data(bpy.data.collections[sn_cast_string(collection)].objects).link(object=sn_cast_blend_data(objects), )\n                            for_node_A588D = 0\n                            for_node_index_A588D = 0\n                            for for_node_index_A588D, for_node_A588D in enumerate(bpy.data.collections):\n                                if for_node_A588D.name != collection:\n                                    if for_node_A588D.objects.find(sn_cast_blend_data(objects).name) != -1:\n                                        run_function_on_66A6D = for_node_A588D.objects.unlink(object=sn_cast_blend_data(objects), )\n                                        \n                                        \n                                    else:\n                                        pass\n                                    \n                                    \n                                else:\n                                    pass\n                                \n                                \n                            if bpy.context.scene.collection.objects.find(sn_cast_blend_data(objects).name) != -1:\n                                run_function_on_63DDA = bpy.context.scene.collection.objects.unlink(object=sn_cast_blend_data(objects), )\n                                \n                                \n                            else:\n                                pass\n                            \n                            \n                            \n                            \n                        except Exception as exc:\n                            print(str(exc) + \" | Error in function Move to Collection\")\n                    ",
+    "func_name": "move_to_collection",
+    "inputs": [
+        {
+            "idname": "SN_ExecuteSocket",
+            "name": "Run Function",
+            "subtype": "NONE"
+        },
+        {
+            "idname": "SN_DataSocket",
+            "name": "Objects",
+            "subtype": "NONE"
+        },
+        {
+            "idname": "SN_StringSocket",
+            "name": "Collection",
+            "subtype": "NONE"
+        }
+    ],
+    "outputs": [
+        {
+            "idname": "SN_ExecuteSocket",
+            "name": "Execute",
+            "subtype": "NONE"
+        }
+    ]
+}
