@@ -361,92 +361,100 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_register(self, context):
-        return self.get_reg_unreg_code("register")
+        if os.path.exists(self.snippet_path):
+            return self.get_reg_unreg_code("register")
+        return {"code": ""}
 
 
     def code_unregister(self, context):
-        return self.get_reg_unreg_code("unregister")
+        if os.path.exists(self.snippet_path):
+            return self.get_reg_unreg_code("unregister")
+        return {"code": ""}
 
 
     def code_imperative(self, context):
-        # set identifier for non selected variables
-        var_id = f"snippet_vars_{self.uid}"
+        if os.path.exists(self.snippet_path):
+            # set identifier for non selected variables
+            var_id = f"snippet_vars_{self.uid}"
 
-        # write strings for processing
-        var_identifier = self.get_main_function().split("\n")[0].strip().replace("SNIPPET_VARS", var_id)
-        identifier = self.get_main_function().split("\n")[1].strip()
-        code = ""
-        for function in self.get_function_definitions():
-            code += self.get_function_definitions()[function]
-        main_code = "\n".join(self.get_main_function().split("\n")[2:])
-
-
-        # replace var names with selected
-        for var in self.var_collection:
-            if var.name in self.node_tree.sn_variables and var.type == self.node_tree.sn_variables[var.name].var_type:
-                code = code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.name].identifier)
-                main_code = main_code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.name].identifier)
-
-        # replace not selected vars with standalone
-        code = code.replace("SNIPPET_VARS", var_id)
-        main_code = main_code.replace("SNIPPET_VARS", var_id)
-
-        # replace property identifiers
-        for prop in self.prop_collection:
-            code = code.replace(prop.identifier, prop.identifier+"_unused")
-            main_code = main_code.replace(prop.identifier, prop.identifier+"_unused")
-        for prop in self.prop_collection:
-            if prop.name in self.node_tree.sn_properties and prop.type == self.node_tree.sn_properties[prop.name].var_type and prop.attach_property_to == self.node_tree.sn_properties[prop.name].attach_property_to:
-                code = code.replace(prop.identifier+"_unused", self.node_tree.sn_properties[prop.name].identifier)
-                main_code = main_code.replace(prop.identifier+"_unused", self.node_tree.sn_properties[prop.name].identifier)
-            else:
-                code = code.replace(prop.identifier+"_unused", prop.identifier + "_" + self.uid)
-                main_code = main_code.replace(prop.identifier+"_unused", prop.identifier + "_" + self.uid)
+            # write strings for processing
+            var_identifier = self.get_main_function().split("\n")[0].strip().replace("SNIPPET_VARS", var_id)
+            identifier = self.get_main_function().split("\n")[1].strip()
+            code = ""
+            for function in self.get_function_definitions():
+                code += self.get_function_definitions()[function]
+            main_code = "\n".join(self.get_main_function().split("\n")[2:])
 
 
-        # split strings for list processing
-        code = code.split("\n")
-        for i in range(len(code)): 
-            code[i] = code[i] + "\n"
-        main_code = main_code.split("\n")
-        for i in range(len(main_code)): 
-            main_code[i] = main_code[i] + "\n"
+            # replace var names with selected
+            for var in self.var_collection:
+                if var.name in self.node_tree.sn_variables and var.type == self.node_tree.sn_variables[var.name].var_type:
+                    code = code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.name].identifier)
+                    main_code = main_code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.name].identifier)
 
-        return {
-            "code": f"""
-                    {var_identifier}
-                    {identifier}
-                        {self.list_code(code, 6)}
-                        {self.list_code(main_code, 6)}
-                    """
-        }
+            # replace not selected vars with standalone
+            code = code.replace("SNIPPET_VARS", var_id)
+            main_code = main_code.replace("SNIPPET_VARS", var_id)
+
+            # replace property identifiers
+            for prop in self.prop_collection:
+                code = code.replace(prop.identifier, prop.identifier+"_unused")
+                main_code = main_code.replace(prop.identifier, prop.identifier+"_unused")
+            for prop in self.prop_collection:
+                if prop.name in self.node_tree.sn_properties and prop.type == self.node_tree.sn_properties[prop.name].var_type and prop.attach_property_to == self.node_tree.sn_properties[prop.name].attach_property_to:
+                    code = code.replace(prop.identifier+"_unused", self.node_tree.sn_properties[prop.name].identifier)
+                    main_code = main_code.replace(prop.identifier+"_unused", self.node_tree.sn_properties[prop.name].identifier)
+                else:
+                    code = code.replace(prop.identifier+"_unused", prop.identifier + "_" + self.uid)
+                    main_code = main_code.replace(prop.identifier+"_unused", prop.identifier + "_" + self.uid)
+
+
+            # split strings for list processing
+            code = code.split("\n")
+            for i in range(len(code)): 
+                code[i] = code[i] + "\n"
+            main_code = main_code.split("\n")
+            for i in range(len(main_code)): 
+                main_code[i] = main_code[i] + "\n"
+
+            return {
+                "code": f"""
+                        {var_identifier}
+                        {identifier}
+                            {self.list_code(code, 7)}
+                            {self.list_code(main_code, 7)}
+                        """
+            }
+        return {"code": ""}
 
 
     def code_evaluate(self, context, touched_socket):
-        func_name = ""
-        with open(self.snippet_path) as snippet:
-            data = json.loads(snippet.read())
-            func_name = self.func_name(data["func_name"])
+        if os.path.exists(self.snippet_path):
+            func_name = ""
+            with open(self.snippet_path) as snippet:
+                data = json.loads(snippet.read())
+                func_name = self.func_name(data["func_name"])
 
-        parameters = []
-        
-        if len(self.inputs) > 0 and self.inputs[0].bl_idname == "SN_InterfaceSocket":
-            layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
-            parameters.append(layout + ", ")
-        
-        for inp in self.inputs:
-            if not inp.bl_idname in ["SN_ExecuteSocket", "SN_InterfaceSocket"]:
-                parameters.append(inp.code() + ", ")
+            parameters = []
+            
+            if len(self.inputs) > 0 and self.inputs[0].bl_idname == "SN_InterfaceSocket":
+                layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
+                parameters.append(layout + ", ")
+            
+            for inp in self.inputs:
+                if not inp.bl_idname in ["SN_ExecuteSocket", "SN_InterfaceSocket"]:
+                    parameters.append(inp.code() + ", ")
 
-        if len(self.inputs) > 0 and touched_socket == self.inputs[0]:
-            return {
-                "code": f"""
-                        snippet_return_{self.uid} = {func_name}({self.list_code(parameters)})
-                        {self.outputs[0].code(6) if len(self.outputs) else ""}
-                        """
-            }
+            if len(self.inputs) > 0 and touched_socket == self.inputs[0]:
+                return {
+                    "code": f"""
+                            snippet_return_{self.uid} = {func_name}({self.list_code(parameters)})
+                            {self.outputs[0].code(7) if len(self.outputs) else ""}
+                            """
+                }
 
-        else:
-            return {
-                "code": f"""{func_name}({self.list_code(parameters)})[{self.outputs.find(touched_socket.name)-1}]"""
-            }
+            else:
+                return {
+                    "code": f"""{func_name}({self.list_code(parameters)})[{self.outputs.find(touched_socket.name)-1}]"""
+                }
+        return {"code": ""}

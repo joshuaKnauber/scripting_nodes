@@ -211,7 +211,11 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if len(parameters) > len(self.inputs[index:]):
                         input_len = len(self.inputs)-index
                         for x, parameter in enumerate(parameters):
-                            if x >= input_len:
+                            if x < input_len-1 and parameter[0] != self.inputs[x+index].default_text:
+                                inp = self.add_input(parameter[1],parameter[0])
+                                self.inputs.move(len(self.inputs)-1, x+index)
+                                input_len+=1
+                            elif x >= input_len:
                                 inp = self.add_input(parameter[1],parameter[0])
 
                     else:

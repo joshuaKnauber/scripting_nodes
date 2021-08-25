@@ -300,7 +300,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         changelog = [
             "Added action recorder node",
             "You can now use functions inside snippets",
-            "Run function now has a delay feature"
+            "Added selector panel for custom vars and props to snippets",
+            "Run function now has a delay feature",
             "Fixed buttons and run operator nodes not updating when changing custom properties",
             "Fixed buttons and run operator nodes not updating on operator name change",
             "Fixed data nodes not working on other data node"
