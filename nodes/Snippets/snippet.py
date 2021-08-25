@@ -178,6 +178,7 @@ class SN_VarPropertyGroup(bpy.types.PropertyGroup):
                     self["name"] = ""
             else:
                 self["name"] = ""
+        self.node().auto_compile()
 
     name: bpy.props.StringProperty(name="Name of the Variable", update=update_name)
     is_prop: bpy.props.BoolProperty(default=False)
@@ -185,7 +186,7 @@ class SN_VarPropertyGroup(bpy.types.PropertyGroup):
     identifier: bpy.props.StringProperty()
     attach_property_to: bpy.props.StringProperty()
     node_uid: bpy.props.StringProperty()
-    
+
     def node(self):
         for graph in bpy.context.scene.sn.addon_tree().sn_graphs:
             for node in graph.node_tree.nodes:
@@ -300,10 +301,13 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
         variables = {}
         properties = {}
         if ".json" in self.snippet_path:
-            with open(self.snippet_path) as snippet:
-                data = json.loads(snippet.read())
-                variables = data["variable_definitions"]
-                properties = data["property_identifiers"]
+            if os.path.exists(self.snippet_path):
+                with open(self.snippet_path) as snippet:
+                    data = json.loads(snippet.read())
+                    if "variable_definitions" in data:
+                        variables = data["variable_definitions"]
+                    if "property_identifiers" in data:
+                        properties = data["property_identifiers"]
         for x, var in enumerate(variables):
             row = layout.row(align=True)
             row.label(text=variables[var][0]+":")
@@ -348,9 +352,10 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                 
                 code = "\n"
                 for line in data[name].split("\n"):
-                    for prop in data["property_identifiers"]:
-                        if prop in line and not prop in used_props:
-                            code += line.replace(prop, prop + "_" + self.uid)+"\n"
+                    if "property_identifiers" in data:
+                        for prop in data["property_identifiers"]:
+                            if prop in line and not prop in used_props:
+                                code += line.replace(prop, prop + "_" + self.uid)+"\n"
 
                 return {"code": code}
 
