@@ -142,7 +142,9 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
         props = list(set(self.get_used_properties(node)))
         data["register"] = self.get_prop_register(props)
         data["unregister"] = self.get_prop_unregister(props)
-        data["property_identifiers"] = [prop.identifier for prop in props]
+        data["property_identifiers"] = {}
+        for prop in props:
+            data["property_identifiers"][prop.identifier] = [prop.name, prop.var_type, prop.attach_property_to]
 
         return json.dumps(data, indent=4)
 
@@ -162,22 +164,26 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
 
 class SN_VarPropertyGroup(bpy.types.PropertyGroup):
 
-    def get_var_data(self):
-        for var in self.node().get_variables():
-            if self.node().get_variables()[var][0] == self.var_name:
-                return var, self.node().get_variables()[var][1]
-        return ["", ""]
-
     def update_name(self, context):
-        if self.var_name in self.node().node_tree.sn_variables:
-            if self.node().node_tree.sn_variables[self.var_name].var_type != self.var_type:
-                self["var_name"] = ""
-        else:
-            self["var_name"] = ""
+        if self.is_prop:
+            if self.name in self.node().node_tree.sn_properties:
+                if self.node().node_tree.sn_properties[self.name].var_type != self.type or self.node().node_tree.sn_properties[self.name].attach_property_to != self.attach_property_to:
+                    self["name"] = ""
+            else:
+                self["name"] = ""
 
-    var_name: bpy.props.StringProperty(name="Name of the Variable", update=update_name)
-    var_type: bpy.props.StringProperty()
+        else:
+            if self.name in self.node().node_tree.sn_variables:
+                if self.node().node_tree.sn_variables[self.name].var_type != self.type:
+                    self["name"] = ""
+            else:
+                self["name"] = ""
+
+    name: bpy.props.StringProperty(name="Name of the Variable", update=update_name)
+    is_prop: bpy.props.BoolProperty(default=False)
+    type: bpy.props.StringProperty()
     identifier: bpy.props.StringProperty()
+    attach_property_to: bpy.props.StringProperty()
     node_uid: bpy.props.StringProperty()
     
     def node(self):
@@ -230,11 +236,20 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                             if len(data["function"].split("}")[0].split("{")[-1]):
                                 self.has_vars = True
 
+                        if "property_identifiers" in data:
+                            for prop in data["property_identifiers"]:
+                                new_prop = self.prop_collection.add()
+                                new_prop.is_prop = True
+                                new_prop.node_uid = self.uid
+                                new_prop.type = data["property_identifiers"][prop][1]
+                                new_prop.identifier = prop
+                                new_prop.attach_property_to = data["property_identifiers"][prop][2]
+
                         if "variable_definitions" in data:
                             for var in data["variable_definitions"]:
                                 new_var = self.var_collection.add()
                                 new_var.node_uid = self.uid
-                                new_var.var_type = data["variable_definitions"][var][1]
+                                new_var.type = data["variable_definitions"][var][1]
                                 new_var.identifier = var
 
                         for inp_data in data["inputs"]:
@@ -263,6 +278,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
     snippet_path: bpy.props.StringProperty(subtype="FILE_PATH",name="Path",description="Path to the snippet json file", update=update_snippet)
     has_vars: bpy.props.BoolProperty(default=False)
     var_collection: bpy.props.CollectionProperty(type=SN_VarPropertyGroup)
+    prop_collection: bpy.props.CollectionProperty(type=SN_VarPropertyGroup)
 
 
     def get_variables(self):
@@ -281,12 +297,22 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self,context,layout):
         if self.label == "Snippet":
             layout.prop(self,"snippet_path")
-        variables = self.get_variables()
+        variables = {}
+        properties = {}
+        if ".json" in self.snippet_path:
+            with open(self.snippet_path) as snippet:
+                data = json.loads(snippet.read())
+                variables = data["variable_definitions"]
+                properties = data["property_identifiers"]
         for x, var in enumerate(variables):
-            box = layout.box()
-            col = box.column(align=True)
-            col.label(text=variables[var][0]+":")
-            col.prop_search(self.var_collection[x], "var_name", self.node_tree, "sn_variables", text="")
+            row = layout.row(align=True)
+            row.label(text=variables[var][0]+":")
+            row.prop_search(self.var_collection[x], "name", self.node_tree, "sn_variables", text="")
+
+        for x, prop in enumerate(properties):
+            row = layout.row(align=True)
+            row.label(text=properties[prop][0]+":")
+            row.prop_search(self.prop_collection[x], "name", self.node_tree, "sn_properties", text="")
 
 
     def get_main_function(self):
@@ -315,11 +341,20 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
         with open(self.snippet_path) as snippet:
             data = json.loads(snippet.read())
             if name in data:
-                for prop in data["property_identifiers"]:
-                    data[name] = data[name].replace(prop, prop + "_" + self.uid)
-                return {"code": data[name]}
-            
-            
+                used_props = []
+                for prop in self.prop_collection:
+                    if prop.name in self.node_tree.sn_properties and prop.type == self.node_tree.sn_properties[prop.name].var_type and prop.attach_property_to == self.node_tree.sn_properties[prop.name].attach_property_to:
+                        used_props.append(prop.identifier)
+                
+                code = "\n"
+                for line in data[name].split("\n"):
+                    for prop in data["property_identifiers"]:
+                        if prop in line and not prop in used_props:
+                            code += line.replace(prop, prop + "_" + self.uid)+"\n"
+
+                return {"code": code}
+
+
     def code_register(self, context):
         return self.get_reg_unreg_code("register")
 
@@ -343,19 +378,25 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         # replace var names with selected
         for var in self.var_collection:
-            if var.var_name in self.node_tree.sn_variables and var.var_type == self.node_tree.sn_variables[var.var_name].var_type:
-                code = code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.var_name].identifier)
-                main_code = main_code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.var_name].identifier)
+            if var.name in self.node_tree.sn_variables and var.type == self.node_tree.sn_variables[var.name].var_type:
+                code = code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.name].identifier)
+                main_code = main_code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.name].identifier)
 
-        # replace non selected vars with standalone
+        # replace not selected vars with standalone
         code = code.replace("SNIPPET_VARS", var_id)
         main_code = main_code.replace("SNIPPET_VARS", var_id)
 
         # replace property identifiers
-        for prop in self.get_property_identifiers():
-            code = code.replace("." + prop, "." + prop + "_" + self.uid)
-        for prop in self.get_property_identifiers():
-            main_code = main_code.replace("." + prop, "." + prop + "_" + self.uid)
+        for prop in self.prop_collection:
+            code = code.replace(prop.identifier, prop.identifier+"_unused")
+            main_code = main_code.replace(prop.identifier, prop.identifier+"_unused")
+        for prop in self.prop_collection:
+            if prop.name in self.node_tree.sn_properties and prop.type == self.node_tree.sn_properties[prop.name].var_type and prop.attach_property_to == self.node_tree.sn_properties[prop.name].attach_property_to:
+                code = code.replace(prop.identifier+"_unused", self.node_tree.sn_properties[prop.name].identifier)
+                main_code = main_code.replace(prop.identifier+"_unused", self.node_tree.sn_properties[prop.name].identifier)
+            else:
+                code = code.replace(prop.identifier+"_unused", prop.identifier + "_" + self.uid)
+                main_code = main_code.replace(prop.identifier+"_unused", prop.identifier + "_" + self.uid)
 
 
         # split strings for list processing
