@@ -457,4 +457,6 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                 return {
                     "code": f"""{func_name}({self.list_code(parameters)})[{self.outputs.find(touched_socket.name)-1}]"""
                 }
+
+        self.add_error("No snippet file", "This snippet file does not exist!", True)
         return {"code": ""}
