@@ -1,13 +1,4 @@
 {
     "categories": [],
-    "snippets": [
-        {
-            "name": "snippet lol",
-            "filename": "snippet lol.json"
-        },
-        {
-            "name": "Move to Collection",
-            "filename": "Move_to_Collection.json"
-        }
-    ]
+    "snippets": []
 }

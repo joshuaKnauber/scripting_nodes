@@ -21,17 +21,6 @@ class SN_BranchNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_data_input("True")
         self.add_data_input("False")
         self.add_data_output("Result")
-        
-        
-    def code_imperative(self,context):
-        return {
-            "code": f"""
-                    def sn_branch(v1,v2,condition):
-                        if condition:
-                            return v1
-                        return v2
-                    """
-        }
 
 
     def code_evaluate(self, context, touched_socket):

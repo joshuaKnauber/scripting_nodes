@@ -155,4 +155,9 @@ def serpens_functions(addon_tree):
                         return item[0]
                 return string
 
+            def sn_branch(v1,v2,condition):
+                if condition:
+                    return v1
+                return v2
+
             """
