@@ -1,7 +1,7 @@
 import bpy
 import json
 import os
-from ...node_tree.base_node import SN_ScriptingBaseNode
+from ...node_tree.base_node import SN_ScriptingBaseNode, SN_GenericPropertyGroup
 
 
 
@@ -38,12 +38,14 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
 
     def get_used_variables(self, start_node):
         vars = []
+        var_names = {}
         for node in (self.get_used_functions(start_node) + [start_node]):
             for node in list(set(self.get_all_connected(node, []))):
                 if node.bl_idname in ["SN_GetVariableNode", "SN_SetVariableNode", "SN_ChangeVariableNode", "SN_ResetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode"]:
-                    if node.search_value in node.node_tree.sn_variables:
+                    if node.search_value in node.node_tree.sn_variables and not node.search_value in vars:
                         vars.append(node.search_value)
-        return vars
+                        var_names[node.node_tree.sn_variables[node.search_value].identifier] = [node.search_value, node.node_tree.sn_variables[node.search_value].var_type]
+        return vars, var_names
 
     def get_used_properties(self, start_node):
         props = []
@@ -69,7 +71,7 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
 
 
     def get_variable_code(self, node):
-        used_variables = list(set(self.get_used_variables(node)))
+        used_variables = list(set(self.get_used_variables(node)[0]))
         code = ""
         for var in used_variables:
             code += node.node_tree.sn_variables[var].variable_register()
@@ -135,6 +137,7 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
 
         data["function"] = code
 
+        data["variable_definitions"] = self.get_used_variables(node)[1]
         data["function_definitions"] = self.get_function_def(self.get_used_functions(node), context)
         props = list(set(self.get_used_properties(node)))
         data["register"] = self.get_prop_register(props)
@@ -156,6 +159,33 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
 
+
+class SN_VarPropertyGroup(bpy.types.PropertyGroup):
+
+    def get_var_data(self):
+        for var in self.node().get_variables():
+            if self.node().get_variables()[var][0] == self.var_name:
+                return var, self.node().get_variables()[var][1]
+        return ["", ""]
+
+    def update_name(self, context):
+        if self.var_name in self.node().node_tree.sn_variables:
+            if self.node().node_tree.sn_variables[self.var_name].var_type != self.var_type:
+                self["var_name"] = ""
+        else:
+            self["var_name"] = ""
+
+    var_name: bpy.props.StringProperty(name="Name of the Variable", update=update_name)
+    var_type: bpy.props.StringProperty()
+    identifier: bpy.props.StringProperty()
+    node_uid: bpy.props.StringProperty()
+    
+    def node(self):
+        for graph in bpy.context.scene.sn.addon_tree().sn_graphs:
+            for node in graph.node_tree.nodes:
+                if not node.bl_idname in ["NodeFrame","NodeReroute"]:
+                    if node.uid == self.node_uid:
+                        return node
 
 
 class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -179,6 +209,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def update_snippet(self, context):
+        self.var_collection.clear()
         self.inputs.clear()
         self.outputs.clear()
         self.has_vars = False
@@ -198,6 +229,13 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                         elif "SNIPPET_VARS" in data["function"]:
                             if len(data["function"].split("}")[0].split("{")[-1]):
                                 self.has_vars = True
+
+                        if "variable_definitions" in data:
+                            for var in data["variable_definitions"]:
+                                new_var = self.var_collection.add()
+                                new_var.node_uid = self.uid
+                                new_var.var_type = data["variable_definitions"][var][1]
+                                new_var.identifier = var
 
                         for inp_data in data["inputs"]:
                             if inp_data["idname"] == "SN_ExecuteSocket": inp_data["name"] = "Execute"
@@ -224,6 +262,16 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     snippet_path: bpy.props.StringProperty(subtype="FILE_PATH",name="Path",description="Path to the snippet json file", update=update_snippet)
     has_vars: bpy.props.BoolProperty(default=False)
+    var_collection: bpy.props.CollectionProperty(type=SN_VarPropertyGroup)
+
+
+    def get_variables(self):
+        if ".json" in self.snippet_path:
+            with open(self.snippet_path) as snippet:
+                data = json.loads(snippet.read())
+                if "variable_definitions" in data:
+                    return data["variable_definitions"]
+        return {}
 
 
     def on_create(self,context):
@@ -233,6 +281,12 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self,context,layout):
         if self.label == "Snippet":
             layout.prop(self,"snippet_path")
+        variables = self.get_variables()
+        for x, var in enumerate(variables):
+            box = layout.box()
+            col = box.column(align=True)
+            col.label(text=variables[var][0]+":")
+            col.prop_search(self.var_collection[x], "var_name", self.node_tree, "sn_variables", text="")
 
 
     def get_main_function(self):
@@ -275,24 +329,39 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def code_imperative(self, context):
+        # set identifier for non selected variables
         var_id = f"snippet_vars_{self.uid}"
+
+        # write strings for processing
         var_identifier = self.get_main_function().split("\n")[0].strip().replace("SNIPPET_VARS", var_id)
         identifier = self.get_main_function().split("\n")[1].strip()
         code = ""
         for function in self.get_function_definitions():
             code += self.get_function_definitions()[function]
+        main_code = "\n".join(self.get_main_function().split("\n")[2:])
 
+
+        # replace var names with selected
+        for var in self.var_collection:
+            if var.var_name in self.node_tree.sn_variables and var.var_type == self.node_tree.sn_variables[var.var_name].var_type:
+                code = code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.var_name].identifier)
+                main_code = main_code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.var_name].identifier)
+
+        # replace non selected vars with standalone
+        code = code.replace("SNIPPET_VARS", var_id)
+        main_code = main_code.replace("SNIPPET_VARS", var_id)
+
+        # replace property identifiers
         for prop in self.get_property_identifiers():
             code = code.replace("." + prop, "." + prop + "_" + self.uid)
-        code = code.replace("SNIPPET_VARS", var_id)
+        for prop in self.get_property_identifiers():
+            main_code = main_code.replace("." + prop, "." + prop + "_" + self.uid)
+
+
+        # split strings for list processing
         code = code.split("\n")
         for i in range(len(code)): 
             code[i] = code[i] + "\n"
-
-        main_code = "\n".join(self.get_main_function().split("\n")[2:])
-        for prop in self.get_property_identifiers():
-            main_code = main_code.replace("." + prop, "." + prop + "_" + self.uid)
-        main_code = main_code.replace("SNIPPET_VARS", var_id)
         main_code = main_code.split("\n")
         for i in range(len(main_code)): 
             main_code[i] = main_code[i] + "\n"

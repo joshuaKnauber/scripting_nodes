@@ -1,0 +1,54 @@
+{
+    "name": "snippet lol",
+    "uid": "D14ED",
+    "function": "                    SNIPPET_VARS = {\"new_variable\": \"\", \"test\": 0, }\n                    def snippet_lol():\n                        try:\n                             function_return_A3F24 = first()\n                            SNIPPET_VARS[\"new_variable\"] = r\"Surface\"\n                            sn_cast_blend_data(bpy.context.scene).new_property = r\"Surface\"\n                            return 5, bpy.context.active_object, \n                            \n                            \n                            \n                            \n                        except Exception as exc:\n                            print(str(exc) + \" | Error in function snippet lol\")\n                    ",
+    "register": "\nif not 'new_property' in bpy.types.Scene.bl_rna.properties: bpy.types.Scene.new_property = bpy.props.StringProperty(name='New Property',description='',subtype='NONE',options=set(),default='')\n",
+    "unregister": "\nif 'new_property' in bpy.types.Scene.bl_rna.properties: del bpy.types.Scene.new_property\n",
+    "properties": [],
+    "func_name": "snippet_lol",
+    "inputs": [
+        {
+            "idname": "SN_ExecuteSocket",
+            "name": "Run Function",
+            "subtype": "NONE",
+            "attributes": {}
+        }
+    ],
+    "outputs": [
+        {
+            "idname": "SN_ExecuteSocket",
+            "name": "Execute",
+            "subtype": "NONE",
+            "attributes": {}
+        },
+        {
+            "idname": "SN_IntegerSocket",
+            "name": "Integer",
+            "subtype": "NONE",
+            "attributes": {}
+        },
+        {
+            "idname": "SN_BlendDataSocket",
+            "name": "Active",
+            "subtype": "NONE",
+            "attributes": {}
+        }
+    ],
+    "variable_definitions": {
+        "new_variable": [
+            "New Variable",
+            "STRING"
+        ],
+        "test": [
+            "test",
+            "INTEGER"
+        ]
+    },
+    "function_definitions": {
+        "15FD7": "\n                    def first():\n                        try:\n                             SNIPPET_VARS[\"new_variable\"] = r\"First\"\n                            sn_print(\"New Addon\",r\"\")\n                            sn_cast_blend_data(bpy.context.scene).new_property = r\"first\"\n                            function_return_0377E = second()\n                            \n                            \n                            \n                            \n                            \n                        except Exception as exc:\n                            print(str(exc) + \" | Error in function first\")\n                    ",
+        "F5117": "\n                    def second():\n                        try:\n                             SNIPPET_VARS[\"new_variable\"] = r\"Second\"\n                            sn_print(\"New Addon\",r\"hi\")\n                            sn_cast_blend_data(bpy.context.scene).new_property = r\"second\"\n                            sn_print(\"New Addon\",r\"\")\n                            SNIPPET_VARS[\"test\"] = 1\n                            \n                            \n                            \n                            \n                            \n                            \n                        except Exception as exc:\n                            print(str(exc) + \" | Error in function second\")\n                    "
+    },
+    "property_identifiers": [
+        "new_property"
+    ]
+}

@@ -1,4 +1,9 @@
 {
     "categories": [],
-    "snippets": []
+    "snippets": [
+        {
+            "name": "snippet lol",
+            "filename": "snippet lol.json"
+        }
+    ]
 }
