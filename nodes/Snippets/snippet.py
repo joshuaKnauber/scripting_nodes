@@ -190,6 +190,7 @@ class SN_VarPropertyGroup(bpy.types.PropertyGroup):
 
     name: bpy.props.StringProperty(name="Name of the Variable", update=update_name)
     new_identifier: bpy.props.StringProperty()
+    og_name: bpy.props.StringProperty()
     is_prop: bpy.props.BoolProperty(default=False)
     type: bpy.props.StringProperty()
     identifier: bpy.props.StringProperty()
@@ -244,6 +245,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_snippet(self, context):
         self.var_collection.clear()
+        self.prop_collection.clear()
         self.inputs.clear()
         self.outputs.clear()
         self.has_vars = False
@@ -269,6 +271,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 new_prop = self.prop_collection.add()
                                 new_prop.is_prop = True
                                 new_prop.node_uid = self.uid
+                                new_prop.og_name = data["property_identifiers"][prop][0]
                                 new_prop.type = data["property_identifiers"][prop][1]
                                 new_prop.identifier = prop
                                 new_prop.attach_property_to = data["property_identifiers"][prop][2]
@@ -277,6 +280,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                             for var in data["variable_definitions"]:
                                 new_var = self.var_collection.add()
                                 new_var.node_uid = self.uid
+                                new_var.og_name = data["variable_definitions"][var][0]
                                 new_var.type = data["variable_definitions"][var][1]
                                 new_var.identifier = var
 
@@ -325,27 +329,18 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self,context,layout):
         if self.label == "Snippet":
             layout.prop(self,"snippet_path")
-        variables = {}
-        properties = {}
-        if ".json" in self.snippet_path:
-            if os.path.exists(self.snippet_path):
-                with open(self.snippet_path) as snippet:
-                    data = json.loads(snippet.read())
-                    if "variable_definitions" in data:
-                        variables = data["variable_definitions"]
-                    if "property_identifiers" in data:
-                        properties = data["property_identifiers"]
-        for x, var in enumerate(variables):
-            row = layout.row(align=True)
-            row.label(text=variables[var][0]+":")
-            row.prop_search(self.var_collection[x], "name", self.node_tree, "sn_variables", text="")
-            row.operator("sn.question_mark", text="", icon="QUESTION").to_display = "Choose a '" + variables[var][1].replace("_", " ").title() + "' variable to assign this snippet variable to.\nIf you don't choose anything it will use the snippets standalone variable."
 
-        for x, prop in enumerate(properties):
+        for var in self.var_collection:
             row = layout.row(align=True)
-            row.label(text=properties[prop][0]+":")
-            row.prop_search(self.prop_collection[x], "name", self.node_tree, "sn_properties", text="")
-            row.operator("sn.question_mark", text="", icon="QUESTION").to_display = "Choose a '" + properties[prop][1].replace("_", " ").title() + "' property to assign this snippet property to.\nIf you don't choose anything it will use the snippets standalone property."
+            row.label(text=var.og_name+":")
+            row.prop_search(var, "name", self.node_tree, "sn_variables", text="")
+            row.operator("sn.question_mark", text="", icon="QUESTION").to_display = "Choose a '" + var.type.replace("_", " ").title() + "' variable to assign this snippet variable to.\nIf you don't choose anything it will use the snippets standalone variable."
+
+        for prop in self.prop_collection:
+            row = layout.row(align=True)
+            row.label(text=prop.og_name+":")
+            row.prop_search(prop, "name", self.node_tree, "sn_properties", text="")
+            row.operator("sn.question_mark", text="", icon="QUESTION").to_display = "Choose a '" + prop.type.replace("_", " ").title() + "' property to assign this snippet property to.\nIf you don't choose anything it will use the snippets standalone property."
 
 
     def get_main_function(self):
