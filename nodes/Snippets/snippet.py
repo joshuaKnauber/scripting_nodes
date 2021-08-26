@@ -77,6 +77,20 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
             code += node.node_tree.sn_variables[var].variable_register()
         return "SNIPPET_VARS = {" + code + "}"
 
+
+    def get_code_imperative(self, start_node, context):
+        code = ""
+        used = []
+        for node in (self.get_used_functions(start_node) + [start_node]):
+            for node in list(set(self.get_all_connected(node, []))):
+                if "imperative_once" in node.node_options and node.node_options["imperative_once"]:
+                    if not "starts_tree" in node.node_options or not node.node_options["starts_tree"]:
+                        if not node.bl_idname in used:
+                            code += node.code_imperative(context)["code"]
+                            used.append(node.bl_idname)
+        return code
+
+
     def get_prop_register(self, props):
         code = "\n"
         for prop in props:
@@ -137,6 +151,7 @@ class SN_OT_SaveSnippet(bpy.types.Operator):
 
         data["function"] = code
 
+        data["code_imperative"] = self.get_code_imperative(node, context)
         data["variable_definitions"] = self.get_used_variables(node)[1]
         data["function_definitions"] = self.get_function_def(self.get_used_functions(node), context)
         props = list(set(self.get_used_properties(node)))
@@ -352,6 +367,14 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             return data["function"] + "\n"
         return ""
 
+    def get_code_imperative(self):
+        if ".json" in self.snippet_path:
+            with open(self.snippet_path) as snippet:
+                data = json.loads(snippet.read())
+                if "code_imperative" in data:
+                    return data["code_imperative"] + "\n"
+        return ""
+
     def get_property_identifiers(self):
         if ".json" in self.snippet_path:
             code = []
@@ -402,6 +425,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             var_id = f"snippet_vars_{self.uid}"
 
             # write strings for processing
+            code_imperative = self.get_code_imperative().split("\n")
             var_identifier = self.get_main_function().split("\n")[0].strip().replace("SNIPPET_VARS", var_id)
             identifier = self.get_main_function().split("\n")[1].strip()
             code = ""
@@ -440,11 +464,14 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             main_code = main_code.split("\n")
             for i in range(len(main_code)): 
                 main_code[i] = main_code[i] + "\n"
+            for i in range(len(code_imperative)): 
+                code_imperative[i] = code_imperative[i] + "\n"
 
             return {
                 "code": f"""
                         {var_identifier}
                         {identifier}
+                            {self.list_code(code_imperative, 7)}
                             {self.list_code(code, 7)}
                             {self.list_code(main_code, 7)}
                         """
