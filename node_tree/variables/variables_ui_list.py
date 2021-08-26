@@ -121,6 +121,12 @@ class SN_Variable(bpy.types.PropertyGroup):
         base_node.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
         base_node.update_nodes_by_types("SN_GetVariableNode", "SN_SetVariableNode", "SN_AddToListNode", "SN_RemoveFromListNode", "SN_ChangeVariableNode", "SN_ResetVariableNode")
 
+    def update_snippets(self):
+        base_node = SN_ScriptingBaseNode()
+        base_node.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
+        base_node.update_nodes_by_type("SN_SnippetNode")
+
+
     def update_name(self,context):
         key = "variable"
         if self.is_property:
@@ -146,9 +152,11 @@ class SN_Variable(bpy.types.PropertyGroup):
             self.update_prop_nodes()
         else:
             self.update_var_nodes()
+        self.update_snippets()
 
         self.identifier = node.get_python_name(self.name, f"new_{key}")
 
+        self.update_snippets()
         if self.is_property:
             self.update_prop_nodes()
         else:
@@ -201,6 +209,7 @@ class SN_Variable(bpy.types.PropertyGroup):
             self.update_prop_nodes()
         else:
             self.update_var_nodes()
+        self.update_snippets()
 
         self.trigger_update(context)
 
@@ -318,6 +327,7 @@ class SN_Variable(bpy.types.PropertyGroup):
 
     def update_attach_to(self, context):
         self.update_prop_nodes()
+        self.update_snippets()
         self.trigger_update(context)
     
     is_data_collection: bpy.props.BoolProperty(name="Data Collection",

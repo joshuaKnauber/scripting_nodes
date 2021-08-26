@@ -169,18 +169,27 @@ class SN_VarPropertyGroup(bpy.types.PropertyGroup):
             if self.name in self.node().node_tree.sn_properties:
                 if self.node().node_tree.sn_properties[self.name].var_type != self.type or self.node().node_tree.sn_properties[self.name].attach_property_to != self.attach_property_to:
                     self["name"] = ""
+                    self.new_identifier = ""
+                else:
+                    self.new_identifier = self.node().node_tree.sn_properties[self.name].identifier
             else:
                 self["name"] = ""
+                self.new_identifier = ""
 
         else:
             if self.name in self.node().node_tree.sn_variables:
                 if self.node().node_tree.sn_variables[self.name].var_type != self.type:
                     self["name"] = ""
+                    self.new_identifier = ""
+                else:
+                    self.new_identifier = self.node().node_tree.sn_variables[self.name].identifier
             else:
                 self["name"] = ""
+                self.new_identifier = ""
         self.node().auto_compile()
 
     name: bpy.props.StringProperty(name="Name of the Variable", update=update_name)
+    new_identifier: bpy.props.StringProperty()
     is_prop: bpy.props.BoolProperty(default=False)
     type: bpy.props.StringProperty()
     identifier: bpy.props.StringProperty()
@@ -205,6 +214,24 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_options = {
         "default_color": (0.3,0.3,0.3)
     }
+
+    def on_outside_update(self, dummy):
+        for var in self.node_tree.sn_variables:
+            for my_var in self.var_collection:
+                if my_var.new_identifier:
+                    if my_var.new_identifier == var.identifier:
+                        my_var.name = var.name
+        for prop in self.node_tree.sn_properties:
+            for my_prop in self.prop_collection:
+                if my_prop.new_identifier:
+                    if my_prop.new_identifier == prop.identifier:
+                        my_prop.name = prop.name
+
+
+        for prop in self.prop_collection:
+            prop.update_name(None)
+        for var in self.var_collection:
+            var.update_name(None)
 
     def get_function_definitions(self):
         if ".json" in self.snippet_path:
@@ -312,11 +339,13 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             row = layout.row(align=True)
             row.label(text=variables[var][0]+":")
             row.prop_search(self.var_collection[x], "name", self.node_tree, "sn_variables", text="")
+            row.operator("sn.question_mark", text="", icon="QUESTION").to_display = "Choose a '" + variables[var][1].replace("_", " ").title() + "' variable to assign this snippet variable to.\nIf you don't choose anything it will use the snippets standalone variable."
 
         for x, prop in enumerate(properties):
             row = layout.row(align=True)
             row.label(text=properties[prop][0]+":")
             row.prop_search(self.prop_collection[x], "name", self.node_tree, "sn_properties", text="")
+            row.operator("sn.question_mark", text="", icon="QUESTION").to_display = "Choose a '" + properties[prop][1].replace("_", " ").title() + "' property to assign this snippet property to.\nIf you don't choose anything it will use the snippets standalone property."
 
 
     def get_main_function(self):
