@@ -80,7 +80,7 @@ class SN_AddonPreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
     property_index: bpy.props.IntProperty(name="Preferences Property Index")
 
     def on_create(self, context):
-        self.add_interface_output("Preferences")
+        self.add_interface_output("Preferences").removable = True
         self.add_dynamic_interface_output("Preferences")
 
     def on_free(self):
