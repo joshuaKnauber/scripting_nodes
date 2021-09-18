@@ -1,4 +1,9 @@
 {
     "categories": [],
-    "snippets": []
+    "snippets": [
+        {
+            "name": "Nodes test",
+            "filename": "Nodes test.json"
+        }
+    ]
 }

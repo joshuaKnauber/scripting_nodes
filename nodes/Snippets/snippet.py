@@ -328,15 +328,6 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
     prop_collection: bpy.props.CollectionProperty(type=SN_VarPropertyGroup)
 
 
-    def get_variables(self):
-        if ".json" in self.snippet_path:
-            with open(self.snippet_path) as snippet:
-                data = json.loads(snippet.read())
-                if "variable_definitions" in data:
-                    return data["variable_definitions"]
-        return {}
-
-
     def on_create(self,context):
         self.label = "Snippet"
 
@@ -437,8 +428,10 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             # replace var names with selected
             for var in self.var_collection:
                 if var.name in self.node_tree.sn_variables and var.type == self.node_tree.sn_variables[var.name].var_type:
-                    code = code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.name].identifier)
-                    main_code = main_code.replace('SNIPPET_VARS["' + var.identifier, self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.name].identifier)
+                    code = code.replace(f'SNIPPET_VARS["{var.identifier}"]', self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.name].identifier + '"]')
+                    main_code = main_code.replace(f'SNIPPET_VARS["{var.identifier}"]', self.get_python_name(self.node_tree.name) + '["' + self.node_tree.sn_variables[var.name].identifier + '"]')
+                    code = code.replace(f"SNIPPET_VARS['{var.identifier}']", self.get_python_name(self.node_tree.name) + "['" + self.node_tree.sn_variables[var.name].identifier + "']")
+                    main_code = main_code.replace(f"SNIPPET_VARS['{var.identifier}']", self.get_python_name(self.node_tree.name) + "['" + self.node_tree.sn_variables[var.name].identifier + "']")
 
             # replace not selected vars with standalone
             code = code.replace("SNIPPET_VARS", var_id)
