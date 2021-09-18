@@ -17,7 +17,7 @@ class SN_RowNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self,context):
         self.add_interface_input("Interface").mirror_name = True
-        self.add_interface_output("Row")
+        self.add_interface_output("Row").removable = True
         self.add_dynamic_interface_output("Row")
 
         self.add_boolean_input("Align").set_default(False)

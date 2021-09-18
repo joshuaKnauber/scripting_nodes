@@ -126,7 +126,7 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     
 
     def on_create(self,context):
-        self.add_interface_output("Panel")
+        self.add_interface_output("Panel").removable = True
         self.add_dynamic_interface_output("Panel")
 
 

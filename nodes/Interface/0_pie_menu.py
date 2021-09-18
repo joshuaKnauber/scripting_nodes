@@ -26,7 +26,7 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_create(self,context):
-        self.add_interface_output("Pie Menu")
+        self.add_interface_output("Pie Menu").removable = True
         self.add_dynamic_interface_output("Pie Menu")
         
         self.add_boolean_input("Poll").set_default(True)
