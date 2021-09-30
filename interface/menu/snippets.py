@@ -11,20 +11,21 @@ class SN_MT_SnippetMenu(bpy.types.Menu):
         layout = self.layout
         installed_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "node_tree", "snippets", "installed.json")
 
-        with open(installed_path, "r") as data:
-            data = json.loads(data.read())
-            file_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "node_tree", "snippets", "files")
+        if hasattr(context, "snippet_category"):
+            with open(installed_path, "r") as data:
+                data = json.loads(data.read())
+                file_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "node_tree", "snippets", "files")
 
-            if not context.snippet_category:
-                for snippet in data["snippets"]:
-                    op = layout.operator("sn.add_snippet_node", text=snippet["name"])
-                    op.path = os.path.join(file_dir, snippet["filename"])
+                if not context.snippet_category:
+                    for snippet in data["snippets"]:
+                        op = layout.operator("sn.add_snippet_node", text=snippet["name"])
+                        op.path = os.path.join(file_dir, snippet["filename"])
 
-            else:
-                i = context.scene.sn.snippet_categories.find(context.snippet_category.name)
-                for snippet in data["categories"][i]["snippets"]:
-                    op = layout.operator("sn.add_snippet_node", text=snippet["name"])
-                    op.path = os.path.join(file_dir, snippet["filename"])
+                else:
+                    i = context.scene.sn.snippet_categories.find(context.snippet_category.name)
+                    for snippet in data["categories"][i]["snippets"]:
+                        op = layout.operator("sn.add_snippet_node", text=snippet["name"])
+                        op.path = os.path.join(file_dir, snippet["filename"])
 
 
 def snippet_menu(self, context):
