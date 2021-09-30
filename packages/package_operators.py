@@ -49,7 +49,7 @@ class SN_OT_InstallPackage(bpy.types.Operator, ImportHelper):
             package_info = self.get_package_info()
             if package_info:
                 self.write_to_installed(package_info, extracted_files)
-                self.report({"INFO"},message="Installed! Please restart blender to load the new nodes!")
+                bpy.ops.script.reload()
         return {"FINISHED"}
 
 
@@ -95,7 +95,7 @@ class SN_OT_UninstallPackage(bpy.types.Operator):
         if package:
             self.remove_nodes(package["nodes"])
             self.remove_empty_dirs()
-            self.report({"INFO"},message="Removed! Please restart blender to reload the nodes!")
+            bpy.ops.script.reload()
         return {"FINISHED"}
 
     def invoke(self, context, event):
