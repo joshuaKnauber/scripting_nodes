@@ -305,7 +305,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             "Fixed buttons and run operator nodes not updating when changing custom properties",
             "Fixed buttons and run operator nodes not updating on operator name change",
             "Fixed data nodes not working on other data node",
-            "Make initial interface outputs removable"
+            "Make initial interface outputs removable",
+            "Fixed package uninstall"
         ]
         if changelog:
             box = layout.box()

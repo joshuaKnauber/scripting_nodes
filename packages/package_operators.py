@@ -1,5 +1,6 @@
 import bpy
 import os
+import shutil
 import json
 import zipfile
 from bpy_extras.io_utils import ImportHelper
@@ -77,13 +78,23 @@ class SN_OT_UninstallPackage(bpy.types.Operator):
         for name in nodes:
             if not "__init__" in name:
                 path = os.path.join(os.path.dirname(os.path.dirname(__file__)),"nodes",name)
-                if os.path.exists(path):
+                if os.path.exists(path) and not os.path.isdir(path):
                     os.remove(path)
+                    
+    def remove_empty_dirs(self):
+        dir = os.path.join(os.path.dirname(os.path.dirname(__file__)),"nodes")
+        for file in os.listdir(dir):
+            path = os.path.join(dir, file)
+            if os.path.isdir(path):
+                files = os.listdir(path)
+                if len(files) == 0 or (len(files) == 1 and "__init__.py" in files):
+                    shutil.rmtree(path)
     
     def execute(self, context):
         package = self.get_package()
         if package:
             self.remove_nodes(package["nodes"])
+            self.remove_empty_dirs()
             self.report({"INFO"},message="Removed! Please restart blender to reload the nodes!")
         return {"FINISHED"}
 
