@@ -41,11 +41,10 @@ class SN_DisplayKeymapItem(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_input("Interface").mirror_name = True
         self.add_string_input("Label")
         self.add_boolean_input("Toggle").set_default(False)
-        SN_ScriptingBaseNode.auto_compile()
+        self.auto_compile()
     
 
-    keymap: bpy.props.StringProperty(update=setup_node)
-    item: bpy.props.StringProperty()
+    key_uid: bpy.props.StringProperty(update=setup_node)
     
     show_type: bpy.props.EnumProperty(name="Show Item", description="Show the selected item",
                                     items=[("type","Shortcut","Show Shortcut"),
@@ -58,16 +57,16 @@ class SN_DisplayKeymapItem(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def draw_node(self,context,layout):
-        if not self.keymap:
+        if not self.key_uid:
             layout.label(text="Only custom shortcuts are supported right now!",icon="ERROR")
             row = layout.row()
             row.enabled = False
             row.scale_y = 1.5
             row.operator("sn.paste_shortcut",icon="PASTEDOWN",text="Paste Shortcut").node = self.name
         else:
-            row = layout.row()
-            row.enabled = False
-            row.label(text="Readd this node when editing your keymap",icon="ERROR")
+            # row = layout.row()
+            # row.enabled = False
+            # row.label(text="Readd this node when editing your keymap",icon="ERROR")
             layout.prop(self,"show_type",expand=True)
 
 
@@ -76,12 +75,9 @@ class SN_DisplayKeymapItem(bpy.types.Node, SN_ScriptingBaseNode):
         layout = touched_socket.links[0].from_node.what_layout(touched_socket.links[0].from_socket)
 
         return {"code": f"""
-                if "{self.keymap}" in bpy.context.window_manager.keyconfigs.addon.keymaps:
-                    if "{self.item}" in bpy.context.window_manager.keyconfigs.addon.keymaps["{self.keymap}"].keymap_items:
-                        kmi = bpy.context.window_manager.keyconfigs.addon.keymaps["{self.keymap}"].keymap_items["{self.item}"]
-                        {layout}.prop(kmi, "{self.show_type}", text={self.inputs["Label"].code()}, full_event=True, toggle={self.inputs["Toggle"].code()})
-                    else:
-                        {layout}.label(text="Couldn't find keymap item!", icon="ERROR")
+                if "{self.key_uid}" in addon_keymaps:
+                    _, kmi = addon_keymaps["{self.key_uid}"]
+                    {layout}.prop(kmi, "{self.show_type}", text={self.inputs["Label"].code()}, full_event=True, toggle={self.inputs["Toggle"].code()})
                 else:
-                    {layout}.label(text="Couldn't find keymap!", icon="ERROR")
+                    {layout}.label(text="Couldn't find keymap item!", icon="ERROR")
                 """}

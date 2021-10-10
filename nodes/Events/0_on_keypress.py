@@ -41,14 +41,12 @@ class SN_AddKeymapDisplay(bpy.types.Operator):
     bl_description = "Adds the keymap display node"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
 
-    keymap: bpy.props.StringProperty(options={"HIDDEN"})
-    item: bpy.props.StringProperty(options={"HIDDEN"})
+    key_uid: bpy.props.StringProperty(options={"HIDDEN"})
 
     def execute(self, context):
         bpy.ops.node.add_node("INVOKE_DEFAULT",type="SN_DisplayKeymapItem",use_transform=True)
         node = context.space_data.node_tree.nodes.active
-        node.item = self.item
-        node.keymap = self.keymap
+        node.key_uid = self.key_uid
         return {"FINISHED"}
     
     
@@ -322,13 +320,12 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                               update=update_custom_operator)
     
 
-    def draw_node(self,context,layout):
+    def draw_node(self, context, layout):
         row = layout.row(align=True)
         row.prop(self,"space",text="")
         row.prop(self,"value",text="")
         op = row.operator("sn.add_keymap_display",text="",icon="FORWARD")
-        op.keymap = space_names[self.space]
-        op.item = self.code_evaluate(context, None, get_action=True)
+        op.key_uid = self.uid
         
         layout.operator("sn.record_key",text=self.key,depress=self.recording).node = self.name
         row = layout.row(align=True)
@@ -390,7 +387,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_imperative(self, context):
         return {
             "code": f"""
-                    addon_keymaps = []
+                    addon_keymaps = {{}}
                     """
         }
         
@@ -459,7 +456,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                                         alt={self.alt},
                                                         shift={self.shift})
                             {self.list_code(properties,7)}
-                            addon_keymaps.append((km, kmi))
+                            addon_keymaps['{self.uid}'] = (km, kmi)
                     """
 
         }
@@ -476,7 +473,8 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     def code_unregister(self, context):
         return {
             "code": f"""
-                    for km,kmi in addon_keymaps:
+                    for key in addon_keymaps:
+                        km, kmi = addon_keymaps[key]
                         km.keymap_items.remove(kmi)
                     addon_keymaps.clear()
                     """
