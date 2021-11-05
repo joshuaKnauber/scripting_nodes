@@ -298,16 +298,6 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_changelog(self, layout):
         changelog = [
-            "Added action recorder node",
-            "You can now use functions inside snippets",
-            "Added selector panel for custom vars and props to snippets",
-            "Run function now can delay when the function runs",
-            "Fixed buttons and run operator nodes not updating when changing custom properties",
-            "Fixed buttons and run operator nodes not updating on operator name change",
-            "Fixed data nodes not working on other data node",
-            "Fixed package uninstall",
-            "Fixed keymap display node with multiple keys",
-            "Make initial interface outputs removable"
         ]
         if changelog:
             box = layout.box()
