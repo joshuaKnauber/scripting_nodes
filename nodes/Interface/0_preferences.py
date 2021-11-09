@@ -50,7 +50,7 @@ class SN_OT_GetSetPreferencesProperty(bpy.types.Operator):
         idname = f"'{node.addon_tree.sn_graphs[0].short()}'"
             
         tree.nodes.active.copied_path = construct_from_property(
-            f"context.preferences.addons[{idname}].preferences", prop, node.uid)
+            f"bpy.context.preferences.addons[{idname}].preferences", prop, node.uid)
         return {"FINISHED"}
 
     def draw(self, context):
