@@ -5,6 +5,13 @@ from ..compiler.compiler import combine_blocks
 from uuid import uuid4
 
 
+"""
+- code is stored in property on node
+- when a nodes data changes it calls its compile function
+- when as a result of that its code changes, it triggers an update to all parent program nodes
+- when a start parent node is triggered, it changes the code in the node tree
+"""
+
 
 class SN_ScriptingBaseNode:
 
@@ -14,6 +21,117 @@ class SN_ScriptingBaseNode:
 
     bl_icon = "NONE"
     bl_label = "Node"
+    
+    """
+    NOTE: remove the concept of having a main tree for the addon. from now on one addon per file and all different trees are saved as separate files
+    NOTE: store a list of registered functions in the node tree. nodes can use this to check if they need to register a function again
+    NOTE: when exporting the final addon, somehow trigger compile on all nodes to get export code
+    NOTE: data sockets somehow need to update their own and connected nodes
+    """
+
+    @property
+    def node_tree(self):
+        """ Returns the node tree this node lives in """
+        return self.id_data
+
+
+    @property
+    def uuid(self):
+        """ Returnes a uid for this node. Note that this is not stable and will change over time! """
+        return uuid4().hex[:5].upper()
+
+
+    def code_changed(self, context=None):
+        """ Triggers an update on all affected, connected program nodes """
+        # go through all inputs and update connected program nodes
+
+
+    def compile(self, context=None, is_export=False):
+        """ Call this when any data of this node changed, including properties or data inputs. Updates this nodes program code """
+        if is_export:
+            self.code = self.evaluate_export(bpy.context)
+        else:
+            self.code = self.evaluate(bpy.context)
+
+
+    order: bpy.props.IntProperty(default=0,
+                                min=0,
+        	                    name="Compile Index",
+                                description="Index of this node in the compile order. This will change the order the code is added to the addon files. 0 is the first node to be added",
+                                update=compile)
+
+
+    def _get_min_indent(self, code_lines):
+        """ Returns the minimum indent of the given lines of text """
+        pass
+
+    def _normalize_code(self, raw_code):
+        """ Normalizes the given code to the minimum indent """
+        min_indent = self._get_min_indent(raw_code.split("\n"))
+        return raw_code
+
+    def set_code(self, raw_code):
+        """ Checks if the given code is different from the current code and sets the property. If required it triggers a code update """
+        normalized = self._normalize_code(raw_code)
+        if self.get("code") == None or normalized != self["code"]:
+            self["code"] = normalized
+            self.code_changed()
+
+    def get_code(self):
+        """ Returns the current code of this node """
+        return self.get("code", "")
+
+    code: bpy.props.StringProperty(name="Code",
+                                    description="The current compiled code for this node",
+                                    set=set_code,
+                                    get=get_code)
+
+
+    def use_imperative(self, raw_code, identifier=None):
+        """Handler called to add unregister code to this node. Note that this only has an effect when called in evaluate
+        raw_code: the code that should be added. It's good practise to store this in a class variable and not pass it as a string in evaluate
+        indentifier: if an identifier is given the raw_code is only added if code with this identifier hasn't been added to this node tree before
+        """
+        pass
+
+
+    def use_register(self, raw_code, identifier=None):
+        """Handler called to add unregister code to this node. Note that this only has an effect when called in evaluate
+        raw_code: the code that should be added. It's good practise to store this in a class variable and not pass it as a string in evaluate
+        indentifier: if an identifier is given the raw_code is only added if code with this identifier hasn't been added to this node tree before
+        """
+        pass
+
+
+    def use_unregister(self, raw_code, identifier=None):
+        """Handler called to add unregister code to this node. Note that this only has an effect when called in evaluate
+        raw_code: the code that should be added. It's good practise to store this in a class variable and not pass it as a string in evaluate
+        indentifier: if an identifier is given the raw_code is only added if code with this identifier hasn't been added to this node tree before
+        """
+        pass
+
+
+    def evaluate(self, context):
+        """ Called when the program code of this node is required from a specific socket. This should return a string with the nodes code. It can also inject code with handlers"""
+        # test = "test"
+        # self.use_imperative("""
+        #                     print("some code in here")
+        #                     """)
+        # return f"""
+        #         print("test {test}")
+        #         """
+        return ""
+
+
+    def evaluate_export(self, context):
+        """ Called when the addon is exported. This should return a string with the nodes export ready code. It can also inject code with handlers """
+        return self.evaluate(context)
+
+
+
+
+
+
 
     node_options = {
         "default_color": (0.3,0.3,0.3),
@@ -31,12 +149,6 @@ class SN_ScriptingBaseNode:
     
     node_tree_uid: bpy.props.StringProperty()
     addon_tree_uid: bpy.props.StringProperty()
-    
-    @property
-    def node_tree(self):
-        for tree in bpy.data.node_groups:
-            if tree.sn_uid == self.node_tree_uid:
-                return tree
     
     @property
     def addon_tree(self):
@@ -326,6 +438,8 @@ class SN_ScriptingBaseNode:
 
 
     def draw_buttons_ext(self,context,layout):
+        layout.use_property_split = True
+        layout.prop(self, "order")
         self.draw_node_panel(context,layout)
         
 
