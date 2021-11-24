@@ -65,23 +65,15 @@ class SN_PT_GraphPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-
-        addon_tree = context.scene.sn.addon_tree()
+        sn = context.scene.sn
 
         row = layout.row(align=False)
-        row.template_list("SN_UL_GraphList", "Graphs", addon_tree, "sn_graphs", addon_tree, "sn_graph_index",rows=4)
+        row.template_list("SN_UL_GraphList", "Graphs", bpy.data, "node_groups", sn, "node_tree_index", rows=4)
         col = row.column(align=True)
-        col.operator("sn.add_graph", text="", icon="ADD")
+        col.operator("node.new_node_tree", text="", icon="ADD")
         col.operator("sn.append_graph", text="", icon="APPEND_BLEND")
-        col.operator("sn.remove_graph", text="", icon="REMOVE").index = addon_tree.sn_graph_index
-        
-        col.separator()
-        row = col.row(align=True)
-        row.enabled = addon_tree.sn_graph_index > 1
-        row.operator("sn.move_graph", text="", icon="TRIA_UP").up = True
-        row = col.row(align=True)
-        row.enabled = addon_tree.sn_graph_index < len(addon_tree.sn_graphs)-1
-        row.operator("sn.move_graph", text="", icon="TRIA_DOWN").up = False
+        col.operator("sn.remove_graph", text="", icon="REMOVE").index = sn.node_tree_index
+
 
 
 class SN_PT_VariablePanel(bpy.types.Panel):
@@ -93,64 +85,162 @@ class SN_PT_VariablePanel(bpy.types.Panel):
     bl_category = "Serpens"
     bl_order = 1
 
-    def draw_header(self,context):
+    def draw(self, context):
         layout = self.layout
-        layout.operator("sn.question_mark", text="", icon="QUESTION", emboss=False).to_display = "Variables can be strings, integers, floats, booleans, lists or blend data.\nWhen your addon is loaded they store the default value that you set right here.\n\nThen you can use getters, setters and change by nodes to access and change the value.\nA getter returns the current value of the variable. A setter sets the variable to a new value,\nignoring the last. Change by nodes only works for string and numbers, since they take the\ncurrent value of the variable and add/subtract to it. \n\nThere is also a button to copy the python path for a variable. \nYou can use this to access the variable in your python scripts."
+
+
+
+class SN_PT_PropertyPanel(bpy.types.Panel):
+    bl_idname = "SN_PT_PropertyPanel"
+    bl_label = "Properties"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_order = 1
+    
+    def draw(self, context):
+        layout = self.layout
+            
+            
+
+class SN_PT_AssetsPanel(bpy.types.Panel):
+    bl_idname = "SN_PT_AssetsPanel"
+    bl_label = "Assets"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_order = 2
+    bl_options = {"DEFAULT_CLOSED"}
+
+    def draw(self, context):
+        layout = self.layout
+
+
+
+class SN_PT_IconPanel(bpy.types.Panel):
+    bl_idname = "SN_PT_IconPanel"
+    bl_label = "Custom Icons"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_order = 3
+    bl_options = {"DEFAULT_CLOSED"}
+
+    def draw(self, context):
+        layout = self.layout
+
+
+
+class SN_PT_AddonInfoPanel(bpy.types.Panel):
+    bl_idname = "SN_PT_AddonInfoPanel"
+    bl_label = "Addon"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_options = {"DEFAULT_CLOSED"}
+    bl_order = 4
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.sn.editing_addon != "NONE" and context.space_data.tree_type == "ScriptingNodesTree"
+
+    def draw(self, context):
+        layout = self.layout
+        sn = context.scene.sn
+        
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+        layout.prop(sn, "addon_name")
+        layout.prop(sn, "description")
+        layout.prop(sn, "author")
+        layout.prop(sn, "location")
+        layout.prop(sn, "warning")
+        layout.prop(sn, "doc_url")
+        layout.prop(sn, "tracker_url")
+        col = layout.column(align=True)
+        col.prop(sn, "category")
+        if sn.category == "CUSTOM":
+            col.prop(sn, "custom_category", text=" ")
+        layout.prop(sn, "version")
+        layout.prop(sn, "blender")
+        
+        row = layout.row()
+        row.scale_y = 1.5
+        col = row.column(align=True)
+        col.operator("sn.save_addon",text="Save Addon",icon="FILE_TICK")
+        row = col.row()
+        row.scale_y = 0.7
+        row.operator("sn.export_to_marketplace",text="Add to Marketplace",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id)
+
+
+
+class SN_PT_SnippetPanel(bpy.types.Panel):
+    bl_idname = "SN_PT_SnippetPanel"
+    bl_label = "Snippets"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_order = 5
+    bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.sn.editing_addon != "NONE" and context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+
+    def draw(self, context):
+        layout = self.layout
+
+
+
+class SN_PT_AddonSettingsPanel(bpy.types.Panel):
+    bl_idname = "SN_PT_AddonSettingsPanel"
+    bl_label = "Settings"
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_options = {"DEFAULT_CLOSED"}
+    bl_order = 6
+
+    @classmethod
+    def poll(cls, context):
+        return context.scene.sn.editing_addon != "NONE" and context.space_data.tree_type == "ScriptingNodesTree"
 
     def draw(self, context):
         layout = self.layout
 
         addon_tree = context.scene.sn.addon_tree()
-        graph_tree = addon_tree.sn_graphs[addon_tree.sn_graph_index].node_tree
+        addon_graph = addon_tree.sn_graphs[0]
 
-        row = layout.row(align=False)
-        col = row.column(align=True)
-        col.template_list("SN_UL_VariableList", "Variables", graph_tree, "sn_variables", graph_tree, "sn_variable_index",rows=3)
-        if len(graph_tree.sn_variables):
-            var = graph_tree.sn_variables[graph_tree.sn_variable_index]
-            btn_row = col.row(align=True)
-            btn_row.operator("sn.add_var_getter",icon="SORT_DESC", text="Getter")
-            btn_row.operator("sn.add_var_setter",icon="SORT_ASC", text="Setter")
-        col = row.column(align=True)
-        col.operator("sn.add_variable", text="", icon="ADD")
-        col.operator("sn.remove_variable", text="", icon="REMOVE")
-        
-        col.separator()
-        row = col.row(align=True)
-        row.enabled = graph_tree.sn_variable_index > 0
-        row.operator("sn.move_variable", text="", icon="TRIA_UP").up = True
-        row = col.row(align=True)
-        row.enabled = graph_tree.sn_variable_index < len(graph_tree.sn_variables)-1
-        row.operator("sn.move_variable", text="", icon="TRIA_DOWN").up = False
-        
-        if len(graph_tree.sn_variables):
-            layout.separator()
-            row = layout.row()
-            col = row.column()
-            col.use_property_split = True
-            col.use_property_decorate = False
-            
-            row = col.row(align=True)
-            row.prop(var,"var_type",text="Type")
-            copy_name = f"{SN_ScriptingBaseNode().get_python_name(graph_tree.name)}[\"{var.identifier}\"]"
-            row.operator("sn.get_python_name",text="",icon="COPYDOWN").to_copy = copy_name
-            col.separator()
-            
-            if var.var_type == "STRING":
-                col.prop(var,"str_default")
-            elif var.var_type == "INTEGER":
-                col.prop(var,"int_default")
-            elif var.var_type == "FLOAT":
-                col.prop(var,"float_default")
-            elif var.var_type == "BOOLEAN":
-                col.prop(var,"bool_default")
-            elif var.var_type == "LIST":
-                col.label(text="There are no defaults for lists.", icon="QUESTION")
-            elif var.var_type == "BLEND_DATA":
-                col.prop(var,"is_data_collection")
+        layout.use_property_split = True
+        layout.use_property_decorate = False
 
-            
-            row.label(text="",icon="BLANK1")
+        row = layout.row()
+        row.alignment = "RIGHT"
+        row.label(text="Last Compile: "+addon_graph.last_compile_time)
+
+        layout.prop(addon_graph, "compile_on_start", text="Compile on Startup")
+
+        layout.separator()
+
+        layout.prop(addon_graph, "autocompile", text="Auto Compile")
+        row = layout.row()
+        row.enabled = addon_graph.autocompile
+        row.prop(addon_graph, "autocompile_delay", text="Delay")
+
+        layout.separator()
+
+        col = layout.column()
+        col.enabled = bpy.data.is_saved
+        col.prop(context.scene.sn, "use_autosave")
+        row = col.row()
+        row.enabled = context.scene.sn.use_autosave
+        row.prop(context.scene.sn, "autosave_delay")
+
+        layout.separator()
+
+        layout.template_ID(context.scene.sn, "easy_bpy",
+                           open="text.open", text="Easy BPY")
+
 
 
 def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
@@ -315,129 +405,11 @@ def draw_property(context,var,layout,from_node="",node_attr="",node_index=0):
             op.node = from_node
             op.node_attr = node_attr
             op.node_index = node_index
+
+
+"""
+
             
             
-class SN_PT_PropertyPanel(bpy.types.Panel):
-    bl_parent_id = "SN_PT_GraphPanel"
-    bl_idname = "SN_PT_PropertyPanel"
-    bl_label = "Properties"
-    bl_space_type = 'NODE_EDITOR'
-    bl_region_type = 'UI'
-    bl_category = "Serpens"
-    bl_order = 2
-    
 
-    def draw_header(self,context):
-        layout = self.layout
-        layout.operator("sn.question_mark", text="", icon="QUESTION", emboss=False).to_display = "Properties are like variables, but they can be displayed to the user. There are strings, integers,\nfloats, booleans, and enums(Dropdowns). Properties are always attached to an ID Object.\nIf you attach it to 'Object', every object will have that property.\n\nSimilar to variables, there are getters and setters. Additionally there is also an update node, \nthat executes every time the property changes and an interface node to display the property. \nAll of the nodes have a blend data input from where it will access the property.\nIf you attach it to 'Object' this will have to be an object. If you attach it to 'Scene', \nthis will most likely be the active scene.\n\nThere is also a button to copy the python path. You will need to replace the 'PLACEHOLDER'"
-
-    def draw(self, context):
-        layout = self.layout
-
-        addon_tree = context.scene.sn.addon_tree()
-
-        row = layout.row(align=False)
-        col = row.column(align=True)
-        col.template_list("SN_UL_VariableList", "Properties", addon_tree, "sn_properties", addon_tree, "sn_property_index",rows=3)
-        if len(addon_tree.sn_properties):
-            btn_row = col.row(align=True)
-            btn_row.operator("sn.add_prop_getter",icon="SORT_DESC", text="Getter")
-            btn_row.operator("sn.add_prop_setter",icon="SORT_ASC", text="Setter")
-        col = row.column(align=True)
-        col.operator("sn.add_property", text="", icon="ADD")
-        col.operator("sn.remove_property", text="", icon="REMOVE")
-        
-        col.separator()
-        row = col.row(align=True)
-        row.enabled = addon_tree.sn_property_index > 0
-        row.operator("sn.move_property", text="", icon="TRIA_UP").up = True
-        row = col.row(align=True)
-        row.enabled = addon_tree.sn_property_index < len(addon_tree.sn_properties)-1
-        row.operator("sn.move_property", text="", icon="TRIA_DOWN").up = False
-        
-        if len(addon_tree.sn_properties):
-            layout.separator()
-            row = layout.row()
-            draw_property(context, addon_tree.sn_properties[addon_tree.sn_property_index], row)
-            row.label(text="",icon="BLANK1")
-
-
-class SN_PT_IconPanel(bpy.types.Panel):
-    bl_parent_id = "SN_PT_GraphPanel"
-    bl_idname = "SN_PT_IconPanel"
-    bl_label = "Custom Icons"
-    bl_space_type = 'NODE_EDITOR'
-    bl_region_type = 'UI'
-    bl_category = "Serpens"
-    bl_order = 3
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
-        layout = self.layout
-
-        addon_tree = context.scene.sn.addon_tree()
-        
-        row = layout.row(align=False)
-        col = row.column(align=True)
-        col.template_list("SN_UL_IconList", "Custom Icons", addon_tree, "sn_icons", addon_tree, "sn_icon_index",rows=3)
-        if len(addon_tree.sn_icons):
-            col.operator("sn.add_get_icon",icon="SORT_DESC", text="Getter")
-        col = row.column(align=True)
-        col.operator("sn.add_icon", text="", icon="ADD")
-        col.operator("sn.remove_icon", text="", icon="REMOVE")
-        
-        col.separator()
-        row = col.row(align=True)
-        row.enabled = addon_tree.sn_icon_index > 0
-        row.operator("sn.move_icon", text="", icon="TRIA_UP").up = True
-        row = col.row(align=True)
-        row.enabled = addon_tree.sn_icon_index < len(addon_tree.sn_icons)-1
-        row.operator("sn.move_icon", text="", icon="TRIA_DOWN").up = False
-        
-        
-        if len(addon_tree.sn_icons):
-            col = layout.column()
-            row = col.row()
-            icon = addon_tree.sn_icons[addon_tree.sn_icon_index]
-            row.template_ID(icon, "image", new="image.new", open="image.open")
-            row.label(icon="BLANK1")
-            
-            
-class SN_PT_AssetsPanel(bpy.types.Panel):
-    bl_parent_id = "SN_PT_GraphPanel"
-    bl_idname = "SN_PT_AssetsPanel"
-    bl_label = "Assets"
-    bl_space_type = 'NODE_EDITOR'
-    bl_region_type = 'UI'
-    bl_category = "Serpens"
-    bl_order = 4
-    bl_options = {"DEFAULT_CLOSED"}
-
-    def draw(self, context):
-        layout = self.layout
-
-        addon_tree = context.scene.sn.addon_tree()
-        
-        row = layout.row(align=False)
-        col = row.column(align=True)
-        col.template_list("SN_UL_AssetList", "Assets", addon_tree, "sn_assets", addon_tree, "sn_asset_index",rows=3)
-        if len(addon_tree.sn_assets) and addon_tree.sn_assets[addon_tree.sn_asset_index].name:
-            col.operator("sn.add_get_asset",icon="SORT_DESC", text="Getter")
-        col = row.column(align=True)
-        col.operator("sn.add_asset", text="", icon="ADD")
-        col.operator("sn.remove_asset", text="", icon="REMOVE")
-        
-        col.separator()
-        row = col.row(align=True)
-        row.enabled = addon_tree.sn_asset_index > 0
-        row.operator("sn.move_asset", text="", icon="TRIA_UP").up = True
-        row = col.row(align=True)
-        row.enabled = addon_tree.sn_asset_index < len(addon_tree.sn_assets)-1
-        row.operator("sn.move_asset", text="", icon="TRIA_DOWN").up = False
-        
-        
-        if len(addon_tree.sn_assets):
-            col = layout.column()
-            row = col.row()
-            row.prop(addon_tree.sn_assets[addon_tree.sn_asset_index],"path",text="")
-            row.label(icon="BLANK1")
+"""

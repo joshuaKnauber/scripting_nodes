@@ -16,10 +16,10 @@ bl_info = {
     "name" : "Serpens",
     "author" : "Joshua Knauber, Finn Knauber", 
     "description" : "Adds a node editor for building addons with nodes",
-    "blender" : (2, 93, 0),
-    "version" : (2, 1, 7),
+    "blender" : (3, 0, 0),
+    "version" : (3, 0, 0),
     "location" : "Editors -> Visual Scripting",
-    "wiki_url": "", 
+    "docs_url": "", 
     "category" : "Node" 
 }
 
@@ -38,20 +38,12 @@ from .interface.header.header import prepend_header, append_header, example_drop
 from .interface.menu.rightclick import serpens_right_click
 from .interface.menu.snippets import snippet_menu
 
-from .node_tree.graphs.graph_ui_lists import SN_Graph, update_graph_index
-from .node_tree.variables.variables_ui_list import SN_Variable
-from .node_tree.icons.icons_ui_list import SN_Icon
-from .node_tree.assets.assets_ui_list import SN_Asset
-from .node_tree.base_node import SN_NodeCollection
-from .node_tree.node_tree import update_create_tree, handle_versioning
 from .settings.addon_properties import SN_AddonProperties
 from .settings.updates import check_serpens_updates
 
 from .compiler.compiler import handle_file_load, handle_file_unload
 
-
-from . import compiler, interface, node_tree, nodes, packages, settings
-
+from . import handlers
 
 from . import auto_load
 auto_load.init()
@@ -60,18 +52,12 @@ auto_load.init()
 @persistent
 def load_handler(dummy):
     handle_file_unload()
-    handle_versioning()
     handle_file_load()
     check_serpens_updates(bl_info["version"])
 
 
 def unload_handler(dummy=None):
     handle_file_unload()
-
-
-@persistent
-def depsgraph_handler(dummy):
-    update_create_tree()
     
     
 def register_icons():
@@ -89,44 +75,16 @@ def unregister_icons():
 
 
 def register_classes():
-    # compiler.register()
-    # interface.register()
-    # node_tree.register()
-    # nodes.register()
-    # packages.register()
-    # settings.register()
     auto_load.register()
 
 
 def unregister_classes():
-    # settings.unregister()
-    # packages.unregister()
-    # nodes.unregister()
-    # node_tree.unregister()
-    # interface.unregister()
-    # compiler.unregister()
     auto_load.unregister()
     
 
 def register():
     # register the classes of the addon
     register_classes()
-
-    # register the graph properties
-    bpy.types.NodeTree.sn_graphs = bpy.props.CollectionProperty(type=SN_Graph,name="Scripting Graphs")
-    bpy.types.NodeTree.sn_graph_index = bpy.props.IntProperty(default=0, update=update_graph_index,name="Scripting Graph Index")
-    bpy.types.NodeTree.sn_variables = bpy.props.CollectionProperty(type=SN_Variable,name="Scripting Variables")
-    bpy.types.NodeTree.sn_variable_index = bpy.props.IntProperty(default=0,name="Scripting Variable Index")
-    bpy.types.NodeTree.sn_properties = bpy.props.CollectionProperty(type=SN_Variable,name="Scripting Properties")
-    bpy.types.NodeTree.sn_property_index = bpy.props.IntProperty(default=0,name="Scripting Property Index")
-    bpy.types.NodeTree.sn_icons = bpy.props.CollectionProperty(type=SN_Icon,name="Scripting Icons")
-    bpy.types.NodeTree.sn_icon_index = bpy.props.IntProperty(default=0,name="Scripting Icon Index")
-    bpy.types.NodeTree.sn_assets = bpy.props.CollectionProperty(type=SN_Asset,name="Scripting Assets")
-    bpy.types.NodeTree.sn_asset_index = bpy.props.IntProperty(default=0,name="Scripting Asset Index")
-    bpy.types.NodeTree.sn_nodes = bpy.props.CollectionProperty(type=SN_NodeCollection,name="Scripting Node Collections")
-    bpy.types.NodeTree.sn_done_setup = bpy.props.BoolProperty(default=False,name="Scripting Setup Done")
-    bpy.types.NodeTree.sn_version = bpy.props.IntVectorProperty(name="Serpens Version")
-    bpy.types.NodeTree.sn_uid = bpy.props.StringProperty(name="Serpens UID")
     
     # register the text properties
     bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False,name="Is Serpens Addon")
@@ -153,7 +111,7 @@ def register():
 
     # app handlers
     bpy.app.handlers.load_post.append(load_handler)
-    bpy.app.handlers.depsgraph_update_post.append(depsgraph_handler)
+    bpy.app.handlers.depsgraph_update_post.append(handlers.depsgraph_handler)
     atexit.register(unload_handler)
     
     # add right click menu
@@ -168,18 +126,6 @@ def unregister():
 
     # remove from the node add menu
     bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
-
-    # unregister the graph properties
-    del bpy.types.NodeTree.sn_graphs
-    del bpy.types.NodeTree.sn_graph_index
-    del bpy.types.NodeTree.sn_variables
-    del bpy.types.NodeTree.sn_variable_index
-    del bpy.types.NodeTree.sn_icons
-    del bpy.types.NodeTree.sn_icon_index
-    del bpy.types.NodeTree.sn_assets
-    del bpy.types.NodeTree.sn_asset_index
-    del bpy.types.NodeTree.sn_nodes
-    del bpy.types.NodeTree.sn_uid
 
     # unregister the text properties
     del bpy.types.Text.is_sn_addon
@@ -198,7 +144,7 @@ def unregister():
 
     # remove handlers
     bpy.app.handlers.load_post.remove(load_handler)
-    bpy.app.handlers.depsgraph_update_post.remove(depsgraph_handler)
+    bpy.app.handlers.depsgraph_update_post.remove(handlers.depsgraph_handler)
     atexit.unregister(unload_handler)
     
     # remove right click menu

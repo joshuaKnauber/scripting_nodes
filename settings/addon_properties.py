@@ -2,6 +2,7 @@ import os
 import bpy
 import json
 from ..node_tree.base_node import SN_NodeCollection
+from ..node_tree.graphs.graph_ui_lists import SN_Graph
 
 
 example_dict = {
@@ -214,3 +215,75 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     easy_bpy: bpy.props.PointerProperty(type=bpy.types.Text, name="EasyBPY",
                                         description="The easy bpy text file for using easy bpy in your scripts")
+
+
+
+
+    node_tree_index: bpy.props.IntProperty(default=0, name="Active Node Tree", description="The node tree you're currently editing")
+
+    addon_name: bpy.props.StringProperty(default="My Addon",
+                                        name="Addon Name",
+                                        description="The name of the addon")
+
+    description: bpy.props.StringProperty(default="",
+                                        name="Description",
+                                        description="The description of the addon")
+
+    author: bpy.props.StringProperty(default="Your Name",
+                                        name="Author",
+                                        description="The author of this addon")
+
+    version: bpy.props.IntVectorProperty(default=(1,0,0),
+                                        size=3,
+                                        min=0,
+                                        name="Version",
+                                        description="The author of this addon")
+
+    def update_blender(self,context):
+        if not self.blender[1] > 9:
+            self.blender = (self.blender[0],int(str(self.blender[1])+"0"),self.blender[2])
+        self.update_changes(context)
+
+    blender: bpy.props.IntVectorProperty(default=(3, 0, 0),
+                                        update=update_blender,
+                                        size=3,
+                                        min=0,
+                                        name="Minimum Blender",
+                                        description="Minimum blender version required for this addon")
+
+    location: bpy.props.StringProperty(default="",
+                                        name="Location",
+                                        description="Describes where the addons functionality can be found")
+
+    warning: bpy.props.StringProperty(default="",
+                                        name="Warning",
+                                        description="Used if there is a bug or a problem that the user should be aware of")
+
+    doc_url: bpy.props.StringProperty(default="",
+                                        name="Doc URL",
+                                        description="URL to the addons documentation")
+
+    tracker_url: bpy.props.StringProperty(default="",
+                                        name="Tracker URL",
+                                        description="URL to the addons bug tracker")
+
+    def get_categories(self,context):
+        categories = ["3D View", "Add Mesh", "Add Curve", "Animation", "Compositing", "Development", None,
+                    "Game Engine", "Import-Export", "Lighting", "Material","Mesh","Node",None,
+                    "Object","Paint","Physics","Render","Rigging","Scene",None,
+                    "Sequencer","System","Text Editor","UV","User Interface"]
+        items = []
+        for cat in categories:
+            if cat:
+                items.append((cat,cat,cat))
+            else:
+                items.append(("","",""))
+        return items+[("CUSTOM","- Custom Category -","Add your own category")]
+
+    category: bpy.props.EnumProperty(items=get_categories,
+                                        name="Category",
+                                        description="The category the addon will be displayed in")
+
+    custom_category: bpy.props.StringProperty(default="My Category",
+                                        name="Custom Category",
+                                        description="Your custom category")

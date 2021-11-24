@@ -130,9 +130,6 @@ class SN_ScriptingBaseNode:
 
 
 
-
-
-
     node_options = {
         "default_color": (0.3,0.3,0.3),
         "has_collection": False,
@@ -440,6 +437,7 @@ class SN_ScriptingBaseNode:
     def draw_buttons_ext(self,context,layout):
         layout.use_property_split = True
         layout.prop(self, "order")
+        layout.label(text=self.code)
         self.draw_node_panel(context,layout)
         
 
