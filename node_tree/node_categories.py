@@ -1,7 +1,7 @@
 import bpy
-import os
-import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
+import os
+
 
 
 class SN_ScriptingNodesCategory(NodeCategory):
@@ -11,9 +11,12 @@ class SN_ScriptingNodesCategory(NodeCategory):
         return context.space_data.tree_type == 'ScriptingNodesTree'
 
 
+
 def get_node_categories():
     node_categories_list = {}
+
     container = os.path.join(os.path.dirname(os.path.dirname(__file__)),"nodes")
+
     for base, _, files in os.walk(container):
         if not os.path.basename(base) in ["__pycache__","nodes"]:
             if not os.path.basename(base) in node_categories_list:
@@ -30,12 +33,12 @@ def get_node_categories():
                 for line in node_file.readlines():
                     if "class" in line and "SN_ScriptingBaseNode" in line:
                         name = line.split("class ")[-1].split("(")[0]
-                        if not name in ["SN_TutorialNode", "SN_OutPortalNode"]:
+                        if not name in []:
                             category_items.append(NodeItem(name))
         if category_items:
             node_categories.append(SN_ScriptingNodesCategory(category.replace(" ","_").lower(), category.replace("_", " "), items=category_items))
 
-    layout_items = [NodeItem("NodeFrame")]
+    layout_items = [NodeItem("NodeFrame"), NodeItem("NodeReroute")]
     node_categories.append(SN_ScriptingNodesCategory("LAYOUT", "Layout", items=layout_items))
 
     return node_categories

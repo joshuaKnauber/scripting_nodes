@@ -1,7 +1,10 @@
 import bpy
 import re
 from ..base_node import SN_ScriptingBaseNode
-from ...interface.menu.rightclick import construct_from_property, construct_from_attached_property
+
+
+def construct_from_property(): pass
+def construct_from_attached_property(): pass
 
 
 def name_is_unique(collection, name):

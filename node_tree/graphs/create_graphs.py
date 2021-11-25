@@ -117,8 +117,7 @@ class SN_OT_RemoveGraph(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        addon_tree = context.scene.sn.addon_tree()
-        return addon_tree.sn_graph_index != 0
+        return True
 
     def execute(self, context):
         addon_tree = context.scene.sn.addon_tree()

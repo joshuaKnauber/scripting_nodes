@@ -96,16 +96,6 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                 return True
         return False
 
-    def get_addon_items(self, context):
-        items = []
-        for tree in bpy.data.node_groups:
-            if len(tree.sn_graphs):
-                items.append(
-                    (tree.sn_graphs[0].name, tree.sn_graphs[0].name, tree.sn_graphs[0].name))
-        if items:
-            return items
-        return [("NONE", "NONE", "NONE")]
-
     def update_editing_addon(self, context):
         addon_tree = self.addon_tree()
         addon_tree.sn_graph_index = addon_tree.sn_graph_index
@@ -128,11 +118,6 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
             bpy.ops.sn.compile()
             self.example_dropdown = "NONE"
 
-    editing_addon: bpy.props.EnumProperty(items=get_addon_items,
-                                          update=update_editing_addon,
-                                          name="Editing Addon",
-                                          description="Select the addon you want to edit")
-
     example_dropdown: bpy.props.EnumProperty(items=get_example_items,
                                              update=update_examples,
                                              name="Examples",
@@ -151,8 +136,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
         full_items = []
         for item in items:
-            icon = "FILE_SCRIPT" if item == self.editing_addon else "SCRIPT"
-            full_items.append((item, item, item, icon, len(full_items)))
+            full_items.append((item, item, item, "SCRIPT", len(full_items)))
 
         return full_items
 

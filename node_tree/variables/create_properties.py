@@ -1,6 +1,5 @@
 import bpy
 import json
-from ...interface.menu.rightclick import construct_from_attached_property, construct_from_property
 
 
 class SN_OT_CreateProperty(bpy.types.Operator):
@@ -20,6 +19,9 @@ class SN_OT_CreateProperty(bpy.types.Operator):
         addon_tree.sn_property_index = len(addon_tree.sn_properties)-1
         return {"FINISHED"}
 
+
+def construct_from_property(): pass
+def construct_from_attached_property(): pass
 
 
 class SN_OT_RemoveProperty(bpy.types.Operator):

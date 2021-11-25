@@ -46,9 +46,9 @@ class SN_ScriptingBaseNode:
         # go through all inputs and update connected program nodes
 
 
-    def compile(self, context=None, is_export=False):
+    def compile(self, context=None):
         """ Call this when any data of this node changed, including properties or data inputs. Updates this nodes program code """
-        if is_export:
+        if False: # is export
             self.code = self.evaluate_export(bpy.context)
         else:
             self.code = self.evaluate(bpy.context)
@@ -166,9 +166,10 @@ class SN_ScriptingBaseNode:
 
 
     def auto_compile(self,context=None):
-        self.on_any_change()
-        self.node_tree.set_changes(True)
-        self.update_item_name()
+        # self.on_any_change()
+        # self.node_tree.set_changes(True)
+        # self.update_item_name()
+        pass
         
         
     ### UPDATE FROM NODE PER TYPE
@@ -277,17 +278,17 @@ class SN_ScriptingBaseNode:
 
 
     def init(self,context):
-        self.node_tree_uid = bpy.context.space_data.node_tree.sn_uid
-        self.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
-        self.uid = uuid4().hex[:5].upper()
+        # self.node_tree_uid = bpy.context.space_data.node_tree.sn_uid
+        # self.addon_tree_uid = bpy.context.scene.sn.addon_tree().sn_uid
+        # self.uid = uuid4().hex[:5].upper()
         if "default_color" in self.node_options:
             self.color = self.node_options["default_color"]
         else:
             self.color = (0.3,0.3,0.3)
         self.use_custom_color = True
-        self.__create_property_group()
-        self.__add_self_to_property_group()
-        self.auto_compile()
+        # self.__create_property_group()
+        # self.__add_self_to_property_group()
+        # self.auto_compile()
         self.on_create(context)
 
 

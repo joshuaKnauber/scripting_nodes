@@ -34,7 +34,7 @@ import os
 
 from .keymaps.keymap import register_keymaps, unregister_keymaps
 from .node_tree.node_categories import get_node_categories
-from .interface.header.header import prepend_header, append_header, example_dropdown
+from .interface.header.header import prepend_header, append_header
 from .interface.menu.rightclick import serpens_right_click
 from .interface.menu.snippets import snippet_menu
 
@@ -72,47 +72,39 @@ def register_icons():
         
 def unregister_icons():
     bpy.utils.previews.remove( bpy.types.Scene.sn_icons )
-
-
-def register_classes():
-    auto_load.register()
-
-
-def unregister_classes():
-    auto_load.unregister()
     
 
 def register():
     # register the classes of the addon
-    register_classes()
+    auto_load.register()
     
     # register the text properties
-    bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False,name="Is Serpens Addon")
+    # bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False,name="Is Serpens Addon")
 
     # addon properties
-    bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties,name="Serpens Properties")
+    # bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties,name="Serpens Properties")
 
     # register the keymaps
-    register_keymaps()
+    # register_keymaps()
 
     # register the icons
-    register_icons()
+    # register_icons()
 
     # register node categories
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
 
     # add the node tree header
-    bpy.types.NODE_HT_header.append(append_header)
-    bpy.types.NODE_HT_header.prepend(prepend_header)
-    bpy.types.NODE_MT_editor_menus.append(example_dropdown)
+    # bpy.types.NODE_HT_header.append(append_header)
+    # bpy.types.NODE_HT_header.prepend(prepend_header)
+    # bpy.types.NODE_MT_editor_menus.append(example_dropdown)
 
     # add to the node add menu
-    bpy.types.NODE_MT_category_snippets.append(snippet_menu)
+    # bpy.types.NODE_MT_category_snippets.append(snippet_menu)
 
     # app handlers
-    bpy.app.handlers.load_post.append(load_handler)
-    bpy.app.handlers.depsgraph_update_post.append(handlers.depsgraph_handler)
-    atexit.register(unload_handler)
+    # bpy.app.handlers.load_post.append(load_handler)
+    # bpy.app.handlers.depsgraph_update_post.append(handlers.depsgraph_handler)
+    # atexit.register(unload_handler)
     
     # add right click menu
     bpy.types.WM_MT_button_context.append(serpens_right_click)
@@ -120,36 +112,36 @@ def register():
 
 def unregister():
     # remove the node tree header
-    bpy.types.NODE_HT_header.remove(append_header)
-    bpy.types.NODE_HT_header.remove(prepend_header)
-    bpy.types.NODE_MT_editor_menus.remove(example_dropdown)
+    # bpy.types.NODE_HT_header.remove(append_header)
+    # bpy.types.NODE_HT_header.remove(prepend_header)
+    # bpy.types.NODE_MT_editor_menus.remove(example_dropdown)
 
     # remove from the node add menu
-    bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
+    # bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
 
     # unregister the text properties
-    del bpy.types.Text.is_sn_addon
+    # del bpy.types.Text.is_sn_addon
 
     # addon properties
-    del bpy.types.Scene.sn
+    # del bpy.types.Scene.sn
 
     # unregister the keymaps
-    unregister_keymaps()
+    # unregister_keymaps()
 
     # unregister the icons
-    unregister_icons()
+    # unregister_icons()
 
     # unregister node categories
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
 
     # remove handlers
-    bpy.app.handlers.load_post.remove(load_handler)
-    bpy.app.handlers.depsgraph_update_post.remove(handlers.depsgraph_handler)
-    atexit.unregister(unload_handler)
+    # bpy.app.handlers.load_post.remove(load_handler)
+    # bpy.app.handlers.depsgraph_update_post.remove(handlers.depsgraph_handler)
+    # atexit.unregister(unload_handler)
     
     # remove right click menu
     try: bpy.types.WM_MT_button_context.remove(serpens_right_click)
     except: pass
 
     # unregister the addon classes
-    unregister_classes()
+    auto_load.unregister()

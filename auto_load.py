@@ -27,9 +27,7 @@ def init():
 
 def register():
     for cls in ordered_classes:
-        try:
-            bpy.utils.register_class(cls)
-        except: pass
+        bpy.utils.register_class(cls)
 
     for module in modules:
         if module.__name__ == __name__:
@@ -39,9 +37,7 @@ def register():
 
 def unregister():
     for cls in reversed(ordered_classes):
-        try:
-            bpy.utils.unregister_class(cls)
-        except: pass
+        bpy.utils.unregister_class(cls)
 
     for module in modules:
         if module.__name__ == __name__:

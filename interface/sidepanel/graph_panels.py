@@ -61,7 +61,7 @@ class SN_PT_GraphPanel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.sn.editing_addon != "NONE" and context.space_data.tree_type == "ScriptingNodesTree"
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
 
     def draw(self, context):
         layout = self.layout
@@ -142,7 +142,7 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.sn.editing_addon != "NONE" and context.space_data.tree_type == "ScriptingNodesTree"
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
 
     def draw(self, context):
         layout = self.layout
@@ -185,7 +185,7 @@ class SN_PT_SnippetPanel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.sn.editing_addon != "NONE" and context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
 
     def draw(self, context):
         layout = self.layout
@@ -203,7 +203,7 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return context.scene.sn.editing_addon != "NONE" and context.space_data.tree_type == "ScriptingNodesTree"
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
 
     def draw(self, context):
         layout = self.layout
