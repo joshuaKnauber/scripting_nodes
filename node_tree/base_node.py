@@ -62,21 +62,21 @@ class SN_ScriptingBaseNode:
         min_indent = self._get_min_indent(raw_code.split("\n"))
         return raw_code
 
-    def set_code(self, raw_code):
+    def _set_code(self, raw_code):
         """ Checks if the given code is different from the current code and sets the property. If required it triggers a code update """
         normalized = self._normalize_code(raw_code)
         if self.get("code") == None or normalized != self["code"]:
             self["code"] = normalized
             self.node_code_changed()
 
-    def get_code(self):
+    def _get_code(self):
         """ Returns the current code of this node """
         return self.get("code", "")
 
     code: bpy.props.StringProperty(name="Code",
                                     description="The current compiled code for this node",
-                                    set=set_code,
-                                    get=get_code)
+                                    set=_set_code,
+                                    get=_get_code)
 
 
     def use_imperative(self, raw_code, identifier=None):

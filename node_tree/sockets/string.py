@@ -9,28 +9,15 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
 
 
-    def get_value(self):
-        if self.is_output:
-            return self.get(self.subtype_attr, "")
-        else:
-            from_out = self.from_socket()
-            if from_out:
-                return from_out.default_value
-            return self.get(self.subtype_attr, "")
+    default_python_value = "\"\""
 
-    def set_value(self, value):
-        self[self.subtype_attr] = value
-        
-        if self.is_output:
-            for socket in self.to_sockets():
-                socket.node.evaluate(bpy.context)
-        else:
-            self.node.evaluate(bpy.context)
+    def get_python_repr(self):
+        return f"\"{self.default_value}\""
 
     default_value: bpy.props.StringProperty(name="Value",
                                             description="Value of this socket",
-                                            get=get_value,
-                                            set=set_value)
+                                            get=ScriptingSocket._get_value,
+                                            set=ScriptingSocket._set_value)
 
     value_file_path: bpy.props.StringProperty(name="Value",
                                             description="Value of this socket",
@@ -48,7 +35,6 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         return (0.44, 0.7, 1)
 
     def draw_socket(self, context, layout, node, text):
-        text = self.get(self.subtype_attr, "")
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:

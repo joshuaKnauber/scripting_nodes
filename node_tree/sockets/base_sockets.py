@@ -6,15 +6,17 @@ class ScriptingSocket:
     
     ### SOCKET GENERAL
     output_limit = 9999
+    # OVERWRITE
     socket_shape = "CIRCLE" # CIRCLE | SQUARE | DIAMOND
 
 
-    ### SOCKET OPTIONS    
+    ### SOCKET OPTIONS
+    # OVERWRITE
     is_program = False # Only Interface and Execute sockets are programs
     socket_type = "" # Uniquely identifiable socket type
-    
     dynamic = False # True if this is a dynamic socket
 
+    # OVERWRITE
     subtypes = ["NONE"] # possible subtypes for this data socket. Vector sockets should be seperate socket types, not subtypes (their size is a subtype)!
     subtype_values = {"NONE": "default_value"} # the matching propertie names for this data sockets subtype
 
@@ -31,14 +33,16 @@ class ScriptingSocket:
         pass
     
     ### DRAW SOCKET
+    # OVERWRITE
+    def draw_socket(self, context, layout, node, text): pass
+
     def draw(self, context, layout, node, text):
         self.draw_socket(context, layout, node, text)
 
 
     ### SOCKET COLOR
-    def get_color(self, context, node):
-        """ overwrite this to set the sockets basic color """
-        return (0,0,0)
+    # OVERWRITE
+    def get_color(self, context, node): return (0,0,0)
 
     def draw_color(self, context, node):
         c = self.get_color(context, node)
@@ -48,34 +52,77 @@ class ScriptingSocket:
         return (c[0], c[1], c[2], alpha)
 
 
-    ### HANDLE DATA CODE
+    ### DATA CODE
+    # OVERWRITE
+    default_python_value = "None"
+    def get_python_repr(self): return "None"
+
+
+    def _get_python(self):
+        if self.is_output:
+            return self.get("python_value", self.default_python_value)
+        else:
+            from_out = self.from_socket()
+            if from_out:
+                # TODO handle data conversion here
+                return from_out.python_value
+            return self.get_python_repr()
+
+    def _set_python(self, value):
+        self["python_value"] = value
+
+        if self.is_output:
+            for socket in self.to_sockets():
+                socket.node.evaluate(bpy.context)
+        else:
+            self.node.evaluate(bpy.context)
+
+    python_value: bpy.props.StringProperty(name="Python Value",
+                                            description="Python representation of this sockets value",
+                                            get=_get_python,
+                                            set=_set_python)
+
+    
+    def _get_value(self):
+        return self.get(self.subtype_attr, '')
+
+    def _set_value(self, value):
+        self[self.subtype_attr] = value
+        self.python_value = self._get_python()
+
+    
+    # OVERWRITE
+    default_value: bpy.props.StringProperty(name="Value",
+                                            description="Value of this socket",
+                                            get=_get_value,
+                                            set=_set_value)
+
+
+    ### CONNECTED SOCKETS
+    def _get_to_sockets(self, socket):
+        to_sockets = []
+        if socket.node.bl_idname == "NodeReroute":
+            for link in socket.node.outputs[0].links:
+                to_sockets += self._get_to_sockets(link.to_socket)
+        else:
+            to_sockets.append(socket)
+        return to_sockets
+
     def to_sockets(self):
         sockets = []
         for link in self.links:
-            if self.is_valid_link(link):
-                to_inp = self.to_socket(link)
-                if to_inp:
-                    sockets.append(to_inp)
-        return sockets
+            sockets += self._get_to_sockets(link.to_socket)
 
-    def to_socket(self, link):
-        if self.is_linked:
-            to_inp = link.to_socket
-            while to_inp.node.bl_idname == "NodeReroute":
-                if to_inp.node.outputs[0].is_linked:
-                    # BUG what if routing in multiple directions again?
-                    to_inp = to_inp.node.outputs[0].links[0].to_socket
-                else:
-                    return None
-            return to_inp
-        return None
+        if self.is_program and len(sockets) > 1:
+            # TODO think about how to invalidate links here and validate them again if necessary (also above when going through links)
+            return sockets[1:]
+        return sockets
 
     def from_socket(self):
         if self.is_linked:
             from_out = self.links[0].from_socket
             while from_out.node.bl_idname == "NodeReroute":
                 if from_out.node.inputs[0].is_linked:
-                    # BUG see to_socket
                     from_out = from_out.node.inputs[0].links[0].from_socket
                 else:
                     return None

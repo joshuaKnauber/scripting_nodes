@@ -9,11 +9,10 @@ class SN_TestNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Test Node"
 
     def on_create(self, context):
-        self.add_string_input()
-        self.add_string_output()
+        self.add_string_input("String")
 
     def evaluate(self, context):
-        pass
+        print(self.inputs["String"].python_value, self.name)
 
     def draw_node(self, context, layout):
-        layout.label(text=self.inputs[0].default_value)
+        layout.label(text=self.name)

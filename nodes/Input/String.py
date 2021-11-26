@@ -12,7 +12,7 @@ class SN_StringNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_string_output("String")
 
     def evaluate(self, context):
-        self.outputs["String"].default_value = self.string
+        self.outputs["String"].python_value = f"\"{self.string}\""
 
     string: bpy.props.StringProperty(name="String", description="String value of this node", update=evaluate)
 
