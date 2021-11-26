@@ -28,6 +28,8 @@ class SN_ScriptingBaseNode:
     # set this to true for the node if it starts a program node tree (nodes like operator, panel, ...)
     is_trigger = False
 
+    # set this for any interface nodes that change the layout type (nodes like row, column, split, ...)
+    layout_type = "layout"
 
     """
     NOTE: remove the concept of having a main tree for the addon. from now on one addon per file and all different trees are saved as separate files
@@ -116,14 +118,6 @@ class SN_ScriptingBaseNode:
         Set self.code as the last thing you do in this node!!! Set all data outputs code before or this might cause issues!
         You can store temporary code in variables in this function before you set self.code if necessary to adhere to this.
         """
-        # test = "test"
-        # self.use_imperative("""
-        #                     print("some code in here")
-        #                     """)
-        # self.code =   f"""
-        #               print("test {test}")
-        #               """
-        self.code = ""
 
 
     order: bpy.props.IntProperty(default=0,
@@ -195,7 +189,10 @@ class SN_ScriptingBaseNode:
     def draw_buttons_ext(self,context,layout):
         layout.use_property_split = True
         layout.prop(self, "order")
-        layout.label(text=self.code)
+        box = layout.box()
+        col = box.column(align=True)
+        for line in self.code.split("\n"):
+            col.label(text=line)
         self.draw_node_panel(context, layout)
         
 
@@ -232,3 +229,14 @@ class SN_ScriptingBaseNode:
     ### ERROR HANDLING
     def add_error(self, title, description, fatal=False):
         pass
+
+
+
+    ### INTERFACE UTIL
+    @property
+    def active_layout(self):
+        interface_socket = self.inputs[0]
+        from_out = interface_socket.from_socket()
+        if from_out and from_out.bl_label == "Interface":
+            return from_out.node.layout_type
+        return "layout"

@@ -13,7 +13,7 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_string_input("Label")
 
     def evaluate(self, context):
-        self.code = f"layout.label(text={self.inputs['Label'].python_value})"
+        self.code = f"{self.active_layout}.label(text={self.inputs['Label'].python_value})"
 
     def draw_node(self, context, layout):
         pass
