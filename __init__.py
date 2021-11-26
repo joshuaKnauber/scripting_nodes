@@ -41,8 +41,6 @@ from .interface.menu.snippets import snippet_menu
 from .settings.addon_properties import SN_AddonProperties
 from .settings.updates import check_serpens_updates
 
-from .compiler.compiler import handle_file_load, handle_file_unload
-
 from . import handlers
 
 from . import auto_load
@@ -51,13 +49,11 @@ auto_load.init()
 
 @persistent
 def load_handler(dummy):
-    handle_file_unload()
-    handle_file_load()
     check_serpens_updates(bl_info["version"])
 
 
 def unload_handler(dummy=None):
-    handle_file_unload()
+    pass
     
     
 def register_icons():
@@ -82,7 +78,7 @@ def register():
     # bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False,name="Is Serpens Addon")
 
     # addon properties
-    # bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties,name="Serpens Properties")
+    bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties,name="Serpens Properties")
 
     # register the keymaps
     # register_keymaps()
@@ -123,7 +119,7 @@ def unregister():
     # del bpy.types.Text.is_sn_addon
 
     # addon properties
-    # del bpy.types.Scene.sn
+    del bpy.types.Scene.sn
 
     # unregister the keymaps
     # unregister_keymaps()
