@@ -1,6 +1,8 @@
-import bpy
 from nodeitems_utils import NodeCategory, NodeItem
 import os
+from .. import nodes
+import sys
+import inspect
 
 
 
@@ -13,6 +15,10 @@ class SN_ScriptingNodesCategory(NodeCategory):
 
 
 def get_node_categories():
+    # classes = [obj for name, obj in inspect.getmembers(sys.modules[nodes.__name__], inspect.isclass) if obj.__module__ is nodes.__name__]
+    # print(classes)
+    
+
     node_categories_list = {}
 
     container = os.path.join(os.path.dirname(os.path.dirname(__file__)),"nodes")
