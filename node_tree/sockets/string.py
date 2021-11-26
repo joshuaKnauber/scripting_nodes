@@ -1,5 +1,5 @@
 import bpy
-from .base_sockets import ScriptingSocket
+from .base_socket import ScriptingSocket
 
 
 
@@ -38,4 +38,4 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:
-            layout.prop(self, "default_value", text=text)
+            layout.prop(self, self.subtype_attr, text=text)

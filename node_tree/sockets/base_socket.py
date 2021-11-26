@@ -52,30 +52,40 @@ class ScriptingSocket:
         return (c[0], c[1], c[2], alpha)
 
 
-    ### DATA CODE
+    ### PASS CODE AND DATA
     # OVERWRITE
     default_python_value = "None"
     def get_python_repr(self): return "None"
 
 
     def _get_python(self):
-        if self.is_output:
-            return self.get("python_value", self.default_python_value)
+        if self.is_program:
+            if self.is_output:
+                return self.get("python_value", self.default_python_value)
+        
         else:
-            from_out = self.from_socket()
-            if from_out:
-                # TODO handle data conversion here
-                return from_out.python_value
-            return self.get_python_repr()
+            if self.is_output:
+                return self.get("python_value", self.default_python_value)
+            else:
+                from_out = self.from_socket()
+                if from_out:
+                    # TODO handle data conversion here
+                    return from_out.python_value
+                return self.get_python_repr()
 
     def _set_python(self, value):
         self["python_value"] = value
 
-        if self.is_output:
-            for socket in self.to_sockets():
-                socket.node.evaluate(bpy.context)
+        if self.is_program:
+            if self.is_output:
+                self.node.evaluate(bpy.context)
+        
         else:
-            self.node.evaluate(bpy.context)
+            if self.is_output:
+                for socket in self.to_sockets():
+                    socket.node.evaluate(bpy.context)
+            else:
+                self.node.evaluate(bpy.context)
 
     python_value: bpy.props.StringProperty(name="Python Value",
                                             description="Python representation of this sockets value",

@@ -50,7 +50,11 @@ class SN_ScriptingBaseNode:
 
     def node_code_changed(self, context=None):
         """ Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes """
-        pass
+        for inp in self.inputs:
+            if inp.is_program:
+                from_out = inp.from_socket()
+                if from_out:
+                    from_out.python_value = self.code
 
 
     def _get_min_indent(self, code_lines):
@@ -212,6 +216,11 @@ class SN_ScriptingBaseNode:
     def add_execute_output(self, label="Execute"): return self._add_output("SN_ExecuteSocket", label)
     def add_dynamic_execute_input(self, label="Execute"): return self._add_input("SN_ExecuteSocket", label, True)
     def add_dynamic_execute_output(self, label="Execute"): return self._add_output("SN_ExecuteSocket", label, True)
+
+    def add_interface_input(self, label="Interface"): return self._add_input("SN_InterfaceSocket", label)
+    def add_interface_output(self, label="Interface"): return self._add_output("SN_InterfaceSocket", label)
+    def add_dynamic_interface_input(self, label="Interface"): return self._add_input("SN_InterfaceSocket", label, True)
+    def add_dynamic_interface_output(self, label="Interface"): return self._add_output("SN_InterfaceSocket", label, True)
 
     def add_string_input(self, label="String"): return self._add_input("SN_StringSocket", label)
     def add_string_output(self, label="String"): return self._add_output("SN_StringSocket", label)
