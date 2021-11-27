@@ -5,7 +5,11 @@ import bpy
 
 class SN_AddonProperties(bpy.types.PropertyGroup):
 
-    node_tree_index: bpy.props.IntProperty(default=0, name="Active Node Tree", description="The node tree you're currently editing")
+    def update_node_tree_index(self, context):
+        if len(bpy.data.node_groups):
+            bpy.context.space_data.node_tree = bpy.data.node_groups[self.node_tree_index]
+
+    node_tree_index: bpy.props.IntProperty(default=0, name="Active Node Tree", description="The node tree you're currently editing", update=update_node_tree_index)
 
     addon_name: bpy.props.StringProperty(default="My Addon",
                                         name="Addon Name",

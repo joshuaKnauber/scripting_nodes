@@ -67,12 +67,11 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         layout = self.layout
         sn = context.scene.sn
 
-        # row = layout.row(align=False)
-        # row.template_list("SN_UL_GraphList", "Graphs", bpy.data, "node_groups", sn, "node_tree_index", rows=4)
-        # col = row.column(align=True)
-        # col.operator("node.new_node_tree", text="", icon="ADD")
-        # col.operator("sn.append_graph", text="", icon="APPEND_BLEND")
-        # col.operator("sn.remove_graph", text="", icon="REMOVE").index = sn.node_tree_index
+        row = layout.row(align=False)
+        row.template_list("SN_UL_GraphList", "Graphs", bpy.data, "node_groups", sn, "node_tree_index", rows=4)
+        col = row.column(align=True)
+        col.operator("node.new_node_tree", text="", icon="ADD")
+        col.operator("sn.remove_graph", text="", icon="TRASH").index = sn.node_tree_index
 
 
 
@@ -97,11 +96,15 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_order = 1
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
     
     def draw(self, context):
         layout = self.layout
-            
-            
+
+
 
 class SN_PT_AssetsPanel(bpy.types.Panel):
     bl_idname = "SN_PT_AssetsPanel"
@@ -111,6 +114,10 @@ class SN_PT_AssetsPanel(bpy.types.Panel):
     bl_category = "Serpens"
     bl_order = 2
     bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
 
     def draw(self, context):
         layout = self.layout
@@ -125,6 +132,10 @@ class SN_PT_IconPanel(bpy.types.Panel):
     bl_category = "Serpens"
     bl_order = 3
     bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
 
     def draw(self, context):
         layout = self.layout
@@ -146,24 +157,24 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        # sn = context.scene.sn
+        sn = context.scene.sn
         
-        # layout.use_property_split = True
-        # layout.use_property_decorate = False
-        # layout.prop(sn, "addon_name")
-        # layout.prop(sn, "description")
-        # layout.prop(sn, "author")
-        # layout.prop(sn, "location")
-        # layout.prop(sn, "warning")
-        # layout.prop(sn, "doc_url")
-        # layout.prop(sn, "tracker_url")
-        # col = layout.column(align=True)
-        # col.prop(sn, "category")
-        # if sn.category == "CUSTOM":
-        #     col.prop(sn, "custom_category", text=" ")
-        # layout.prop(sn, "version")
-        # layout.prop(sn, "blender")
-        
+        layout.use_property_split = True
+        layout.use_property_decorate = False
+        layout.prop(sn, "addon_name")
+        layout.prop(sn, "description")
+        layout.prop(sn, "author")
+        layout.prop(sn, "location")
+        layout.prop(sn, "warning")
+        layout.prop(sn, "doc_url")
+        layout.prop(sn, "tracker_url")
+        col = layout.column(align=True)
+        col.prop(sn, "category")
+        if sn.category == "CUSTOM":
+            col.prop(sn, "custom_category", text=" ")
+        layout.prop(sn, "version")
+        layout.prop(sn, "blender")
+
         # row = layout.row()
         # row.scale_y = 1.5
         # col = row.column(align=True)
