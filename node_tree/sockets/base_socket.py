@@ -27,10 +27,7 @@ class ScriptingSocket:
     @property
     def subtype_attr(self):
         return self.subtype_values[self.subtype]
-    
-    ### UPDATE SOCKET
-    def update_socket(self, node, link):
-        pass
+        
     
     ### DRAW SOCKET
     # OVERWRITE

@@ -14,6 +14,7 @@ class SN_LayoutColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_output()
         self.add_interface_output()
         self.add_string_input()
+        self.node_tree.links.new(self.inputs[0], self.outputs[0])
 
     def evaluate(self, context):
         self.code = f"""

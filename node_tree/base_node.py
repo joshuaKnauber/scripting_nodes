@@ -1,4 +1,5 @@
 import bpy
+import functools
 from uuid import uuid4
 
 
@@ -37,6 +38,10 @@ class SN_ScriptingBaseNode:
     NOTE: when exporting the final addon, somehow trigger compile on all nodes to get export code
     NOTE: data sockets somehow need to update their own and connected nodes
     """
+    @classmethod
+    def poll(cls, ntree):
+        return ntree.bl_idname == 'ScriptingNodesTree'
+
 
     @property
     def node_tree(self):
@@ -184,11 +189,14 @@ class SN_ScriptingBaseNode:
 
 
     ### LINK UPDATE
-    def on_link_insert_before(self, link): pass
+    def on_link_insert(self, link): pass
+
+    def after_insert_link(self, link):
+        self.on_link_insert(link)
 
     def insert_link(self, link):
         """ Handle creation of a link to or from the node """
-        self.on_link_insert_before(link)
+        # bpy.app.timers.register(functools.partial(self.after_insert_link, link), first_interval=0.001)
 
 
     ### SOCKET VALUE UPDATE
@@ -221,14 +229,14 @@ class SN_ScriptingBaseNode:
     ### CREATE SOCKETS
     def _add_input(self, idname, label, dynamic=False):
         socket = self.inputs.new(idname, label)
-        socket.dynamic = dynamic
-        socket.display_shape = socket.socket_shape
+        # socket.dynamic = dynamic
+        # socket.display_shape = socket.socket_shape
         return socket
     
     def _add_output(self, idname, label, dynamic=False):
         socket = self.outputs.new(idname, label)
-        socket.dynamic = dynamic
-        socket.display_shape = socket.socket_shape
+        # socket.dynamic = dynamic
+        # socket.display_shape = socket.socket_shape
         return socket
 
     def add_execute_input(self, label="Execute"): return self._add_input("SN_ExecuteSocket", label)
