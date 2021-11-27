@@ -17,11 +17,9 @@ class SN_LayoutRowNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         self.code = f"""
-                    # pass
                     row = {self.active_layout}.row()
-                        # pass
-                    {self.outputs[0].python_value}
-                    {self.outputs[1].python_value}
+                    {self.indent(self.outputs[0].python_value, 5)}
+                    {self.indent(self.outputs[1].python_value, 5)}
                     """
 
     def draw_node(self, context, layout):

@@ -59,14 +59,36 @@ class SN_ScriptingBaseNode:
                     from_out.python_value = self.code
 
 
+    def indent(self, code, indents):
+        """ Indents the given code by the given amount of indents. Use this when inserting multiline blocks into code """
+        lines = code.split("\n")
+        for i in range(1, len(lines)):
+            lines[i] = " "*(4*indents) + lines[i]
+        return "\n".join(lines)
+
+
+    def _get_indents(self, line):
+        """ Returns the amount of spaces at the start of the given line """
+        return len(line) - len(line.lstrip())
+    
     def _get_min_indent(self, code_lines):
         """ Returns the minimum indent of the given lines of text """
-        pass
+        min_indent = 9999
+        for line in code_lines:
+            if not line.isspace() and line:
+                min_indent = min(min_indent, self._get_indents(line))
+        return min_indent if min_indent != 9999 else 0
 
     def _normalize_code(self, raw_code):
-        """ Normalizes the given code to the minimum indent """
-        min_indent = self._get_min_indent(raw_code.split("\n"))
-        return raw_code
+        """ Normalizes the given code to the minimum indent and removes empty lines """
+        lines = raw_code.split("\n")
+        min_indent = self._get_min_indent(lines)
+        indented = []
+        for line in lines:
+            new_line = line[min_indent:]
+            if new_line:
+                indented.append(new_line)
+        return "\n".join(indented)
 
     def _set_code(self, raw_code):
         """ Checks if the given code is different from the current code and sets the property. If required it triggers a code update """

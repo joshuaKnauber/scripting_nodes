@@ -10,4 +10,4 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     # variables: bpy.props.CollectionProperty()
 
     def update(self):
-        pass
+        print("update tree")
