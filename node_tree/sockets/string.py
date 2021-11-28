@@ -5,6 +5,7 @@ from .base_socket import ScriptingSocket
 
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
+    bl_idname = "SN_StringSocket"
     group = "DATA"
     bl_label = "String"
 

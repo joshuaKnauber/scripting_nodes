@@ -5,6 +5,7 @@ from .base_socket import ScriptingSocket
     
 class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
     
+    bl_idname = "SN_ExecuteSocket"
     output_limit = 1
     socket_shape = "DIAMOND"
     is_program = True
