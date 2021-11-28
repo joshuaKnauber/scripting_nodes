@@ -2,6 +2,13 @@ from bpy_extras.io_utils import ImportHelper
 import bpy
 import os
 
+def get_serpens_graphs():
+    graphs = []
+    for tree in bpy.data.node_groups:
+        if tree.bl_rna.identifier == "ScriptingNodesTree":
+            graphs.append(tree)
+    return graphs
+
 
 class SN_OT_RemoveGraph(bpy.types.Operator):
     bl_idname = "sn.remove_graph"
@@ -11,11 +18,16 @@ class SN_OT_RemoveGraph(bpy.types.Operator):
 
     index: bpy.props.IntProperty(options={"SKIP_SAVE"})
 
-    def execute(self, context):
-        for node in bpy.data.node_groups[self.index].nodes:
-            bpy.data.node_groups[self.index].nodes.remove(node)
+    @classmethod
+    def poll(cls, context):
+        return len(get_serpens_graphs()) > 0 and context.scene.sn.node_tree_index < len(get_serpens_graphs())
 
-        bpy.data.node_groups.remove(bpy.data.node_groups[self.index])
+    def execute(self, context):
+        tree = get_serpens_graphs()[self.index]
+        for node in tree.nodes:
+            tree.nodes.remove(node)
+
+        bpy.data.node_groups.remove(tree)
         bpy.context.scene.sn.node_tree_index = self.index-1 if self.index>0 else 0
         return {"FINISHED"}
 
@@ -29,7 +41,7 @@ class SN_OT_AppendPopup(bpy.types.Operator):
     bl_label = "Append Graph"
     bl_description = "Appends this graph from the addon"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
-    
+
     def get_graph_items(self,context):
         items = []
         with bpy.data.libraries.load(self.path) as (data_from, data_to):
