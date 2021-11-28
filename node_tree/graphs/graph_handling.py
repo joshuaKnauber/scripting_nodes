@@ -76,5 +76,3 @@ class SN_OT_AppendGraph(bpy.types.Operator, ImportHelper):
             bpy.ops.sn.append_popup("INVOKE_DEFAULT",path=self.filepath)
         return {"FINISHED"}
 
-
-
