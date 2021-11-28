@@ -20,3 +20,4 @@ class SN_OT_RemoveGraph(bpy.types.Operator):
     def invoke(self, context, event):
         return context.window_manager.invoke_confirm(self, event)
 
+

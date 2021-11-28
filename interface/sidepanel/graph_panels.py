@@ -71,7 +71,17 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         row.template_list("SN_UL_GraphList", "Graphs", bpy.data, "node_groups", sn, "node_tree_index", rows=4)
         col = row.column(align=True)
         col.operator("node.new_node_tree", text="", icon="ADD")
+        col.operator("sn.append_graph", text="", icon="APPEND_BLEND")
         col.operator("sn.remove_graph", text="", icon="TRASH").index = sn.node_tree_index
+
+        
+        # col.separator()
+        # row = col.row(align=True)
+        # row.enabled = addon_tree.sn_graph_index > 1
+        # row.operator("sn.move_graph", text="", icon="TRIA_UP").up = True
+        # row = col.row(align=True)
+        # row.enabled = addon_tree.sn_graph_index < len(addon_tree.sn_graphs)-1
+        # row.operator("sn.move_graph", text="", icon="TRIA_DOWN").up = False
 
 
 
