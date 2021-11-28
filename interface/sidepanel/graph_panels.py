@@ -72,7 +72,16 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         col = row.column(align=True)
         col.operator("node.new_node_tree", text="", icon="ADD")
         col.operator("sn.append_graph", text="", icon="APPEND_BLEND")
-        col.operator("sn.remove_graph", text="", icon="REMOVE").index = sn.node_tree_index
+        col.operator("sn.remove_graph", text="", icon="TRASH").index = sn.node_tree_index
+
+        
+        # col.separator()
+        # row = col.row(align=True)
+        # row.enabled = addon_tree.sn_graph_index > 1
+        # row.operator("sn.move_graph", text="", icon="TRIA_UP").up = True
+        # row = col.row(align=True)
+        # row.enabled = addon_tree.sn_graph_index < len(addon_tree.sn_graphs)-1
+        # row.operator("sn.move_graph", text="", icon="TRIA_DOWN").up = False
 
 
 
@@ -97,11 +106,15 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_order = 1
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
     
     def draw(self, context):
         layout = self.layout
-            
-            
+
+
 
 class SN_PT_AssetsPanel(bpy.types.Panel):
     bl_idname = "SN_PT_AssetsPanel"
@@ -111,6 +124,10 @@ class SN_PT_AssetsPanel(bpy.types.Panel):
     bl_category = "Serpens"
     bl_order = 2
     bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
 
     def draw(self, context):
         layout = self.layout
@@ -125,6 +142,10 @@ class SN_PT_IconPanel(bpy.types.Panel):
     bl_category = "Serpens"
     bl_order = 3
     bl_options = {"DEFAULT_CLOSED"}
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
 
     def draw(self, context):
         layout = self.layout
@@ -163,14 +184,14 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
             col.prop(sn, "custom_category", text=" ")
         layout.prop(sn, "version")
         layout.prop(sn, "blender")
-        
-        row = layout.row()
-        row.scale_y = 1.5
-        col = row.column(align=True)
-        col.operator("sn.save_addon",text="Save Addon",icon="FILE_TICK")
-        row = col.row()
-        row.scale_y = 0.7
-        row.operator("sn.export_to_marketplace",text="Add to Marketplace",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id)
+
+        # row = layout.row()
+        # row.scale_y = 1.5
+        # col = row.column(align=True)
+        # col.operator("sn.save_addon",text="Save Addon",icon="FILE_TICK")
+        # row = col.row()
+        # row.scale_y = 0.7
+        # row.operator("sn.export_to_marketplace",text="Add to Marketplace",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id)
 
 
 
@@ -208,38 +229,38 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
-        addon_tree = context.scene.sn.addon_tree()
-        addon_graph = addon_tree.sn_graphs[0]
+        # addon_tree = context.scene.sn.addon_tree()
+        # addon_graph = addon_tree.sn_graphs[0]
 
-        layout.use_property_split = True
-        layout.use_property_decorate = False
+        # layout.use_property_split = True
+        # layout.use_property_decorate = False
 
-        row = layout.row()
-        row.alignment = "RIGHT"
-        row.label(text="Last Compile: "+addon_graph.last_compile_time)
+        # row = layout.row()
+        # row.alignment = "RIGHT"
+        # row.label(text="Last Compile: "+addon_graph.last_compile_time)
 
-        layout.prop(addon_graph, "compile_on_start", text="Compile on Startup")
+        # layout.prop(addon_graph, "compile_on_start", text="Compile on Startup")
 
-        layout.separator()
+        # layout.separator()
 
-        layout.prop(addon_graph, "autocompile", text="Auto Compile")
-        row = layout.row()
-        row.enabled = addon_graph.autocompile
-        row.prop(addon_graph, "autocompile_delay", text="Delay")
+        # layout.prop(addon_graph, "autocompile", text="Auto Compile")
+        # row = layout.row()
+        # row.enabled = addon_graph.autocompile
+        # row.prop(addon_graph, "autocompile_delay", text="Delay")
 
-        layout.separator()
+        # layout.separator()
 
-        col = layout.column()
-        col.enabled = bpy.data.is_saved
-        col.prop(context.scene.sn, "use_autosave")
-        row = col.row()
-        row.enabled = context.scene.sn.use_autosave
-        row.prop(context.scene.sn, "autosave_delay")
+        # col = layout.column()
+        # col.enabled = bpy.data.is_saved
+        # col.prop(context.scene.sn, "use_autosave")
+        # row = col.row()
+        # row.enabled = context.scene.sn.use_autosave
+        # row.prop(context.scene.sn, "autosave_delay")
 
-        layout.separator()
+        # layout.separator()
 
-        layout.template_ID(context.scene.sn, "easy_bpy",
-                           open="text.open", text="Easy BPY")
+        # layout.template_ID(context.scene.sn, "easy_bpy",
+        #                    open="text.open", text="Easy BPY")
 
 
 
