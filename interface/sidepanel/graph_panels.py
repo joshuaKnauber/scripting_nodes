@@ -74,7 +74,7 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         col.operator("sn.append_graph", text="", icon="APPEND_BLEND")
         col.operator("sn.remove_graph", text="", icon="TRASH").index = sn.node_tree_index
 
-        
+
         # col.separator()
         # row = col.row(align=True)
         # row.enabled = addon_tree.sn_graph_index > 1
