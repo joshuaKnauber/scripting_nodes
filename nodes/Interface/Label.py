@@ -1,5 +1,5 @@
 import bpy
-from ...node_tree.base_node import SN_ScriptingBaseNode
+from ..base_node import SN_ScriptingBaseNode
 
 
 

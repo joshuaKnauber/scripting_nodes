@@ -2,12 +2,15 @@ from bpy_extras.io_utils import ImportHelper
 import bpy
 import os
 
+
+
 def get_serpens_graphs():
     graphs = []
     for tree in bpy.data.node_groups:
         if tree.bl_rna.identifier == "ScriptingNodesTree":
             graphs.append(tree)
     return graphs
+
 
 
 class SN_OT_RemoveGraph(bpy.types.Operator):
@@ -20,6 +23,7 @@ class SN_OT_RemoveGraph(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
+        # TODO Fix this operator with graph filtering
         return len(get_serpens_graphs()) > 0 and context.scene.sn.node_tree_index < len(get_serpens_graphs())
 
     def execute(self, context):

@@ -108,30 +108,6 @@ class SN_ScriptingBaseNode:
                                     get=_get_code)
 
 
-    def use_imperative(self, raw_code, identifier=None):
-        """Handler called to add unregister code to this node. Note that this only has an effect when called in evaluate
-        raw_code: the code that should be added. It's good practise to store this in a class variable and not pass it as a string in evaluate
-        indentifier: if an identifier is given the raw_code is only added if code with this identifier hasn't been added to this node tree before
-        """
-        pass
-
-
-    def use_register(self, raw_code, identifier=None):
-        """Handler called to add unregister code to this node. Note that this only has an effect when called in evaluate
-        raw_code: the code that should be added. It's good practise to store this in a class variable and not pass it as a string in evaluate
-        indentifier: if an identifier is given the raw_code is only added if code with this identifier hasn't been added to this node tree before
-        """
-        pass
-
-
-    def use_unregister(self, raw_code, identifier=None):
-        """Handler called to add unregister code to this node. Note that this only has an effect when called in evaluate
-        raw_code: the code that should be added. It's good practise to store this in a class variable and not pass it as a string in evaluate
-        indentifier: if an identifier is given the raw_code is only added if code with this identifier hasn't been added to this node tree before
-        """
-        pass
-
-
     def evaluate(self, context):
         """Updates this nodes code and the code of all changed data outputs
         Call this when the data of this node has changed (e.g. as the update function of properties).
@@ -167,11 +143,11 @@ class SN_ScriptingBaseNode:
 
 
     ### COPY NODE
-    def on_copy(self, node): pass
+    def on_copy(self, old): pass
 
-    def copy(self, node):
+    def copy(self, old):
         # set up the node
-        self.on_copy(node)
+        self.on_copy(old)
         # evaluate the node for the first time after copying
         self.evaluate(bpy.context)
 
@@ -274,3 +250,58 @@ class SN_ScriptingBaseNode:
                 if from_out:
                     return from_out.node.layout_type
         return "layout"
+
+
+
+### NODE TEMPLATE
+"""
+import bpy
+from ..base_node import SN_ScriptingBaseNode
+
+
+
+class SN_YourNode(bpy.types.Node, SN_ScriptingBaseNode):
+
+    bl_idname = "SN_YourNode"
+    bl_label = "Node Name"
+    node_color = "DEFAULT"
+
+    # delete these two if you don't need them
+    is_trigger = False
+    layout_type = "layout"
+
+
+    # avoid having properties on your nodes, expose everything to sockets if possible
+    string: bpy.props.StringProperty(name="String", description="String value of this node", update=evaluate)
+
+
+    def on_create(self, context):
+        self.add_string_output()
+
+
+    def on_copy(self, old): pass
+
+
+    def on_free(self): pass
+
+
+    def on_node_update(self): pass
+
+
+    def on_link_insert(self, socket, link): pass
+
+
+    def on_link_remove(self, socket): pass
+
+
+    def evaluate(self, context):
+        self.outputs[0].python_value = "# comment"
+        self.code = ""
+
+
+    def draw_node(self, context, layout):
+        layout.prop(self, "string", text="")
+
+
+    def draw_node_panel(self, context, layout): pass
+"""

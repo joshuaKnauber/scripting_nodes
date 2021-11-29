@@ -1,9 +1,9 @@
 import bpy
-from ..node_tree.base_node import SN_ScriptingBaseNode
-import os
 import gpu
 import bgl
 from gpu_extras.batch import batch_for_shader
+import os
+from .base_node import SN_ScriptingBaseNode
 
 
 

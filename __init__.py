@@ -34,8 +34,8 @@ import os
 from .keymaps.keymap import register_keymaps, unregister_keymaps
 from .node_tree.node_categories import get_node_categories
 from .interface.header.header import header_prepend, header_append
-from .interface.menu.rightclick import serpens_right_click
-from .interface.menu.snippets import snippet_menu
+from .interface.menus.rightclick import serpens_right_click
+from .interface.menus.snippets import snippet_menu
 
 from .settings.addon_properties import SN_AddonProperties
 
