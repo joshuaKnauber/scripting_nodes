@@ -71,12 +71,10 @@ class ScriptingSocket:
             if self.is_output:
                 return self.get("python_value", self.default_python_value)
             else:
-                # remove is linked here in favor of checking link in from_socket
-                if len(self.links) > 0:
-                    if self.node.node_tree.is_valid_link(self.links[0]):
-                        from_out = self.from_socket()
-                        # TODO handle data conversion here
-                        return from_out.python_value
+                from_out = self.from_socket()
+                if from_out:
+                    # TODO handle data conversion here
+                    return from_out.python_value
                 return self.get_python_repr()
 
     def _set_python(self, value):
@@ -84,7 +82,6 @@ class ScriptingSocket:
             self["python_value"] = value
             self._trigger_update()
 
-    # TODO evaluate node when it is created, maybe duplicated?
     def _trigger_update(self):
         if self.is_program:
             if self.is_output:
@@ -111,7 +108,7 @@ class ScriptingSocket:
         return self.get(self.subtype_attr, '')
 
     def _set_value(self, value):
-        # TODO: handle subtypes values changing
+        # TODO: handle subtypes value updates
         self[self.subtype_attr] = value
         self.python_value = self._get_python()
 
@@ -139,12 +136,12 @@ class ScriptingSocket:
                 to_sockets.append(socket)
         return to_sockets
 
-    def to_sockets(self):
+    def to_sockets(self, get_all_program=False):
         sockets = []
         for link in self.links:
             sockets += self._get_to_sockets(link.to_socket)
 
-        if self.is_program and len(sockets) > 1:
+        if self.is_program and len(sockets) > 1 and not get_all_program:
             return sockets[1:]
         return sockets
 
