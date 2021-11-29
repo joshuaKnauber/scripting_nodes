@@ -57,11 +57,15 @@ class SN_ScriptingBaseNode:
 
     def node_code_changed(self, context=None):
         """ Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes """
-        for inp in self.inputs:
-            if inp.is_program:
-                from_out = inp.from_socket()
-                if from_out:
-                    from_out.python_value = self.code
+        if self.is_trigger:
+            print("trigger code update")
+        else:
+            for inp in self.inputs:
+                if inp.is_program:
+                    from_out = inp.from_socket()
+                    if from_out:
+                        from_out.python_value = self.code
+
 
 
     def indent(self, code, indents):
@@ -209,7 +213,21 @@ class SN_ScriptingBaseNode:
     ### DRAW NODE
     def draw_node(self, context, layout): pass
 
+    def _draw_debug_code(self, context, layout):
+        pure_data = not self.code
+        for socket in self.inputs.values() + self.outputs.values():
+            if socket.is_program:
+                pure_data = False
+        if not pure_data:
+            box = layout.box()
+            col = box.column(align=True)
+            for line in self.code.split("\n"):
+                col.label(text=line)
+
+
     def draw_buttons(self, context, layout):
+        if context.scene.sn.debug_python_nodes:
+            self._draw_debug_code(context, layout)
         self.draw_node(context, layout)
 
 
@@ -219,10 +237,6 @@ class SN_ScriptingBaseNode:
     def draw_buttons_ext(self,context,layout):
         layout.use_property_split = True
         layout.prop(self, "order")
-        box = layout.box()
-        col = box.column(align=True)
-        for line in self.code.split("\n"):
-            col.label(text=line)
         self.draw_node_panel(context, layout)
         
 

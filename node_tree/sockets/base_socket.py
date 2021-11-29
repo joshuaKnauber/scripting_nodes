@@ -34,6 +34,8 @@ class ScriptingSocket:
     def draw_socket(self, context, layout, node, text): pass
 
     def draw(self, context, layout, node, text):
+        if context.scene.sn.debug_python_sockets:
+            text = self.python_value
         self.draw_socket(context, layout, node, text)
 
 

@@ -5,6 +5,14 @@ import os
 
 class SN_AddonProperties(bpy.types.PropertyGroup):
 
+    debug_python_nodes: bpy.props.BoolProperty(default=False,
+                                        name="Debug Nodes",
+                                        description="Debug internal node code")
+
+    debug_python_sockets: bpy.props.BoolProperty(default=False,
+                                        name="Debug Sockets",
+                                        description="Debug internal socket code")
+
     def update_node_tree_index(self, context):
         if len(bpy.data.node_groups):
             bpy.context.space_data.node_tree = bpy.data.node_groups[self.node_tree_index]

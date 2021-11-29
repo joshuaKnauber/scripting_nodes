@@ -14,7 +14,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_output()
 
     def evaluate(self, context):
-        print(self.outputs[0].python_value)
+        self.code = f"print({self.outputs[0].python_value})"
 
     def draw_node(self, context, layout):
         pass
