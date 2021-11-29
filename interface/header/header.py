@@ -26,6 +26,10 @@ def header_prepend(self, context):
         row.operator("wm.console_toggle", text="", icon="CONSOLE")
         row.popover("SN_PT_HeaderSettings", text="", icon="PREFERENCES")
 
+        if context.scene.sn.has_update or False:
+            row.separator()
+            row.operator("sn.update_message", text="Update!", icon="INFO", depress=True)
+
 
 
 

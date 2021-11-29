@@ -5,6 +5,10 @@ import os
 
 class SN_AddonProperties(bpy.types.PropertyGroup):
 
+    has_update: bpy.props.BoolProperty(name="Has Update",
+                                        description="If Serpens has an available update or not. This is set on file load.",
+                                        default=False)
+
     debug_python_nodes: bpy.props.BoolProperty(default=False,
                                         name="Debug Nodes",
                                         description="Debug internal node code")
