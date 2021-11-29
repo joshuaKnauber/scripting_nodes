@@ -2,13 +2,13 @@ import bpy
 
 
 
-class SN_PT_SnippetPanel(bpy.types.Panel):
-    bl_idname = "SN_PT_SnippetPanel"
-    bl_label = "Snippets"
+class SN_PT_AssetsPanel(bpy.types.Panel):
+    bl_idname = "SN_PT_AssetsPanel"
+    bl_label = "Assets"
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
-    bl_order = 5
+    bl_order = 2
     bl_options = {"DEFAULT_CLOSED"}
 
     @classmethod

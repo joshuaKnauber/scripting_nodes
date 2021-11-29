@@ -1,14 +1,6 @@
 import bpy
-import functools
 from uuid import uuid4
 
-
-"""
-- code is stored in property on node
-- when a nodes data changes it calls its compile function
-- when as a result of that its code changes, it triggers an update to all parent program nodes
-- when a start parent node is triggered, it changes the code in the node tree
-"""
 
 
 class SN_ScriptingBaseNode:
@@ -34,11 +26,10 @@ class SN_ScriptingBaseNode:
     layout_type = "layout"
 
     """
-    NOTE: remove the concept of having a main tree for the addon. from now on one addon per file and all different trees are saved as separate files
     NOTE: store a list of registered functions in the node tree. nodes can use this to check if they need to register a function again
     NOTE: when exporting the final addon, somehow trigger compile on all nodes to get export code
-    NOTE: data sockets somehow need to update their own and connected nodes
     """
+
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == 'ScriptingNodesTree'
@@ -61,10 +52,10 @@ class SN_ScriptingBaseNode:
         if self.is_trigger:
             print("trigger code update")
         else:
+            # update the code of all program inputs to reflect the nodes code
             for inp in self.inputs:
                 if inp.is_program:
                     inp.python_value = self.code
-
 
 
     def indent(self, code, indents):
@@ -73,7 +64,6 @@ class SN_ScriptingBaseNode:
         for i in range(1, len(lines)):
             lines[i] = " "*(4*indents) + lines[i]
         return "\n".join(lines)
-
 
     def _get_indents(self, line):
         """ Returns the amount of spaces at the start of the given line """
@@ -98,16 +88,19 @@ class SN_ScriptingBaseNode:
                 indented.append(new_line)
         return "\n".join(indented)
 
+
     def _set_code(self, raw_code):
-        """ Checks if the given code is different from the current code and sets the property. If required it triggers a code update """
+        """ Checks if the given code is different from the current code and. If required it triggers a code update """
         normalized = self._normalize_code(raw_code)
         if self.get("code") == None or normalized != self["code"]:
             self["code"] = normalized
             self.node_code_changed()
 
+
     def _get_code(self):
         """ Returns the current code of this node """
         return self.get("code", "")
+
 
     code: bpy.props.StringProperty(name="Code",
                                     description="The current compiled code for this node",
@@ -145,7 +138,7 @@ class SN_ScriptingBaseNode:
 
         The function is also automatically called when the code of program nodes connected to the output changes and when code of data inputs of this node are changed.
 
-        Set self.code as the last thing you do in this node!!! Set all data outputs code before or this might cause issues!
+        Set self.code as the last thing you do in this node!!! Set all data outputs code before or this will lead to issues!
         You can store temporary code in variables in this function before you set self.code if necessary to adhere to this.
         """
 
@@ -161,12 +154,15 @@ class SN_ScriptingBaseNode:
     def on_create(self, context): pass
 
     def init(self, context):
+        # set up custom color
         self.use_custom_color = True
         if str(self.node_color) in self._colors:
             self.color = self._colors[self.node_color]
         else:
             self.color = self.node_color
+        # set up the node
         self.on_create(context)
+        # evaluate node for the first time
         self.evaluate(context)
 
 
@@ -174,7 +170,9 @@ class SN_ScriptingBaseNode:
     def on_copy(self, node): pass
 
     def copy(self, node):
+        # set up the node
         self.on_copy(node)
+        # evaluate the node for the first time after copying
         self.evaluate(bpy.context)
 
 
@@ -193,32 +191,22 @@ class SN_ScriptingBaseNode:
         self.on_node_update()
 
 
-    ### LINK UPDATE
-    def on_link_insert(self, link): pass
+    ### LINK UPDATE TODO: trigger link insert and remove events
+    def on_link_insert(self, socket, link): pass
 
-    def after_insert_link(self, link):
-        self.on_link_insert(link)
-
-    def insert_link(self, link):
-        """ Handle creation of a link to or from the node """
-        # bpy.app.timers.register(functools.partial(self.after_insert_link, link), first_interval=0.001)
-
-
-    ### SOCKET VALUE UPDATE
-    def on_socket_value_change(self, socket): pass
-
-    def socket_value_change(self, socket):
-        self.on_socket_value_change(socket)
+    def on_link_remove(self, socket): pass
 
 
     ### DRAW NODE
     def draw_node(self, context, layout): pass
 
     def _draw_debug_code(self, context, layout):
+        # get if the node only has data sockets
         pure_data = not self.code
         for socket in self.inputs.values() + self.outputs.values():
             if socket.is_program:
                 pure_data = False
+        # draw code line by line
         if not pure_data:
             box = layout.box()
             col = box.column(align=True)
@@ -254,6 +242,7 @@ class SN_ScriptingBaseNode:
         # socket.display_shape = socket.socket_shape
         return socket
 
+
     def add_execute_input(self, label="Execute"): return self._add_input("SN_ExecuteSocket", label)
     def add_execute_output(self, label="Execute"): return self._add_output("SN_ExecuteSocket", label)
     def add_dynamic_execute_input(self, label="Execute"): return self._add_input("SN_ExecuteSocket", label, True)
@@ -270,16 +259,15 @@ class SN_ScriptingBaseNode:
     def add_dynamic_string_output(self, label="String"): return self._add_output("SN_StringSocket", label, True)
 
     
-    
     ### ERROR HANDLING
     def add_error(self, title, description, fatal=False):
         pass
 
 
-
     ### INTERFACE UTIL
     @property
     def active_layout(self):
+        """ Returns the last connected layout type for this node """
         for inp in self.inputs:
             if inp.bl_label == "Interface":
                 from_out = inp.from_socket()
