@@ -14,9 +14,13 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         return (link.from_socket, link.to_socket, link)
 
     def is_valid_connection(self, from_out, to_inp):
+        # TODO: check if data types are convertible
         if from_out and from_out.is_program == to_inp.is_program:
-            # TODO: check if origin is a program socket and multiple connected
-            # TODO: check if data types are convertible
+            # Check if multiple program sockets are connected
+            if to_inp.is_program:
+                to_sockets = from_out.to_sockets(check_validity=False)
+                if to_inp != to_sockets[0]:
+                    return False
             return True
         return False
 

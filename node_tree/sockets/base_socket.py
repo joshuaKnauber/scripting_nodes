@@ -126,26 +126,23 @@ class ScriptingSocket:
 
 
     ### CONNECTED SOCKETS
-    def _get_to_sockets(self, socket):
+    def _get_to_sockets(self, socket, check_validity=True):
         to_sockets = []
         if socket.node.bl_idname == "NodeReroute":
             for link in socket.node.outputs[0].links:
                 to_sockets += self._get_to_sockets(link.to_socket)
         else:
-            if self.node.node_tree.is_valid_connection(self, socket):
+            if not check_validity or self.node.node_tree.is_valid_connection(self, socket):
                 to_sockets.append(socket)
         return to_sockets
 
-    def to_sockets(self, get_all_program=False):
+    def to_sockets(self, check_validity=True):
         sockets = []
         for link in self.links:
-            sockets += self._get_to_sockets(link.to_socket)
-
-        if self.is_program and len(sockets) > 1 and not get_all_program:
-            return sockets[1:]
+            sockets += self._get_to_sockets(link.to_socket, check_validity)
         return sockets
 
-    def from_socket(self):
+    def from_socket(self, check_validity=True):
         if len(self.links) > 0:
             from_out = self.links[0].from_socket
             while from_out.node.bl_idname == "NodeReroute":
@@ -153,6 +150,6 @@ class ScriptingSocket:
                     from_out = from_out.node.inputs[0].links[0].from_socket
                 else:
                     return None
-            if self.node.node_tree.is_valid_connection(from_out, self):
+            if not check_validity or self.node.node_tree.is_valid_connection(from_out, self):
                 return from_out
         return None
