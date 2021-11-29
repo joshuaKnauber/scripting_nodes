@@ -1,18 +1,19 @@
 import bpy
 
 
-#keymaps
+# keymaps
 addon_keymaps = {}
 
 
 def get_shortcut(key):
+    """ Returns the shortcut struct for the given key """
     return addon_keymaps[key][1]
 
 
 def register_keymaps():
-    #registers the visual scripting keymaps
+    # registers the visual scripting keymaps
 
-    #create keymap
+    # create keymap
     global addon_keymaps
     addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
     
@@ -20,22 +21,22 @@ def register_keymaps():
     addon_keyconfig = wm.keyconfigs.addon
     kc = addon_keyconfig
 
-    km = kc.keymaps.new(name="Node Editor", space_type="NODE_EDITOR")
+    # km = kc.keymaps.new(name="Node Editor", space_type="NODE_EDITOR")
 
     # shortcut for compiling
-    kmi = km.keymap_items.new(
-        idname="sn.compile",
-        type="R",
-        value="PRESS",
-        shift=True,
-        ctrl=False,
-        alt=False,
-        )
-    addon_keymaps[ "compile" ] = (km, kmi)
+    # kmi = km.keymap_items.new(
+    #     idname="sn.compile",
+    #     type="R",
+    #     value="PRESS",
+    #     shift=True,
+    #     ctrl=False,
+    #     alt=False,
+    #     )
+    # addon_keymaps["compile"] = (km, kmi)
 
 
 def unregister_keymaps():
-    #unregister visual scripting keymaps
+    # unregister visual scripting keymaps
     global addon_keymaps
 
     for key in addon_keymaps:

@@ -26,7 +26,6 @@ bl_info = {
 
 import bpy
 import nodeitems_utils
-from bpy.app.handlers import persistent
 from bpy.utils import previews
 import atexit
 
@@ -47,15 +46,7 @@ from . import auto_load
 auto_load.init()
 
 
-@persistent
-def load_handler(dummy):
-    check_serpens_updates(bl_info["version"])
 
-
-def unload_handler(dummy=None):
-    pass
-    
-    
 def register_icons():
     bpy.types.Scene.sn_icons = bpy.utils.previews.new()
     icons_dir = os.path.join( os.path.dirname( __file__ ), "assets", "icons" )
@@ -64,11 +55,13 @@ def register_icons():
 
     for icon in icons:
         bpy.types.Scene.sn_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
-        
-        
+
+
+
 def unregister_icons():
     bpy.utils.previews.remove( bpy.types.Scene.sn_icons )
-    
+
+
 
 def register():
     # register the classes of the addon
@@ -78,10 +71,10 @@ def register():
     # bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False,name="Is Serpens Addon")
 
     # addon properties
-    bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties,name="Serpens Properties")
+    bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties, name="Serpens Properties")
 
     # register the keymaps
-    # register_keymaps()
+    register_keymaps()
 
     # register the icons
     register_icons()
@@ -95,12 +88,12 @@ def register():
     bpy.types.NODE_MT_editor_menus.append(header_prepend)
 
     # add to the node add menu
-    # bpy.types.NODE_MT_category_snippets.append(snippet_menu)
+    bpy.types.NODE_MT_category_snippets.append(snippet_menu)
 
     # app handlers
-    # bpy.app.handlers.load_post.append(load_handler)
-    # bpy.app.handlers.depsgraph_update_post.append(handlers.depsgraph_handler)
-    # atexit.register(unload_handler)
+    bpy.app.handlers.depsgraph_update_post.append(handlers.depsgraph_handler)
+    bpy.app.handlers.load_post.append(handlers.load_handler)
+    atexit.register(handlers.unload_handler)
     
     # add right click menu
     bpy.types.WM_MT_button_context.append(serpens_right_click)
@@ -113,7 +106,7 @@ def unregister():
     bpy.types.NODE_HT_header.remove(header_append)
 
     # remove from the node add menu
-    # bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
+    bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
 
     # unregister the text properties
     # del bpy.types.Text.is_sn_addon
@@ -122,7 +115,7 @@ def unregister():
     del bpy.types.Scene.sn
 
     # unregister the keymaps
-    # unregister_keymaps()
+    unregister_keymaps()
 
     # unregister the icons
     unregister_icons()
@@ -131,13 +124,13 @@ def unregister():
     nodeitems_utils.unregister_node_categories('SCRIPTING_NODES')
 
     # remove handlers
-    # bpy.app.handlers.load_post.remove(load_handler)
-    # bpy.app.handlers.depsgraph_update_post.remove(handlers.depsgraph_handler)
-    # atexit.unregister(unload_handler)
+    bpy.app.handlers.depsgraph_update_post.remove(handlers.depsgraph_handler)
+    bpy.app.handlers.load_post.remove(handlers.load_handler)
+    atexit.unregister(handlers.unload_handler)
     
     # remove right click menu
-    try: bpy.types.WM_MT_button_context.remove(serpens_right_click)
-    except: pass
+    if hasattr(bpy.types, "WM_MT_button_context"):
+        bpy.types.WM_MT_button_context.remove(serpens_right_click)
 
     # unregister the addon classes
     auto_load.unregister()

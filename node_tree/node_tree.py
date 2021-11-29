@@ -9,7 +9,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     is_sn = True
 
     link_cache = {} # stores cache of the links from the previous update for all node trees based on their memory adress
-
+    
 
     def _map_link_to_sockets(self, link):
         """ Maps the given link to a tuple of the from socket, to socket and the link itself """
