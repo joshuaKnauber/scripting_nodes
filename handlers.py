@@ -1,5 +1,7 @@
 import bpy
 from bpy.app.handlers import persistent
+from . import bl_info
+from .settings.updates import check_serpens_updates
 
 
 
@@ -12,7 +14,7 @@ def depsgraph_handler(dummy):
 
 @persistent
 def load_handler(dummy):
-    pass
+    check_serpens_updates(bl_info["version"])
 
 
 @persistent

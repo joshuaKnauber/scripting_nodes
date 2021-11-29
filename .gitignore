@@ -2,3 +2,4 @@ __pycache__/
 .vscode
 *.pyc
 *.blend1
+update_log.json

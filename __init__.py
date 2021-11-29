@@ -38,7 +38,6 @@ from .interface.menu.rightclick import serpens_right_click
 from .interface.menu.snippets import snippet_menu
 
 from .settings.addon_properties import SN_AddonProperties
-from .settings.updates import check_serpens_updates
 
 from . import handlers
 
@@ -88,7 +87,7 @@ def register():
     bpy.types.NODE_MT_editor_menus.append(header_prepend)
 
     # add to the node add menu
-    bpy.types.NODE_MT_category_snippets.append(snippet_menu)
+    # bpy.types.NODE_MT_category_snippets.append(snippet_menu)
 
     # app handlers
     bpy.app.handlers.depsgraph_update_post.append(handlers.depsgraph_handler)
@@ -106,7 +105,7 @@ def unregister():
     bpy.types.NODE_HT_header.remove(header_append)
 
     # remove from the node add menu
-    bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
+    # bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
 
     # unregister the text properties
     # del bpy.types.Text.is_sn_addon

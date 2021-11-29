@@ -38,21 +38,24 @@ class SN_OT_MessageUpdate(bpy.types.Operator):
 
 
 def update_log():
-    with open(os.path.join(os.path.dirname(__file__), "update_log.json"), "w") as update_log:
-        update_log.write(json.dumps(
-            {"last_check": str(date.today())}, indent=4))
+    with open(os.path.join(os.path.dirname(__file__), "update_log.json"), "w") as log:
+        log.write(json.dumps({"last_check": str(date.today())}, indent=4))
 
 
 def should_update():
     should_update = False
-    addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[
-        0]].preferences
+    addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences
     if not addon_prefs.check_for_updates:
         should_update = False
-    with open(os.path.join(os.path.dirname(__file__), "update_log.json"), "r") as update_log:
-        update_log = json.loads(update_log.read())
-        if not update_log["last_check"] == str(date.today()):
-            should_update = True
+
+    log_path = os.path.join(os.path.dirname(__file__), "update_log.json")
+    if os.path.exists(log_path):
+        with open(log_path, "r") as log:
+            log = json.loads(log.read())
+            if not log["last_check"] == str(date.today()):
+                should_update = True
+    else:
+        update_log()
     return should_update
 
 
