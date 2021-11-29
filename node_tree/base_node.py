@@ -13,6 +13,7 @@ from uuid import uuid4
 
 class SN_ScriptingBaseNode:
 
+    is_sn = True
     bl_width_default = 160
     bl_width_min = 40
     bl_width_max = 5000
@@ -62,9 +63,7 @@ class SN_ScriptingBaseNode:
         else:
             for inp in self.inputs:
                 if inp.is_program:
-                    from_out = inp.from_socket()
-                    if from_out:
-                        from_out.python_value = self.code
+                    inp.python_value = self.code
 
 
 
@@ -168,6 +167,7 @@ class SN_ScriptingBaseNode:
         else:
             self.color = self.node_color
         self.on_create(context)
+        self.evaluate(context)
 
 
     ### COPY NODE
@@ -175,6 +175,7 @@ class SN_ScriptingBaseNode:
 
     def copy(self, node):
         self.on_copy(node)
+        self.evaluate(bpy.context)
 
 
     ### FREE NODE
@@ -279,8 +280,9 @@ class SN_ScriptingBaseNode:
     ### INTERFACE UTIL
     @property
     def active_layout(self):
-        interface_socket = self.inputs[0]
-        from_out = interface_socket.from_socket()
-        if from_out and from_out.bl_label == "Interface":
-            return from_out.node.layout_type
+        for inp in self.inputs:
+            if inp.bl_label == "Interface":
+                from_out = inp.from_socket()
+                if from_out:
+                    return from_out.node.layout_type
         return "layout"
