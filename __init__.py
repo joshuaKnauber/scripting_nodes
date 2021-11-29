@@ -34,7 +34,7 @@ import os
 
 from .keymaps.keymap import register_keymaps, unregister_keymaps
 from .node_tree.node_categories import get_node_categories
-from .interface.header.header import header_panel
+from .interface.header.header import header_prepend, header_append
 from .interface.menu.rightclick import serpens_right_click
 from .interface.menu.snippets import snippet_menu
 
@@ -90,7 +90,9 @@ def register():
     nodeitems_utils.register_node_categories('SCRIPTING_NODES', get_node_categories())
 
     # add the node tree header
-    bpy.types.NODE_MT_editor_menus.append(header_panel)
+    # bpy.types.NODE_HT_header.prepend(header_prepend)
+    bpy.types.NODE_HT_header.append(header_append)
+    bpy.types.NODE_MT_editor_menus.append(header_prepend)
 
     # add to the node add menu
     # bpy.types.NODE_MT_category_snippets.append(snippet_menu)
@@ -106,7 +108,9 @@ def register():
 
 def unregister():
     # remove the node tree header
-    bpy.types.NODE_MT_editor_menus.remove(header_panel)
+    # bpy.types.NODE_HT_header.remove(header_prepend)
+    bpy.types.NODE_MT_editor_menus.remove(header_prepend)
+    bpy.types.NODE_HT_header.remove(header_append)
 
     # remove from the node add menu
     # bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
