@@ -50,7 +50,7 @@ class SN_ScriptingBaseNode:
     def node_code_changed(self, context=None):
         """ Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes """
         if self.is_trigger:
-            print("trigger code update")
+            self.add_imperative(self.code)
         else:
             # update the code of all program inputs to reflect the nodes code
             for inp in self.inputs:
@@ -108,6 +108,19 @@ class SN_ScriptingBaseNode:
                                     get=_get_code)
 
 
+    def add_imperative(self, code):
+        pass
+
+    def add_import(self, module, keys=[], aliases=[]):
+        pass
+
+    def add_register(self, code):
+        pass
+
+    def add_unregister(self, code):
+        pass
+
+
     def evaluate(self, context):
         """Updates this nodes code and the code of all changed data outputs
         Call this when the data of this node has changed (e.g. as the update function of properties).
@@ -116,6 +129,13 @@ class SN_ScriptingBaseNode:
 
         Set self.code as the last thing you do in this node!!! Set all data outputs code before or this will lead to issues!
         You can store temporary code in variables in this function before you set self.code if necessary to adhere to this.
+
+        You should follow this order to add code in this function:
+        - Set data outputs python_value
+        - Add code with add_import, add_imperative, add_register, add_unregister (the order of these doesn't matter)
+        - Set self.code
+
+        You can do all of these or none of these, but follow the order to help the register process to work smoothly
         """
 
 

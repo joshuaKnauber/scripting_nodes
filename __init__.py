@@ -65,9 +65,6 @@ def unregister_icons():
 def register():
     # register the classes of the addon
     auto_load.register()
-    
-    # register the text properties
-    # bpy.types.Text.is_sn_addon = bpy.props.BoolProperty(default=False,name="Is Serpens Addon")
 
     # addon properties
     bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties, name="Serpens Properties")
@@ -106,9 +103,6 @@ def unregister():
 
     # remove from the node add menu
     # bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
-
-    # unregister the text properties
-    # del bpy.types.Text.is_sn_addon
 
     # addon properties
     del bpy.types.Scene.sn

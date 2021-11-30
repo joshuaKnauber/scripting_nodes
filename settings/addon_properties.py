@@ -1,5 +1,41 @@
 import bpy
 import os
+            
+
+
+class CodeSnippet:
+    """ Represents a part of code in the final file. This handles things like unique function names and is used to get code ready for the python file """
+
+    def __init__(self, code):
+        self._code = code
+
+    def update(self, code):
+        pass
+
+    @property
+    def code(self):
+        # handle unique functions names here
+        return self._code
+
+
+
+class AddonCode:
+    """ Represents the final python file with all its code parts. This assembles and updates the python file if necessary """
+
+    def __init__(self):
+        self._imports = {}
+        self._imperative = {}
+        self._register = {}
+        self._unregister = {}
+
+    def _save_snippet(self, save_key, key, code, unique_keys):
+        if key in getattr(self, save_key):
+            getattr(self, save_key)[key].update(code)
+        else:
+            getattr(self, save_key)[key] = CodeSnippet(code)
+
+    def add_imperative(self, key, code, unique_keys=[]):
+        self._save_snippet("_imperative", key, code, unique_keys)
 
 
 
@@ -91,3 +127,32 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     custom_category: bpy.props.StringProperty(default="My Category",
                                         name="Custom Category",
                                         description="Your custom category")
+
+
+    # potential solution for if this https://developer.blender.org/T88986 bug was fixed
+
+    addon_text: bpy.props.PointerProperty(name="Text File",
+                                            description="File which the addon is stored in",
+                                            type=bpy.types.Text)
+
+    def get_addon_text(self):
+        if not self.addon_text:
+            self.addon_text = bpy.data.texts.new("Addon File")
+
+
+"""
+
+any node can have:
+- some imperative code
+- some imports
+- some register code
+- some unregister code
+
+are there even trigger nodes?
+
+how do i register and unregister things?
+how do nodes that wouldn't be trigger nodes add code?
+how would utility functions work if it's not a text file?
+how do different node trees work? are there different files? is this different on export?
+
+"""
