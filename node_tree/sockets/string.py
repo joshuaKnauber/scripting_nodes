@@ -22,11 +22,13 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     value_file_path: bpy.props.StringProperty(name="Value",
                                             description="Value of this socket",
-                                            subtype="FILE_PATH")
+                                            subtype="FILE_PATH",
+                                            update=ScriptingSocket._update_value)
 
     value_dir_path: bpy.props.StringProperty(name="Value",
                                             description="Value of this socket",
-                                            subtype="DIR_PATH")
+                                            subtype="DIR_PATH",
+                                            update=ScriptingSocket._update_value)
 
     subtypes = ["NONE", "FILE_PATH", "DIR_PATH"]
     subtype_values = {"NONE": "default_value", "FILE_PATH": "value_file_path", "DIR_PATH": "value_dir_path"}

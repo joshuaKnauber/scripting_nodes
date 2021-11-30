@@ -41,7 +41,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def _update_post(self):
         """ Only do visual aspects in here as this is run after evaluating the nodes """
-        # TODO check time of this function to see if it impacts performance
+        # TODO check time of this function to see if it impacts performance (when more complex node setups are possible)
         # mark links as invalid
         for link in self.links:
             if not self.is_valid_link(link):

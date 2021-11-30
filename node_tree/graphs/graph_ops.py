@@ -23,7 +23,7 @@ class SN_OT_RemoveGraph(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        # TODO Fix this operator with graph filtering
+        # TODO Fix this operator with graph filtering (wait until registering is done to see how to reregister after removing)
         return len(get_serpens_graphs()) > 0 and context.scene.sn.node_tree_index < len(get_serpens_graphs())
 
     def execute(self, context):
@@ -63,7 +63,7 @@ class SN_OT_AppendPopup(bpy.types.Operator):
     def execute(self, context):
         if self.graphs != "NONE":
             bpy.ops.wm.append(filename=self.graphs, directory=self.path + "\\NodeTree\\")
-            #TODO somehow compile new tree
+            #TODO somehow compile new tree (wait until registering is done here)
 
         return {"FINISHED"}
     
