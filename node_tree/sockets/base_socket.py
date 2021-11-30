@@ -157,7 +157,7 @@ class ScriptingSocket:
         # recursively find all sockets when splitting at reroutes
         if socket.node.bl_idname == "NodeReroute":
             for link in socket.node.outputs[0].links:
-                to_sockets += self._get_to_sockets(link.to_socket)
+                to_sockets += self._get_to_sockets(link.to_socket, check_validity)
         else:
             # check validity of connection
             if not check_validity or self.node.node_tree.is_valid_connection(self, socket):
