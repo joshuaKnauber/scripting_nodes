@@ -27,7 +27,7 @@ class SN_ScriptingBaseNode:
 
     """
     NOTE: store a list of registered functions in the node tree. nodes can use this to check if they need to register a function again
-    NOTE: when exporting the final addon, somehow trigger compile on all nodes to get export code
+    NOTE: when exporting the final addon, somehow trigger compile on all nodes to get export code (or just save file or separated files?)
     """
 
     @classmethod
