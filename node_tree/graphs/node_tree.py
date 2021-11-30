@@ -13,7 +13,10 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def _map_link_to_sockets(self, link):
         """ Maps the given link to a tuple of the from socket, to socket and the link itself """
-        return (link.from_socket, link.to_socket, link)
+        from_real = None
+        if getattr(link.to_socket, "is_sn", False):
+            from_real = link.to_socket.from_socket()
+        return (link.from_socket, link.to_socket, from_real, link)
 
 
     def is_valid_connection(self, from_out, to_inp):
@@ -50,7 +53,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def _update_changed_links(self, links):
         """ Forces the affected nodes to update depending on if it's a program or data socket """
-        for from_out, to_inp, _ in links:
+        for from_out, to_inp, _, _ in links:
             # update data sockets
             if getattr(to_inp, "is_sn", False) and not to_inp.is_program and to_inp.node:
                 to_inp.force_update()
@@ -58,16 +61,33 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             elif getattr(from_out, "is_sn", False) and from_out.is_program and from_out.node:
                 from_out.force_update()
 
+
+    def _call_link_inserts(self, added):
+        """ Calls link_insert for all new links """
+        for _, to_inp, from_real, _ in added:
+            if from_real:
+                from_real.node.link_insert(from_real, to_inp, is_output=True)
+                to_inp.node.link_insert(from_real, to_inp, is_output=False)
+
+    def _call_link_removes(self, removed):
+        """ Calls link_remove for all removed links """
+        for _, to_inp, from_real, _ in removed:
+            if from_real:
+                if from_real.node:
+                    from_real.node.link_remove(from_real, to_inp, is_output=True)
+                if to_inp.node:
+                    to_inp.node.link_remove(from_real, to_inp, is_output=False)
+
+
     def _update_added_links(self, added):
         """ Triggers an update on the given links data outputs and program inputs to update the affected program """
         self._update_changed_links(added)
-        # call insert link function here WIP
-        for _, _, link in added:
-            pass
+        self._call_link_inserts(added)
 
     def _update_removed_links(self, removed):
         """ Triggers an update on the given links data inputs and program outputs to update the affected program """
         self._update_changed_links(removed)
+        self._call_link_removes(removed)
 
 
     def _update_tree_links(self):

@@ -23,7 +23,7 @@ class SN_ScriptingBaseNode:
     is_trigger = False
 
     # set this for any interface nodes that change the layout type (nodes like row, column, split, ...)
-    layout_type = "layout"
+    layout_type = None
 
     """
     NOTE: store a list of registered functions in the node tree. nodes can use this to check if they need to register a function again
@@ -187,10 +187,30 @@ class SN_ScriptingBaseNode:
         self.on_node_update()
 
 
-    ### LINK UPDATE TODO: trigger link insert and remove events
-    def on_link_insert(self, socket, link): pass
+    ### LINK UPDATE
+    def on_link_insert(self, from_socket, to_socket, is_output): pass
 
-    def on_link_remove(self, socket): pass
+    def _insert_link_layout_update(self, from_socket, is_output):
+        """ Updates the layout type of this node when a node with layout type gets connected """
+        if not is_output and from_socket.node.layout_type:
+            self.evaluate(bpy.context)
+
+    def link_insert(self, from_socket, to_socket, is_output):
+        self._insert_link_layout_update(from_socket, is_output)
+        self.on_link_insert(from_socket, to_socket, is_output)
+
+
+    # (from_socket or to_socket might not have a node if it was deleted!)
+    def on_link_remove(self, from_socket, to_socket, is_output): pass
+
+    def _remove_link_layout_update(self, from_socket, is_output):
+        """ Updates the layout type of this node when a connected node with layout type gets removed """
+        if not is_output and not from_socket.node or (from_socket.node and from_socket.node.layout_type):
+            self.evaluate(bpy.context)
+
+    def link_remove(self, from_socket, to_socket, is_output):
+        self._remove_link_layout_update(from_socket, is_output)
+        self.on_link_remove(from_socket, to_socket, is_output)
 
 
     ### DRAW NODE
@@ -268,6 +288,7 @@ class SN_ScriptingBaseNode:
             if inp.bl_label == "Interface":
                 from_out = inp.from_socket()
                 if from_out:
+                    assert from_out.node.layout_type != None, f"Layout type not set on {from_out.node.bl_label}"
                     return from_out.node.layout_type
         return "layout"
 

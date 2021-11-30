@@ -8,6 +8,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_PanelNode"
     bl_label = "Panel"
     bl_width_default = 200
+    layout_type = "layout"
     is_trigger = True
 
     def on_create(self, context):
