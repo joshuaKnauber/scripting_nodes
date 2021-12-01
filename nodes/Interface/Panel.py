@@ -13,7 +13,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "INTERFACE"
 
     def on_create(self, context):
-        # self.add_interface_output()
+        self.add_interface_output()
         self.add_dynamic_interface_output()
 
     def evaluate(self, context):

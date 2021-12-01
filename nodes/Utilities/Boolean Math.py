@@ -8,7 +8,6 @@ class SN_BooleanMathNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_BooleanMathNode"
     bl_label = "Boolean Math"
     node_color = "BOOLEAN"
-    # bl_width_default = 200
 
     def on_create(self, context):
         enum = self.add_enum_input("")
@@ -19,6 +18,6 @@ class SN_BooleanMathNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_output("Boolean")
 
     def evaluate(self, context):
-        values = [inp.python_value for inp in self.inputs[1:]]
+        values = [inp.python_value for inp in self.inputs[1:-1]]
         join_op = f" {self.inputs[0].python_value} ".join(values)
         self.outputs["Boolean"].python_value = join_op

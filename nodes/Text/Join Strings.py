@@ -18,6 +18,6 @@ class SN_JoinStringsNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_string_output("String")
 
     def evaluate(self, context):
-        values = [inp.python_value for inp in self.inputs[1:]]
+        values = [inp.python_value for inp in self.inputs[1:-1]]
         join_op = f"+{self.inputs['Delimiter'].python_value}+".join(values)
         self.outputs["String"].python_value = join_op
