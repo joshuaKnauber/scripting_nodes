@@ -10,14 +10,39 @@ class SN_BooleanMathNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "BOOLEAN"
 
     def on_create(self, context):
-        enum = self.add_enum_input("")
-        enum.items = str(["and", "or"])
         self.add_boolean_input("Boolean")
         self.add_boolean_input("Boolean")
         self.add_dynamic_boolean_input("Boolean")
         self.add_boolean_output("Boolean")
 
+
+    def update_operation(self, context):
+        for inp in self.inputs[1:]:
+            inp.enabled = self.operation != "NOT"
+        self.evaluate(context)
+
+    operation: bpy.props.EnumProperty(items=[("AND", "And", "Returns True if both inputs are True"),
+                                            ("OR", "Or", "Returns True if one or both inputs are True"),
+                                            ("NOT", "Not", "Returns True if the inputs is False and False if the input is True")],
+                                    name="Operation",
+                                    description="Operation to perform on the input booleans",
+                                    update=update_operation)
+
+
+    def draw_node(self, context, layout):
+        layout.prop(self, "operation", text='')
+
     def evaluate(self, context):
-        values = [inp.python_value for inp in self.inputs[1:-1]]
-        join_op = f" {self.inputs[0].python_value} ".join(values)
-        self.outputs["Boolean"].python_value = join_op
+        # not operation
+        if self.operation == "NOT":
+            self.outputs["Boolean"].python_value = f" not {self.inputs[0].python_value}"
+        # and or or operation
+        else:
+            # get all input values
+            values = []
+            for inp in self.inputs[:-1]:
+                if inp.enabled:
+                    values.append(inp.python_value)
+            # join input values on operation name
+            join_op = f" {'and' if self.operation == 'AND' else 'or'} ".join(values)
+            self.outputs["Boolean"].python_value = join_op

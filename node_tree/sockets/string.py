@@ -10,11 +10,25 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_label = "String"
 
 
-    default_python_value = "\"\""
+    default_python_value = "\'\'"
     default_prop_value = ""
 
+    string_repr_warning: bpy.props.BoolProperty(default=False,
+                                                name="Potential Error Warning!",
+                                                description="You're using two types of quotes in your string! Be aware that this will cause syntax errors if you don't change ' to \\'")
+
     def get_python_repr(self):
-        return f"\"{self.default_value}\""
+        self.string_repr_warning = False
+        value = self.default_value
+        if "'" in value and not '"' in value:
+            return f"\"{value}\""
+        elif '"' in value and not "'" in value:
+            return f"\'{value}\'"
+        else:
+            if "'" in value and '"' in value:
+                self.string_repr_warning = True
+            return f"\'{value}\'"
+            
 
     default_value: bpy.props.StringProperty(name="Value",
                                             description="Value of this socket",
@@ -42,4 +56,6 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:
+            if self.string_repr_warning:
+                layout.prop(self, "string_repr_warning", text="", icon="ERROR", emboss=False)
             layout.prop(self, self.subtype_attr, text=text)
