@@ -199,15 +199,15 @@ class SN_ScriptingBaseNode:
 
     def _insert_trigger_dynamic(self, from_socket, to_socket):
         """ Triggers dynamic sockets to add new ones """
-        if from_socket and from_socket.node:
+        if from_socket and from_socket.node and from_socket.dynamic:
             from_socket.trigger_dynamic()
-        if to_socket and to_socket.node:
+        if to_socket and to_socket.node and to_socket.dynamic:
             to_socket.trigger_dynamic()
 
     def link_insert(self, from_socket, to_socket, is_output):
-        self._insert_trigger_dynamic(from_socket, to_socket)
         self._insert_link_layout_update(from_socket, is_output)
         self.on_link_insert(from_socket, to_socket, is_output)
+        self._insert_trigger_dynamic(from_socket, to_socket)
 
 
     # (from_socket or to_socket might not have a node if it was deleted!)

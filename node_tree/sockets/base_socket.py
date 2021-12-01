@@ -246,17 +246,11 @@ class ScriptingSocket:
             if self.is_output:
                 socket = self.node._add_output(self.bl_idname, self.name)
                 # move socket
-                if not insert_above:
-                    self.node.outputs.move(len(self.node.outputs)-1, self.index+1)
-                else:
-                    self.node.outputs.move(len(self.node.outputs)-1, self.index)
+                self.node.outputs.move(len(self.node.outputs)-1, self.index+1 if not insert_above else self.index)
             else:
                 socket = self.node._add_input(self.bl_idname, self.name)
                 # move socket
-                if not insert_above:
-                    self.node.inputs.move(len(self.node.inputs)-1, self.index+1)
-                else:
-                    self.node.inputs.move(len(self.node.inputs)-1, self.index)
+                self.node.inputs.move(len(self.node.inputs)-1, self.index+1 if not insert_above else self.index)
 
             # set new socket
             socket.dynamic = self.dynamic
