@@ -7,6 +7,7 @@ class SN_JoinStringsNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_JoinStringsNode"
     bl_label = "Join Strings"
+    node_color = "STRING"
 
     def on_create(self, context):
         self.add_string_input("Delimiter")

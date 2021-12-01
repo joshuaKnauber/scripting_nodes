@@ -10,6 +10,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 200
     layout_type = "layout"
     is_trigger = True
+    node_color = "INTERFACE"
 
     def on_create(self, context):
         self.add_interface_output()

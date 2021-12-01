@@ -7,6 +7,7 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_LabelNode"
     bl_label = "Label"
+    node_color = "INTERFACE"
 
     def on_create(self, context):
         self.add_interface_input()

@@ -15,6 +15,8 @@ class SN_ScriptingBaseNode:
 
     _colors = {
         "DEFAULT": (0.18, 0.18, 0.18),
+        "INTERFACE": ((0.2, 0.17, 0.14)),
+        "STRING": (0.14, 0.17, 0.19),
     }
     # the default color of this node. Set this to one of the options in _colors or use a vec3
     node_color = "DEFAULT"
@@ -228,7 +230,6 @@ class SN_ScriptingBaseNode:
             col = box.column(align=True)
             for line in self.code.split("\n"):
                 col.label(text=line)
-
 
     def draw_buttons(self, context, layout):
         if context.scene.sn.debug_python_nodes:
