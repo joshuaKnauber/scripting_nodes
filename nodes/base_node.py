@@ -197,7 +197,15 @@ class SN_ScriptingBaseNode:
         if not is_output and from_socket.node.layout_type:
             self.evaluate(bpy.context)
 
+    def _insert_trigger_dynamic(self, from_socket, to_socket):
+        """ Triggers dynamic sockets to add new ones """
+        if from_socket and from_socket.node:
+            from_socket.trigger_dynamic()
+        if to_socket and to_socket.node:
+            to_socket.trigger_dynamic()
+
     def link_insert(self, from_socket, to_socket, is_output):
+        self._insert_trigger_dynamic(from_socket, to_socket)
         self._insert_link_layout_update(from_socket, is_output)
         self.on_link_insert(from_socket, to_socket, is_output)
 
@@ -249,14 +257,12 @@ class SN_ScriptingBaseNode:
     ### CREATE SOCKETS
     def _add_input(self, idname, label, dynamic=False):
         socket = self.inputs.new(idname, label)
-        # socket.dynamic = dynamic
-        # socket.display_shape = socket.socket_shape
+        socket.dynamic = dynamic
         return socket
     
     def _add_output(self, idname, label, dynamic=False):
         socket = self.outputs.new(idname, label)
-        # socket.dynamic = dynamic
-        # socket.display_shape = socket.socket_shape
+        socket.dynamic = dynamic
         return socket
 
 
