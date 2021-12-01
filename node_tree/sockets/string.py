@@ -11,6 +11,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 
     default_python_value = "\"\""
+    default_prop_value = ""
 
     def get_python_repr(self):
         return f"\"{self.default_value}\""

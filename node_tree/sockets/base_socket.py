@@ -102,6 +102,7 @@ class ScriptingSocket:
     ### PASS CODE AND DATA
     # OVERWRITE
     default_python_value = "None"
+    default_prop_value = ""
     def get_python_repr(self): return "None"
 
 
@@ -166,7 +167,7 @@ class ScriptingSocket:
     
     def _get_value(self):
         """ Returns the current value of this socket """
-        return self.get(self.subtype_attr, '')
+        return self.get(self.subtype_attr, self.default_prop_value)
 
 
     def _set_value(self, value):

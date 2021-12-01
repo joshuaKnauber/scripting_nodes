@@ -17,6 +17,7 @@ class SN_ScriptingBaseNode:
         "DEFAULT": (0.18, 0.18, 0.18),
         "INTERFACE": ((0.2, 0.17, 0.14)),
         "STRING": (0.14, 0.17, 0.19),
+        "BOOLEAN": (0.15, 0.13, 0.14),
     }
     # the default color of this node. Set this to one of the options in _colors or use a vec3
     node_color = "DEFAULT"
@@ -151,13 +152,19 @@ class SN_ScriptingBaseNode:
     ### INIT NODE
     def on_create(self, context): pass
 
-    def init(self, context):
-        # set up custom color
+    def _set_node_color(self):
+        """ Sets the color of the node depending on the node_color """
         self.use_custom_color = True
         if str(self.node_color) in self._colors:
             self.color = self._colors[self.node_color]
-        else:
+        elif type(self.node_color) == tuple:
             self.color = self.node_color
+        else:
+            self.color = self._colors["DEFAULT"]
+
+    def init(self, context):
+        # set up custom color
+        self._set_node_color()
         # set up the node
         self.on_create(context)
         # evaluate node for the first time
@@ -280,6 +287,16 @@ class SN_ScriptingBaseNode:
     def add_string_output(self, label="String"): return self._add_output("SN_StringSocket", label)
     def add_dynamic_string_input(self, label="String"): return self._add_input("SN_StringSocket", label, True)
     def add_dynamic_string_output(self, label="String"): return self._add_output("SN_StringSocket", label, True)
+
+    def add_enum_input(self, label="Enum"): return self._add_input("SN_EnumSocket", label)
+    def add_enum_output(self, label="Enum"): return self._add_output("SN_EnumSocket", label)
+    def add_dynamic_enum_input(self, label="Enum"): return self._add_input("SN_EnumSocket", label, True)
+    def add_dynamic_enum_output(self, label="Enum"): return self._add_output("SN_EnumSocket", label, True)
+
+    def add_boolean_input(self, label="Boolean"): return self._add_input("SN_BooleanSocket", label)
+    def add_boolean_output(self, label="Boolean"): return self._add_output("SN_BooleanSocket", label)
+    def add_dynamic_boolean_input(self, label="Boolean"): return self._add_input("SN_BooleanSocket", label, True)
+    def add_dynamic_boolean_output(self, label="Boolean"): return self._add_output("SN_BooleanSocket", label, True)
 
     
     ### ERROR HANDLING

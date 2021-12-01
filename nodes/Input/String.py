@@ -15,7 +15,7 @@ class SN_StringNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         self.outputs["String"].python_value = f"\"{self.string}\""
 
-    string: bpy.props.StringProperty(name="String", description="String value of this node", update=evaluate)
+    string: bpy.props.StringProperty(name="Value", description="String value of this node", update=evaluate)
 
     def draw_node(self, context, layout):
         layout.prop(self, "string", text="")
