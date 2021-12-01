@@ -10,8 +10,7 @@ class SN_PT_HeaderSettings(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        # layout.prop(context.scene.sn, "insert_sockets", icon="NODE_INSERT_OFF")
-        # layout.prop(context.scene.sn, "python_buttons", icon="COPYDOWN")
+        layout.prop(context.scene.sn, "insert_sockets", icon="TRIA_UP")
 
 
 

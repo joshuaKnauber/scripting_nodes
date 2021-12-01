@@ -53,6 +53,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Debug Sockets",
                                         description="Debug internal socket code")
 
+    insert_sockets: bpy.props.BoolProperty(default=False,
+                                        name="Insert Socket Buttons",
+                                        description="Show an insert button on dynamic sockets to insert a new socket above")
+
 
     def update_node_tree_index(self, context):
         if len(bpy.data.node_groups):

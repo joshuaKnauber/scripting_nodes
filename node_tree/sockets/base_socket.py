@@ -18,9 +18,9 @@ class ScriptingSocket:
     dynamic: bpy.props.BoolProperty(default=False,
                                     name="Dynamic",
                                     description="If this socket adds another socket when connected")
-    removable: bpy.props.BoolProperty(default=False,
-                                    name="Removable",
-                                    description="True if this socket can be removed from the node entirely")
+    prev_dynamic: bpy.props.BoolProperty(default=False,
+                                    name="Previously Dynamic",
+                                    description="True if this socket was previously dynamic and can now be removed")
 
     # OVERWRITE
     subtypes = ["NONE"] # possible subtypes for this data socket. Vector sockets should be seperate socket types, not subtypes (their size is a subtype)!
@@ -41,14 +41,6 @@ class ScriptingSocket:
     # OVERWRITE
     def draw_socket(self, context, layout, node, text): pass
 
-    def _draw_dynamic_socket(self, layout, node, text):
-        """ Draws the operators for dynamic sockets """
-        op = layout.operator("sn.add_dynamic", text="", emboss=False, icon="ADD")
-        op.node = node.name
-        op.is_output = self.is_output
-        op.index = self.index
-        layout.label(text=text)
-
     def _draw_removable_socket(self, layout, node):
         """ Draws the operators for removable sockets """
         op = layout.operator("sn.remove_socket", text="", emboss=False, icon="REMOVE")
@@ -56,16 +48,41 @@ class ScriptingSocket:
         op.is_output = self.is_output
         op.index = self.index
 
+    def _draw_dynamic_socket(self, layout, node, text):
+        """ Draws the operators for dynamic sockets """
+        # draw add operator
+        op = layout.operator("sn.add_dynamic", text="", emboss=False, icon="ADD")
+        op.node = node.name
+        op.is_output = self.is_output
+        op.insert_above = False
+        op.index = self.index
+
+        # draw socket label
+        layout.label(text=text)
+
+    def _draw_prev_dynamic_socket(self, context, layout, node):
+        """ Draws the operators for previously dynamic sockets """
+        # draw remove socket
+        self._draw_removable_socket(layout, node)
+
+        # draw add above operator
+        if context.scene.sn.insert_sockets:
+            op = layout.operator("sn.add_dynamic", text="", emboss=False, icon="TRIA_UP")
+            op.node = node.name
+            op.is_output = self.is_output
+            op.insert_above = True
+            op.index = self.index
+
     def draw(self, context, layout, node, text):
         """ Draws this socket """
         # draw debug text for sockets
-        if context.scene.sn.debug_python_sockets:
+        if context.scene.sn.debug_python_sockets and self.python_value:
             text = self.python_value
         if self.dynamic:
             self._draw_dynamic_socket(layout, node, text)
         else:
-            if self.removable:
-                self._draw_removable_socket(layout, node)
+            if self.prev_dynamic:
+                self._draw_prev_dynamic_socket(context, layout, node)
             self.draw_socket(context, layout, node, text)
 
 
@@ -222,23 +239,33 @@ class ScriptingSocket:
                 return index
         return -1
 
-    def trigger_dynamic(self):
+    def trigger_dynamic(self, insert_above=False):
         """ Adds another socket like this one after itself and turns itself into a normal socket """
-        if self.dynamic:
-            # set this socket
-            self.dynamic = False
-            self.removable = True
-
+        if self.dynamic or self.prev_dynamic:
             # add new socket
             if self.is_output:
-                socket = self.node._add_input(self.bl_idname, self.name, True)
-                self.node.outputs.move(len(self.node.outputs)-1, self.index+1)
+                socket = self.node._add_output(self.bl_idname, self.name)
+                # move socket
+                if not insert_above:
+                    self.node.outputs.move(len(self.node.outputs)-1, self.index+1)
+                else:
+                    self.node.outputs.move(len(self.node.outputs)-1, self.index)
             else:
-                socket = self.node._add_input(self.bl_idname, self.name, True)
-                self.node.inputs.move(len(self.node.inputs)-1, self.index+1)
+                socket = self.node._add_input(self.bl_idname, self.name)
+                # move socket
+                if not insert_above:
+                    self.node.inputs.move(len(self.node.inputs)-1, self.index+1)
+                else:
+                    self.node.inputs.move(len(self.node.inputs)-1, self.index)
 
             # set new socket
+            socket.dynamic = self.dynamic
+            socket.prev_dynamic = self.prev_dynamic
             socket.subtype = self.subtype
+
+            # set this socket
+            self.dynamic = False
+            self.prev_dynamic = True
 
 
 
@@ -251,6 +278,7 @@ class SN_AddDynamic(bpy.types.Operator):
     node: bpy.props.StringProperty(options={"HIDDEN", "SKIP_SAVE"})
     is_output: bpy.props.BoolProperty(options={"HIDDEN", "SKIP_SAVE"})
     index: bpy.props.IntProperty(options={"HIDDEN", "SKIP_SAVE"})
+    insert_above: bpy.props.BoolProperty(default=False, options={"HIDDEN", "SKIP_SAVE"})
 
     @classmethod
     def poll(cls, context):
@@ -269,7 +297,7 @@ class SN_AddDynamic(bpy.types.Operator):
                 socket = node.inputs[self.index]
                 
             # trigger adding dynamic socket
-            socket.trigger_dynamic()
+            socket.trigger_dynamic(self.insert_above)
 
             # trigger reevaluation
             node.evaluate(context)

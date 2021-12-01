@@ -13,8 +13,7 @@ class SN_LayoutRowNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_interface_input()
         self.add_interface_output()
-        self.add_interface_output()
-        self.add_string_input()
+        self.add_dynamic_interface_output()
 
     def evaluate(self, context):
         self.code = f"""
