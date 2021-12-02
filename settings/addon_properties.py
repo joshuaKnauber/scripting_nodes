@@ -1,47 +1,18 @@
 import bpy
 import os
+
+
+"""
+- Node runs its own register
+- Node saves the registered class to keep it for unregistering
+- Node saves all utilitites for class
+- Node unregisters on free
+- add_... adds utility to node which saves it
+"""
             
 
 
-class CodeSnippet:
-    """ Represents a part of code in the final file. This handles things like unique function names and is used to get code ready for the python file """
-
-    def __init__(self, code):
-        self._code = code
-
-    def update(self, code):
-        pass
-
-    @property
-    def code(self):
-        # handle unique functions names here
-        return self._code
-
-
-
-class AddonCode:
-    """ Represents the final python file with all its code parts. This assembles and updates the python file if necessary """
-
-    def __init__(self):
-        self._imports = {}
-        self._imperative = {}
-        self._register = {}
-        self._unregister = {}
-
-    def _save_snippet(self, save_key, key, code, unique_keys):
-        if key in getattr(self, save_key):
-            getattr(self, save_key)[key].update(code)
-        else:
-            getattr(self, save_key)[key] = CodeSnippet(code)
-
-    def add_imperative(self, key, code, unique_keys=[]):
-        self._save_snippet("_imperative", key, code, unique_keys)
-
-
-
 class SN_AddonProperties(bpy.types.PropertyGroup):
-
-    addon = AddonCode()
 
     has_update: bpy.props.BoolProperty(name="Has Update",
                                         description="If Serpens has an available update or not. This is set on file load.",

@@ -17,6 +17,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_dynamic_interface_output()
 
     def evaluate(self, context):
+        self.add_register("bpy.utils.register_class(SNA_PT_HelloWorldPanel)")
         self.code = f"""
                     class SNA_PT_HelloWorldPanel(bpy.types.Panel):
                         bl_label = "Hello World Panel"
@@ -27,19 +28,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                         def draw(self, context):
                             layout = self.layout
-
-                            obj = context.object
-
-                            row = layout.row()
-                            row.label(text="Hello world!", icon='WORLD_DATA')
-
-                            row = layout.row()
-                            row.label(text="Active object is: " + obj.name)
-                            row = layout.row()
-                            row.prop(obj, "name")
-
-                            row = layout.row()
-                            row.operator("mesh.primitive_cube_add")
+                            
+                            {self.indent([out.python_value for out in self.outputs[:-1]], 7)}
                     """
 
     def draw_node(self, context, layout):

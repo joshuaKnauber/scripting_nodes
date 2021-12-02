@@ -28,10 +28,6 @@ class SN_ScriptingBaseNode:
     # set this for any interface nodes that change the layout type (nodes like row, column, split, ...)
     layout_type = None
 
-    """
-    NOTE: store a list of registered functions in the node tree. nodes can use this to check if they need to register a function again
-    NOTE: when exporting the final addon, somehow trigger compile on all nodes to get export code (or just save file or separated files?)
-    """
 
     @classmethod
     def poll(cls, ntree):
@@ -50,10 +46,20 @@ class SN_ScriptingBaseNode:
         return uuid4().hex[:5].upper()
 
 
+    def compile(self, unregister):
+        """ Registers or unregisters this trigger nodes current code and stores results """
+        if not unregister:
+            try:
+                exec(self.code + "\nprint('test')")
+            except Exception as error:
+                print(error)
+
+
     def node_code_changed(self, context=None):
         """ Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes """
         if self.is_trigger:
-            self.add_imperative(self.code)
+            self.compile(unregister=True)
+            self.compile(unregister=False)
         else:
             # update the code of all program inputs to reflect the nodes code
             for inp in self.inputs:
@@ -63,6 +69,11 @@ class SN_ScriptingBaseNode:
 
     def indent(self, code, indents):
         """ Indents the given code by the given amount of indents. Use this when inserting multiline blocks into code """
+        # join code blocks if given
+        if type(code) == list:
+            code = "\n".join(code)
+
+        # split code and indent properly
         lines = code.split("\n")
         for i in range(1, len(lines)):
             lines[i] = " "*(4*indents) + lines[i]
