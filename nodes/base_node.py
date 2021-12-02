@@ -265,11 +265,13 @@ class SN_ScriptingBaseNode:
     def _add_input(self, idname, label, dynamic=False):
         socket = self.inputs.new(idname, label)
         socket.dynamic = dynamic
+        socket.display_shape = socket.socket_shape
         return socket
     
     def _add_output(self, idname, label, dynamic=False):
         socket = self.outputs.new(idname, label)
         socket.dynamic = dynamic
+        socket.display_shape = socket.socket_shape
         return socket
 
 
