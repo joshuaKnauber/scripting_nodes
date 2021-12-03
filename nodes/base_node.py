@@ -80,10 +80,6 @@ class SN_ScriptingBaseNode:
         return linked
 
 
-    # stores the unregister functions for nodes with a key TODO to recall them when reregistering
-    unregister_cache = {}
-
-
     def _get_import_list(self, linked=[]):
         """ Returns the imports for this node as a list of import lines """
         if not linked: linked = self._get_linked_nodes()
@@ -146,22 +142,23 @@ class SN_ScriptingBaseNode:
         unregister = self._format_unregister(linked)
 
         run_register = "\nregister()\n"
-        store_unregister = f"bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}'].unregister_cache['{self.name}'] = unregister\n"
+        store_unregister = f"bpy.context.scene.sn.unregister_cache['{id(self)}'] = unregister\n"
 
         return imports + imperative + f"\n{self.code}\n" + register + unregister + run_register + store_unregister
 
 
     def unregister(self):
         """ Unregisters this trigger nodes current code """
+        sn = bpy.context.scene.sn
         if self.is_trigger:
-            if self.name in self.unregister_cache:
+            if self.name in sn.unregister_cache:
                 # run unregister
                 try:
-                    self.unregister_cache[self.name]()
+                    sn.unregister_cache[id(self)]()
                 except Exception as error:
                     print(error)
                 # remove unregister function
-                del self.unregister_cache[self.name]
+                del sn.unregister_cache[id(self)]
  
 
     def compile(self):

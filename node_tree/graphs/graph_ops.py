@@ -1,7 +1,7 @@
 from bpy_extras.io_utils import ImportHelper
 import bpy
 import os
-from .node_tree import compile_all
+from .node_tree import compile_all, unregister_all
 
 
 
@@ -103,4 +103,16 @@ class SN_OT_ForceCompile(bpy.types.Operator):
 
     def execute(self, context):
         compile_all()
+        return {"FINISHED"}
+
+
+
+class SN_OT_ForceUnregister(bpy.types.Operator):
+    bl_idname = "sn.force_unregister"
+    bl_label = "Force Unregister"
+    bl_description = "Forces all node trees to unregister"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        unregister_all()
         return {"FINISHED"}

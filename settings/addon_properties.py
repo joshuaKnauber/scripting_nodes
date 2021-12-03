@@ -5,6 +5,10 @@ import os
 
 class SN_AddonProperties(bpy.types.PropertyGroup):
 
+    # stores the unregister functions for nodes with their id as the key to recall them when reregistering
+    unregister_cache = {}
+
+
     has_update: bpy.props.BoolProperty(name="Has Update",
                                         description="If Serpens has an available update or not. This is set on file load.",
                                         default=False)
@@ -24,6 +28,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     compile_on_load: bpy.props.BoolProperty(default=True,
                                         name="Compile On Load",
                                         description="Compile this addon when the file is loaded")
+
+
+    easy_bpy: bpy.props.PointerProperty(type=bpy.types.Text,
+                                        name="Easy BPY File",
+                                        description="The file that contains the easy bpy module")
 
 
     def update_node_tree_index(self, context):

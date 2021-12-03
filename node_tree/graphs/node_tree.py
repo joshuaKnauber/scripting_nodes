@@ -15,6 +15,11 @@ def unregister_all():
     for group in bpy.data.node_groups:
         if group.bl_idname == "ScriptingNodesTree":
             group.unregister()
+    for key in bpy.context.scene.sn.unregister_cache:
+        try:
+            bpy.context.scene.sn.unregister_cache[key]()
+        except Exception as error:
+            print(error)
 
 
 
