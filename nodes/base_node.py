@@ -83,26 +83,72 @@ class SN_ScriptingBaseNode:
     # stores the unregister functions for nodes with a key TODO to recall them when reregistering
     unregister_cache = {}
 
-    def _process_node_code(self):
-        # TEMPORARY
-        imports = "import bpy\n"
-        imperative = ""
-        register = ""
-        unregister = ""
 
-        for node in self._get_linked_nodes():
-            imports += node.code_import + "\n"
-            imperative += node.code_imperative + "\n"
-            register += node.code_register + "\n"
-            unregister += node.code_unregister + "\n"
+    def _get_import_list(self, linked=[]):
+        """ Returns the imports for this node as a list of import lines """
+        if not linked: linked = self._get_linked_nodes()
+        import_list = []
+        for node in linked:
+            imports = node.code_import
+            for imp in imports.split("\n"):
+                imp = imp.strip()
+                if imp and not imp in import_list:
+                    import_list.append(imp)
+        return import_list
 
-        register = "def register():\n" + self.indent(register, 1, 0) + "\n"
-        unregister = "def unregister():\n" + self.indent(unregister, 1, 0) + "\n"
+    def _format_imports(self, linked=[]):
+        """ Returns the imports for this node formatted for a python file """
+        if not linked: linked = self._get_linked_nodes()
+        import_list = self._get_import_list(linked)
+        return "import bpy\n" + "\n".join(import_list) + "\n"
 
-        run_register = "register()\n"
+
+    def _format_imperative(self, linked=[]):
+        """ Returns the imperative code for this node formatted for a python file """
+        # TODO there can still be duplicates in here. Maybe find a good way of removing those
+        if not linked: linked = self._get_linked_nodes()
+        full_imperative = "\n"
+        for node in linked:
+            imperative = node.code_imperative
+            if imperative:
+                full_imperative += imperative + "\n"
+        return full_imperative
+
+
+    def _format_register(self, linked=[]):
+        """ Returns the register code for this node formatted for a python file """
+        if not linked: linked = self._get_linked_nodes()
+        full_register = ""
+        for node in linked:
+            register = node.code_register
+            if register:
+                full_register += register + "\n"
+        return "\ndef register():\n" + self.indent(full_register, 1, 0) + "\n"
+
+
+    def _format_unregister(self, linked=[]):
+        """ Returns the unregister code for this node formatted for a python file """
+        if not linked: linked = self._get_linked_nodes()
+        full_unregister = ""
+        for node in linked:
+            unregister = node.code_unregister
+            if unregister:
+                full_unregister += unregister + "\n"
+        return "\ndef unregister():\n" + self.indent(full_unregister, 1, 0) + "\n"
+
+
+    def _format_node_code(self):
+        """ Formats this nodes and its connected nodes code ready to register in a separate file """
+        linked = self._get_linked_nodes()
+        imports = self._format_imports(linked)
+        imperative = self._format_imperative(linked)
+        register = self._format_register(linked)
+        unregister = self._format_unregister(linked)
+
+        run_register = "\nregister()\n"
         store_unregister = f"bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}'].unregister_cache['{self.name}'] = unregister\n"
 
-        return imports + self.code + "\n" + register + unregister + run_register + store_unregister
+        return imports + imperative + f"\n{self.code}\n" + register + unregister + run_register + store_unregister
 
 
     def unregister(self):
@@ -126,7 +172,7 @@ class SN_ScriptingBaseNode:
 
             # create text file
             txt = bpy.data.texts.new("tmp_serpens")
-            txt.write(self._process_node_code())
+            txt.write(self._format_node_code())
 
             # run text file
             ctx = bpy.context.copy()
@@ -274,6 +320,7 @@ class SN_ScriptingBaseNode:
         - Set self.code, self.code_import, self.code_imperative, self.code_register, self.code_unregister (order doesn't matter here)
 
         You can do all of these or none of these, but follow the order to help the register process to work smoothly
+        For adding imports, only import full modules like 'import math' instead of 'from math import radians'
 
         You can access your data inputs python_value and the python_value of your program outputs to use in your code.
         It's recommended to use formatted strings for making this easy to read.
@@ -384,6 +431,9 @@ class SN_ScriptingBaseNode:
             if getattr(self, key):
                 box = layout.box()
                 col = box.column(align=True)
+                row = col.row()
+                row.enabled = False
+                row.label(text=key.replace("_", " ").title())
                 for line in getattr(self, key).split("\n"):
                     col.label(text=line)
 
