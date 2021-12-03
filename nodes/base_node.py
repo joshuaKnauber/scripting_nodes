@@ -1,10 +1,7 @@
 import bpy
 from uuid import uuid4
-import hashlib
 
-# save register, ... only in node
-# on compile trigger nodes checks all connected, sorts code and makes a "file" out of that
-# on addons save the same thing is done, just that all the trigger nodes are saved as imperative, and all nodes can add register, ...
+
 
 class SN_ScriptingBaseNode:
 
