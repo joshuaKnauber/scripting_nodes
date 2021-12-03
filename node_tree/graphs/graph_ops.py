@@ -1,6 +1,7 @@
 from bpy_extras.io_utils import ImportHelper
 import bpy
 import os
+from .node_tree import compile_all
 
 
 
@@ -92,3 +93,14 @@ class SN_OT_AppendGraph(bpy.types.Operator, ImportHelper):
             bpy.ops.sn.append_popup("INVOKE_DEFAULT",path=self.filepath)
         return {"FINISHED"}
 
+
+
+class SN_OT_ForceCompile(bpy.types.Operator):
+    bl_idname = "sn.force_compile"
+    bl_label = "Force Compile"
+    bl_description = "Forces all node trees to compile"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        compile_all()
+        return {"FINISHED"}

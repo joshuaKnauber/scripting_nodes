@@ -38,5 +38,9 @@ def header_append(self, context):
 
         row = layout.row()
         row.separator()
+        col = row.column()
+        col.scale_x = 1.5
+        col.operator("sn.force_compile", text="", icon="FILE_REFRESH")
+        row.separator()
         row.operator("wm.url_open", text="", icon_value=bpy.context.scene.sn_icons["discord"].icon_id).url = "https://discord.com/invite/NK6kyae"
         row.operator("wm.url_open", text="", icon_value=bpy.context.scene.sn_icons["bug"].icon_id).url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/bugs/"
