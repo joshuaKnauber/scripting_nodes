@@ -89,6 +89,7 @@ def register():
     # app handlers
     bpy.app.handlers.depsgraph_update_post.append(handlers.depsgraph_handler)
     bpy.app.handlers.load_post.append(handlers.load_handler)
+    bpy.app.handlers.load_pre.append(handlers.unload_handler)
     atexit.register(handlers.unload_handler)
     
     # add right click menu
@@ -119,6 +120,7 @@ def unregister():
     # remove handlers
     bpy.app.handlers.depsgraph_update_post.remove(handlers.depsgraph_handler)
     bpy.app.handlers.load_post.remove(handlers.load_handler)
+    bpy.app.handlers.load_pre.remove(handlers.unload_handler)
     atexit.unregister(handlers.unload_handler)
     
     # remove right click menu

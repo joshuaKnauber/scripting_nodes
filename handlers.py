@@ -2,6 +2,7 @@ import bpy
 from bpy.app.handlers import persistent
 from . import bl_info
 from .settings.updates import check_serpens_updates
+from .node_tree.graphs.node_tree import compile_all, unregister_all
 
 
 
@@ -15,8 +16,10 @@ def depsgraph_handler(dummy):
 @persistent
 def load_handler(dummy):
     check_serpens_updates(bl_info["version"])
+    if bpy.context.scene.sn.compile_on_load:
+        compile_all()
 
 
 @persistent
 def unload_handler(dummy=None):
-    pass
+    unregister_all()

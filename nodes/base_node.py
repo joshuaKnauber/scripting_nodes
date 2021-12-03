@@ -105,7 +105,7 @@ class SN_ScriptingBaseNode:
         return imports + self.code + "\n" + register + unregister + run_register + store_unregister
 
 
-    def _unregister(self):
+    def unregister(self):
         """ Unregisters this trigger nodes current code """
         if self.is_trigger:
             if self.name in self.unregister_cache:
@@ -122,7 +122,7 @@ class SN_ScriptingBaseNode:
         """ Registers or unregisters this trigger nodes current code and stores results """
         if self.is_trigger:
             # unregister
-            self._unregister()
+            self.unregister()
 
             # create text file
             txt = bpy.data.texts.new("tmp_serpens")
@@ -332,7 +332,7 @@ class SN_ScriptingBaseNode:
     def free(self):
         # unregister the nodes content
         if self.is_trigger:
-            self._unregister()
+            self.unregister()
         # free node
         self.on_free()
 

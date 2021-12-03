@@ -1,6 +1,23 @@
 import bpy
 
 
+
+def compile_all():
+    """ Compile all node trees in this file """
+    for group in bpy.data.node_groups:
+        if group.bl_idname == "ScriptingNodesTree":
+            group.compile()
+
+
+
+def unregister_all():
+    """ Unregister all node trees in this file """
+    for group in bpy.data.node_groups:
+        if group.bl_idname == "ScriptingNodesTree":
+            group.unregister()
+
+
+
 class ScriptingNodesTree(bpy.types.NodeTree):
 
     bl_idname = 'ScriptingNodesTree'
@@ -112,3 +129,17 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def update(self):
         self._update_tree_links()
+
+
+    def compile(self):
+        """ Compile all nodes in this node tree """
+        for node in self.nodes:
+            if getattr(node, "is_trigger", False):
+                node.compile()
+
+
+    def unregister(self):
+        """ Unregister all nodes in this node tree """
+        for node in self.nodes:
+            if getattr(node, "is_trigger", False):
+                node.unregister()

@@ -1,14 +1,5 @@
 import bpy
 import os
-
-
-"""
-- Node runs its own register
-- Node saves the registered class to keep it for unregistering
-- Node saves all utilitites for class
-- Node unregisters on free
-- add_... adds utility to node which saves it
-"""
             
 
 
@@ -29,6 +20,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     insert_sockets: bpy.props.BoolProperty(default=False,
                                         name="Insert Socket Buttons",
                                         description="Show an insert button on dynamic sockets to insert a new socket above")
+
+    compile_on_load: bpy.props.BoolProperty(default=True,
+                                        name="Compile On Load",
+                                        description="Compile this addon when the file is loaded")
 
 
     def update_node_tree_index(self, context):

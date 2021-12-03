@@ -22,12 +22,12 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
 
-        layout.prop(sn, "debug_python_nodes")
-        layout.prop(sn, "debug_python_sockets")
-
-        # layout.prop(addon_graph, "compile_on_start", text="Compile on Startup")
+        layout.prop(sn, "compile_on_load")
 
         # layout.separator()
+        # layout.template_ID(context.scene.sn, "easy_bpy", open="text.open", text="Easy BPY")
 
-        # layout.template_ID(context.scene.sn, "easy_bpy",
-        #                    open="text.open", text="Easy BPY")
+        layout.separator()
+        layout.label(text="Debug")
+        layout.prop(sn, "debug_python_nodes")
+        layout.prop(sn, "debug_python_sockets")
