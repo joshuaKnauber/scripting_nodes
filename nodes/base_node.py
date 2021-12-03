@@ -318,8 +318,7 @@ class SN_ScriptingBaseNode:
         # set up the node
         self.on_copy(old)
         # compile the node for the first time after copying
-        self.evaluate(bpy.context)
-        self._trigger_root_nodes()
+        self._evaluate(bpy.context)
 
 
     ### FREE NODE
