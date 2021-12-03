@@ -143,20 +143,20 @@ class ScriptingSocket:
         if self.is_program:
             # evaluate this node if this is a program output
             if self.is_output:
-                self.node.evaluate(bpy.context)
+                self.node._evaluate(bpy.context)
             # evaluate all connected nodes if this is a program input
             else:
                 from_socket = self.from_socket()
                 if from_socket:
-                    from_socket.node.evaluate(bpy.context)
+                    from_socket.node._evaluate(bpy.context)
         else:
             # evaluate all connected nodes if this is a data output
             if self.is_output:
                 for socket in self.to_sockets():
-                    socket.node.evaluate(bpy.context)
+                    socket.node._evaluate(bpy.context)
             # evaluate this node if this is a data input
             else:
-                self.node.evaluate(bpy.context)
+                self.node._evaluate(bpy.context)
         
 
     python_value: bpy.props.StringProperty(name="Python Value",

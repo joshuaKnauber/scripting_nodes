@@ -3,6 +3,13 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
+# extra evaluate to run something after evaluation is done
+# keep track of changes to code -> only node code has changed; other code has changed
+# if only node code has changed -> node_code_changed
+# if also other code changed -> node_code_changed -> trigger roots
+
+
+
 class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_PanelNode"
@@ -17,7 +24,6 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_dynamic_interface_output()
 
     def evaluate(self, context):
-        self.add_register("bpy.utils.register_class(SNA_PT_HelloWorldPanel)")
         self.code = f"""
                     class SNA_PT_HelloWorldPanel(bpy.types.Panel):
                         bl_label = "Hello World Panel"
@@ -31,6 +37,9 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                             
                             {self.indent([out.python_value for out in self.outputs[:-1]], 7)}
                     """
+
+        self.code_unregister = "bpy.utils.unregister_class(SNA_PT_HelloWorldPanel)"
+        self.code_register = "bpy.utils.register_class(SNA_PT_HelloWorldPanel)"
 
     def draw_node(self, context, layout):
         pass

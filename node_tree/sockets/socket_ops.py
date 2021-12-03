@@ -33,7 +33,7 @@ class SN_AddDynamic(bpy.types.Operator):
             socket.trigger_dynamic(self.insert_above)
 
             # trigger reevaluation
-            node.evaluate(context)
+            node._evaluate(context)
         return {"FINISHED"}
 
 
@@ -65,5 +65,5 @@ class SN_RemoveSocket(bpy.types.Operator):
                 node.inputs.remove(node.inputs[self.index])
 
             # trigger reevaluation
-            node.evaluate(context)
+            node._evaluate(context)
         return {"FINISHED"}

@@ -19,7 +19,7 @@ class SN_BooleanMathNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_operation(self, context):
         for inp in self.inputs[1:]:
             inp.enabled = self.operation != "NOT"
-        self.evaluate(context)
+        self._evaluate(context)
 
     operation: bpy.props.EnumProperty(items=[("AND", "And", "Returns True if both inputs are True"),
                                             ("OR", "Or", "Returns True if one or both inputs are True"),

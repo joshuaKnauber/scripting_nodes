@@ -1,7 +1,9 @@
 import bpy
 from uuid import uuid4
 
-
+# save register, ... only in node
+# on compile trigger nodes checks all connected, sorts code and makes a "file" out of that
+# on addons save the same thing is done, just that all the trigger nodes are saved as imperative, and all nodes can add register, ...
 
 class SN_ScriptingBaseNode:
 
@@ -46,25 +48,65 @@ class SN_ScriptingBaseNode:
         return uuid4().hex[:5].upper()
 
 
-    def compile(self, unregister):
+    @property
+    def root_nodes(self):
+        """ Returns the trigger nodes that are connected to this node """
+        return filter(lambda node: node.is_trigger, self._get_linked_nodes())
+
+
+    def _get_linked_nodes(self, linked=None):
+        """ Recursively returns a list of all nodes linked to the given node """
+        if linked == None: linked = [self]
+        new_linked = []
+
+        # get all nodes connected to this nodes input
+        for inp in self.inputs:
+            from_out = inp.from_socket()
+            if from_out and not from_out.node in linked and not from_out.node in new_linked:
+                new_linked.append(from_out.node)
+        
+        # get all nodes connected to this nodes output
+        for out in self.outputs:
+            for to_inp in out.to_sockets():
+                if not to_inp.node in linked and not to_inp.node in new_linked:
+                    new_linked.append(to_inp.node)
+
+        # get all nodes linked to the found nodes
+        linked += new_linked
+        for node in new_linked:
+            linked = node._get_linked_nodes(linked)
+
+        return linked
+
+
+    def compile(self):
         """ Registers or unregisters this trigger nodes current code and stores results """
-        if not unregister:
+        if self.is_trigger:
             try:
-                exec(self.code + "\nprint('test')")
+                linked = self._get_linked_nodes()
+                # print(linked)
+                print("compile "+self.name)
+                exec(self.code)
             except Exception as error:
                 print(error)
 
 
-    def node_code_changed(self, context=None):
+    def _node_code_changed(self):
         """ Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes """
         if self.is_trigger:
-            self.compile(unregister=True)
-            self.compile(unregister=False)
+            self.compile()
         else:
             # update the code of all program inputs to reflect the nodes code
             for inp in self.inputs:
                 if inp.is_program:
                     inp.python_value = self.code
+
+
+    def _trigger_root_nodes(self):
+        """ Compiles the root node of this node if it exists """
+        roots = self.root_nodes
+        for root in roots:
+            root.compile()
 
 
     def indent(self, code, indents):
@@ -103,17 +145,24 @@ class SN_ScriptingBaseNode:
         return "\n".join(indented)
 
 
-    def _set_code(self, raw_code):
-        """ Checks if the given code is different from the current code and. If required it triggers a code update """
+    def _set_any_code(self, key, raw_code):
+        """ Checks if the given code is different from the current code. If required it triggers a code update """
         normalized = self._normalize_code(raw_code)
-        if self.get("code") == None or normalized != self["code"]:
-            self["code"] = normalized
-            self.node_code_changed()
+        if self.get(key) == None or normalized != self[key]:
+            self[key] = normalized
+
+    def _set_code(self, raw_code): self._set_any_code("code", raw_code)
+    def _set_code_import(self, raw_code): self._set_any_code("code_import", raw_code)
+    def _set_code_imperative(self, raw_code): self._set_any_code("code_imperative", raw_code)
+    def _set_code_register(self, raw_code): self._set_any_code("code_register", raw_code)
+    def _set_code_unregister(self, raw_code): self._set_any_code("code_unregister", raw_code)
 
 
-    def _get_code(self):
-        """ Returns the current code of this node """
-        return self.get("code", "")
+    def _get_code(self): return self.get("code", "")
+    def _get_code_import(self): return self.get("code_import", "")
+    def _get_code_imperative(self): return self.get("code_imperative", "")
+    def _get_code_register(self): return self.get("code_register", "")
+    def _get_code_unregister(self): return self.get("code_unregister", "")
 
 
     code: bpy.props.StringProperty(name="Code",
@@ -121,22 +170,53 @@ class SN_ScriptingBaseNode:
                                     set=_set_code,
                                     get=_get_code)
 
+    code_import: bpy.props.StringProperty(name="Code Import",
+                                    description="The current compiled code for this nodes imports",
+                                    set=_set_code_import,
+                                    get=_get_code_import)
 
-    def add_imperative(self, code):
-        pass
+    code_imperative: bpy.props.StringProperty(name="Code Imperative",
+                                    description="The current compiled code for this nodes additional imperative code",
+                                    set=_set_code_imperative,
+                                    get=_get_code_imperative)
 
-    def add_import(self, module, keys=[], aliases=[]):
-        pass
+    code_register: bpy.props.StringProperty(name="Code Register",
+                                    description="The current compiled code for this nodes registrations",
+                                    set=_set_code_register,
+                                    get=_get_code_register)
 
-    def add_register(self, code):
-        pass
+    code_unregister: bpy.props.StringProperty(name="Code Unregister",
+                                    description="The current compiled code for this nodes unregistrations",
+                                    set=_set_code_unregister,
+                                    get=_get_code_unregister)
 
-    def add_unregister(self, code):
-        pass
+
+    def _evaluate(self, context):
+        """ Internal evaluate to check if changes happened and trigger the compile process """
+        # keep track of code before changes
+        prev_code = self.code
+        prev_code_import = self.code_import
+        prev_code_imperative = self.code_imperative
+        prev_code_register = self.code_register
+        prev_code_unregister = self.code_unregister
+
+        # evaluate node
+        self.evaluate(context)
+
+        # trigger compiler if code changed
+        other_code_changed = not (prev_code_import == self.code_import and prev_code_imperative == self.code_imperative \
+                                and prev_code_register == self.code_register and prev_code_unregister == self.code_unregister)
+        node_code_changed = prev_code != self.code
+
+        # trigger compiler updates
+        if node_code_changed:
+            self._node_code_changed()
+        if other_code_changed:
+            self._trigger_root_nodes()
 
 
     def evaluate(self, context):
-        """Updates this nodes code and the code of all changed data outputs
+        """ Updates this nodes code and the code of all changed data outputs
         Call this when the data of this node has changed (e.g. as the update function of properties).
 
         The function is also automatically called when the code of program nodes connected to the output changes and when code of data inputs of this node are changed.
@@ -146,8 +226,13 @@ class SN_ScriptingBaseNode:
 
         You should follow this order to add code in this function:
         - Set data outputs python_value
-        - Add code with add_import, add_imperative, add_register, add_unregister (the order of these doesn't matter)
-        - Set self.code
+        - ... TODO -> also use _evaluate in updates not evaluate
+
+        You can access your data inputs python_value to use in your code and the python_value of your program outputs.
+        It's recommended to use formatted strings for making this easy to read.
+
+        You can use self.indent("your_code_string", indents) to indent blocks of code from output python_values. This can also be a list of values.
+        The indents depend on your actual python file. If your string has 5 indents, pass 5 to the function. Make sure you're using 4 spaces as indents for your file.
 
         You can do all of these or none of these, but follow the order to help the register process to work smoothly
         """
@@ -179,7 +264,7 @@ class SN_ScriptingBaseNode:
         # set up the node
         self.on_create(context)
         # evaluate node for the first time
-        self.evaluate(context)
+        self._evaluate(context)
 
 
     ### COPY NODE
@@ -189,7 +274,7 @@ class SN_ScriptingBaseNode:
         # set up the node
         self.on_copy(old)
         # evaluate the node for the first time after copying
-        self.evaluate(bpy.context)
+        self._evaluate(bpy.context)
 
 
     ### FREE NODE
@@ -213,7 +298,7 @@ class SN_ScriptingBaseNode:
     def _insert_link_layout_update(self, from_socket, is_output):
         """ Updates the layout type of this node when a node with layout type gets connected """
         if not is_output and from_socket.node.layout_type:
-            self.evaluate(bpy.context)
+            self._evaluate(bpy.context)
 
     def _insert_trigger_dynamic(self, from_socket, to_socket):
         """ Triggers dynamic sockets to add new ones """
@@ -234,7 +319,7 @@ class SN_ScriptingBaseNode:
     def _remove_link_layout_update(self, from_socket, is_output):
         """ Updates the layout type of this node when a connected node with layout type gets removed """
         if not is_output and not from_socket.node or (from_socket.node and from_socket.node.layout_type):
-            self.evaluate(bpy.context)
+            self._evaluate(bpy.context)
 
     def link_remove(self, from_socket, to_socket, is_output):
         self._remove_link_layout_update(from_socket, is_output)
@@ -245,17 +330,17 @@ class SN_ScriptingBaseNode:
     def draw_node(self, context, layout): pass
 
     def _draw_debug_code(self, context, layout):
-        # get if the node only has data sockets
-        pure_data = not self.code
-        for socket in self.inputs.values() + self.outputs.values():
-            if socket.is_program:
-                pure_data = False
-        # draw code line by line
-        if not pure_data:
-            box = layout.box()
-            col = box.column(align=True)
-            for line in self.code.split("\n"):
-                col.label(text=line)
+        """ Draws the code for this node line by line on the node """
+        for key in ["code", "code_import", "code_imperative", "code_register", "code_unregister"]:
+            if getattr(self, key):
+                box = layout.box()
+                col = box.column(align=True)
+                for line in getattr(self, key).split("\n"):
+                    col.label(text=line)
+            else:
+                row = layout.row()
+                row.enabled = False
+                row.label(text=f"- No {key} for this node")
 
     def draw_buttons(self, context, layout):
         if context.scene.sn.debug_python_nodes:
