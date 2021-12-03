@@ -80,9 +80,11 @@ class SN_ScriptingBaseNode:
         return linked
 
 
+    # stores the unregister functions for nodes with a key TODO to recall them when reregistering
     unregister_cache = {}
 
     def _process_node_code(self):
+        # TEMPORARY
         imports = "import bpy\n"
         imperative = ""
         register = ""
@@ -106,32 +108,35 @@ class SN_ScriptingBaseNode:
     def _unregister(self):
         """ Unregisters this trigger nodes current code """
         if self.is_trigger:
-            print(f"Serpens Log: Compiling {self.name}")
-
             if self.name in self.unregister_cache:
+                # run unregister
                 try:
                     self.unregister_cache[self.name]()
                 except Exception as error:
                     print(error)
+                # remove unregister function
                 del self.unregister_cache[self.name]
  
 
     def compile(self):
         """ Registers or unregisters this trigger nodes current code and stores results """
         if self.is_trigger:
-            print(f"Serpens Log: Compiling {self.name}")
-
+            # unregister
             self._unregister()
 
+            # create text file
             txt = bpy.data.texts.new("tmp_serpens")
             txt.write(self._process_node_code())
 
+            # run text file
             ctx = bpy.context.copy()
             ctx['edit_text'] = txt
             try:
                 bpy.ops.text.run_script(ctx)
             except Exception as error:
                 print(error)
+
+            # remove text file
             bpy.data.texts.remove(txt)
 
 
