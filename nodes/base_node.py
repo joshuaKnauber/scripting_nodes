@@ -79,16 +79,51 @@ class SN_ScriptingBaseNode:
         return linked
 
 
+    unregister_cache = {}
+
+    def _process_node_code(self):
+        imports = "import bpy\n"
+        imperative = ""
+        register = ""
+        unregister = ""
+
+        for node in self._get_linked_nodes():
+            imports += node.code_import + "\n"
+            imperative += node.code_imperative + "\n"
+            register += node.code_register + "\n"
+            unregister += node.code_unregister + "\n"
+
+        register = "def register():\n" + self.indent(register, 1, 0) + "\n"
+        unregister = "def unregister():\n" + self.indent(unregister, 1, 0) + "\n"
+
+        run_register = "register()\n"
+        store_unregister = f"bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}'].unregister_cache['{self.name}'] = unregister\n"
+
+        return imports + self.code + "\n" + register + unregister + run_register + store_unregister
+
+
     def compile(self):
         """ Registers or unregisters this trigger nodes current code and stores results """
         if self.is_trigger:
+            print(f"Serpens Log: Compiling {self.name}")
+
+            if self.name in self.unregister_cache:
+                try:
+                    self.unregister_cache[self.name]()
+                except Exception as error:
+                    print(error)
+                del self.unregister_cache[self.name]
+
+            txt = bpy.data.texts.new(".tmp_serpens")
+            txt.write(self._process_node_code())
+
+            ctx = bpy.context.copy()
+            ctx['edit_text'] = txt
             try:
-                linked = self._get_linked_nodes()
-                # print(linked)
-                print("compile "+self.name)
-                exec(self.code)
+                bpy.ops.text.run_script(ctx)
             except Exception as error:
                 print(error)
+            bpy.data.texts.remove(txt)
 
 
     def _node_code_changed(self):
@@ -109,7 +144,7 @@ class SN_ScriptingBaseNode:
             root.compile()
 
 
-    def indent(self, code, indents):
+    def indent(self, code, indents, start_line_index=1):
         """ Indents the given code by the given amount of indents. Use this when inserting multiline blocks into code """
         # join code blocks if given
         if type(code) == list:
@@ -117,7 +152,7 @@ class SN_ScriptingBaseNode:
 
         # split code and indent properly
         lines = code.split("\n")
-        for i in range(1, len(lines)):
+        for i in range(start_line_index, len(lines)):
             lines[i] = " "*(4*indents) + lines[i]
         return "\n".join(lines)
 
