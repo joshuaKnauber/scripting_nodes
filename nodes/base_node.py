@@ -132,7 +132,7 @@ class SN_ScriptingBaseNode:
             ctx = bpy.context.copy()
             ctx['edit_text'] = txt
             try:
-                bpy.ops.text.run_script(ctx)
+                bpy.ops.text.run_script(ctx) # TODO undo doesn't recompile
             except Exception as error:
                 print(error)
 
@@ -266,24 +266,20 @@ class SN_ScriptingBaseNode:
 
     def evaluate(self, context):
         """ Updates this nodes code and the code of all changed data outputs
-        Call this when the data of this node has changed (e.g. as the update function of properties).
+        The function is automatically called when the code of program nodes connected to the output changes and when code of data inputs of this node are changed.
+        Call _evaluate instead of evaluate when the data of this node has changed (e.g. as the update function of properties).
 
-        The function is also automatically called when the code of program nodes connected to the output changes and when code of data inputs of this node are changed.
-
-        Set self.code as the last thing you do in this node!!! Set all data outputs code before or this will lead to issues!
-        You can store temporary code in variables in this function before you set self.code if necessary to adhere to this.
-
-        You should follow this order to add code in this function:
+        You should follow this order to update this nodes code in this function:
         - Set data outputs python_value
-        - ... TODO -> also use _evaluate in updates not evaluate
+        - Set self.code, self.code_import, self.code_imperative, self.code_register, self.code_unregister (order doesn't matter here)
 
-        You can access your data inputs python_value to use in your code and the python_value of your program outputs.
+        You can do all of these or none of these, but follow the order to help the register process to work smoothly
+
+        You can access your data inputs python_value and the python_value of your program outputs to use in your code.
         It's recommended to use formatted strings for making this easy to read.
 
         You can use self.indent("your_code_string", indents) to indent blocks of code from output python_values. This can also be a list of values.
-        The indents depend on your actual python file. If your string has 5 indents, pass 5 to the function. Make sure you're using 4 spaces as indents for your file.
-
-        You can do all of these or none of these, but follow the order to help the register process to work smoothly
+        The indents depend on your actual python file. If there are 5 indents before your string, pass 5 to the function. Make sure you're using 4 spaces as indents for your file.
         """
 
 
@@ -390,10 +386,6 @@ class SN_ScriptingBaseNode:
                 col = box.column(align=True)
                 for line in getattr(self, key).split("\n"):
                     col.label(text=line)
-            else:
-                row = layout.row()
-                row.enabled = False
-                row.label(text=f"- No {key} for this node")
 
     def draw_buttons(self, context, layout):
         if context.scene.sn.debug_python_nodes:
