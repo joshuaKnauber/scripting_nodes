@@ -24,10 +24,11 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_dynamic_interface_output()
 
     def evaluate(self, context):
+        uid = self.uuid
         self.code = f"""
-                    class SNA_PT_HelloWorldPanel(bpy.types.Panel):
+                    class SNA_PT_HelloWorldPanel_{uid}(bpy.types.Panel):
                         bl_label = "Hello World Panel"
-                        bl_idname = "OBJECT_PT_hello"
+                        bl_idname = "SNA_PT_HelloWorldPanel_{uid}"
                         bl_space_type = 'PROPERTIES'
                         bl_region_type = 'WINDOW'
                         bl_context = "object"
@@ -38,8 +39,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                             {self.indent([out.python_value for out in self.outputs[:-1]], 7)}
                     """
 
-        self.code_unregister = "bpy.utils.unregister_class(SNA_PT_HelloWorldPanel)"
-        self.code_register = "bpy.utils.register_class(SNA_PT_HelloWorldPanel)"
+        self.code_unregister = f"bpy.utils.unregister_class(SNA_PT_HelloWorldPanel_{uid})"
+        self.code_register = f"bpy.utils.register_class(SNA_PT_HelloWorldPanel_{uid})"
 
     def draw_node(self, context, layout):
         pass

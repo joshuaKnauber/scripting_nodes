@@ -1,5 +1,6 @@
 import bpy
 from uuid import uuid4
+import hashlib
 
 # save register, ... only in node
 # on compile trigger nodes checks all connected, sorts code and makes a "file" out of that
@@ -102,8 +103,8 @@ class SN_ScriptingBaseNode:
         return imports + self.code + "\n" + register + unregister + run_register + store_unregister
 
 
-    def compile(self):
-        """ Registers or unregisters this trigger nodes current code and stores results """
+    def _unregister(self):
+        """ Unregisters this trigger nodes current code """
         if self.is_trigger:
             print(f"Serpens Log: Compiling {self.name}")
 
@@ -113,8 +114,16 @@ class SN_ScriptingBaseNode:
                 except Exception as error:
                     print(error)
                 del self.unregister_cache[self.name]
+ 
 
-            txt = bpy.data.texts.new(".tmp_serpens")
+    def compile(self):
+        """ Registers or unregisters this trigger nodes current code and stores results """
+        if self.is_trigger:
+            print(f"Serpens Log: Compiling {self.name}")
+
+            self._unregister()
+
+            txt = bpy.data.texts.new("tmp_serpens")
             txt.write(self._process_node_code())
 
             ctx = bpy.context.copy()
@@ -308,14 +317,19 @@ class SN_ScriptingBaseNode:
     def copy(self, old):
         # set up the node
         self.on_copy(old)
-        # evaluate the node for the first time after copying
-        self._evaluate(bpy.context)
+        # compile the node for the first time after copying
+        self.evaluate(bpy.context)
+        self._trigger_root_nodes()
 
 
     ### FREE NODE
     def on_free(self): pass
 
     def free(self):
+        # unregister the nodes content
+        if self.is_trigger:
+            self._unregister()
+        # free node
         self.on_free()
 
 
