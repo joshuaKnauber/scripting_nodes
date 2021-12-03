@@ -5,7 +5,7 @@ import os
 
 class SN_AddonProperties(bpy.types.PropertyGroup):
 
-    # stores the unregister functions for nodes with their id as the key to recall them when reregistering
+    # stores the unregister functions for nodes with their memory adress as the key to recall them when reregistering
     unregister_cache = {}
 
 

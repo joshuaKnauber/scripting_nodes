@@ -139,7 +139,7 @@ class SN_ScriptingBaseNode:
         unregister = self._format_unregister(linked)
 
         run_register = "\nregister()\n"
-        store_unregister = f"bpy.context.scene.sn.unregister_cache['{id(self)}'] = unregister\n"
+        store_unregister = f"bpy.context.scene.sn.unregister_cache['{self.as_pointer()}'] = unregister\n"
 
         return imports + imperative + f"\n{self.code}\n" + register + unregister + run_register + store_unregister
 
@@ -148,14 +148,14 @@ class SN_ScriptingBaseNode:
         """ Unregisters this trigger nodes current code """
         sn = bpy.context.scene.sn
         if self.is_trigger:
-            if self.name in sn.unregister_cache:
+            if f"{self.as_pointer()}" in sn.unregister_cache:
                 # run unregister
                 try:
-                    sn.unregister_cache[id(self)]()
+                    sn.unregister_cache[f"{self.as_pointer()}"]()
                 except Exception as error:
                     print(error)
                 # remove unregister function
-                del sn.unregister_cache[id(self)]
+                del sn.unregister_cache[f"{self.as_pointer()}"]
  
 
     def compile(self):
