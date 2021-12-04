@@ -9,6 +9,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     unregister_cache = {}
 
 
+    picker_active: bpy.props.BoolProperty(default=False,
+                                        name="Picker Is Active",
+                                        description="This is enabled when a location picker for panels or similar is active")
+
+
     has_update: bpy.props.BoolProperty(name="Has Update",
                                         description="If Serpens has an available update or not. This is set on file load.",
                                         default=False)

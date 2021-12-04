@@ -3,69 +3,6 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-def register_dummy_panel(space, region):
-    panel = f"""
-class SN_PT_Dummy{space}{region}(bpy.types.Panel):
-    bl_label = "test"
-    bl_space_type = '{space}'
-    bl_region_type = '{region}'
-    bl_context = "object"
-    bl_category = "SELECT"
-
-    bl_options = {{"HIDE_HEADER"}}
-    bl_order = 0
-    
-    def draw(self, context):
-        layout = self.layout
-        row = layout.row()
-        row.scale_y = 1.5
-        row.alert = True
-        row.operator("sn.select_panel_location", text="Select {space} {region}")
-    
-bpy.utils.register_class(SN_PT_Dummy{space}{region})
-"""
-    exec(panel)
-     
-
-
-
-class SN_OT_SelectPanelLocation(bpy.types.Operator):
-    bl_idname = "sn.select_panel_location"
-    bl_label = "Select Panel Location"
-    bl_description = "Select the location of this panel in the Interface"
-    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
-
-    node_tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
-    node: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
-
-    @classmethod
-    def poll(cls, context):
-        return True
-
-    def execute(self, context):
-        space_types = ["EMPTY", "VIEW_3D", "IMAGE_EDITOR", "NODE_EDITOR",
-                        "SEQUENCE_EDITOR", "CLIP_EDITOR", "DOPESHEET_EDITOR",
-                        "GRAPH_EDITOR", "NLA_EDITOR", "TEXT_EDITOR", "CONSOLE",
-                        "INFO", "TOPBAR", "STATUSBAR", "OUTLINER", "PROPERTIES",
-                        "FILE_BROWSER", "SPREADSHEET", "PREFERENCES"]
-        region_types = ["WINDOW", "HEADER", "CHANNELS", "TEMPORARY", "UI", "TOOLS",
-                        "TOOL_PROPS", "PREVIEW", "HUD", "NAVIGATION_BAR", "EXECUTE",
-                        "FOOTER", "TOOL_HEADER", "XR"]
-        
-        for region in region_types:
-            for space in space_types:
-                try:
-                    register_dummy_panel(space, region)
-                except Exception as error:
-                    print(error)
-        
-        for area in context.screen.areas:
-            area.tag_redraw()
-        return {"FINISHED"}
-
-
-
-
 class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_PanelNode"
@@ -87,17 +24,70 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="The label of your panel",
                                     update=SN_ScriptingBaseNode._evaluate)
 
+    space: bpy.props.StringProperty(default="VIEW_3D",
+                                    name="Space",
+                                    description="The space your panel is in",
+                                    update=SN_ScriptingBaseNode._evaluate)
+
+    region: bpy.props.StringProperty(default="UI",
+                                    name="Region",
+                                    description="The region your panel is in",
+                                    update=SN_ScriptingBaseNode._evaluate)
+
+    context: bpy.props.StringProperty(default="",
+                                    name="Context",
+                                    description="The context your panel is in",
+                                    update=SN_ScriptingBaseNode._evaluate)
+
+    category: bpy.props.StringProperty(default="New Category",
+                                    name="Category",
+                                    description="The category your panel is in",
+                                    update=SN_ScriptingBaseNode._evaluate)
+
+    order: bpy.props.IntProperty(default=0, min=0,
+                                name="Order",
+                                description="The order of your panel compared to the other panels",
+                                update=SN_ScriptingBaseNode._evaluate)
+
+    hide_header: bpy.props.BoolProperty(default=False,
+                                    name="Hide Header",
+                                    description="Hide the panels header",
+                                    update=SN_ScriptingBaseNode._evaluate)
+
+    expand_header: bpy.props.BoolProperty(default=False,
+                                    name="Expand Header",
+                                    description="Expands the header to fill the full panel width",
+                                    update=SN_ScriptingBaseNode._evaluate)
+
+    default_closed: bpy.props.BoolProperty(default=False,
+                                    name="Default Closed",
+                                    description="Closes the panel by default",
+                                    update=SN_ScriptingBaseNode._evaluate)
+
+    show_advanced: bpy.props.BoolProperty(default=False,
+                                    name="Advanced Options",
+                                    description="Show advanced python options for positioning the panel")
+
     def evaluate(self, context):
         uid = self.uuid
         # TODO make a function to get a valid python representation of a string for var names
         idname = f"SNA_PT_{self.label.title().replace(' ', '') if self.label else 'Panel'}_{uid}"
+
+        options = []
+        if self.hide_header: options.append("'HIDE_HEADER'")
+        if self.expand_header: options.append("'HEADER_LAYOUT_EXPAND'")
+        if self.default_closed: options.append("'DEFAULT_CLOSED'")
+
         self.code = f"""
                     class {idname}(bpy.types.Panel):
                         bl_label = "{self.label}"
                         bl_idname = "{idname}"
-                        bl_space_type = 'PROPERTIES'
-                        bl_region_type = 'WINDOW'
-                        bl_context = "object"
+                        bl_space_type = '{self.space}'
+                        bl_region_type = '{self.region}'
+                        {f"bl_context = '{self.context}'" if self.context else ""}
+                        {f"bl_category = '{self.category}'" if self.category else ""}
+                        bl_order = {self.order}
+                        {f"bl_options = {{{', '.join(options)}}}" if options else ""}
 
                         @classmethod
                         def poll(cls, context):
@@ -118,5 +108,21 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self, context, layout):
         row = layout.row()
         row.scale_y = 1.5
-        row.operator("sn.select_panel_location")
+        op = row.operator("sn.activate_panel_picker", text=f"{self.space.replace('_', ' ').title()} {self.region.replace('_', ' ').title()} {self.context.replace('_', ' ').title()}", icon="EYEDROPPER")
+        op.node_tree = self.node_tree.name
+        op.node = self.name
+
         layout.prop(self, "label")
+        layout.prop(self, "category")
+
+        layout.prop(self, "order")
+        layout.prop(self, "hide_header")
+        layout.prop(self, "expand_header")
+        layout.prop(self, "default_closed")
+
+        box = layout.box()
+        box.prop(self, "show_advanced", icon="TRIA_DOWN" if self.show_advanced else "TRIA_RIGHT", emboss=False)
+        if self.show_advanced:
+            box.prop(self, "space")
+            box.prop(self, "region")
+            box.prop(self, "context")
