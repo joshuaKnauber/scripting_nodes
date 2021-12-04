@@ -1,4 +1,5 @@
 import bpy
+from bpy import props
 from .base_socket import ScriptingSocket
 
 
@@ -13,7 +14,10 @@ class SN_OT_SetIcon(bpy.types.Operator):
     icon: bpy.props.IntProperty()
 
     def execute(self, context):
-        context.space_data.node_tree.nodes[self.node].inputs[self.socket].default_value = self.icon
+        if self.socket != -1:
+            context.space_data.node_tree.nodes[self.node].inputs[self.socket].default_value = self.icon
+        else:
+            context.space_data.node_tree.nodes[self.node].icon = self.icon
         context.area.tag_redraw()
         return {"FINISHED"}
 
@@ -38,7 +42,10 @@ class SN_OT_SelectIcon(bpy.types.Operator):
     def draw(self,context):
         layout = self.layout
         icons = bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items
-        socket = context.space_data.node_tree.nodes[self.node].inputs[self.socket]
+        if self.socket != -1:
+            prop = context.space_data.node_tree.nodes[self.node].inputs[self.socket].default_value
+        else:
+            prop = context.space_data.node_tree.nodes[self.node].icon
 
         row = layout.row()
         row.prop(self,"icon_search",text="",icon="VIEWZOOM")
@@ -46,7 +53,7 @@ class SN_OT_SelectIcon(bpy.types.Operator):
         grid = layout.grid_flow(align=True,even_columns=True, even_rows=True)
         for icon in icons:
             if self.icon_search.lower() in icon.name.lower() or not self.icon_search:
-                op = grid.operator("sn.set_icon",text="", icon_value=icon.value, emboss=socket.default_value==icon.value)
+                op = grid.operator("sn.set_icon",text="", icon_value=icon.value, emboss=prop==icon.value)
                 op.node = self.node
                 op.socket = self.socket
                 op.icon = icon.value
@@ -87,9 +94,10 @@ class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     def draw_socket(self, context, layout, node, text):
         layout.label(text=text)
-        row = layout.row()
-        row.scale_x = 1.74
-        op = row.operator("sn.select_icon", text="Choose Icon", icon_value=self.default_value)
-        op.node = node.name
-        op.socket = self.index
+        if not self.is_linked and not self.is_output:
+            row = layout.row()
+            row.scale_x = 1.74
+            op = row.operator("sn.select_icon", text="Choose Icon", icon_value=self.default_value)
+            op.node = node.name
+            op.socket = self.index
 

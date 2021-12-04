@@ -21,6 +21,7 @@ class SN_ScriptingBaseNode:
         "INTERFACE": ((0.2, 0.17, 0.14)),
         "STRING": (0.14, 0.17, 0.19),
         "BOOLEAN": (0.15, 0.13, 0.14),
+        "ICON": (0.14, 0.17, 0.19),
     }
     # the default color of this node. Set this to one of the options in _colors or use a vec3
     node_color = "DEFAULT"
