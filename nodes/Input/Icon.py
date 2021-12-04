@@ -16,18 +16,18 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.icon_source == "BLENDER":
             self.outputs["Icon"].python_value = f"{self.icon}"
             self.code_register = f""
-            self.code_unregister = f""
+            # self.code_unregister = f""
         else:
             if self.icon_file:
                 uid = self.uuid
-                self.outputs["Icon"].python_value = f"bpy.context.scene.sn_icons_{uid}['{self.icon_file.name}'].icon_id"
+                self.outputs["Icon"].python_value = f"bpy.context.scene.sn_icons_{uid}['{ self.icon_file.name.replace(' ', '_').upper() }'].icon_id"
                 self.code_register = f"""
-                        bpy.types.Scene.sn_icons_{uid} = bpy.utils.previews.new()
-                        bpy.types.Scene.sn_icons_{uid}.load('{self.icon_file.name}', '{self.icon_file.name}', 'IMAGE')
+                        bpy.types.Scene.sn_icons_{uid} = {{}}
+                        bpy.types.Scene.sn_icons_{uid}['{self.icon_file.name.replace(' ', '_').upper()}'] = bpy.data.images['{self.icon_file.name}'].preview
                         """
-                self.code_unregister = f"bpy.utils.previews.remove(bpy.types.Scene.sn_icons_{uid})"
+                self.code_unregister = f"del bpy.types.Scene.sn_icons_{uid}"
             else:
-                self.outputs["Icon"].python_value = ""
+                self.outputs["Icon"].python_value = "0"
                 self.code_register = ""
                 self.code_unregister = ""
 
