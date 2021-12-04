@@ -10,12 +10,11 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "BOOLEAN"
 
     def on_create(self, context):
+        self.add_boolean_input("Boolean").hide = True
         self.add_boolean_output("Boolean")
 
     def evaluate(self, context):
-        self.outputs["Boolean"].python_value = f"{self.boolean}"
-
-    boolean: bpy.props.BoolProperty(name="Value", description="Boolean value of this node", update=evaluate)
+        self.outputs["Boolean"].python_value = self.inputs["Boolean"].python_value
 
     def draw_node(self, context, layout):
-        layout.prop(self, "boolean")
+        layout.prop(self.inputs["Boolean"], "default_value", text="Value")
