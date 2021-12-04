@@ -1,10 +1,7 @@
 import bpy
 from uuid import uuid4
-import hashlib
 
-# save register, ... only in node
-# on compile trigger nodes checks all connected, sorts code and makes a "file" out of that
-# on addons save the same thing is done, just that all the trigger nodes are saved as imperative, and all nodes can add register, ...
+
 
 class SN_ScriptingBaseNode:
 
@@ -81,42 +78,85 @@ class SN_ScriptingBaseNode:
         return linked
 
 
-    # stores the unregister functions for nodes with a key TODO to recall them when reregistering
-    unregister_cache = {}
+    def _get_import_list(self, linked=[]):
+        """ Returns the imports for this node as a list of import lines """
+        if not linked: linked = self._get_linked_nodes()
+        import_list = []
+        for node in linked:
+            imports = node.code_import
+            for imp in imports.split("\n"):
+                imp = imp.strip()
+                if imp and not imp in import_list:
+                    import_list.append(imp)
+        return import_list
 
-    def _process_node_code(self):
-        # TEMPORARY
-        imports = "import bpy\n"
-        imperative = ""
-        register = ""
-        unregister = ""
+    def _format_imports(self, linked=[]):
+        """ Returns the imports for this node formatted for a python file """
+        if not linked: linked = self._get_linked_nodes()
+        import_list = self._get_import_list(linked)
+        return "import bpy\n" + "\n".join(import_list) + "\n"
 
-        for node in self._get_linked_nodes():
-            imports += node.code_import + "\n"
-            imperative += node.code_imperative + "\n"
-            register += node.code_register + "\n"
-            unregister += node.code_unregister + "\n"
 
-        register = "def register():\n" + self.indent(register, 1, 0) + "\n"
-        unregister = "def unregister():\n" + self.indent(unregister, 1, 0) + "\n"
+    def _format_imperative(self, linked=[]):
+        """ Returns the imperative code for this node formatted for a python file """
+        # TODO there can still be duplicates in here. Maybe find a good way of removing those
+        if not linked: linked = self._get_linked_nodes()
+        full_imperative = "\n"
+        for node in linked:
+            imperative = node.code_imperative
+            if imperative:
+                full_imperative += imperative + "\n"
+        return full_imperative
 
-        run_register = "register()\n"
-        store_unregister = f"bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}'].unregister_cache['{self.name}'] = unregister\n"
 
-        return imports + self.code + "\n" + register + unregister + run_register + store_unregister
+    def _format_register(self, linked=[]):
+        """ Returns the register code for this node formatted for a python file """
+        if not linked: linked = self._get_linked_nodes()
+        full_register = ""
+        for node in linked:
+            register = node.code_register
+            if register:
+                full_register += register + "\n"
+        return "\ndef register():\n" + self.indent(full_register, 1, 0) + "\n"
+
+
+    def _format_unregister(self, linked=[]):
+        """ Returns the unregister code for this node formatted for a python file """
+        if not linked: linked = self._get_linked_nodes()
+        full_unregister = ""
+        for node in linked:
+            unregister = node.code_unregister
+            if unregister:
+                full_unregister += unregister + "\n"
+        return "\ndef unregister():\n" + self.indent(full_unregister, 1, 0) + "\n"
+
+
+    def _format_node_code(self):
+        """ Formats this nodes and its connected nodes code ready to register in a separate file """
+        linked = self._get_linked_nodes() # TODO sort linked by compile order
+        imports = self._format_imports(linked)
+        imperative = self._format_imperative(linked)
+        register = self._format_register(linked)
+        unregister = self._format_unregister(linked)
+
+        run_register = "\nregister()\n"
+        store_unregister = f"bpy.context.scene.sn.unregister_cache['{self.as_pointer()}'] = unregister\n"
+
+        return imports + imperative + f"\n{self.code}\n" + register + unregister + run_register + store_unregister
 
 
     def unregister(self):
         """ Unregisters this trigger nodes current code """
+        sn = bpy.context.scene.sn
         if self.is_trigger:
-            if self.name in self.unregister_cache:
+            if f"{self.as_pointer()}" in sn.unregister_cache:
                 # run unregister
                 try:
-                    self.unregister_cache[self.name]()
+                    sn.unregister_cache[f"{self.as_pointer()}"]()
                 except Exception as error:
                     print(error)
                 # remove unregister function
-                del self.unregister_cache[self.name]
+                del sn.unregister_cache[f"{self.as_pointer()}"]
  
 
     def compile(self):
@@ -127,13 +167,13 @@ class SN_ScriptingBaseNode:
 
             # create text file
             txt = bpy.data.texts.new("tmp_serpens")
-            txt.write(self._process_node_code())
+            txt.write(self._format_node_code())
 
             # run text file
             ctx = bpy.context.copy()
             ctx['edit_text'] = txt
             try:
-                bpy.ops.text.run_script(ctx)
+                bpy.ops.text.run_script(ctx) # TODO undo doesn't recompile
             except Exception as error:
                 print(error)
 
@@ -267,24 +307,21 @@ class SN_ScriptingBaseNode:
 
     def evaluate(self, context):
         """ Updates this nodes code and the code of all changed data outputs
-        Call this when the data of this node has changed (e.g. as the update function of properties).
+        The function is automatically called when the code of program nodes connected to the output changes and when code of data inputs of this node are changed.
+        Call _evaluate instead of evaluate when the data of this node has changed (e.g. as the update function of properties).
 
-        The function is also automatically called when the code of program nodes connected to the output changes and when code of data inputs of this node are changed.
-
-        Set self.code as the last thing you do in this node!!! Set all data outputs code before or this will lead to issues!
-        You can store temporary code in variables in this function before you set self.code if necessary to adhere to this.
-
-        You should follow this order to add code in this function:
+        You should follow this order to update this nodes code in this function:
         - Set data outputs python_value
-        - ... TODO -> also use _evaluate in updates not evaluate
+        - Set self.code, self.code_import, self.code_imperative, self.code_register, self.code_unregister (order doesn't matter here)
 
-        You can access your data inputs python_value to use in your code and the python_value of your program outputs.
+        You can do all of these or none of these, but follow the order to help the register process to work smoothly
+        For adding imports, only import full modules like 'import math' instead of 'from math import radians'
+
+        You can access your data inputs python_value and the python_value of your program outputs to use in your code.
         It's recommended to use formatted strings for making this easy to read.
 
         You can use self.indent("your_code_string", indents) to indent blocks of code from output python_values. This can also be a list of values.
-        The indents depend on your actual python file. If your string has 5 indents, pass 5 to the function. Make sure you're using 4 spaces as indents for your file.
-
-        You can do all of these or none of these, but follow the order to help the register process to work smoothly
+        The indents depend on your actual python file. If there are 5 indents before your string, pass 5 to the function. Make sure you're using 4 spaces as indents for your file.
         """
 
 
@@ -292,7 +329,7 @@ class SN_ScriptingBaseNode:
                                 min=0,
         	                    name="Compile Index",
                                 description="Index of this node in the compile order. This will change the order the code is added to the addon files. 0 is the first node to be added",
-                                update=evaluate)
+                                update=_evaluate)
     
 
     ### INIT NODE
@@ -389,12 +426,11 @@ class SN_ScriptingBaseNode:
             if getattr(self, key):
                 box = layout.box()
                 col = box.column(align=True)
+                row = col.row()
+                row.enabled = False
+                row.label(text=key.replace("_", " ").title())
                 for line in getattr(self, key).split("\n"):
                     col.label(text=line)
-            else:
-                row = layout.row()
-                row.enabled = False
-                row.label(text=f"- No {key} for this node")
 
     def draw_buttons(self, context, layout):
         if context.scene.sn.debug_python_nodes:
@@ -492,7 +528,7 @@ class SN_YourNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     # avoid having properties on your nodes, expose everything to sockets if possible
-    string: bpy.props.StringProperty(name="String", description="String value of this node", update=evaluate)
+    string: bpy.props.StringProperty(name="String", description="String value of this node", update=SN_ScriptingBaseNode._evaluate)
 
 
     def on_create(self, context):

@@ -77,7 +77,7 @@ class ScriptingSocket:
         """ Draws this socket """
         # draw debug text for sockets
         if context.scene.sn.debug_python_sockets and self.python_value:
-            text = self.python_value
+            text = self.python_value.replace("\n", " || ")
         if self.dynamic:
             self._draw_dynamic_socket(layout, node, text)
         else:

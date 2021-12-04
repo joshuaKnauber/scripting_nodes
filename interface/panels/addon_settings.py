@@ -22,12 +22,15 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
 
-        layout.prop(sn, "compile_on_load")
-
-        # layout.separator()
-        # layout.template_ID(context.scene.sn, "easy_bpy", open="text.open", text="Easy BPY")
+        col = layout.column(heading="General")
+        col.prop(sn, "compile_on_load")
 
         layout.separator()
-        layout.label(text="Debug")
-        layout.prop(sn, "debug_python_nodes")
-        layout.prop(sn, "debug_python_sockets")
+        row = layout.row(align=True)
+        row.template_ID(context.scene.sn, "easy_bpy", open="text.open", text="Easy BPY")
+        row.operator("wm.url_open", text="", icon="URL").url = "https://curtisholt.online/easybpy"
+
+        layout.separator()
+        col = layout.column(heading="Debug")
+        col.prop(sn, "debug_python_nodes")
+        col.prop(sn, "debug_python_sockets")

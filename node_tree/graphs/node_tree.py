@@ -2,11 +2,11 @@ import bpy
 
 
 
-def compile_all():
+def compile_all(hard=False):
     """ Compile all node trees in this file """
     for group in bpy.data.node_groups:
         if group.bl_idname == "ScriptingNodesTree":
-            group.compile()
+            group.compile(hard)
 
 
 
@@ -15,6 +15,11 @@ def unregister_all():
     for group in bpy.data.node_groups:
         if group.bl_idname == "ScriptingNodesTree":
             group.unregister()
+    for key in bpy.context.scene.sn.unregister_cache:
+        try:
+            bpy.context.scene.sn.unregister_cache[key]()
+        except Exception as error:
+            print(error)
 
 
 
@@ -131,10 +136,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         self._update_tree_links()
 
 
-    def compile(self):
-        """ Compile all nodes in this node tree """
+    def compile(self, hard=False):
+        """ Compile all nodes in this node tree. If hard is true every node is also reevaluated. Use this if duplicates in other graphs could exist """
         for node in self.nodes:
-            if getattr(node, "is_trigger", False):
+            if hard and hasattr(node, "is_trigger"):
+                node._evaluate(bpy.context)
+            elif getattr(node, "is_trigger", False):
                 node.compile()
 
 
