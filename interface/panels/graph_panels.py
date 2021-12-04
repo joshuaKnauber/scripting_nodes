@@ -34,9 +34,9 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         row = layout.row(align=False)
         row.template_list("SN_UL_GraphList", "Graphs", bpy.data, "node_groups", sn, "node_tree_index", rows=4)
         col = row.column(align=True)
-        col.operator("node.new_node_tree", text="", icon="ADD")
+        col.operator("sn.add_graph", text="", icon="ADD")
         col.operator("sn.append_graph", text="", icon="APPEND_BLEND")
-        col.operator("sn.remove_graph", text="", icon="TRASH").index = sn.node_tree_index
+        col.operator("sn.remove_graph", text="", icon="REMOVE")
 
 
         # col.separator()
