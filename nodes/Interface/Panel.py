@@ -1,5 +1,6 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
+from ...utils import get_python_name
 
 
 
@@ -70,8 +71,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         uid = self.uuid
-        # TODO make a function to get a valid python representation of a string for var names
-        idname = f"SNA_PT_{self.label.title().replace(' ', '') if self.label else 'Panel'}_{uid}"
+        py_name = get_python_name(self.label)
+        idname = f"SNA_PT_{py_name.upper() if py_name else 'Panel'}_{uid}"
 
         options = []
         if self.hide_header: options.append("'HIDE_HEADER'")
