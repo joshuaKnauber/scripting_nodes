@@ -16,7 +16,7 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.icon_source == "BLENDER":
             self.outputs["Icon"].python_value = f"{self.icon}"
             self.code_register = f""
-            # self.code_unregister = f""
+            self.code_unregister = f""
         else:
             if self.icon_file:
                 uid = self.uuid
