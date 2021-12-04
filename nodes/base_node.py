@@ -132,7 +132,7 @@ class SN_ScriptingBaseNode:
 
     def _format_node_code(self):
         """ Formats this nodes and its connected nodes code ready to register in a separate file """
-        linked = self._get_linked_nodes()
+        linked = self._get_linked_nodes() # TODO sort linked by compile order
         imports = self._format_imports(linked)
         imperative = self._format_imperative(linked)
         register = self._format_register(linked)
@@ -328,7 +328,7 @@ class SN_ScriptingBaseNode:
                                 min=0,
         	                    name="Compile Index",
                                 description="Index of this node in the compile order. This will change the order the code is added to the addon files. 0 is the first node to be added",
-                                update=evaluate)
+                                update=_evaluate)
     
 
     ### INIT NODE
@@ -524,7 +524,7 @@ class SN_YourNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     # avoid having properties on your nodes, expose everything to sockets if possible
-    string: bpy.props.StringProperty(name="String", description="String value of this node", update=evaluate)
+    string: bpy.props.StringProperty(name="String", description="String value of this node", update=SN_ScriptingBaseNode._evaluate)
 
 
     def on_create(self, context):
