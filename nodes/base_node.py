@@ -291,7 +291,10 @@ class SN_ScriptingBaseNode:
         prev_code_unregister = self.code_unregister
 
         # evaluate node
-        self.evaluate(context)
+        if context.scene.sn.is_exporting:
+            self.evalute_export(context)
+        else:
+            self.evaluate(context)
 
         # trigger compiler if code changed
         other_code_changed = not (prev_code_import == self.code_import and prev_code_imperative == self.code_imperative \
@@ -323,6 +326,11 @@ class SN_ScriptingBaseNode:
         You can use self.indent("your_code_string", indents) to indent blocks of code from output python_values. This can also be a list of values.
         The indents depend on your actual python file. If there are 5 indents before your string, pass 5 to the function. Make sure you're using 4 spaces as indents for your file.
         """
+
+
+    def evalute_export(self, context):
+        """ Used to overwrite evaluate for exporting if required """
+        self.evaluate(context)
 
 
     order: bpy.props.IntProperty(default=0,

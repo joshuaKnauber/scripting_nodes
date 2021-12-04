@@ -9,6 +9,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     unregister_cache = {}
 
 
+    is_exporting: bpy.props.BoolProperty(default=False,
+                                        name="Is Exporting",
+                                        description="Saves the current status of exporting to evaluate nodes differently")
+
+
     picker_active: bpy.props.BoolProperty(default=False,
                                         name="Picker Is Active",
                                         description="This is enabled when a location picker for panels or similar is active")
