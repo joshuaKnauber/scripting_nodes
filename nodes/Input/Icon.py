@@ -15,15 +15,21 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         if self.icon_source == "BLENDER":
             self.outputs["Icon"].python_value = f"{self.icon}"
+            self.code_register = f""
+            self.code_unregister = f""
         else:
-            self.outputs["Icon"].python_value = f"0"
-            print(self.icon_file)
-            self.register = f"""
-                    bpy.types.Scene.sn_icons_{self.uid} = bpy.utils.previews.new()
-                    import os
-                    icons_dir = os.path.join(os.path.dirname(__file__), 'assets', 'icons')
-                    # bpy.types.Scene.sn_icons_{self.uid}.load()
-                    """
+            if self.icon_file:
+                uid = self.uuid
+                self.outputs["Icon"].python_value = f"bpy.context.scene.sn_icons_{uid}['{self.icon_file.name}'].icon_id"
+                self.code_register = f"""
+                        bpy.types.Scene.sn_icons_{uid} = bpy.utils.previews.new()
+                        bpy.types.Scene.sn_icons_{uid}.load('{self.icon_file.name}', '{self.icon_file.name}', 'IMAGE')
+                        """
+                self.code_unregister = f"bpy.utils.previews.remove(bpy.types.Scene.sn_icons_{uid})"
+            else:
+                self.outputs["Icon"].python_value = ""
+                self.code_register = ""
+                self.code_unregister = ""
 
 
     icon_source: bpy.props.EnumProperty(name="Icon Source",
@@ -41,7 +47,7 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_node(self, context, layout):
         row = layout.row()
-        row.scale_y = 1.3
+        row.scale_y = 1.2
         row.prop(self,"icon_source",expand=True)
 
         if self.icon_source == "BLENDER":
@@ -49,7 +55,5 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
             op.node = self.name
             op.socket = -1
         else:
-            col = layout.column()
-            col.scale_y = 1.3
-            col.template_ID(self, "icon_file", new="image.new", open="image.open", live_icon=True)
+            layout.template_ID(self, "icon_file", new="image.new", open="image.open", live_icon=True)
 
