@@ -16,7 +16,7 @@ class SN_LabelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_icon_input("Icon")
 
     def evaluate(self, context):
-        self.code = f"{self.active_layout}.label(text={self.inputs['Label'].python_value})"
+        self.code = f"{self.active_layout}.label(text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})"
 
     def draw_node(self, context, layout):
         pass
