@@ -291,10 +291,10 @@ class SN_ScriptingBaseNode:
         prev_code_unregister = self.code_unregister
 
         # evaluate node
-        if context.scene.sn.is_exporting:
-            self.evalute_export(context)
+        if bpy.context.scene.sn.is_exporting:
+            self.evalute_export(bpy.context)
         else:
-            self.evaluate(context)
+            self.evaluate(bpy.context)
 
         # trigger compiler if code changed
         other_code_changed = not (prev_code_import == self.code_import and prev_code_imperative == self.code_imperative \
