@@ -2,7 +2,7 @@ import bpy
 
 
 
-class SN_AddDynamic(bpy.types.Operator):
+class SN_OT_AddDynamic(bpy.types.Operator):
     bl_idname = "sn.add_dynamic"
     bl_label = "Add Dynamic Socket"
     bl_description = "Add another socket like this one"
@@ -38,7 +38,7 @@ class SN_AddDynamic(bpy.types.Operator):
 
 
 
-class SN_RemoveSocket(bpy.types.Operator):
+class SN_OT_RemoveSocket(bpy.types.Operator):
     bl_idname = "sn.remove_socket"
     bl_label = "Remove Socket"
     bl_description = "Removes this socket"
