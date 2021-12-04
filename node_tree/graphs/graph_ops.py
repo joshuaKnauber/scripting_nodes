@@ -125,13 +125,16 @@ class SN_OT_AppendPopup(bpy.types.Operator):
 
 class SN_OT_ForceCompile(bpy.types.Operator):
     bl_idname = "sn.force_compile"
-    bl_label = "Force Compile"
+    bl_label = "This might be slow for large addons!"
     bl_description = "Forces all node trees to compile"
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context):
         compile_all(hard=True)
         return {"FINISHED"}
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_confirm(self, event)
 
 
 
