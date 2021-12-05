@@ -9,6 +9,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     unregister_cache = {}
 
 
+    # stores the preferences draw function while compiling the addon to draw in the serpens preferences
+    preferences = []
+
+
     is_exporting: bpy.props.BoolProperty(default=False,
                                         name="Is Exporting",
                                         description="Saves the current status of exporting to evaluate nodes differently")
