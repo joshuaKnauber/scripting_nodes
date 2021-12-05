@@ -1,5 +1,6 @@
 import bpy
 from uuid import uuid4
+from ..node_tree.sockets.conversions import CONVERT_UTILS
 
 
 
@@ -101,7 +102,7 @@ class SN_ScriptingBaseNode:
         """ Returns the imperative code for this node formatted for a python file """
         # TODO there can still be duplicates in here. Maybe find a good way of removing those
         if not linked: linked = self._get_linked_nodes()
-        full_imperative = "\n"
+        full_imperative = "\n" + CONVERT_UTILS + "\n"
         for node in linked:
             imperative = node.code_imperative
             if imperative:

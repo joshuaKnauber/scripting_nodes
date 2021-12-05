@@ -1,4 +1,5 @@
 import bpy
+from .conversions import CONVERSIONS
 
 
 
@@ -126,8 +127,11 @@ class ScriptingSocket:
                 # returns the connected data outputs current python value or the python representation for this input
                 from_out = self.from_socket()
                 if from_out:
-                    # TODO handle data conversion here
-                    return from_out.python_value
+                    value = from_out.python_value
+                    if from_out.bl_label != self.bl_label:
+                        # TODO handle data conversion here
+                        value = CONVERSIONS[from_out.bl_label][self.bl_label](value)
+                    return value
                 return self.get_python_repr()
 
 

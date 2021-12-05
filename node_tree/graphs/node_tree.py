@@ -1,4 +1,5 @@
 import bpy
+from ..sockets.conversions import CONVERSIONS
 
 
 
@@ -43,14 +44,22 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def is_valid_connection(self, from_out, to_inp):
         """ Check if a connection between the given sockets would be valid """
-        # TODO: check if data types are convertible
         if from_out and from_out.is_program == to_inp.is_program:
             # check if multiple program sockets are connected
             if to_inp.is_program:
                 to_sockets = from_out.to_sockets(check_validity=False)
                 if to_inp != to_sockets[0]:
                     return False
-            return True
+                return True
+            # data types are the same
+            elif from_out.bl_label == to_inp.bl_label:
+                return True
+            # check if data types are convertible
+            else:
+                if from_out.bl_label in CONVERSIONS:
+                    if to_inp.bl_label in CONVERSIONS[from_out.bl_label]:
+                        return True
+                return False
         return False
 
     def is_valid_link(self, link):
