@@ -11,9 +11,9 @@ class SN_IsInStringNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 200
 
     def on_create(self, context):
-        self.add_string_input("Substring")
         self.add_string_input("String")
+        self.add_string_input("Substring")
         self.add_boolean_output("Is in String")
 
     def evaluate(self, context):
-        self.outputs[0].python_value = f"{self.inputs[0].python_value} in {self.inputs[1].python_value}"
+        self.outputs[0].python_value = f"{self.inputs['Substring'].python_value} in {self.inputs['String'].python_value}"
