@@ -495,6 +495,16 @@ class SN_ScriptingBaseNode:
     def add_dynamic_boolean_input(self, label="Boolean"): return self._add_input("SN_BooleanSocket", label, True)
     def add_dynamic_boolean_output(self, label="Boolean"): return self._add_output("SN_BooleanSocket", label, True)
 
+    def add_float_input(self, label="Float"): return self._add_input("SN_FloatSocket", label)
+    def add_float_output(self, label="Float"): return self._add_output("SN_FloatSocket", label)
+    def add_dynamic_float_input(self, label="Float"): return self._add_input("SN_FloatSocket", label, True)
+    def add_dynamic_float_output(self, label="Float"): return self._add_output("SN_FloatSocket", label, True)
+
+    def add_factor_input(self, label="Factor"): return self._add_input("SN_FloatFactorSocket", label)
+    def add_factor_output(self, label="Factor"): return self._add_output("SN_FloatFactorSocket", label)
+    def add_dynamic_factor_input(self, label="Factor"): return self._add_input("SN_FloatFactorSocket", label, True)
+    def add_dynamic_factor_output(self, label="Factor"): return self._add_output("SN_FloatFactorSocket", label, True)
+
     def add_icon_input(self, label="Icon"): return self._add_input("SN_IconSocket", label)
     def add_icon_output(self, label="Icon"): return self._add_output("SN_IconSocket", label)
 
