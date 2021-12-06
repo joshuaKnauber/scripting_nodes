@@ -40,10 +40,13 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     icon: bpy.props.IntProperty(name="Value", description="Value of this socket", update=SN_ScriptingBaseNode._evaluate)
 
+    def test_update(self, context):
+        self._evaluate(context)
+
     icon_file: bpy.props.PointerProperty(type=bpy.types.Image,
                                         name="Image File",
                                         description="The image you want to use as an icon",
-                                        update=SN_ScriptingBaseNode._evaluate)
+                                        update=test_update)
 
     def draw_node(self, context, layout):
         row = layout.row()
