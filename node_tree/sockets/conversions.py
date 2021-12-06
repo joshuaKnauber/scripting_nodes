@@ -40,6 +40,7 @@ CONVERSIONS = {
     "String": {
         "Boolean": string_to_bool,
         "Icon": string_to_icon,
+        "Enum": lambda python_value: python_value,
     },
     "Boolean": {
         "String": bool_to_string,
@@ -49,4 +50,7 @@ CONVERSIONS = {
         "String": icon_to_string,
         "Boolean": icon_to_bool,
     },
+    "Enum": {
+        "String": lambda python_value: python_value,
+    }
 }

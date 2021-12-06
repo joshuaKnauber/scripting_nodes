@@ -19,7 +19,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     def get_python_repr(self):
         self.string_repr_warning = False
-        value = self.default_value
+        value = getattr(self, self.subtype_attr)
         if "'" in value and not '"' in value:
             return f"\"{value}\""
         elif '"' in value and not "'" in value:
