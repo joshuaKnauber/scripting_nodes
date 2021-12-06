@@ -65,6 +65,16 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="Closes the panel by default",
                                     update=SN_ScriptingBaseNode._evaluate)
 
+    is_subpanel: bpy.props.BoolProperty(default=False,
+                                    name="Is Subpanel",
+                                    description="If this panel should be a subpanel",
+                                    update=SN_ScriptingBaseNode._evaluate)
+
+    panel_parent: bpy.props.StringProperty(default="EEVEE_MATERIAL_PT_surface",
+                                    name="Parent",
+                                    description="The panel id this subpanel should be shown in",
+                                    update=SN_ScriptingBaseNode._evaluate)
+
     show_advanced: bpy.props.BoolProperty(default=False,
                                     name="Advanced Options",
                                     description="Show advanced python options for positioning the panel")
@@ -89,6 +99,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {f"bl_category = '{self.category}'" if self.category else ""}
                         bl_order = {self.order}
                         {f"bl_options = {{{', '.join(options)}}}" if options else ""}
+                        {f"bl_parent_id = '{self.panel_parent}'" if self.is_subpanel and self.panel_parent else ""}
 
                         @classmethod
                         def poll(cls, context):
@@ -108,13 +119,22 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_node(self, context, layout):
         row = layout.row()
-        row.scale_y = 1.5
-        op = row.operator("sn.activate_panel_picker", text=f"{self.space.replace('_', ' ').title()} {self.region.replace('_', ' ').title()} {self.context.replace('_', ' ').title()}", icon="EYEDROPPER")
-        op.node_tree = self.node_tree.name
-        op.node = self.name
+        row.scale_y = 1.3
+
+        if not self.is_subpanel:
+            op = row.operator("sn.activate_panel_picker", text=f"{self.space.replace('_', ' ').title()} {self.region.replace('_', ' ').title()} {self.context.replace('_', ' ').title()}", icon="EYEDROPPER")
+            op.node_tree = self.node_tree.name
+            op.node = self.name
+        else:
+            op = row.operator("sn.activate_subpanel_picker", text=f"{self.panel_parent.replace('_PT_', ' ').replace('_', ' ').title()}", icon="EYEDROPPER")
+            op.node_tree = self.node_tree.name
+            op.node = self.name
+        
+        layout.prop(self, "is_subpanel")
 
         layout.prop(self, "label")
-        layout.prop(self, "category")
+        if not self.is_subpanel:
+            layout.prop(self, "category")
 
         layout.prop(self, "order")
         layout.prop(self, "hide_header")
@@ -124,6 +144,11 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         box = layout.box()
         box.prop(self, "show_advanced", icon="TRIA_DOWN" if self.show_advanced else "TRIA_RIGHT", emboss=False)
         if self.show_advanced:
-            box.prop(self, "space")
-            box.prop(self, "region")
-            box.prop(self, "context")
+            col = box.column()
+            col.enabled = not self.is_subpanel
+            col.prop(self, "space")
+            col.prop(self, "region")
+            col.prop(self, "context")
+            row = box.row()
+            row.enabled = self.is_subpanel
+            row.prop(self, "panel_parent")
