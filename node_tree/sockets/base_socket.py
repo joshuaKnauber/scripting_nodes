@@ -129,7 +129,6 @@ class ScriptingSocket:
                 if from_out:
                     value = from_out.python_value
                     if from_out.bl_label != self.bl_label:
-                        # TODO handle data conversion here
                         value = CONVERSIONS[from_out.bl_label][self.bl_label](value)
                     return value
                 return self.get_python_repr()

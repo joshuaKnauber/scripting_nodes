@@ -134,7 +134,8 @@ class SN_ScriptingBaseNode:
 
     def _format_node_code(self):
         """ Formats this nodes and its connected nodes code ready to register in a separate file """
-        linked = self._get_linked_nodes() # TODO sort linked by compile order
+        linked = self._get_linked_nodes()
+        linked = sorted(linked, key=lambda node: node.order)
         imports = self._format_imports(linked)
         imperative = self._format_imperative(linked)
         register = self._format_register(linked)
