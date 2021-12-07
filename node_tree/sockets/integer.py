@@ -3,11 +3,11 @@ from .base_socket import ScriptingSocket
 
 
 
-class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
+class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
 
-    bl_idname = "SN_FloatSocket"
+    bl_idname = "SN_IntegerSocket"
     group = "DATA"
-    bl_label = "Float"
+    bl_label = "Integer"
 
 
     default_python_value = "0"
@@ -16,7 +16,7 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_python_repr(self):
         return f"{self.default_value}"
 
-    default_value: bpy.props.FloatProperty(name="Value",
+    default_value: bpy.props.IntProperty(name="Value",
                                             default=0,
                                             description="Value of this socket",
                                             get=ScriptingSocket._get_value,
@@ -25,9 +25,9 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     subtypes = ["NONE"]
     subtype_values = {"NONE": "default_value"}
     
-
+    
     def get_color(self, context, node):
-        return (0.6, 0.6, 0.6)
+        return (0.15, 0.52, 0.17)
 
     def draw_socket(self, context, layout, node, text):
         if self.is_output or self.is_linked:

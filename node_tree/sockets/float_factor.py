@@ -29,7 +29,7 @@ class SN_FloatFactorSocket(bpy.types.NodeSocket, ScriptingSocket):
     
 
     def get_color(self, context, node):
-        return (0.5, 0.5, 0.5)
+        return (0.6, 0.6, 0.6)
 
     def draw_socket(self, context, layout, node, text):
         if self.is_output or self.is_linked:
