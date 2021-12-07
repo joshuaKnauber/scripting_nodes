@@ -20,7 +20,9 @@ def header_prepend(self, context):
 
         row = layout.row()
         row.separator()
-        row.operator("wm.console_toggle", text="Console", icon="CONSOLE")
+        subrow = row.row(align=True)
+        subrow.operator("sn.clear_console", text="", icon="TRASH")
+        subrow.operator("wm.console_toggle", text="Console", icon="CONSOLE")
         row.prop(context.preferences.view, "show_tooltips_python", text="", icon="INFO")
         row.popover("SN_PT_HeaderSettings", text="", icon="PREFERENCES")
 
