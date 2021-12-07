@@ -24,11 +24,12 @@ def header_prepend(self, context):
         row.prop(context.preferences.view, "show_tooltips_python", text="", icon="INFO")
         row.popover("SN_PT_HeaderSettings", text="", icon="PREFERENCES")
 
-        if context.scene.sn.has_update or False:
+        if context.scene.sn.has_update:
             row.separator()
             row.operator("sn.update_message", text="Update!", icon="INFO", depress=True)
 
-
+        if len(context.space_data.node_tree.nodes) == 0:
+            row.operator("node.add_node", text="Start Tutorial", icon="PLAY", depress=True).type = "SN_TutorialNode"
 
 
 

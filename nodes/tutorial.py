@@ -37,51 +37,21 @@ tutorial = [
     },
     {
         "image": "panel_start.jpg",
-        "nodes": [
-                    {"idname": "SN_AddToPanelNode",
-                     "name": "First Add To Panel",
-                     "offset_x": 0,
-                     "offset_y": -150}
-                ],
     },
     {
-        "image": "label.jpg",
-        "nodes": [
-                    {"name": "First Add To Panel"},
-                    {"idname": "SN_LabelNode",
-                     "name": "First Label",
-                     "offset_x": 300,
-                     "offset_y": -150}
-                ],
-        "links": [
-                    {"out_name":"First Add To Panel",
-                    "out_socket":0,
-                    "in_name":"First Label",
-                    "in_socket":0}
-        ]
+        "image": "label.jpg"
     },
     {
-        "image": "seeing_the_label.jpg",
-        "nodes": None,
-        "links": None
+        "image": "seeing_the_label.jpg"
     },
     {
-        "image": "adventure.jpg",
-        "adventure": True
+        "image": "adventure.jpg"
     },
     {
         "image": "interface.jpg",
-        "sockets": [
-            "self.add_interface_output('Interface')",
-            "self.add_interface_input('Interface')",
-        ]
     },
     {
         "image": "execute.jpg",
-        "sockets": [
-            "self.add_execute_output('Execute')",
-            "self.add_execute_input('Execute')",
-        ]
     },
     {
         "image": "function.jpg"
@@ -94,12 +64,6 @@ tutorial = [
     },
     {
         "image": "get_property.jpg",
-        "nodes": [
-                    {"idname": "SN_GetPropertyNode",
-                     "name": "Get First Property",
-                     "offset_x": 0,
-                     "offset_y": -150}
-                ],
     },
     {
         "image": "blend_data.jpg"
@@ -192,10 +156,12 @@ class SN_OT_SetTutorial(bpy.types.Operator):
         return {"FINISHED"}
 
 
+
 shader = None
 batch = None
 image = None
 handler = None
+
 
 
 def load_shader(img, x, y, size):
@@ -223,6 +189,7 @@ def load_shader(img, x, y, size):
         raise Exception()
 
 
+
 def draw():
     global shader
     global batch
@@ -239,18 +206,17 @@ def draw():
         bpy.types.SpaceNodeEditor.draw_handler_remove(handler, 'WINDOW')
 
 
+
 class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_TutorialNode"
     bl_label = "Tutorial"
     bl_icon = "HELP"
-    bl_width_default = 212
+    bl_width_default = 220
     
-    node_options = {
-        "default_color": (0.15,0.15,0.15),
-    }
-    
-    show_settings: bpy.props.BoolProperty(default=False,name="Show Settings",description="Show the settings")
+    show_settings: bpy.props.BoolProperty(default=False,
+                                        name="Show Settings",
+                                        description="Show the settings")
     
     
     chapters = [
@@ -390,7 +356,7 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
         return current_chapter
     
 
-    def draw_node(self,context,layout):
+    def draw_node(self, context, layout):
         row = layout.row()
         row.alignment = "CENTER"
         row.label(text=self.current_chapter())
