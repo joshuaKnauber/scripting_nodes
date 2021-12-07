@@ -19,9 +19,9 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_dynamic_interface_output("Panel")
 
 
-    append: bpy.props.EnumProperty(items=[
-                                    ("APPEND", "Append", "Append this to the end of the panel"),
-                                    ("PREPEND", "Prepend", "Prepend this to the start of the panel")],
+    append: bpy.props.EnumProperty(default="APPEND", items=[
+                                    ("PREPEND", "Prepend", "Prepend this to the start of the panel"),
+                                    ("APPEND", "Append", "Append this to the end of the panel")],
                                     name="Position",
                                     description="Position of this interface to the selected panel",
                                     update=SN_ScriptingBaseNode._evaluate)
