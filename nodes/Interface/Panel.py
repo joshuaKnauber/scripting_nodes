@@ -75,9 +75,6 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="The panel id this subpanel should be shown in",
                                     update=SN_ScriptingBaseNode._evaluate)
 
-    show_advanced: bpy.props.BoolProperty(default=False,
-                                    name="Advanced Options",
-                                    description="Show advanced python options for positioning the panel")
 
     def evaluate(self, context):
         uid = self.uuid
@@ -103,7 +100,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                         @classmethod
                         def poll(cls, context):
-                            return not {self.inputs["Hide"].python_value}
+                            return not ({self.inputs["Hide"].python_value})
                         
                         def draw_header(self, context):
                             layout = self.layout
@@ -114,8 +111,9 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                             {self.indent([out.python_value for out in filter(lambda out: out.name=='Panel' and not out.dynamic, self.outputs)], 7)}
                     """
 
-        self.code_unregister = f"bpy.utils.unregister_class({idname})"
         self.code_register = f"bpy.utils.register_class({idname})"
+        self.code_unregister = f"bpy.utils.unregister_class({idname})"
+
 
     def draw_node(self, context, layout):
         row = layout.row()
@@ -141,14 +139,13 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "expand_header")
         layout.prop(self, "default_closed")
 
-        box = layout.box()
-        box.prop(self, "show_advanced", icon="TRIA_DOWN" if self.show_advanced else "TRIA_RIGHT", emboss=False)
-        if self.show_advanced:
-            col = box.column()
-            col.enabled = not self.is_subpanel
-            col.prop(self, "space")
-            col.prop(self, "region")
-            col.prop(self, "context")
-            row = box.row()
-            row.enabled = self.is_subpanel
-            row.prop(self, "panel_parent")
+        
+    def draw_node_panel(self, context, layout):
+        col = layout.column()
+        col.enabled = not self.is_subpanel
+        col.prop(self, "space")
+        col.prop(self, "region")
+        col.prop(self, "context")
+        row = layout.row()
+        row.enabled = self.is_subpanel
+        row.prop(self, "panel_parent")
