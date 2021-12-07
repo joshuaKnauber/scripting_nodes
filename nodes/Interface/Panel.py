@@ -17,7 +17,6 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_input("Hide")
         self.add_interface_output("Panel")
         self.add_dynamic_interface_output("Panel")
-        self.add_interface_output("Header")
         self.add_dynamic_interface_output("Header")
 
     label: bpy.props.StringProperty(default="New Panel",

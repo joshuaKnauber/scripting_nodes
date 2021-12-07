@@ -19,7 +19,7 @@ bl_info = {
     "blender" : (3, 0, 0),
     "version" : (3, 0, 0),
     "location" : "Editors -> Visual Scripting",
-    "docs_url": "", 
+    "doc_url": "", 
     "category" : "Node" 
 }
 

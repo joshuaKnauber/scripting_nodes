@@ -454,6 +454,7 @@ class SN_ScriptingBaseNode:
     def draw_buttons_ext(self,context,layout):
         layout.use_property_split = True
         layout.prop(self, "order")
+        layout.separator()
         self.draw_node_panel(context, layout)
         
 
