@@ -1,6 +1,5 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
-from ...utils import get_python_name
 
 
 

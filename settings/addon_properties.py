@@ -1,5 +1,6 @@
 import bpy
-import os
+from uuid import uuid4
+from ..utils import get_python_name
             
 
 
@@ -11,6 +12,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     # stores the preferences draw function while compiling the addon to draw in the serpens preferences
     preferences = []
+
+
+    @property
+    def module_name(self):
+        return get_python_name(bpy.context.scene.sn.addon_name, replacement=f"addon_{uuid4().hex[:5].upper()}")
 
 
     is_exporting: bpy.props.BoolProperty(default=False,

@@ -25,7 +25,7 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
     def create_structure(self, path):
         """ Sets up the addons folder structure at the given filepath """
         os.mkdir(path)
-        baseDir = os.path.join(path, os.path.basename(path))
+        baseDir = os.path.join(path, bpy.context.scene.sn.module_name)
         os.mkdir(baseDir)
         os.mkdir(os.path.join(baseDir, "assets"))
         os.mkdir(os.path.join(baseDir, "icons"))
@@ -50,6 +50,8 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
         return {"FINISHED"}
 
     def invoke(self, context, event):
-        self.filepath = "fgjpesgp.zip"
-        wm = context.window_manager.fileselect_add(self)
+        version = ".".join([str(i) for i in context.scene.sn.version])
+        self.filepath = context.scene.sn.module_name + f"_{version}"
+        print(self.filepath, context.scene.sn.module_name + f"_{version}")
+        context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
