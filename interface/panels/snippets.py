@@ -17,3 +17,11 @@ class SN_PT_SnippetPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+
+        # snippets could now in theory start from any node because they all store their code
+        # only issue is that they don't have controllable inputs and values but maybe those can only exist if you export a function
+        if not context.active_node:
+            layout.label(text="No node starting point selected", icon="ERROR")
+
+        else:
+            layout.operator("")

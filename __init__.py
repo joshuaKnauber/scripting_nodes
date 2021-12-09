@@ -127,3 +127,14 @@ def unregister():
 
     # unregister the addon classes
     auto_load.unregister()
+
+
+
+"""
+big problems:
+- refs to nodes selected on other nodes
+- vector inputs
+- blend data systems
+- properties
+- variables
+"""
