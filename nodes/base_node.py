@@ -484,6 +484,11 @@ class SN_ScriptingBaseNode:
     def add_dynamic_interface_input(self, label="Interface"): return self._add_input("SN_InterfaceSocket", label, True)
     def add_dynamic_interface_output(self, label="Interface"): return self._add_output("SN_InterfaceSocket", label, True)
 
+    def add_data_input(self, label="Data"): return self._add_input("SN_DataSocket", label)
+    def add_data_output(self, label="Data"): return self._add_output("SN_DataSocket", label)
+    def add_dynamic_data_input(self, label="Data"): return self._add_input("SN_DataSocket", label, True)
+    def add_dynamic_data_output(self, label="Data"): return self._add_output("SN_DataSocket", label, True)
+
     def add_string_input(self, label="String"): return self._add_input("SN_StringSocket", label)
     def add_string_output(self, label="String"): return self._add_output("SN_StringSocket", label)
     def add_dynamic_string_input(self, label="String"): return self._add_input("SN_StringSocket", label, True)

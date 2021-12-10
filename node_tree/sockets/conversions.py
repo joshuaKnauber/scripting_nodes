@@ -38,19 +38,39 @@ def icon_to_bool(python_value):
 
 CONVERSIONS = {
     "String": {
+        "Data": lambda python_value: python_value,
         "Boolean": string_to_bool,
         "Icon": string_to_icon,
         "Enum": lambda python_value: python_value,
     },
     "Boolean": {
+        "Data": lambda python_value: python_value,
         "String": bool_to_string,
         "Icon": bool_to_icon,
     },
     "Icon": {
+        "Data": lambda python_value: python_value,
         "String": icon_to_string,
         "Boolean": icon_to_bool,
     },
     "Enum": {
+        "Data": lambda python_value: python_value,
         "String": lambda python_value: python_value,
-    }
+    },
+    "Float": {
+        "Data": lambda python_value: python_value,
+        "Factor": lambda python_value: python_value,
+    },
+    "Factor": {
+        "Data": lambda python_value: python_value,
+        "Float": lambda python_value: python_value,
+    },
+    "Data": {
+        "String": lambda python_value: python_value,
+        "Boolean": lambda python_value: python_value,
+        "Icon": lambda python_value: python_value,
+        "Enum": lambda python_value: python_value,
+        "Float": lambda python_value: python_value,
+        "Factor": lambda python_value: python_value,
+    },
 }
