@@ -15,9 +15,10 @@ def depsgraph_handler(dummy):
 
 @persistent
 def load_handler(dummy):
-    check_serpens_updates(bl_info["version"])
-    if bpy.context.scene.sn.compile_on_load:
-        compile_all()
+    pass
+    # check_serpens_updates(bl_info["version"])
+    # if bpy.context.scene.sn.compile_on_load:
+    #     compile_all()
 
 
 @persistent

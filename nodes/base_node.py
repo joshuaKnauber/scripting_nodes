@@ -462,16 +462,57 @@ class SN_ScriptingBaseNode:
 
     ### CREATE SOCKETS
     def _add_input(self, idname, label, dynamic=False):
+        """ Adds an input for this node. This function itself doesn't evaluate as it may be used before the node is ready """
         socket = self.inputs.new(idname, label)
         socket.dynamic = dynamic
         socket.display_shape = socket.socket_shape
         return socket
     
     def _add_output(self, idname, label, dynamic=False):
+        """ Adds an output for this node. This function itself doesn't evaluate as it may be used before the node is ready """
         socket = self.outputs.new(idname, label)
         socket.dynamic = dynamic
         socket.display_shape = socket.socket_shape
         return socket
+    
+    
+    def convert_socket(self, socket, to_idname):
+        """ Converts the socket from it's current type to the given idname """
+        if socket.bl_idname != to_idname:
+            index = socket.index
+            if index != -1:
+                prev_links = socket.links[:] # TODO clean up and fix relinking sockets causing crash
+                if socket.is_output:
+                    out = self._add_output(to_idname, socket.name, socket.dynamic)
+                    out.prev_dynamic = socket.prev_dynamic
+                    out.subtype = socket.subtype
+                    self.outputs.remove(socket)
+                    self.outputs.move(len(self.outputs)-1, index)
+                    # for link in prev_links:
+                    #     self.node_tree.links.new(out, link.to_socket)
+                else:
+                    inp = self._add_input(to_idname, socket.name, socket.dynamic)
+                    inp.prev_dynamic = socket.prev_dynamic
+                    inp.subtype = socket.subtype
+                    self.inputs.remove(socket)
+                    self.inputs.move(len(self.inputs)-1, index)
+                    # for link in prev_links:
+                    #     self.node_tree.links.new(inp, link.from_socket)
+        self._evaluate(bpy.context)
+    
+    
+    socket_names = {
+        "Execute": "SN_ExecuteSocket",
+        "Interface": "SN_InterfaceSocket",
+        "Data": "SN_DataSocket",
+        "String": "SN_StringSocket",
+        "Enum": "SN_EnumSocket",
+        "Boolean": "SN_BooleanSocket",
+        "Integer": "SN_IntegerSocket",
+        "Float": "SN_FloatSocket",
+        "Factor": "SN_FloatFactorSocket",
+        "Icon": "SN_IconSocket",
+    }
 
 
     def add_execute_input(self, label="Execute"): return self._add_input("SN_ExecuteSocket", label)

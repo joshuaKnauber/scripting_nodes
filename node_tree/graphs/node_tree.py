@@ -147,7 +147,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def compile(self, hard=False):
         """ Compile all nodes in this node tree. If hard is true every node is also reevaluated. Use this if duplicates in other graphs could exist """
-        for node in self.nodes:
+        for node in self.nodes: # TODO, this might be wrong, check for exporting. This will also compile reroutes
             if hard and hasattr(node, "is_trigger"):
                 node._evaluate(bpy.context)
             elif getattr(node, "is_trigger", False):

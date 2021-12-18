@@ -9,7 +9,12 @@ def string_to_icon(value):
     if value in bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items.keys():
         return bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items[value].value
     return string_to_int(value)
-
+    
+def icon_to_string(value):
+    if value < len(bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items):
+        return bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items[value].name
+    return ""
+    
 """
 
 
@@ -29,7 +34,7 @@ def bool_to_icon(python_value):
 
 
 def icon_to_string(python_value):
-    return f"str({python_value})"
+    return f"icon_to_string({python_value})"
 
 def icon_to_bool(python_value):
     return f"bool({python_value})"
