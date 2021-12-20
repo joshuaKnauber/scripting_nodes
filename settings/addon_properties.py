@@ -29,9 +29,19 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="This is enabled when a location picker for panels or similar is active")
 
 
+    show_wrap_settings: bpy.props.BoolProperty(default=False,
+                                        name="Show Wrap Settings",
+                                        description="If this is enabled, the wrapping settings for the text in these panels are show.")
+
+    line_length: bpy.props.IntProperty(default=40, min=10,
+                                        name="Line Wrap",
+                                        description="The amount of characters shown in a single line in the panel.")
+
+
     has_update: bpy.props.BoolProperty(name="Has Update",
                                         description="If Serpens has an available update or not. This is set on file load.",
                                         default=False)
+
 
     debug_python_nodes: bpy.props.BoolProperty(default=False,
                                         name="Debug Nodes",
@@ -41,9 +51,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Debug Sockets",
                                         description="Debug internal socket code")
 
+
     insert_sockets: bpy.props.BoolProperty(default=False,
                                         name="Insert Socket Buttons",
                                         description="Show an insert button on dynamic sockets to insert a new socket above")
+
 
     compile_on_load: bpy.props.BoolProperty(default=True,
                                         name="Compile On Load",

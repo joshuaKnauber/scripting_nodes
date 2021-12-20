@@ -12,6 +12,20 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     layout_type = "layout"
     is_trigger = True
     node_color = "INTERFACE"
+    
+    docs = {
+        "description": "This node can be used to make a panel or a subpanel in the blender user interface. Use the picker button to select the location of the panel in the UI.\nIf you want to add it to a N-Panel, click the Picker button and go to the Misc category in the N-Panel.",
+        "settings": "- Is Subpanel: If this is enabled the this panel node becomes a subpanel inside another panel."
+                    + "- Label: The label is what gets displayed in the header of the panel.\n"
+                    + "- Category: If your panel is in an N-Panel, this represents the tab your panel goes in. Otherwise you can ignore this.\n"
+                    + "- Order: If you have multiple panels you can order them with this number. The first panel is 0. You can't always sort your panel above blender internal panels.\n"
+                    + "- Hide Header: Hides the header of your panel completely. Blender may also show your panel at the top of the panel stack.\n"
+                    + "- Expand Header: Applies normal layouts to your header. This will expand inputs and labels and let you align things other than to the left.\n"
+                    + "- Default Closed: Closes your panel by default.\n",
+        "inputs": "- Hide: If this receives True (enabled), your panel will be hidden from the UI.",
+        "outputs": "- Panel: The panel outputs are the starting point for you to add elements to your interface.\n"
+                    + "- Header: The header outputs can add elements to your panels header. You can leave the label empty and add it back with a label."
+    }
 
     def on_create(self, context):
         self.add_boolean_input("Hide")

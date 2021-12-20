@@ -31,6 +31,14 @@ class SN_ScriptingBaseNode:
 
     # set this for any interface nodes that change the layout type (nodes like row, column, split, ...)
     layout_type = None
+    
+    # optional documentation for this node displayed in the n-panel
+    docs = {
+        "description": "",
+        "settings": "",
+        "inputs": "",
+        "outputs": ""
+    }
 
 
     @classmethod
