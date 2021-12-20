@@ -15,10 +15,10 @@ def depsgraph_handler(dummy):
 
 @persistent
 def load_handler(dummy):
-    pass
     # check_serpens_updates(bl_info["version"])
-    # if bpy.context.scene.sn.compile_on_load:
-    #     compile_all()
+    if bpy.context.scene.sn.compile_on_load:
+        print("loaded")
+        # compile_all() # TODO enabling this crashes blender (maybe a version thing?)
 
 
 @persistent
