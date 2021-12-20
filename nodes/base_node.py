@@ -195,6 +195,7 @@ class SN_ScriptingBaseNode:
 
     def _node_code_changed(self):
         """ Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes """
+        print(f"Serpens Log: {self.label if self.label else self.name} received an update")
         if self.is_trigger:
             self.compile()
         else:
@@ -206,6 +207,7 @@ class SN_ScriptingBaseNode:
 
     def _trigger_root_nodes(self):
         """ Compiles the root node of this node if it exists """
+        print(f"Serpens Log: {self.label if self.label else self.name} received an update")
         roots = self.root_nodes
         for root in roots:
             root.compile()
