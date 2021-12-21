@@ -42,6 +42,7 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
         
         # register
         exec(self.register_code)
+        print(f"Serpens Log: Property {self.name} received an update")
         self.unregister_cache[f"{self.as_pointer()}"] = self.unregister_code
         
 

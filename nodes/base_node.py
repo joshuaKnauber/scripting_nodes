@@ -201,7 +201,7 @@ class SN_ScriptingBaseNode:
 
     def _node_code_changed(self):
         """ Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes """
-        print(f"Serpens Log: {self.label if self.label else self.name} received an update")
+        print(f"Serpens Log: Node {self.label if self.label else self.name} received an update")
         if self.is_trigger:
             self.compile()
         else:

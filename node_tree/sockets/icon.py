@@ -1,5 +1,4 @@
 import bpy
-from bpy import props
 from .base_socket import ScriptingSocket
 
 
