@@ -26,11 +26,11 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
     
     @property
     def register_code(self):
-        return f"bpy.types.{self.attach_to}.{get_python_name(self.name, 'new_property')} = bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
+        return f"bpy.types.{self.attach_to}.sna_{get_python_name(self.name, 'new_property')} = bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
     
     @property
     def unregister_code(self):
-        return f"del bpy.types.{self.attach_to}.{get_python_name(self.name, 'new_property')}"
+        return f"del bpy.types.{self.attach_to}.sna_{get_python_name(self.name, 'new_property')}"
     
         
     def compile(self, context=None):
@@ -58,7 +58,8 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
                                     default="New Property",
                                     get=get_name,
                                     set=set_name,
-                                    update=compile)
+                                    update=compile,
+                                    subtype="FILE_NAME")
     
     
     description: bpy.props.StringProperty(name="Description",
