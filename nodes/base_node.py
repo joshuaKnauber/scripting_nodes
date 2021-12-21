@@ -39,6 +39,12 @@ class SN_ScriptingBaseNode:
         "inputs": "",
         "outputs": ""
     }
+    
+    
+    # disables evaluation, only use this when the node is being initialized
+    disable_evaluation: bpy.props.BoolProperty(default=True,
+                                               name="Disable Evaluation",
+                                               description="If this is enabled this node won't reevaluate. This should only be used for debugging or when the node is being initialized.")
 
 
     @classmethod
@@ -297,6 +303,8 @@ class SN_ScriptingBaseNode:
 
     def _evaluate(self, context):
         """ Internal evaluate to check if changes happened and trigger the compile process """
+        if self.disable_evaluation: return
+        
         # keep track of code before changes
         prev_code = self.code
         prev_code_import = self.code_import
@@ -373,6 +381,7 @@ class SN_ScriptingBaseNode:
         # set up the node
         self.on_create(context)
         # evaluate node for the first time
+        self.disable_evaluation = False
         self._evaluate(context)
 
 
