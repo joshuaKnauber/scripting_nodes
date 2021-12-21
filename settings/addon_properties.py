@@ -1,5 +1,6 @@
 import bpy
 from uuid import uuid4
+from ..addon.properties.properties import SN_PT_GeneralProperties
 from ..utils import get_python_name
             
 
@@ -71,7 +72,12 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         if len(bpy.data.node_groups):
             bpy.context.space_data.node_tree = bpy.data.node_groups[self.node_tree_index]
 
-    node_tree_index: bpy.props.IntProperty(default=0, name="Active Node Tree", description="The node tree you're currently editing", update=update_node_tree_index)
+    node_tree_index: bpy.props.IntProperty(default=0, min=0, name="Active Node Tree", description="The node tree you're currently editing", update=update_node_tree_index)
+
+
+    properties: bpy.props.CollectionProperty(type=SN_PT_GeneralProperties)
+
+    property_index: bpy.props.IntProperty(default=0, min=0, name="Active Property", description="The property you're currently editing")
 
 
     addon_name: bpy.props.StringProperty(default="My Addon",

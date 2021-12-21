@@ -16,3 +16,26 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
     
     def draw(self, context):
         layout = self.layout
+        sn = context.scene.sn
+        
+        # draw property ui list
+        row = layout.row(align=False)
+        row.template_list("SN_UL_PropertyList", "Properties", sn, "properties", sn, "property_index", rows=4)
+        col = row.column(align=True)
+        col.operator("sn.add_property", text="", icon="ADD")
+        col.operator("sn.add_property", text="", icon="VIEWZOOM")
+        col.operator("sn.remove_property", text="", icon="REMOVE")
+        
+        if sn.property_index < len(sn.properties):
+            prop = sn.properties[sn.property_index]
+            
+            col = layout.column()
+            col.use_property_split = True
+            col.use_property_decorate = False
+
+            # draw general property settings
+            prop.draw(context, col)
+            
+            # draw property specific settings
+            col.separator()
+            prop.settings.draw(context, col, prop)
