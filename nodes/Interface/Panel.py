@@ -33,7 +33,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_dynamic_interface_output("Panel")
         self.add_dynamic_interface_output("Header")
 
-    label: bpy.props.StringProperty(default="New Panel",
+    panel_label: bpy.props.StringProperty(default="New Panel",
                                     name="Label",
                                     description="The label of your panel",
                                     update=SN_ScriptingBaseNode._evaluate)
@@ -88,11 +88,18 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="The panel id this subpanel should be shown in",
                                     update=SN_ScriptingBaseNode._evaluate)
 
+    idname_override: bpy.props.StringProperty(default="",
+                                    name="Idname Override",
+                                    description="Use this if you want to define the idname of this panel yourself",
+                                    update=SN_ScriptingBaseNode._evaluate)
+
 
     def evaluate(self, context):
-        uid = self.uuid
-        py_name = get_python_name(self.label)
-        idname = f"SNA_PT_{py_name.upper() if py_name else 'Panel'}_{uid}"
+        py_name = get_python_name(self.panel_label)
+        alt_py_name = get_python_name(self.name)
+        idname = f"SNA_PT_{py_name.upper() if py_name else alt_py_name}_{self.space}_{self.region}{'_'+self.context if self.context else ''}"
+        if self.idname_override:
+            idname = self.idname_override
 
         options = []
         if self.hide_header: options.append("'HIDE_HEADER'")
@@ -101,7 +108,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.code = f"""
                     class {idname}(bpy.types.Panel):
-                        bl_label = "{self.label}"
+                        bl_label = "{self.panel_label}"
                         bl_idname = "{idname}"
                         bl_space_type = '{self.space}'
                         bl_region_type = '{self.region}'
@@ -143,7 +150,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         layout.prop(self, "is_subpanel")
 
-        layout.prop(self, "label")
+        layout.prop(self, "panel_label")
         if not self.is_subpanel:
             layout.prop(self, "category")
 
@@ -162,3 +169,4 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         row = layout.row()
         row.enabled = self.is_subpanel
         row.prop(self, "panel_parent")
+        layout.prop(self, "idname_override")

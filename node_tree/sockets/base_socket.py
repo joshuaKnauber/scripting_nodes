@@ -51,6 +51,10 @@ class ScriptingSocket:
 
     def _draw_dynamic_socket(self, layout, node, text):
         """ Draws the operators for dynamic sockets """
+        # draw socket label
+        if self.is_output:
+            layout.label(text=text)
+
         # draw add operator
         op = layout.operator("sn.add_dynamic", text="", emboss=False, icon="ADD")
         op.node = node.name
@@ -59,7 +63,8 @@ class ScriptingSocket:
         op.index = self.index
 
         # draw socket label
-        layout.label(text=text)
+        if not self.is_output:
+            layout.label(text=text)
 
     def _draw_prev_dynamic_socket(self, context, layout, node):
         """ Draws the operators for previously dynamic sockets """
@@ -82,9 +87,10 @@ class ScriptingSocket:
         if self.dynamic:
             self._draw_dynamic_socket(layout, node, text)
         else:
+            if self.is_output: self.draw_socket(context, layout, node, text)
             if self.prev_dynamic:
                 self._draw_prev_dynamic_socket(context, layout, node)
-            self.draw_socket(context, layout, node, text)
+            if not self.is_output: self.draw_socket(context, layout, node, text)
 
 
     ### SOCKET COLOR
