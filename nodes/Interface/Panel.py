@@ -32,6 +32,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_output("Panel")
         self.add_dynamic_interface_output("Panel")
         self.add_dynamic_interface_output("Header")
+        self.custom_parent_ntree = self.node_tree
 
     panel_label: bpy.props.StringProperty(default="New Panel",
                                     name="Label",
@@ -88,35 +89,64 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="The panel id this subpanel should be shown in",
                                     update=SN_ScriptingBaseNode._evaluate)
 
+    parent_type: bpy.props.EnumProperty(name="Parent Type",
+                                    description="Use a custom panel as a parent",
+                                    items=[("BLENDER", "Blender", "Blender", "BLENDER", 0),
+                                           ("CUSTOM", "Custom", "Custom", "FILE_SCRIPT", 1)],
+                                    update=SN_ScriptingBaseNode._evaluate)
+    
+    custom_parent: bpy.props.StringProperty(name="Custom Parent",
+                                    description="The panel used as a custom parent panel for this subpanel",
+                                    update=SN_ScriptingBaseNode._evaluate)
+    
+    custom_parent_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
+                                    name="Panel Node Tree",
+                                    description="The node tree to select the panel from",
+                                    poll=SN_ScriptingBaseNode.ntree_poll,
+                                    update=SN_ScriptingBaseNode._evaluate)
+
     idname_override: bpy.props.StringProperty(default="",
                                     name="Idname Override",
                                     description="Use this if you want to define the idname of this panel yourself",
                                     update=SN_ScriptingBaseNode._evaluate)
 
 
-    def evaluate(self, context):
+    @property
+    def panel_idname(self):
         py_name = get_python_name(self.panel_label)
         alt_py_name = get_python_name(self.name)
-        idname = f"SNA_PT_{py_name.upper() if py_name else alt_py_name}_{self.space}_{self.region}{'_'+self.context if self.context else ''}"
+        idname = f"SNA_PT_{py_name.upper() if py_name else alt_py_name}_{self.static_uid}"
         if self.idname_override:
             idname = self.idname_override
+        return idname
 
+
+    def evaluate(self, context):
         options = []
         if self.hide_header: options.append("'HIDE_HEADER'")
         if self.expand_header: options.append("'HEADER_LAYOUT_EXPAND'")
         if self.default_closed: options.append("'DEFAULT_CLOSED'")
+        
+        parent = ""
+        if self.is_subpanel:
+            if self.parent_type == "BLENDER":
+                parent = self.panel_parent
+            elif self.custom_parent_ntree and self.custom_parent in self.custom_parent_ntree.nodes:
+                parent_node = self.custom_parent_ntree.nodes[self.custom_parent]
+                if not parent_node.is_subpanel:
+                    parent = parent_node.panel_idname
 
         self.code = f"""
-                    class {idname}(bpy.types.Panel):
+                    class {self.panel_idname}(bpy.types.Panel):
                         bl_label = "{self.panel_label}"
-                        bl_idname = "{idname}"
+                        bl_idname = "{self.panel_idname}"
                         bl_space_type = '{self.space}'
                         bl_region_type = '{self.region}'
                         {f"bl_context = '{self.context}'" if self.context else ""}
                         {f"bl_category = '{self.category}'" if self.category else ""}
                         bl_order = {self.order}
                         {f"bl_options = {{{', '.join(options)}}}" if options else ""}
-                        {f"bl_parent_id = '{self.panel_parent}'" if self.is_subpanel and self.panel_parent else ""}
+                        {f"bl_parent_id = '{parent}'" if self.is_subpanel and parent else ""}
 
                         @classmethod
                         def poll(cls, context):
@@ -131,22 +161,34 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                             {self.indent([out.python_value for out in filter(lambda out: out.name=='Panel' and not out.dynamic, self.outputs)], 7)}
                     """
 
-        self.code_register = f"bpy.utils.register_class({idname})"
-        self.code_unregister = f"bpy.utils.unregister_class({idname})"
+        self.code_register = f"bpy.utils.register_class({self.panel_idname})"
+        self.code_unregister = f"bpy.utils.unregister_class({self.panel_idname})"
 
 
     def draw_node(self, context, layout):
-        row = layout.row()
-        row.scale_y = 1.3
-
+        row = layout.row(align=True)
+        row.scale_y = 2
+        
         if not self.is_subpanel:
             op = row.operator("sn.activate_panel_picker", text=f"{self.space.replace('_', ' ').title()} {self.region.replace('_', ' ').title()} {self.context.replace('_', ' ').title()}", icon="EYEDROPPER")
             op.node_tree = self.node_tree.name
             op.node = self.name
         else:
-            op = row.operator("sn.activate_subpanel_picker", text=f"{self.panel_parent.replace('_PT_', ' ').replace('_', ' ').title()}", icon="EYEDROPPER")
-            op.node_tree = self.node_tree.name
-            op.node = self.name
+            if self.parent_type == "BLENDER":
+                op = row.operator("sn.activate_subpanel_picker", text=f"{self.panel_parent.replace('_PT_', ' ').replace('_', ' ').title()}", icon="EYEDROPPER")
+                op.node_tree = self.node_tree.name
+                op.node = self.name
+            else:
+                col = row.column(align=True)
+                col.scale_y = 0.5
+                parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
+                subrow = col.row(align=True)
+                subrow.prop_search(self, "custom_parent_ntree", bpy.data, "node_groups", text="")
+                subrow = col.row(align=True)
+                subrow.enabled = self.custom_parent_ntree != None
+                subrow.prop_search(self, "custom_parent", bpy.data.node_groups[parent_tree.name].node_collection(self.bl_idname), "refs", text="")
+
+            row.prop(self, "parent_type", text="", icon_only=True)
         
         layout.prop(self, "is_subpanel")
 

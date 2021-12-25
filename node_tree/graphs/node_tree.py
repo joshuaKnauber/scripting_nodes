@@ -1,5 +1,6 @@
 import bpy
 from ..sockets.conversions import CONVERSIONS
+from .node_refs import NodeRefCollection
 
 
 
@@ -32,6 +33,15 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     is_sn = True
 
     link_cache = {} # stores cache of the links from the previous update for all node trees based on their memory adress
+
+    node_refs: bpy.props.CollectionProperty(type=NodeRefCollection,
+                                        name="Node References",
+                                        description="A collection of groups that hold references to nodes of a specific idname")
+
+    
+    def node_collection(self, idname):
+        """ Returns the collection for the given node idname refs in this node trees """
+        return self.node_refs[idname]
     
 
     def _map_link_to_sockets(self, link):

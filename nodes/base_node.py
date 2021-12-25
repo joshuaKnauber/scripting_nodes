@@ -50,6 +50,11 @@ class SN_ScriptingBaseNode:
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == 'ScriptingNodesTree'
+    
+    
+    # poll function for node tree pointer prop searches
+    def ntree_poll(self, group):
+        return group.bl_idname == "ScriptingNodesTree"
 
 
     @property
@@ -60,8 +65,22 @@ class SN_ScriptingBaseNode:
 
     @property
     def uuid(self):
-        """ Returnes a uid for this node. Note that this is not stable and will change over time! """
+        """ Returns a uid for this node. Note that this is not stable and will change over time! """
         return uuid4().hex[:5].upper()
+    
+    
+    @property
+    def collection(self):
+        """ Returns the collection for the nodes of this type """
+        return self.node_tree.node_refs[self.bl_idname]
+    
+    
+    def get_collection_uuid(self):
+        return self.get("static_uid", "")
+
+    # uid for finding this node in the collection. Avoid using this for things that do not need to be static, use uuid instead
+    static_uid: bpy.props.StringProperty(name="Static UID",
+                                    description="Unique Identifier for finding this node in the ref collection of the node tree and for use for static names in code")
 
 
     @property
@@ -374,8 +393,23 @@ class SN_ScriptingBaseNode:
             self.color = self.node_color
         else:
             self.color = self._colors["DEFAULT"]
-
+            
+    def _create_node_collection_item(self):
+        """ Creates an item in the nodes collection of this node tree for this node """
+        # set a new collection uid for this node
+        self.static_uid = uuid4().hex[:5].upper()
+        # add a new collection if it doesn't exist yet
+        if not self.bl_idname in self.node_tree.node_refs:
+            collection = self.node_tree.node_refs.add()
+            collection.name = self.bl_idname
+        # add the node to the collection
+        node_ref = self.collection.refs.add()
+        node_ref.uid = self.static_uid
+        node_ref.name = self.name
+    
     def init(self, context):
+        # create node collection item
+        self._create_node_collection_item()
         # set up custom color
         self._set_node_color()
         # set up the node
@@ -389,6 +423,8 @@ class SN_ScriptingBaseNode:
     def on_copy(self, old): pass
 
     def copy(self, old):
+        # create node collection item
+        self._create_node_collection_item()
         # set up the node
         self.on_copy(old)
         # compile the node for the first time after copying
@@ -397,8 +433,17 @@ class SN_ScriptingBaseNode:
 
     ### FREE NODE
     def on_free(self): pass
+    
+    def _remove_node_collection_item(self):
+        """ Removes the reference item for this node from this node trees references """
+        for i, ref in enumerate(self.collection.refs):
+            if ref.uid == self.static_uid:
+                self.collection.refs.remove(i)
+                break
 
     def free(self):
+        # remove node reference from node tree references
+        self._remove_node_collection_item()
         # unregister the nodes content
         if self.is_trigger:
             self.unregister()
@@ -411,6 +456,7 @@ class SN_ScriptingBaseNode:
 
     def update(self):
         """ Update on node graph topology changes (adding or removing nodes and links) """
+        print("update")
         self.on_node_update()
 
 

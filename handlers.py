@@ -19,6 +19,7 @@ def load_handler(dummy):
     if bpy.context.scene.sn.compile_on_load:
         print("loaded")
         # compile_all() # TODO enabling this crashes blender (maybe a version thing?)
+        # TODO compile all with compile order
 
 
 @persistent
