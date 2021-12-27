@@ -135,7 +135,9 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 parent_node = self.custom_parent_ntree.nodes[self.custom_parent]
                 if not parent_node.is_subpanel:
                     parent = parent_node.panel_idname
-
+        # BUG changing order doesn't reorder the panel when added to sidepanel
+        # BUG can't select serpens panels for subpanels
+        # BUG custom subpanels aren't properly solved yet
         self.code = f"""
                     class {self.panel_idname}(bpy.types.Panel):
                         bl_label = "{self.panel_label}"
