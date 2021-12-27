@@ -112,6 +112,30 @@ class SN_ScriptingBaseNode:
             linked = node._get_linked_nodes(linked)
 
         return linked
+    
+    
+    def _format_paragraphs(self, code):
+        """ Adjusts the spacing in the code paragraphs """
+        # remove blank lines
+        code = code.split("\n")
+        code = list(filter(lambda line: not line.strip() == "", code))
+        # add blank lines
+        spaced = []
+        prev_indents = 0
+        for i, line in enumerate(code):
+            curr_indents = len(line) - len(line.lstrip())
+            # add line if less indents
+            if curr_indents < prev_indents:
+                spaced.append("")
+            # add line if decorator
+            elif line.lstrip()[0] == "@":
+                spaced.append("")
+            # add line before comment
+            elif line.lstrip()[0] == "#":
+                spaced.append("")
+            spaced.append(line)
+            prev_indents = curr_indents
+        return "\n".join(spaced)
 
 
     def _get_import_list(self, linked=[]):
@@ -173,13 +197,14 @@ class SN_ScriptingBaseNode:
         linked = sorted(linked, key=lambda node: node.order)
         imports = self._format_imports(linked)
         imperative = self._format_imperative(linked)
+        main_code = self.code
         register = self._format_register(linked)
         unregister = self._format_unregister(linked)
 
         run_register = "\nregister()\n"
         store_unregister = f"bpy.context.scene.sn.unregister_cache['{self.as_pointer()}'] = unregister\n"
 
-        return imports + imperative + f"\n{self.code}\n" + register + unregister + run_register + store_unregister
+        return imports + imperative + f"\n{main_code}\n" + register + unregister + run_register + store_unregister
 
 
     def unregister(self):
@@ -220,7 +245,7 @@ class SN_ScriptingBaseNode:
 
     def _node_code_changed(self):
         """ Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes """
-        print(f"Serpens Log: Node {self.label if self.label else self.name} received an update")
+        print(f"Serpens Log: {self.label if self.label else self.name} received an update")
         if self.is_trigger:
             self.compile()
         else:
@@ -277,6 +302,7 @@ class SN_ScriptingBaseNode:
     def _set_any_code(self, key, raw_code):
         """ Checks if the given code is different from the current code. If required it triggers a code update """
         normalized = self._normalize_code(raw_code)
+        normalized = self._format_paragraphs(normalized)
         if self.get(key) == None or normalized != self[key]:
             self[key] = normalized
 

@@ -146,7 +146,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {f"bl_category = '{self.category}'" if self.category and not parent else ""}
                         bl_order = {self.order}
                         {f"bl_options = {{{', '.join(options)}}}" if options else ""}
-                        {f"bl_parent_id = '{parent}'" if self.is_subpanel and not parent else ""}
+                        {f"bl_parent_id = '{parent}'" if self.is_subpanel and parent else ""}
 
                         @classmethod
                         def poll(cls, context):
