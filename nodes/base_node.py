@@ -75,6 +75,19 @@ class SN_ScriptingBaseNode:
         return self.node_tree.node_refs[self.bl_idname]
     
     
+    # Called by any trigger node when its code updates. Use this to catch changes to nodes that you're holding references to and modify your own values
+    def on_ref_update(self, node): pass
+            
+            
+    def trigger_ref_update(self):
+        """ Triggers an update on all nodes. Every node can then check if it has a reference to this node and update it's own values accordingly """
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                for node in ntree.nodes:
+                    if hasattr(node, "is_trigger") and not node == self:
+                        node.on_ref_update(self)
+    
+    
     def get_collection_uuid(self):
         return self.get("static_uid", "")
 
@@ -248,6 +261,7 @@ class SN_ScriptingBaseNode:
         print(f"Serpens Log: {self.label if self.label else self.name} received an update")
         if self.is_trigger:
             self.compile()
+            self.trigger_ref_update()
         else:
             # update the code of all program inputs to reflect the nodes code
             for inp in self.inputs:
@@ -344,6 +358,12 @@ class SN_ScriptingBaseNode:
                                     description="The current compiled code for this nodes unregistrations",
                                     set=_set_code_unregister,
                                     get=_get_code_unregister)
+    
+    
+    def _evaluate_and_compile(self, context):
+        """ Internal evaluate with guaranteed compile if this is necessary to properly update this node """
+        self._evaluate(context)
+        self._node_code_changed()
 
 
     def _evaluate(self, context):
@@ -371,7 +391,7 @@ class SN_ScriptingBaseNode:
         # trigger compiler updates
         if node_code_changed:
             self._node_code_changed()
-        if other_code_changed:
+        if other_code_changed and not self.is_trigger:
             self._trigger_root_nodes()
 
 

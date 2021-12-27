@@ -33,6 +33,28 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_dynamic_interface_output("Panel")
         self.add_dynamic_interface_output("Header")
         self.custom_parent_ntree = self.node_tree
+        
+        
+    def update_from_parent(self, parent):
+        """ Update this subpanels nodes values from the parent node """
+        self["space"] = parent["space"]
+        self["region"] = parent["region"]
+        self["context"] = parent["context"]
+        
+        
+    def on_ref_update(self, node):
+        if self.is_subpanel:
+            if node.bl_idname == self.bl_idname:
+                if node.node_tree == self.custom_parent_ntree and node.name == self.custom_parent:
+                    self.update_from_parent(node)
+                    self._evaluate_and_compile(bpy.context)
+                
+        
+    def update_custom_parent(self, context):
+        if self.custom_parent_ntree and self.custom_parent in self.custom_parent_ntree.nodes:
+            parent = self.custom_parent_ntree.nodes[self.custom_parent]
+            self.update_from_parent(parent)
+        self._evaluate(context)
 
     panel_label: bpy.props.StringProperty(default="New Panel",
                                     name="Label",
@@ -62,7 +84,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     order: bpy.props.IntProperty(default=0, min=0,
                                 name="Order",
                                 description="The order of your panel compared to the other panels",
-                                update=SN_ScriptingBaseNode._evaluate)
+                                update=SN_ScriptingBaseNode._evaluate_and_compile)
 
     hide_header: bpy.props.BoolProperty(default=False,
                                     name="Hide Header",
@@ -97,7 +119,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     custom_parent: bpy.props.StringProperty(name="Custom Parent",
                                     description="The panel used as a custom parent panel for this subpanel",
-                                    update=SN_ScriptingBaseNode._evaluate)
+                                    update=update_custom_parent)
     
     custom_parent_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Panel Node Tree",
@@ -135,16 +157,16 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 parent_node = self.custom_parent_ntree.nodes[self.custom_parent]
                 if not parent_node.is_subpanel:
                     parent = parent_node.panel_idname
+        
         # BUG changing order doesn't reorder the panel when added to sidepanel
-        # BUG can't select serpens panels for subpanels
-        # BUG custom subpanels aren't properly solved yet
+        
         self.code = f"""
                     class {self.panel_idname}(bpy.types.Panel):
-                        bl_label = "{self.panel_label}"
-                        bl_idname = "{self.panel_idname}"
-                        {f"bl_space_type = '{self.space}'" if not parent else ""}
-                        {f"bl_region_type = '{self.region}'" if not parent else ""}
-                        {f"bl_context = '{self.context}'" if self.context and parent else ""}
+                        bl_label = '{self.panel_label}'
+                        bl_idname = '{self.panel_idname}'
+                        bl_space_type = '{self.space}'
+                        bl_region_type = '{self.region}'
+                        bl_context = '{self.context}'
                         {f"bl_category = '{self.category}'" if self.category and not parent else ""}
                         bl_order = {self.order}
                         {f"bl_options = {{{', '.join(options)}}}" if options else ""}
@@ -168,27 +190,31 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def draw_node(self, context, layout):
-        row = layout.row(align=True)
-        row.scale_y = 2
         
         if not self.is_subpanel:
+            row = layout.row(align=True)
+            row.scale_y = 1.4
             op = row.operator("sn.activate_panel_picker", text=f"{self.space.replace('_', ' ').title()} {self.region.replace('_', ' ').title()} {self.context.replace('_', ' ').title()}", icon="EYEDROPPER")
             op.node_tree = self.node_tree.name
             op.node = self.name
         else:
+            row = layout.row(align=True)
             if self.parent_type == "BLENDER":
                 op = row.operator("sn.activate_subpanel_picker", text=f"{self.panel_parent.replace('_PT_', ' ').replace('_', ' ').title()}", icon="EYEDROPPER")
                 op.node_tree = self.node_tree.name
                 op.node = self.name
             else:
-                col = row.column(align=True)
-                col.scale_y = 0.5
                 parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
-                subrow = col.row(align=True)
-                subrow.prop_search(self, "custom_parent_ntree", bpy.data, "node_groups", text="")
-                subrow = col.row(align=True)
+                row.prop_search(self, "custom_parent_ntree", bpy.data, "node_groups", text="")
+                subrow = row.row(align=True)
                 subrow.enabled = self.custom_parent_ntree != None
                 subrow.prop_search(self, "custom_parent", bpy.data.node_groups[parent_tree.name].node_collection(self.bl_idname), "refs", text="")
+                if self.custom_parent == self.name and self.custom_parent_ntree == self.node_tree:
+                    layout.label(text="Can't use self as panel parent!", icon="ERROR")
+                elif self.custom_parent and self.custom_parent_ntree and self.custom_parent in self.custom_parent_ntree.nodes:
+                    if self.custom_parent_ntree.nodes[self.custom_parent].is_subpanel:
+                        layout.label(text="Can't use subpanel as parent!", icon="ERROR")
+                        
 
             row.prop(self, "parent_type", text="", icon_only=True)
         
