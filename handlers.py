@@ -18,14 +18,12 @@ def depsgraph_handler(dummy):
 @persistent
 def load_handler(dummy):
     check_easy_bpy_install()
-    # check_serpens_updates(bl_info["version"])
-    # if bpy.context.scene.sn.compile_on_load:
-        # compile_all() # TODO enabling this crashes blender (maybe a version thing?)
-        # TODO compile all with compile order
+    if bpy.context.scene.sn.compile_on_load:
+        compile_all()
+    check_serpens_updates(bl_info["version"])
 
 
 
 @persistent
 def unload_handler(dummy=None):
-    pass
-    # unregister_all() # TODO
+    unregister_all()

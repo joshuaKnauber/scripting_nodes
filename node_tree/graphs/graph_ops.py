@@ -130,6 +130,7 @@ class SN_OT_ForceCompile(bpy.types.Operator):
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context):
+        unregister_all()
         compile_all(hard=True)
         return {"FINISHED"}
 

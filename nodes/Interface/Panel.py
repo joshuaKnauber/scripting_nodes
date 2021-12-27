@@ -140,13 +140,13 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                     class {self.panel_idname}(bpy.types.Panel):
                         bl_label = "{self.panel_label}"
                         bl_idname = "{self.panel_idname}"
-                        bl_space_type = '{self.space}'
-                        bl_region_type = '{self.region}'
-                        {f"bl_context = '{self.context}'" if self.context else ""}
-                        {f"bl_category = '{self.category}'" if self.category else ""}
+                        {f"bl_space_type = '{self.space}'" if not parent else ""}
+                        {f"bl_region_type = '{self.region}'" if not parent else ""}
+                        {f"bl_context = '{self.context}'" if self.context and parent else ""}
+                        {f"bl_category = '{self.category}'" if self.category and not parent else ""}
                         bl_order = {self.order}
                         {f"bl_options = {{{', '.join(options)}}}" if options else ""}
-                        {f"bl_parent_id = '{parent}'" if self.is_subpanel and parent else ""}
+                        {f"bl_parent_id = '{parent}'" if self.is_subpanel and not parent else ""}
 
                         @classmethod
                         def poll(cls, context):

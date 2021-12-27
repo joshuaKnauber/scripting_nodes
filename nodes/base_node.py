@@ -456,7 +456,6 @@ class SN_ScriptingBaseNode:
 
     def update(self):
         """ Update on node graph topology changes (adding or removing nodes and links) """
-        print("update")
         self.on_node_update()
 
 

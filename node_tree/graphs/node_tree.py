@@ -157,12 +157,19 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def compile(self, hard=False):
         """ Compile all nodes in this node tree. If hard is true every node is also reevaluated. Use this if duplicates in other graphs could exist """
-        for node in self.nodes:
-            if hard and hasattr(node, "is_trigger"):
-                node._evaluate(bpy.context)
-            elif not hard and getattr(node, "is_trigger", False):
+        # evaluate all nodes
+        if hard:
+            for node in self.nodes:
                 if hasattr(node, "is_trigger"):
-                    node.compile()
+                    node._evaluate(bpy.context)
+        # get trigger nodes
+        compile_nodes = []
+        for node in self.nodes:
+            if getattr(node, "is_trigger", False):
+                compile_nodes.append(node)
+        # compile sorted nodes
+        for node in sorted(compile_nodes, key=lambda node: node.order):
+            node.compile()
 
 
     def unregister(self):
