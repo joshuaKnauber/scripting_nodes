@@ -12,6 +12,7 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
  
 
+
 bl_info = {
     "name" : "Serpens",
     "author" : "Joshua Knauber, Finn Knauber", 
@@ -22,6 +23,7 @@ bl_info = {
     "doc_url": "", 
     "category" : "Node" 
 }
+
 
 
 import bpy
@@ -48,12 +50,12 @@ auto_load.init()
 
 def register_icons():
     bpy.types.Scene.sn_icons = bpy.utils.previews.new()
-    icons_dir = os.path.join( os.path.dirname( __file__ ), "assets", "icons" )
+    icons_dir = os.path.join( os.path.dirname( __file__ ), "assets", "icons")
 
-    icons = [ "discord", "bug", "serpens" ]
+    icons = ["discord", "serpens"]
 
     for icon in icons:
-        bpy.types.Scene.sn_icons.load( icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE' )
+        bpy.types.Scene.sn_icons.load(icon, os.path.join( icons_dir, icon + ".png" ), 'IMAGE')
 
 
 
@@ -127,14 +129,3 @@ def unregister():
 
     # unregister the addon classes
     auto_load.unregister()
-
-
-
-"""
-big problems:
-- refs to nodes selected on other nodes
-- vector inputs
-- blend data systems
-- properties
-- variables
-"""

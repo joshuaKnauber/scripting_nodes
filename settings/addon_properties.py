@@ -63,9 +63,9 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="Compile this addon when the file is loaded")
 
 
-    easy_bpy: bpy.props.PointerProperty(type=bpy.types.Text,
-                                        name="Easy BPY File",
-                                        description="The file that contains the easy bpy module")
+    easy_bpy_path: bpy.props.StringProperty(default="",
+                                        name="Easy BPY Path",
+                                        description="Gets set when a file is loaded. Set to the easy bpy file path.")
 
 
     def update_node_tree_index(self, context):
