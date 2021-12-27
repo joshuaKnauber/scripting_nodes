@@ -16,20 +16,24 @@ class SN_OT_CopyProperty(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
     
     def execute(self, context):
-        # copy data path if available
-        if bpy.ops.ui.copy_data_path_button.poll():
-            bpy.ops.ui.copy_data_path_button("INVOKE_DEFAULT", full_path=True)
-            self.report({"INFO"}, message="Copied!")
-            return {"FINISHED"}
-
         # get property details
         property_pointer = getattr(context, "button_pointer", None)
         property_value = getattr(context, "button_prop", None)
+
+        # copy data path if available
+        if bpy.ops.ui.copy_data_path_button.poll():
+            bpy.ops.ui.copy_data_path_button("INVOKE_DEFAULT", full_path=True)
+            context.scene.sn.last_copied_datatype = property_value.type.title()
+            context.scene.sn.last_copied_datapath = context.window_manager.clipboard
+            self.report({"INFO"}, message="Copied!")
+            return {"FINISHED"}
 
         # check if replacement is available
         if property_pointer and property_value:
             if property_pointer.bl_rna.identifier in REPLACE_NAMES:
                 context.window_manager.clipboard = f"{REPLACE_NAMES[property_pointer.bl_rna.identifier]}.{property_value.identifier}"
+                context.scene.sn.last_copied_datatype = property_value.type.title()
+                context.scene.sn.last_copied_datapath = context.window_manager.clipboard
                 self.report({"INFO"}, message="Copied!")
                 return {"FINISHED"}
 

@@ -576,6 +576,8 @@ class SN_ScriptingBaseNode:
                     out = self._add_output(to_idname, socket.name, socket.dynamic)
                     out.prev_dynamic = socket.prev_dynamic
                     out.subtype = socket.subtype
+                    out.indexable = socket.indexable
+                    out["index_type"] = socket.index_type
                     self.outputs.remove(socket)
                     self.outputs.move(len(self.outputs)-1, index)
                     # for link in prev_links:
@@ -584,6 +586,8 @@ class SN_ScriptingBaseNode:
                     inp = self._add_input(to_idname, socket.name, socket.dynamic)
                     inp.prev_dynamic = socket.prev_dynamic
                     inp.subtype = socket.subtype
+                    inp.indexable = socket.indexable
+                    inp["index_type"] = socket.index_type
                     self.inputs.remove(socket)
                     self.inputs.move(len(self.inputs)-1, index)
                     # for link in prev_links:
@@ -602,6 +606,7 @@ class SN_ScriptingBaseNode:
         "Float": "SN_FloatSocket",
         "Factor": "SN_FloatFactorSocket",
         "Icon": "SN_IconSocket",
+        "Index": "SN_IndexSocket",
     }
 
 
@@ -614,6 +619,8 @@ class SN_ScriptingBaseNode:
     def add_interface_output(self, label="Interface"): return self._add_output("SN_InterfaceSocket", label)
     def add_dynamic_interface_input(self, label="Interface"): return self._add_input("SN_InterfaceSocket", label, True)
     def add_dynamic_interface_output(self, label="Interface"): return self._add_output("SN_InterfaceSocket", label, True)
+
+    def add_index_input(self, label="Index"): return self._add_input("SN_IndexSocket", label)
 
     def add_data_input(self, label="Data"): return self._add_input("SN_DataSocket", label)
     def add_data_output(self, label="Data"): return self._add_output("SN_DataSocket", label)

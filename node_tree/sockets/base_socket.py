@@ -36,6 +36,21 @@ class ScriptingSocket:
     @property
     def subtype_attr(self):
         return self.subtype_values[self.subtype]
+    
+    
+    # INDEXING OPTIONS
+    def update_index_type(self, context): self.node.convert_socket(self, self.node.socket_names[self.index_type])
+        
+    indexable: bpy.props.BoolProperty(default=False,
+                                    name="Indexable",
+                                    description="If this socket is indexable. Switches between String, Integer and Blend Data")
+    
+    index_type: bpy.props.EnumProperty(name="Index Type",
+                                    description="The type of index this socket indexes with",
+                                    items=[("String", "Name", "Name", "SYNTAX_OFF", 0),
+                                           ("Integer", "Index", "Index", "DRIVER_TRANSFORM", 1),
+                                           ("Blend Data", "Blend Data", "Blend Data", "MONKEY", 2)], # TODO
+                                    update=update_index_type)
         
     
     ### DRAW SOCKET
@@ -90,7 +105,10 @@ class ScriptingSocket:
             if self.is_output: self.draw_socket(context, layout, node, text)
             if self.prev_dynamic:
                 self._draw_prev_dynamic_socket(context, layout, node)
-            if not self.is_output: self.draw_socket(context, layout, node, text)
+            if not self.is_output:
+                self.draw_socket(context, layout, node, text)
+                if self.indexable:
+                    layout.prop(self, "index_type", icon_only=True)
 
 
     ### SOCKET COLOR
@@ -111,6 +129,11 @@ class ScriptingSocket:
     default_python_value = "None"
     default_prop_value = ""
     def get_python_repr(self): return "None"
+    
+    
+    def reset_value(self):
+        """ Resets this sockets python value back to the default """
+        self.python_value = self.default_python_value
 
 
     def _get_python(self):

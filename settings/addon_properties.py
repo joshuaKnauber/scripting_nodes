@@ -28,6 +28,15 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     picker_active: bpy.props.BoolProperty(default=False,
                                         name="Picker Is Active",
                                         description="This is enabled when a location picker for panels or similar is active")
+    
+    
+    last_copied_datatype: bpy.props.StringProperty(default="",
+                                        name="Last Copied Data Type",
+                                        description="The type of data last copied with the copy property button")
+                                        
+    last_copied_datapath: bpy.props.StringProperty(default="",
+                                        name="Last Copied Data Path",
+                                        description="The path of data last copied with the copy property button")
 
 
     show_wrap_settings: bpy.props.BoolProperty(default=False,
