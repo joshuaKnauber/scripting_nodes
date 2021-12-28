@@ -23,14 +23,9 @@ class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             get=ScriptingSocket._get_value,
                                             set=ScriptingSocket._set_value)
 
-    named_icon: bpy.props.StringProperty(name="Value",
-                                            description="Value of this socket",
-                                            subtype="FILE_PATH",
-                                            update=ScriptingSocket._update_value)
 
-
-    subtypes = ["NONE", "STRING_VALUE"]
-    subtype_values = {"NONE": "default_value", "NAMED_ICON": "named_icon"}
+    subtypes = ["NONE"]
+    subtype_values = {"NONE": "default_value"}
 
 
     def get_color(self, context, node):
