@@ -81,7 +81,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="The category your panel is in",
                                     update=SN_ScriptingBaseNode._evaluate)
 
-    order: bpy.props.IntProperty(default=0, min=0,
+    panel_order: bpy.props.IntProperty(default=0, min=0,
                                 name="Order",
                                 description="The order of your panel compared to the other panels",
                                 update=SN_ScriptingBaseNode._evaluate_and_compile)
@@ -168,7 +168,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         bl_region_type = '{self.region}'
                         bl_context = '{self.context}'
                         {f"bl_category = '{self.category}'" if self.category and not parent else ""}
-                        bl_order = {self.order}
+                        bl_order = {self.panel_order}
                         {f"bl_options = {{{', '.join(options)}}}" if options else ""}
                         {f"bl_parent_id = '{parent}'" if self.is_subpanel and parent else ""}
 
@@ -224,7 +224,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         if not self.is_subpanel:
             layout.prop(self, "category")
 
-        layout.prop(self, "order")
+        layout.prop(self, "panel_order")
         layout.prop(self, "hide_header")
         layout.prop(self, "expand_header")
         layout.prop(self, "default_closed")
