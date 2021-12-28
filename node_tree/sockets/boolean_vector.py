@@ -1,0 +1,52 @@
+import bpy
+import mathutils
+from .base_socket import ScriptingSocket
+
+
+
+class SN_BooleanVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
+
+    bl_idname = "SN_BooleanVectorSocket"
+    group = "DATA"
+    bl_label = "Boolean Vector"
+
+
+    default_python_value = "(False, False, False)"
+    default_prop_value = (False, False, False)
+
+    def get_python_repr(self):
+        return f"{mathutils.Vector(self.default_value)[:self.size]}"
+    
+    
+    def _get_value(self):
+        value = ScriptingSocket._get_value(self)
+        return mathutils.Vector(value)
+    
+    def _set_value(self, value):
+        ScriptingSocket._set_value(self, value)
+        
+    size: bpy.props.IntProperty(default=3, min=1, max=32,
+                                name="Size",
+                                description="Size of this boolean vector")
+
+    default_value: bpy.props.BoolVectorProperty(name="Value",
+                                            # default=tuple([True]*32),
+                                            size=32,
+                                            description="Value of this socket",
+                                            get=_get_value,
+                                            set=_set_value)
+
+    subtypes = ["NONE"]
+    subtype_values = {"NONE": "default_value"}
+    
+    
+    def get_color(self, context, node):
+        return (0.38, 0.34, 0.84)
+
+    def draw_socket(self, context, layout, node, text):
+        if self.is_output or self.is_linked:
+            layout.label(text=text)
+        else:
+            col = layout.column(heading=text, align=True)
+            for i in range(self.size):
+                col.prop(self, self.subtype_attr, index=i, text=str(getattr(self, self.subtype_attr)[i]), toggle=True)

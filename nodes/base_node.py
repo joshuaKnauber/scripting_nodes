@@ -21,7 +21,8 @@ class SN_ScriptingBaseNode:
         "BOOLEAN": (0.15, 0.13, 0.14),
         "ICON": (0.14, 0.17, 0.19),
         "FLOAT": (0.25, 0.25, 0.25),
-        "INTEGER": (0.14, 0.19, 0.15)
+        "INTEGER": (0.14, 0.19, 0.15),
+        "VECTOR": (0.13, 0.13, 0.15)
     }
     # the default color of this node. Set this to one of the options in _colors or use a vec3
     node_color = "DEFAULT"
@@ -650,6 +651,11 @@ class SN_ScriptingBaseNode:
     def add_boolean_output(self, label="Boolean"): return self._add_output("SN_BooleanSocket", label)
     def add_dynamic_boolean_input(self, label="Boolean"): return self._add_input("SN_BooleanSocket", label, True)
     def add_dynamic_boolean_output(self, label="Boolean"): return self._add_output("SN_BooleanSocket", label, True)
+
+    def add_boolean_vector_input(self, label="Boolean Vector"): return self._add_input("SN_BooleanVectorSocket", label)
+    def add_boolean_vector_output(self, label="Boolean Vector"): return self._add_output("SN_BooleanVectorSocket", label)
+    def add_dynamic_boolean_vector_input(self, label="Boolean Vector"): return self._add_input("SN_BooleanVectorSocket", label, True)
+    def add_dynamic_boolean_vector_output(self, label="Boolean Vector"): return self._add_output("SN_BooleanVectorSocket", label, True)
 
     def add_integer_input(self, label="Integer"): return self._add_input("SN_IntegerSocket", label)
     def add_integer_output(self, label="Integer"): return self._add_output("SN_IntegerSocket", label)
