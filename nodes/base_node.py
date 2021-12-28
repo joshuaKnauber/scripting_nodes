@@ -585,27 +585,23 @@ class SN_ScriptingBaseNode:
         if socket.bl_idname != to_idname:
             index = socket.index
             if index != -1:
-                prev_links = socket.links[:] # TODO clean up and fix relinking sockets causing crash
+                # add new socket
                 if socket.is_output:
-                    out = self._add_output(to_idname, socket.name, socket.dynamic)
-                    out.prev_dynamic = socket.prev_dynamic
-                    out.subtype = socket.subtype
-                    out.indexable = socket.indexable
-                    out["index_type"] = socket.index_type
+                    new = self._add_output(to_idname, socket.name, socket.dynamic)
+                else:
+                    new = self._add_input(to_idname, socket.name, socket.dynamic)
+                # set socket properties
+                new.prev_dynamic = socket.prev_dynamic
+                new.subtype = socket.subtype
+                new.indexable = socket.indexable
+                new["index_type"] = socket.index_type
+                # move socket and remove old
+                if socket.is_output:
                     self.outputs.remove(socket)
                     self.outputs.move(len(self.outputs)-1, index)
-                    # for link in prev_links:
-                    #     self.node_tree.links.new(out, link.to_socket)
                 else:
-                    inp = self._add_input(to_idname, socket.name, socket.dynamic)
-                    inp.prev_dynamic = socket.prev_dynamic
-                    inp.subtype = socket.subtype
-                    inp.indexable = socket.indexable
-                    inp["index_type"] = socket.index_type
                     self.inputs.remove(socket)
                     self.inputs.move(len(self.inputs)-1, index)
-                    # for link in prev_links:
-                    #     self.node_tree.links.new(inp, link.from_socket)
         self._evaluate(bpy.context)
     
     
