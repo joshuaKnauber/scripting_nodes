@@ -358,12 +358,6 @@ class SN_ScriptingBaseNode:
                                     description="The current compiled code for this nodes unregistrations",
                                     set=_set_code_unregister,
                                     get=_get_code_unregister)
-    
-    
-    def _evaluate_and_compile(self, context):
-        """ Internal evaluate with guaranteed compile if this is necessary to properly update this node """
-        self._evaluate(context)
-        self._node_code_changed()
 
 
     def _evaluate(self, context):

@@ -40,21 +40,24 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self["space"] = parent["space"]
         self["region"] = parent["region"]
         self["context"] = parent["context"]
-        
-        
-    def on_ref_update(self, node):
-        if self.is_subpanel:
-            if node.bl_idname == self.bl_idname:
-                if node.node_tree == self.custom_parent_ntree and node.name == self.custom_parent:
-                    self.update_from_parent(node)
-                    self._evaluate_and_compile(bpy.context)
                 
         
     def update_custom_parent(self, context):
+        """ Updates the nodes settings when a new parent panel is selected """
         if self.custom_parent_ntree and self.custom_parent in self.custom_parent_ntree.nodes:
             parent = self.custom_parent_ntree.nodes[self.custom_parent]
             self.update_from_parent(parent)
         self._evaluate(context)
+        
+        
+    def on_ref_update(self, node):
+        """ Called when a parent panel is updated, updates this nodes settings """
+        if node.bl_idname == self.bl_idname:
+            if self.is_subpanel:
+                if node.node_tree == self.custom_parent_ntree and node.name == self.custom_parent:
+                    self.update_from_parent(node)
+                    self._evaluate(bpy.context)
+
 
     panel_label: bpy.props.StringProperty(default="New Panel",
                                     name="Label",
@@ -84,7 +87,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     panel_order: bpy.props.IntProperty(default=0, min=0,
                                 name="Order",
                                 description="The order of your panel compared to the other panels",
-                                update=SN_ScriptingBaseNode._evaluate_and_compile)
+                                update=SN_ScriptingBaseNode._evaluate)
 
     hide_header: bpy.props.BoolProperty(default=False,
                                     name="Hide Header",
@@ -133,17 +136,23 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     update=SN_ScriptingBaseNode._evaluate)
 
 
-    @property
-    def panel_idname(self):
+    
+    last_idname: bpy.props.StringProperty(name="Last Idname",
+                                    description="The last idname that this panel had when it was compiled",
+                                    default="")
+
+    def update_idname(self):
         py_name = get_python_name(self.panel_label)
         alt_py_name = get_python_name(self.name)
-        idname = f"SNA_PT_{py_name.upper() if py_name else alt_py_name}_{self.static_uid}"
+        idname = f"SNA_PT_{py_name.upper() if py_name else alt_py_name}_{self.uuid}"
         if self.idname_override:
             idname = self.idname_override
-        return idname
+        self.last_idname = idname
 
 
     def evaluate(self, context):
+        self.update_idname()
+        
         options = []
         if self.hide_header: options.append("'HIDE_HEADER'")
         if self.expand_header: options.append("'HEADER_LAYOUT_EXPAND'")
@@ -156,14 +165,12 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
             elif self.custom_parent_ntree and self.custom_parent in self.custom_parent_ntree.nodes:
                 parent_node = self.custom_parent_ntree.nodes[self.custom_parent]
                 if not parent_node.is_subpanel:
-                    parent = parent_node.panel_idname
-        
-        # BUG changing order doesn't reorder the panel when added to sidepanel
-        
+                    parent = parent_node.last_idname
+                
         self.code = f"""
-                    class {self.panel_idname}(bpy.types.Panel):
+                    class {self.last_idname}(bpy.types.Panel):
                         bl_label = '{self.panel_label}'
-                        bl_idname = '{self.panel_idname}'
+                        bl_idname = '{self.last_idname}'
                         bl_space_type = '{self.space}'
                         bl_region_type = '{self.region}'
                         bl_context = '{self.context}'
@@ -185,8 +192,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                             {self.indent([out.python_value for out in filter(lambda out: out.name=='Panel' and not out.dynamic, self.outputs)], 7)}
                     """
 
-        self.code_register = f"bpy.utils.register_class({self.panel_idname})"
-        self.code_unregister = f"bpy.utils.unregister_class({self.panel_idname})"
+        self.code_register = f"bpy.utils.register_class({self.last_idname})"
+        self.code_unregister = f"bpy.utils.unregister_class({self.last_idname})"
 
 
     def draw_node(self, context, layout):
