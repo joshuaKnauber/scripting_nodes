@@ -52,6 +52,7 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         op = row.operator("sn.activate_subpanel_picker", text=f"{self.panel_parent.replace('_PT_', ' ').replace('_', ' ').title()}", icon="EYEDROPPER")
         op.node_tree = self.node_tree.name
         op.node = self.name
+        op.allow_subpanels = True
         
         layout.prop(self, "append", expand=True)
 

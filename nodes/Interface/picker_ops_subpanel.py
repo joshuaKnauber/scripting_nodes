@@ -41,6 +41,7 @@ class SN_OT_ActivateSubpanelPicker(bpy.types.Operator):
 
     node_tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
     node: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    allow_subpanels: bpy.props.BoolProperty(default=False, options={"SKIP_SAVE", "HIDDEN"})
 
     @classmethod
     def poll(cls, context):
@@ -49,7 +50,7 @@ class SN_OT_ActivateSubpanelPicker(bpy.types.Operator):
     def execute(self, context):
         # register panels
         for panel in bpy.types.Panel.__subclasses__():
-            if not getattr(panel, "bl_parent_id", False):
+            if not getattr(panel, "bl_parent_id", False) or self.allow_subpanels:
                 register_dummy_subpanel(self.node_tree, self.node, panel)
         
         # redraw screen
@@ -80,6 +81,16 @@ class SN_OT_PickSubpanelLocation(bpy.types.Operator):
             if self.node in ntree.nodes:
                 node = ntree.nodes[self.node]
                 node.panel_parent = self.panel
+                
+                panel = getattr(bpy.types, self.panel)
+                if hasattr(panel, "bl_space_type") and hasattr(node, "space"):
+                    node.space = panel.bl_space_type
+                if hasattr(panel, "bl_region_type") and hasattr(node, "region"):
+                    node.region = panel.bl_region_type
+                if hasattr(panel, "bl_context") and hasattr(node, "context"):
+                    node.context = panel.bl_context
+                else:
+                    node.context = ""
 
         # unregister panels
         for panel in registered_subpanels:
