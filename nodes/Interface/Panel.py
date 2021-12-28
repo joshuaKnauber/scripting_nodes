@@ -57,6 +57,15 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if node.node_tree == self.custom_parent_ntree and node.name == self.custom_parent:
                     self.update_from_parent(node)
                     self._evaluate(bpy.context)
+                    
+                    
+    def update_is_subpanel(self, context):
+        """ Updates the compile order when turned into a subpanel """
+        if self.is_subpanel:
+            self.order = 1
+        else:
+            self.order = 0
+        self._evaluate(context)
 
 
     panel_label: bpy.props.StringProperty(default="New Panel",
@@ -107,7 +116,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     is_subpanel: bpy.props.BoolProperty(default=False,
                                     name="Is Subpanel",
                                     description="If this panel should be a subpanel",
-                                    update=SN_ScriptingBaseNode._evaluate)
+                                    update=update_is_subpanel)
 
     panel_parent: bpy.props.StringProperty(default="EEVEE_MATERIAL_PT_surface",
                                     name="Parent",
