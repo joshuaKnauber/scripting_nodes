@@ -41,7 +41,9 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     
     def node_collection(self, idname):
         """ Returns the collection for the given node idname refs in this node trees """
-        return self.node_refs[idname]
+        if idname in self.node_refs:
+            return self.node_refs[idname]
+        return {"name": idname, "refs": []}
     
 
     def _map_link_to_sockets(self, link):

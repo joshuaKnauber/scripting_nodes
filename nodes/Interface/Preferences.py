@@ -38,4 +38,9 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.evaluate(context)
 
     def draw_node(self, context, layout):
-        pass
+        amount = 0
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                amount += len(ntree.node_collection(self.bl_idname).refs)
+        if amount > 1:
+            layout.label(text="Multiple preferences nodes! Only one will be used", icon="ERROR")
