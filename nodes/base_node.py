@@ -538,6 +538,8 @@ class SN_ScriptingBaseNode:
 
     def _draw_debug_code(self, context, layout):
         """ Draws the code for this node line by line on the node """
+        box = layout.box()
+        box.label(text=f"Static UID: {self.static_uid}")
         for key in ["code", "code_import", "code_imperative", "code_register", "code_unregister"]:
             if getattr(self, key):
                 box = layout.box()
