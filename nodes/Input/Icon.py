@@ -74,4 +74,5 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
             op.socket = -1
         else:
             layout.template_ID(self, "icon_file", new="image.new", open="image.open", live_icon=True)
-
+            if self.icon_file and not self.icon_file.filepath:
+                layout.label(text="Image not saved!", icon="ERROR")
