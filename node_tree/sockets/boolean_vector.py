@@ -12,34 +12,33 @@ class SN_BooleanVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 
     default_python_value = "(False, False, False)"
-    default_prop_value = (False, False, False)
+    default_prop_value = tuple([False]*32)
 
     def get_python_repr(self):
-        return f"{mathutils.Vector(self.default_value)[:self.size]}"
+        return f"{tuple(getattr(self, self.subtype_attr))[:self.size]}"
     
     
     def _get_value(self):
         value = ScriptingSocket._get_value(self)
-        return mathutils.Vector(value)
+        value = tuple(map(lambda x: bool(x), value))
+        return tuple(value)
     
     def _set_value(self, value):
         value = list(value)
         while len(value) < 32:
-            value.append(True)
+            value.append(False)
         ScriptingSocket._set_value(self, tuple(value))
         
     def update_size(self, context):
         self.default_python_value = str(tuple([False]*self.size))
-        self.default_prop_value = tuple([False]*self.size)
         self._set_value(self.default_value)
 
-    size: bpy.props.IntProperty(default=3, min=1, max=32,
+    size: bpy.props.IntProperty(default=3, min=2, max=32,
                                 name="Size",
                                 description="Size of this boolean vector",
                                 update=update_size)
 
     default_value: bpy.props.BoolVectorProperty(name="Value",
-                                            # default=tuple([True]*32),
                                             size=32,
                                             description="Value of this socket",
                                             get=_get_value,

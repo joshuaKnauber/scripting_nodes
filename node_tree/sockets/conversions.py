@@ -19,44 +19,26 @@ def icon_to_string(value):
 
 
 
-def string_to_bool(python_value):
-    return f"bool({python_value})"
-
-def string_to_icon(python_value):
-    return f"string_to_icon({python_value})"
-
-
-def bool_to_string(python_value):
-    return f"str({python_value})"
-
-def bool_to_icon(python_value):
-    return f"int({python_value})"
-
-
-def icon_to_string(python_value):
-    return f"icon_to_string({python_value})"
-
-def icon_to_bool(python_value):
-    return f"bool({python_value})"
-
-
-
 CONVERSIONS = { # convert KEY to OPTIONS
     "String": {
         "Data": lambda python_value: python_value,
-        "Boolean": string_to_bool,
-        "Icon": string_to_icon,
+        "Boolean": lambda python_value: f"bool({python_value})",
+        "Icon": lambda python_value: f"string_to_icon({python_value})",
         "Enum": lambda python_value: python_value,
     },
     "Boolean": {
         "Data": lambda python_value: python_value,
-        "String": bool_to_string,
-        "Icon": bool_to_icon,
+        "String": lambda python_value: f"str({python_value})",
+        "Icon": lambda python_value: f"int({python_value})",
+    },
+    "Boolean Vector": {
+        "Data": lambda python_value: python_value,
+        "String": lambda python_value: f"str(tuple({python_value}))",
     },
     "Icon": {
         "Data": lambda python_value: python_value,
-        "String": icon_to_string,
-        "Boolean": icon_to_bool,
+        "String": lambda python_value: f"icon_to_string({python_value})",
+        "Boolean": lambda python_value: f"bool({python_value})",
     },
     "Enum": {
         "Data": lambda python_value: python_value,
