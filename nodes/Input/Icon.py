@@ -11,8 +11,21 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_icon_output("Icon")
-
+        
     def evaluate(self, context):
+        if self.icon_source == "BLENDER":
+            self.outputs["Icon"].python_value = f"{self.icon}"
+            self.code_register = f""
+            self.code_unregister = f""
+        else:
+            if self.icon_file:
+                self.outputs["Icon"].python_value = f"{self.icon_file.preview.icon_id}"
+            else:
+                self.outputs["Icon"].python_value = "0"
+            self.code_register = ""
+            self.code_unregister = ""
+    
+    def evaluate_export(self, context):
         if self.icon_source == "BLENDER":
             self.outputs["Icon"].python_value = f"{self.icon}"
             self.code_register = f""
@@ -40,13 +53,15 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     icon: bpy.props.IntProperty(name="Value", description="Value of this socket", update=SN_ScriptingBaseNode._evaluate)
 
-    def test_update(self, context):
+    def update_icon_file(self, context):
+        if self.icon_file:
+            self.icon_file.preview_ensure()
         self._evaluate(context)
 
     icon_file: bpy.props.PointerProperty(type=bpy.types.Image,
                                         name="Image File",
                                         description="The image you want to use as an icon",
-                                        update=test_update)
+                                        update=update_icon_file)
 
     def draw_node(self, context, layout):
         row = layout.row()

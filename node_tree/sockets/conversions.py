@@ -41,7 +41,7 @@ def icon_to_bool(python_value):
 
 
 
-CONVERSIONS = {
+CONVERSIONS = { # convert KEY to OPTIONS
     "String": {
         "Data": lambda python_value: python_value,
         "Boolean": string_to_bool,
