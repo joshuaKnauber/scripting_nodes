@@ -62,6 +62,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Debug Sockets",
                                         description="Debug internal socket code")
 
+    debug_python_properties: bpy.props.BoolProperty(default=False,
+                                        name="Debug Properties",
+                                        description="Debug internal property code")
+
 
     insert_sockets: bpy.props.BoolProperty(default=False,
                                         name="Insert Socket Buttons",

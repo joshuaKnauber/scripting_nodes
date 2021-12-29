@@ -29,6 +29,21 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
         if sn.property_index < len(sn.properties):
             prop = sn.properties[sn.property_index]
             
+            # draw property debug
+            if sn.debug_python_properties:
+                box = layout.box()
+                col = box.column(align=True)
+                row = col.row()
+                row.enabled = False
+                row.label(text="Register")
+                col.label(text=prop.register_code)
+                box = layout.box()
+                col = box.column(align=True)
+                row = col.row()
+                row.enabled = False
+                row.label(text="Unregister")
+                col.label(text=prop.unregister_code)
+            
             col = layout.column()
             col.use_property_split = True
             col.use_property_decorate = False

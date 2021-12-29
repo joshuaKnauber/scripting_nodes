@@ -29,6 +29,7 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         col = layout.column(heading="Debug")
         col.prop(sn, "debug_python_nodes")
         col.prop(sn, "debug_python_sockets")
+        col.prop(sn, "debug_python_properties")
         
         
         
