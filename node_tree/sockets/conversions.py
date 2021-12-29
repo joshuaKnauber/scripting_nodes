@@ -15,6 +15,12 @@ def icon_to_string(value):
         return bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items[value].name
     return ""
     
+def enum_set_to_string(value):
+    print(type(value), value)
+    if len(value) > 0:
+        return list(value)[0]
+    return "NONE"
+    
 """
 
 
@@ -43,6 +49,13 @@ CONVERSIONS = { # convert KEY to OPTIONS
     "Enum": {
         "Data": lambda python_value: python_value,
         "String": lambda python_value: python_value,
+
+        "ENUM_FLAG": {
+            "NONE": lambda python_value: f"enum_set_to_string({python_value})",
+        },
+        "NONE": {
+            "ENUM_FLAG": lambda python_value: f"set([{python_value}])",
+        }
     },
     "Integer": {
         "Data": lambda python_value: python_value,

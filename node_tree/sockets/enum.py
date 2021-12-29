@@ -14,6 +14,8 @@ class SN_EnumSocket(bpy.types.NodeSocket, ScriptingSocket):
     default_prop_value = ""
 
     def get_python_repr(self):
+        if self.subtype == "ENUM_FLAG":
+            return f"{getattr(self, self.subtype_attr)}"
         return f"\'{getattr(self, self.subtype_attr)}\'"
 
 
