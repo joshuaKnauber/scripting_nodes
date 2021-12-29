@@ -1,6 +1,7 @@
 import bpy
 from uuid import uuid4
 from ..addon.properties.properties import SN_PT_GeneralProperties
+from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
             
 
@@ -87,6 +88,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     properties: bpy.props.CollectionProperty(type=SN_PT_GeneralProperties)
 
     property_index: bpy.props.IntProperty(default=0, min=0, name="Active Property", description="The property you're currently editing")
+
+
+    assets: bpy.props.CollectionProperty(type=SN_AssetProperties)
+
+    asset_index: bpy.props.IntProperty(default=0, min=0, name="Active Asset", description="The asset you're currently editing")
 
 
     addon_name: bpy.props.StringProperty(default="My Addon",
