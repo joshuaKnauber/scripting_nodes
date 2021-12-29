@@ -14,7 +14,7 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     default_prop_value = 0
 
     def get_python_repr(self):
-        return f"{self.default_value}"
+        return f"{getattr(self, self.subtype_attr)}"
 
     default_value: bpy.props.FloatProperty(name="Value",
                                             default=0,
@@ -22,8 +22,15 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
                                             get=ScriptingSocket._get_value,
                                             set=ScriptingSocket._set_value)
 
-    subtypes = ["NONE"]
-    subtype_values = {"NONE": "default_value"}
+    factor_value: bpy.props.FloatProperty(name="Value",
+                                            default=0,
+                                            description="Value of this socket",
+                                            soft_min=0,
+                                            soft_max=1,
+                                            update=ScriptingSocket._update_value)
+
+    subtypes = ["NONE", "FACTOR"]
+    subtype_values = {"NONE": "default_value", "FACTOR": "factor_value"}
     
 
     def get_color(self, context, node):
@@ -33,4 +40,4 @@ class SN_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:
-            layout.prop(self, self.subtype_attr, text=text)
+            layout.prop(self, self.subtype_attr, text=text, slider=self.subtype == "FACTOR")
