@@ -16,10 +16,11 @@ def icon_to_string(value):
     return ""
     
 def enum_set_to_string(value):
-    print(type(value), value)
-    if len(value) > 0:
-        return list(value)[0]
-    return "NONE"
+    if type(value) == set:
+        if len(value) > 0:
+            return list(value)[0]
+        return "NONE"
+    return value
     
 """
 
@@ -48,7 +49,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     },
     "Enum": {
         "Data": lambda python_value: python_value,
-        "String": lambda python_value: python_value,
+        "String": lambda python_value: f"enum_set_to_string({python_value})",
 
         "ENUM_FLAG": {
             "NONE": lambda python_value: f"enum_set_to_string({python_value})",
