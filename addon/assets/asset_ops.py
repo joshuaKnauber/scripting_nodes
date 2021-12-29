@@ -94,7 +94,7 @@ class SN_OT_FindAsset(bpy.types.Operator):
             col = layout.column()
             row = col.row()
             row.enabled = False
-            row.label(text=asset.name)
+            row.label(text=f"Asset: {asset.name}")
             for ntree in bpy.data.node_groups:
                 if ntree.bl_idname == "ScriptingNodesTree":
                     for node in ntree.nodes:
