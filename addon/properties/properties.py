@@ -25,6 +25,10 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
     
     
     @property
+    def data_path(self):
+        return f"{self.attach_to.upper()}_PLACEHOLDER.sna_{get_python_name(self.name, 'new_property')}"
+    
+    @property
     def register_code(self):
         return f"bpy.types.{self.attach_to}.sna_{get_python_name(self.name, 'new_property')} = bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
     

@@ -33,3 +33,18 @@ class SN_OT_RemoveProperty(bpy.types.Operator):
         sn.properties.remove(sn.property_index)
         sn.property_index -= 1
         return {"FINISHED"}
+
+
+
+class SN_OT_CopyPythonName(bpy.types.Operator):
+    bl_idname = "sn.copy_python_name"
+    bl_label = "Copy Python Name"
+    bl_description = "Copies the python name of this item to use in scripts"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    name: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        context.window_manager.clipboard = self.name
+        self.report({"INFO"}, message="Copied!")
+        return {"FINISHED"}

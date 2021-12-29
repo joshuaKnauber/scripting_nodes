@@ -7,3 +7,4 @@ class SN_UL_PropertyList(bpy.types.UIList):
         row = layout.row()
         row.label(text="", icon=item.icon)
         row.prop(item, "name", emboss=False, text="")
+        row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False).name = item.data_path
