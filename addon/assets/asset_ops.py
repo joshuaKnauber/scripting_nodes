@@ -86,41 +86,51 @@ class SN_OT_FindAsset(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         
+        # init asset nodes
         empty_nodes = []
+        asset_nodes = []
+        asset = None
         if context.scene.sn.asset_index < len(context.scene.sn.assets):
             asset = context.scene.sn.assets[context.scene.sn.asset_index]
-            
-            found_nodes = False
+
+        # find assets nodes
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                for node in ntree.nodes:
+                    if node.bl_idname == "SN_AssetNode":
+                        if asset and node.asset == asset.name:
+                            asset_nodes.append(node)
+                        elif not node.asset:
+                            empty_nodes.append(node)
+                        
+        # draw nodes for selected asset    
+        if context.scene.sn.asset_index < len(context.scene.sn.assets):
             col = layout.column()
             row = col.row()
             row.enabled = False
             row.label(text=f"Asset: {asset.name}")
-            for ntree in bpy.data.node_groups:
-                if ntree.bl_idname == "ScriptingNodesTree":
-                    for node in ntree.nodes:
-                        if node.bl_idname == "SN_AssetNode":
-                            if node.asset == asset.name:
-                                found_nodes = True
-                                op = col.operator("sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF")
-                                op.node_tree = ntree.name
-                                op.node = node.name
-                            elif not node.asset:
-                                empty_nodes.append(node)
             
-            if not found_nodes:
+            for node in asset_nodes:
+                op = col.operator("sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF")
+                op.node_tree = node.node_tree.name
+                op.node = node.name
+            
+            if not asset_nodes:
                 col.label(text="No nodes found for this asset", icon="INFO")
         
+        # draw nodes with empty asset
         col = layout.column()
         row = col.row()
         row.label(text="Empty Asset Nodes")
         row.enabled = False
-        if len(empty_nodes) > 0:
-            for node in empty_nodes:
-                op = col.operator("sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF")
-                op.node_tree = ntree.name
-                op.node = node.name
-        else:
-            col.label(text="No nodes found for this asset", icon="INFO")
+        
+        for node in empty_nodes:
+            op = col.operator("sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF")
+            op.node_tree = node.node_tree.name
+            op.node = node.name
+
+        if not empty_nodes:
+            col.label(text="No empty asset nodes found", icon="INFO")
     
     def invoke(self, context, event):
         return context.window_manager.invoke_popup(self, width=250)
