@@ -7,6 +7,8 @@ class SN_PT_IntegerProperty(PropertySettings, bpy.types.PropertyGroup):
     
     def draw(self, context, layout, prop):
         """ Draws the settings for this property type """
+        layout.prop(self, "subtype")
+        layout.prop(self, "unit")
         row = layout.row()
         row.enabled = not self.is_vector
         row.prop(self, "default")
@@ -64,6 +66,8 @@ class SN_PT_IntegerProperty(PropertySettings, bpy.types.PropertyGroup):
             options = f"size={self.size}, default={tuple(list(self.vector_default)[:self.size])}"
         else:
             options = f"default={self.default}"
+        options += f", subtype='{self.subtype}'"
+        options += f", unit='{self.unit}'"
         if self.use_min: options += f", min={self.min}"
         if self.use_soft_min: options += f", soft_min={self.soft_min}"
         if self.use_max: options += f", max={self.max}"
@@ -74,6 +78,59 @@ class SN_PT_IntegerProperty(PropertySettings, bpy.types.PropertyGroup):
     default: bpy.props.IntProperty(name="Default",
                                     description="Default value of this property (This may not reset automatically for existing attached items)",
                                     update=PropertySettings.compile)
+    
+    
+    def get_subtype_items(self, context):
+        items = [("NONE", "None", "No subtype, just a default float input"),
+                ("PIXEL", "Pixel", "Pixel"), # TODO proper descriptions
+                ("UNSIGNED", "Unsigned", "Unsigned"),
+                ("PERCENTAGE", "Percentage", "Percentage"),
+                ("FACTOR", "Factor", "Factor"),
+                ("ANGLE", "Angle", "Angle"),
+                ("TIME", "Time", "Time"),
+                ("DISTANCE", "Distance", "Distance"),
+                ("DISTANCE_CAMERA", "Distance Camera", "Distance Camera"),
+                ("POWER", "Power", "Power"),
+                ("TEMPERATURE", "Temperature", "Temperature")]
+        if self.is_vector:
+            items = [("NONE", "None", "No subtype, just a default float vector input"),
+                ("COLOR", "Color", "Color"),
+                ("TRANSLATION", "Translation", "Translation"),
+                ("DIRECTION", "Direction", "Direction"),
+                ("VELOCITY", "Velocity", "Velocity"),
+                ("ACCELERATION", "Acceleration", "Acceleration"),
+                ("MATRIX", "Matrix", "Matrix"),
+                ("EULER", "Euler", "Euler"),
+                ("QUATERNION", "Quaternion", "Quaternion"),
+                ("AXISANGLE", "Axisangle", "Axisangle"),
+                ("XYZ", "XYZ", "XYZ"),
+                ("XYZ_LENGTH", "XYZ Length", "XYZ Length"),
+                ("COLOR_GAMMA", "Color Gamma", "Color Gamma"),
+                ("COORDINATES", "Coordinates", "Coordinates"),
+                ("LAYER", "Layer", "Layer"),
+                ("LAYER_MEMBER", "Layer Member", "Layer Member"),]
+        return items
+        
+    subtype: bpy.props.EnumProperty(name="Subtype",
+                                    description="The subtype of this property. This changes how the property is displayed",
+                                    update=PropertySettings.compile,
+                                    items=get_subtype_items)
+    
+    
+    unit: bpy.props.EnumProperty(name="Unit",
+                                    description="The unit of this property. This changes how the property is displayed",
+                                    update=PropertySettings.compile,
+                                    items=[("NONE", "None", "No unit, just a default float input"),
+                                            ("LENGTH", "Length", "Length"), # TODO proper descriptions
+                                            ("AREA", "Area", "Area"),
+                                            ("VOLUME", "Volume", "Volume"),
+                                            ("ROTATION", "Rotation", "Rotation"),
+                                            ("TIME", "Time", "Time"),
+                                            ("VELOCITY", "Velocity", "Velocity"),
+                                            ("ACCELERATION", "Acceleration", "Acceleration"),
+                                            ("MASS", "Mass", "Mass"),
+                                            ("CAMERA", "Camera", "Camera"),
+                                            ("POWER", "Power", "Power")])
     
     
     use_min: bpy.props.BoolProperty(name="Minimum",
