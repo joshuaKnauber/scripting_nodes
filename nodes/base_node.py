@@ -615,8 +615,11 @@ class SN_ScriptingBaseNode:
         "String": "SN_StringSocket",
         "Enum": "SN_EnumSocket",
         "Boolean": "SN_BooleanSocket",
+        "Boolean Vector": "SN_BooleanVectorSocket",
         "Integer": "SN_IntegerSocket",
+        "Integer Vector": "SN_IntegerVectorSocket",
         "Float": "SN_FloatSocket",
+        "Float Vector": "SN_FloatVectorSocket",
         "Factor": "SN_FloatFactorSocket",
         "Icon": "SN_IconSocket",
     }
@@ -662,10 +665,20 @@ class SN_ScriptingBaseNode:
     def add_dynamic_integer_input(self, label="Integer"): return self._add_input("SN_IntegerSocket", label, True)
     def add_dynamic_integer_output(self, label="Integer"): return self._add_output("SN_IntegerSocket", label, True)
 
+    def add_integer_vector_input(self, label="Integer Vector"): return self._add_input("SN_IntegerVectorSocket", label)
+    def add_integer_vector_output(self, label="Integer Vector"): return self._add_output("SN_IntegerVectorSocket", label)
+    def add_dynamic_integer_vector_input(self, label="Integer Vector"): return self._add_input("SN_IntegerVectorSocket", label, True)
+    def add_dynamic_integer_vector_output(self, label="Integer Vector"): return self._add_output("SN_IntegerVectorSocket", label, True)
+
     def add_float_input(self, label="Float"): return self._add_input("SN_FloatSocket", label)
     def add_float_output(self, label="Float"): return self._add_output("SN_FloatSocket", label)
     def add_dynamic_float_input(self, label="Float"): return self._add_input("SN_FloatSocket", label, True)
     def add_dynamic_float_output(self, label="Float"): return self._add_output("SN_FloatSocket", label, True)
+
+    def add_float_vector_input(self, label="Float Vector"): return self._add_input("SN_FloatVectorSocket", label)
+    def add_float_vector_output(self, label="Float Vector"): return self._add_output("SN_FloatVectorSocket", label)
+    def add_dynamic_float_vector_input(self, label="Float Vector"): return self._add_input("SN_FloatVectorSocket", label, True)
+    def add_dynamic_float_vector_output(self, label="Float Vector"): return self._add_output("SN_FloatVectorSocket", label, True)
 
     def add_factor_input(self, label="Factor"): return self._add_input("SN_FloatFactorSocket", label)
     def add_factor_output(self, label="Factor"): return self._add_output("SN_FloatFactorSocket", label)

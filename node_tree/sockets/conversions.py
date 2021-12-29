@@ -44,12 +44,27 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Data": lambda python_value: python_value,
         "String": lambda python_value: python_value,
     },
+    "Integer": {
+        "Data": lambda python_value: python_value,
+        "Float": lambda python_value: python_value,
+        "Factor": lambda python_value: python_value,
+    },
+    "Integer Vector": {
+        "Data": lambda python_value: python_value,
+        "String": lambda python_value: f"str(tuple({python_value}))",
+    },
     "Float": {
         "Data": lambda python_value: python_value,
+        "Integer": lambda python_value: python_value,
         "Factor": lambda python_value: python_value,
+    },
+    "Float Vector": {
+        "Data": lambda python_value: python_value,
+        "String": lambda python_value: f"str(tuple({python_value}))",
     },
     "Factor": {
         "Data": lambda python_value: python_value,
+        "Integer": lambda python_value: python_value,
         "Float": lambda python_value: python_value,
     },
     "Data": {
