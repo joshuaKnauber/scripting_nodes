@@ -43,8 +43,15 @@ class SN_EnumSocket(bpy.types.NodeSocket, ScriptingSocket):
                                     get=_get_value,
                                     set=ScriptingSocket._set_value)
 
-    subtypes = ["NONE"]
-    subtype_values = {"NONE": "default_value"}
+
+    flag_value: bpy.props.EnumProperty(name="Value",
+                                    description="Value of this socket",
+                                    items=get_items,
+                                    options={"ENUM_FLAG"},
+                                    update=ScriptingSocket._update_value)
+
+    subtypes = ["NONE", "ENUM_FLAG"]
+    subtype_values = {"NONE": "default_value", "ENUM_FLAG": "flag_value"}
     
 
     def get_color(self, context, node):
@@ -54,4 +61,8 @@ class SN_EnumSocket(bpy.types.NodeSocket, ScriptingSocket):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:
-            layout.prop(self, self.subtype_attr, text=text)
+            if self.subtype == "ENUM_FLAG":
+                col = layout.column(heading=text)
+                col.prop(self, self.subtype_attr, text=text)
+            else:
+                layout.prop(self, self.subtype_attr, text=text)
