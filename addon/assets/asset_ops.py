@@ -61,6 +61,12 @@ class SN_OT_FindNode(bpy.types.Operator):
 
     def execute(self, context):
         ntree = bpy.data.node_groups[self.node_tree]
+        # set active graph and select
+        context.space_data.node_tree = ntree
+        for index, group in enumerate(bpy.data.node_groups):
+            if group == ntree:
+                context.scene.sn.node_tree_index = index
+        # select node and frame
         for node in ntree.nodes:
             node.select = node.name == self.node
         bpy.ops.node.view_selected("INVOKE_DEFAULT")
