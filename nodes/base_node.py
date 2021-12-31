@@ -243,7 +243,11 @@ class SN_ScriptingBaseNode:
 
             # create text file
             txt = bpy.data.texts.new("tmp_serpens")
-            txt.write(self._format_node_code())
+            code = self._format_node_code()
+            txt.write(code)
+            if bpy.context.scene.sn.debug_code:
+                for i, line in enumerate(code.split("\n")):
+                    print(f"{i+1}: {line}")
 
             # run text file
             ctx = bpy.context.copy()

@@ -55,7 +55,7 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
 
     def set_name(self, value):
         # TODO make sure name is unique
-        # NOTE maybe check for references here when name changes to update them
+        # TODO check for references here when name changes to update them
         self["name"] = value
     
     name: bpy.props.StringProperty(name="Property Name",

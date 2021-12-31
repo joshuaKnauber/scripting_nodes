@@ -62,6 +62,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Debug Sockets",
                                         description="Debug internal socket code")
 
+    debug_code: bpy.props.BoolProperty(default=False,
+                                        name="Log Code",
+                                        description="Prints the code that is being run when a node changes")
+
     debug_python_properties: bpy.props.BoolProperty(default=False,
                                         name="Debug Properties",
                                         description="Debug internal property code")

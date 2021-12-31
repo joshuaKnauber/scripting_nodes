@@ -34,11 +34,11 @@ class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         uid = self.uuid
         func_name = f"sna_add_to_{self.panel_parent.lower()}_{uid}"
-
+                
         self.code = f"""
                     def {func_name}(self, context):
-                        layout = self.layout
                         if not ({self.inputs["Hide"].python_value}):
+                            layout = self.layout
                             {self.indent([out.python_value for out in self.outputs[:-1]], 7)}
                     """
 
