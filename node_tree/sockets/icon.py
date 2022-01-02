@@ -37,6 +37,6 @@ class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
             row = layout.row()
             row.scale_x = 1.74
             op = row.operator("sn.select_icon", text="Choose Icon", icon_value=self.default_value)
-            op.node = node.name
-            op.socket = self.index
+            op.icon_data_path = f"bpy.data.node_groups['{node.node_tree.name}'].nodes['{node.name}'].inputs[{self.index}]"
+            op.prop_name = "default_value"
 

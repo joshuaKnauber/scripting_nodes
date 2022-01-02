@@ -5,7 +5,7 @@ from .settings import PropertySettings
 
 class EnumItem(bpy.types.PropertyGroup):
     
-    name: bpy.props.StringProperty(name="Name",
+    name: bpy.props.StringProperty(name="Name", default="New Item",
                                 description="Name of this enum item")
     
     description: bpy.props.StringProperty(name="Description",
@@ -23,10 +23,18 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
         """ Draws the settings for this property type """
         layout.prop(self, "enum_flag")
         layout.separator()
-        for item in self.items:
+        row = layout.row()
+        row.scale_y = 1.2
+        op = row.operator("sn.add_enum_item", text="Add Item", icon="ADD")
+        op.item_data_path = "context.scene.sn.properties[context.scene.sn.property_index].settings.items"
+        for i, item in enumerate(self.items):
             box = layout.box()
-            box.prop(item, "name")
-            box.prop(item, "description", text="")
+            box.use_property_split = False
+            row = box.row()
+            row.prop(item, "name")
+            op = row.operator("sn.select_icon", icon_value=item.icon, text="Icon" if not item.icon else "", emboss=False)
+            op.icon_data_path = f"context.scene.sn.properties[context.scene.sn.property_index].settings.items[{i}]"
+            box.prop(item, "description")
         
     
     @property

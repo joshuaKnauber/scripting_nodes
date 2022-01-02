@@ -76,15 +76,13 @@ class SN_OT_SetIcon(bpy.types.Operator):
     bl_description = "Sets this icon"
     bl_options = {"REGISTER","UNDO","INTERNAL"}
 
-    node: bpy.props.StringProperty()
-    socket: bpy.props.IntProperty()
-    icon: bpy.props.IntProperty()
+    icon_data_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    prop_name: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"}, default="icon")
+    icon: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
-        if self.socket != -1:
-            context.space_data.node_tree.nodes[self.node].inputs[self.socket].default_value = self.icon
-        else:
-            context.space_data.node_tree.nodes[self.node].icon = self.icon
+        data = eval(self.icon_data_path)
+        setattr(data, self.prop_name, self.icon)
         context.area.tag_redraw()
         return {"FINISHED"}
 
@@ -97,8 +95,9 @@ class SN_OT_SelectIcon(bpy.types.Operator):
     bl_options = {"REGISTER","UNDO","INTERNAL"}
     bl_property = "icon_search"
     
-    node: bpy.props.StringProperty()
-    socket: bpy.props.IntProperty()
+    icon_data_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    prop_name: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"}, default="icon")
+    
     icon_search: bpy.props.StringProperty(name="Search", options={"SKIP_SAVE"})
 
     def execute(self, context):
@@ -110,10 +109,9 @@ class SN_OT_SelectIcon(bpy.types.Operator):
     def draw(self,context):
         layout = self.layout
         icons = bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items
-        if self.socket != -1:
-            prop = context.space_data.node_tree.nodes[self.node].inputs[self.socket].default_value
-        else:
-            prop = context.space_data.node_tree.nodes[self.node].icon
+        
+        data = eval(self.icon_data_path)
+        prop = getattr(data, self.prop_name)
 
         row = layout.row()
         row.prop(self,"icon_search",text="",icon="VIEWZOOM")
@@ -122,6 +120,6 @@ class SN_OT_SelectIcon(bpy.types.Operator):
         for icon in icons:
             if self.icon_search.lower() in icon.name.lower() or not self.icon_search:
                 op = grid.operator("sn.set_icon",text="", icon_value=icon.value, emboss=prop==icon.value)
-                op.node = self.node
-                op.socket = self.socket
+                op.icon_data_path = self.icon_data_path
+                op.prop_name = self.prop_name
                 op.icon = icon.value

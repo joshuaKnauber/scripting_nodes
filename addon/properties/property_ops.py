@@ -48,3 +48,18 @@ class SN_OT_CopyPythonName(bpy.types.Operator):
         context.window_manager.clipboard = self.name
         self.report({"INFO"}, message="Copied!")
         return {"FINISHED"}
+
+
+
+class SN_OT_AddEnumItem(bpy.types.Operator):
+    bl_idname = "sn.add_enum_item"
+    bl_label = "Add Enum Item"
+    bl_description = "Adds an enum item to this property"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    item_data_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        items = eval(self.item_data_path)
+        items.add()
+        return {"FINISHED"}

@@ -70,8 +70,7 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         if self.icon_source == "BLENDER":
             op = layout.operator("sn.select_icon", text="Choose Icon", icon_value=self.icon)
-            op.node = self.name
-            op.socket = -1
+            op.icon_data_path = f"bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}']"
         else:
             layout.template_ID(self, "icon_file", new="image.new", open="image.open", live_icon=True)
             if self.icon_file and not self.icon_file.filepath:
