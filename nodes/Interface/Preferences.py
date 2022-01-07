@@ -38,6 +38,7 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.evaluate(context)
 
     def draw_node(self, context, layout):
+        layout.operator("sn.open_preferences", icon="PREFERENCES")
         amount = 0
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":

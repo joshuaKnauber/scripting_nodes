@@ -255,7 +255,17 @@ class SN_ScriptingBaseNode:
             try:
                 bpy.ops.text.run_script(ctx) # TODO undo doesn't recompile
             except Exception as error:
+                print("")
+                print(f"--- Serpens error in node tree of '{self.name}' ---")
                 print(error)
+                print("----------------------------------------------------")
+                print("")
+                if bpy.context.preferences.addons[__name__.partition('.')[0]].preferences.keep_last_error_file:
+                    if not "serpens_error" in bpy.data.texts:
+                        bpy.data.texts.new("serpens_error")
+                    err = bpy.data.texts["serpens_error"]
+                    err.clear()
+                    err.write(code)
 
             # remove text file
             bpy.data.texts.remove(txt)

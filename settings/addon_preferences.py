@@ -14,10 +14,22 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     check_for_updates: bpy.props.BoolProperty(name="Check For Updates",
                                         description="Check for updates online when loading the addon",
                                         default=True)
+    
+    keep_last_error_file: bpy.props.BoolProperty(name="Keep Error File",
+                                        description="Keeps a copy of any compiled file that threw an error as 'serpens_error' in the text editor",
+                                        default=False)
 
 
     def draw_serpens_prefs(self, context, layout):
-        layout.prop(self, "check_for_updates")
+        row = layout.row()
+
+        col = row.column(heading="General")
+        col.use_property_split = True
+        col.prop(self, "check_for_updates")
+        
+        col = row.column(heading="Debugging")
+        col.use_property_split = True
+        col.prop(self, "keep_last_error_file")
 
 
     def draw_custom_prefs(self, context, layout):
