@@ -5,6 +5,12 @@ from .settings import PropertySettings
 
 class SN_PT_StringProperty(PropertySettings, bpy.types.PropertyGroup):
     
+    type_description = "String properties can hold a line of text.\n" \
+                    + "\n" \
+                    + "String properties are displayed as text inputs in the UI. \n" \
+                    + "There are subtypes to add a file selector to the string property."
+
+    
     def draw(self, context, layout, prop):
         """ Draws the settings for this property type """
         layout.prop(self, "subtype")

@@ -11,6 +11,7 @@ class SN_OT_AddProperty(bpy.types.Operator):
     def execute(self, context):
         sn = context.scene.sn
         new_prop = sn.properties.add()
+        new_prop.name = "New Property"
         for index, property in enumerate(sn.properties):
             if property == new_prop:
                 sn.property_index = index

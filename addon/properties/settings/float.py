@@ -5,6 +5,12 @@ from .settings import PropertySettings
 
 class SN_PT_FloatProperty(PropertySettings, bpy.types.PropertyGroup):
     
+    type_description = "Float properties can hold decimal number.\n" \
+                    + "They can also be turned into a vector which holds multiple of these.\n" \
+                    + "\n" \
+                    + "Floats are displayed as number inputs or sliders.\n" \
+                    + "Float vectors can be used with subtypes, for example to make a color input."
+    
     def draw(self, context, layout, prop):
         """ Draws the settings for this property type """
         layout.prop(self, "subtype")

@@ -1,5 +1,6 @@
 import bpy
 from ...utils import get_python_name
+from .settings.settings import id_items, property_icons
 from .settings.string import SN_PT_StringProperty
 from .settings.boolean import SN_PT_BooleanProperty
 from .settings.float import SN_PT_FloatProperty
@@ -10,12 +11,14 @@ from .settings.collection import SN_PT_CollectionProperty
 from .settings.group import SN_PT_GroupProperty
 
 
-
+# TODO make sure pointers and collections are registered after groups
 class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
     
     def draw(self, context, layout):
         """ Draws the general property settings """
-        layout.prop(self, "property_type")
+        row = layout.row()
+        row.prop(self, "property_type")
+        row.operator("sn.tooltip", text="", emboss=False, icon="QUESTION").text = self.settings.type_description
         layout.prop(self, "attach_to")
         layout.prop(self, "description")
         
@@ -55,8 +58,18 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
 
     def set_name(self, value):
         # TODO make sure name is unique
-        # TODO check for references here when name changes to update them
+        # TODO check for node references here when name changes to update them
+        # get properties to update references
+        to_update_props = []
+        if self.property_type == "Group":
+            for prop in bpy.context.scene.sn.properties:
+                if prop.property_type == "Pointer" and prop.settings.prop_group == self.get_name():
+                    to_update_props.append(prop)
+        # set value
         self["name"] = value
+        # update property references
+        for prop in to_update_props:
+            prop.settings.prop_group = value
     
     name: bpy.props.StringProperty(name="Property Name",
                                     description="Name of this property",
@@ -72,20 +85,9 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
                                           update=compile)
     
     
-    property_icons = {
-        "String": "SYNTAX_OFF",
-        "Boolean": "FORCE_CHARGE",
-        "Float": "CON_TRANSLIKE",
-        "Integer": "DRIVER_TRANSFORM",
-        "Enum": "PRESET",
-        "Pointer": "MONKEY",
-        "Collection": "ASSET_MANAGER",
-        "Group": "FILEBROWSER",
-    }
-    
     @property
     def icon(self):
-        return self.property_icons[self.property_type]
+        return property_icons[self.property_type]
     
     
     property_type: bpy.props.EnumProperty(name="Type",
@@ -101,18 +103,9 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
                                            ("Group", "Group", "Stores multiple properties to be used in a collection or pointer property", property_icons["Group"], 7)])
 
 
-    id_data = ["Scene", "Action", "Armature", "Brush", "CacheFile", "Camera",
-        "Collection", "Curve", "FreestyleLineStyle", "GreasePencil",
-        "Image", "Key", "Lattice", "Library", "Light", "LightProbe",
-        "Mask", "Material", "Mesh", "MetaBall", "MovieClip", "NodeTree",
-        "Object", "PaintCurve", "Palette", "ParticleSettings",
-        "Screen", "Sound", "Speaker", "Text", "Texture", "VectorFont",
-        "Volume", "WindowManager", "WorkSpace", "World"]
-
-
     def get_attach_to_items(self, context):
         items = []
-        for item in self.id_data:
+        for item in id_items:
             items.append((item, item, item))
         return items
 

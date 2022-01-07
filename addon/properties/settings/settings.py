@@ -2,6 +2,29 @@ import bpy
 
 
 
+id_items = ["Scene", "Action", "Armature", "Brush", "CacheFile", "Camera",
+        "Collection", "Curve", "FreestyleLineStyle", "GreasePencil",
+        "Image", "Key", "Lattice", "Library", "Light", "LightProbe",
+        "Mask", "Material", "Mesh", "MetaBall", "MovieClip", "NodeTree",
+        "Object", "PaintCurve", "Palette", "ParticleSettings",
+        "Screen", "Sound", "Speaker", "Text", "Texture", "VectorFont",
+        "Volume", "WindowManager", "WorkSpace", "World"]
+
+
+
+property_icons = {
+    "String": "SYNTAX_OFF",
+    "Boolean": "FORCE_CHARGE",
+    "Float": "CON_TRANSLIKE",
+    "Integer": "DRIVER_TRANSFORM",
+    "Enum": "PRESET",
+    "Pointer": "MONKEY",
+    "Collection": "ASSET_MANAGER",
+    "Group": "FILEBROWSER",
+}
+
+
+
 class PropertySettings:
     
     @property

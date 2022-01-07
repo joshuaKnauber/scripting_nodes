@@ -5,6 +5,11 @@ from .settings import PropertySettings
 
 class SN_PT_BooleanProperty(PropertySettings, bpy.types.PropertyGroup):
     
+    type_description = "Boolean properties can hold a value of True or False.\n" \
+                    + "They can also be turned into a vector which holds multiple of these.\n" \
+                    + "\n" \
+                    + "Booleans are displayed as checkboxes or toggles in the UI."
+    
     def draw(self, context, layout, prop):
         """ Draws the settings for this property type """
         row = layout.row(heading="Default")

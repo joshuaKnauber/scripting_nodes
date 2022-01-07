@@ -19,6 +19,11 @@ class EnumItem(bpy.types.PropertyGroup):
 
 class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
     
+    type_description = "Enum properties can hold a multiple items with a name and description.\n" \
+                    + "\n" \
+                    + "Enum properties are displayed as dropdowns or a list of toggles."
+                    
+    
     def draw(self, context, layout, prop):
         """ Draws the settings for this property type """
         layout.prop(self, "enum_flag")

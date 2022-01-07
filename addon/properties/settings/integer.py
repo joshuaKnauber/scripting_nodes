@@ -5,6 +5,11 @@ from .settings import PropertySettings
 
 class SN_PT_IntegerProperty(PropertySettings, bpy.types.PropertyGroup):
     
+    type_description = "Integer properties can hold decimal number.\n" \
+                    + "They can also be turned into a vector which holds multiple of these.\n" \
+                    + "\n" \
+                    + "Integers are displayed as number inputs."
+    
     def draw(self, context, layout, prop):
         """ Draws the settings for this property type """
         layout.prop(self, "subtype")
