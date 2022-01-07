@@ -19,6 +19,33 @@ def get_python_name(name, replacement="", separator="_"):
 
 
 
+
+
+def get_indents(line):
+    """ Returns the amount of spaces at the start of the given line """
+    return len(line) - len(line.lstrip())
+
+def get_min_indent(code_lines):
+    """ Returns the minimum indent of the given lines of text """
+    min_indent = 9999
+    for line in code_lines:
+        if not line.isspace() and line:
+            min_indent = min(min_indent, get_indents(line))
+    return min_indent if min_indent != 9999 else 0
+
+def normalize_code(raw_code):
+    """ Normalizes the given code to the minimum indent and removes empty lines """
+    lines = raw_code.split("\n")
+    min_indent = get_min_indent(lines)
+    indented = []
+    for line in lines:
+        new_line = line[min_indent:]
+        if new_line:
+            indented.append(new_line)
+    return "\n".join(indented)
+
+
+
 class SN_OT_Tooltip(bpy.types.Operator):
     bl_idname = "sn.tooltip"
     bl_label = "Tooltip"

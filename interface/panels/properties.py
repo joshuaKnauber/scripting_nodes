@@ -36,13 +36,15 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
                 row = col.row()
                 row.enabled = False
                 row.label(text="Register")
-                col.label(text=prop.register_code)
+                for line in prop.register_code.split("\n"):
+                    col.label(text=line)
                 box = layout.box()
                 col = box.column(align=True)
                 row = col.row()
                 row.enabled = False
                 row.label(text="Unregister")
-                col.label(text=prop.unregister_code)
+                for line in prop.unregister_code.split("\n"):
+                    col.label(text=line)
             
             col = layout.column()
             col.use_property_split = True

@@ -74,11 +74,15 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Data": lambda python_value: python_value,
         "String": lambda python_value: f"str(tuple({python_value}))",
     },
+    "List": {
+        "Data": lambda python_value: python_value,
+    },
     "Data": {
         "String": lambda python_value: python_value,
         "Boolean": lambda python_value: python_value,
         "Icon": lambda python_value: python_value,
         "Enum": lambda python_value: python_value,
         "Float": lambda python_value: python_value,
+        "List": lambda python_value: python_value,
     },
 }

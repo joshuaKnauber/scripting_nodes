@@ -1,5 +1,6 @@
 import bpy
 from uuid import uuid4
+from ..utils import normalize_code
 from ..node_tree.sockets.conversions import CONVERT_UTILS
 
 
@@ -16,13 +17,15 @@ class SN_ScriptingBaseNode:
 
     _colors = {
         "DEFAULT": (0.18, 0.18, 0.18),
+        "PROGRAM": (0.25, 0.25, 0.25),
         "INTERFACE": ((0.2, 0.17, 0.14)),
         "STRING": (0.14, 0.17, 0.19),
         "BOOLEAN": (0.15, 0.13, 0.14),
         "ICON": (0.14, 0.17, 0.19),
         "FLOAT": (0.25, 0.25, 0.25),
         "INTEGER": (0.14, 0.19, 0.15),
-        "VECTOR": (0.13, 0.13, 0.15)
+        "VECTOR": (0.13, 0.13, 0.15),
+        "List": (0.13, 0.13, 0.15)
     }
     # the default color of this node. Set this to one of the options in _colors or use a vec3
     node_color = "DEFAULT"
@@ -304,33 +307,10 @@ class SN_ScriptingBaseNode:
             lines[i] = " "*(4*indents) + lines[i]
         return "\n".join(lines)
 
-    def _get_indents(self, line):
-        """ Returns the amount of spaces at the start of the given line """
-        return len(line) - len(line.lstrip())
-    
-    def _get_min_indent(self, code_lines):
-        """ Returns the minimum indent of the given lines of text """
-        min_indent = 9999
-        for line in code_lines:
-            if not line.isspace() and line:
-                min_indent = min(min_indent, self._get_indents(line))
-        return min_indent if min_indent != 9999 else 0
-
-    def _normalize_code(self, raw_code):
-        """ Normalizes the given code to the minimum indent and removes empty lines """
-        lines = raw_code.split("\n")
-        min_indent = self._get_min_indent(lines)
-        indented = []
-        for line in lines:
-            new_line = line[min_indent:]
-            if new_line:
-                indented.append(new_line)
-        return "\n".join(indented)
-
 
     def _set_any_code(self, key, raw_code):
         """ Checks if the given code is different from the current code. If required it triggers a code update """
-        normalized = self._normalize_code(raw_code)
+        normalized = normalize_code(raw_code)
         normalized = self._format_paragraphs(normalized)
         if self.get(key) == None or normalized != self[key]:
             self[key] = normalized
@@ -695,6 +675,9 @@ class SN_ScriptingBaseNode:
 
     def add_icon_input(self, label="Icon"): return self._add_input("SN_IconSocket", label)
     def add_icon_output(self, label="Icon"): return self._add_output("SN_IconSocket", label)
+
+    def add_list_input(self, label="List"): return self._add_input("SN_ListSocket", label)
+    def add_list_output(self, label="List"): return self._add_output("SN_ListSocket", label)
 
     
     ### ERROR HANDLING

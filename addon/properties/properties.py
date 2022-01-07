@@ -1,5 +1,6 @@
 import bpy
-from ...utils import get_python_name
+from ...utils import get_python_name, normalize_code
+from ...nodes.base_node import SN_ScriptingBaseNode
 from .settings.settings import id_items, property_icons
 from .settings.string import SN_PT_StringProperty
 from .settings.boolean import SN_PT_BooleanProperty
@@ -33,7 +34,23 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
     
     @property
     def register_code(self):
-        return f"bpy.types.{self.attach_to}.sna_{get_python_name(self.name, 'new_property')} = bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
+        code = f"bpy.types.{self.attach_to}.sna_{get_python_name(self.name, 'new_property')} = bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
+
+        # add enum item function
+        # TODO this wont work inside of operators, preferences or on export
+        if self.property_type == "Enum":
+            code = f"""
+                    def sna_enum_items(self, context):
+                        for ntree in bpy.data.node_groups:
+                            if ntree.bl_idname == "ScriptingNodesTree":
+                                for node in ntree.nodes:
+                                    if node.bl_idname == "SN_GenerateEnumItemsNode" and node.prop_name == "{self.name}":
+                                        return eval(node.code)
+                        return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
+                    {code}
+                    """
+            code = normalize_code(code)
+        return code
     
     @property
     def unregister_code(self):
@@ -58,18 +75,30 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
 
     def set_name(self, value):
         # TODO make sure name is unique
-        # TODO check for node references here when name changes to update them
+
+        # get nodes to update references
+        to_update_nodes = []
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                for node in ntree.nodes:
+                    if hasattr(node, "prop_name") and node.prop_name == self.name:
+                        to_update_nodes.append(node)
+
         # get properties to update references
         to_update_props = []
         if self.property_type == "Group":
             for prop in bpy.context.scene.sn.properties:
-                if prop.property_type == "Pointer" and prop.settings.prop_group == self.get_name():
+                if prop.property_type == "Pointer" and prop.settings.prop_group == self.name:
                     to_update_props.append(prop)
+
         # set value
         self["name"] = value
+
         # update property references
         for prop in to_update_props:
             prop.settings.prop_group = value
+        for node in to_update_nodes:
+            node.prop_name = value
     
     name: bpy.props.StringProperty(name="Property Name",
                                     description="Name of this property",

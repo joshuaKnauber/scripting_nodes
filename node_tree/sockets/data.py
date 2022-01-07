@@ -11,10 +11,10 @@ class SN_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 
     default_python_value = "None"
-    default_prop_value = ""
+    default_prop_value = None
 
     def get_python_repr(self):
-        return f""
+        return f"None"
     
 
     def get_color(self, context, node):
