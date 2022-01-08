@@ -1,4 +1,5 @@
 import bpy
+from ....utils import normalize_code
 from .settings import PropertySettings
 
 
@@ -21,7 +22,8 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
     
     type_description = "Enum properties can hold a multiple items with a name and description.\n" \
                     + "\n" \
-                    + "Enum properties are displayed as dropdowns or a list of toggles."
+                    + "Enum properties are displayed as dropdowns or a list of toggles.\n" \
+                    + "Dynamic enums can be used to display custom icons such as a list of asset images."
                     
     
     def draw(self, context, layout, prop):
@@ -58,11 +60,28 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
             items = [f"('{item.name}', '{item.name}', '{item.description}', {item.icon}, {i})" for i, item in enumerate(self.items)]
             options = f"items=[{', '.join(items)}]"
         else:
-            options = f"items={'sna_enum_items'}"
+            options = f"items={f'{self.prop.python_name}_enum_items'}"
             
         if self.enum_flag:
             options += ", options={'ENUM_FLAG'}" # TODO you can't select the first item when this is enabled
         return options
+    
+    
+    def register_code(self, code):
+        # TODO this wont work inside of operators, preferences or on export
+        # TODO this is different on export
+        code = f"""
+                def {self.prop.python_name}_enum_items(self, context):
+                    for ntree in bpy.data.node_groups:
+                        if ntree.bl_idname == "ScriptingNodesTree":
+                            for node in ntree.nodes:
+                                if node.bl_idname == "SN_GenerateEnumItemsNode" and node.prop_name == "{self.prop.name}":
+                                    items = eval(node.code)
+                                    return [node.make_enum_item(item[0], item[1], item[2], item[3], item[4]) for item in items]
+                    return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
+                {code}
+                """
+        return normalize_code(code)
     
     
     enum_flag: bpy.props.BoolProperty(name="Select Multiple",

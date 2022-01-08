@@ -1,6 +1,5 @@
 import bpy
-from ...utils import get_python_name, normalize_code
-from ...nodes.base_node import SN_ScriptingBaseNode
+from ...utils import get_python_name
 from .settings.settings import id_items, property_icons
 from .settings.string import SN_PT_StringProperty
 from .settings.boolean import SN_PT_BooleanProperty
@@ -39,22 +38,8 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
     @property
     def register_code(self):
         code = f"bpy.types.{self.attach_to}.{self.python_name} = bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
-
-        # add enum item function
-        # TODO this wont work inside of operators, preferences or on export
-        if self.property_type == "Enum":
-            code = f"""
-                    def sna_enum_items(self, context):
-                        for ntree in bpy.data.node_groups:
-                            if ntree.bl_idname == "ScriptingNodesTree":
-                                for node in ntree.nodes:
-                                    if node.bl_idname == "SN_GenerateEnumItemsNode" and node.prop_name == "{self.name}":
-                                        items = eval(node.code)
-                                        return [node.make_enum_item(item[0], item[1], item[2], item[3], item[4]) for item in items]
-                        return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
-                    {code}
-                    """
-            code = normalize_code(code)
+        if hasattr(self.settings, "register_code"):
+            return self.settings.register_code(code)
         return code
     
     @property

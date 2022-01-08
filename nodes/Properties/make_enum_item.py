@@ -1,5 +1,4 @@
 import bpy
-from random import randint
 from ..base_node import SN_ScriptingBaseNode
 
 

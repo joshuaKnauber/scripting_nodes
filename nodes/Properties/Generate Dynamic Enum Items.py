@@ -3,7 +3,7 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-_item_map = dict()
+_item_map = dict() # item map to store enum items while debugging. this is moved to generated code for enum props on export
 
 class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode):
 
@@ -21,7 +21,7 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_list_input("Items")
         
     def make_enum_item(self, _id, name, descr, preview_id, uid):
-        """ Function for making an enum item while debugging """
+        """ Function for making an enum item while debugging. This is moved to generated code on export in the enum register """
         lookup = f"{str(_id)}\0{str(name)}\0{str(descr)}\0{str(preview_id)}\0{str(uid)}"
         if not lookup in _item_map:
             _item_map[lookup] = (_id, name, descr, preview_id, uid)
