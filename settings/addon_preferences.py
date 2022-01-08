@@ -34,6 +34,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_custom_prefs(self, context, layout):
         if context.scene.sn.preferences:
+            layout.label(text="This will be shown in your preferences:", icon="INFO")
             context.scene.sn.preferences[0](layout)
         else:
             layout.label(text="No preferences node added to your addon.", icon="ERROR")
