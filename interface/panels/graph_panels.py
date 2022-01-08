@@ -17,7 +17,7 @@ class SN_OT_GetPythonName(bpy.types.Operator):
 
 class SN_PT_GraphPanel(bpy.types.Panel):
     bl_idname = "SN_PT_GraphPanel"
-    bl_label = "Graphs"
+    bl_label = "Node Trees"
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"

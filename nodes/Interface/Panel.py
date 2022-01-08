@@ -90,12 +90,12 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     category: bpy.props.StringProperty(default="New Category",
                                     name="Category",
-                                    description="The category your panel is in",
+                                    description="The category your panel is in (Only relevant if in an N-Panel)",
                                     update=SN_ScriptingBaseNode._evaluate)
 
     panel_order: bpy.props.IntProperty(default=0, min=0,
                                 name="Order",
-                                description="The order of your panel compared to the other panels",
+                                description="The order of your panel compared to other custom panels",
                                 update=SN_ScriptingBaseNode._evaluate)
 
     hide_header: bpy.props.BoolProperty(default=False,

@@ -16,8 +16,8 @@ def get_serpens_graphs():
 
 class SN_OT_AddGraph(bpy.types.Operator):
     bl_idname = "sn.add_graph"
-    bl_label = "Add Graph"
-    bl_description = "Adds a graph to the addon"
+    bl_label = "Add Node Tree"
+    bl_description = "Adds a node tree to the addon"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
     def execute(self, context):
@@ -32,8 +32,8 @@ class SN_OT_AddGraph(bpy.types.Operator):
 
 class SN_OT_RemoveGraph(bpy.types.Operator):
     bl_idname = "sn.remove_graph"
-    bl_label = "Remove Graph"
-    bl_description = "Removes this graph from the addon"
+    bl_label = "Remove Node Tree"
+    bl_description = "Removes this node tree from the addon"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
     @classmethod
@@ -56,8 +56,8 @@ class SN_OT_RemoveGraph(bpy.types.Operator):
     
 class SN_OT_AppendGraph(bpy.types.Operator, ImportHelper):
     bl_idname = "sn.append_graph"
-    bl_label = "Append Graph"
-    bl_description = "Appends a graph from another file to this addon"
+    bl_label = "Append Node Tree"
+    bl_description = "Appends a node tree from another file to this addon"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
     
     filter_glob: bpy.props.StringProperty( default='*.blend', options={'HIDDEN'} )
@@ -72,8 +72,8 @@ class SN_OT_AppendGraph(bpy.types.Operator, ImportHelper):
 
 class SN_OT_AppendPopup(bpy.types.Operator):
     bl_idname = "sn.append_popup"
-    bl_label = "Append Graph"
-    bl_description = "Appends this graph from the addon"
+    bl_label = "Append Node Tree"
+    bl_description = "Appends this node tree from the addon"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
     def get_graph_items(self, context):
@@ -88,8 +88,8 @@ class SN_OT_AppendPopup(bpy.types.Operator):
 
     path: bpy.props.StringProperty(options={"HIDDEN", "SKIP_SAVE"})
 
-    graph: bpy.props.EnumProperty(name="Graph",
-                                   description="Graph to import",
+    graph: bpy.props.EnumProperty(name="Node Tree",
+                                   description="Node Tree to import",
                                    items=get_graph_items,
                                    options={"HIDDEN", "SKIP_SAVE"})
 
@@ -114,9 +114,9 @@ class SN_OT_AppendPopup(bpy.types.Operator):
     
     def draw(self, context):
         if self.graph == "NONE":
-            self.layout.label(text="No Graphs found in this blend file",icon="ERROR")
+            self.layout.label(text="No Node Trees found in this blend file",icon="ERROR")
         else:
-            self.layout.prop(self, "graph", text="Graph")
+            self.layout.prop(self, "graph", text="Node Tree")
 
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self)

@@ -7,7 +7,6 @@ class SN_MakeEnumItemNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_MakeEnumItemNode"
     bl_label = "Make Enum Item"
-    node_color = "PROGRAM"
     bl_width_default = 200
 
     def on_create(self, context):

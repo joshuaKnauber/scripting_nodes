@@ -299,3 +299,5 @@ class ScriptingSocket:
             # set this socket
             self.dynamic = False
             self.prev_dynamic = True
+            
+            self.node._evaluate(bpy.context)
