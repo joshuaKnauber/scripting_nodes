@@ -56,6 +56,8 @@ class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
         code = f"class SNA_GROUP_{self.prop.python_name}(bpy.types.PropertyGroup):\n\n"
         for prop in self.properties:
             code += " "*4 + prop.register_code + "\n\n"
+        if not len(self.properties):
+            code += " "*4 + "pass\n\n"
         code += raw
         return code
     

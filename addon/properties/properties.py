@@ -68,13 +68,16 @@ class SN_PT_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
         # TODO make sure pointers and collections are un/registered after groups
         # get register code
         reg_code = "def register():\n"
-        for prop in bpy.context.scene.sn.properties:
+        props = bpy.context.scene.sn.properties.values()
+        props.sort(key=lambda prop: prop.property_type == "Group", reverse=True)
+        for prop in props:
             for line in prop.register_code.split("\n"):
                 reg_code += " "*4 + line + "\n"
         
         # get unregister code
         unreg_code = "\ndef unregister():\n"
-        for prop in bpy.context.scene.sn.properties:
+        props.reverse()
+        for prop in props:
             for line in prop.unregister_code.split("\n"):
                 unreg_code += " "*4 + line + "\n"
         
