@@ -21,11 +21,11 @@ def get_python_name(name, replacement="", separator="_"):
 
 def print_debug_code(code):
     """ Prints the given code with line numbers """
-    print("\n--- CODE START")
     if bpy.context.scene.sn.debug_code:
+        print("\n--- CODE START")
         for i, line in enumerate(code.split("\n")):
             print(f"{i+1}: {line}")
-    print("--- CODE END\n")
+        print("--- CODE END\n")
 
 
 

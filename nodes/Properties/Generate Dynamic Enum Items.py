@@ -62,9 +62,6 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode):
                 row = layout.row()
                 row.alert = True
                 row.label(text="You do not have an enum property selected!", icon="ERROR")
-                row = layout.row()
-                row.alert = True
-                row.label(text="You do not have an enum property selected!", icon="ERROR")
                 
             elif not context.scene.sn.properties[self.prop_name].settings.is_dynamic:
                 row = layout.row()

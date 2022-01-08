@@ -28,7 +28,8 @@ class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
         for prop in self.properties:
             box = layout.box()
             row = box.row()
-            row.prop(prop, "expand", text="", emboss=False, icon="DISCLOSURE_TRI_DOWN" if prop.expand else "DISCLOSURE_TRI_RIGHT")
+            subrow = row.row()
+            subrow.prop(prop, "expand", text="", icon="DISCLOSURE_TRI_DOWN" if prop.expand else "DISCLOSURE_TRI_RIGHT", emboss=False)
             row.prop(prop, "name", text="")
 
             if prop.expand:

@@ -721,7 +721,9 @@ class SN_YourNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     # avoid having properties on your nodes, expose everything to sockets if possible
-    string: bpy.props.StringProperty(name="String", description="String value of this node", update=SN_ScriptingBaseNode._evaluate)
+    string: bpy.props.StringProperty(name="String",
+                                description="String value of this node",
+                                update=SN_ScriptingBaseNode._evaluate) # make sure to call _evaluate when a property value changes
 
 
     def on_create(self, context):
