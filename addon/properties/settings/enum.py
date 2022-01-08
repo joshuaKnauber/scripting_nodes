@@ -29,7 +29,7 @@ class EnumItem(bpy.types.PropertyGroup):
 
 class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
     
-    type_description = "Enum properties can hold a multiple items with a name and description.\n" \
+    type_description = "Enum properties can hold multiple items with a name and description.\n" \
                     + "\n" \
                     + "Enum properties are displayed as dropdowns or a list of toggles.\n" \
                     + "Dynamic enums can be used to display custom icons such as a list of asset images."
@@ -66,13 +66,17 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
     def register_options(self):
         options = ""
         if not self.is_dynamic:
-            items = [f"('{item.name}', '{item.name}', '{item.description}', {item.icon}, {i})" for i, item in enumerate(self.items)]
+            items = []
+            for i, item in enumerate(self.items):
+                if self.enum_flag:
+                    i = 2 ** i
+                items.append(f"('{item.name}', '{item.name}', '{item.description}', {item.icon}, {i})")
             options = f"items=[{', '.join(items)}]"
         else:
             options = f"items={f'{self.prop.python_name}_enum_items'}"
             
         if self.enum_flag:
-            options += ", options={'ENUM_FLAG'}" # TODO you can't select the first item when this is enabled
+            options += ", options={'ENUM_FLAG'}"
         return options
     
     
@@ -86,7 +90,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
                             for node in ntree.nodes:
                                 if node.bl_idname == "SN_GenerateEnumItemsNode" and node.prop_name == "{self.prop.name}":
                                     items = eval(node.code)
-                                    return [node.make_enum_item(item[0], item[1], item[2], item[3], item[4]) for item in items]
+                                    return [node.make_enum_item(item[0], item[1], item[2], item[3], {'2**item[4]' if self.enum_flag else 'item[4]'}) for item in items]
                     return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
                 {code}
                 """
