@@ -34,6 +34,8 @@ class SN_PT_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
             code = f"bpy.types.{self.attach_to}.{self.python_name} = bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
         else:
             code = f"bpy.utils.register_class(SNA_GROUP_{self.python_name})"
+            if not bpy.context.scene.sn.is_exporting:
+                code += f"\nbpy.context.scene.sn.unregister_cache['{self.as_pointer()}'] = SNA_GROUP_{self.python_name}"
         if hasattr(self.settings, "register_code"):
             return self.settings.register_code(code)
         return code
@@ -43,7 +45,12 @@ class SN_PT_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
         if not self.property_type == "Group":
             return f"del bpy.types.{self.attach_to}.{self.python_name}"
         else:
-            return f"bpy.utils.unregister_class(SNA_GROUP_{self.python_name})"
+            if bpy.context.scene.sn.is_exporting:
+                return f"bpy.utils.unregister_class(SNA_GROUP_{self.python_name})"
+            else:
+                code = f"bpy.utils.unregister_class(bpy.context.scene.sn.unregister_cache['{self.as_pointer()}'])\n"
+                code += f"del bpy.context.scene.sn.unregister_cache['{self.as_pointer()}']"
+                return code
     
 
     def unregister_all(self):
