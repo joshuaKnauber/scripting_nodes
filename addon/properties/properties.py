@@ -46,18 +46,29 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
     def unregister_code(self):
         return f"del bpy.types.{self.attach_to}.{self.python_name}"
     
-        
-    def compile(self, context=None):
-        """ Registers the property and unregisters potential previous version """
-        # unregister previous
+    
+    def prop_unregister(self):
+        """ Unregisters the property if registered """
         if f"{self.as_pointer()}" in self.unregister_cache:
-            exec(self.unregister_cache[f"{self.as_pointer()}"])
+            try: exec(self.unregister_cache[f"{self.as_pointer()}"])
+            except: print(f"Serpens Log: Error in unregistering property '{self.name}'")
             del self.unregister_cache[f"{self.as_pointer()}"]
-        
-        # register
-        exec(self.register_code)
-        print(f"Serpens Log: Property {self.name} received an update")
+            
+            
+    def prop_register(self):
+        """ Registers the property """
+        try: exec(self.register_code)
+        except: print(f"Serpens Log: Error in registering property '{self.name}'")
         self.unregister_cache[f"{self.as_pointer()}"] = self.unregister_code
+    
+    
+    def compile(self, context=None):
+        """ Registers the property and unregisters previous version """
+        # unregister previous
+        self.prop_unregister()
+        # register
+        self.prop_register()
+        print(f"Serpens Log: Property {self.name} received an update")
         
 
     def get_name(self):

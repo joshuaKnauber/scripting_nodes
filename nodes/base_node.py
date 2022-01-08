@@ -228,7 +228,7 @@ class SN_ScriptingBaseNode:
         return imports + imperative + f"\n{main_code}\n" + register + unregister + run_register + store_unregister
 
 
-    def unregister(self):
+    def node_unregister(self):
         """ Unregisters this trigger nodes current code """
         sn = bpy.context.scene.sn
         if self.is_trigger:
@@ -246,7 +246,7 @@ class SN_ScriptingBaseNode:
         """ Registers or unregisters this trigger nodes current code and stores results """
         if self.is_trigger:
             # unregister
-            self.unregister()
+            self.node_unregister()
 
             # create text file
             txt = bpy.data.texts.new("tmp_serpens")
@@ -485,7 +485,7 @@ class SN_ScriptingBaseNode:
         self._remove_node_collection_item()
         # unregister the nodes content
         if self.is_trigger:
-            self.unregister()
+            self.node_unregister()
         # free node
         self.on_free()
 
@@ -619,6 +619,7 @@ class SN_ScriptingBaseNode:
         "Float": "SN_FloatSocket",
         "Float Vector": "SN_FloatVectorSocket",
         "Icon": "SN_IconSocket",
+        "List": "SN_ListSocket",
     }
 
 

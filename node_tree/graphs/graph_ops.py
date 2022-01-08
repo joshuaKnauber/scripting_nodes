@@ -44,7 +44,7 @@ class SN_OT_RemoveGraph(bpy.types.Operator):
     def execute(self, context):
         sn = context.scene.sn
         group = bpy.data.node_groups[sn.node_tree_index]
-        group.unregister()
+        group.graph_unregister()
         bpy.data.node_groups.remove(group)
         sn.node_tree_index -= 1
         return {"FINISHED"}

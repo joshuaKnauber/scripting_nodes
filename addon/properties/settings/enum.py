@@ -6,14 +6,23 @@ from .settings import PropertySettings
 
 class EnumItem(bpy.types.PropertyGroup):
     
+    def update(self, context):
+        # TODO this might not work with nodes
+        path = ".".join(repr(self.path_resolve("name", False)).split(".")[:-2])
+        prop = eval(path)
+        prop.compile()
+        
     name: bpy.props.StringProperty(name="Name", default="New Item",
-                                description="Name of this enum item")
+                                description="Name of this enum item",
+                                update=update)
     
     description: bpy.props.StringProperty(name="Description",
-                                description="Description of this enum item")
+                                description="Description of this enum item",
+                                update=update)
     
     icon: bpy.props.IntProperty(name="Icon", default=0, min=0,
-                                description="Icon value of this enum item")
+                                description="Icon value of this enum item",
+                                update=update)
 
 
 

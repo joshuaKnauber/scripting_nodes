@@ -61,6 +61,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     "Integer": {
         "Data": lambda python_value: python_value,
         "Float": lambda python_value: python_value,
+        "Boolean": lambda python_value: f"bool({python_value})",
     },
     "Integer Vector": {
         "Data": lambda python_value: python_value,
@@ -69,6 +70,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     "Float": {
         "Data": lambda python_value: python_value,
         "Integer": lambda python_value: python_value,
+        "Boolean": lambda python_value: f"bool({python_value})",
     },
     "Float Vector": {
         "Data": lambda python_value: python_value,
