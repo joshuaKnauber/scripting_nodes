@@ -10,7 +10,7 @@ class SN_PT_CollectionProperty(bpy.types.PropertyGroup):
                     + "Integers are displayed as number inputs."
     
     
-    def draw(self, context, layout, prop):
+    def draw(self, context, layout):
         """ Draws the settings for this property type """
         
         

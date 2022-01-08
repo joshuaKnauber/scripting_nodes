@@ -11,7 +11,7 @@ class SN_PT_FloatProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "Floats are displayed as number inputs or sliders.\n" \
                     + "Float vectors can be used with subtypes, for example to make a color input."
     
-    def draw(self, context, layout, prop):
+    def draw(self, context, layout):
         """ Draws the settings for this property type """
         layout.prop(self, "subtype")
         layout.prop(self, "unit")

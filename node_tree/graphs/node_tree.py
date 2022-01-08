@@ -6,8 +6,8 @@ from .node_refs import NodeRefCollection
 
 def compile_all(hard=False):
     """ Compile all node trees in this file """
-    for prop in bpy.context.scene.sn.properties:
-        prop.prop_register()
+    if len(bpy.context.scene.sn.properties):
+        bpy.context.scene.sn.properties[0].register_all()
     for group in bpy.data.node_groups:
         if group.bl_idname == "ScriptingNodesTree":
             group.compile(hard)
@@ -16,8 +16,8 @@ def compile_all(hard=False):
 
 def unregister_all():
     """ Unregister all node trees in this file """
-    for prop in bpy.context.scene.sn.properties:
-        prop.prop_unregister()
+    if len(bpy.context.scene.sn.properties):
+        bpy.context.scene.sn.properties[0].unregister_all()
     for group in bpy.data.node_groups:
         if group.bl_idname == "ScriptingNodesTree":
             group.graph_unregister()

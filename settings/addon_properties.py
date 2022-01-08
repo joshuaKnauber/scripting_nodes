@@ -180,21 +180,3 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     def get_addon_text(self):
         if not self.addon_text:
             self.addon_text = bpy.data.texts.new("Addon File")
-
-
-"""
-
-any node can have:
-- some imperative code
-- some imports
-- some register code
-- some unregister code
-
-are there even trigger nodes?
-
-how do i register and unregister things?
-how do nodes that wouldn't be trigger nodes add code?
-how would utility functions work if it's not a text file?
-how do different node trees work? are there different files? is this different on export?
-
-"""

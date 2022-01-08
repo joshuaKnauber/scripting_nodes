@@ -31,8 +31,11 @@ class SN_OT_RemoveProperty(bpy.types.Operator):
 
     def execute(self, context):
         sn = context.scene.sn
+        sn.properties[sn.property_index].unregister_all()
         sn.properties.remove(sn.property_index)
         sn.property_index -= 1
+        if len(sn.properties):
+            sn.properties[0].register_all()
         return {"FINISHED"}
 
 
@@ -63,4 +66,16 @@ class SN_OT_AddEnumItem(bpy.types.Operator):
     def execute(self, context):
         items = eval(self.item_data_path)
         items.add()
+        return {"FINISHED"}
+
+
+
+class SN_OT_AddPropertyItem(bpy.types.Operator):
+    bl_idname = "sn.add_property_item"
+    bl_label = "Add Property"
+    bl_description = "Adds a property to this group"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    def execute(self, context):
+        context.scene.sn.properties[context.scene.sn.property_index].settings.properties.add()
         return {"FINISHED"}

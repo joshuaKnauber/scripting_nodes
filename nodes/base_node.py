@@ -1,6 +1,6 @@
 import bpy
 from uuid import uuid4
-from ..utils import normalize_code
+from ..utils import normalize_code, print_debug_code
 from ..node_tree.sockets.conversions import CONVERT_UTILS
 
 
@@ -252,9 +252,7 @@ class SN_ScriptingBaseNode:
             txt = bpy.data.texts.new("tmp_serpens")
             code = self._format_node_code()
             txt.write(code)
-            if bpy.context.scene.sn.debug_code:
-                for i, line in enumerate(code.split("\n")):
-                    print(f"{i+1}: {line}")
+            print_debug_code(code)
 
             # run text file
             ctx = bpy.context.copy()

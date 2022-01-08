@@ -11,7 +11,7 @@ class SN_PT_StringProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "There are subtypes to add a file selector to the string property."
 
     
-    def draw(self, context, layout, prop):
+    def draw(self, context, layout):
         """ Draws the settings for this property type """
         layout.prop(self, "subtype")
         layout.prop(self, "default")

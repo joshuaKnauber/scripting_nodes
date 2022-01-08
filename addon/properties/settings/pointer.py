@@ -14,7 +14,7 @@ class SN_PT_PointerProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "from a dropdown and get the blend data from the property."
     
     
-    def draw(self, context, layout, prop):
+    def draw(self, context, layout):
         """ Draws the settings for this property type """
         layout.prop(self, "use_prop_group")
         if not self.use_prop_group:
@@ -37,7 +37,14 @@ class SN_PT_PointerProperty(PropertySettings, bpy.types.PropertyGroup):
     
     @property
     def register_options(self):
-        data_type = "bpy.types."+self.data_type if not self.use_prop_group else f"'{self.prop_group}'"
+        if not self.use_prop_group:
+            data_type = "bpy.types."+self.data_type
+        else:
+            sn = bpy.context.scene.sn
+            if self.prop_group in sn.properties and sn.properties[self.prop_group].property_type == "Group":
+                data_type = f"SNA_GROUP_{bpy.context.scene.sn.properties[self.prop_group].python_name}"
+            else:
+                data_type = "bpy.types.Scene"
         return f"type={data_type}"
     
     

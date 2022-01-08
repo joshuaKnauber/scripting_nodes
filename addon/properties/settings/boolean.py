@@ -10,7 +10,7 @@ class SN_PT_BooleanProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "\n" \
                     + "Booleans are displayed as checkboxes or toggles in the UI."
     
-    def draw(self, context, layout, prop):
+    def draw(self, context, layout):
         """ Draws the settings for this property type """
         row = layout.row(heading="Default")
         row.enabled = not self.is_vector

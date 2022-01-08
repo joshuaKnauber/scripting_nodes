@@ -19,6 +19,14 @@ def get_python_name(name, replacement="", separator="_"):
 
 
 
+def print_debug_code(code):
+    """ Prints the given code with line numbers """
+    print("\n--- CODE START")
+    if bpy.context.scene.sn.debug_code:
+        for i, line in enumerate(code.split("\n")):
+            print(f"{i+1}: {line}")
+    print("--- CODE END\n")
+
 
 
 def get_indents(line):

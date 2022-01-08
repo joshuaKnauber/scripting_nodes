@@ -55,4 +55,4 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
             
             # draw property specific settings
             col.separator()
-            prop.settings.draw(context, col, prop)
+            prop.settings.draw(context, col)

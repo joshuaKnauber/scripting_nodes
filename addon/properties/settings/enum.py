@@ -35,7 +35,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "Dynamic enums can be used to display custom icons such as a list of asset images."
                     
     
-    def draw(self, context, layout, prop):
+    def draw(self, context, layout):
         """ Draws the settings for this property type """
         layout.prop(self, "enum_flag")
         layout.prop(self, "is_dynamic")
