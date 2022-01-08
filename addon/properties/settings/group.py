@@ -16,10 +16,10 @@ class SN_SimpleProperty(BasicProperty, bpy.types.PropertyGroup):
 
 class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
     
-    type_description = "Boolean properties can hold a value of True or False.\n" \
-                    + "They can also be turned into a vector which holds multiple of these.\n" \
+    type_description = "Group properties can hold multiple other properties.\n" \
+                    + "They are used in combination with a pointer or collection property.\n" \
                     + "\n" \
-                    + "Booleans are displayed as checkboxes or toggles in the UI."
+                    + "A common use for group properties is to group your addons settings together."
     
     
     def draw(self, context, layout):
