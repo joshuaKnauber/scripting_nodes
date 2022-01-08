@@ -12,6 +12,7 @@ class SN_OT_AddAsset(bpy.types.Operator, ImportHelper):
     
     def execute(self, context):
         _, extension = os.path.splitext(self.filepath)
+        # TODO you should be able to select full directories as assets (e.g. a folder of images)
         if extension:
             sn = context.scene.sn
             new_asset = sn.assets.add()

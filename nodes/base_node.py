@@ -194,6 +194,8 @@ class SN_ScriptingBaseNode:
             register = node.code_register
             if register:
                 full_register += register + "\n"
+        if not full_register.strip():
+            full_register = "pass\n" + full_register
         return "\ndef register():\n" + self.indent(full_register, 1, 0) + "\n"
 
 
@@ -205,6 +207,8 @@ class SN_ScriptingBaseNode:
             unregister = node.code_unregister
             if unregister:
                 full_unregister += unregister + "\n"
+        if not full_unregister.strip():
+            full_unregister = "pass\n" + full_unregister
         return "\ndef unregister():\n" + self.indent(full_unregister, 1, 0) + "\n"
 
 

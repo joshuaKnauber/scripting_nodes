@@ -61,7 +61,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
             options = f"items={'sna_enum_items'}"
             
         if self.enum_flag:
-            options += ", options={'ENUM_FLAG'}"
+            options += ", options={'ENUM_FLAG'}" # TODO you can't select the first item when this is enabled
         return options
     
     

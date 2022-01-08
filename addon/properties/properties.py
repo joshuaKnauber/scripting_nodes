@@ -29,12 +29,16 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
     
     
     @property
+    def python_name(self):
+        return f"sna_{get_python_name(self.name, 'new_property')}"
+
+    @property
     def data_path(self):
-        return f"{self.attach_to.upper()}_PLACEHOLDER.sna_{get_python_name(self.name, 'new_property')}"
+        return f"{self.attach_to.upper()}_PLACEHOLDER.{self.python_name}"
     
     @property
     def register_code(self):
-        code = f"bpy.types.{self.attach_to}.sna_{get_python_name(self.name, 'new_property')} = bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
+        code = f"bpy.types.{self.attach_to}.{self.python_name} = bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
 
         # add enum item function
         # TODO this wont work inside of operators, preferences or on export
@@ -45,7 +49,8 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
                             if ntree.bl_idname == "ScriptingNodesTree":
                                 for node in ntree.nodes:
                                     if node.bl_idname == "SN_GenerateEnumItemsNode" and node.prop_name == "{self.name}":
-                                        return eval(node.code)
+                                        items = eval(node.code)
+                                        return [node.make_enum_item(item[0], item[1], item[2], item[3], item[4]) for item in items]
                         return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
                     {code}
                     """
@@ -54,7 +59,7 @@ class SN_PT_GeneralProperties(bpy.types.PropertyGroup):
     
     @property
     def unregister_code(self):
-        return f"del bpy.types.{self.attach_to}.sna_{get_python_name(self.name, 'new_property')}"
+        return f"del bpy.types.{self.attach_to}.{self.python_name}"
     
         
     def compile(self, context=None):
