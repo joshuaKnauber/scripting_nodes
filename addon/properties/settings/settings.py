@@ -32,6 +32,10 @@ class PropertySettings:
         for prop in bpy.context.scene.sn.properties:
             if prop.settings == self:
                 return prop
+            if prop.property_type == "Group":
+                for subprop in prop.settings.properties:
+                    if subprop.settings == self:
+                        return subprop
 
     def compile(self, context=None):
         """ Compile the property for these settings """

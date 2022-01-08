@@ -34,10 +34,10 @@ class BasicProperty():
         return code
     
     
-    def compile(self, context=None):
+    def _compile(self, context=None):
         """ Update the property with the parent classes compile function """
-        if hasattr(self.__class__, "compile"):
-            self.__class__.compile(self)
+        if hasattr(self, "compile"):
+            self.compile(context)
     
 
     def get_name(self):
@@ -75,13 +75,13 @@ class BasicProperty():
                                     default="New Property",
                                     get=get_name,
                                     set=set_name,
-                                    update=compile,
+                                    update=_compile,
                                     subtype="FILE_NAME")
     
     
     description: bpy.props.StringProperty(name="Description",
                                           description="The description of this property, shown in tooltips",
-                                          update=compile)
+                                          update=_compile)
     
     
     @property
@@ -91,7 +91,7 @@ class BasicProperty():
     
     property_type: bpy.props.EnumProperty(name="Type",
                                     description="The type of data this property can store",
-                                    update=compile,
+                                    update=_compile,
                                     items=[("String", "String", "Stores text, can display a text input or a filepath field", property_icons["String"], 0),
                                            ("Boolean", "Boolean", "Stores True or False, can be used for a checkbox", property_icons["Boolean"], 1),
                                            ("Float", "Float", "Stores a decimal number or a vector", property_icons["Float"], 2),
