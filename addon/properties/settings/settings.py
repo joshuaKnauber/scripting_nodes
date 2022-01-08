@@ -29,6 +29,7 @@ class PropertySettings:
     
     @property
     def prop(self):
+        #TODO search correct group here
         for prop in bpy.context.scene.sn.properties:
             if prop.settings == self:
                 return prop
