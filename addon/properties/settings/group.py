@@ -34,6 +34,7 @@ class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
             subrow = row.row()
             subrow.prop(prop, "expand", text="", icon="DISCLOSURE_TRI_DOWN" if prop.expand else "DISCLOSURE_TRI_RIGHT", emboss=False)
             row.prop(prop, "name", text="")
+            row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False).name = "PROP_PATH_PLACEHOLDER."+prop.python_name
 
             if prop.expand:
                 prop.draw(context, box)
