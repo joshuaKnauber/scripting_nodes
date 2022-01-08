@@ -1,5 +1,4 @@
 import bpy
-from ....utils import normalize_code
 from .settings import PropertySettings
 from ..property_simple import BasicProperty
 
@@ -8,6 +7,10 @@ from ..property_simple import BasicProperty
 class SN_SimpleProperty(BasicProperty, bpy.types.PropertyGroup):
     
     expand: bpy.props.BoolProperty(default=True, name="Expand", description="Expand this property")
+
+    def compile(self, context=None):
+        sn = bpy.context.scene.sn
+        sn.properties[sn.property_index].compile()
 
 
 

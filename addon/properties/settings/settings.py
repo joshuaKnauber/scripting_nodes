@@ -35,4 +35,5 @@ class PropertySettings:
 
     def compile(self, context=None):
         """ Compile the property for these settings """
-        self.prop.compile()
+        if self.prop:
+            self.prop.compile()

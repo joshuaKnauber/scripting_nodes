@@ -35,7 +35,9 @@ class BasicProperty():
     
     
     def compile(self, context=None):
-        """ Update the property """
+        """ Update the property with the parent classes compile function """
+        if hasattr(self.__class__, "compile"):
+            self.__class__.compile(self)
     
 
     def get_name(self):
