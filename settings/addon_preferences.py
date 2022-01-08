@@ -53,4 +53,4 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
 
 
-# addon_prefs = context.preferences.addons[bpy.context.scene.sn.addon_tree().sn_graphs[0].short()].preferences
+# addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences
