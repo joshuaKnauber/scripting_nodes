@@ -94,7 +94,7 @@ class SN_PT_FloatProperty(PropertySettings, bpy.types.PropertyGroup):
     
     def get_subtype_items(self, context):
         items = [("NONE", "None", "No subtype, just a default float input"),
-                ("PIXEL", "Pixel", "Pixel"), # TODO proper descriptions
+                ("PIXEL", "Pixel", "Pixel"),
                 ("UNSIGNED", "Unsigned", "Unsigned"),
                 ("PERCENTAGE", "Percentage", "Percentage"),
                 ("FACTOR", "Factor", "Factor"),
@@ -133,7 +133,7 @@ class SN_PT_FloatProperty(PropertySettings, bpy.types.PropertyGroup):
                                     description="The unit of this property. This changes how the property is displayed",
                                     update=PropertySettings.compile,
                                     items=[("NONE", "None", "No unit, just a default float input"),
-                                            ("LENGTH", "Length", "Length"), # TODO proper descriptions
+                                            ("LENGTH", "Length", "Length"),
                                             ("AREA", "Area", "Area"),
                                             ("VOLUME", "Volume", "Volume"),
                                             ("ROTATION", "Rotation", "Rotation"),

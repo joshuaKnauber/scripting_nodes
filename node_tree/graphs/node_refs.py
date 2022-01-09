@@ -6,6 +6,7 @@ class NodeRef(bpy.types.PropertyGroup):
     
     @property
     def node(self):
+        print(repr(self.path_resolve("name", False)))
         node_tree = self.id_data # TODO optimize
         for node in node_tree.nodes:
             if node.static_uid == self.uid:

@@ -220,6 +220,12 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op.node_tree = self.node_tree.name
                 op.node = self.name
             else:
+                subrow = row.row()
+                subrow.enabled = self.custom_parent_ntree != None and self.custom_parent in self.custom_parent_ntree.nodes
+                op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+                op.node_tree = self.custom_parent_ntree.name if self.custom_parent_ntree else ""
+                op.node = self.custom_parent
+            
                 parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
                 row.prop_search(self, "custom_parent_ntree", bpy.data, "node_groups", text="")
                 subrow = row.row(align=True)
@@ -230,7 +236,6 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 elif self.custom_parent and self.custom_parent_ntree and self.custom_parent in self.custom_parent_ntree.nodes:
                     if self.custom_parent_ntree.nodes[self.custom_parent].is_subpanel:
                         layout.label(text="Can't use subpanel as parent!", icon="ERROR")
-                        
 
             row.prop(self, "parent_type", text="", icon_only=True)
         

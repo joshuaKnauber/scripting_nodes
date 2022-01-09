@@ -85,7 +85,7 @@ class SN_PT_IntegerProperty(PropertySettings, bpy.types.PropertyGroup):
     
     def get_subtype_items(self, context):
         items = [("NONE", "None", "No subtype, just a default float input"),
-                ("PIXEL", "Pixel", "Pixel"), # TODO proper descriptions
+                ("PIXEL", "Pixel", "Pixel"),
                 ("UNSIGNED", "Unsigned", "Unsigned"),
                 ("PERCENTAGE", "Percentage", "Percentage"),
                 ("FACTOR", "Factor", "Factor"),
