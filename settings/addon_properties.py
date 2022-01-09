@@ -1,6 +1,6 @@
 import bpy
 from uuid import uuid4
-from ..addon.properties.properties import SN_PT_GeneralProperties
+from ..addon.properties.properties import SN_GeneralProperties
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
             
@@ -93,7 +93,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     node_tree_index: bpy.props.IntProperty(default=0, min=0, name="Active Node Tree", description="The node tree you're currently editing", update=update_node_tree_index)
 
 
-    properties: bpy.props.CollectionProperty(type=SN_PT_GeneralProperties)
+    properties: bpy.props.CollectionProperty(type=SN_GeneralProperties)
 
     property_index: bpy.props.IntProperty(default=0, min=0, name="Active Property", description="The property you're currently editing")
 

@@ -27,18 +27,16 @@ property_icons = {
 
 class PropertySettings:
     
+    dummy: bpy.props.StringProperty(name="DUMMY", description="Dummy prop for resolving path")
+    
     @property
     def prop(self):
-        #TODO search correct group here
-        for prop in bpy.context.scene.sn.properties:
-            if prop.settings == self:
-                return prop
-            if prop.property_type == "Group":
-                for subprop in prop.settings.properties:
-                    if subprop.settings == self:
-                        return subprop
+        """ Returns the property these settings belong to """
+        # TODO this might not work with nodes
+        path = ".".join(repr(self.path_resolve("dummy", False)).split(".")[:-2])
+        prop = eval(path)
+        return prop
 
     def compile(self, context=None):
         """ Compile the property for these settings """
-        if self.prop:
-            self.prop.compile()
+        self.prop.compile()

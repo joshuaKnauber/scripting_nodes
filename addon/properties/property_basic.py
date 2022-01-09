@@ -34,6 +34,14 @@ class BasicProperty():
         return code
     
     
+    @property
+    def prop_collection(self):
+        # TODO this might not work with nodes
+        path = "[".join(repr(self.path_resolve("name", False)).split("[")[:-1])
+        coll = eval(path)
+        return coll
+    
+    
     def _compile(self, context=None):
         """ Update the property with the parent classes compile function """
         if hasattr(self, "compile"):

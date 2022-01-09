@@ -1,6 +1,6 @@
 import bpy
 from .settings import PropertySettings
-from ..property_simple import BasicProperty
+from ..property_basic import BasicProperty
 
 
 

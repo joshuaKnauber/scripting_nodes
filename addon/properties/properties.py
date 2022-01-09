@@ -1,13 +1,13 @@
 import bpy
 from ...utils import print_debug_code
-from .property_simple import BasicProperty
+from .property_basic import BasicProperty
 from .settings.settings import property_icons
 from .settings.group import SN_PT_GroupProperty
 from .settings.settings import id_items
 
 
 
-class SN_PT_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
+class SN_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
     
     def draw(self, context, layout):
         """ Draws the general property settings """
