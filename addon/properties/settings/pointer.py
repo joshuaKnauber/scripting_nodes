@@ -16,7 +16,8 @@ class SN_PT_PointerProperty(PropertySettings, bpy.types.PropertyGroup):
     
     def draw(self, context, layout):
         """ Draws the settings for this property type """
-        layout.prop(self, "use_prop_group") # TODO only show this if not in prop group
+        if getattr(self.prop, "is_scene_prop", False):
+            layout.prop(self, "use_prop_group")
         if not self.use_prop_group:
             layout.prop(self, "data_type")
         else:

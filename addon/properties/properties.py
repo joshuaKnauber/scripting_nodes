@@ -9,6 +9,8 @@ from .settings.settings import id_items
 
 class SN_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
     
+    is_scene_prop = True
+    
     def draw(self, context, layout):
         """ Draws the general property settings """
         row = layout.row()
@@ -30,20 +32,25 @@ class SN_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
     
     @property
     def register_code(self):
+        # register non group properties
         if not self.property_type == "Group":
             code = f"bpy.types.{self.attach_to}.{self.python_name} = bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
+        # register group properties
         else:
             code = f"bpy.utils.register_class(SNA_GROUP_{self.python_name})"
             if not bpy.context.scene.sn.is_exporting:
                 code += f"\nbpy.context.scene.sn.unregister_cache['{self.as_pointer()}'] = SNA_GROUP_{self.python_name}"
+        # add register code from prop settings
         if hasattr(self.settings, "register_code"):
             return self.settings.register_code(code)
         return code
     
     @property
     def unregister_code(self):
+        # unregister non group properties
         if not self.property_type == "Group":
             return f"del bpy.types.{self.attach_to}.{self.python_name}"
+        # unregister group properties
         else:
             if bpy.context.scene.sn.is_exporting:
                 return f"bpy.utils.unregister_class(SNA_GROUP_{self.python_name})"
@@ -65,11 +72,11 @@ class SN_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
 
     def register_all(self):
         """ Registers all scene properties """
-        # TODO make sure pointers and collections are un/registered after groups
-        # get register code
-        reg_code = "def register():\n"
         props = bpy.context.scene.sn.properties.values()
         props.sort(key=lambda prop: prop.property_type == "Group", reverse=True)
+
+        # get register code
+        reg_code = "def register():\n"
         for prop in props:
             for line in prop.register_code.split("\n"):
                 reg_code += " "*4 + line + "\n"
@@ -84,6 +91,7 @@ class SN_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
         store_unregister = f"bpy.context.scene.sn.unregister_cache['properties'] = unregister\n"
         assembled = "import bpy\n\n" + reg_code + unreg_code + "\nregister()\n" + store_unregister
 
+        # register
         print_debug_code(assembled)
         try: exec(assembled)
         except Exception as err:
