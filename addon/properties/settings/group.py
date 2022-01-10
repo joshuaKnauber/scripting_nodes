@@ -7,10 +7,17 @@ from ..property_basic import BasicProperty
 class SN_SimpleProperty(BasicProperty, bpy.types.PropertyGroup):
     
     expand: bpy.props.BoolProperty(default=True, name="Expand", description="Expand this property")
+    
+    @property
+    def group_prop_parent(self):
+        """ Returns the parent of the property collection this property lives in """
+        # TODO this might not work with nodes
+        coll_path = "[".join(repr(self.path_resolve("name", False)).split("[")[:-1])
+        parent_path = coll_path.split("stngs_group")[0][:-1]
+        return eval(parent_path)
 
     def compile(self, context=None):
-        sn = bpy.context.scene.sn
-        sn.properties[sn.property_index].compile()
+        self.group_prop_parent.compile()
 
 
 
@@ -44,16 +51,16 @@ class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
         
     @property
     def prop_type_name(self):
-        return "PointerProperty"
+        return f"SNA_GROUP_{self.prop.python_name}"
     
     
     @property
     def register_options(self):
-        return f"type=bpy.types.NodeTree"
+        return f""
     
     
     def register_code(self, raw):
-        code = f"class SNA_GROUP_{self.prop.python_name}(bpy.types.PropertyGroup):\n\n"
+        code = f"class {self.prop_type_name}(bpy.types.PropertyGroup):\n\n"
         for prop in self.properties:
             code += " "*4 + prop.register_code + "\n\n"
         if not len(self.properties):

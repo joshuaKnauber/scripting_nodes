@@ -1,13 +1,44 @@
 import bpy
 from ...utils import print_debug_code
 from .property_basic import BasicProperty
-from .settings.settings import property_icons
+from .settings.settings import id_items, property_icons
 from .settings.group import SN_PT_GroupProperty
-from .settings.settings import id_items
 
 
 
-class SN_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
+class FullBasicProperty(BasicProperty):
+    
+    property_type: bpy.props.EnumProperty(name="Type",
+                                    description="The type of data this property can store",
+                                    update=BasicProperty._compile,
+                                    items=[("String", "String", "Stores text, can display a text input or a filepath field", property_icons["String"], 0),
+                                           ("Boolean", "Boolean", "Stores True or False, can be used for a checkbox", property_icons["Boolean"], 1),
+                                           ("Float", "Float", "Stores a decimal number or a vector", property_icons["Float"], 2),
+                                           ("Integer", "Integer", "Stores an integer number or a vector", property_icons["Integer"], 3),
+                                           ("Enum", "Enum", "Stores multiple entries to be used as dropdowns", property_icons["Enum"], 4),
+                                           ("Pointer", "Pointer", "Stores a reference to certain types of blend data, collection or group properties", property_icons["Pointer"], 5),
+                                           ("Collection", "Collection", "Stores a list of certain blend data or property groups to be displayed in lists", property_icons["Collection"], 6),
+                                           ("Group", "Group", "Stores multiple properties to be used in a collection or pointer property", property_icons["Group"], 7)])
+    
+    @property
+    def settings(self):
+        return {
+            "String": self.stngs_string,
+            "Boolean": self.stngs_boolean,
+            "Float": self.stngs_float,
+            "Integer": self.stngs_integer,
+            "Enum": self.stngs_enum,
+            "Pointer": self.stngs_pointer,
+            "Collection": self.stngs_collection,
+            "Group": self.stngs_group,
+        }[self.property_type]
+    
+    
+    stngs_group: bpy.props.PointerProperty(type=SN_PT_GroupProperty)
+
+
+
+class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
     
     is_scene_prop = True
     
@@ -74,6 +105,7 @@ class SN_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
         """ Registers all scene properties """
         props = bpy.context.scene.sn.properties.values()
         props.sort(key=lambda prop: prop.property_type == "Group", reverse=True)
+        # TODO sort property groups to have props with references to other groups sorted below
 
         # get register code
         reg_code = "def register():\n"
@@ -118,33 +150,3 @@ class SN_GeneralProperties(BasicProperty, bpy.types.PropertyGroup):
                                     description="The type of blend data to attach this property to",
                                     items=get_attach_to_items,
                                     update=compile)
-    
-    
-    # overwrite property_type, settings and added stngs_group for scene properties
-    property_type: bpy.props.EnumProperty(name="Type",
-                                    description="The type of data this property can store",
-                                    update=compile,
-                                    items=[("String", "String", "Stores text, can display a text input or a filepath field", property_icons["String"], 0),
-                                           ("Boolean", "Boolean", "Stores True or False, can be used for a checkbox", property_icons["Boolean"], 1),
-                                           ("Float", "Float", "Stores a decimal number or a vector", property_icons["Float"], 2),
-                                           ("Integer", "Integer", "Stores an integer number or a vector", property_icons["Integer"], 3),
-                                           ("Enum", "Enum", "Stores multiple entries to be used as dropdowns", property_icons["Enum"], 4),
-                                           ("Pointer", "Pointer", "Stores a reference to certain types of blend data, collection or group properties", property_icons["Pointer"], 5),
-                                           ("Collection", "Collection", "Stores a list of certain blend data or property groups to be displayed in lists", property_icons["Collection"], 6),
-                                           ("Group", "Group", "Stores multiple properties to be used in a collection or pointer property", property_icons["Group"], 7)])
-    
-    @property
-    def settings(self):
-        return {
-            "String": self.stngs_string,
-            "Boolean": self.stngs_boolean,
-            "Float": self.stngs_float,
-            "Integer": self.stngs_integer,
-            "Enum": self.stngs_enum,
-            "Pointer": self.stngs_pointer,
-            "Collection": self.stngs_collection,
-            "Group": self.stngs_group,
-        }[self.property_type]
-    
-    
-    stngs_group: bpy.props.PointerProperty(type=SN_PT_GroupProperty)

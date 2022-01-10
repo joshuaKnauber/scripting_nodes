@@ -36,10 +36,20 @@ class BasicProperty():
     
     @property
     def prop_collection(self):
+        """ Returns the collection this property lives in """
         # TODO this might not work with nodes
         path = "[".join(repr(self.path_resolve("name", False)).split("[")[:-1])
         coll = eval(path)
         return coll
+    
+    
+    @property
+    def prop_collection_origin(self):
+        """ Returns the source where the main property collection lives """
+        # TODO this might not work with nodes
+        parent_path = repr(self.path_resolve("name", False)).split("properties")[0][:-1]
+        parent = eval(parent_path)
+        return parent
     
     
     def _compile(self, context=None):
