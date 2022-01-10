@@ -1,5 +1,5 @@
 import bpy
-from .settings import PropertySettings, id_items
+from .settings import PropertySettings
 
 
 

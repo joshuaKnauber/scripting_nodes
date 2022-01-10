@@ -16,17 +16,19 @@ class SN_PT_PointerProperty(PropertySettings, bpy.types.PropertyGroup):
     
     def draw(self, context, layout):
         """ Draws the settings for this property type """
-        if getattr(self.prop, "is_scene_prop", False):
-            layout.prop(self, "use_prop_group")
+        src = self.prop.prop_collection_origin
+        layout.prop(self, "use_prop_group")
         if not self.use_prop_group:
             layout.prop(self, "data_type")
         else:
-            layout.prop_search(self, "prop_group", context.scene.sn, "properties")
+            layout.prop_search(self, "prop_group", src, "properties")
             row = layout.row()
             row.alert = True
-            if self.prop_group and self.prop_group in context.scene.sn.properties:
-                if not context.scene.sn.properties[self.prop_group].property_type == "Group":
+            if self.prop_group and self.prop_group in src.properties:
+                if not src.properties[self.prop_group].property_type == "Group":
                     row.label(text="The selected property is not a group!", icon="ERROR")
+                elif hasattr(self.prop, "group_prop_parent") and self.prop.group_prop_parent.name == self.prop_group:
+                    row.label(text="Can't use self reference for this collection!", icon="ERROR")
             else:
                 row.label(text="There is no valid property group selected!", icon="ERROR")
         
@@ -41,11 +43,11 @@ class SN_PT_PointerProperty(PropertySettings, bpy.types.PropertyGroup):
         if not self.use_prop_group:
             data_type = "bpy.types."+self.data_type
         else:
-            sn = bpy.context.scene.sn
-            if self.prop_group in sn.properties and sn.properties[self.prop_group].property_type == "Group":
-                data_type = f"SNA_GROUP_{bpy.context.scene.sn.properties[self.prop_group].python_name}"
-            else:
-                data_type = "bpy.types.Scene"
+            src = self.prop.prop_collection_origin
+            data_type = "bpy.types.Scene"
+            if self.prop_group in src.properties and src.properties[self.prop_group].property_type == "Group":
+                if not hasattr(self.prop, "group_prop_parent") or (hasattr(self.prop, "group_prop_parent") and self.prop.group_prop_parent.name != self.prop_group):
+                    data_type = f"SNA_GROUP_{bpy.context.scene.sn.properties[self.prop_group].python_name}"
         return f"type={data_type}"
     
     
