@@ -106,7 +106,7 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
         for subprop in prop.settings.properties:
             if subprop.property_type == "Collection" and subprop.settings.prop_group in self.prop_collection_origin.properties:
                 return True
-            elif prop.property_type == "Pointer" and prop.settings.use_prop_group and prop.settings.prop_group in self.prop_collection_origin.properties:
+            elif subprop.property_type == "Pointer" and subprop.settings.use_prop_group and subprop.settings.prop_group in self.prop_collection_origin.properties:
                 return True
         return False
             

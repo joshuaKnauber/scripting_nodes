@@ -63,6 +63,7 @@ class BasicProperty():
 
     def set_name(self, value):
         # TODO make sure name is unique
+        # TODO update property refs in groups
 
         # get nodes to update references
         to_update_nodes = []
