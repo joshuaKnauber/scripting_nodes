@@ -99,13 +99,35 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
                 print("Serpens Log: Failed to unregister properties. Restart blender to clean the file!")
                 print(err)
             del bpy.context.scene.sn.unregister_cache["properties"]
+            
+            
+    def is_propgroup_with_references(self, prop):
+        """ Returns if the given property group has pointer or collection props with references to other prop groups """
+        for subprop in prop.settings.properties:
+            if subprop.property_type == "Collection" and subprop.settings.prop_group in self.prop_collection_origin.properties:
+                return True
+            elif prop.property_type == "Pointer" and prop.settings.use_prop_group and prop.settings.prop_group in self.prop_collection_origin.properties:
+                return True
+        return False
+            
+            
+    def get_sorted_props(self):
+        """ Returns a list of the properties, sorted for registering """
+        props = bpy.context.scene.sn.properties.values()
+        # sort groups to the top of the list
+        props.sort(key=lambda prop: prop.property_type == "Group", reverse=True)
+        # split property groups with collections or pointers with use prop group enabled
+        prop_groups = list(filter(lambda prop: prop.property_type == "Group", props))
+        other_props = list(filter(lambda prop: not prop in prop_groups, props))
+        ref_prop_groups = list(filter(self.is_propgroup_with_references, prop_groups))
+        prop_groups = list(filter(lambda prop: not prop in ref_prop_groups, prop_groups))
+        # TODO sort ref_prop_groups -> may fail if a prop group has a prop with a collection or pointer to another prop group with the same
+        return prop_groups + ref_prop_groups + other_props
         
 
     def register_all(self):
         """ Registers all scene properties """
-        props = bpy.context.scene.sn.properties.values()
-        props.sort(key=lambda prop: prop.property_type == "Group", reverse=True)
-        # TODO sort property groups to have props with references to other groups sorted below
+        props = self.get_sorted_props()
 
         # get register code
         reg_code = "def register():\n"
