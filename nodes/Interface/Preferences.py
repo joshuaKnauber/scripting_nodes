@@ -1,7 +1,6 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
-from .PropertyNode import PropertyNode
-from ...utils import get_python_name
+from ..Properties.PropertyNode import PropertyNode
 
 
 
