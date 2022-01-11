@@ -82,16 +82,16 @@ class SN_OT_MoveGroupProperty(bpy.types.Operator):
     bl_description = "Moves this property"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
-    prop_items_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    group_items_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
     index: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
     move_up: bpy.props.BoolProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
-        items = eval(self.prop_items_path)
+        items = eval(self.group_items_path)
         if self.move_up:
-            items.move(self.index, self.index + 1)
-        else:
             items.move(self.index, self.index - 1)
+        else:
+            items.move(self.index, self.index + 1)
         return {"FINISHED"}
 
 

@@ -57,9 +57,25 @@ class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
             subrow = row.row()
             subrow.prop(prop, "expand", text="", icon="DISCLOSURE_TRI_DOWN" if prop.expand else "DISCLOSURE_TRI_RIGHT", emboss=False)
             row.prop(prop, "name", text="")
+
+            subrow = row.row(align=True)
+            subcol = subrow.column(align=True)
+            subcol.enabled = i > 0
+            op = subcol.operator("sn.move_group_property", text="", icon="TRIA_UP")
+            op.group_items_path = f"{self.prop.full_prop_path}.settings.properties"
+            op.index = i
+            op.move_up = True
+            subcol = subrow.column(align=True)
+            subcol.enabled = i < len(self.properties)-1
+            op = subcol.operator("sn.move_group_property", text="", icon="TRIA_DOWN")
+            op.group_items_path = f"{self.prop.full_prop_path}.settings.properties"
+            op.index = i
+            op.move_up = False
+
             op = row.operator("sn.remove_group_property", text="", icon="TRASH", emboss=False)
             op.group_items_path = f"{self.prop.full_prop_path}.settings.properties"
             op.index = i
+            
             row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False).name = "PROP_PATH_PLACEHOLDER."+prop.python_name
 
             if prop.expand:
