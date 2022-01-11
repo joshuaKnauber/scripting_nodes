@@ -77,6 +77,9 @@ class SN_OT_AddPropertyItem(bpy.types.Operator):
     bl_description = "Adds a property to this group"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
+    group_data_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
     def execute(self, context):
-        context.scene.sn.properties[context.scene.sn.property_index].settings.properties.add()
+        prop = eval(self.group_data_path)
+        prop.settings.properties.add()
         return {"FINISHED"}

@@ -4,13 +4,39 @@ from .settings import PropertySettings
 
 
 
+_enum_prop_cache = {} # stores key, value of enum.as_pointer, prop
+
 class EnumItem(bpy.types.PropertyGroup):
     
+    @property
+    def prop(self):
+        if self.id_data.bl_rna.identifier == "ScriptingNodesTree":
+            # find property in nodes to return
+            if not str(self.as_pointer()) in _enum_prop_cache:
+                for node in self.id_data.nodes:
+                    if hasattr(node, "properties"):
+                        for prop in node.properties:
+                            if prop.property_type == "Enum":
+                                for item in prop.settings.items:
+                                    if item == self:
+                                        _enum_prop_cache[str(self.as_pointer())] = node
+                                        break
+                            elif prop.property_type == "Group":
+                                for subprop in prop.settings.properties:
+                                    if subprop.property_type == "Enum":
+                                        for item in subprop.settings.items:
+                                            if item == self:
+                                                _enum_prop_cache[str(self.as_pointer())] = node
+                                                break
+            return _enum_prop_cache[str(self.as_pointer())]
+        
+        else:
+            path = ".".join(repr(self.path_resolve("name", False)).split(".")[:-2])
+            prop = eval(path)
+            return prop
+    
     def update(self, context):
-        # TODO this might not work with nodes
-        path = ".".join(repr(self.path_resolve("name", False)).split(".")[:-2])
-        prop = eval(path)
-        prop.compile()
+        self.prop.compile()
         
     name: bpy.props.StringProperty(name="Name", default="New Item",
                                 description="Name of this enum item",

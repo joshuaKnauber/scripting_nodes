@@ -48,7 +48,8 @@ class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
         """ Draws the settings for this property type """
         row = layout.row()
         row.scale_y = 1.2
-        row.operator("sn.add_property_item", text="Add Property", icon="ADD")
+        op = row.operator("sn.add_property_item", text="Add Property", icon="ADD")
+        op.group_data_path = f"{self.prop.full_prop_path}"
         
         for prop in self.properties:
             box = layout.box()
