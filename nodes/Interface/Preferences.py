@@ -1,10 +1,11 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
+from .PropertyNode import PropertyNode
 from ...utils import get_python_name
 
 
 
-class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
     bl_idname = "SN_PreferencesNode"
     bl_label = "Preferences"
@@ -45,3 +46,5 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode):
                 amount += len(ntree.node_collection(self.bl_idname).refs)
         if amount > 1:
             layout.label(text="Multiple preferences nodes! Only one will be used", icon="ERROR")
+            
+        self.draw_list(layout)
