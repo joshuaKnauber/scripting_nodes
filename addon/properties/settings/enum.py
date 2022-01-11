@@ -63,6 +63,14 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
     
     
     @property
+    def item_func_name(self):
+        name = f"{self.prop.python_name}_enum_items"
+        if hasattr(self.prop, "group_prop_parent"):
+            return f"{self.prop.group_prop_parent.python_name}_{name}"
+        return name
+    
+    
+    @property
     def register_options(self):
         options = ""
         if not self.is_dynamic:
@@ -73,7 +81,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
                 items.append(f"('{item.name}', '{item.name}', '{item.description}', {item.icon}, {i})")
             options = f"items=[{', '.join(items)}]"
         else:
-            options = f"items={f'{self.prop.python_name}_enum_items'}"
+            options = f"items={self.item_func_name}"
             
         if self.enum_flag:
             options += ", options={'ENUM_FLAG'}"
@@ -81,14 +89,32 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
     
     
     def register_code(self, code):
-        # TODO this wont work inside of operators, preferences or on export
+        # TODO this may not work inside of operators, preferences or on export
         # TODO this is different on export
-        code = f"""
-                def {self.prop.python_name}_enum_items(self, context):
+        
+        # enum in property group
+        if hasattr(self.prop, "group_prop_parent"):
+            code = f"""
+                def {self.item_func_name}(self, context):
                     for ntree in bpy.data.node_groups:
                         if ntree.bl_idname == "ScriptingNodesTree":
-                            for node in ntree.nodes:
-                                if node.bl_idname == "SN_GenerateEnumItemsNode" and node.prop_name == "{self.prop.name}":
+                            for ref in ntree.node_collection("SN_GenerateEnumItemsNode").refs:
+                                node = ref.node
+                                if node.from_prop_group and node.prop_group == "{self.prop.group_prop_parent.name}" and node.prop_name == "{self.prop.name}":
+                                    items = eval(node.code)
+                                    return [node.make_enum_item(item[0], item[1], item[2], item[3], {'2**item[4]' if self.enum_flag else 'item[4]'}) for item in items]
+                    return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
+                {code}
+                """
+        # enum as normal property
+        else:
+            code = f"""
+                def {self.item_func_name}(self, context):
+                    for ntree in bpy.data.node_groups:
+                        if ntree.bl_idname == "ScriptingNodesTree":
+                            for ref in ntree.node_collection("SN_GenerateEnumItemsNode").refs:
+                                node = ref.node
+                                if not node.from_prop_group and node.prop_name == "{self.prop.name}":
                                     items = eval(node.code)
                                     return [node.make_enum_item(item[0], item[1], item[2], item[3], {'2**item[4]' if self.enum_flag else 'item[4]'}) for item in items]
                     return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
