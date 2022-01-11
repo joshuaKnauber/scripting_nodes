@@ -1,6 +1,6 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
-from ..Properties.PropertyNode import PropertyNode
+from ..templates.PropertyNode import PropertyNode
 
 
 

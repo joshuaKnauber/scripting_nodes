@@ -25,6 +25,8 @@ property_icons = {
 
 
 
+_prop_cache = {} # stores key, value of settings.as_pointer with prop for settings
+
 class PropertySettings:
     
     dummy: bpy.props.StringProperty(name="DUMMY", description="Dummy prop for resolving path")
@@ -32,10 +34,25 @@ class PropertySettings:
     @property
     def prop(self):
         """ Returns the property these settings belong to """
-        # TODO this might not work with nodes
-        path = ".".join(repr(self.path_resolve("dummy", False)).split(".")[:-2])
-        prop = eval(path)
-        return prop
+        if self.id_data.bl_rna.identifier == "ScriptingNodesTree":
+            # find property in nodes to return
+            if not str(self.as_pointer()) in _prop_cache:
+                for node in self.id_data.nodes:
+                    if hasattr(node, "properties"):
+                        for prop in node.properties:
+                            if prop.settings == self:
+                                _prop_cache[str(self.as_pointer())] = prop
+                                break
+                            elif prop.property_type == "Group":
+                                for subprop in prop.settings.properties:
+                                    if subprop.settings == self:
+                                        _prop_cache[str(self.as_pointer())] = subprop
+                                        break
+            return _prop_cache[str(self.as_pointer())]
+        else:
+            path = ".".join(repr(self.path_resolve("dummy", False)).split(".")[:-2])
+            prop = eval(path)
+            return prop
 
     def compile(self, context=None):
         """ Compile the property for these settings """

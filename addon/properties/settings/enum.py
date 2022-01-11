@@ -45,7 +45,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
             row = layout.row()
             row.scale_y = 1.2
             op = row.operator("sn.add_enum_item", text="Add Item", icon="ADD")
-            op.item_data_path = "context.scene.sn.properties[context.scene.sn.property_index].settings.items"
+            op.item_data_path = f"{self.prop.full_prop_path}.settings.items"
 
             for i, item in enumerate(self.items):
                 box = layout.box()
@@ -53,7 +53,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
                 row = box.row()
                 row.prop(item, "name")
                 op = row.operator("sn.select_icon", icon_value=item.icon if item.icon != 0 else 101, text="", emboss=item.icon==0)
-                op.icon_data_path = f"context.scene.sn.properties[context.scene.sn.property_index].settings.items[{i}]"
+                op.icon_data_path = f"{self.prop.full_prop_path}.settings.items[{i}]"
                 box.prop(item, "description")
         
     

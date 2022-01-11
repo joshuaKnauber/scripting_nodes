@@ -5,21 +5,12 @@ from ...addon.properties.properties import FullBasicProperty
 
 class SN_NodeProperty(FullBasicProperty, bpy.types.PropertyGroup):
     
-    node_tree_ref: bpy.props.StringProperty(name="Node Tree",
-                                    description="Node Tree this property lives in")
-    
-    node_ref: bpy.props.StringProperty(name="Node",
-                                    description="Node this property lives in")
-
-    @property
-    def node(self):
-        if self.node_tree_ref and self.node_ref:
-            return bpy.data.node_groups[self.node_tree_ref].nodes[self.node_ref]
-        return None
-    
     @property
     def data_path(self):
         return "" # TODO
+    
+    def compile(self, context=None):
+        self.prop_collection_origin._evaluate(bpy.context)
 
 
 

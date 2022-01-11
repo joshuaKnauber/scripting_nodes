@@ -10,6 +10,8 @@ from .settings.pointer import SN_PT_PointerProperty
 from .settings.collection import SN_PT_CollectionProperty
 
 
+_prop_collection_cache = {} # stores key, value of prop.as_pointer, prop collection
+_prop_origin_cache = {} # stores key, value of prop.as_pointer, prop collection origin
 
 class BasicProperty():
     
@@ -37,19 +39,61 @@ class BasicProperty():
     @property
     def prop_collection(self):
         """ Returns the collection this property lives in """
-        # TODO this might not work with nodes
-        path = "[".join(repr(self.path_resolve("name", False)).split("[")[:-1])
-        coll = eval(path)
-        return coll
+        if self.id_data.bl_rna.identifier == "ScriptingNodesTree":
+            # find property in nodes to return
+            if not str(self.as_pointer()) in _prop_collection_cache:
+                for node in self.id_data.nodes:
+                    if hasattr(node, "properties"):
+                        for prop in node.properties:
+                            if prop == self:
+                                _prop_collection_cache[str(self.as_pointer())] = node.properties
+                                break
+                            elif prop.property_type == "Group":
+                                for subprop in prop.settings.properties:
+                                    if subprop == self:
+                                        _prop_collection_cache[str(self.as_pointer())] = prop.settings.properties
+                                        break
+            return _prop_collection_cache[str(self.as_pointer())]
+        
+        else:
+            path = "[".join(repr(self.path_resolve("name", False)).split("[")[:-1])
+            coll = eval(path)
+            return coll
     
     
     @property
     def prop_collection_origin(self):
         """ Returns the source where the main property collection lives """
-        # TODO this might not work with nodes
-        parent_path = repr(self.path_resolve("name", False)).split("properties")[0][:-1]
-        parent = eval(parent_path)
-        return parent
+        if self.id_data.bl_rna.identifier == "ScriptingNodesTree":
+            # find property in nodes to return
+            if not str(self.as_pointer()) in _prop_origin_cache:
+                for node in self.id_data.nodes:
+                    if hasattr(node, "properties"):
+                        for prop in node.properties:
+                            if prop == self:
+                                _prop_origin_cache[str(self.as_pointer())] = node
+                                break
+                            elif prop.property_type == "Group":
+                                for subprop in prop.settings.properties:
+                                    if subprop == self:
+                                        _prop_origin_cache[str(self.as_pointer())] = node
+                                        break
+            return _prop_origin_cache[str(self.as_pointer())]
+        
+        else:
+            parent_path = repr(self.path_resolve("name", False)).split("properties")[0][:-1]
+            parent = eval(parent_path)
+            return parent
+        
+
+    @property
+    def full_prop_path(self):
+        """ Returns the full data path for this property """
+        main_prop_path = f"{repr(self.prop_collection_origin)}.properties"
+        if hasattr(self, "group_prop_parent"):
+            main_prop_path += f"['{self.group_prop_parent.name}'].settings.properties"
+        main_prop_path += f"['{self.name}']"
+        return main_prop_path
     
     
     def _compile(self, context=None):

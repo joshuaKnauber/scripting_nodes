@@ -12,6 +12,7 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "PROGRAM"
     bl_width_default = 200
     is_trigger = True
+    # TODO make template node for things like this where you pick specific property from some source
     
 
     def on_create(self, context):
@@ -23,7 +24,7 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 update=SN_ScriptingBaseNode._evaluate)
     
     prop_source: bpy.props.EnumProperty(name="Property Source",
-                                items=[("SCENE", "Scene", "Scene Properties"),
+                                items=[("ADDON", "Addon", "Addon Properties"),
                                         ("NODE", "Node", "Node Properties")],
                                 description="Where the property should be selected from",
                                 update=SN_ScriptingBaseNode._evaluate)
@@ -40,7 +41,7 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode):
     def get_enum_source(self):
         """ Returns the parent of the collection the enum property should be searched in """
         sn = bpy.context.scene.sn
-        if self.prop_source == "SCENE":
+        if self.prop_source == "ADDON":
             if self.from_prop_group and self.prop_group in sn.properties and sn.properties[self.prop_group].property_type == "Group":
                 return sn.properties[self.prop_group].settings
             elif not self.from_prop_group:
@@ -53,7 +54,7 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode):
     def get_prop_group_src(self):
         """ Returns the parent of the collection the property group should be searched in """
         sn = bpy.context.scene.sn
-        if self.prop_source == "SCENE":
+        if self.prop_source == "ADDON":
             return sn
         elif self.prop_source == "NODE":
             pass # TODO

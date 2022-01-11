@@ -4,6 +4,8 @@ from ..property_basic import BasicProperty
 
 
 
+_group_prop_cache = {} # stores key, value of prop.as_pointer, prop
+
 class SN_SimpleProperty(BasicProperty, bpy.types.PropertyGroup):
     
     expand: bpy.props.BoolProperty(default=True, name="Expand", description="Expand this property")
@@ -11,10 +13,23 @@ class SN_SimpleProperty(BasicProperty, bpy.types.PropertyGroup):
     @property
     def group_prop_parent(self):
         """ Returns the parent of the property collection this property lives in """
-        # TODO this might not work with nodes
-        coll_path = "[".join(repr(self.path_resolve("name", False)).split("[")[:-1])
-        parent_path = coll_path.split("stngs_group")[0][:-1]
-        return eval(parent_path)
+        if self.id_data.bl_rna.identifier == "ScriptingNodesTree":
+            # find property in nodes to return
+            if not str(self.as_pointer()) in _group_prop_cache:
+                for node in self.id_data.nodes:
+                    if hasattr(node, "properties"):
+                        for prop in node.properties:
+                            if prop.property_type == "Group":
+                                for subprop in prop.settings.properties:
+                                    if subprop == self:
+                                        _group_prop_cache[str(self.as_pointer())] = prop
+                                        break
+            return _group_prop_cache[str(self.as_pointer())]
+        
+        else:
+            coll_path = "[".join(repr(self.path_resolve("name", False)).split("[")[:-1])
+            parent_path = coll_path.split("stngs_group")[0][:-1]
+            return eval(parent_path)
 
     def compile(self, context=None):
         self.group_prop_parent.compile()
