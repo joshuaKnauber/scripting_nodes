@@ -65,7 +65,8 @@ class SN_OT_AddEnumItem(bpy.types.Operator):
 
     def execute(self, context):
         items = eval(self.item_data_path)
-        items.add()
+        item = items.add()
+        item.update(context)
         return {"FINISHED"}
 
 
