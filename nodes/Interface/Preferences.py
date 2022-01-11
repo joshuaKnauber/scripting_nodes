@@ -12,7 +12,7 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     layout_type = "layout"
     is_trigger = True
     node_color = "INTERFACE"
-
+    
     def on_create(self, context):
         self.add_interface_output("Preferences")
         self.add_dynamic_interface_output("Preferences")

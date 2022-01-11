@@ -7,7 +7,8 @@ class SN_NodeProperty(FullBasicProperty, bpy.types.PropertyGroup):
     
     @property
     def data_path(self):
-        return "" # TODO
+        data = self.prop_collection_origin.bl_label.replace(" ", "_").upper() + "_PLACEHOLDER"
+        return f"{data}.{self.python_name}"
     
     def compile(self, context=None):
         self.prop_collection_origin._evaluate(bpy.context)
