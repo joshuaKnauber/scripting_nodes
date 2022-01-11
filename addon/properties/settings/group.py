@@ -51,12 +51,15 @@ class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
         op = row.operator("sn.add_property_item", text="Add Property", icon="ADD")
         op.group_data_path = f"{self.prop.full_prop_path}"
         
-        for prop in self.properties:
+        for i, prop in enumerate(self.properties):
             box = layout.box()
             row = box.row()
             subrow = row.row()
             subrow.prop(prop, "expand", text="", icon="DISCLOSURE_TRI_DOWN" if prop.expand else "DISCLOSURE_TRI_RIGHT", emboss=False)
             row.prop(prop, "name", text="")
+            op = row.operator("sn.remove_group_property", text="", icon="TRASH", emboss=False)
+            op.group_items_path = f"{self.prop.full_prop_path}.settings.properties"
+            op.index = i
             row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False).name = "PROP_PATH_PLACEHOLDER."+prop.python_name
 
             if prop.expand:

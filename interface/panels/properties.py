@@ -25,6 +25,16 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
         col.operator("sn.add_property", text="", icon="ADD")
         col.operator("sn.add_property", text="", icon="VIEWZOOM")
         col.operator("sn.remove_property", text="", icon="REMOVE")
+
+        col.separator()
+        subrow = col.row(align=True)
+        subrow.enabled = sn.property_index > 0
+        op = subrow.operator("sn.move_property", text="", icon="TRIA_UP")
+        op.move_up = True
+        subrow = col.row(align=True)
+        subrow.enabled = sn.property_index < len(sn.properties)-1
+        op = subrow.operator("sn.move_property", text="", icon="TRIA_DOWN")
+        op.move_up = False
         
         if sn.property_index < len(sn.properties):
             prop = sn.properties[sn.property_index]

@@ -40,6 +40,62 @@ class SN_OT_RemoveProperty(bpy.types.Operator):
 
 
 
+class SN_OT_RemoveGroupProperty(bpy.types.Operator):
+    bl_idname = "sn.remove_group_property"
+    bl_label = "Remove Property"
+    bl_description = "Removes this property from the addon"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    group_items_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    index: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        items = eval(self.group_items_path)
+        items.remove(self.index)
+        return {"FINISHED"}
+
+
+
+class SN_OT_MoveProperty(bpy.types.Operator):
+    bl_idname = "sn.move_property"
+    bl_label = "Move Property"
+    bl_description = "Moves this property"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    move_up: bpy.props.BoolProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        sn = context.scene.sn
+        if self.move_up:
+            sn.properties.move(sn.property_index, sn.property_index - 1)
+            sn.property_index -= 1
+        else:
+            sn.properties.move(sn.property_index, sn.property_index + 1)
+            sn.property_index += 1
+        return {"FINISHED"}
+
+
+
+class SN_OT_MoveGroupProperty(bpy.types.Operator):
+    bl_idname = "sn.move_group_property"
+    bl_label = "Move Property"
+    bl_description = "Moves this property"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    prop_items_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    index: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
+    move_up: bpy.props.BoolProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        items = eval(self.prop_items_path)
+        if self.move_up:
+            items.move(self.index, self.index + 1)
+        else:
+            items.move(self.index, self.index - 1)
+        return {"FINISHED"}
+
+
+
 class SN_OT_CopyPythonName(bpy.types.Operator):
     bl_idname = "sn.copy_python_name"
     bl_label = "Copy Python Name"

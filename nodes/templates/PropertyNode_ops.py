@@ -15,7 +15,7 @@ class SN_OT_AddNodeProperty(bpy.types.Operator):
         ntree = bpy.data.node_groups[self.node_tree]
         node = ntree.nodes[self.node]
         node.properties.add()
-        node.prop_index = len(node.properties) - 1
+        node.property_index = len(node.properties) - 1
         return {"FINISHED"}
 
 
@@ -32,9 +32,32 @@ class SN_OT_RemoveNodeProperty(bpy.types.Operator):
     def execute(self, context):
         ntree = bpy.data.node_groups[self.node_tree]
         node = ntree.nodes[self.node]
-        if node.prop_index < len(node.properties):
-            node.properties.remove(node.prop_index)
-        node.prop_index -= 1
+        if node.property_index < len(node.properties):
+            node.properties.remove(node.property_index)
+        node.property_index -= 1
+        return {"FINISHED"}
+
+
+
+class SN_OT_MoveNodeProperty(bpy.types.Operator):
+    bl_idname = "sn.move_node_property"
+    bl_label = "Move Property"
+    bl_description = "Moves this property"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    
+    node_tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    node: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    move_up: bpy.props.BoolProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        node = bpy.data.node_groups[self.node_tree].nodes[self.node]
+        if self.move_up:
+            node.properties.move(node.property_index, node.property_index - 1)
+            node.property_index -= 1
+        else:
+            node.properties.move(node.property_index, node.property_index + 1)
+            node.property_index += 1
         return {"FINISHED"}
 
 
@@ -54,13 +77,13 @@ class SN_OT_EditNodeProperty(bpy.types.Operator):
     def draw(self, context):
         layout = self.layout
         node = bpy.data.node_groups[self.node_tree].nodes[self.node]
-        prop = node.properties[node.prop_index]
+        prop = node.properties[node.property_index]
         prop.draw(context, layout)
         layout.separator()
         prop.settings.draw(context, layout)
 
     def invoke(self, context, event):
         node = bpy.data.node_groups[self.node_tree].nodes[self.node]
-        if node.prop_index < len(node.properties):
+        if node.property_index < len(node.properties):
             return context.window_manager.invoke_popup(self, width=300)
         return {"FINISHED"}
