@@ -63,22 +63,26 @@ class BasicProperty():
 
     def set_name(self, value):
         # TODO make sure name is unique
-        # TODO update property refs in groups
 
         # get nodes to update references
         to_update_nodes = []
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
-                    if hasattr(node, "prop_name") and node.prop_name == self.name:
-                        to_update_nodes.append(node)
+                    for key in ["prop_name", "prop_group"]:
+                        if hasattr(node, key) and getattr(node, key) == self.name:
+                            to_update_nodes.append((node, key))
 
         # get properties to update references
         to_update_props = []
         if self.property_type == "Group":
-            for prop in bpy.context.scene.sn.properties:
-                if prop.property_type == "Pointer" and prop.settings.prop_group == self.name:
+            for prop in self.prop_collection:
+                if prop.property_type in ["Pointer", "Collection"] and prop.settings.prop_group == self.name:
                     to_update_props.append(prop)
+                elif prop.property_type == "Group" and prop != self:
+                    for subprop in prop.settings.properties:
+                        if subprop.property_type in ["Pointer", "Collection"] and subprop.settings.prop_group == self.name:
+                            to_update_props.append(subprop)
 
         # set value
         self["name"] = value
@@ -86,8 +90,8 @@ class BasicProperty():
         # update property references
         for prop in to_update_props:
             prop.settings.prop_group = value
-        for node in to_update_nodes:
-            node.prop_name = value
+        for node, key in to_update_nodes:
+            setattr(node, key, value)
     
     name: bpy.props.StringProperty(name="Property Name",
                                     description="Name of this property",

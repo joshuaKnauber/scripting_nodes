@@ -89,6 +89,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
     
     
     def register_code(self, code):
+        # NOTE these functions may be a reason for slow down with a lot of nodes (could be fixed with better node refs?)
         # TODO this may not work inside of operators, preferences or on export
         # TODO this is different on export
         
