@@ -86,6 +86,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="Gets set when a file is loaded. Set to the easy bpy file path.")
 
 
+    development_node: bpy.props.PointerProperty(type=bpy.types.Text,
+                                        name="Node File",
+                                        description="File for developing a node in")
+
+
     def update_node_tree_index(self, context):
         if len(bpy.data.node_groups):
             bpy.context.space_data.node_tree = bpy.data.node_groups[self.node_tree_index]

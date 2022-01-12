@@ -9,7 +9,7 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_options = {"DEFAULT_CLOSED"}
-    bl_order = 6
+    bl_order = 7
 
     @classmethod
     def poll(cls, context):
