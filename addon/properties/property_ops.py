@@ -137,5 +137,6 @@ class SN_OT_AddPropertyItem(bpy.types.Operator):
 
     def execute(self, context):
         prop = eval(self.group_data_path)
-        prop.settings.properties.add()
+        new_prop = prop.settings.properties.add()
+        new_prop.name = "New Property"
         return {"FINISHED"}

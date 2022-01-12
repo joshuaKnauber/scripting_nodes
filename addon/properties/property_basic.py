@@ -1,5 +1,5 @@
 import bpy
-from ...utils import get_python_name
+from ...utils import get_python_name, unique_collection_name
 from .settings.settings import property_icons
 from .settings.string import SN_PT_StringProperty
 from .settings.boolean import SN_PT_BooleanProperty
@@ -25,7 +25,14 @@ class BasicProperty():
     
     @property
     def python_name(self):
-        return f"sna_{get_python_name(self.name, 'new_property')}"
+        names = []
+        for prop in self.prop_collection:
+            if prop == self:
+                break
+            names.append(prop.python_name)
+        
+        name = unique_collection_name(f"sna_{get_python_name(self.name, 'new_property')}", "new_property", names, "_")
+        return name
     
     
     @property
@@ -103,10 +110,11 @@ class BasicProperty():
     
 
     def get_name(self):
-        return self.get("name", "New Property")  
+        return self.get("name", "New Property")
 
     def set_name(self, value):
-        # TODO make sure name is unique
+        names = list(map(lambda item: item.name, list(filter(lambda item: item!=self, self.prop_collection))))
+        value = unique_collection_name(value, "New Property", names, " ")
 
         # get nodes to update references
         to_update_nodes = []
