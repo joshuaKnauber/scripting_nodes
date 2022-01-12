@@ -1,5 +1,6 @@
 import bpy
 from ...addon.properties.properties import FullBasicProperty
+from ...addon.properties.property_ops import get_sorted_props
 
 
 
@@ -9,6 +10,54 @@ class SN_NodeProperty(FullBasicProperty, bpy.types.PropertyGroup):
     def data_path(self):
         data = self.prop_collection_origin.bl_label.replace(" ", "_").upper() + "_PLACEHOLDER"
         return f"{data}.{self.python_name}"
+    
+    
+    @property
+    def register_code_imperative(self):
+        # create property groups
+        if self.property_type == "Group":
+            return self.settings.register_code("")
+        return ""
+    
+    
+    @property
+    def register_code(self):
+        # register group properties
+        if self.property_type == "Group":
+            code = f"bpy.utils.register_class(SNA_GROUP_{self.python_name})"
+            if not bpy.context.scene.sn.is_exporting:
+                code += f"\nbpy.context.scene.sn.unregister_cache['{self.as_pointer()}'] = SNA_GROUP_{self.python_name}"
+            # add register code from prop settings
+            if hasattr(self.settings, "register_code"):
+                return self.settings.register_code(code)
+            return code
+        return ""
+    
+    
+    @property
+    def register_code_props(self):
+        # register non group properties
+        if not self.property_type == "Group":
+            code = f"{self.python_name}: bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
+            # add register code from prop settings
+            if hasattr(self.settings, "register_code"):
+                return self.settings.register_code(code)
+            return code
+        return ""
+    
+    
+    @property
+    def unregister_code(self):
+        # unregister group properties
+        if self.property_type == "Group":
+            if bpy.context.scene.sn.is_exporting:
+                return f"bpy.utils.unregister_class(SNA_GROUP_{self.python_name})"
+            else:
+                code = f"bpy.utils.unregister_class(bpy.context.scene.sn.unregister_cache['{self.as_pointer()}'])\n"
+                code += f"del bpy.context.scene.sn.unregister_cache['{self.as_pointer()}']"
+                return code
+        return ""
+    
     
     def compile(self, context=None):
         self.prop_collection_origin._evaluate(bpy.context)
@@ -23,6 +72,40 @@ class PropertyNode():
 
     properties: bpy.props.CollectionProperty(type=SN_NodeProperty)
     
+    
+    def props_imperative(self, context):
+        code = ""
+        props = get_sorted_props(self.properties.values())
+        for prop in props:
+            code += prop.register_code_imperative
+        return code
+    
+
+    def props_register(self, context):
+        code = ""
+        props = get_sorted_props(self.properties.values())
+        for prop in props:
+            code += prop.register_code
+        return code
+    
+
+    def props_unregister(self, context):
+        code = ""
+        props = get_sorted_props(self.properties.values())
+        props.reverse()
+        for prop in props:
+            code += prop.unregister_code
+        return code
+    
+
+    def props_code(self, context):
+        code = ""
+        props = get_sorted_props(self.properties.values())
+        for prop in props:
+            code += prop.register_code_props
+        return code
+    
+
     def draw_list(self, layout):
         row = layout.row()
         row.template_list("SN_UL_PropertyList", "", self, "properties", self, "property_index")

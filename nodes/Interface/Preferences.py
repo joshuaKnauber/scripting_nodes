@@ -14,23 +14,48 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     node_color = "INTERFACE"
     
     def on_create(self, context):
+        self.add_boolean_input("Hide").default_value = False
         self.add_interface_output("Preferences")
         self.add_dynamic_interface_output("Preferences")
 
     def evaluate(self, context):
+        props_imperative_list = self.props_imperative(context).split("\n")
+        props_code_list = self.props_code(context).split("\n")
+        props_register_list = self.props_register(context).split("\n")
+        props_unregister_list = self.props_unregister(context).split("\n")
+        
+        idname = f"SNA_TempAddonPreferences_{self.static_uid}"
+        prop_name = f"sna_addon_prefs_temp_{self.static_uid}"
+
+        self.code_imperative = f"""
+                                {self.indent(props_imperative_list, 8)}
+                                
+                                class {idname}(bpy.types.PropertyGroup):
+                                    pass
+                                    {self.indent(props_code_list, 9)}
+                                """
+
         self.code = f"""
                     def sna_prefs(layout):
-                        pass
-                        {self.indent([out.python_value for out in self.outputs[:-1]], 6)}
+                        if not ({self.inputs["Hide"].python_value}):
+                            self = bpy.context.scene.{prop_name}
+                            {self.indent([out.python_value for out in self.outputs[:-1]], 7)}
                     """
 
         self.code_register = f"""
+                            {self.indent(props_register_list, 7)}
+                            bpy.utils.register_class({idname})
+                            bpy.types.Scene.{prop_name} = bpy.props.PointerProperty(type={idname})
                             bpy.context.scene.sn.preferences.append(sna_prefs)
                             for a in bpy.context.screen.areas: a.tag_redraw()
                             """
+
         self.code_unregister = f"""
                             bpy.context.scene.sn.preferences.clear()
                             for a in bpy.context.screen.areas: a.tag_redraw()
+                            del bpy.types.Scene.{prop_name}
+                            bpy.utils.unregister_class({idname})
+                            {self.indent(props_unregister_list, 7)}
                             """
 
     def evalute_export(self, context):
