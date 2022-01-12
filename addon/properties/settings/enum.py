@@ -118,6 +118,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
         # NOTE these functions may be a reason for slow down with a lot of nodes (could be fixed with better node refs?)
         # TODO this may not work inside of operators, preferences or on export
         # TODO this is different on export
+        # TODO check that node matches fully, also in from_node_tree and from_node
         
         # enum in property group
         if hasattr(self.prop, "group_prop_parent"):

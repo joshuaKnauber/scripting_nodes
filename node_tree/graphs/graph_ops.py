@@ -132,6 +132,7 @@ class SN_OT_ForceCompile(bpy.types.Operator):
     def execute(self, context):
         unregister_all()
         compile_all(hard=True)
+        # TODO purge references that don't have a node anymore which got lost for whatever reason
         return {"FINISHED"}
 
     def invoke(self, context, event):
