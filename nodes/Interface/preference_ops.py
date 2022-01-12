@@ -9,7 +9,13 @@ class SN_OT_OpenPreferences(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO"}
 
     def execute(self, context):
-        bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
+        has_prefs = False
+        for area in context.screen.areas:
+            if area.type == "PREFERENCES":
+                has_prefs = True
+                break
+        if not has_prefs:
+            bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
         context.preferences.active_section = "ADDONS"
         context.window_manager.addon_search = "Serpens"
         bpy.ops.preferences.addon_expand(module="blender_visual_scripting_addon")
