@@ -30,6 +30,10 @@ class SN_SimpleProperty(BasicProperty, bpy.types.PropertyGroup):
             coll_path = "[".join(repr(self.path_resolve("name", False)).split("[")[:-1])
             parent_path = coll_path.split("stngs_group")[0][:-1]
             return eval(parent_path)
+        
+    @property
+    def python_name(self):
+        return super().python_name[4:] # cut of sna_ for props in prop group (mainly for name prop)
 
     def compile(self, context=None):
         self.group_prop_parent.compile()
@@ -40,6 +44,7 @@ class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
     
     type_description = "Group properties can hold multiple other properties.\n" \
                     + "They are used in combination with a pointer or collection property.\n" \
+                    + "Use a property called 'Name' to find properties in a collection.\n" \
                     + "\n" \
                     + "A common use for group properties is to group your addons settings together."
     

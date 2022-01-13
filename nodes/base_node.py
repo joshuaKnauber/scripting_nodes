@@ -367,6 +367,13 @@ class SN_ScriptingBaseNode:
         prev_code_imperative = self.code_imperative
         prev_code_register = self.code_register
         prev_code_unregister = self.code_unregister
+        
+        # reset code
+        self.code = ""
+        self.code_import = ""
+        self.code_imperative = ""
+        self.code_register = ""
+        self.code_unregister = ""
 
         # evaluate node
         if bpy.context.scene.sn.is_exporting:
@@ -558,7 +565,13 @@ class SN_ScriptingBaseNode:
 
     def draw_buttons_ext(self,context,layout):
         layout.use_property_split = True
+        layout.use_property_decorate = False
         layout.prop(self, "order")
+        layout.separator()
+        box = layout.box()
+        for inp in self.inputs:
+            if not inp.is_program:
+                box.prop(inp, "convert_data", text=f"Convert {inp.name} Data")
         layout.separator()
         self.draw_node_panel(context, layout)
         

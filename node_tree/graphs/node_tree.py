@@ -72,6 +72,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                 return True
             # check if data types are convertible
             else:
+                if not to_inp.convert_data:
+                    return True
                 if from_out.bl_label in CONVERSIONS:
                     if to_inp.bl_label in CONVERSIONS[from_out.bl_label]:
                         return True

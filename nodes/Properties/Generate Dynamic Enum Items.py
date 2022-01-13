@@ -56,6 +56,12 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
 
     def draw_node(self, context, layout):
         self.draw_reference_selection(layout, True)
+        prop_src = self.get_prop_source()
+        if self.prop_name and prop_src and self.prop_name in prop_src.properties:
+            if prop_src.properties[self.prop_name].property_type != "Enum":
+                self.draw_warning(layout, "The selected property is not an enum property!")
+            elif not prop_src.properties[self.prop_name].settings.is_dynamic:
+                self.draw_warning(layout, "The selected property does not have dynamic items!")
         
         # add item button
         op = layout.operator("node.add_node", text="New Enum Item", icon="ADD")

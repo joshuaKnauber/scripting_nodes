@@ -110,7 +110,7 @@ class BasicProperty():
     
 
     def get_name(self):
-        return self.get("name", "New Property")
+        return self.get("name", "Prop Default")
 
     def set_name(self, value):
         names = list(map(lambda item: item.name, list(filter(lambda item: item!=self, self.prop_collection))))
@@ -147,7 +147,7 @@ class BasicProperty():
     
     name: bpy.props.StringProperty(name="Property Name",
                                     description="Name of this property",
-                                    default="New Property",
+                                    default="Prop Default",
                                     get=get_name,
                                     set=set_name,
                                     update=_compile,

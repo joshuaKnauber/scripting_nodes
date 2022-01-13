@@ -23,6 +23,10 @@ class ScriptingSocket:
                                     name="Previously Dynamic",
                                     description="True if this socket was previously dynamic and can now be removed")
 
+    convert_data: bpy.props.BoolProperty(default=True,
+                                    name="Convert Data",
+                                    description="Convert the incoming data to this sockets type")
+
     # OVERWRITE
     subtypes = ["NONE"] # possible subtypes for this data socket. Vector sockets should be seperate socket types, not subtypes (their size is a subtype)!
     subtype_values = {"NONE": "default_value"} # the matching propertie names for this data sockets subtype
@@ -157,14 +161,15 @@ class ScriptingSocket:
                 from_out = self.from_socket()
                 if from_out:
                     value = from_out.python_value
-                    # convert different socket types
-                    if from_out.bl_label != self.bl_label:
-                        value = CONVERSIONS[from_out.bl_label][self.bl_label](value)
-                    # convert convertable subtypes of the same socket
-                    elif from_out.subtype != self.subtype:
-                        if from_out.subtype in CONVERSIONS[from_out.bl_label]:
-                            if self.subtype in CONVERSIONS[from_out.bl_label][from_out.subtype]:
-                                value = CONVERSIONS[from_out.bl_label][from_out.subtype][self.subtype](value)
+                    if self.convert_data:
+                        # convert different socket types
+                        if from_out.bl_label != self.bl_label:
+                            value = CONVERSIONS[from_out.bl_label][self.bl_label](value)
+                        # convert convertable subtypes of the same socket
+                        elif from_out.subtype != self.subtype:
+                            if from_out.subtype in CONVERSIONS[from_out.bl_label]:
+                                if self.subtype in CONVERSIONS[from_out.bl_label][from_out.subtype]:
+                                    value = CONVERSIONS[from_out.bl_label][from_out.subtype][self.subtype](value)
                     return value
                 return self.get_python_repr()
 
