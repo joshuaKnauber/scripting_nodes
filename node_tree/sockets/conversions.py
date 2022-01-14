@@ -63,6 +63,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Data": lambda python_value: python_value,
         "Icon": lambda python_value: python_value,
         "Float": lambda python_value: python_value,
+        "String": lambda python_value: f"str({python_value})",
         "Boolean": lambda python_value: f"bool({python_value})",
     },
     "Integer Vector": {
@@ -72,6 +73,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     "Float": {
         "Data": lambda python_value: python_value,
         "Integer": lambda python_value: python_value,
+        "String": lambda python_value: f"str({python_value})",
         "Boolean": lambda python_value: f"bool({python_value})",
     },
     "Float Vector": {
@@ -81,6 +83,10 @@ CONVERSIONS = { # convert KEY to OPTIONS
     "List": {
         "Data": lambda python_value: python_value,
     },
+    "Blend Data": {
+        "Data": lambda python_value: python_value,
+        "String": lambda python_value: f"str({python_value})",
+    },
     "Data": {
         "String": lambda python_value: python_value,
         "Boolean": lambda python_value: python_value,
@@ -88,5 +94,6 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Enum": lambda python_value: python_value,
         "Float": lambda python_value: python_value,
         "List": lambda python_value: python_value,
+        "Blend Data": lambda python_value: python_value,
     },
 }

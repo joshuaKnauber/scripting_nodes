@@ -25,7 +25,8 @@ class SN_ScriptingBaseNode:
         "FLOAT": (0.25, 0.25, 0.25),
         "INTEGER": (0.14, 0.19, 0.15),
         "VECTOR": (0.13, 0.13, 0.15),
-        "List": (0.13, 0.13, 0.15)
+        "List": (0.13, 0.13, 0.15),
+        "BLEND_DATA": (0.12, 0.15, 0.15)
     }
     # the default color of this node. Set this to one of the options in _colors or use a vec3
     node_color = "DEFAULT"
@@ -567,11 +568,12 @@ class SN_ScriptingBaseNode:
         layout.use_property_split = True
         layout.use_property_decorate = False
         layout.prop(self, "order")
-        layout.separator()
-        box = layout.box()
-        for inp in self.inputs:
-            if not inp.is_program:
-                box.prop(inp, "convert_data", text=f"Convert {inp.name} Data")
+        if len(self.inputs):
+            layout.separator()
+            box = layout.box()
+            for inp in self.inputs:
+                if not inp.is_program:
+                    box.prop(inp, "convert_data", text=f"Convert {inp.name} Data")
         layout.separator()
         self.draw_node_panel(context, layout)
         
@@ -643,6 +645,7 @@ class SN_ScriptingBaseNode:
         "Float Vector": "SN_FloatVectorSocket",
         "Icon": "SN_IconSocket",
         "List": "SN_ListSocket",
+        "Blend Data": "SN_BlendDataSocket",
     }
 
 
@@ -706,6 +709,9 @@ class SN_ScriptingBaseNode:
 
     def add_list_input(self, label="List"): return self._add_input("SN_ListSocket", label)
     def add_list_output(self, label="List"): return self._add_output("SN_ListSocket", label)
+
+    def add_blend_data_input(self, label="Blend Data"): return self._add_input("SN_BlendDataSocket", label)
+    def add_blend_data_output(self, label="Blend Data"): return self._add_output("SN_BlendDataSocket", label)
 
     
     ### ERROR HANDLING
