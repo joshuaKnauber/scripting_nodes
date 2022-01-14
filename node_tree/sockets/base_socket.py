@@ -22,10 +22,18 @@ class ScriptingSocket:
     prev_dynamic: bpy.props.BoolProperty(default=False,
                                     name="Previously Dynamic",
                                     description="True if this socket was previously dynamic and can now be removed")
+    
+    
+    def update_conversion(self, context):
+        if self.is_linked:
+            from_out = self.links[0].from_socket
+            self.node.node_tree.links.remove(self.links[0])
+            self.node.node_tree.links.new(from_out, self)
 
     convert_data: bpy.props.BoolProperty(default=True,
                                     name="Convert Data",
-                                    description="Convert the incoming data to this sockets type")
+                                    description="Convert the incoming data to this sockets type",
+                                    update=update_conversion)
 
     # OVERWRITE
     subtypes = ["NONE"] # possible subtypes for this data socket. Vector sockets should be seperate socket types, not subtypes (their size is a subtype)!
