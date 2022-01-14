@@ -44,6 +44,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     },
     "Icon": {
         "Data": lambda python_value: python_value,
+        "Integer": lambda python_value: python_value,
         "String": lambda python_value: f"icon_to_string({python_value})",
         "Boolean": lambda python_value: f"bool({python_value})",
     },
@@ -60,6 +61,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     },
     "Integer": {
         "Data": lambda python_value: python_value,
+        "Icon": lambda python_value: python_value,
         "Float": lambda python_value: python_value,
         "Boolean": lambda python_value: f"bool({python_value})",
     },

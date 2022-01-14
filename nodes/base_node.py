@@ -597,6 +597,13 @@ class SN_ScriptingBaseNode:
         if socket.bl_idname != to_idname:
             index = socket.index
             if index != -1:
+                # save links
+                links = []
+                for link in socket.links:
+                    if socket.is_output:
+                        links.append(link.to_socket)
+                    else:
+                        links.append(link.from_socket)
                 # add new socket
                 if socket.is_output:
                     new = self._add_output(to_idname, socket.name, socket.dynamic)
@@ -611,9 +618,14 @@ class SN_ScriptingBaseNode:
                 if socket.is_output:
                     self.outputs.remove(socket)
                     self.outputs.move(len(self.outputs)-1, index)
+                    socket = self.outputs[index]
                 else:
                     self.inputs.remove(socket)
                     self.inputs.move(len(self.inputs)-1, index)
+                    socket = self.inputs[index]
+                # relink sockets
+                for link in links:
+                    self.node_tree.links.new(socket, link)
         self._evaluate(bpy.context)
     
     
