@@ -38,9 +38,12 @@ class ScriptingSocket:
     # OVERWRITE
     subtypes = ["NONE"] # possible subtypes for this data socket. Vector sockets should be seperate socket types, not subtypes (their size is a subtype)!
     subtype_values = {"NONE": "default_value"} # the matching propertie names for this data sockets subtype
+    def on_subtype_update(self): pass
 
     def get_subtype_items(self, _): return [(name, name, name) for name in self.subtypes]
-    def update_subtype(self, _): self.force_update()
+    def update_subtype(self, _):
+        self.force_update()
+        self.on_subtype_update()
     subtype: bpy.props.EnumProperty(name="Subtype",
                                     description="The subtype of this socket",
                                     items=get_subtype_items,

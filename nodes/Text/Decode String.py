@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_DecodeStringNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_DecodeStringNode"
-    bl_label = "Decode String"
+    bl_label = "Decode Byte String"
     node_color = "STRING"
 
     def on_create(self, context):

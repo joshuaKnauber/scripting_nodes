@@ -16,6 +16,15 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_python_repr(self):
         return f"None"
     
+    def on_subtype_update(self):
+        self.display_shape = {
+            "NONE": "CIRCLE",
+            "COLLECTION": "SQUARE",
+        }[self.subtype]
+
+    subtypes = ["NONE", "COLLECTION"]
+    subtype_values = {"NONE": "default_value", "COLLECTION": "default_value"}
+    
 
     def get_color(self, context, node):
         return (0, 0.87, 0.7)
