@@ -616,7 +616,7 @@ class SN_ScriptingBaseNode:
                 if socket.subtype in new.subtypes:
                     new.subtype = socket.subtype
                 new.indexable = socket.indexable
-                new["index_type"] = socket.index_type
+                new.index_type = socket.index_type
                 # move socket and remove old
                 if socket.is_output:
                     self.outputs.remove(socket)
