@@ -613,7 +613,8 @@ class SN_ScriptingBaseNode:
                     new = self._add_input(to_idname, socket.name, socket.dynamic)
                 # set socket properties
                 new.prev_dynamic = socket.prev_dynamic
-                new.subtype = socket.subtype
+                if socket.subtype in new.subtypes:
+                    new.subtype = socket.subtype
                 new.indexable = socket.indexable
                 new["index_type"] = socket.index_type
                 # move socket and remove old
@@ -646,6 +647,7 @@ class SN_ScriptingBaseNode:
         "Icon": "SN_IconSocket",
         "List": "SN_ListSocket",
         "Blend Data": "SN_BlendDataSocket",
+        "Blend Data Collection": "SN_BlendDataSocket",
     }
 
 
