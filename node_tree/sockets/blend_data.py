@@ -17,6 +17,12 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
                                 name="Required",
                                 description="If this property is required or not")
 
+    def update_warning(self, context): self["required_warning"] = True
+    required_warning: bpy.props.BoolProperty(default=True,
+                                update=update_warning,
+                                name="Not linked!",
+                                description="This blend data input needs to be connected for this node to work!")
+
     def get_python_repr(self):
         return f"None"
     
@@ -38,4 +44,4 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
         if self.required and not self.is_linked:
             row = layout.row()
             row.alert = True
-            row.label(text="(Required)")
+            row.prop(self, "required_warning", text="", icon="ERROR")
