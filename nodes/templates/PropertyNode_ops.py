@@ -77,6 +77,8 @@ class SN_OT_EditNodeProperty(bpy.types.Operator):
 
     def draw(self, context):
         layout = self.layout
+        layout.use_property_split = True
+        layout.use_property_decorate = False
         node = bpy.data.node_groups[self.node_tree].nodes[self.node]
         prop = node.properties[node.property_index]
         prop.draw(context, layout)
