@@ -50,6 +50,11 @@ class SN_ScriptingBaseNode:
     disable_evaluation: bpy.props.BoolProperty(default=True,
                                                name="Disable Evaluation",
                                                description="If this is enabled this node won't reevaluate. This should only be used for debugging or when the node is being initialized.")
+    
+    
+    skip_export: bpy.props.BoolProperty(default=False,
+                                               name="Skip Export",
+                                               description="If this is enabled this node won't be part of the exported addon.")
 
 
     @classmethod
@@ -568,12 +573,13 @@ class SN_ScriptingBaseNode:
         layout.use_property_split = True
         layout.use_property_decorate = False
         layout.prop(self, "order")
+        if self.is_trigger:
+            layout.prop(self, "skip_export")
         if len(self.inputs):
             layout.separator()
-            box = layout.box()
             for inp in self.inputs:
                 if not inp.is_program:
-                    box.prop(inp, "convert_data", text=f"Convert {inp.name} Data")
+                    layout.prop(inp, "convert_data", text=f"Convert '{inp.name}' Data")
         layout.separator()
         self.draw_node_panel(context, layout)
         
