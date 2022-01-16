@@ -25,7 +25,7 @@ class SN_ScriptingBaseNode:
         "FLOAT": (0.25, 0.25, 0.25),
         "INTEGER": (0.14, 0.19, 0.15),
         "VECTOR": (0.13, 0.13, 0.15),
-        "List": (0.13, 0.13, 0.15),
+        "LIST": (0.13, 0.13, 0.15),
         "BLEND_DATA": (0.12, 0.15, 0.15)
     }
     # the default color of this node. Set this to one of the options in _colors or use a vec3
