@@ -37,7 +37,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     def update_file_path(self, context):
         self["value_file_path"] = bpy.path.abspath(self.value_file_path)
-        ScriptingSocket._update_value(context)
+        self._update_value(context)
 
     value_file_path: bpy.props.StringProperty(name="Value",
                                             description="Value of this socket",
@@ -46,7 +46,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     def update_dir_path(self, context):
         self["value_dir_path"] = bpy.path.abspath(self.value_dir_path)
-        ScriptingSocket._update_value(context)
+        self._update_value(context)
 
     value_dir_path: bpy.props.StringProperty(name="Value",
                                             description="Value of this socket",
