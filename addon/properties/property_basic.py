@@ -21,6 +21,7 @@ class BasicProperty():
         row.prop(self, "property_type")
         row.operator("sn.tooltip", text="", emboss=False, icon="QUESTION").text = self.settings.type_description
         layout.prop(self, "description")
+        layout.prop(self, "prop_options")
 
     
     @property
@@ -36,8 +37,16 @@ class BasicProperty():
     
     
     @property
-    def register_code(self):
-        code = f"{self.python_name}: bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
+    def get_prop_options(self):
+        options = ""
+        if self.prop_options:
+            options = " options={" + ", ".join(map(lambda option: f"'{option}'", list(self.prop_options))) + "},"
+        return options
+    
+    
+    @property
+    def register_code(self):         
+        code = f"{self.python_name}: bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}',{self.get_prop_options} {self.settings.register_options})"
         if hasattr(self.settings, "register_code"):
             return self.settings.register_code(code)
         return code
@@ -174,6 +183,20 @@ class BasicProperty():
                                            ("Enum", "Enum", "Stores multiple entries to be used as dropdowns", property_icons["Enum"], 4),
                                            ("Pointer", "Pointer", "Stores a reference to certain types of blend data, collection or group properties", property_icons["Pointer"], 5),
                                            ("Collection", "Collection", "Stores a list of certain blend data or property groups to be displayed in lists", property_icons["Collection"], 6)])
+
+
+    def get_prop_option_items(self, context):
+        items = [("HIDDEN", "Hidden", "Hide property from operator popups"),
+                ("SKIP_SAVE", "Skip Save", "Don't save this property between calls"),
+                ("ANIMATABLE", "Animatable", "Enable if this property should be animatable"),
+                ("TEXTEDIT_UPDATE", "Textedit Update", "Calls the update function every time the property is edited (Only string properties, not operator popups)")]
+        return items
+
+    prop_options: bpy.props.EnumProperty(name="Options",
+                                    description="Options for this property",
+                                    options={"ENUM_FLAG"},
+                                    items=get_prop_option_items,
+                                    update=_compile)
 
 
     @property
