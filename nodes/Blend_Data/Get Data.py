@@ -92,18 +92,15 @@ class SN_GetDataNode(bpy.types.Node, SN_ScriptingBaseNode, GetDataNode):
     
     def socket_type_by_value_type(self, value):
         types = {
-            "String": str,
-            "Boolean": bool,
-            "Float": float,
-            "Integer": int,
-            "List": list,
-            "Float Vector": mathutils.Vector,
-            "Float Vector": mathutils.Euler,
-            "Float Vector": mathutils.Color,
-            "Float Vector": mathutils.Quaternion,
+            "String": [str],
+            "Boolean": [bool],
+            "Float": [float],
+            "Integer": [int],
+            "List": [list],
+            "Float Vector": [mathutils.Vector, mathutils.Euler, mathutils.Color, mathutils.Quaternion],
         }
         for name in types:
-            if types[name] == type(value):
+            if type(value) in types[name]:
                 return name
         if hasattr(value, "bl_rna"):
             return "Blend Data"
