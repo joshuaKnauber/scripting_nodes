@@ -11,7 +11,9 @@ class SN_IndexBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "BLEND_DATA"
     
     def on_create(self, context):
-        self.add_blend_data_input("Blend Data Collection").subtype = "COLLECTION"
+        inp = self.add_blend_data_input("Blend Data Collection")
+        inp.subtype = "COLLECTION"
+        inp.required = True
         self.add_integer_input("Index")
         self.add_blend_data_output("Blend Data")
 

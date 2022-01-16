@@ -12,6 +12,10 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     default_python_value = ""
     default_prop_value = None
+    
+    required: bpy.props.BoolProperty(default=False,
+                                name="Required",
+                                description="If this property is required or not")
 
     def get_python_repr(self):
         return f"None"
@@ -31,3 +35,7 @@ class SN_BlendDataSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     def draw_socket(self, context, layout, node, text):
         layout.label(text=text)
+        if self.required and not self.is_linked:
+            row = layout.row()
+            row.alert = True
+            row.label(text="(Required)")
