@@ -267,21 +267,6 @@ class SN_ScriptingBaseNode:
                 print(error)
             # remove unregister function
             del sn.unregister_cache[pointer]
-            
-            
-    def clean_unused_unregisters(self):
-        """  """
-        pointers = list(bpy.context.scene.sn.unregister_cache.keys())
-        for node in self.node_tree.nodes:
-            if node.is_trigger:
-                if f"{node.as_pointer()}" in pointers:
-                    pointers.remove(f"{node.as_pointer()}")
-                else:
-                    node.compile()
-        if "properties" in pointers:
-            pointers.remove("properties")
-        for pointer in pointers:
-            self.pointer_unregister(pointer)
 
 
     def node_unregister(self):
