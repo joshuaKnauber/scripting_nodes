@@ -36,7 +36,7 @@ import os
 from .keymaps.keymap import register_keymaps, unregister_keymaps
 from .node_tree.node_categories import get_node_categories
 from .interface.header.header import header_prepend, header_append
-from .interface.panels.warnings import append_warning, prepend_name_warning
+from .interface.panels.warnings import append_warning, append_name_warning
 from .interface.menus.rightclick import serpens_right_click
 from .interface.menus.snippets import snippet_menu
 
@@ -88,7 +88,7 @@ def register():
     # add no edit warnings
     bpy.types.NODE_PT_node_tree_interface_inputs.append(append_warning)
     bpy.types.NODE_PT_node_tree_interface_outputs.append(append_warning)
-    bpy.types.NODE_PT_active_node_generic.prepend(prepend_name_warning)
+    bpy.types.NODE_PT_active_node_generic.append(append_name_warning)
 
     # add to the node add menu
     # bpy.types.NODE_MT_category_snippets.append(snippet_menu)

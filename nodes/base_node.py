@@ -1,6 +1,6 @@
 import bpy
 from uuid import uuid4
-from ..utils import normalize_code, print_debug_code
+from ..utils import normalize_code, print_debug_code, unique_collection_name
 from ..node_tree.sockets.conversions import CONVERT_UTILS
 
 
@@ -44,6 +44,28 @@ class SN_ScriptingBaseNode:
         "inputs": "",
         "outputs": ""
     }
+    
+
+    def update_node_name(self, context):
+        # reset edit name if set to empty
+        if not self.edit_name:
+            self.edit_name = self.name
+        else:
+            # sync name with edit name
+            if self.name != self.edit_name:
+                # update nodes with same name
+                if self.edit_name in self.node_tree.nodes:
+                    names = list(map(lambda node: node.name, self.node_tree.nodes))
+                    self.node_tree.nodes[self.edit_name].edit_name = unique_collection_name(self.edit_name, "Node", names, ".")
+                # set name
+                self.name = self.edit_name
+            # update references
+            ref = self.collection.get_ref_by_uid(self.static_uid)
+            ref.name = self.edit_name
+
+    edit_name: bpy.props.StringProperty(name="Name",
+                                    description="Edit this name instead of the node name",
+                                    update=update_node_name)
     
     
     # disables evaluation, only use this when the node is being initialized
@@ -474,10 +496,13 @@ class SN_ScriptingBaseNode:
         if not self.bl_idname in self.node_tree.node_refs:
             collection = self.node_tree.node_refs.add()
             collection.name = self.bl_idname
+        # clear unused references
+        self.collection.clear_unused_refs()
         # add the node to the collection
         node_ref = self.collection.refs.add()
         node_ref.uid = self.static_uid
-        node_ref.name = self.name
+        self.edit_name = self.name
+        node_ref.name = self.edit_name
     
     def init(self, context):
         # create node collection item
