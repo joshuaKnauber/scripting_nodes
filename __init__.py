@@ -97,6 +97,7 @@ def register():
     bpy.app.handlers.depsgraph_update_post.append(handlers.depsgraph_handler)
     bpy.app.handlers.load_post.append(handlers.load_handler)
     bpy.app.handlers.load_pre.append(handlers.unload_handler)
+    bpy.app.handlers.undo_post.append(handlers.undo_post)
     atexit.register(handlers.unload_handler)
     
     # add right click menu
@@ -111,7 +112,7 @@ def unregister():
     # remove no edit warnings
     bpy.types.NODE_PT_node_tree_interface_inputs.remove(append_warning)
     bpy.types.NODE_PT_node_tree_interface_outputs.remove(append_warning)
-    bpy.types.NODE_PT_active_node_generic.remove(prepend_name_warning)
+    bpy.types.NODE_PT_active_node_generic.remove(append_name_warning)
     
     # remove from the node add menu
     # bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
@@ -132,6 +133,7 @@ def unregister():
     bpy.app.handlers.depsgraph_update_post.remove(handlers.depsgraph_handler)
     bpy.app.handlers.load_post.remove(handlers.load_handler)
     bpy.app.handlers.load_pre.remove(handlers.unload_handler)
+    bpy.app.handlers.undo_post.remove(handlers.undo_post)
     atexit.unregister(handlers.unload_handler)
     
     # remove right click menu

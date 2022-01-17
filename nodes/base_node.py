@@ -306,7 +306,7 @@ class SN_ScriptingBaseNode:
             ctx = bpy.context.copy()
             ctx['edit_text'] = txt
             try:
-                bpy.ops.text.run_script(ctx) # TODO undo doesn't recompile
+                bpy.ops.text.run_script(ctx)
             except Exception as error:
                 print("")
                 print(f"--- Serpens error in node tree of '{self.name}' ---")
@@ -328,7 +328,6 @@ class SN_ScriptingBaseNode:
         """ Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes """
         print(f"Serpens Log: {self.label if self.label else self.name} received an update")
         if self.is_trigger:
-            self.clean_unused_unregisters()
             self.compile()
             self.trigger_ref_update()
         else:
@@ -343,7 +342,6 @@ class SN_ScriptingBaseNode:
         print(f"Serpens Log: {self.label if self.label else self.name} received an update")
         roots = self.root_nodes
         for root in roots:
-            self.clean_unused_unregisters()
             root.compile()
 
 
