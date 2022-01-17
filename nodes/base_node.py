@@ -234,18 +234,38 @@ class SN_ScriptingBaseNode:
         return imports + imperative + f"\n{main_code}\n" + register + unregister + run_register + store_unregister
 
 
+    def pointer_unregister(self, pointer):
+        """ Unregisters the given pointers function """
+        sn = bpy.context.scene.sn
+        if pointer in sn.unregister_cache:
+            # run unregister
+            try:
+                sn.unregister_cache[pointer]()
+            except Exception as error:
+                print(error)
+            # remove unregister function
+            del sn.unregister_cache[pointer]
+            
+            
+    def clean_unused_unregisters(self):
+        """  """
+        pointers = list(bpy.context.scene.sn.unregister_cache.keys())
+        for node in self.node_tree.nodes:
+            if node.is_trigger:
+                if f"{node.as_pointer()}" in pointers:
+                    pointers.remove(f"{node.as_pointer()}")
+                else:
+                    node.compile()
+        if "properties" in pointers:
+            pointers.remove("properties")
+        for pointer in pointers:
+            self.pointer_unregister(pointer)
+
+
     def node_unregister(self):
         """ Unregisters this trigger nodes current code """
-        sn = bpy.context.scene.sn
         if self.is_trigger:
-            if f"{self.as_pointer()}" in sn.unregister_cache:
-                # run unregister
-                try:
-                    sn.unregister_cache[f"{self.as_pointer()}"]()
-                except Exception as error:
-                    print(error)
-                # remove unregister function
-                del sn.unregister_cache[f"{self.as_pointer()}"]
+            self.pointer_unregister(f"{self.as_pointer()}")
  
 
     def compile(self):
@@ -286,6 +306,7 @@ class SN_ScriptingBaseNode:
         """ Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes """
         print(f"Serpens Log: {self.label if self.label else self.name} received an update")
         if self.is_trigger:
+            self.clean_unused_unregisters()
             self.compile()
             self.trigger_ref_update()
         else:
@@ -300,6 +321,7 @@ class SN_ScriptingBaseNode:
         print(f"Serpens Log: {self.label if self.label else self.name} received an update")
         roots = self.root_nodes
         for root in roots:
+            self.clean_unused_unregisters()
             root.compile()
 
 

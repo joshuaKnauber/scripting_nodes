@@ -82,10 +82,14 @@ CONVERSIONS = { # convert KEY to OPTIONS
     },
     "List": {
         "Data": lambda python_value: python_value,
+        "Float Vector": lambda python_value: f"list({python_value})",
+        "Integer Vector": lambda python_value: f"list({python_value})",
+        "Boolean Vector": lambda python_value: f"list({python_value})",
     },
     "Blend Data": {
         "Data": lambda python_value: python_value,
         "String": lambda python_value: f"str({python_value})",
+        "List": lambda python_value: f"{python_value}.values()", # TODO only collections
     },
     "Data": {
         "String": lambda python_value: python_value,
