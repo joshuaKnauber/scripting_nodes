@@ -62,8 +62,16 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_is_subpanel(self, context):
         """ Updates the compile order when turned into a subpanel """
         if self.is_subpanel:
+            self["parent_type"] = "BLENDER"
+            self["ref_SN_PanelNode"] = ""
+            self["space"] = "PROPERTIES"
+            self["region"] = "WINDOW"
+            self["context"] = "render"
             self.order = 1
         else:
+            self["space"] = "VIEW_3D"
+            self["region"] = "UI"
+            self["context"] = ""
             self.order = 0
         self._evaluate(context)
 
@@ -118,7 +126,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="If this panel should be a subpanel",
                                     update=update_is_subpanel)
 
-    panel_parent: bpy.props.StringProperty(default="EEVEE_MATERIAL_PT_surface",
+    panel_parent: bpy.props.StringProperty(default="RENDER_PT_context",
                                     name="Parent",
                                     description="The panel id this subpanel should be shown in",
                                     update=SN_ScriptingBaseNode._evaluate)

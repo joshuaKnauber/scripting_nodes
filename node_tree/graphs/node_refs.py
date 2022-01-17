@@ -20,16 +20,17 @@ class NodeRef(bpy.types.PropertyGroup):
         return None
             
     def set_name(self, value):
-        prev_name = self["name"]
+        prev_name = self.get("name", "")
         self["name"] = value
         
         # update references
-        ref_node = self.node
-        for ntree in bpy.data.node_groups:
-            if ntree.bl_idname == "ScriptingNodesTree":
-                for node in ntree.nodes:
-                    if getattr(node, f"ref_{ref_node.bl_idname}", None) == prev_name:
-                        setattr(node, f"ref_{ref_node.bl_idname}", value)
+        if prev_name:
+            ref_node = self.node
+            for ntree in bpy.data.node_groups:
+                if ntree.bl_idname == "ScriptingNodesTree":
+                    for node in ntree.nodes:
+                        if getattr(node, f"ref_{ref_node.bl_idname}", None) == prev_name:
+                            setattr(node, f"ref_{ref_node.bl_idname}", value)
     
     def get_name(self):
         return self.get("name", "")
