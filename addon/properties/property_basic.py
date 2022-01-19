@@ -189,7 +189,7 @@ class BasicProperty():
         items = [("HIDDEN", "Hidden", "Hide property from operator popups"),
                 ("SKIP_SAVE", "Skip Save", "Don't save this property between calls"),
                 ("ANIMATABLE", "Animatable", "Enable if this property should be animatable"),
-                ("TEXTEDIT_UPDATE", "Textedit Update", "Calls the update function every time the property is edited (Only string properties, not operator popups)")]
+                ("TEXTEDIT_UPDATE", "Textedit Update", "Calls the update function every time the property is edited (Only string properties; not operator popups)")]
         return items
 
     prop_options: bpy.props.EnumProperty(name="Options",
