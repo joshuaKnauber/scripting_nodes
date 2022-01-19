@@ -21,7 +21,11 @@ class SN_PT_AssetsPanel(bpy.types.Panel):
         
         # draw asset list
         row = layout.row(align=False)
-        row.template_list("SN_UL_AssetList", "Assets", sn, "assets", sn, "asset_index", rows=3)
+        col = row.column(align=True)
+        col.template_list("SN_UL_AssetList", "Assets", sn, "assets", sn, "asset_index", rows=3)
+        op = col.operator("node.add_node", text="Add Node", icon="ADD")
+        op.type = "SN_AssetNode"
+        op.use_transform = True
         col = row.column(align=True)
         col.operator("sn.add_asset", text="", icon="ADD")
         col.operator("sn.find_asset", text="", icon="VIEWZOOM")

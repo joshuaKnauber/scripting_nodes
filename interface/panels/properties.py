@@ -20,7 +20,9 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
         
         # draw property ui list
         row = layout.row(align=False)
-        row.template_list("SN_UL_PropertyList", "Properties", sn, "properties", sn, "property_index", rows=4)
+        col = row.column(align=True)
+        col.template_list("SN_UL_PropertyList", "Properties", sn, "properties", sn, "property_index", rows=4)
+        col.operator("sn.add_property_node", text="Add Node", icon="ADD")
         col = row.column(align=True)
         col.operator("sn.add_property", text="", icon="ADD")
         col.operator("sn.add_property", text="", icon="VIEWZOOM")
@@ -35,6 +37,8 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
         subrow.enabled = sn.property_index < len(sn.properties)-1
         op = subrow.operator("sn.move_property", text="", icon="TRIA_DOWN")
         op.move_up = False
+        layout.separator()
+        
         
         if sn.property_index < len(sn.properties):
             prop = sn.properties[sn.property_index]
