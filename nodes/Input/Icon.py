@@ -54,11 +54,21 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 self.outputs["Icon"].python_value = "0"
         elif self.icon_source == "PATH":
-            pass
+            self.code_import = "import os"
+            self.code_imperative = f"""
+                                    def load_preview_icon(path):
+                                        if os.path.exists(path):
+                                            if not path in bpy.context.scene.sn_icons:
+                                                bpy.context.scene.sn_icons.load(path, path, "IMAGE")
+                                            return bpy.context.scene.sn_icons[path].icon_id
+                                        return 0
+                                    """
+            self.outputs["Icon"].python_value = f"load_preview_icon(r{self.inputs[0].python_value})"
     
     
     def evaluate_export(self, context):
         # maybe dont save in property, use global dict or something similar instead
+        # TODO
         if self.icon_source == "BLENDER":
             self.outputs["Icon"].python_value = f"{self.icon}"
         else:
