@@ -14,7 +14,7 @@ class {idname}(bpy.types.Panel):
     bl_label = "test"
     bl_space_type = '{space}'
     bl_region_type = '{region}'
-
+    bl_category = 'SERPENS'
     bl_options = {{"HIDE_HEADER"}}
     bl_order = 0
     
