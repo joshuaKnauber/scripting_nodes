@@ -29,24 +29,3 @@ class SN_OT_PasteOperator(bpy.types.Operator):
         else:
             self.report({"ERROR"}, message="Not a valid blender operator. Use the Rightclick Menu -> Get Serpens Operator button")
         return {"FINISHED"}
-
-
-
-class SN_OT_ToggleDisabledHide(bpy.types.Operator):
-    bl_idname = "sn.toggle_disabled_hide"
-    bl_label = "Toggle Hide"
-    bl_description = "Hides or unhides the disabled inputs on this node"
-    bl_options = {"REGISTER", "INTERNAL"}
-    
-    node: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
-    node_tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
-
-    def execute(self, context):
-        hide = None
-        node = bpy.data.node_groups[self.node_tree].nodes[self.node]
-        for inp in node.inputs:
-            if inp.can_be_disabled and inp.disabled:
-                if hide == None:
-                    hide = not inp.hide
-                inp.hide = hide
-        return {"FINISHED"}

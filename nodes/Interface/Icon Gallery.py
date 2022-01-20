@@ -29,5 +29,3 @@ class SN_IconGalleryNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReference
         if self.prop_name and prop_src and self.prop_name in prop_src.properties:
             if prop_src.properties[self.prop_name].property_type != "Enum":
                 self.draw_warning(layout, "The selected property is not an enum property!")
-            elif not prop_src.properties[self.prop_name].settings.is_dynamic:
-                self.draw_warning(layout, "The selected property does not have dynamic items!")

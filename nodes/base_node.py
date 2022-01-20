@@ -116,7 +116,7 @@ class SN_ScriptingBaseNode:
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
-                    if hasattr(node, "is_trigger") and not node == self:
+                    if hasattr(node, f"ref_{self.bl_idname}") and not node == self:
                         node.on_ref_update(self)
     
     
@@ -756,7 +756,6 @@ class SN_ScriptingBaseNode:
         """ Creates an input from the given property """
         # get property type
         prop_type = prop.type.title()
-        print(prop, prop_type)
         if prop_type == "Int":
             prop_type = "Integer"
         if getattr(prop, "is_array", False):

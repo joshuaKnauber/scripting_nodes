@@ -47,7 +47,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         """ Returns the collection for the given node idname refs in this node trees """
         if idname in self.node_refs:
             return self.node_refs[idname]
-        return {"name": idname, "refs": []}
+        return self.node_refs["empty"]
     
 
     def _map_link_to_sockets(self, link):
@@ -160,6 +160,10 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
 
     def update(self):
+        # add empty collection for node drawing
+        if not "empty" in self.node_refs:
+            self.node_refs.add().name = "empty"
+        # update tree links
         self._update_tree_links()
 
 
