@@ -751,6 +751,37 @@ class SN_ScriptingBaseNode:
     def add_blend_data_input(self, label="Blend Data"): return self._add_input("SN_BlendDataSocket", label)
     def add_blend_data_output(self, label="Blend Data"): return self._add_output("SN_BlendDataSocket", label)
 
+
+    def add_input_from_property(self, prop):
+        """ Creates an input from the given property """
+        # get property type
+        prop_type = prop.type.title()
+        if prop_type == "Int":
+            prop_type = "Integer"
+        if getattr(prop, "is_array", False):
+            prop_type = f"{prop_type} Vector"
+        # add property
+        if prop_type in self.socket_names:
+            # dynamic enums
+            if prop_type == "Enum":
+                if not prop.enum_items:
+                    prop_type = "String"
+            inp = self._add_input(self.socket_names[prop_type], prop.name)
+            # get enum items
+            if prop_type == "Enum":
+                inp.items = str(list(map(lambda item: item.identifier, prop.enum_items)))
+                if prop.is_enum_flag:
+                    inp.subtype = "ENUM_FLAG"
+            # get property default
+            default = prop.default
+            if getattr(prop, "is_array", False):
+                default = tuple([prop.default]*32)
+                inp.size = prop.array_length
+            inp.default_value = default
+
+            return inp
+        return None
+
     
     ### ERROR HANDLING
     def add_error(self, title, description, fatal=False):

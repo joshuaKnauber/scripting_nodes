@@ -35,6 +35,19 @@ class ScriptingSocket:
                                     description="Convert the incoming data to this sockets type",
                                     update=update_conversion)
 
+
+    def update_disabled(self, context):
+        self.force_update()
+
+    disabled: bpy.props.BoolProperty(default=False,
+                                    name="Disabled",
+                                    description="Disable this socket for this node",
+                                    update=update_disabled)
+
+    can_be_disabled: bpy.props.BoolProperty(default=False,
+                                    name="Can Be Hidden",
+                                    description="Lets the user disable this socket which can be used for evaluation")
+
     # OVERWRITE
     subtypes = ["NONE"] # possible subtypes for this data socket. Vector sockets should be seperate socket types, not subtypes (their size is a subtype)!
     subtype_values = {"NONE": "default_value"} # the matching propertie names for this data sockets subtype
@@ -44,6 +57,7 @@ class ScriptingSocket:
     def update_subtype(self, _):
         self.force_update()
         self.on_subtype_update()
+        
     subtype: bpy.props.EnumProperty(name="Subtype",
                                     description="The subtype of this socket",
                                     items=get_subtype_items,
@@ -130,16 +144,32 @@ class ScriptingSocket:
         # draw debug text for sockets
         if context.scene.sn.debug_python_sockets and self.python_value:
             text = self.python_value.replace("\n", " || ")
+        # draw dynamic sockets
         if self.dynamic:
             self._draw_dynamic_socket(layout, node, text)
         else:
-            if self.is_output: self.draw_socket(context, layout, node, text)
+            # draw output
+            if self.is_output:
+                self.draw_socket(context, layout, node, text)
+            # draw previously dynamic socket (with insert socket)
             if self.prev_dynamic:
                 self._draw_prev_dynamic_socket(context, layout, node)
+            # draw inputs
             if not self.is_output:
-                self.draw_socket(context, layout, node, text)
-                if self.indexable:
-                    layout.prop(self, "index_type", icon_only=True)
+                # draw disable icon
+                if self.can_be_disabled:
+                    layout.prop(self, "disabled", icon_only=True, icon="HIDE_ON" if self.disabled else "HIDE_OFF", emboss=False)
+                    layout = layout.row()
+                    layout.enabled = not self.disabled
+                # draw disabled socket
+                if self.can_be_disabled and self.disabled:
+                    layout.label(text=text)
+                # draw enabled socket
+                else:
+                    self.draw_socket(context, layout, node, text)
+                    # draw indexable socket
+                    if self.indexable:
+                        layout.prop(self, "index_type", icon_only=True)
 
 
     ### SOCKET COLOR
