@@ -68,3 +68,6 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         op = row.operator("sn.paste_operator", text=self.pasted_name if self.pasted_operator else "Paste Operator", icon="PASTEDOWN")
         op.node_tree = self.node_tree.name
         op.node = self.name
+        op = row.operator("sn.toggle_disabled_hide", text="", icon="HIDE_OFF")
+        op.node_tree = self.node_tree.name
+        op.node = self.name

@@ -756,6 +756,7 @@ class SN_ScriptingBaseNode:
         """ Creates an input from the given property """
         # get property type
         prop_type = prop.type.title()
+        print(prop, prop_type)
         if prop_type == "Int":
             prop_type = "Integer"
         if getattr(prop, "is_array", False):
@@ -777,7 +778,10 @@ class SN_ScriptingBaseNode:
             if getattr(prop, "is_array", False):
                 default = tuple([prop.default]*32)
                 inp.size = prop.array_length
-            inp.default_value = default
+            if prop_type == "Enum" and prop.is_enum_flag:
+                pass
+            else:
+                inp.default_value = default
 
             return inp
         return None
