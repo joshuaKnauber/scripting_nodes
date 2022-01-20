@@ -4,10 +4,10 @@ from ..templates.PropertyReferenceNode import PropertyReferenceNode
 
 
 
-class SN_ImageGalleryNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferenceNode):
+class SN_IconGalleryNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferenceNode):
 
-    bl_idname = "SN_ImageGalleryNode"
-    bl_label = "Image Gallery"
+    bl_idname = "SN_IconGalleryNode"
+    bl_label = "Icon Gallery"
     node_color = "INTERFACE"
 
     def on_create(self, context):
