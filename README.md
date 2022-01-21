@@ -37,3 +37,4 @@ Visual Scripting addon for blender with nodes
 - [ ] Complete ToDo's (in code)
 - [ ] Fix Bugs
 - [ ] Packages and Snippets
+- [ ] New Demo version
