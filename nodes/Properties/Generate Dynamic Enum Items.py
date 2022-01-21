@@ -28,9 +28,10 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
 
 
     def evaluate(self, context):
-        self.code_imperative = ""
-        self.code = ""
-
+        print("ye")
+        # self.code_imperative = ""
+        # self.code = ""
+        
         enum_src = self.get_prop_source()
         if enum_src and self.prop_name in enum_src.properties and enum_src.properties[self.prop_name].property_type == "Enum":
             self.code_imperative = f"""

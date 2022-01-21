@@ -395,6 +395,7 @@ class SN_ScriptingBaseNode:
         if self.disable_evaluation: return
         
         # keep track of code before changes
+        print("re")
         prev_code = self.code
         prev_code_import = self.code_import
         prev_code_imperative = self.code_imperative
