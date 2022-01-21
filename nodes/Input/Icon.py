@@ -63,7 +63,7 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             return bpy.context.scene.sn_icons[path].icon_id
                                         return 0
                                     """
-            self.outputs["Icon"].python_value = f"load_preview_icon(r{self.inputs[0].python_value})"
+            self.outputs["Icon"].python_value = f"load_preview_icon({self.inputs[0].python_value})"
     
     
     def evaluate_export(self, context):

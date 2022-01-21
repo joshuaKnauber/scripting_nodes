@@ -21,13 +21,16 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
         self.string_repr_warning = False
         value = getattr(self, self.subtype_attr)
         if "'" in value and not '"' in value:
-            return f"\"{value}\""
+            value = f"\"{value}\""
         elif '"' in value and not "'" in value:
-            return f"\'{value}\'"
+            value = f"\'{value}\'"
         else:
             if "'" in value and '"' in value:
                 self.string_repr_warning = True
-            return f"\'{value}\'"
+            value = f"\'{value}\'"
+        if self.subtype == "NONE":
+            return value
+        return f"r{value}"
             
 
     default_value: bpy.props.StringProperty(name="Value",
