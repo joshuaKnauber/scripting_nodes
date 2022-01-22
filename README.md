@@ -12,6 +12,7 @@ Visual Scripting addon for blender with nodes
 - [ ] If Interface (& Program with dropdown)
 - [ ] For Interface (& Program with dropdown)
 - [ ] Repeat Interface (& Program with dropdown)
+- [ ] Prop Search
 
 ### Blend Data
 - [ ] Get Data Node
