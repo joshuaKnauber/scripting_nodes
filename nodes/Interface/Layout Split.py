@@ -1,0 +1,42 @@
+import bpy
+from ..base_node import SN_ScriptingBaseNode
+
+
+
+class SN_LayoutSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
+
+    bl_idname = "SN_LayoutSplitNode"
+    bl_label = "Split"
+    layout_type = "split"
+    bl_width_default = 200
+    node_color = "INTERFACE"
+
+    def on_create(self, context):
+        self.add_interface_input()
+        inp = self.add_float_input("Factor")
+        inp.subtype = "FACTOR"
+        inp.default_value = 0.5
+        self.add_boolean_input("Align")
+        self.add_boolean_input("Alert")
+        self.add_boolean_input("Enabled")["default_value"] = True
+        self.add_boolean_input("Split Layout")
+        self.add_boolean_input("Decorate Layout")
+        self.add_float_input("Scale X")["default_value"] = 1
+        self.add_float_input("Scale Y")["default_value"] = 1
+        self.add_enum_input("Alignment")["items"] = str(["Expand", "Left", "Center", "Right"])
+        self.add_interface_output()
+        self.add_interface_output()
+
+    def evaluate(self, context):
+        self.code = f"""
+                    split = {self.active_layout}.split(factor={self.inputs["Factor"].python_value}, align={self.inputs["Align"].python_value})
+                    split.alert = {self.inputs["Alert"].python_value}
+                    split.enabled = {self.inputs["Enabled"].python_value}
+                    split.use_property_split = {self.inputs["Split Layout"].python_value}
+                    split.use_property_decorate = {self.inputs["Decorate Layout"].python_value}
+                    split.scale_x = {self.inputs["Scale X"].python_value}
+                    split.scale_y = {self.inputs["Scale Y"].python_value}
+                    split.alignment = {self.inputs["Alignment"].python_value}.upper()
+                    {self.indent(self.outputs[0].python_value, 5)}
+                    {self.indent(self.outputs[1].python_value, 5)}
+                    """

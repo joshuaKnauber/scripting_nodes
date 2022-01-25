@@ -6,10 +6,10 @@ Visual Scripting addon for blender with nodes
 - [ ] Display Property Node
 - [ ] Generate Dynamic Enum Items Node (Fix imperative)
 - [ ] Menu Nodes
-- [ ] Split Node
+- [X] Split Node
 - [ ] Button Node (Custom Operators)
 - [ ] Interface Functions
-- [ ] If Interface (& Program with dropdown)
+- [X] If Interface (& Program with dropdown)
 - [ ] For Interface (& Program with dropdown)
 - [ ] Repeat Interface (& Program with dropdown)
 - [ ] Prop Search
