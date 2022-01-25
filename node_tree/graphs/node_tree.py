@@ -64,9 +64,13 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             # check if multiple program sockets are connected
             if to_inp.is_program:
                 to_sockets = from_out.to_sockets(check_validity=False)
-                if to_inp != to_sockets[0]:
-                    return False
-                return True
+                if from_out.bl_label == to_inp.bl_label:
+                    # check if first same program socket
+                    for socket in to_sockets:
+                        if socket.bl_label == to_inp.bl_label:
+                            if socket == to_inp: return True
+                            else: break
+                return False
             # data types are the same
             elif from_out.bl_label == to_inp.bl_label:
                 return True

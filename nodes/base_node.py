@@ -395,7 +395,7 @@ class SN_ScriptingBaseNode:
         if self.disable_evaluation: return
         
         # keep track of code before changes
-        print("re")
+        # TODO this seems to be buggy. didn't reset the code for some node, no idea how to reproduce
         prev_code = self.code
         prev_code_import = self.code_import
         prev_code_imperative = self.code_imperative

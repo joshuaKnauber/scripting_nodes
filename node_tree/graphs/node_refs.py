@@ -14,7 +14,7 @@ class NodeRef(bpy.types.PropertyGroup):
             return node_cache[f"{node_tree.name};{self.uid}"]
         # save node to cache
         for node in node_tree.nodes:
-            if node.static_uid == self.uid:
+            if getattr(node, "static_uid", None) == self.uid:
                 node_cache[f"{node_tree.name};{node.static_uid}"] = node
                 return node
         return None
