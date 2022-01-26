@@ -42,4 +42,4 @@ Visual Scripting addon for blender with nodes
 - [ ] Fix Bugs
 - [ ] Packages and Snippets
 - [ ] New Demo version
-- [ ] Msgbus
+- [X] Msgbus

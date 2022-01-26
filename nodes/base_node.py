@@ -45,28 +45,6 @@ class SN_ScriptingBaseNode:
         "outputs": ""
     }
     
-
-    def update_node_name(self, context):
-        # reset edit name if set to empty
-        if not self.edit_name:
-            self.edit_name = self.name
-        else:
-            # sync name with edit name
-            if self.name != self.edit_name:
-                # update nodes with same name
-                if self.edit_name in self.node_tree.nodes:
-                    names = list(map(lambda node: node.name, self.node_tree.nodes))
-                    self.node_tree.nodes[self.edit_name].edit_name = unique_collection_name(self.edit_name, "Node", names, ".")
-                # set name
-                self.name = self.edit_name
-            # update references
-            ref = self.collection.get_ref_by_uid(self.static_uid)
-            ref.name = self.edit_name
-
-    edit_name: bpy.props.StringProperty(name="Name",
-                                    description="Edit this name instead of the node name",
-                                    update=update_node_name)
-    
     
     # disables evaluation, only use this when the node is being initialized
     disable_evaluation: bpy.props.BoolProperty(default=True,
@@ -485,8 +463,7 @@ class SN_ScriptingBaseNode:
         # add the node to the collection
         node_ref = self.collection.refs.add()
         node_ref.uid = self.static_uid
-        self.edit_name = self.name
-        node_ref.name = self.edit_name
+        node_ref.name = self.name
     
     def init(self, context):
         # create node collection item

@@ -4,8 +4,14 @@ owner = object()
 
 
 
-def name_change_callback(*args):
-    print("name change", args, bpy.context.copy())
+def name_change_callback(cls):
+    for ntree in bpy.data.node_groups:
+        if ntree.bl_idname == "ScriptingNodesTree":
+            for ref in ntree.node_collection(cls.bl_idname).refs:
+                node = ref.node
+                if node and node.name != ref.name:
+                    ref.name = node.name
+                    return
 
 
 
@@ -16,12 +22,11 @@ def subscribe_to_name_change():
             bpy.msgbus.subscribe_rna(
                 key=subscribe_to,
                 owner=owner,
-                args=(owner, cls),
+                args=(cls,),
                 notify=name_change_callback,
             )
 
 
 
 def unsubscribe_from_name_change():
-    pass
-    # bpy.msgbus.clear_by_handle
+    bpy.msgbus.clear_by_owner(owner)
