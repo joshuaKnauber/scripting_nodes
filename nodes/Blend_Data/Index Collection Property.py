@@ -8,7 +8,7 @@ class SN_IndexCollectionPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_IndexCollectionPropertyNode"
     bl_label = "Index Collection Property"
-    node_color = "BLEND_DATA"
+    node_color = "PROPERTY"
     
     def on_create(self, context):
         self.add_collection_property_input()

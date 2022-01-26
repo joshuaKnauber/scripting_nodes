@@ -7,7 +7,7 @@ class SN_BlenderDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_BlenderDataNode"
     bl_label = "Blender Data"
-    node_color = "BLEND_DATA"
+    node_color = "PROPERTY"
 
     def on_create(self, context):
         self.add_property_output("Current Context")

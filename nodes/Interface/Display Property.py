@@ -19,6 +19,9 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefer
 
     def evaluate(self, context):
         if self.inputs["Property"].is_linked:
-            self.code = f"{self.active_layout}.prop(context.scene, 'sna_new_property', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})"
+            self.code = f"""
+                        prop_src, prop_name = {self.inputs['Property'].python_value}
+                        {self.active_layout}.prop(prop_src, prop_name, text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})
+                        """
         else:
             self.code = f"{self.active_layout}.label(text='No Property connected!', icon='ERROR')"

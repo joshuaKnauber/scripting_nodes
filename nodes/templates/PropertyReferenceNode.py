@@ -47,7 +47,7 @@ class PropertyReferenceNode():
             else:
                 return None
         
-        if self.from_prop_group and self.prop_group in src.properties and src.properties[self.prop_group].property_type == "Group":
+        if self.from_prop_group and hasattr(src, "properties") and self.prop_group in src.properties and src.properties[self.prop_group].property_type == "Group":
             return src.properties[self.prop_group].settings
         elif not self.from_prop_group:
             return src
@@ -60,7 +60,9 @@ class PropertyReferenceNode():
             return bpy.context.scene.sn
         elif self.prop_source == "NODE":
             if self.from_node_tree and self.from_node and self.from_node in self.from_node_tree.nodes:
-                return self.from_node_tree.nodes[self.from_node]
+                node = self.from_node_tree.nodes[self.from_node]
+                if hasattr(node, "properties"):
+                    return node
         return None
     
     
@@ -73,8 +75,8 @@ class PropertyReferenceNode():
     def draw_reference_selection(self, layout, unique_selection=False):
         prop_src = self.get_prop_source()
         prop_group_src = self.get_prop_group_src()
-        layout.prop(self, "prop_source", text="")
-        layout.prop(self, "from_prop_group", text="Use Property Group")
+        layout.prop(self, "prop_source", expand=True)
+        layout.prop(self, "from_prop_group", text="From Property Group")
 
         # select node
         if self.prop_source == "NODE":
@@ -93,13 +95,13 @@ class PropertyReferenceNode():
         
         # select prop group and property
         row = layout.row(align=True)
-        if self.from_prop_group:
+        if self.from_prop_group and prop_group_src:
             row.prop_search(self, "prop_group", prop_group_src, "properties", text="", icon="FILEBROWSER")
-        if prop_src:
+        if prop_group_src and prop_src:
             row.prop_search(self, "prop_name", prop_src, "properties", text="")
 
         # warnings prop group
-        if self.from_prop_group and self.prop_group:
+        if self.from_prop_group and self.prop_group and prop_group_src:
             if not self.prop_group in prop_group_src.properties:
                 self.draw_warning(layout, "Can't find this property group!")
             elif prop_group_src.properties[self.prop_group].property_type != "Group":
@@ -113,10 +115,12 @@ class PropertyReferenceNode():
         # multiple nodes warning
         if unique_selection:
             if self.prop_name:
-                for ref in self.collection.refs: # TODO for NODE
-                    node = ref.node
-                    if node != self and self.prop_name == node.prop_name:
-                        if self.from_prop_group and node.from_prop_group and self.prop_group == node.prop_group:
-                            self.draw_warning(layout, "Multiple nodes found for this property!")
-                        elif not self.from_prop_group and not node.from_prop_group:
-                            self.draw_warning(layout, "Multiple nodes found for this property!")
+                for node in self.collection.nodes: # TODO for NODE
+                    if node != self and self.prop_source == node.prop_source and self.prop_name == node.prop_name:
+                        if self.prop_source == "ADDON" or (self.prop_source == "NODE" and self.from_node == node.from_node and self.from_node_tree == self.from_node_tree):
+                            if self.from_prop_group and node.from_prop_group and self.prop_group == node.prop_group:
+                                self.draw_warning(layout, "Multiple nodes found for this property!")
+                                break
+                            elif not self.from_prop_group and not node.from_prop_group:
+                                self.draw_warning(layout, "Multiple nodes found for this property!")
+                                break
