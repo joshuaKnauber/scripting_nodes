@@ -25,12 +25,12 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     def default_python_value(self):
         if self.name in blend_data_defaults:
             return blend_data_defaults[self.name]["value"]
-        return "None"
+        return "(None, 'NONE')"
     
     def get_python_repr(self):
         return self.default_python_value # python_value of this socket should be set as (property_source, 'property_name')
 
-    default_prop_value = None
+    default_prop_value = (None, "NONE")
     
     
     def _get_python_value_parts(self):
@@ -48,9 +48,9 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     @property
     def python_value_pointer(self):
         """ Returns the value of this property socket not as a tuple but as its full representation """
-        print("poiniepwg", self.name)
         parts = self._get_python_value_parts()
         if len(parts) == 2:
+            if parts[0] == "self": return "self"
             return f"{parts[0]}.{parts[1][1:-1]}"
         return self.python_value
     
@@ -59,6 +59,7 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
         """ Returns the value of this property socket not as a tuple but only the property source """
         parts = self._get_python_value_parts()
         if len(parts) == 2:
+            if parts[0] == "self": return "self"
             return parts[0]
         return self.python_value
     
@@ -67,6 +68,7 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
         """ Returns the value of this property socket not as a tuple but only the property name """
         parts = self._get_python_value_parts()
         if len(parts) == 2:
+            if parts[0] == "self": return "self"
             return parts[1]
         return self.python_value
     

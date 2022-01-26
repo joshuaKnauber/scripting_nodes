@@ -7,10 +7,6 @@ class PropertyReferenceNode():
     
     allow_prop_paste = False
     add_indexing_inputs = False
-    
-    prop_name: bpy.props.StringProperty(name="Property",
-                                description="Select the property you want to generate items for",
-                                update=SN_ScriptingBaseNode._evaluate)
 
 
     def _disect_data_path(self, path):
@@ -69,9 +65,26 @@ class PropertyReferenceNode():
     
     
     def on_prop_change(self, context):
-        if self.add_indexing_inputs and self.prop_source == "BLENDER":
-            self.create_inputs_from_path()
+        if self.add_indexing_inputs:
+            if self.prop_source == "BLENDER":
+                self.create_inputs_from_path()
+            else:
+                prop_src = self.get_prop_source()
+                self.inputs[0].name = "Data"
+                if self.prop_name and prop_src:
+                    if self.prop_name in prop_src.properties:
+                        prop = prop_src.properties[self.prop_name]
+                        if self.from_prop_group:
+                            # fuck -> need to select pointer property which I want to display
+                            self.inputs[0].name = prop_src.attach_to
+                        else:
+                            self.inputs[0].name = prop.attach_to
         self._evaluate(context)
+    
+    
+    prop_name: bpy.props.StringProperty(name="Property",
+                                description="Select the property you want to generate items for",
+                                update=on_prop_change)
 
     
     def prop_source_items(self, context):
@@ -143,8 +156,9 @@ class PropertyReferenceNode():
         row.label(text=warning, icon="ERROR")
     
     
-    def draw_reference_selection(self, layout, unique_selection=False):
-        layout.prop(self, "prop_source", expand=True)
+    def draw_reference_selection(self, layout, unique_selection=False, draw_prop_source=True):
+        if draw_prop_source:
+            layout.prop(self, "prop_source", expand=True)
 
         if self.prop_source == "BLENDER":
             row = layout.row(align=True)

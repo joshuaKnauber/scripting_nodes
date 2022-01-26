@@ -2,7 +2,8 @@
 Visual Scripting addon for blender with nodes
 
 // TODO
-- Could you have the property as a socket type? Just plug in the property you want to show or get. That could then have inputs for indexing. This way it's all on one node instead of on every node and you should usually only need one extra node for blend data
+Custom properties in Property node
+Maybe separate the property node in two or three different nodes for getting props from different places
 
 ## Tasks
 ### Interface

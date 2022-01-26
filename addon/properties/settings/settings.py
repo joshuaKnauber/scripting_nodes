@@ -10,6 +10,19 @@ id_items = ["Scene", "Action", "Armature", "Brush", "CacheFile", "Camera",
         "Screen", "Sound", "Speaker", "Text", "Texture", "VectorFont",
         "Volume", "WindowManager", "WorkSpace", "World"]
 
+id_data = {"Scene": "scenes", "Action":"actions", "Armature":"armatures",
+        "Brush":"bruhes", "CacheFile":"cache_files", "Camera":"cameras",
+        "Collection":"collections", "Curve":"curves", "FreestyleLineStyle":"linestyles",
+        "GreasePencil":"grease_pencils", "Image": "images", "Key": "shape_keys",
+        "Lattice": "lattices", "Library": "libraries", "Light": "lights",
+        "LightProbe": "lightprobes", "Mask": "masks", "Material": "materials",
+        "Mesh": "meshes", "MetaBall": "metaballs", "MovieClip": "movieclips",
+        "NodeTree": "node_groups", "Object": "objects", "PaintCurve": "paint_curves",
+        "Palette": "palettes", "ParticleSettings": "particles", "Screen": "screens",
+        "Sound": "sounds", "Speaker": "speakers", "Text": "texts", "Texture": "textures",
+        "VectorFont": "fonts", "Volume": "volumes", "WindowManager": "window_managers",
+        "WorkSpace": "workspaces", "World": "worlds"}
+
 
 
 property_icons = {

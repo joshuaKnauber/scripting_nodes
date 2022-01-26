@@ -2,7 +2,7 @@ import bpy
 from ...utils import print_debug_code
 from .property_basic import BasicProperty
 from .property_ops import get_sorted_props
-from .settings.settings import id_items, property_icons
+from .settings.settings import id_items, id_data, property_icons
 from .settings.group import SN_PT_GroupProperty
 
 
@@ -145,8 +145,26 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
         for item in id_items:
             items.append((item, item, item))
         return items
+    
+    def update_attach_to(self, context):
+        # get nodes to update references
+        to_update_nodes = []
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                for node in ntree.nodes:
+                    for key in ["prop_name", "prop_group"]:
+                        if hasattr(node, key) and getattr(node, key) == self.name:
+                            to_update_nodes.append((node, key))
+                            
+        for node, key in to_update_nodes:
+            # trigger an update on the affected nodes
+            setattr(node, key, self.name)
+        self.compile()
+        
+    def get_attach_data(self):
+        return id_data[self.attach_to]
 
     attach_to: bpy.props.EnumProperty(name="Attach To",
                                     description="The type of blend data to attach this property to",
                                     items=get_attach_to_items,
-                                    update=compile)
+                                    update=update_attach_to)
