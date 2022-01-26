@@ -1,6 +1,9 @@
 # blender_visual_scripting_addon
 Visual Scripting addon for blender with nodes
 
+// TODO
+- Could you have the property as a socket type? Just plug in the property you want to show or get. That could then have inputs for indexing. This way it's all on one node instead of on every node and you should usually only need one extra node for blend data
+
 ## Tasks
 ### Interface
 - [ ] Display Property Node
@@ -11,7 +14,7 @@ Visual Scripting addon for blender with nodes
 - [ ] Interface Functions
 - [X] If Interface (& Program with dropdown)
 - [ ] For Interface (& Program with dropdown)
-- [ ] Repeat Interface (& Program with dropdown)
+- [X] Repeat Interface (& Program with dropdown)
 - [ ] Prop Search
 
 ### Blend Data

@@ -14,9 +14,9 @@ class SN_IfElseInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_interface_input()
         self.add_boolean_input("Condition").default_value = True
-        self.add_interface_output("Continue")
         self.add_interface_output("True")
         self.add_interface_output("False")
+        self.add_interface_output("Continue")
         
     def on_link_insert(self, from_socket, to_socket, is_output):
         if to_socket == self.inputs[0]:
@@ -25,8 +25,8 @@ class SN_IfElseInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         self.code = f"""
                     if {self.inputs['Condition'].python_value}:
-                        {self.outputs['True'].python_value if self.outputs['True'].python_value.strip() else 'pass'}
+                        {self.indent(self.outputs['True'].python_value, 6) if self.outputs['True'].python_value.strip() else 'pass'}
                     else:
-                        {self.outputs['False'].python_value if self.outputs['False'].python_value.strip() else 'pass'}
-                    {self.outputs['Continue'].python_value}
+                        {self.indent(self.outputs['False'].python_value, 6) if self.outputs['False'].python_value.strip() else 'pass'}
+                    {self.indent(self.outputs['Continue'].python_value, 5)}
                     """
