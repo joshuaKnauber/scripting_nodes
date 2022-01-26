@@ -51,7 +51,6 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
 
     def invoke(self, context, event):
         version = ".".join([str(i) for i in context.scene.sn.version])
-        self.filepath = context.scene.sn.module_name + f"_{version}"
-        print(self.filepath, context.scene.sn.module_name + f"_{version}")
+        self.filepath = f"{context.scene.sn.module_name}_{version}.blend"
         context.window_manager.fileselect_add(self)
         return {'RUNNING_MODAL'}
