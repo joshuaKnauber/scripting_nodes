@@ -4,18 +4,16 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_IndexBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_IndexCollectionPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_IndexBlendDataNode"
-    bl_label = "Index Blend Data"
+    bl_idname = "SN_IndexCollectionPropertyNode"
+    bl_label = "Index Collection Property"
     node_color = "BLEND_DATA"
     
     def on_create(self, context):
-        inp = self.add_blend_data_input("Blend Data Collection")
-        inp.subtype = "COLLECTION"
-        inp.required = True
+        self.add_collection_property_input()
         self.add_integer_input("Index")
-        self.add_blend_data_output("Blend Data")
+        self.add_property_output()
 
     def update_index_type(self, context):
         self.convert_socket(self.inputs[1], self.socket_names[self.index_type])

@@ -14,7 +14,7 @@ class SN_DisplaySearchNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferen
     def on_create(self, context):
         self.add_interface_input()
         self.add_string_input("Label")
-        self.add_blend_data_input("Collection").subtype == "COLLECTION"
+        self.add_collection_property_input()
 
     def evaluate(self, context):
         prop_src = self.get_prop_source()

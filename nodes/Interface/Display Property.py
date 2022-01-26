@@ -4,31 +4,21 @@ from ..templates.PropertyReferenceNode import PropertyReferenceNode
 
 
 
-class SN_PropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferenceNode):
+class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferenceNode):
 
-    bl_idname = "SN_PropertyNode"
+    bl_idname = "SN_DisplayPropertyNode"
     bl_label = "Display Property"
     node_color = "INTERFACE"
     bl_width_default = 200
 
     def on_create(self, context):
         self.add_interface_input()
+        self.add_property_input()
         self.add_string_input("Label")
         self.add_icon_input("Icon")
 
     def evaluate(self, context):
-        prop_src = self.get_prop_source()
-        if prop_src and self.prop_name and self.prop_name in prop_src.properties:
-            if not prop_src.properties[self.prop_name].property_type in ["Group", "Collection"]:
-                prop = prop_src.properties[self.prop_name]
-                self.code = f"{self.active_layout}.prop(context.scene, '{prop.python_name}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})"
-
-    def draw_node(self, context, layout):
-        self.draw_reference_selection(layout)
-        prop_src = self.get_prop_source()
-        if self.prop_name and prop_src and self.prop_name in prop_src.properties:
-            prop = prop_src.properties[self.prop_name]
-            if prop.property_type in ["Group", "Collection"]:
-                self.draw_warning(layout, "The selected property type can't be displayed!")
-            elif prop.property_type == "Pointer" and prop.settings.use_prop_group:
-                self.draw_warning(layout, "Can't display pointers with property groups!")
+        if self.inputs["Property"].is_linked:
+            self.code = f"{self.active_layout}.prop(context.scene, 'sna_new_property', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})"
+        else:
+            self.code = f"{self.active_layout}.label(text='No Property connected!', icon='ERROR')"

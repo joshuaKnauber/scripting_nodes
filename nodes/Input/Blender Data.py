@@ -10,10 +10,10 @@ class SN_BlenderDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "BLEND_DATA"
 
     def on_create(self, context):
-        self.add_blend_data_output("Current Context")
-        self.add_blend_data_output("Blend Data")
-        self.add_blend_data_output("App")
-        self.add_blend_data_output("Path")
+        self.add_property_output("Current Context")
+        self.add_property_output("Blend Data")
+        self.add_property_output("App")
+        self.add_property_output("Path")
         
     def evaluate(self, context):
         self.outputs["Current Context"].python_value = "bpy.context"

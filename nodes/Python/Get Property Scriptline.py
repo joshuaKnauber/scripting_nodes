@@ -11,7 +11,7 @@ class SN_GetPropertyScriptlineNode(bpy.types.Node, SN_ScriptingBaseNode, GetData
     bl_width_default = 200
 
     def on_create(self, context):
-        self.add_blend_data_input().required = True
+        self.add_property_input()
         self.add_string_input("Property")
         self.add_data_output("Data")
         

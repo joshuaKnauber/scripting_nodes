@@ -12,7 +12,7 @@ class SN_DisplayPreviewNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_interface_input()
-        self.add_blend_data_input("Blend Data")
+        self.add_property_input()
         self.add_boolean_input("Show Buttons")
         
     supported_types: bpy.props.BoolProperty(name="Supported Types",

@@ -683,8 +683,8 @@ class SN_ScriptingBaseNode:
         "Float Vector": "SN_FloatVectorSocket",
         "Icon": "SN_IconSocket",
         "List": "SN_ListSocket",
-        "Blend Data": "SN_BlendDataSocket",
-        "Blend Data Collection": "SN_BlendDataSocket",
+        "Collection Property": "SN_CollectionPropertySocket",
+        "Property": "SN_PropertySocket",
     }
 
 
@@ -749,8 +749,11 @@ class SN_ScriptingBaseNode:
     def add_list_input(self, label="List"): return self._add_input("SN_ListSocket", label)
     def add_list_output(self, label="List"): return self._add_output("SN_ListSocket", label)
 
-    def add_blend_data_input(self, label="Blend Data"): return self._add_input("SN_BlendDataSocket", label)
-    def add_blend_data_output(self, label="Blend Data"): return self._add_output("SN_BlendDataSocket", label)
+    def add_collection_property_input(self, label="Collection Property"): return self._add_input("SN_CollectionPropertySocket", label)
+    def add_collection_property_output(self, label="Collection Property"): return self._add_output("SN_CollectionPropertySocket", label)
+
+    def add_property_input(self, label="Property"): return self._add_input("SN_PropertySocket", label)
+    def add_property_output(self, label="Property"): return self._add_output("SN_PropertySocket", label)
 
 
     def add_input_from_property(self, prop):

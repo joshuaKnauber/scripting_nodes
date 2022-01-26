@@ -91,10 +91,10 @@ class ScriptingSocket:
                                     description="If this socket is indexable. Switches between String, Integer and Blend Data")
     
     index_type: bpy.props.EnumProperty(name="Index Type",
-                                    description="The type of index this socket indexes with",
+                                    description="The type of index this socket indexes the property with",
                                     items=[("String", "Name", "Name", "SYNTAX_OFF", 0),
                                            ("Integer", "Index", "Index", "DRIVER_TRANSFORM", 1),
-                                           ("Blend Data", "Blend Data", "Blend Data", "MONKEY", 2)],
+                                           ("Property", "Property", "Property", "MONKEY", 2)],
                                     update=update_index_type)
         
     

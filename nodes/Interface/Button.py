@@ -12,7 +12,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_interface_input()
-        self.add_string_input("Label")
+        self.add_string_input("Label").default_value = "My Button"
         self.add_boolean_input("Emboss").default_value = True
         self.add_boolean_input("Depress")
         self.add_icon_input("Icon")

@@ -15,7 +15,7 @@ class SN_IconGalleryNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReference
         self.add_boolean_input("Show Labels")
         self.add_float_input("Scale").default_value = 5
         self.add_float_input("Scale Popup").default_value = 5
-        self.add_blend_data_input("Blend Data") # TODO
+        self.add_property_input("Blend Data") # TODO
 
     def evaluate(self, context):
         enum_src = self.get_prop_source()
