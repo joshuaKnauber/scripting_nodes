@@ -96,6 +96,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Boolean": lambda python_value: python_value,
         "Icon": lambda python_value: python_value,
         "Enum": lambda python_value: python_value,
+        "Integer": lambda python_value: python_value,
         "Float": lambda python_value: python_value,
         "List": lambda python_value: python_value,
         "Blend Data": lambda python_value: python_value,

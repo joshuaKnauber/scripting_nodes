@@ -13,7 +13,7 @@ class SN_OT_PasteDataPath(bpy.types.Operator):
 
     def execute(self, context):
         if "bpy." in context.window_manager.clipboard:
-            bpy.data.node_groups[self.node_tree].nodes[self.node].data_path = context.window_manager.clipboard
+            bpy.data.node_groups[self.node_tree].nodes[self.node].pasted_data_path = context.window_manager.clipboard
         else:
             self.report({"ERROR"}, message="Not a valid blender data path. Use the Rightclick Menu -> Get Serpens Property button")
         return {"FINISHED"}
@@ -30,5 +30,5 @@ class SN_OT_ResetDataPath(bpy.types.Operator):
     node_tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
-        bpy.data.node_groups[self.node_tree].nodes[self.node].data_path = ""
+        bpy.data.node_groups[self.node_tree].nodes[self.node].pasted_data_path = ""
         return {"FINISHED"}

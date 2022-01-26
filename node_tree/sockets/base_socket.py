@@ -70,21 +70,15 @@ class ScriptingSocket:
     # INDEXING OPTIONS
     def update_index_type(self, context):
         if self.indexable and self.bl_idname != self.node.socket_names[self.index_type]:
+            # hide all index sockets before blend data input
+            hide = self.index_type == "Property"
+            for inp in self.node.inputs:
+                if inp == self:
+                    hide = False
+                if inp.indexable:
+                    inp.hide = hide
             # convert socket
             self.node.convert_socket(self, self.node.socket_names[self.index_type])
-        else:
-            return
-            # hide all index sockets before blend data input
-            print("start")
-            hide = False
-            for i in range(len(self.node.inputs)-1, -1, -1):
-                inp = self.node.inputs[i]
-                if inp.indexable:
-                    print(inp, hide)
-                    inp.hide = hide
-                    if inp.index_type == "Blend Data":
-                        hide = True
-            print("done")
 
     indexable: bpy.props.BoolProperty(default=False,
                                     name="Indexable",
