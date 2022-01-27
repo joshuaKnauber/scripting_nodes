@@ -222,12 +222,12 @@ class ScriptingSocket:
                     if self.convert_data:
                         # convert different socket types
                         if from_out.bl_label != self.bl_label:
-                            value = CONVERSIONS[from_out.bl_label][self.bl_label](value)
+                            value = CONVERSIONS[from_out.bl_label][self.bl_label](from_out)
                         # convert convertable subtypes of the same socket
                         elif from_out.subtype != self.subtype:
                             if from_out.subtype in CONVERSIONS[from_out.bl_label]:
                                 if self.subtype in CONVERSIONS[from_out.bl_label][from_out.subtype]:
-                                    value = CONVERSIONS[from_out.bl_label][from_out.subtype][self.subtype](value)
+                                    value = CONVERSIONS[from_out.bl_label][from_out.subtype][self.subtype](from_out)
                     return value
                 return self.get_python_repr()
 

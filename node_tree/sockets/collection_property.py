@@ -1,9 +1,10 @@
 import bpy
 from .base_socket import ScriptingSocket
+from .property_template import PropertySocket
 
 
 
-class SN_CollectionPropertySocket(bpy.types.NodeSocket, ScriptingSocket):
+class SN_CollectionPropertySocket(bpy.types.NodeSocket, ScriptingSocket, PropertySocket):
 
     bl_idname = "SN_CollectionPropertySocket"
     group = "DATA"
@@ -11,11 +12,11 @@ class SN_CollectionPropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     socket_shape = "SQUARE"
 
 
-    default_python_value = ""
-    default_prop_value = None
+    default_python_value = "(None, 'NONE')"
+    default_prop_value = (None, "NONE")
     
     def get_python_repr(self):
-        return f"None"
+        return self.default_python_value
 
     subtypes = ["NONE"]
     subtype_values = {"NONE": "default_value"}

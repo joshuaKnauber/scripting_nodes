@@ -67,6 +67,7 @@ class PropertyReferenceNode():
     def on_prop_change(self, context):
         if self.add_indexing_inputs:
             if self.prop_source == "BLENDER":
+                self.label = self.get_pasted_prop_name()
                 self.create_inputs_from_path()
             else:
                 prop_src = self.get_prop_source()
