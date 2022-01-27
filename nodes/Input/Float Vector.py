@@ -10,7 +10,7 @@ class SN_FloatVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "VECTOR"
 
     def on_create(self, context):
-        self.add_float_vector_input("Float").hide = True
+        self.add_float_vector_input("Float").set_hide(True)
         self.add_float_vector_output("Float")
 
     def evaluate(self, context):

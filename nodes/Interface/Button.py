@@ -92,7 +92,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     def udpate_hide_disabled_inputs(self, context):
         for inp in self.inputs:
             if inp.can_be_disabled:
-                inp.hide = self.hide_disabled_inputs
+                inp.set_hide(self.hide_disabled_inputs)
     
     hide_disabled_inputs: bpy.props.BoolProperty(default=False,
                                         name="Hide Disabled Inputs",

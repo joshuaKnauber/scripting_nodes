@@ -13,15 +13,15 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         inp = self.add_string_input("Image Path")
         inp.subtype = "FILE_PATH"
-        inp.hide = True
+        inp.set_hide(True)
         self.add_icon_output("Icon")
                 
                 
     def update_icon_source(self, context):
         if self.icon_source == "PATH":
-            self.inputs[0].hide = False
+            self.inputs[0].set_hide(False)
         else:
-            self.inputs[0].hide = True
+            self.inputs[0].set_hide(True)
         self._evaluate(context)
 
     icon_source: bpy.props.EnumProperty(name="Icon Source",

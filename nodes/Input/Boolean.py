@@ -10,7 +10,7 @@ class SN_BooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "BOOLEAN"
 
     def on_create(self, context):
-        self.add_boolean_input("Boolean").hide = True
+        self.add_boolean_input("Boolean").set_hide(True)
         self.add_boolean_output("Boolean")
 
     def evaluate(self, context):

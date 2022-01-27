@@ -68,6 +68,13 @@ class ScriptingSocket:
     
     
     # INDEXING OPTIONS
+    def set_hide(self, value):
+        """ Sets the hide value of this socket and disconnects all links if hidden """
+        if value:
+            for link in self.links:
+                self.node.node_tree.links.remove(link)
+        self.hide = value
+        
     def update_index_type(self, context):
         if self.indexable and self.bl_idname != self.node.socket_names[self.index_type]:
             # hide all index sockets before blend data input
@@ -76,7 +83,7 @@ class ScriptingSocket:
                 if inp == self:
                     hide = False
                 if inp.indexable:
-                    inp.hide = hide
+                    inp.set_hide(hide)
             # convert socket
             self.node.convert_socket(self, self.node.socket_names[self.index_type])
 
