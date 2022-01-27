@@ -83,4 +83,6 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     def draw_socket(self, context, layout, node, text):
         if self.name in blend_data_defaults:
             text += f" ({blend_data_defaults[self.name]['name']})"
+        elif not self.is_output and not self.is_linked:
+            text += " (NO CONNECTION!)"
         layout.label(text=text)

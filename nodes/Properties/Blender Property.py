@@ -31,7 +31,7 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefer
                 data_path += f".{segment.split('[')[0]}"
                 
                 if self.segment_is_indexable(segment):
-                    if self.inputs[inp_index].index_type == "Property":
+                    if self.inputs[inp_index].bl_label == "Property":
                         data_path = self.inputs[inp_index].python_value_pointer
                     else:
                         data_path += f"[{self.inputs[inp_index].python_value}]"
