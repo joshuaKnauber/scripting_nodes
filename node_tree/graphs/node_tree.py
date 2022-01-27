@@ -117,10 +117,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def _call_link_inserts(self, added):
         """ Calls link_insert for all new links """
-        for _, to_inp, from_real, _ in added:
+        for from_output, to_inp, from_real, _ in added:
             if from_real:
                 from_real.node.link_insert(from_real, to_inp, is_output=True)
                 to_inp.node.link_insert(from_real, to_inp, is_output=False)
+            elif getattr(from_output, "changeable", False):
+                from_output.data_type = to_inp.bl_idname
 
     def _call_link_removes(self, removed):
         """ Calls link_remove for all removed links """

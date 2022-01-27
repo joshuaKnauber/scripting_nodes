@@ -28,12 +28,20 @@ id_data = {"Scene": "scenes", "Action":"actions", "Armature":"armatures",
 property_icons = {
     "String": "SYNTAX_OFF",
     "Boolean": "FORCE_CHARGE",
+    "Boolean Vector": "FORCE_CHARGE",
     "Float": "CON_TRANSLIKE",
+    "Float Vector": "CON_TRANSLIKE",
     "Integer": "DRIVER_TRANSFORM",
+    "Integer Vector": "DRIVER_TRANSFORM",
     "Enum": "PRESET",
     "Pointer": "MONKEY",
+    "Property": "MONKEY",
     "Collection": "ASSET_MANAGER",
+    "Collection Property": "ASSET_MANAGER",
     "Group": "FILEBROWSER",
+    "List": "LONGDISPLAY",
+    "Data": "OBJECT_DATA",
+    "Icon": "DRIVER_TRANSFORM",
 }
 
 

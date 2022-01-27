@@ -97,18 +97,4 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "String": lambda socket: f"str({socket.python_value_pointer}.keys())",
         "List": lambda socket: f"{socket.python_value_pointer}.values()",
     },
-    "Data": {
-        "String": lambda socket: socket.python_value,
-        "Enum": lambda socket: socket.python_value,
-        "Boolean": lambda socket: socket.python_value,
-        "Boolean Vector": lambda socket: socket.python_value,
-        "Icon": lambda socket: socket.python_value,
-        "Integer": lambda socket: socket.python_value,
-        "Integer Vector": lambda socket: socket.python_value,
-        "Float": lambda socket: socket.python_value,
-        "Float Vector": lambda socket: socket.python_value,
-        "List": lambda socket: socket.python_value,
-        "Property": lambda socket: socket.python_value,
-        "Collection Property": lambda socket: socket.python_value,
-    },
 }

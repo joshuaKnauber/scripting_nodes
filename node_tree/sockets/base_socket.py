@@ -1,5 +1,6 @@
 import bpy
 from .conversions import CONVERSIONS
+from ...addon.properties.settings.settings import property_icons
 
 
 
@@ -97,6 +98,25 @@ class ScriptingSocket:
                                            ("Integer", "Index", "Index", "DRIVER_TRANSFORM", 1),
                                            ("Property", "Property", "Property", "MONKEY", 2)],
                                     update=update_index_type)
+    
+    
+    def update_data_type(self, context):
+        if self.changeable and self.data_type != self.bl_idname:
+            self.node.convert_socket(self, self.data_type)
+
+    def get_data_type_items(self, context):
+        items = []
+        for i, name in enumerate(list(self.node.socket_names.keys())[2:]):
+            items.append((self.node.socket_names[name], name, name, property_icons[name], i))
+        return items
+            
+    changeable: bpy.props.BoolProperty(default=False,
+                                    name="Changeable",
+                                    description="If this data socket type can be changed")
+    
+    data_type: bpy.props.EnumProperty(name="The type this socket has right now",
+                                    update=update_data_type,
+                                    items=get_data_type_items)
         
     
     ### DRAW SOCKET
@@ -152,6 +172,10 @@ class ScriptingSocket:
             # draw output
             if self.is_output:
                 self.draw_socket(context, layout, node, text)
+                # draw changeable socket
+                if self.changeable:
+                    layout.separator()
+                    layout.prop(self, "data_type", icon_only=True)
             # draw previously dynamic socket (with insert socket)
             if self.prev_dynamic:
                 self._draw_prev_dynamic_socket(context, layout, node)
@@ -171,6 +195,10 @@ class ScriptingSocket:
                     # draw indexable socket
                     if self.indexable:
                         layout.prop(self, "index_type", icon_only=True)
+                    # draw changeable socket
+                    if self.changeable:
+                        layout.separator()
+                        layout.prop(self, "data_type", icon_only=True)
 
 
     ### SOCKET COLOR

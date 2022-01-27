@@ -3,8 +3,6 @@ Visual Scripting addon for blender with nodes
 
 
 TODO
-- Property nodes still just have a data output
-- Data needs some way of getting converted
 - You can't access some obscure blender properties (is that ok? improve get data scriptline instead?)
 - You can't access nested blend data
 

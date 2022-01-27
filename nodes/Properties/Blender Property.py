@@ -17,7 +17,8 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefer
 
     def on_create(self, context):
         self.add_property_output("Property")
-        self.add_data_output("Value")
+        out = self.add_data_output("Value")
+        out.changeable = True
         self.prop_source = "BLENDER"
 
 

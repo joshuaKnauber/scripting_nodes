@@ -60,7 +60,7 @@ class PropertyReferenceNode():
                     
     def get_pasted_prop_name(self):
         if self.pasted_data_path:
-            return self.pasted_data_path.split(".")[-1].replace("_", " ").title()
+            return self.pasted_data_path.split(".")[-1].replace("_", " ").split("[")[0].title()
         return "Property"
     
     

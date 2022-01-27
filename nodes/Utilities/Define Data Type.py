@@ -1,6 +1,5 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
-from ...node_tree.sockets.conversions import CONVERSIONS
 
 
 class SN_DefineDataType(bpy.types.Node, SN_ScriptingBaseNode):
@@ -31,7 +30,4 @@ class SN_DefineDataType(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_string_output("Data")
 
     def evaluate(self, context):
-        for name in self.socket_names:
-            if self.socket_names[name] == self.outputs[0].bl_idname:
-                self.outputs[0].python_value = CONVERSIONS["Data"][name](self.inputs[0])
-                break
+        self.outputs[0].python_value = self.inputs[0].python_value
