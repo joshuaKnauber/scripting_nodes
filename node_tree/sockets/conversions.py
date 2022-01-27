@@ -95,7 +95,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Data": lambda socket: socket.python_value_pointer,
         "Property": lambda socket: socket.python_value,
         "String": lambda socket: f"str({socket.python_value_pointer}.keys())",
-        "List": lambda socket: f"{socket.python_value_pointer}.values()", # TODO only collections
+        "List": lambda socket: f"{socket.python_value_pointer}.values()",
     },
     "Data": {
         "String": lambda socket: socket.python_value,

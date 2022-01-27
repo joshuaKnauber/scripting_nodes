@@ -1,9 +1,6 @@
 # blender_visual_scripting_addon
 Visual Scripting addon for blender with nodes
 
-// TODO
-Custom properties in Property node
-Maybe separate the property node in two or three different nodes for getting props from different places
 
 ## Tasks
 ### Interface
