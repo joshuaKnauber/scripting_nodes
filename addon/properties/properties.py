@@ -149,12 +149,12 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
     def update_attach_to(self, context):
         # get nodes to update references
         to_update_nodes = []
+        key = "prop_group" if self.property_type == "Group" else "prop_name"
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
-                    for key in ["prop_name", "prop_group"]:
-                        if hasattr(node, key) and getattr(node, key) == self.name:
-                            to_update_nodes.append((node, key))
+                    if hasattr(node, key) and getattr(node, key) == self.name:
+                        to_update_nodes.append((node, key))
                             
         for node, key in to_update_nodes:
             # trigger an update on the affected nodes
