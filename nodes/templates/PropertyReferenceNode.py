@@ -71,14 +71,20 @@ class PropertyReferenceNode():
             else:
                 prop_src = self.get_prop_source()
                 self.inputs[0].name = "Data"
+                self.label = "Custom Property"
                 if self.prop_name and prop_src:
                     if self.prop_name in prop_src.properties:
                         prop = prop_src.properties[self.prop_name]
+                        self.label = prop.name
+                        # property from group -> input is pointer
                         if self.from_prop_group:
-                            # fuck -> need to select pointer property which I want to display
-                            self.inputs[0].name = prop_src.attach_to
-                        else:
+                            self.inputs[0].name = "Pointer Property"
+                        # addon property
+                        elif hasattr(prop, "attach_to"):
                             self.inputs[0].name = prop.attach_to
+                        # node property
+                        else:
+                            self.inputs[0].name = prop_src.bl_label
         self._evaluate(context)
     
     
