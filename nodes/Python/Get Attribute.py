@@ -15,4 +15,4 @@ class SN_GetAttributeNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_data_output("Data").changeable = True
         
     def evaluate(self, context):
-        self.outputs[0].python_value = f"getattr({self.inputs[0].python_value_pointer}, {self.inputs['Attribute'].python_value}, None)"
+        self.outputs[0].python_value = f"getattr({self.inputs[0].python_value}, {self.inputs['Attribute'].python_value}, None)"

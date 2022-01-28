@@ -24,7 +24,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefer
                         if hasattr({self.inputs['Property'].python_value_source}, '{self.inputs['Property'].python_value_name}'):
                             {self.active_layout}.prop({self.inputs['Property'].python_value_source}, '{self.inputs['Property'].python_value_name}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})
                         else:
-                            {self.active_layout}.label(text=f"{{'{self.inputs['Property'].python_value_source}'}} doesn't have property {{'{self.inputs['Property'].python_value_name}'}}", icon="ERROR")
+                            {self.active_layout}.label(text=f"{{str({self.inputs['Property'].python_value_source})}} doesn't have property {{'{self.inputs['Property'].python_value_name}'}}", icon="ERROR")
                         """
         else:
             self.code = f"{self.active_layout}.label(text='No Property connected!', icon='ERROR')"

@@ -87,14 +87,14 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Boolean Vector": lambda socket: f"list({socket.python_value})",
     },
     "Property": {
-        "Data": lambda socket: socket.python_value_pointer,
+        "Data": lambda socket: socket.python_value,
         "Collection Property": lambda socket: socket.python_value,
-        "String": lambda socket: f"str({socket.python_value_pointer})",
+        "String": lambda socket: f"str({socket.python_value})",
     },
     "Collection Property": {
-        "Data": lambda socket: socket.python_value_pointer,
+        "Data": lambda socket: socket.python_value,
         "Property": lambda socket: socket.python_value,
-        "String": lambda socket: f"str({socket.python_value_pointer}.keys())",
-        "List": lambda socket: f"{socket.python_value_pointer}.values()",
+        "String": lambda socket: f"str({socket.python_value}.keys())",
+        "List": lambda socket: f"{socket.python_value}.values()",
     },
 }
