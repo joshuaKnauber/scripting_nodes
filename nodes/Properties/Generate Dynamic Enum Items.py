@@ -31,10 +31,7 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
         return _item_map[lookup]
 
 
-    def evaluate(self, context):
-        # self.code_imperative = ""
-        # self.code = ""
-        
+    def evaluate(self, context):        
         enum_src = self.get_prop_source()
         if enum_src and self.prop_name in enum_src.properties and enum_src.properties[self.prop_name].property_type == "Enum":
             prop = enum_src.properties[self.prop_name]
@@ -59,9 +56,13 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
                         # this code doesn't reflect how you would usually write this
                         def {enum_item_func_name}(self, context):
                             return [make_enum_item(item[0], item[1], item[2], item[3], {'2**i' if prop.settings.enum_flag else 'i'}) for i, item in enumerate({list_code})]
-
-                        node = bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}']
-                        node.enum_item_funcs['{self.as_pointer()}'] = {enum_item_func_name}
+                        """
+            self.code_register = f"""
+                        bpy.context.scene.sn.node_function_cache['{self.static_uid}'] = {enum_item_func_name}
+                        """
+            self.code_unregister = f"""
+                        if '{self.static_uid}' in bpy.context.scene.sn.node_function_cache:
+                            del bpy.context.scene.sn.node_function_cache['{self.static_uid}']
                         """
             # TODO export
 

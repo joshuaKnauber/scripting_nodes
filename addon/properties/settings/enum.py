@@ -132,7 +132,8 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
                             node = ref.node
                             enum_src = node.get_prop_source()
                             if enum_src and '{self.prop.name}' in enum_src.properties and enum_src.properties['{self.prop.name}'].property_type == "Enum":
-                                return node.enum_item_funcs[f'{{node.as_pointer()}}'](self, context)
+                                if node.static_uid in bpy.context.scene.sn.node_function_cache:
+                                    return bpy.context.scene.sn.node_function_cache[node.static_uid](self, context)
                 return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
             {code}
             """

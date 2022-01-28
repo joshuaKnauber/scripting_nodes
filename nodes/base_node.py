@@ -112,7 +112,7 @@ class SN_ScriptingBaseNode:
         return filter(lambda node: node.is_trigger, self._get_linked_nodes())
 
 
-    def _get_linked_nodes(self, linked=None):
+    def _get_linked_nodes(self, linked=None, started_at_trigger=False):
         """ Recursively returns a list of all nodes linked to the given node """
         if linked == None: linked = [self]
         new_linked = []
@@ -121,18 +121,20 @@ class SN_ScriptingBaseNode:
         for inp in self.inputs:
             from_out = inp.from_socket()
             if from_out and not from_out.node in linked and not from_out.node in new_linked:
-                new_linked.append(from_out.node)
+                if not started_at_trigger or (started_at_trigger and not from_out.is_program):
+                    new_linked.append(from_out.node)
         
         # get all nodes connected to this nodes output
         for out in self.outputs:
             for to_inp in out.to_sockets():
                 if not to_inp.node in linked and not to_inp.node in new_linked:
-                    new_linked.append(to_inp.node)
+                    if not started_at_trigger or (started_at_trigger and to_inp.is_program):
+                        new_linked.append(to_inp.node)
 
         # get all nodes linked to the found nodes
         linked += new_linked
         for node in new_linked:
-            linked = node._get_linked_nodes(linked)
+            linked = node._get_linked_nodes(linked=linked, started_at_trigger=started_at_trigger)
 
         return linked
     
@@ -220,7 +222,7 @@ class SN_ScriptingBaseNode:
 
     def _format_node_code(self):
         """ Formats this nodes and its connected nodes code ready to register in a separate file """
-        linked = self._get_linked_nodes()
+        linked = self._get_linked_nodes(started_at_trigger=True)
         linked = sorted(linked, key=lambda node: node.order)
         imports = self._format_imports(linked)
         imperative = self._format_imperative(linked)

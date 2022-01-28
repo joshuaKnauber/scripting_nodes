@@ -54,21 +54,29 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 self.outputs["Icon"].python_value = "0"
         elif self.icon_source == "PATH":
-            self.code_import = "import os"
+            self.code_import = """
+                                import bpy.utils.previews
+                                import os
+                                """
+            self.code_register = """
+                                if not 'custom_icons' in bpy.context.scene.sn.preview_collections:
+                                    pcoll = bpy.utils.previews.new()
+                                    bpy.context.scene.sn.preview_collections['custom_icons'] = pcoll
+                                """
             self.code_imperative = f"""
                                     def load_preview_icon(path):
-                                        if os.path.exists(path):
-                                            if not path in bpy.context.scene.sn_icons:
-                                                bpy.context.scene.sn_icons.load(path, path, "IMAGE")
-                                            return bpy.context.scene.sn_icons[path].icon_id
-                                        return 0
+                                        if not path in bpy.context.scene.sn.preview_collections['custom_icons']:
+                                            if os.path.exists(path):
+                                                bpy.context.scene.sn.preview_collections['custom_icons'].load(path, path, "IMAGE")
+                                            else:
+                                                return 0
+                                        return bpy.context.scene.sn.preview_collections['custom_icons'][path].icon_id
                                     """
             self.outputs["Icon"].python_value = f"load_preview_icon({self.inputs[0].python_value})"
     
     
     def evaluate_export(self, context):
-        # maybe dont save in property, use global dict or something similar instead
-        # TODO
+        # TODO save in global dict of preview collections and remove on unregister
         if self.icon_source == "BLENDER":
             self.outputs["Icon"].python_value = f"{self.icon}"
         else:

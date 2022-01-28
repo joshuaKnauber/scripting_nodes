@@ -47,5 +47,6 @@ TODO
 - [ ] New Demo version
 - [X] Msgbus
 - [ ] Proper error logging
-- [ ] Enum Flag enum returns
-- [ ] Generate dynamic enum items on startup
+- [X] Enum Flag enum returns
+- [X] Path icons on startup
+- [X] Generate dynamic enum items on startup

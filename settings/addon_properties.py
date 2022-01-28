@@ -14,6 +14,14 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     # stores the preferences draw function while compiling the addon to draw in the serpens preferences
     preferences = []
+    
+    
+    # stores the custom icon property collections while developing an addon
+    preview_collections = {}
+    
+    
+    # stores functions that are needed to be stored while developing an addon
+    node_function_cache = {}
 
 
     @property
