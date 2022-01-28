@@ -3,14 +3,13 @@ Visual Scripting addon for blender with nodes
 
 
 TODO
-- You can't access some obscure blender properties (is that ok? improve get data scriptline instead?)
-- You can't access nested blend data
-- Can't get blend data with get data scriptline
+- You can't access nested blend data !!!
+- You can't access some blender properties (is that ok? improve get data scriptline instead?)
 
 
 ## Tasks
 ### Interface
-- [ ] Display Property Node
+- [X] Display Property Node
 - [ ] Generate Dynamic Enum Items Node (Fix imperative)
 - [ ] Menu Nodes
 - [X] Split Node
@@ -19,7 +18,7 @@ TODO
 - [X] If Interface (& Program with dropdown)
 - [ ] For Interface (& Program with dropdown)
 - [X] Repeat Interface (& Program with dropdown)
-- [ ] Prop Search
+- [X] Prop Search
 
 ### Blend Data
 - [ ] Get Data Node
@@ -43,7 +42,7 @@ TODO
 - [ ] Reimplement Missing Nodes
 - [ ] Implement missing export differences
 - [ ] Complete ToDo's (in code)
-- [ ] Fix Bugs
+- [ ] Fix known bugs
 - [ ] Packages and Snippets
 - [ ] New Demo version
 - [X] Msgbus
