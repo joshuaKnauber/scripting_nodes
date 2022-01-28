@@ -10,6 +10,11 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
     
     
     @property
+    def node_tree(self):
+        return self.id_data
+
+
+    @property
     def data_path(self):
         return ""
     
@@ -23,8 +28,11 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
         return self.get("name", "Variable Default")
 
     def set_name(self, value):
-        names = list(map(lambda item: item.name, list(filter(lambda item: item!=self, self.prop_collection))))
+        names = list(map(lambda item: item.name, list(filter(lambda item: item!=self, self.node_tree.variables))))
         value = unique_collection_name(value, "New Variable", names, " ")
+
+        self["name"] = value
+        return # TODO
 
         # get nodes to update references
         to_update_nodes = []

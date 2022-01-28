@@ -26,19 +26,21 @@ class SN_PT_VariablePanel(bpy.types.Panel):
             row = layout.row(align=False)
             col = row.column(align=True)
             col.template_list("SN_UL_VariableList", "Variables", ntree, "variables", ntree, "variable_index", rows=4)
-            col.operator("sn.add_property_node", text="Add Node", icon="ADD")
+            col.operator("sn.add_variable_node", text="Add Node", icon="ADD").node_tree = ntree.name
             col = row.column(align=True)
-            col.operator("sn.add_property", text="", icon="ADD")
-            col.operator("sn.add_property", text="", icon="VIEWZOOM")
-            col.operator("sn.remove_property", text="", icon="REMOVE")
+            col.operator("sn.add_variable", text="", icon="ADD").node_tree = ntree.name
+            col.operator("sn.add_variable", text="", icon="VIEWZOOM").node_tree = ntree.name
+            col.operator("sn.remove_variable", text="", icon="REMOVE").node_tree = ntree.name
 
             col.separator()
             subrow = col.row(align=True)
             subrow.enabled = ntree.variable_index > 0
-            op = subrow.operator("sn.move_property", text="", icon="TRIA_UP")
+            op = subrow.operator("sn.move_variable", text="", icon="TRIA_UP")
             op.move_up = True
+            op.node_tree = ntree.name
             subrow = col.row(align=True)
             subrow.enabled = ntree.variable_index < len(ntree.variables)-1
-            op = subrow.operator("sn.move_property", text="", icon="TRIA_DOWN")
+            op = subrow.operator("sn.move_variable", text="", icon="TRIA_DOWN")
             op.move_up = False
+            op.node_tree = ntree.name
             layout.separator()

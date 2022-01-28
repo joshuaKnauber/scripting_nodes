@@ -44,7 +44,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                                         name="Variables",
                                         description="The variables of this node tree")
 
-    variable_index: bpy.props.IntProperty(name="Variable Index",
+    variable_index: bpy.props.IntProperty(name="Variable Index", min=0,
                                         description="Index of the selected variable")
     
 
