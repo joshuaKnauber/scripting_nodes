@@ -23,7 +23,7 @@ class SN_CustomPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefere
     def evaluate(self, context):
         prop_src = self.get_prop_source()
         # valid property selected
-        if prop_src and self.prop_name in prop_src.properties and not prop_src.properties[self.prop_name].property_type in ["Group", "Collection"]:
+        if prop_src and self.prop_name in prop_src.properties and not prop_src.properties[self.prop_name].property_type == "Group":
             prop = prop_src.properties[self.prop_name]
             self.outputs["Property"].python_value = f"{self.inputs[0].python_value}.{prop.python_name}"
             self.outputs["Value"].python_value = f"{self.inputs[0].python_value}.{prop.python_name}"
@@ -37,5 +37,5 @@ class SN_CustomPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefere
         self.draw_reference_selection(layout)
         prop_src = self.get_prop_source()
         if self.prop_name and prop_src and self.prop_name in prop_src.properties:
-            if prop_src.properties[self.prop_name].property_type in ["Group", "Collection"]:
-                self.draw_warning(layout, "Can't return Group or Collection properties!")
+            if prop_src.properties[self.prop_name].property_type == "Group":
+                self.draw_warning(layout, "Can't return Group properties!")

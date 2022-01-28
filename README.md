@@ -16,9 +16,10 @@ TODO
 - [ ] Button Node (Custom Operators)
 - [ ] Interface Functions
 - [X] If Interface (& Program with dropdown)
-- [ ] For Interface (& Program with dropdown)
+- [X] For Interface (& Program with dropdown)
 - [X] Repeat Interface (& Program with dropdown)
 - [X] Prop Search
+- [X] UI List
 
 ### Blend Data
 - [ ] Get Data Node
@@ -50,3 +51,4 @@ TODO
 - [X] Enum Flag enum returns
 - [X] Path icons on startup
 - [X] Generate dynamic enum items on startup
+- [ ] Property source and name split when there is brackets at the end

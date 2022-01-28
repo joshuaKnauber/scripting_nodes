@@ -1,6 +1,7 @@
 import bpy
 from ..sockets.conversions import CONVERSIONS
 from .node_refs import NodeRefCollection
+from ...addon.variables.variables import SN_VariableProperties
 
 
 
@@ -37,6 +38,15 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     is_sn = True
 
     link_cache = {} # stores cache of the links from the previous update for all node trees based on their memory adress
+
+
+    variables: bpy.props.CollectionProperty(type=SN_VariableProperties,
+                                        name="Variables",
+                                        description="The variables of this node tree")
+
+    variable_index: bpy.props.IntProperty(name="Variable Index",
+                                        description="Index of the selected variable")
+    
 
     node_refs: bpy.props.CollectionProperty(type=NodeRefCollection,
                                         name="Node References",

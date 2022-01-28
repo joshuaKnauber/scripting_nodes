@@ -159,8 +159,7 @@ class BasicProperty():
                                     default="Prop Default",
                                     get=get_name,
                                     set=set_name,
-                                    update=_compile,
-                                    subtype="FILE_NAME")
+                                    update=_compile)
     
     
     description: bpy.props.StringProperty(name="Description",
