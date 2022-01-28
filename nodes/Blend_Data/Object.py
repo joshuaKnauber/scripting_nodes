@@ -28,9 +28,9 @@ class SN_ObjectBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 update=update_index_type)
         
     def evaluate(self, context):
-        self.outputs["All Objects"].python_value = f"(bpy.data, 'objects')"
-        self.outputs["Active Object"].python_value = f"(bpy.context, 'active_object')"
-        self.outputs["Indexed"].python_value = f"(bpy.data, 'objects', {self.inputs[0].python_value})"
+        self.outputs["All Objects"].python_value = f"bpy.data.objects"
+        self.outputs["Active Object"].python_value = f"bpy.context.active_object"
+        self.outputs["Indexed"].python_value = f"bpy.data.objects[{self.inputs[0].python_value}]"
 
     def draw_node(self, context, layout):
         layout.prop(self, "index_type", expand=True)

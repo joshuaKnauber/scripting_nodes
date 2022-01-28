@@ -6,16 +6,16 @@ from .property_template import PropertySocket
 
 blend_data_defaults = {
     "Scene": {
-        "value": "(bpy.context, 'scene')",
+        "value": "bpy.context.scene",
         "name": "Using Active"},
     "Object": {
-        "value": "(bpy.context, 'active_object')",
+        "value": "bpy.context.active_object",
         "name": "Using Active"},
     "Preferences": {
-        "value": "(self, '')",
+        "value": "self",
         "name": "Using Self"},
     "Operator": {
-        "value": "(self, '')",
+        "value": "self",
         "name": "Using Self"},
 }
 
@@ -32,12 +32,12 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket, PropertySocket):
     def default_python_value(self):
         if self.name in blend_data_defaults:
             return blend_data_defaults[self.name]["value"]
-        return "(None, 'NONE')"
+        return "None"
     
-    default_prop_value = (None, "NONE")
+    default_prop_value = ""
 
     def get_python_repr(self):
-        return self.default_python_value # python_value of this socket should be set as (property_source, 'property_name', indexing{optional})
+        return self.default_python_value
     
     
     subtypes = ["NONE"]

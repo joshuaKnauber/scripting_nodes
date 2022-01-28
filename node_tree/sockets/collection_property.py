@@ -12,11 +12,12 @@ class SN_CollectionPropertySocket(bpy.types.NodeSocket, ScriptingSocket, Propert
     socket_shape = "SQUARE"
 
 
-    default_python_value = "(None, 'NONE')"
-    default_prop_value = (None, "NONE")
+    default_python_value = "None"
+    default_prop_value = ""
     
     def get_python_repr(self):
         return self.default_python_value
+
 
     subtypes = ["NONE"]
     subtype_values = {"NONE": "default_value"}

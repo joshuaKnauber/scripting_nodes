@@ -26,7 +26,7 @@ class SN_IndexCollectionPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 update=update_index_type)
         
     def evaluate(self, context):
-        self.outputs[0].python_value = f"({self.inputs[0].python_value_source}, '{self.inputs[0].python_value_name}', {self.inputs[1].python_value})"
+        self.outputs[0].python_value = f"{self.inputs[0].python_value}[{self.inputs[1].python_value}]"
 
     def draw_node(self, context, layout):
         layout.prop(self, "index_type", expand=True)

@@ -28,18 +28,18 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefer
 
             inp_index = 0
             data = self.get_data()                    
-            for segment in data[:-1]:
+            for segment in data:
                 data_path += f".{segment.split('[')[0]}"
                 
                 if self.segment_is_indexable(segment):
                     if self.inputs[inp_index].bl_label == "Property":
-                        data_path = self.inputs[inp_index].python_value_pointer
+                        data_path = self.inputs[inp_index].python_value
                     else:
                         data_path += f"[{self.inputs[inp_index].python_value}]"
                     inp_index += 1
                 
-            self.outputs["Property"].python_value = f"({data_path}, '{data[-1]}')"
-            self.outputs["Value"].python_value = f"{data_path}.{data[-1]}"
+            self.outputs["Property"].python_value = data_path
+            self.outputs["Value"].python_value = data_path
         else:
             self.outputs["Property"].reset_value()
             self.outputs["Value"].reset_value()
@@ -47,8 +47,3 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefer
 
     def draw_node(self, context, layout):
         self.draw_reference_selection(layout, draw_prop_source=False)
-        if self.prop_source != "BLENDER":
-            prop_src = self.get_prop_source()
-            if self.prop_name and prop_src and self.prop_name in prop_src.properties:
-                if prop_src.properties[self.prop_name].property_type in ["Group", "Collection"]:
-                    self.draw_warning(layout, "Can't return Group or Collection properties!")
