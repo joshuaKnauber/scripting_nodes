@@ -26,14 +26,8 @@ class SN_CustomPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefere
         # valid property selected
         if prop_src and self.prop_name in prop_src.properties and not prop_src.properties[self.prop_name].property_type in ["Group", "Collection"]:
             prop = prop_src.properties[self.prop_name]
-            # indexed with property
-            if self.inputs[0].index_type == "Property":
-                self.outputs["Property"].python_value = f"({self.inputs[0].python_value_pointer}, '{prop.python_name}')"
-                self.outputs["Value"].python_value = f"{self.inputs[0].python_value_pointer}.{prop.python_name}"
-            # indexed by name or index
-            else:
-                self.outputs["Property"].python_value = f"(bpy.data.{prop.get_attach_data()}[{self.inputs[0].python_value}], '{prop.python_name}')"
-                self.outputs["Value"].python_value = f"bpy.data.{prop.get_attach_data()}[{self.inputs[0].python_value}].{prop.python_name}"
+            self.outputs["Property"].python_value = f"({self.inputs[0].python_value_pointer}, '{prop.python_name}')"
+            self.outputs["Value"].python_value = f"{self.inputs[0].python_value_pointer}.{prop.python_name}"
         # no valid property selected
         else:
             self.outputs["Property"].reset_value()

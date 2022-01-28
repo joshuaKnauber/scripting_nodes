@@ -28,7 +28,6 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
 
 
     def evaluate(self, context):
-        print("ye")
         # self.code_imperative = ""
         # self.code = ""
         

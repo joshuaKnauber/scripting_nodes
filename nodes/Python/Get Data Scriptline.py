@@ -11,28 +11,18 @@ class SN_GetDataScriptlineNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_string_input("Line")
-        self.add_data_output("Data")
-        
-    def update_data_type(self, context):
-        self.convert_socket(self.outputs[0], self.socket_names[self.data_type])
-        self._evaluate(context)
-        
-    data_type: bpy.props.EnumProperty(name="Type",
-                                    description="The type of data of this property",
-                                    items=[("Data", "Data", "Data"),
-                                            ("Blend Data", "Blend Data", "Blend Data"),
-                                            ("String", "String", "String"),
-                                            ("Boolean", "Boolean", "Boolean"),
-                                            ("Boolean Vector", "Boolean Vector", "Boolean Vector"),
-                                            ("Float", "Float", "Float"),
-                                            ("Float Vector", "Float Vector", "Float Vector"),
-                                            ("Integer", "Integer", "Integer"),
-                                            ("Integer Vector", "Integer Vector", "Integer Vector"),
-                                            ("List", "List", "List")],
-                                    update=update_data_type)
+        self.add_data_output("Data").changeable = True
         
     def evaluate(self, context):
-        self.outputs[0].python_value = f"eval({self.inputs[0].python_value})"
+        if self.outputs[0].bl_label == "Property" or self.outputs[0].bl_label == "Collection Property":
+            self.outputs[0].python_value = f"{self.inputs[0].python_value}"
+        else:
+            self.outputs[0].python_value = f"eval({self.inputs[0].python_value})"
         
     def draw_node(self, context, layout):
-        layout.prop(self, "data_type")
+        if self.outputs[0].bl_label == "Property" or self.outputs[0].bl_label == "Collection Property":
+            box = layout.box()
+            col = box.column(align=True)
+            col.label(text="(prop_source, 'prop_name', prop_index)")
+            col.label(text="e.g. (bpy.data, 'objects', 'Cube')")
+            col.label(text="e.g. (bpy.context, 'active_object')")

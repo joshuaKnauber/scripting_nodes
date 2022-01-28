@@ -5,6 +5,7 @@ Visual Scripting addon for blender with nodes
 TODO
 - You can't access some obscure blender properties (is that ok? improve get data scriptline instead?)
 - You can't access nested blend data
+- Can't get blend data with get data scriptline
 
 
 ## Tasks
@@ -47,3 +48,4 @@ TODO
 - [ ] New Demo version
 - [X] Msgbus
 - [ ] Proper error logging
+- [ ] Enum Flag enum returns
