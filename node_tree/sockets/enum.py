@@ -51,13 +51,18 @@ class SN_EnumSocket(bpy.types.NodeSocket, ScriptingSocket):
                                     items=get_items,
                                     options={"ENUM_FLAG"},
                                     update=ScriptingSocket._update_value)
+    
+    def on_subtype_update(self):
+        self.display_shape = "CIRCLE" if self.subtype == "NONE" else "SQUARE"
 
     subtypes = ["NONE", "ENUM_FLAG"]
     subtype_values = {"NONE": "default_value", "ENUM_FLAG": "flag_value"}
     
 
     def get_color(self, context, node):
-        return (0.44, 0.7, 1)
+        if self.subtype == "NONE":
+            return (0.44, 0.7, 1)
+        return (0.85, 0.15, 1)
 
     def draw_socket(self, context, layout, node, text):
         if self.is_output or self.is_linked:

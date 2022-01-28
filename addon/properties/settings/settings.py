@@ -46,6 +46,27 @@ property_icons = {
 
 
 
+property_socket = {
+    "String": "String",
+    "Boolean": "Boolean",
+    "Float": "Float",
+    "Integer": "Integer",
+    "Enum": "Enum",
+    "Pointer": "Property",
+    "Collection": "Collection Property",
+    "Group": "Data",
+}
+
+def prop_to_socket(prop):
+    socket_name = property_socket[prop.property_type]
+    subtype = "NONE"
+    if getattr(prop.settings, "enum_flag", False):
+        subtype ="ENUM_FLAG"
+    if getattr(prop.settings, "is_vector", False):
+        socket_name += " Vector"
+    return socket_name, subtype
+
+
 _prop_cache = {} # stores key, value of settings.as_pointer with prop for settings
 
 class PropertySettings:

@@ -48,3 +48,4 @@ TODO
 - [X] Msgbus
 - [ ] Proper error logging
 - [ ] Enum Flag enum returns
+- [ ] Generate dynamic enum items on startup

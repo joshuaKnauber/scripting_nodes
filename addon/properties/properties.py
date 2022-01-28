@@ -11,7 +11,7 @@ class FullBasicProperty(BasicProperty):
     
     property_type: bpy.props.EnumProperty(name="Type",
                                     description="The type of data this property can store",
-                                    update=BasicProperty._compile,
+                                    update=BasicProperty.trigger_reference_update,
                                     items=[("String", "String", "Stores text, can display a text input or a filepath field", property_icons["String"], 0),
                                            ("Boolean", "Boolean", "Stores True or False, can be used for a checkbox", property_icons["Boolean"], 1),
                                            ("Float", "Float", "Stores a decimal number or a vector", property_icons["Float"], 2),
@@ -146,20 +146,6 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
             items.append((item, item, item))
         return items
     
-    def update_attach_to(self, context):
-        # get nodes to update references
-        to_update_nodes = []
-        key = "prop_group" if self.property_type == "Group" else "prop_name"
-        for ntree in bpy.data.node_groups:
-            if ntree.bl_idname == "ScriptingNodesTree":
-                for node in ntree.nodes:
-                    if hasattr(node, key) and getattr(node, key) == self.name:
-                        to_update_nodes.append((node, key))
-                            
-        for node, key in to_update_nodes:
-            # trigger an update on the affected nodes
-            setattr(node, key, self.name)
-        self.compile()
         
     def get_attach_data(self):
         return id_data[self.attach_to]
@@ -167,4 +153,4 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
     attach_to: bpy.props.EnumProperty(name="Attach To",
                                     description="The type of blend data to attach this property to",
                                     items=get_attach_to_items,
-                                    update=update_attach_to)
+                                    update=FullBasicProperty.trigger_reference_update)

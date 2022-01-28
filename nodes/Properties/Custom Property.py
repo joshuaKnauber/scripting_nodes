@@ -16,8 +16,7 @@ class SN_CustomPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefere
 
     def on_create(self, context):
         self.add_property_output("Property")
-        out = self.add_data_output("Value")
-        out.changeable = True
+        self.add_data_output("Value")
         self.add_property_input("Data")
 
 

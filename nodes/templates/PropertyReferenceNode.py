@@ -1,5 +1,6 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
+from ...addon.properties.settings.settings import prop_to_socket
 
 
 
@@ -86,6 +87,10 @@ class PropertyReferenceNode():
                         # node property
                         else:
                             self.inputs[0].name = prop_src.bl_label
+                        # convert output to correct type
+                        socket_name, subtype = prop_to_socket(prop)
+                        out = self.convert_socket(self.outputs["Value"], self.socket_names[socket_name])
+                        out.subtype = subtype
         self._evaluate(context)
     
     

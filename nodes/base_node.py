@@ -611,6 +611,7 @@ class SN_ScriptingBaseNode:
     def convert_socket(self, socket, to_idname):
         """ Converts the socket from it's current type to the given idname """
         self.disable_evaluation = True
+        new = socket
         if socket.bl_idname != to_idname:
             index = socket.index
             if index != -1:
@@ -648,6 +649,7 @@ class SN_ScriptingBaseNode:
                     self.node_tree.links.new(socket, link)
         self.disable_evaluation = False
         self._evaluate(bpy.context)
+        return new
     
     
     socket_names = {

@@ -18,8 +18,8 @@ def icon_to_string(value):
 def enum_set_to_string(value):
     if type(value) == set:
         if len(value) > 0:
-            return list(value)[0]
-        return "NONE"
+            return "[" + (", ").join(list(value)) + "]"
+        return "[]"
     return value
     
 """
@@ -28,73 +28,75 @@ def enum_set_to_string(value):
 
 CONVERSIONS = { # convert KEY to OPTIONS
     "String": {
-        "Data": lambda socket: socket.python_value,
-        "Boolean": lambda socket: f"bool({socket.python_value})",
-        "Icon": lambda socket: f"string_to_icon({socket.python_value})",
-        "Enum": lambda socket: socket.python_value,
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",
+        "Icon": lambda from_out, to_inp: f"string_to_icon({from_out.python_value})",
+        "Enum": lambda from_out, to_inp: from_out.python_value if to_inp.subtype == "NONE" else f"set([{from_out.python_value}])",
     },
     "Boolean": {
-        "Data": lambda socket: socket.python_value,
-        "String": lambda socket: f"str({socket.python_value})",
-        "Icon": lambda socket: f"int({socket.python_value})",
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: f"str({from_out.python_value})",
+        "Icon": lambda from_out, to_inp: f"int({from_out.python_value})",
     },
     "Boolean Vector": {
-        "Data": lambda socket: socket.python_value,
-        "String": lambda socket: f"str(tuple({socket.python_value}))",
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: f"str(tuple({from_out.python_value}))",
     },
     "Icon": {
-        "Data": lambda socket: socket.python_value,
-        "Integer": lambda socket: socket.python_value,
-        "String": lambda socket: f"icon_to_string({socket.python_value})",
-        "Boolean": lambda socket: f"bool({socket.python_value})",
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "Integer": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: f"icon_to_string({from_out.python_value})",
+        "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",
     },
     "Enum": {
-        "Data": lambda socket: socket.python_value,
-        "String": lambda socket: f"enum_set_to_string({socket.python_value})",
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: from_out.python_value if from_out.subtype == "NONE" else f"str({from_out.python_value})",
+        "List": lambda from_out, to_inp: f"[{from_out.python_value}]" if from_out.subtype == "NONE" else f"list({from_out.python_value})",
 
         "ENUM_FLAG": {
-            "NONE": lambda socket: f"enum_set_to_string({socket.python_value})",
+            "NONE": lambda from_out, to_inp: f"{from_out.python_value}[0]",
         },
         "NONE": {
-            "ENUM_FLAG": lambda socket: f"set([{socket.python_value}])",
+            "ENUM_FLAG": lambda from_out, to_inp: f"set([{from_out.python_value}])",
         }
     },
     "Integer": {
-        "Data": lambda socket: socket.python_value,
-        "Icon": lambda socket: socket.python_value,
-        "Float": lambda socket: socket.python_value,
-        "String": lambda socket: f"str({socket.python_value})",
-        "Boolean": lambda socket: f"bool({socket.python_value})",
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "Icon": lambda from_out, to_inp: from_out.python_value,
+        "Float": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: f"str({from_out.python_value})",
+        "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",
     },
     "Integer Vector": {
-        "Data": lambda socket: socket.python_value,
-        "String": lambda socket: f"str(tuple({socket.python_value}))",
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: f"str(tuple({from_out.python_value}))",
     },
     "Float": {
-        "Data": lambda socket: socket.python_value,
-        "Integer": lambda socket: socket.python_value,
-        "String": lambda socket: f"str({socket.python_value})",
-        "Boolean": lambda socket: f"bool({socket.python_value})",
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "Integer": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: f"str({from_out.python_value})",
+        "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",
     },
     "Float Vector": {
-        "Data": lambda socket: socket.python_value,
-        "String": lambda socket: f"str(tuple({socket.python_value}))",
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: f"str(tuple({from_out.python_value}))",
     },
     "List": {
-        "Data": lambda socket: socket.python_value,
-        "Float Vector": lambda socket: f"list({socket.python_value})",
-        "Integer Vector": lambda socket: f"list({socket.python_value})",
-        "Boolean Vector": lambda socket: f"list({socket.python_value})",
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "Enum": lambda from_out, to_inp: f"set({from_out.python_value})",
+        "Float Vector": lambda from_out, to_inp: f"list({from_out.python_value})",
+        "Integer Vector": lambda from_out, to_inp: f"list({from_out.python_value})",
+        "Boolean Vector": lambda from_out, to_inp: f"list({from_out.python_value})",
     },
     "Property": {
-        "Data": lambda socket: socket.python_value,
-        "Collection Property": lambda socket: socket.python_value,
-        "String": lambda socket: f"str({socket.python_value})",
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "Collection Property": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: f"str({from_out.python_value})",
     },
     "Collection Property": {
-        "Data": lambda socket: socket.python_value,
-        "Property": lambda socket: socket.python_value,
-        "String": lambda socket: f"str({socket.python_value}.keys())",
-        "List": lambda socket: f"{socket.python_value}.values()",
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "Property": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: f"str({from_out.python_value}.keys())",
+        "List": lambda from_out, to_inp: f"{from_out.python_value}.values()",
     },
 }
