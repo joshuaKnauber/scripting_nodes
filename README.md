@@ -10,7 +10,7 @@ TODO
 ## Tasks
 ### Interface
 - [X] Display Property Node
-- [ ] Generate Dynamic Enum Items Node (Fix imperative)
+- [X] Generate Dynamic Enum Items Node (Fix imperative)
 - [ ] Menu Nodes
 - [X] Split Node
 - [ ] Button Node (Custom Operators)
