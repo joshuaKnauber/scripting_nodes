@@ -105,6 +105,17 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         return self.is_valid_connection(from_out, to_inp)
 
 
+    def _update_reroute_type(self, from_out):
+        """ Updates the reroute look of this node if it is a reroute. Not possible to do custom sockets """
+        for link in from_out.links:
+            if link.to_node.bl_idname == "NodeReroute":
+                link.to_node.inputs[0].type = "VALUE"
+                link.to_node.outputs[0].type = "VALUE"
+                link.to_node.inputs[0].display_shape = link.from_socket.display_shape
+                link.to_node.outputs[0].display_shape = link.from_socket.display_shape
+                self._update_reroute_type(link.to_node.outputs[0])
+
+
     def _update_post(self):
         """ Only do visual aspects in here as this is run after evaluating the nodes """
         # TODO check time of this function to see if it impacts performance (when more complex node setups are possible)
@@ -123,6 +134,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             # update program sockets
             elif getattr(from_out, "is_sn", False) and from_out.is_program and from_out.node:
                 from_out.force_update()
+            self._update_reroute_type(from_out)
 
 
     def _call_link_inserts(self, added):
