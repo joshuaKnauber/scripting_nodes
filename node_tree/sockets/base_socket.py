@@ -16,7 +16,6 @@ class ScriptingSocket:
     ### SOCKET OPTIONS
     # OVERWRITE
     is_program = False # Only Interface and Execute sockets are programs
-    socket_type = "" # Uniquely identifiable socket type
     dynamic: bpy.props.BoolProperty(default=False,
                                     name="Dynamic",
                                     description="If this socket adds another socket when connected")
@@ -117,6 +116,12 @@ class ScriptingSocket:
     data_type: bpy.props.EnumProperty(name="The type this socket has right now",
                                     update=update_data_type,
                                     items=get_data_type_items)
+    
+    
+    # VARIABLE SOCKET OPTIONS
+    
+    is_variable: bpy.props.BoolProperty(name="Is Variable",
+                                    description="If this socket is a variable socket that can be renamed")
         
     
     ### DRAW SOCKET
@@ -168,6 +173,17 @@ class ScriptingSocket:
         # draw dynamic sockets
         if self.dynamic:
             self._draw_dynamic_socket(layout, node, text)
+        # draw variable socket
+        elif self.is_variable:
+            layout.prop(self, "name", text="")
+            # draw changeable socket
+            if self.changeable:
+                layout.separator()
+                layout.prop(self, "data_type", icon_only=True)
+            # draw previously dynamic socket (with insert socket)
+            if self.prev_dynamic:
+                self._draw_prev_dynamic_socket(context, layout, node)
+        # draw normal socket
         else:
             # draw output
             if self.is_output:
@@ -386,6 +402,8 @@ class ScriptingSocket:
             socket.dynamic = self.dynamic
             socket.prev_dynamic = self.prev_dynamic
             socket.subtype = self.subtype
+            socket.changeable = self.changeable
+            socket.is_variable = self.is_variable
 
             # set this socket
             self.dynamic = False

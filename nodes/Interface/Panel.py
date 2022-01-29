@@ -37,7 +37,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self._evaluate(context)
         
         
-    def on_ref_update(self, node):
+    def on_ref_update(self, node, data=None):
         """ Called when a parent panel is updated, updates this nodes settings """
         if self.is_subpanel:
             if node.node_tree == self.custom_parent_ntree and node.name == self.ref_SN_PanelNode:

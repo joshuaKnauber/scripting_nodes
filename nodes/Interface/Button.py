@@ -18,7 +18,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_icon_input("Icon")
         
         
-    def on_ref_update(self, node):
+    def on_ref_update(self, node, data=None):
         if node.node_tree == self.custom_operator_ntree and node.name == self.ref_SN_OperatorNode:
             pass
         

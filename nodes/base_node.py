@@ -86,16 +86,17 @@ class SN_ScriptingBaseNode:
     
     
     # Called by any trigger node when its code updates. Use this to catch changes to nodes that you're holding references to and modify your own values
-    def on_ref_update(self, node): pass
+    def on_ref_update(self, node, data=None): pass
             
             
-    def trigger_ref_update(self):
+    def trigger_ref_update(self, data=None):
         """ Triggers an update on all nodes. Every node can then check if it has a reference to this node and update it's own values accordingly """
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
                     if hasattr(node, f"ref_{self.bl_idname}") and not node == self:
-                        node.on_ref_update(self)
+                        if getattr(node, f"ref_{self.bl_idname}") == self.name:
+                            node.on_ref_update(self, data)
     
     
     def get_collection_uuid(self):
@@ -551,6 +552,15 @@ class SN_ScriptingBaseNode:
     def link_remove(self, from_socket, to_socket, is_output):
         self._remove_link_layout_update(from_socket, is_output)
         self.on_link_remove(from_socket, to_socket, is_output)
+        
+        
+    ### DYNAMIC SOCKET UPDATE
+    def on_dynamic_socket_add(self, socket): pass
+    def on_dynamic_socket_remove(self, index, is_output): pass
+    
+    
+    ### SOCKET TYPE CHANGE
+    def on_socket_type_change(self, socket): pass
 
 
     ### DRAW NODE
@@ -636,6 +646,7 @@ class SN_ScriptingBaseNode:
                 new.indexable = socket.indexable
                 new.index_type = socket.index_type
                 new.changeable = socket.changeable
+                new.is_variable = socket.is_variable
                 new.data_type = new.bl_idname
                 # move socket and remove old
                 if socket.is_output:
@@ -649,6 +660,7 @@ class SN_ScriptingBaseNode:
                 # relink sockets
                 for link in links:
                     self.node_tree.links.new(socket, link)
+                self.on_socket_type_change(new)
         self.disable_evaluation = False
         self._evaluate(bpy.context)
         return new
@@ -773,6 +785,13 @@ class SN_ScriptingBaseNode:
 
             return inp
         return None
+    
+    
+    def add_input_from_socket(self, socket):
+        self._add_input(socket.bl_idname, socket.name)
+    
+    def add_output_from_socket(self, socket):
+        self._add_output(socket.bl_idname, socket.name)
 
     
     ### ERROR HANDLING
