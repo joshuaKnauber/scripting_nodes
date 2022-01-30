@@ -83,6 +83,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     },
     "List": {
         "Data": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: f"str({from_out.python_value})",
         "Enum": lambda from_out, to_inp: f"set({from_out.python_value})",
         "Float Vector": lambda from_out, to_inp: f"list({from_out.python_value})",
         "Integer Vector": lambda from_out, to_inp: f"list({from_out.python_value})",

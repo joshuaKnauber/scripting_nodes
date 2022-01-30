@@ -7,7 +7,7 @@ class SN_ListNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_ListNode"
     bl_label = "List"
-    node_color = "BOOLEAN"
+    node_color = "LIST"
 
     def on_create(self, context):
         self.add_dynamic_data_input("Data")
