@@ -40,6 +40,9 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     link_cache = {} # stores cache of the links from the previous update for all node trees based on their memory adress
 
 
+    variable_cache = {} # stores the variables of this node tree
+
+
     variables: bpy.props.CollectionProperty(type=SN_VariableProperties,
                                         name="Variables",
                                         description="The variables of this node tree")
