@@ -24,6 +24,9 @@ class SN_FunctionReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def on_socket_type_change(self, socket):
         self.trigger_ref_update({ "changed": socket })
+        
+    def on_socket_name_change(self, socket):
+        self.trigger_ref_update({ "updated": socket })
 
 
     def evaluate(self, context):

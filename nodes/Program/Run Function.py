@@ -16,7 +16,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             
     def on_ref_update(self, node, data=None):
-        if node.bl_idname == "SN_FunctionNode":
+        if node.bl_idname == "SN_FunctionNode" and data:
             # inputs has been added
             if "added" in data:
                 self.add_input_from_socket(data["added"])
@@ -26,17 +26,23 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             # input has changed
             elif "changed" in data:
                 self.convert_socket(self.inputs[data["changed"].index], data["changed"].bl_idname)
+            # input has updated
+            elif "updated" in data:
+                self.inputs[data["updated"].index].name = data["updated"].name
             self._evaluate(bpy.context)
-        elif node.bl_idname == "SN_FunctionReturnNode":
+        elif node.bl_idname == "SN_FunctionReturnNode" and data:
             # output has been added
             if "added" in data:
                 self.add_output_from_socket(data["added"])
             # output has been removed
             elif "removed" in data:
                 self.outputs.remove(self.outputs[data["removed"]])
-            # input has changed
+            # output has changed
             elif "changed" in data:
                 self.convert_socket(self.outputs[data["changed"].index], data["changed"].bl_idname)
+            # output has updated
+            elif "updated" in data:
+                self.outputs[data["updated"].index].name = data["updated"].name
             self._evaluate(bpy.context)
             
             

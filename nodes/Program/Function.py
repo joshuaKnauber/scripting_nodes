@@ -26,6 +26,9 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def on_socket_type_change(self, socket):
         self.trigger_ref_update({ "changed": socket })
+        
+    def on_socket_name_change(self, socket):
+        self.trigger_ref_update({ "updated": socket })
 
 
     @property
@@ -34,6 +37,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, context):
+        # TODO export
         out_values = []
         for i, out in enumerate(self.outputs[1:-1]):
             out_values.append(get_python_name(out.name, f"parameter_{i}"))
@@ -41,7 +45,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             
         self.code = f"""
                     def {self.func_name}({out_names}):
-                        {self.indent(self.outputs[0].python_value, 6)}
+                        {self.indent(self.outputs[0].python_value, 6) if self.outputs[0].python_value else 'pass'}
                     """
         self.code_register = f"""
                     bpy.context.scene.sn.node_function_cache['{self.func_name}'] = {self.func_name}

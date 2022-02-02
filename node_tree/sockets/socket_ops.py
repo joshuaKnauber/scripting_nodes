@@ -33,7 +33,6 @@ class SN_OT_AddDynamic(bpy.types.Operator):
             socket.trigger_dynamic(self.insert_above)
 
             # trigger reevaluation
-            node.on_dynamic_socket_add(socket)
             node._evaluate(context)
         return {"FINISHED"}
 

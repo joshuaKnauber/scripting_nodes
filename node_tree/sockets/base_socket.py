@@ -11,6 +11,12 @@ class ScriptingSocket:
     output_limit = 9999
     # OVERWRITE
     socket_shape = "CIRCLE" # CIRCLE | SQUARE | DIAMOND
+    
+    
+    def update_socket_name(self, context): self.node.on_socket_name_change(self)
+    name: bpy.props.StringProperty(name="Socket Name",
+                                description="Name of this socket",
+                                update=update_socket_name)
 
 
     ### SOCKET OPTIONS
@@ -163,10 +169,10 @@ class ScriptingSocket:
             op.node = node.name
             op.is_output = self.is_output
             op.insert_above = True
-            op.index = self.index
 
     def draw(self, context, layout, node, text):
         """ Draws this socket """
+        text = self.name
         # draw debug text for sockets
         if context.scene.sn.debug_python_sockets and self.python_value:
             text = self.python_value.replace("\n", " || ")
@@ -175,13 +181,16 @@ class ScriptingSocket:
             self._draw_dynamic_socket(layout, node, text)
         # draw variable socket
         elif self.is_variable:
+            # draw previously dynamic socket (with insert socket)
+            if not self.is_output and self.prev_dynamic:
+                self._draw_prev_dynamic_socket(context, layout, node)
             layout.prop(self, "name", text="")
             # draw changeable socket
             if self.changeable:
                 layout.separator()
                 layout.prop(self, "data_type", icon_only=True)
             # draw previously dynamic socket (with insert socket)
-            if self.prev_dynamic:
+            if self.is_output and self.prev_dynamic:
                 self._draw_prev_dynamic_socket(context, layout, node)
         # draw normal socket
         else:
@@ -409,4 +418,5 @@ class ScriptingSocket:
             self.dynamic = False
             self.prev_dynamic = True
             
+            self.node.on_dynamic_socket_add(socket)
             self.node._evaluate(bpy.context)

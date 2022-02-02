@@ -559,8 +559,9 @@ class SN_ScriptingBaseNode:
     def on_dynamic_socket_remove(self, index, is_output): pass
     
     
-    ### SOCKET TYPE CHANGE
+    ### SOCKET ATTRIBUTES CHANGE
     def on_socket_type_change(self, socket): pass
+    def on_socket_name_change(self, socket): pass
 
 
     ### DRAW NODE
@@ -608,6 +609,7 @@ class SN_ScriptingBaseNode:
     def _add_input(self, idname, label, dynamic=False):
         """ Adds an input for this node. This function itself doesn't evaluate as it may be used before the node is ready """
         socket = self.inputs.new(idname, label)
+        socket.name = label
         socket.dynamic = dynamic
         socket.display_shape = socket.socket_shape
         return socket
@@ -615,6 +617,7 @@ class SN_ScriptingBaseNode:
     def _add_output(self, idname, label, dynamic=False):
         """ Adds an output for this node. This function itself doesn't evaluate as it may be used before the node is ready """
         socket = self.outputs.new(idname, label)
+        socket.name = label
         socket.dynamic = dynamic
         socket.display_shape = socket.socket_shape
         return socket
