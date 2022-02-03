@@ -44,3 +44,11 @@ class SN_PT_VariablePanel(bpy.types.Panel):
             op.move_up = False
             op.node_tree = ntree.name
             layout.separator()
+            
+            if ntree.variable_index < len(ntree.variables):
+                var = ntree.variables[ntree.variable_index]
+                col = layout.column()
+                col.use_property_split = True
+                col.use_property_decorate = False
+                
+                col.prop(var, "variable_type")

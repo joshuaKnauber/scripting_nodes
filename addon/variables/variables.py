@@ -29,12 +29,12 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
 
     @property
     def data_path(self):
-        return f"SN_VAR_{self.python_name}"
+        return f"var('{self.python_name}')"
     
     
     @property
     def icon(self):
-        return "MONKEY"
+        return property_icons[self.variable_type]
     
     
     def compile(self, context=None):
@@ -43,7 +43,7 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
         if self.python_name in self.node_tree.variable_cache:
             del self.node_tree.variable_cache[self.python_name]
         # register
-        self.node_tree.variable_cache[self.python_name] = ""
+        self.node_tree.variable_cache[self.python_name] = f"{self.python_name} = 'test var'"
         print(f"Serpens Log: Variable {self.name} received an update")
     
     
@@ -98,8 +98,10 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
                                     description="The type of data this variable stores",
                                     update=compile,
                                     items=[("Data", "Data", "Stores any type of data", property_icons["Data"], 0),
-                                           ("Boolean", "Boolean", "Stores True or False", property_icons["Boolean"], 1),
-                                           ("Float", "Float", "Stores a decimal number", property_icons["Float"], 2),
-                                           ("Integer", "Integer", "Stores an integer number", property_icons["Integer"], 3),
-                                           ("Pointer", "Pointer", "Stores a reference to certain types of blend data, collection or group properties", property_icons["Pointer"], 4),
-                                           ("Collection", "Collection", "Stores a list of certain blend data or property groups to be displayed in lists", property_icons["Collection"], 5)])
+                                           ("String", "String", "Stores a string of characters", property_icons["String"], 1),
+                                           ("Boolean", "Boolean", "Stores True or False", property_icons["Boolean"], 2),
+                                           ("Float", "Float", "Stores a decimal number", property_icons["Float"], 3),
+                                           ("Integer", "Integer", "Stores an integer number", property_icons["Integer"], 4),
+                                           ("List", "List", "Stores a list of data", property_icons["List"], 5),
+                                           ("Pointer", "Pointer", "Stores a reference to certain types of blend data, collection or group properties", property_icons["Pointer"], 6),
+                                           ("Collection", "Collection", "Stores a list of certain blend data or property groups to be displayed in lists", property_icons["Collection"], 7)])
