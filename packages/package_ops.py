@@ -7,6 +7,11 @@ from bpy_extras.io_utils import ImportHelper
 
 
 
+loaded_packages = [] # temp var for the loaded packages in a file
+require_reload = False # set to true after a package is installed
+
+
+
 class SN_OT_InstallPackage(bpy.types.Operator, ImportHelper):
     bl_idname = "sn.install_package"
     bl_label = "Install Package"
@@ -47,9 +52,35 @@ class SN_OT_InstallPackage(bpy.types.Operator, ImportHelper):
         if extension == ".zip":
             extracted_files = self.extract_zip()
             package_info = self.get_package_info()
-            if package_info:
-                self.write_to_installed(package_info, extracted_files)
-                bpy.ops.script.reload()
+            if not package_info:
+                package_info = {
+                    "name": os.path.basename(filename),
+                    "author": "Unknown",
+                    "description": "",
+                    "version": "1.0.0",
+                    "wiki": ""}
+            self.write_to_installed(package_info, extracted_files)
+
+        bpy.ops.sn.reload_packages()
+        global require_reload
+        require_reload = True
+        return {"FINISHED"}
+    
+    
+    
+class SN_OT_ReloadPackages(bpy.types.Operator):
+    bl_idname = "sn.reload_packages"
+    bl_label = "Reload Packages"
+    bl_description = "Reloads the installed packages list"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        global loaded_packages
+        installed_path = os.path.join(os.path.dirname(__file__),"installed.json")
+        with open(installed_path, "r") as installed:
+            data = json.loads(installed.read())
+            loaded_packages = data["packages"]
+            print(loaded_packages)
         return {"FINISHED"}
 
 
@@ -95,7 +126,8 @@ class SN_OT_UninstallPackage(bpy.types.Operator):
         if package:
             self.remove_nodes(package["nodes"])
             self.remove_empty_dirs()
-            bpy.ops.script.reload()
+            
+        bpy.ops.sn.reload_packages()
         return {"FINISHED"}
 
     def invoke(self, context, event):

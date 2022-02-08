@@ -1,3 +1,12 @@
 {
-    "packages": []
+    "packages": [
+        {
+            "name": "my_package",
+            "author": "Unknown",
+            "description": "this is some package",
+            "version": "1.0.0",
+            "wiki": "www.google.com",
+            "nodes": []
+        }
+    ]
 }

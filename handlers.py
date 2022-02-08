@@ -23,6 +23,7 @@ def load_handler(dummy):
     if bpy.context.scene.sn.compile_on_load:
         compile_all()
     check_serpens_updates(bl_info["version"])
+    bpy.ops.sn.reload_packages()
 
 
 
