@@ -685,6 +685,7 @@ class SN_ScriptingBaseNode:
         "Icon": "SN_IconSocket",
         "List": "SN_ListSocket",
         "Collection Property": "SN_CollectionPropertySocket",
+        "Collection": "SN_CollectionPropertySocket",
         "Property": "SN_PropertySocket",
     }
 
