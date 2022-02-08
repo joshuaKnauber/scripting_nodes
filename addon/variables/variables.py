@@ -1,13 +1,11 @@
 import bpy
 from ...utils import get_python_name, unique_collection_name
 from ..properties.settings.settings import property_icons
+from .. import sna_globals
 
 
 
 class SN_VariableProperties(bpy.types.PropertyGroup):
-    
-    def compile(self, context=None):
-        pass
     
     
     @property
@@ -23,13 +21,13 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
                 break
             names.append(var.python_name)
         
-        name = unique_collection_name(f"sna_{get_python_name(self.name, 'new_variable')}", "new_variable", names, "_")
+        name = unique_collection_name(f"sna_{get_python_name(self.name, 'sna_new_variable')}", "sna_new_variable", names, "_")
         return name
 
 
     @property
     def data_path(self):
-        return f"var('{self.python_name}')"
+        return f"sna_globals.{self.python_name}"
     
     
     @property
@@ -39,52 +37,35 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
     
     def compile(self, context=None):
         """ Registers the variable and unregisters previous version """
-        # unregister previous
-        if self.python_name in self.node_tree.variable_cache:
-            del self.node_tree.variable_cache[self.python_name]
-        # register
-        self.node_tree.variable_cache[self.python_name] = f"{self.python_name} = 'test var'"
+        setattr(sna_globals, self.python_name, self.var_default)
         print(f"Serpens Log: Variable {self.name} received an update")
     
     
     def get_name(self):
         return self.get("name", "Variable Default")
+    
+    
+    def get_to_update_nodes(self):
+        to_update_nodes = []
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                for node in ntree.nodes:
+                    if getattr(node, "var_name", None) == self.name:
+                        to_update_nodes.append(node)
+        return to_update_nodes
 
     def set_name(self, value):
         names = list(map(lambda item: item.name, list(filter(lambda item: item!=self, self.node_tree.variables))))
         value = unique_collection_name(value, "New Variable", names, " ")
-
-        self["name"] = value
-        return # TODO
-
-        # get nodes to update references
-        to_update_nodes = []
-        key = "prop_group" if self.property_type == "Group" else "prop_name"
-        for ntree in bpy.data.node_groups:
-            if ntree.bl_idname == "ScriptingNodesTree":
-                for node in ntree.nodes:
-                    if hasattr(node, key) and getattr(node, key) == self.name:
-                        to_update_nodes.append((node, key))
-
-        # get properties to update references
-        to_update_props = []
-        if self.property_type == "Group":
-            for prop in self.prop_collection:
-                if prop.property_type in ["Pointer", "Collection"] and prop.settings.prop_group == self.name:
-                    to_update_props.append(prop)
-                elif prop.property_type == "Group" and prop != self:
-                    for subprop in prop.settings.properties:
-                        if subprop.property_type in ["Pointer", "Collection"] and subprop.settings.prop_group == self.name:
-                            to_update_props.append(subprop)
+        to_update = self.get_to_update_nodes()
 
         # set value
         self["name"] = value
+        self.compile()
 
-        # update property references
-        for prop in to_update_props:
-            prop.settings.prop_group = value
-        for node, key in to_update_nodes:
-            setattr(node, key, value)
+        # update node references
+        for node in to_update:
+            node.var_name = value
     
     name: bpy.props.StringProperty(name="Variable Name",
                                     description="Name of this variable",
@@ -94,9 +75,15 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
                                     update=compile)
     
     
+    def update_variable_type(self, context):
+        for node in self.get_to_update_nodes():
+            if hasattr(node, "on_var_changed"):
+                node.on_var_changed()
+        self.compile()
+        
     variable_type: bpy.props.EnumProperty(name="Type",
                                     description="The type of data this variable stores",
-                                    update=compile,
+                                    update=update_variable_type,
                                     items=[("Data", "Data", "Stores any type of data", property_icons["Data"], 0),
                                            ("String", "String", "Stores a string of characters", property_icons["String"], 1),
                                            ("Boolean", "Boolean", "Stores True or False", property_icons["Boolean"], 2),
@@ -105,3 +92,22 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
                                            ("List", "List", "Stores a list of data", property_icons["List"], 5),
                                            ("Pointer", "Pointer", "Stores a reference to certain types of blend data, collection or group properties", property_icons["Pointer"], 6),
                                            ("Collection", "Collection", "Stores a list of certain blend data or property groups to be displayed in lists", property_icons["Collection"], 7)])
+                                           
+    string_default: bpy.props.StringProperty(name="Default", description="Default value for the variable", update=compile)
+    boolean_default: bpy.props.BoolProperty(name="Default", description="Default value for the variable", update=compile)
+    float_default: bpy.props.FloatProperty(name="Default", description="Default value for the variable", update=compile)
+    integer_default: bpy.props.IntProperty(name="Default", description="Default value for the variable", update=compile)
+
+
+    @property
+    def var_default(self):
+        return {
+            "Data": None,
+            "String": self.string_default,
+            "Boolean": self.boolean_default,
+            "Float": self.float_default,
+            "Integer": self.integer_default,
+            "List": [],
+            "Pointer": None,
+            "Collection": None,
+        }[self.variable_type]

@@ -111,7 +111,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     return_names = ", ".join(return_values)
 
                     # set values with execute
-                    self.code = f"{return_names} = bpy.context.scene.sn.node_function_cache['{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}']({inp_values})"
+                    self.code = f"{return_names} = sna_globals.{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})"
                     for i, out in enumerate(self.outputs[1:]):
                         out.python_value = return_values[i]
                 else:
@@ -120,11 +120,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 # set values without execute
                 for i, out in enumerate(self.outputs[1:]):
-                    out.python_value = f"bpy.context.scene.sn.node_function_cache['{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}']({inp_values})[{i}]"
+                    out.python_value = f"sna_globals.{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})[{i}]"
         else:
             for out in self.outputs[1:]:
                 out.reset_value()
-        # TODO export
 
     
     def draw_node(self, context, layout):

@@ -6,6 +6,8 @@ TODO
 - You can't access nested blend data !!!
 - You can't access some blender properties (is that ok? improve get data scriptline instead?)
 
+- could get blend data from realtime stuff and then freeze nodes. you can only access things that exist right now and can then abstract for addon
+
 
 ## Tasks
 ### Interface
@@ -36,7 +38,7 @@ TODO
 - [ ] On Keypress
 
 ### Variables
-- [ ] Figure out variables
+- [X] Figure out variables
 
 ### General
 - [ ] Save Addon

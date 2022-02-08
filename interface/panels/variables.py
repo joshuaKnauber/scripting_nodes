@@ -52,3 +52,16 @@ class SN_PT_VariablePanel(bpy.types.Panel):
                 col.use_property_decorate = False
                 
                 col.prop(var, "variable_type")
+                
+                if var.variable_type == "String":
+                    col.separator()
+                    col.prop(var, "string_default")
+                elif var.variable_type == "Boolean":
+                    col.separator()
+                    col.prop(var, "boolean_default")
+                elif var.variable_type == "Float":
+                    col.separator()
+                    col.prop(var, "float_default")
+                elif var.variable_type == "Integer":
+                    col.separator()
+                    col.prop(var, "integer_default")

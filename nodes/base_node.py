@@ -179,8 +179,9 @@ class SN_ScriptingBaseNode:
     def _format_imports(self, linked=[]):
         """ Returns the imports for this node formatted for a python file """
         if not linked: linked = self._get_linked_nodes()
-        import_list = self._get_import_list(linked)
-        return "import bpy\n" + "\n".join(import_list) + "\n"
+        import_list = ["import bpy", "from blender_visual_scripting_addon.addon import sna_globals"]
+        import_list += self._get_import_list(linked)
+        return "\n".join(import_list) + "\n"
 
 
     def _format_imperative(self, linked=[]):

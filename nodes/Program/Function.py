@@ -48,11 +48,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {self.indent(self.outputs[0].python_value, 6) if self.outputs[0].python_value else 'pass'}
                     """
         self.code_register = f"""
-                    bpy.context.scene.sn.node_function_cache['{self.func_name}'] = {self.func_name}
-                    """
-        self.code_unregister = f"""
-                    if '{self.func_name}' in bpy.context.scene.sn.node_function_cache:
-                        del bpy.context.scene.sn.node_function_cache['{self.func_name}']
+                    sna_globals.{self.func_name} = {self.func_name}
                     """
 
         for i, out in enumerate(self.outputs[1:-1]):

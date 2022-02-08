@@ -7,8 +7,15 @@ from ...addon.variables.variables import SN_VariableProperties
 
 def compile_all(hard=False):
     """ Compile all node trees in this file """
+    # compile properties
     if len(bpy.context.scene.sn.properties):
         bpy.context.scene.sn.properties[0].register_all()
+    # compile variables
+    for group in bpy.data.node_groups:
+        if group.bl_idname == "ScriptingNodesTree":
+            for var in group.variables:
+                var.compile()
+    # compile node trees
     for group in bpy.data.node_groups:
         if group.bl_idname == "ScriptingNodesTree":
             group.compile(hard)
@@ -17,6 +24,7 @@ def compile_all(hard=False):
 
 def unregister_all():
     """ Unregister all node trees in this file """
+    # TODO remove variables
     if len(bpy.context.scene.sn.properties):
         bpy.context.scene.sn.properties[0].unregister_all()
     for group in bpy.data.node_groups:
@@ -38,9 +46,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     is_sn = True
 
     link_cache = {} # stores cache of the links from the previous update for all node trees based on their memory adress
-
-
-    variable_cache = {} # stores the variables of this node tree
 
 
     variables: bpy.props.CollectionProperty(type=SN_VariableProperties,

@@ -20,6 +20,9 @@ class VariableReferenceNode():
                                     description="Variable to get the value from",
                                     update=var_update)
     
+    def on_var_change(self):
+        pass
+    
     def get_var(self):
         if self.var_ntree and self.var_name in self.var_ntree.variables:
             return self.var_ntree.variables[self.var_name]

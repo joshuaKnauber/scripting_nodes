@@ -14,6 +14,6 @@ class SN_ListNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_list_output("List")
 
     def evaluate(self, context):
-        items = [inp.python_value for inp in self.inputs[:-1]]
-        items = filter(lambda item: item != "None", items)
+        items = [inp.python_value if inp.is_linked else None for inp in self.inputs[:-1]]
+        items = filter(lambda item: item != None, items)
         self.outputs["List"].python_value = f"[{', '.join(items)}]"
