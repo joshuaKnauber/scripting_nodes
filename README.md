@@ -33,7 +33,7 @@ TODO
 ### Program
 - [ ] Operator Node
 - [ ] Run Operator (Template from Button)
-- [ ] Functions
+- [X] Functions
 - [ ] App Handlers
 - [ ] On Keypress
 
