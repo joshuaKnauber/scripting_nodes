@@ -80,7 +80,6 @@ class SN_OT_ReloadPackages(bpy.types.Operator):
         with open(installed_path, "r") as installed:
             data = json.loads(installed.read())
             loaded_packages = data["packages"]
-            print(loaded_packages)
         return {"FINISHED"}
 
 

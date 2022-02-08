@@ -4,15 +4,21 @@ import bpy
 
 class SN_PT_PropertyPanel(bpy.types.Panel):
     bl_idname = "SN_PT_PropertyPanel"
-    bl_label = "Properties"
+    bl_label = ""
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_order = 1
+    bl_options = {"HEADER_LAYOUT_EXPAND"}
 
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+    
+    def draw_header(self, context):
+        layout = self.layout
+        layout.label(text="Properties")
+        layout.operator("wm.url_open", text="", icon="QUESTION", emboss=False).url = "https://joshuaknauber.notion.site/Properties-6f7567be7bff4256b9bb0311e8d79f9d"
     
     def draw(self, context):
         layout = self.layout

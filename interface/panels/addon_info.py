@@ -4,16 +4,21 @@ import bpy
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
     bl_idname = "SN_PT_AddonInfoPanel"
-    bl_label = "Addon"
+    bl_label = ""
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
-    bl_options = {"DEFAULT_CLOSED"}
+    bl_options = {"DEFAULT_CLOSED", "HEADER_LAYOUT_EXPAND"}
     bl_order = 4
 
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+    
+    def draw_header(self, context):
+        layout = self.layout
+        layout.label(text="Addon")
+        layout.operator("wm.url_open", text="", icon="QUESTION", emboss=False).url = "https://joshuaknauber.notion.site/Export-496335f1abe44262885bde330efe59c0"
 
     def draw(self, context):
         layout = self.layout

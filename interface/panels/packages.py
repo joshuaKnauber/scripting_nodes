@@ -5,16 +5,21 @@ from ...packages import package_ops
 
 class SN_PT_PackagesPanel(bpy.types.Panel):
     bl_idname = "SN_PT_PackagesPanel"
-    bl_label = "Packages"
+    bl_label = ""
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_order = 6
-    bl_options = {"DEFAULT_CLOSED"}
+    bl_options = {"DEFAULT_CLOSED", "HEADER_LAYOUT_EXPAND"}
 
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+    
+    def draw_header(self, context):
+        layout = self.layout
+        layout.label(text="Packages")
+        layout.operator("wm.url_open", text="", icon="QUESTION", emboss=False).url = "https://joshuaknauber.notion.site/Packages-Snippets-5fc9492b640146a2bcafb269d4a9e876"
 
     def draw(self, context):
         layout = self.layout
@@ -58,16 +63,21 @@ class SN_PT_PackagesPanel(bpy.types.Panel):
 class SN_PT_PackageDevPanel(bpy.types.Panel):
     bl_idname = "SN_PT_PackageDevPanel"
     bl_parent_id = "SN_PT_PackagesPanel"
-    bl_label = "Development"
+    bl_label = ""
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_order = 0
-    bl_options = {"DEFAULT_CLOSED"}
+    bl_options = {"DEFAULT_CLOSED", "HEADER_LAYOUT_EXPAND"}
 
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+    
+    def draw_header(self, context):
+        layout = self.layout
+        layout.label(text="Development")
+        layout.operator("wm.url_open", text="", icon="QUESTION", emboss=False).url = "https://joshuaknauber.notion.site/Packages-f5af01a473f84f78a02d0b6d86baeed7"
 
     def draw(self, context):
         layout = self.layout

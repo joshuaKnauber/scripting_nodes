@@ -34,6 +34,17 @@ def register_keymaps():
         )
     addon_keymaps["compile"] = (km, kmi)
 
+    # shortcut for docs
+    kmi = km.keymap_items.new(
+        idname="sn.open_node_docs",
+        type="F1",
+        value="PRESS",
+        shift=False,
+        ctrl=False,
+        alt=False,
+        )
+    addon_keymaps["docs"] = (km, kmi)
+
 
 def unregister_keymaps():
     # unregister visual scripting keymaps

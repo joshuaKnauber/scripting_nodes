@@ -4,16 +4,21 @@ import bpy
 
 class SN_PT_AddonSettingsPanel(bpy.types.Panel):
     bl_idname = "SN_PT_AddonSettingsPanel"
-    bl_label = "Settings"
+    bl_label = ""
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
-    bl_options = {"DEFAULT_CLOSED"}
+    bl_options = {"DEFAULT_CLOSED", "HEADER_LAYOUT_EXPAND"}
     bl_order = 7
 
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+    
+    def draw_header(self, context):
+        layout = self.layout
+        layout.label(text="Settings")
+        layout.operator("wm.url_open", text="", icon="QUESTION", emboss=False).url = "https://joshuaknauber.notion.site/Workflow-Introduction-d235d03178124dc9b752088d75a25192"
 
     def draw(self, context):
         layout = self.layout
@@ -37,15 +42,21 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
 class SN_PT_EasyBpyPanel(bpy.types.Panel):
     bl_idname = "SN_PT_EasyBpyPanel"
     bl_parent_id = "SN_PT_AddonSettingsPanel"
-    bl_label = "Easy BPY"
+    bl_label = ""
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_order = 0
+    bl_options={"HEADER_LAYOUT_EXPAND"}
 
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+    
+    def draw_header(self, context):
+        layout = self.layout
+        layout.label(text="Easy BPY")
+        layout.operator("wm.url_open", text="", icon="QUESTION", emboss=False).url = "https://joshuaknauber.notion.site/Easy-BPY-e3a894c7bf4c469389e6caa7640c3219"
 
     def draw(self, context):
         layout = self.layout
