@@ -20,7 +20,8 @@ bl_info = {
     "blender" : (3, 0, 0),
     "version" : (3, 0, 0),
     "location" : "Editors -> Visual Scripting",
-    "doc_url": "", 
+    "doc_url": "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233", 
+    "tracker_url": "https://discord.com/invite/NK6kyae", 
     "category" : "Node" 
 }
 
