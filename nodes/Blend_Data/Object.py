@@ -12,6 +12,7 @@ class SN_ObjectBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def on_create(self, context):
         self.add_collection_property_output("All Objects")
+        self.add_collection_property_output("Active Scene Objects")
         self.add_property_output("Active Object")
         self.add_property_output("Indexed")
         self.add_integer_input("Index")
@@ -29,6 +30,7 @@ class SN_ObjectBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def evaluate(self, context):
         self.outputs["All Objects"].python_value = f"bpy.data.objects"
+        self.outputs["Active Scene Objects"].python_value = f"bpy.context.scene.objects"
         self.outputs["Active Object"].python_value = f"bpy.context.active_object"
         self.outputs["Indexed"].python_value = f"bpy.data.objects[{self.inputs[0].python_value}]"
 
