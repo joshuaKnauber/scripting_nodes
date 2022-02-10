@@ -1,7 +1,10 @@
 import bpy
 from bl_ui import space_userpref
 from uuid import uuid4
+
+from .data_properties import SN_DataProperty, is_valid_attribute
 from ..addon.properties.properties import SN_GeneralProperties
+from ..addon.properties.settings.settings import property_icons
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
             
@@ -95,22 +98,6 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="Gets set when a file is loaded. Set to the easy bpy file path.")
 
 
-    development_node: bpy.props.PointerProperty(type=bpy.types.Text,
-                                        name="Node File",
-                                        description="File for developing a node in")
-    
-    
-    def update_hide_preferences(self, context):
-        for cls in space_userpref.classes:
-            if self.hide_preferences: bpy.utils.unregister_class(cls)
-            else: bpy.utils.register_class(cls)
-            
-    hide_preferences: bpy.props.BoolProperty(default=False,
-                                            name="Hide Preferences",
-                                            description="Hides all panels in the preferences window",
-                                            update=update_hide_preferences)
-
-
     def update_node_tree_index(self, context):
         if len(bpy.data.node_groups):
             # TODO only if node tree in space data
@@ -195,14 +182,63 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     custom_category: bpy.props.StringProperty(default="My Category",
                                         name="Custom Category",
                                         description="Your custom category")
+    
+    
+    def create_data_items(self, data, data_path):
+        for attr in dir(data):
+            if is_valid_attribute(attr):
+                prop = None if not hasattr(data, "bl_rna") or not attr in data.bl_rna.properties else data.bl_rna.properties[attr]
+                item = self.data_items.add()
+                if prop:
+                    item.name = prop.name if prop.name else prop.identifier
+                    item.description = prop.description if prop.description else item.name
+                    item.type = prop.type
+                else:
+                    item.name = attr
+                    item.description = attr
+                    item.type = str(type(getattr(data, attr)))
+                item.identifier = attr
+                item.path = f"{data_path}.{attr}"
+                item.parent_path = data_path
+                item.has_properties = hasattr(getattr(data, attr), "bl_rna")
+    
+    def update_data_category(self, context):
+        self.data_items.clear()
+        self.create_data_items(getattr(bpy, self.data_category), f"bpy.{self.data_category}")
 
-
-    # potential solution for if this https://developer.blender.org/T88986 bug was fixed
-
-    addon_text: bpy.props.PointerProperty(name="Text File",
-                                            description="File which the addon is stored in",
-                                            type=bpy.types.Text)
-
-    def get_addon_text(self):
-        if not self.addon_text:
-            self.addon_text = bpy.data.texts.new("Addon File")
+    def update_hide_preferences(self, context):
+        for cls in space_userpref.classes:
+            try:
+                if self.hide_preferences: bpy.utils.unregister_class(cls)
+                else: bpy.utils.register_class(cls)
+            except: pass
+        self.update_data_category(context)
+            
+    hide_preferences: bpy.props.BoolProperty(default=False,
+                                        name="Hide Preferences",
+                                        description="Hides all panels in the preferences window",
+                                        update=update_hide_preferences)
+    
+    data_category: bpy.props.EnumProperty(name="Category",
+                                        items=[("app", "App", "bpy.app"),
+                                               ("context", "Context", "bpy.context"),
+                                               ("data", "Data", "bpy.data"),
+                                               ("path", "Path", "bpy.path"),
+                                               ("utils", "Utils", "bpy.utils")],
+                                        default="context",
+                                        description="Category of blend data",
+                                        update=update_data_category)
+    
+    data_items: bpy.props.CollectionProperty(type=SN_DataProperty)
+    
+    data_filter: bpy.props.EnumProperty(name="Type",
+                                        options={"ENUM_FLAG"},
+                                        description="Filter by data type",
+                                        items=[("POINTER", "Pointer", "Pointer", property_icons["Property"], 1),
+                                               ("COLLECTION", "Collection", "Collection", property_icons["Collection"], 2),
+                                               ("STRING", "String", "String", property_icons["String"], 4),
+                                               ("ENUM", "Enum", "Enum", property_icons["Enum"], 8),
+                                               ("BOOLEAN", "Boolean", "Boolean", property_icons["Boolean"], 16),
+                                               ("INT", "Integer", "Integer", property_icons["Integer"], 32),
+                                               ("FLOAT", "Float", "Float", property_icons["Float"], 64)],
+                                        default={"POINTER","COLLECTION","STRING","ENUM","BOOLEAN","INT","FLOAT"})
