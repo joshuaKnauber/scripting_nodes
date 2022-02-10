@@ -1,4 +1,5 @@
 import bpy
+from bl_ui import space_userpref
 from uuid import uuid4
 from ..addon.properties.properties import SN_GeneralProperties
 from ..addon.assets.assets import SN_AssetProperties
@@ -97,6 +98,17 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     development_node: bpy.props.PointerProperty(type=bpy.types.Text,
                                         name="Node File",
                                         description="File for developing a node in")
+    
+    
+    def update_hide_preferences(self, context):
+        for cls in space_userpref.classes:
+            if self.hide_preferences: bpy.utils.unregister_class(cls)
+            else: bpy.utils.register_class(cls)
+            
+    hide_preferences: bpy.props.BoolProperty(default=False,
+                                            name="Hide Preferences",
+                                            description="Hides all panels in the preferences window",
+                                            update=update_hide_preferences)
 
 
     def update_node_tree_index(self, context):

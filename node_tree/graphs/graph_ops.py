@@ -153,3 +153,20 @@ class SN_OT_ForceUnregister(bpy.types.Operator):
     def execute(self, context):
         unregister_all()
         return {"FINISHED"}
+
+
+
+class SN_OT_ShowDataOverview(bpy.types.Operator):
+    bl_idname = "sn.show_data_overview"
+    bl_label = "Show Data Overview"
+    bl_description = "Opens a window that shows a data overview"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        for area in context.screen.areas:
+            if area.type == "PREFERENCES":
+                break
+        else:
+            bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
+        context.scene.sn.hide_preferences = True
+        return {"FINISHED"}
