@@ -1,4 +1,5 @@
 import bpy
+from ...addon.properties.settings.settings import property_icons
         
         
         
@@ -15,13 +16,18 @@ class SN_PT_navigation_bar(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
 
+        row = layout.row()
+        row.scale_y = 1.4
+        row.alert = True
+        row.operator("sn.exit_search", text="Exit", icon="PANEL_CLOSE")
+        layout.separator()
+
         layout.operator("wm.url_open", text="How to", icon="QUESTION").url = "https://joshuaknauber.notion.site/Blend-Data-33e9f2ea40f44c2498cb26838662b621"
         layout.separator()
 
         row = layout.row()
         row.scale_y = 1.4
-        row.alert = True
-        row.operator("sn.exit_search", text="Exit", icon="PANEL_CLOSE")
+        row.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH")
         layout.separator()
 
         layout.label(text="Source:")
@@ -51,22 +57,16 @@ class SN_PT_data_search(bpy.types.Panel):
         box = layout.box()
         row = box.row()
         if not curr_item.has_properties:
-            row.scale_y = 0.65
+            row.scale_y = 0.7
 
         if curr_item.has_properties:
             row.prop(curr_item, "expand", text="", icon="DISCLOSURE_TRI_DOWN" if curr_item.expand else "DISCLOSURE_TRI_RIGHT", emboss=False)
+        else:
+            row.label(text="", icon=property_icons[curr_item.type.title()] if curr_item.type.title() in property_icons.keys() else "ERROR")
 
         row.label(text=" | ".join(list(map(lambda x: x.name.replace("_", " ").title(), prev_items))))
         row = row.row()
         row.alignment = "RIGHT"
-        
-        # if curr_item.type == "COLLECTION":
-        #     subrow = row.row()
-        #     if curr_item.use_string_index:
-        #         subrow.prop(curr_item, "index_string", text="")
-        #     else:
-        #         subrow.prop(curr_item, "index_int", text="")
-        #     subrow.prop(curr_item, "use_string_index", text="", icon="SYNTAX_OFF" if curr_item.use_string_index else "DRIVER_TRANSFORM")
         
         subrow = row.row()
         subrow.enabled = False

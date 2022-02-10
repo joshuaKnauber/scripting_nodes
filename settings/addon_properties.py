@@ -200,7 +200,16 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                 item.identifier = attr
                 item.path = f"{data_path}.{attr}"
                 item.parent_path = data_path
-                item.has_properties = hasattr(getattr(data, attr), "bl_rna")
+                item.has_properties = hasattr(getattr(data, attr), "bl_rna") # doesnt show empty colls TODO
+        if hasattr(data, "__iter__"):
+            for i, indexed in enumerate(data):
+                item = self.data_items.add()
+                item.name = f"'{indexed.name}'" if hasattr(indexed, "name") else f"[{i}]"
+                item.description = indexed.bl_rna.description
+                item.type = indexed.bl_rna.name
+                item.path = f"{data_path}['{indexed.name}']" if hasattr(indexed, "name") else f"{data_path}[{i}]" 
+                item.parent_path = data_path
+                item.has_properties = True
     
     def update_data_category(self, context):
         self.data_items.clear()
@@ -212,7 +221,8 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                 if self.hide_preferences: bpy.utils.unregister_class(cls)
                 else: bpy.utils.register_class(cls)
             except: pass
-        self.update_data_category(context)
+        if self.hide_preferences:
+            self.update_data_category(context)
             
     hide_preferences: bpy.props.BoolProperty(default=False,
                                         name="Hide Preferences",

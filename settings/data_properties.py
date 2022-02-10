@@ -35,11 +35,4 @@ class SN_DataProperty(bpy.types.PropertyGroup):
     expand: bpy.props.BoolProperty(default=False,
                                 update=update_expand,
                                 name="Expand",
-                                description="Expand the items of this property")    
-
-
-    index_int: bpy.props.IntProperty()
-
-    index_string: bpy.props.StringProperty()
-    
-    use_string_index: bpy.props.BoolProperty(default=False)
+                                description="Expand the items of this property")
