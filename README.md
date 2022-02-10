@@ -57,3 +57,4 @@ TODO
 
 
 read items in blend file node
+scene collections output on collections node

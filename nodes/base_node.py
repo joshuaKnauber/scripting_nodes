@@ -816,51 +816,57 @@ import bpy
 from ..base_node import SN_ScriptingBaseNode
 
 
-
 class SN_YourNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_YourNode"
     bl_label = "Node Name"
     node_color = "DEFAULT"
 
-    # delete these two if you don't need them
+    # delete theseif you don't need them
+		bl_width_default = 160
     is_trigger = False
     layout_type = "layout"
 
-
     # avoid having properties on your nodes, expose everything to sockets if possible
+		# make sure to call _evaluate when a property value changes, you can use self._evaluate(context) if you have a custom update function
     string: bpy.props.StringProperty(name="String",
                                 description="String value of this node",
-                                update=SN_ScriptingBaseNode._evaluate) # make sure to call _evaluate when a property value changes
-
+                                update=SN_ScriptingBaseNode._evaluate)
 
     def on_create(self, context):
+				# create your inputs here
         self.add_string_output()
-
 
     def on_copy(self, old): pass
 
-
     def on_free(self): pass
-
 
     def on_node_update(self): pass
 
-
     def on_link_insert(self, socket, link): pass
-
 
     def on_link_remove(self, socket): pass
 
+		def on_dynamic_socket_add(self, socket): pass
+
+    def on_dynamic_socket_remove(self, index, is_output): pass
+
+		def on_socket_type_change(self, socket): pass
+
+    def on_socket_name_change(self, socket): pass
+
+		def on_ref_update(self, node, data=None): pass
 
     def evaluate(self, context):
+				# generate the code here
         self.outputs[0].python_value = "# comment"
         self.code = ""
 
+		def evaluate_export(self, context):
+				self.evaluate(context)
 
     def draw_node(self, context, layout):
         layout.prop(self, "string", text="")
-
 
     def draw_node_panel(self, context, layout): pass
 """
