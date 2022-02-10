@@ -52,5 +52,5 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket, PropertySocket):
             if self.name in blend_data_defaults:
                 text += f" ({blend_data_defaults[self.name]['name']})"
             else:
-                text += " (NO VALUE!)"
+                text += " (No Data)"
         layout.label(text=text)

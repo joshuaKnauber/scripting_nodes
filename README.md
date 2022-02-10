@@ -54,3 +54,6 @@ TODO
 - [X] Path icons on startup
 - [X] Generate dynamic enum items on startup
 - [ ] Property source and name split when there is brackets at the end
+
+
+read items in blend file node
