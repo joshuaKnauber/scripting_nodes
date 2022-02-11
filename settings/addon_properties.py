@@ -1,6 +1,7 @@
 import bpy
 from bl_ui import space_userpref
 from uuid import uuid4
+import threading
 
 from .data_properties import SN_DataProperty, is_valid_attribute
 from ..addon.properties.properties import SN_GeneralProperties
@@ -252,3 +253,12 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                                ("INT", "Integer", "Integer", property_icons["Integer"], 32),
                                                ("FLOAT", "Float", "Float", property_icons["Float"], 64)],
                                         default={"POINTER","COLLECTION","STRING","ENUM","BOOLEAN","INT","FLOAT"})
+
+    
+    data_search: bpy.props.StringProperty(name="Search",
+                                        description="Search data",
+                                        options={"TEXTEDIT_UPDATE"})
+    
+    data_filter_warning: bpy.props.BoolProperty(default=True,
+                                                name="Filter Warning",
+                                                description="Because of the large amount of data, the filters only filter the visible data!")
