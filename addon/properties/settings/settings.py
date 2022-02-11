@@ -42,6 +42,9 @@ property_icons = {
     "List": "LONGDISPLAY",
     "Data": "OBJECT_DATA",
     "Icon": "DRIVER_TRANSFORM",
+
+    "Function": "FILE_SCRIPT",
+    "Built In Function": "SCRIPTPLUGINS",
 }
 
 

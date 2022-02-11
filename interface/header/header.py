@@ -22,7 +22,7 @@ def header_prepend(self, context):
         if len(context.space_data.node_tree.nodes) == 0:
             row.operator("node.add_node", text="Start Tutorial", icon="PLAY", depress=True).type = "SN_TutorialNode"
             
-        row.operator("sn.show_data_overview", text="Data", icon="VIEWZOOM")
+        row.operator("sn.show_data_overview", text="Data", icon="RNA")
 
         subrow = row.row(align=True)
         subrow.operator("sn.clear_console", text="", icon="TRASH")
@@ -33,7 +33,6 @@ def header_prepend(self, context):
         if context.scene.sn.has_update:
             row.separator()
             row.operator("sn.update_message", text="Update!", icon="INFO", depress=True)
-
 
 
 

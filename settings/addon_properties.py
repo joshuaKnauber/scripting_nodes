@@ -1,9 +1,8 @@
 import bpy
 from bl_ui import space_userpref
 from uuid import uuid4
-import threading
 
-from .data_properties import SN_DataProperty, is_valid_attribute
+from .data_properties import SN_DataProperty, is_valid_attribute, filter_items, filter_defaults
 from ..addon.properties.properties import SN_GeneralProperties
 from ..addon.properties.settings.settings import property_icons
 from ..addon.assets.assets import SN_AssetProperties
@@ -190,18 +189,47 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
             if is_valid_attribute(attr):
                 prop = None if not hasattr(data, "bl_rna") or not attr in data.bl_rna.properties else data.bl_rna.properties[attr]
                 item = self.data_items.add()
-                if prop:
-                    item.name = prop.name if prop.name else prop.identifier
-                    item.description = prop.description if prop.description else item.name
-                    item.type = prop.type
-                else:
-                    item.name = attr
-                    item.description = attr
-                    item.type = str(type(getattr(data, attr)))
                 item.identifier = attr
                 item.path = f"{data_path}.{attr}"
                 item.parent_path = data_path
                 item.has_properties = hasattr(getattr(data, attr), "bl_rna") # doesnt show empty colls TODO
+
+                if prop:
+                    item.name = prop.name if prop.name else prop.identifier
+                    item.description = prop.description if prop.description else item.name
+                    item.type = prop.type.title()
+                    if item.type == "Int": item.type = "Integer"
+                    if getattr(prop, "is_array", False): item.type += " Vector"
+                else:
+                    item.name = attr
+                    item.description = attr
+                
+                    value = getattr(data, attr)
+                    type_name = getattr(type(value), "__name__", "")
+                    item.type = type_name
+                    if hasattr(type(value), "bl_rna"): item.type = "Pointer"
+                    elif type(value) == type(None): item.type = "Pointer"
+                    elif type(value) == list: item.type = "List"
+                    elif type(value) == str: item.type = "String"
+                    elif type(value) == bytes: item.type = "String"
+                    elif type(value) == int: item.type = "Integer"
+                    elif type(value) == float: item.type = "Float"
+                    elif type(value) == bool: item.type = "Boolean"
+                    elif type(value) == tuple:
+                        if len(value) > 0:
+                            if type(value[0]) == int: item.type = "Integer Vector"
+                            elif type(value[0]) == float: item.type = "Float Vector"
+                            elif type(value[0]) == bool: item.type = "Boolean Vector"
+                        else:
+                            item.type = "List"
+                    else:
+                        if type_name == "builtin_function_or_method":
+                            item.type = "Built In Function"
+                        elif type_name == "bpy_func" or type_name == "method" or type_name == "function":
+                            item.type = "Function"
+                        elif type_name == "frozenset":
+                            item.type = "List"
+                            item.path = f"list({item.path})"
         if hasattr(data, "__iter__"):
             for i, indexed in enumerate(data):
                 item = self.data_items.add()
@@ -245,20 +273,9 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     data_filter: bpy.props.EnumProperty(name="Type",
                                         options={"ENUM_FLAG"},
                                         description="Filter by data type",
-                                        items=[("POINTER", "Pointer", "Pointer", property_icons["Property"], 1),
-                                               ("COLLECTION", "Collection", "Collection", property_icons["Collection"], 2),
-                                               ("STRING", "String", "String", property_icons["String"], 4),
-                                               ("ENUM", "Enum", "Enum", property_icons["Enum"], 8),
-                                               ("BOOLEAN", "Boolean", "Boolean", property_icons["Boolean"], 16),
-                                               ("INT", "Integer", "Integer", property_icons["Integer"], 32),
-                                               ("FLOAT", "Float", "Float", property_icons["Float"], 64)],
-                                        default={"POINTER","COLLECTION","STRING","ENUM","BOOLEAN","INT","FLOAT"})
+                                        items=filter_items,
+                                        default=filter_defaults)
 
-    
     data_search: bpy.props.StringProperty(name="Search",
                                         description="Search data",
                                         options={"TEXTEDIT_UPDATE"})
-    
-    data_filter_warning: bpy.props.BoolProperty(default=True,
-                                                name="Filter Warning",
-                                                description="Because of the large amount of data, the filters only filter the visible data!")

@@ -41,3 +41,20 @@ class SN_OT_ReloadData(bpy.types.Operator):
     def execute(self, context):
         context.scene.sn.hide_preferences = True
         return {"FINISHED"}
+
+
+
+class SN_OT_ReloadItemData(bpy.types.Operator):
+    bl_idname = "sn.reload_item_data"
+    bl_label = "Reload ItemData"
+    bl_description = "Reloads this items data"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        for item in context.scene.sn.data_items:
+            if item.path == self.path:
+                item.reload_items()
+                break
+        return {"FINISHED"}
