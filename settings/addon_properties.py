@@ -192,7 +192,9 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                 item.identifier = attr
                 item.path = f"{data_path}.{attr}"
                 item.parent_path = data_path
-                item.has_properties = hasattr(getattr(data, attr), "bl_rna") # doesnt show empty colls TODO
+                item.has_properties = hasattr(getattr(data, attr), "bl_rna")
+                # doesnt show empty colls TODO
+                # context is a mess
 
                 if prop:
                     item.name = prop.name if prop.name else prop.identifier
