@@ -65,6 +65,7 @@ class SN_OT_RemoveSocket(bpy.types.Operator):
                 node.inputs.remove(node.inputs[self.index])
 
             # trigger reevaluation
+            node.on_dynamic_socket_remove(self.index, self.is_output)
             node._evaluate(context)
         return {"FINISHED"}
 

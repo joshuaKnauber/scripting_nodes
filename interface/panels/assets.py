@@ -4,16 +4,21 @@ import bpy
 
 class SN_PT_AssetsPanel(bpy.types.Panel):
     bl_idname = "SN_PT_AssetsPanel"
-    bl_label = "Assets"
+    bl_label = ""
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_order = 2
-    bl_options = {"DEFAULT_CLOSED"}
+    bl_options = {"DEFAULT_CLOSED", "HEADER_LAYOUT_EXPAND"}
 
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+    
+    def draw_header(self, context):
+        layout = self.layout
+        layout.label(text="Assets")
+        layout.operator("wm.url_open", text="", icon="QUESTION", emboss=False).url = "https://joshuaknauber.notion.site/Assets-c013c317a1b840b8824a4161da296614"
 
     def draw(self, context):
         layout = self.layout
@@ -21,7 +26,11 @@ class SN_PT_AssetsPanel(bpy.types.Panel):
         
         # draw asset list
         row = layout.row(align=False)
-        row.template_list("SN_UL_AssetList", "Assets", sn, "assets", sn, "asset_index", rows=3)
+        col = row.column(align=True)
+        col.template_list("SN_UL_AssetList", "Assets", sn, "assets", sn, "asset_index", rows=3)
+        op = col.operator("node.add_node", text="Add Node", icon="ADD")
+        op.type = "SN_AssetNode"
+        op.use_transform = True
         col = row.column(align=True)
         col.operator("sn.add_asset", text="", icon="ADD")
         col.operator("sn.find_asset", text="", icon="VIEWZOOM")

@@ -66,10 +66,10 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
         layout.prop(self, "enum_flag")
         layout.prop(self, "is_dynamic")
 
+        layout.separator()
+        row = layout.row()
+        row.scale_y = 1.2
         if not self.is_dynamic:
-            layout.separator()
-            row = layout.row()
-            row.scale_y = 1.2
             op = row.operator("sn.add_enum_item", text="Add Item", icon="ADD")
             op.item_data_path = f"{self.prop.full_prop_path}.settings.items"
 
@@ -81,6 +81,11 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
                 op = row.operator("sn.select_icon", icon_value=item.icon if item.icon != 0 else 101, text="", emboss=item.icon==0)
                 op.icon_data_path = f"{self.prop.full_prop_path}.settings.items[{i}]"
                 box.prop(item, "description")
+                
+        else:
+            op = row.operator("node.add_node", text="Generate Items", icon="ADD")
+            op.type = "SN_GenerateEnumItemsNode"
+            op.use_transform = True
         
     
     @property
@@ -115,39 +120,23 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
     
     
     def register_code(self, code):
-        # NOTE these functions may be a reason for slow down with a lot of nodes (could be fixed with better node refs?)
-        # TODO this may not work inside of operators, preferences or on export
-        # TODO this is different on export
-        # TODO check that node matches fully, also in from_node_tree and from_node
+        # TODO this is different on export (find node and just return func name (return this props item_func_name from node))
         
         # enum in property group
-        if hasattr(self.prop, "group_prop_parent"):
-            code = f"""
-                def {self.item_func_name}(self, context):
-                    for ntree in bpy.data.node_groups:
-                        if ntree.bl_idname == "ScriptingNodesTree":
-                            for ref in ntree.node_collection("SN_GenerateEnumItemsNode").refs:
-                                node = ref.node
-                                if node.from_prop_group and node.prop_group == "{self.prop.group_prop_parent.name}" and node.prop_name == "{self.prop.name}":
-                                    items = eval(node.code)
-                                    return [node.make_enum_item(item[0], item[1], item[2], item[3], {'2**item[4]' if self.enum_flag else 'item[4]'}) for item in items]
-                    return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
-                {code}
-                """
-        # enum as normal property
-        else:
-            code = f"""
-                def {self.item_func_name}(self, context):
-                    for ntree in bpy.data.node_groups:
-                        if ntree.bl_idname == "ScriptingNodesTree":
-                            for ref in ntree.node_collection("SN_GenerateEnumItemsNode").refs:
-                                node = ref.node
-                                if not node.from_prop_group and node.prop_name == "{self.prop.name}":
-                                    items = eval(node.code)
-                                    return [node.make_enum_item(item[0], item[1], item[2], item[3], {'2**item[4]' if self.enum_flag else 'item[4]'}) for item in items]
-                    return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
-                {code}
-                """
+        code = f"""
+            # this code doesn't reflect how you would usually write this
+            def {self.item_func_name}(self, context):
+                for ntree in bpy.data.node_groups:
+                    if ntree.bl_idname == "ScriptingNodesTree":
+                        for ref in ntree.node_collection("SN_GenerateEnumItemsNode").refs:
+                            node = ref.node
+                            enum_src = node.get_prop_source()
+                            if enum_src and '{self.prop.name}' in enum_src.properties and enum_src.properties['{self.prop.name}'].property_type == "Enum":
+                                if node.static_uid in bpy.context.scene.sn.node_function_cache:
+                                    return bpy.context.scene.sn.node_function_cache[node.static_uid](self, context)
+                return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
+            {code}
+            """
         return normalize_code(code)
     
     

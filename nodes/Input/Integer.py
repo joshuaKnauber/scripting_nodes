@@ -10,7 +10,7 @@ class SN_IntegerNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "INTEGER"
 
     def on_create(self, context):
-        self.add_integer_input("Integer").hide = True
+        self.add_integer_input("Integer").set_hide(True)
         self.add_integer_output("Integer")
 
     def evaluate(self, context):

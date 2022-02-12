@@ -1,6 +1,6 @@
 import bpy
 from uuid import uuid4
-from ..utils import normalize_code, print_debug_code
+from ..utils import normalize_code, print_debug_code, unique_collection_name
 from ..node_tree.sockets.conversions import CONVERT_UTILS
 
 
@@ -26,7 +26,7 @@ class SN_ScriptingBaseNode:
         "INTEGER": (0.14, 0.19, 0.15),
         "VECTOR": (0.13, 0.13, 0.15),
         "LIST": (0.13, 0.13, 0.15),
-        "BLEND_DATA": (0.12, 0.15, 0.15)
+        "PROPERTY": (0.12, 0.15, 0.15)
     }
     # the default color of this node. Set this to one of the options in _colors or use a vec3
     node_color = "DEFAULT"
@@ -36,14 +36,6 @@ class SN_ScriptingBaseNode:
 
     # set this for any interface nodes that change the layout type (nodes like row, column, split, ...)
     layout_type = None
-    
-    # optional documentation for this node displayed in the n-panel
-    docs = {
-        "description": "",
-        "settings": "",
-        "inputs": "",
-        "outputs": ""
-    }
     
     
     # disables evaluation, only use this when the node is being initialized
@@ -86,16 +78,17 @@ class SN_ScriptingBaseNode:
     
     
     # Called by any trigger node when its code updates. Use this to catch changes to nodes that you're holding references to and modify your own values
-    def on_ref_update(self, node): pass
+    def on_ref_update(self, node, data=None): pass
             
             
-    def trigger_ref_update(self):
+    def trigger_ref_update(self, data=None):
         """ Triggers an update on all nodes. Every node can then check if it has a reference to this node and update it's own values accordingly """
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
-                    if hasattr(node, "is_trigger") and not node == self:
-                        node.on_ref_update(self)
+                    if hasattr(node, f"ref_{self.bl_idname}") and not node == self:
+                        if getattr(node, f"ref_{self.bl_idname}") == self.name:
+                            node.on_ref_update(self, data)
     
     
     def get_collection_uuid(self):
@@ -112,7 +105,7 @@ class SN_ScriptingBaseNode:
         return filter(lambda node: node.is_trigger, self._get_linked_nodes())
 
 
-    def _get_linked_nodes(self, linked=None):
+    def _get_linked_nodes(self, linked=None, started_at_trigger=False):
         """ Recursively returns a list of all nodes linked to the given node """
         if linked == None: linked = [self]
         new_linked = []
@@ -121,18 +114,20 @@ class SN_ScriptingBaseNode:
         for inp in self.inputs:
             from_out = inp.from_socket()
             if from_out and not from_out.node in linked and not from_out.node in new_linked:
-                new_linked.append(from_out.node)
+                if not started_at_trigger or (started_at_trigger and not from_out.is_program):
+                    new_linked.append(from_out.node)
         
         # get all nodes connected to this nodes output
         for out in self.outputs:
             for to_inp in out.to_sockets():
                 if not to_inp.node in linked and not to_inp.node in new_linked:
-                    new_linked.append(to_inp.node)
+                    if not started_at_trigger or (started_at_trigger and to_inp.is_program):
+                        new_linked.append(to_inp.node)
 
         # get all nodes linked to the found nodes
         linked += new_linked
         for node in new_linked:
-            linked = node._get_linked_nodes(linked)
+            linked = node._get_linked_nodes(linked=linked, started_at_trigger=started_at_trigger)
 
         return linked
     
@@ -176,8 +171,9 @@ class SN_ScriptingBaseNode:
     def _format_imports(self, linked=[]):
         """ Returns the imports for this node formatted for a python file """
         if not linked: linked = self._get_linked_nodes()
-        import_list = self._get_import_list(linked)
-        return "import bpy\n" + "\n".join(import_list) + "\n"
+        import_list = ["import bpy", "from blender_visual_scripting_addon.addon import sna_globals"]
+        import_list += self._get_import_list(linked)
+        return "\n".join(import_list) + "\n"
 
 
     def _format_imperative(self, linked=[]):
@@ -220,7 +216,7 @@ class SN_ScriptingBaseNode:
 
     def _format_node_code(self):
         """ Formats this nodes and its connected nodes code ready to register in a separate file """
-        linked = self._get_linked_nodes()
+        linked = self._get_linked_nodes(started_at_trigger=True)
         linked = sorted(linked, key=lambda node: node.order)
         imports = self._format_imports(linked)
         imperative = self._format_imperative(linked)
@@ -234,18 +230,23 @@ class SN_ScriptingBaseNode:
         return imports + imperative + f"\n{main_code}\n" + register + unregister + run_register + store_unregister
 
 
+    def pointer_unregister(self, pointer):
+        """ Unregisters the given pointers function """
+        sn = bpy.context.scene.sn
+        if pointer in sn.unregister_cache:
+            # run unregister
+            try:
+                sn.unregister_cache[pointer]()
+            except Exception as error:
+                print(error)
+            # remove unregister function
+            del sn.unregister_cache[pointer]
+
+
     def node_unregister(self):
         """ Unregisters this trigger nodes current code """
-        sn = bpy.context.scene.sn
         if self.is_trigger:
-            if f"{self.as_pointer()}" in sn.unregister_cache:
-                # run unregister
-                try:
-                    sn.unregister_cache[f"{self.as_pointer()}"]()
-                except Exception as error:
-                    print(error)
-                # remove unregister function
-                del sn.unregister_cache[f"{self.as_pointer()}"]
+            self.pointer_unregister(f"{self.as_pointer()}")
  
 
     def compile(self):
@@ -264,7 +265,7 @@ class SN_ScriptingBaseNode:
             ctx = bpy.context.copy()
             ctx['edit_text'] = txt
             try:
-                bpy.ops.text.run_script(ctx) # TODO undo doesn't recompile
+                bpy.ops.text.run_script(ctx)
             except Exception as error:
                 print("")
                 print(f"--- Serpens error in node tree of '{self.name}' ---")
@@ -368,6 +369,7 @@ class SN_ScriptingBaseNode:
         if self.disable_evaluation: return
         
         # keep track of code before changes
+        # TODO this seems to be buggy. didn't reset the code for some node, no idea how to reproduce
         prev_code = self.code
         prev_code_import = self.code_import
         prev_code_imperative = self.code_imperative
@@ -452,6 +454,8 @@ class SN_ScriptingBaseNode:
         if not self.bl_idname in self.node_tree.node_refs:
             collection = self.node_tree.node_refs.add()
             collection.name = self.bl_idname
+        # clear unused references
+        self.collection.clear_unused_refs()
         # add the node to the collection
         node_ref = self.collection.refs.add()
         node_ref.uid = self.static_uid
@@ -541,6 +545,16 @@ class SN_ScriptingBaseNode:
     def link_remove(self, from_socket, to_socket, is_output):
         self._remove_link_layout_update(from_socket, is_output)
         self.on_link_remove(from_socket, to_socket, is_output)
+        
+        
+    ### DYNAMIC SOCKET UPDATE
+    def on_dynamic_socket_add(self, socket): pass
+    def on_dynamic_socket_remove(self, index, is_output): pass
+    
+    
+    ### SOCKET ATTRIBUTES CHANGE
+    def on_socket_type_change(self, socket): pass
+    def on_socket_name_change(self, socket): pass
 
 
     ### DRAW NODE
@@ -588,6 +602,7 @@ class SN_ScriptingBaseNode:
     def _add_input(self, idname, label, dynamic=False):
         """ Adds an input for this node. This function itself doesn't evaluate as it may be used before the node is ready """
         socket = self.inputs.new(idname, label)
+        socket.name = label
         socket.dynamic = dynamic
         socket.display_shape = socket.socket_shape
         return socket
@@ -595,6 +610,7 @@ class SN_ScriptingBaseNode:
     def _add_output(self, idname, label, dynamic=False):
         """ Adds an output for this node. This function itself doesn't evaluate as it may be used before the node is ready """
         socket = self.outputs.new(idname, label)
+        socket.name = label
         socket.dynamic = dynamic
         socket.display_shape = socket.socket_shape
         return socket
@@ -602,6 +618,8 @@ class SN_ScriptingBaseNode:
     
     def convert_socket(self, socket, to_idname):
         """ Converts the socket from it's current type to the given idname """
+        self.disable_evaluation = True
+        new = socket
         if socket.bl_idname != to_idname:
             index = socket.index
             if index != -1:
@@ -623,6 +641,9 @@ class SN_ScriptingBaseNode:
                     new.subtype = socket.subtype
                 new.indexable = socket.indexable
                 new.index_type = socket.index_type
+                new.changeable = socket.changeable
+                new.is_variable = socket.is_variable
+                new.data_type = new.bl_idname
                 # move socket and remove old
                 if socket.is_output:
                     self.outputs.remove(socket)
@@ -635,7 +656,10 @@ class SN_ScriptingBaseNode:
                 # relink sockets
                 for link in links:
                     self.node_tree.links.new(socket, link)
+                self.on_socket_type_change(new)
+        self.disable_evaluation = False
         self._evaluate(bpy.context)
+        return new
     
     
     socket_names = {
@@ -652,8 +676,9 @@ class SN_ScriptingBaseNode:
         "Float Vector": "SN_FloatVectorSocket",
         "Icon": "SN_IconSocket",
         "List": "SN_ListSocket",
-        "Blend Data": "SN_BlendDataSocket",
-        "Blend Data Collection": "SN_BlendDataSocket",
+        "Collection Property": "SN_CollectionPropertySocket",
+        "Collection": "SN_CollectionPropertySocket",
+        "Property": "SN_PropertySocket",
     }
 
 
@@ -718,8 +743,52 @@ class SN_ScriptingBaseNode:
     def add_list_input(self, label="List"): return self._add_input("SN_ListSocket", label)
     def add_list_output(self, label="List"): return self._add_output("SN_ListSocket", label)
 
-    def add_blend_data_input(self, label="Blend Data"): return self._add_input("SN_BlendDataSocket", label)
-    def add_blend_data_output(self, label="Blend Data"): return self._add_output("SN_BlendDataSocket", label)
+    def add_collection_property_input(self, label="Collection Property"): return self._add_input("SN_CollectionPropertySocket", label)
+    def add_collection_property_output(self, label="Collection Property"): return self._add_output("SN_CollectionPropertySocket", label)
+
+    def add_property_input(self, label="Property"): return self._add_input("SN_PropertySocket", label)
+    def add_property_output(self, label="Property"): return self._add_output("SN_PropertySocket", label)
+
+
+    def add_input_from_property(self, prop):
+        """ Creates an input from the given property """
+        # get property type
+        prop_type = prop.type.title()
+        if prop_type == "Int":
+            prop_type = "Integer"
+        if getattr(prop, "is_array", False):
+            prop_type = f"{prop_type} Vector"
+        # add property
+        if prop_type in self.socket_names:
+            # dynamic enums
+            if prop_type == "Enum":
+                if not prop.enum_items:
+                    prop_type = "String"
+            inp = self._add_input(self.socket_names[prop_type], prop.name)
+            # get enum items
+            if prop_type == "Enum":
+                inp.items = str(list(map(lambda item: item.identifier, prop.enum_items)))
+                if prop.is_enum_flag:
+                    inp.subtype = "ENUM_FLAG"
+            # get property default
+            default = prop.default
+            if getattr(prop, "is_array", False):
+                default = tuple([prop.default]*32)
+                inp.size = prop.array_length
+            if prop_type == "Enum" and prop.is_enum_flag:
+                pass
+            else:
+                inp.default_value = default
+
+            return inp
+        return None
+    
+    
+    def add_input_from_socket(self, socket):
+        self._add_input(socket.bl_idname, socket.name)
+    
+    def add_output_from_socket(self, socket):
+        self._add_output(socket.bl_idname, socket.name)
 
     
     ### ERROR HANDLING
@@ -747,51 +816,57 @@ import bpy
 from ..base_node import SN_ScriptingBaseNode
 
 
-
 class SN_YourNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_YourNode"
     bl_label = "Node Name"
     node_color = "DEFAULT"
 
-    # delete these two if you don't need them
+    # delete theseif you don't need them
+		bl_width_default = 160
     is_trigger = False
     layout_type = "layout"
 
-
     # avoid having properties on your nodes, expose everything to sockets if possible
+		# make sure to call _evaluate when a property value changes, you can use self._evaluate(context) if you have a custom update function
     string: bpy.props.StringProperty(name="String",
                                 description="String value of this node",
-                                update=SN_ScriptingBaseNode._evaluate) # make sure to call _evaluate when a property value changes
-
+                                update=SN_ScriptingBaseNode._evaluate)
 
     def on_create(self, context):
+				# create your inputs here
         self.add_string_output()
-
 
     def on_copy(self, old): pass
 
-
     def on_free(self): pass
-
 
     def on_node_update(self): pass
 
-
     def on_link_insert(self, socket, link): pass
-
 
     def on_link_remove(self, socket): pass
 
+		def on_dynamic_socket_add(self, socket): pass
+
+    def on_dynamic_socket_remove(self, index, is_output): pass
+
+		def on_socket_type_change(self, socket): pass
+
+    def on_socket_name_change(self, socket): pass
+
+		def on_ref_update(self, node, data=None): pass
 
     def evaluate(self, context):
+				# generate the code here
         self.outputs[0].python_value = "# comment"
         self.code = ""
 
+		def evaluate_export(self, context):
+				self.evaluate(context)
 
     def draw_node(self, context, layout):
         layout.prop(self, "string", text="")
-
 
     def draw_node_panel(self, context, layout): pass
 """

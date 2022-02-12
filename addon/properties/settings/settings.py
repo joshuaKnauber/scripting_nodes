@@ -10,19 +10,64 @@ id_items = ["Scene", "Action", "Armature", "Brush", "CacheFile", "Camera",
         "Screen", "Sound", "Speaker", "Text", "Texture", "VectorFont",
         "Volume", "WindowManager", "WorkSpace", "World"]
 
+id_data = {"Scene": "scenes", "Action":"actions", "Armature":"armatures",
+        "Brush":"bruhes", "CacheFile":"cache_files", "Camera":"cameras",
+        "Collection":"collections", "Curve":"curves", "FreestyleLineStyle":"linestyles",
+        "GreasePencil":"grease_pencils", "Image": "images", "Key": "shape_keys",
+        "Lattice": "lattices", "Library": "libraries", "Light": "lights",
+        "LightProbe": "lightprobes", "Mask": "masks", "Material": "materials",
+        "Mesh": "meshes", "MetaBall": "metaballs", "MovieClip": "movieclips",
+        "NodeTree": "node_groups", "Object": "objects", "PaintCurve": "paint_curves",
+        "Palette": "palettes", "ParticleSettings": "particles", "Screen": "screens",
+        "Sound": "sounds", "Speaker": "speakers", "Text": "texts", "Texture": "textures",
+        "VectorFont": "fonts", "Volume": "volumes", "WindowManager": "window_managers",
+        "WorkSpace": "workspaces", "World": "worlds"}
+
 
 
 property_icons = {
     "String": "SYNTAX_OFF",
     "Boolean": "FORCE_CHARGE",
+    "Boolean Vector": "FORCE_CHARGE",
     "Float": "CON_TRANSLIKE",
+    "Float Vector": "CON_TRANSLIKE",
     "Integer": "DRIVER_TRANSFORM",
+    "Integer Vector": "DRIVER_TRANSFORM",
     "Enum": "PRESET",
     "Pointer": "MONKEY",
+    "Property": "MONKEY",
     "Collection": "ASSET_MANAGER",
+    "Collection Property": "ASSET_MANAGER",
     "Group": "FILEBROWSER",
+    "List": "LONGDISPLAY",
+    "Data": "OBJECT_DATA",
+    "Icon": "DRIVER_TRANSFORM",
+
+    "Function": "FILE_SCRIPT",
+    "Built In Function": "SCRIPTPLUGINS",
 }
 
+
+
+property_socket = {
+    "String": "String",
+    "Boolean": "Boolean",
+    "Float": "Float",
+    "Integer": "Integer",
+    "Enum": "Enum",
+    "Pointer": "Property",
+    "Collection": "Collection Property",
+    "Group": "Data",
+}
+
+def prop_to_socket(prop):
+    socket_name = property_socket[prop.property_type]
+    subtype = "NONE"
+    if getattr(prop.settings, "enum_flag", False):
+        subtype ="ENUM_FLAG"
+    if getattr(prop.settings, "is_vector", False):
+        socket_name += " Vector"
+    return socket_name, subtype
 
 
 _prop_cache = {} # stores key, value of settings.as_pointer with prop for settings

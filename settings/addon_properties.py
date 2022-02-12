@@ -1,6 +1,10 @@
 import bpy
+from bl_ui import space_userpref
 from uuid import uuid4
+
+from .data_properties import SN_DataProperty, is_valid_attribute, filter_items, filter_defaults
 from ..addon.properties.properties import SN_GeneralProperties
+from ..addon.properties.settings.settings import property_icons
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
             
@@ -14,6 +18,14 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     # stores the preferences draw function while compiling the addon to draw in the serpens preferences
     preferences = []
+    
+    
+    # stores the custom icon property collections while developing an addon
+    preview_collections = {}
+    
+    
+    # stores functions that are needed to be stored while developing an addon
+    node_function_cache = {}
 
 
     @property
@@ -86,13 +98,9 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="Gets set when a file is loaded. Set to the easy bpy file path.")
 
 
-    development_node: bpy.props.PointerProperty(type=bpy.types.Text,
-                                        name="Node File",
-                                        description="File for developing a node in")
-
-
     def update_node_tree_index(self, context):
         if len(bpy.data.node_groups):
+            # TODO only if node tree in space data
             bpy.context.space_data.node_tree = bpy.data.node_groups[self.node_tree_index]
 
     node_tree_index: bpy.props.IntProperty(default=0, min=0, name="Active Node Tree", description="The node tree you're currently editing", update=update_node_tree_index)
@@ -174,14 +182,102 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     custom_category: bpy.props.StringProperty(default="My Category",
                                         name="Custom Category",
                                         description="Your custom category")
+    
+    
+    def create_data_items(self, data, data_path):
+        for attr in dir(data):
+            if is_valid_attribute(attr):
+                prop = None if not hasattr(data, "bl_rna") or not attr in data.bl_rna.properties else data.bl_rna.properties[attr]
+                item = self.data_items.add()
+                item.identifier = attr
+                item.path = f"{data_path}.{attr}"
+                item.parent_path = data_path
+                item.has_properties = hasattr(getattr(data, attr), "bl_rna")
+                # doesnt show empty colls TODO
+                # context is a mess
 
+                if prop:
+                    item.name = prop.name if prop.name else prop.identifier
+                    item.description = prop.description if prop.description else item.name
+                    item.type = prop.type.title()
+                    if item.type == "Int": item.type = "Integer"
+                    if getattr(prop, "is_array", False): item.type += " Vector"
+                else:
+                    item.name = attr
+                    item.description = attr
+                
+                    value = getattr(data, attr)
+                    type_name = getattr(type(value), "__name__", "")
+                    item.type = type_name
+                    if hasattr(type(value), "bl_rna"): item.type = "Pointer"
+                    elif type(value) == type(None): item.type = "Pointer"
+                    elif type(value) == list: item.type = "List"
+                    elif type(value) == str: item.type = "String"
+                    elif type(value) == bytes: item.type = "String"
+                    elif type(value) == int: item.type = "Integer"
+                    elif type(value) == float: item.type = "Float"
+                    elif type(value) == bool: item.type = "Boolean"
+                    elif type(value) == tuple:
+                        if len(value) > 0:
+                            if type(value[0]) == int: item.type = "Integer Vector"
+                            elif type(value[0]) == float: item.type = "Float Vector"
+                            elif type(value[0]) == bool: item.type = "Boolean Vector"
+                        else:
+                            item.type = "List"
+                    else:
+                        if type_name == "builtin_function_or_method":
+                            item.type = "Built In Function"
+                        elif type_name == "bpy_func" or type_name == "method" or type_name == "function":
+                            item.type = "Function"
+                        elif type_name == "frozenset":
+                            item.type = "List"
+                            item.path = f"list({item.path})"
+        if hasattr(data, "__iter__"):
+            for i, indexed in enumerate(data):
+                item = self.data_items.add()
+                item.name = f"'{indexed.name}'" if hasattr(indexed, "name") else f"[{i}]"
+                item.description = indexed.bl_rna.description
+                item.type = indexed.bl_rna.name
+                item.path = f"{data_path}['{indexed.name}']" if hasattr(indexed, "name") else f"{data_path}[{i}]" 
+                item.parent_path = data_path
+                item.has_properties = True
+    
+    def update_data_category(self, context):
+        self.data_items.clear()
+        self.create_data_items(getattr(bpy, self.data_category), f"bpy.{self.data_category}")
 
-    # potential solution for if this https://developer.blender.org/T88986 bug was fixed
+    def update_hide_preferences(self, context):
+        for cls in space_userpref.classes:
+            try:
+                if self.hide_preferences: bpy.utils.unregister_class(cls)
+                else: bpy.utils.register_class(cls)
+            except: pass
+        if self.hide_preferences:
+            self.update_data_category(context)
+            
+    hide_preferences: bpy.props.BoolProperty(default=False,
+                                        name="Hide Preferences",
+                                        description="Hides all panels in the preferences window",
+                                        update=update_hide_preferences)
+    
+    data_category: bpy.props.EnumProperty(name="Category",
+                                        items=[("app", "App", "bpy.app"),
+                                               ("context", "Context", "bpy.context"),
+                                               ("data", "Data", "bpy.data"),
+                                               ("path", "Path", "bpy.path"),
+                                               ("utils", "Utils", "bpy.utils")],
+                                        default="context",
+                                        description="Category of blend data",
+                                        update=update_data_category)
+    
+    data_items: bpy.props.CollectionProperty(type=SN_DataProperty)
+    
+    data_filter: bpy.props.EnumProperty(name="Type",
+                                        options={"ENUM_FLAG"},
+                                        description="Filter by data type",
+                                        items=filter_items,
+                                        default=filter_defaults)
 
-    addon_text: bpy.props.PointerProperty(name="Text File",
-                                            description="File which the addon is stored in",
-                                            type=bpy.types.Text)
-
-    def get_addon_text(self):
-        if not self.addon_text:
-            self.addon_text = bpy.data.texts.new("Addon File")
+    data_search: bpy.props.StringProperty(name="Search",
+                                        description="Search data",
+                                        options={"TEXTEDIT_UPDATE"})

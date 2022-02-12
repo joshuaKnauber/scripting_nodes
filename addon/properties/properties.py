@@ -2,7 +2,7 @@ import bpy
 from ...utils import print_debug_code
 from .property_basic import BasicProperty
 from .property_ops import get_sorted_props
-from .settings.settings import id_items, property_icons
+from .settings.settings import id_items, id_data, property_icons
 from .settings.group import SN_PT_GroupProperty
 
 
@@ -11,7 +11,7 @@ class FullBasicProperty(BasicProperty):
     
     property_type: bpy.props.EnumProperty(name="Type",
                                     description="The type of data this property can store",
-                                    update=BasicProperty._compile,
+                                    update=BasicProperty.trigger_reference_update,
                                     items=[("String", "String", "Stores text, can display a text input or a filepath field", property_icons["String"], 0),
                                            ("Boolean", "Boolean", "Stores True or False, can be used for a checkbox", property_icons["Boolean"], 1),
                                            ("Float", "Float", "Stores a decimal number or a vector", property_icons["Float"], 2),
@@ -145,8 +145,12 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
         for item in id_items:
             items.append((item, item, item))
         return items
+    
+        
+    def get_attach_data(self):
+        return id_data[self.attach_to]
 
     attach_to: bpy.props.EnumProperty(name="Attach To",
                                     description="The type of blend data to attach this property to",
                                     items=get_attach_to_items,
-                                    update=compile)
+                                    update=FullBasicProperty.trigger_reference_update)

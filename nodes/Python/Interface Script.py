@@ -14,10 +14,10 @@ class SN_InterfaceScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_input()
         inp = self.add_string_input("Script Path")
         inp.subtype = "FILE_PATH"
-        inp.hide = True
+        inp.set_hide(True)
         
     def update_source(self, context):
-        self.inputs["Script Path"].hide = self.source == "BLENDER"
+        self.inputs["Script Path"].set_hide(self.source == "BLENDER")
         self._evaluate(context)
         
     source: bpy.props.EnumProperty(name="Source",

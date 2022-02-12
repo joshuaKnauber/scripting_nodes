@@ -1,5 +1,6 @@
 import bpy
 from .conversions import CONVERSIONS
+from ...addon.properties.settings.settings import property_icons
 
 
 
@@ -10,12 +11,17 @@ class ScriptingSocket:
     output_limit = 9999
     # OVERWRITE
     socket_shape = "CIRCLE" # CIRCLE | SQUARE | DIAMOND
+    
+    
+    def update_socket_name(self, context): self.node.on_socket_name_change(self)
+    name: bpy.props.StringProperty(name="Socket Name",
+                                description="Name of this socket",
+                                update=update_socket_name)
 
 
     ### SOCKET OPTIONS
     # OVERWRITE
     is_program = False # Only Interface and Execute sockets are programs
-    socket_type = "" # Uniquely identifiable socket type
     dynamic: bpy.props.BoolProperty(default=False,
                                     name="Dynamic",
                                     description="If this socket adds another socket when connected")
@@ -35,6 +41,19 @@ class ScriptingSocket:
                                     description="Convert the incoming data to this sockets type",
                                     update=update_conversion)
 
+
+    def update_disabled(self, context):
+        self.force_update()
+
+    disabled: bpy.props.BoolProperty(default=False,
+                                    name="Disabled",
+                                    description="Disable this socket for this node",
+                                    update=update_disabled)
+
+    can_be_disabled: bpy.props.BoolProperty(default=False,
+                                    name="Can Be Hidden",
+                                    description="Lets the user disable this socket which can be used for evaluation")
+
     # OVERWRITE
     subtypes = ["NONE"] # possible subtypes for this data socket. Vector sockets should be seperate socket types, not subtypes (their size is a subtype)!
     subtype_values = {"NONE": "default_value"} # the matching propertie names for this data sockets subtype
@@ -44,6 +63,7 @@ class ScriptingSocket:
     def update_subtype(self, _):
         self.force_update()
         self.on_subtype_update()
+        
     subtype: bpy.props.EnumProperty(name="Subtype",
                                     description="The subtype of this socket",
                                     items=get_subtype_items,
@@ -54,34 +74,60 @@ class ScriptingSocket:
     
     
     # INDEXING OPTIONS
+    def set_hide(self, value):
+        """ Sets the hide value of this socket and disconnects all links if hidden """
+        if value:
+            for link in self.links:
+                self.node.node_tree.links.remove(link)
+        self.hide = value
+        
     def update_index_type(self, context):
         if self.indexable and self.bl_idname != self.node.socket_names[self.index_type]:
+            # hide all index sockets before blend data input
+            hide = self.index_type == "Property"
+            for inp in self.node.inputs:
+                if inp == self:
+                    hide = False
+                if inp.indexable:
+                    inp.set_hide(hide)
             # convert socket
             self.node.convert_socket(self, self.node.socket_names[self.index_type])
-        else:
-            return
-            # hide all index sockets before blend data input
-            print("start")
-            hide = False
-            for i in range(len(self.node.inputs)-1, -1, -1):
-                inp = self.node.inputs[i]
-                if inp.indexable:
-                    print(inp, hide)
-                    inp.hide = hide
-                    if inp.index_type == "Blend Data":
-                        hide = True
-            print("done")
 
     indexable: bpy.props.BoolProperty(default=False,
                                     name="Indexable",
                                     description="If this socket is indexable. Switches between String, Integer and Blend Data")
     
     index_type: bpy.props.EnumProperty(name="Index Type",
-                                    description="The type of index this socket indexes with",
+                                    description="The type of index this socket indexes the property with",
                                     items=[("String", "Name", "Name", "SYNTAX_OFF", 0),
                                            ("Integer", "Index", "Index", "DRIVER_TRANSFORM", 1),
-                                           ("Blend Data", "Blend Data", "Blend Data", "MONKEY", 2)],
+                                           ("Property", "Property", "Property", "MONKEY", 2)],
                                     update=update_index_type)
+    
+    
+    def update_data_type(self, context):
+        if self.changeable and self.data_type != self.bl_idname:
+            self.node.convert_socket(self, self.data_type)
+
+    def get_data_type_items(self, context):
+        items = []
+        for i, name in enumerate(list(self.node.socket_names.keys())[2:]):
+            items.append((self.node.socket_names[name], name, name, property_icons[name], i))
+        return items
+            
+    changeable: bpy.props.BoolProperty(default=False,
+                                    name="Changeable",
+                                    description="If this data socket type can be changed")
+    
+    data_type: bpy.props.EnumProperty(name="The type this socket has right now",
+                                    update=update_data_type,
+                                    items=get_data_type_items)
+    
+    
+    # VARIABLE SOCKET OPTIONS
+    
+    is_variable: bpy.props.BoolProperty(name="Is Variable",
+                                    description="If this socket is a variable socket that can be renamed")
         
     
     ### DRAW SOCKET
@@ -123,23 +169,61 @@ class ScriptingSocket:
             op.node = node.name
             op.is_output = self.is_output
             op.insert_above = True
-            op.index = self.index
 
     def draw(self, context, layout, node, text):
         """ Draws this socket """
+        text = self.name
         # draw debug text for sockets
         if context.scene.sn.debug_python_sockets and self.python_value:
             text = self.python_value.replace("\n", " || ")
+        # draw dynamic sockets
         if self.dynamic:
             self._draw_dynamic_socket(layout, node, text)
+        # draw variable socket
+        elif self.is_variable:
+            # draw previously dynamic socket (with insert socket)
+            if not self.is_output and self.prev_dynamic:
+                self._draw_prev_dynamic_socket(context, layout, node)
+            layout.prop(self, "name", text="")
+            # draw changeable socket
+            if self.changeable:
+                layout.separator()
+                layout.prop(self, "data_type", icon_only=True)
+            # draw previously dynamic socket (with insert socket)
+            if self.is_output and self.prev_dynamic:
+                self._draw_prev_dynamic_socket(context, layout, node)
+        # draw normal socket
         else:
-            if self.is_output: self.draw_socket(context, layout, node, text)
+            # draw output
+            if self.is_output:
+                self.draw_socket(context, layout, node, text)
+                # draw changeable socket
+                if self.changeable:
+                    layout.separator()
+                    layout.prop(self, "data_type", icon_only=True)
+            # draw previously dynamic socket (with insert socket)
             if self.prev_dynamic:
                 self._draw_prev_dynamic_socket(context, layout, node)
+            # draw inputs
             if not self.is_output:
-                self.draw_socket(context, layout, node, text)
-                if self.indexable:
-                    layout.prop(self, "index_type", icon_only=True)
+                # draw disable icon
+                if self.can_be_disabled:
+                    layout.prop(self, "disabled", icon_only=True, icon="HIDE_ON" if self.disabled else "HIDE_OFF", emboss=False)
+                    layout = layout.row()
+                    layout.enabled = not self.disabled
+                # draw disabled socket
+                if self.can_be_disabled and self.disabled:
+                    layout.label(text=text)
+                # draw enabled socket
+                else:
+                    self.draw_socket(context, layout, node, text)
+                    # draw indexable socket
+                    if self.indexable:
+                        layout.prop(self, "index_type", icon_only=True)
+                    # draw changeable socket
+                    if self.changeable:
+                        layout.separator()
+                        layout.prop(self, "data_type", icon_only=True)
 
 
     ### SOCKET COLOR
@@ -191,12 +275,12 @@ class ScriptingSocket:
                     if self.convert_data:
                         # convert different socket types
                         if from_out.bl_label != self.bl_label:
-                            value = CONVERSIONS[from_out.bl_label][self.bl_label](value)
+                            value = CONVERSIONS[from_out.bl_label][self.bl_label](from_out, self)
                         # convert convertable subtypes of the same socket
                         elif from_out.subtype != self.subtype:
                             if from_out.subtype in CONVERSIONS[from_out.bl_label]:
                                 if self.subtype in CONVERSIONS[from_out.bl_label][from_out.subtype]:
-                                    value = CONVERSIONS[from_out.bl_label][from_out.subtype][self.subtype](value)
+                                    value = CONVERSIONS[from_out.bl_label][from_out.subtype][self.subtype](from_out, self)
                     return value
                 return self.get_python_repr()
 
@@ -327,9 +411,12 @@ class ScriptingSocket:
             socket.dynamic = self.dynamic
             socket.prev_dynamic = self.prev_dynamic
             socket.subtype = self.subtype
+            socket.changeable = self.changeable
+            socket.is_variable = self.is_variable
 
             # set this socket
             self.dynamic = False
             self.prev_dynamic = True
             
+            self.node.on_dynamic_socket_add(socket)
             self.node._evaluate(bpy.context)

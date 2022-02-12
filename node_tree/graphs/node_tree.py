@@ -1,13 +1,21 @@
 import bpy
 from ..sockets.conversions import CONVERSIONS
 from .node_refs import NodeRefCollection
+from ...addon.variables.variables import SN_VariableProperties
 
 
 
 def compile_all(hard=False):
     """ Compile all node trees in this file """
+    # compile properties
     if len(bpy.context.scene.sn.properties):
         bpy.context.scene.sn.properties[0].register_all()
+    # compile variables
+    for group in bpy.data.node_groups:
+        if group.bl_idname == "ScriptingNodesTree":
+            for var in group.variables:
+                var.compile()
+    # compile node trees
     for group in bpy.data.node_groups:
         if group.bl_idname == "ScriptingNodesTree":
             group.compile(hard)
@@ -16,6 +24,7 @@ def compile_all(hard=False):
 
 def unregister_all():
     """ Unregister all node trees in this file """
+    # TODO remove variables
     if len(bpy.context.scene.sn.properties):
         bpy.context.scene.sn.properties[0].unregister_all()
     for group in bpy.data.node_groups:
@@ -38,6 +47,15 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     link_cache = {} # stores cache of the links from the previous update for all node trees based on their memory adress
 
+
+    variables: bpy.props.CollectionProperty(type=SN_VariableProperties,
+                                        name="Variables",
+                                        description="The variables of this node tree")
+
+    variable_index: bpy.props.IntProperty(name="Variable Index", min=0,
+                                        description="Index of the selected variable")
+    
+
     node_refs: bpy.props.CollectionProperty(type=NodeRefCollection,
                                         name="Node References",
                                         description="A collection of groups that hold references to nodes of a specific idname")
@@ -47,7 +65,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         """ Returns the collection for the given node idname refs in this node trees """
         if idname in self.node_refs:
             return self.node_refs[idname]
-        return {"name": idname, "refs": []}
+        return self.node_refs["empty"]
     
 
     def _map_link_to_sockets(self, link):
@@ -64,9 +82,13 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             # check if multiple program sockets are connected
             if to_inp.is_program:
                 to_sockets = from_out.to_sockets(check_validity=False)
-                if to_inp != to_sockets[0]:
-                    return False
-                return True
+                if from_out.bl_label == to_inp.bl_label:
+                    # check if first same program socket
+                    for socket in to_sockets:
+                        if socket.bl_label == to_inp.bl_label:
+                            if socket == to_inp: return True
+                            else: break
+                return False
             # data types are the same
             elif from_out.bl_label == to_inp.bl_label:
                 return True
@@ -91,6 +113,17 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         return self.is_valid_connection(from_out, to_inp)
 
 
+    def _update_reroute_type(self, from_out):
+        """ Updates the reroute look of this node if it is a reroute. Not possible to do custom sockets """
+        for link in from_out.links:
+            if link.to_node.bl_idname == "NodeReroute":
+                link.to_node.inputs[0].type = "VALUE"
+                link.to_node.outputs[0].type = "VALUE"
+                link.to_node.inputs[0].display_shape = link.from_socket.display_shape
+                link.to_node.outputs[0].display_shape = link.from_socket.display_shape
+                self._update_reroute_type(link.to_node.outputs[0])
+
+
     def _update_post(self):
         """ Only do visual aspects in here as this is run after evaluating the nodes """
         # TODO check time of this function to see if it impacts performance (when more complex node setups are possible)
@@ -109,14 +142,16 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             # update program sockets
             elif getattr(from_out, "is_sn", False) and from_out.is_program and from_out.node:
                 from_out.force_update()
+            self._update_reroute_type(from_out)
 
 
     def _call_link_inserts(self, added):
         """ Calls link_insert for all new links """
-        for _, to_inp, from_real, _ in added:
+        for from_output, to_inp, from_real, _ in added:
             if from_real:
                 from_real.node.link_insert(from_real, to_inp, is_output=True)
                 to_inp.node.link_insert(from_real, to_inp, is_output=False)
+
 
     def _call_link_removes(self, removed):
         """ Calls link_remove for all removed links """
@@ -160,6 +195,10 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
 
     def update(self):
+        # add empty collection for node drawing
+        if not "empty" in self.node_refs:
+            self.node_refs.add().name = "empty"
+        # update tree links
         self._update_tree_links()
 
 

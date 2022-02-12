@@ -13,19 +13,6 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     is_trigger = True
     node_color = "INTERFACE"
     
-    docs = {
-        "description": "This node can be used to make a panel or a subpanel in the blender user interface. Use the picker button to select the location of the panel in the UI.\nIf you want to add it to a N-Panel, click the Picker button and go to the Misc category in the N-Panel.",
-        "settings": "- Is Subpanel: If this is enabled the this panel node becomes a subpanel inside another panel."
-                    + "- Label: The label is what gets displayed in the header of the panel.\n"
-                    + "- Category: If your panel is in an N-Panel, this represents the tab your panel goes in. Otherwise you can ignore this.\n"
-                    + "- Order: If you have multiple panels you can order them with this number. The first panel is 0. You can't always sort your panel above blender internal panels.\n"
-                    + "- Hide Header: Hides the header of your panel completely. Blender may also show your panel at the top of the panel stack.\n"
-                    + "- Expand Header: Applies normal layouts to your header. This will expand inputs and labels and let you align things other than to the left.\n"
-                    + "- Default Closed: Closes your panel by default.\n",
-        "inputs": "- Hide: If this receives True (enabled), your panel will be hidden from the UI.",
-        "outputs": "- Panel: The panel outputs are the starting point for you to add elements to your interface.\n"
-                    + "- Header: The header outputs can add elements to your panels header. You can leave the label empty and add it back with a label."
-    }
 
     def on_create(self, context):
         self.add_boolean_input("Hide")
@@ -44,26 +31,33 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def update_custom_parent(self, context):
         """ Updates the nodes settings when a new parent panel is selected """
-        if self.custom_parent_ntree and self.custom_parent in self.custom_parent_ntree.nodes:
-            parent = self.custom_parent_ntree.nodes[self.custom_parent]
+        if self.custom_parent_ntree and self.ref_SN_PanelNode in self.custom_parent_ntree.nodes:
+            parent = self.custom_parent_ntree.nodes[self.ref_SN_PanelNode]
             self.update_from_parent(parent)
         self._evaluate(context)
         
         
-    def on_ref_update(self, node):
+    def on_ref_update(self, node, data=None):
         """ Called when a parent panel is updated, updates this nodes settings """
-        if node.bl_idname == self.bl_idname:
-            if self.is_subpanel:
-                if node.node_tree == self.custom_parent_ntree and node.name == self.custom_parent:
-                    self.update_from_parent(node)
-                    self._evaluate(bpy.context)
+        if self.is_subpanel:
+            if node.node_tree == self.custom_parent_ntree and node.name == self.ref_SN_PanelNode:
+                self.update_from_parent(node)
+                self._evaluate(bpy.context)
                     
                     
     def update_is_subpanel(self, context):
         """ Updates the compile order when turned into a subpanel """
         if self.is_subpanel:
+            self["parent_type"] = "BLENDER"
+            self["ref_SN_PanelNode"] = ""
+            self["space"] = "PROPERTIES"
+            self["region"] = "WINDOW"
+            self["context"] = "render"
             self.order = 1
         else:
+            self["space"] = "VIEW_3D"
+            self["region"] = "UI"
+            self["context"] = ""
             self.order = 0
         self._evaluate(context)
 
@@ -118,7 +112,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="If this panel should be a subpanel",
                                     update=update_is_subpanel)
 
-    panel_parent: bpy.props.StringProperty(default="EEVEE_MATERIAL_PT_surface",
+    panel_parent: bpy.props.StringProperty(default="RENDER_PT_context",
                                     name="Parent",
                                     description="The panel id this subpanel should be shown in",
                                     update=SN_ScriptingBaseNode._evaluate)
@@ -129,7 +123,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                            ("CUSTOM", "Custom", "Custom", "FILE_SCRIPT", 1)],
                                     update=SN_ScriptingBaseNode._evaluate)
     
-    custom_parent: bpy.props.StringProperty(name="Custom Parent",
+    ref_SN_PanelNode: bpy.props.StringProperty(name="Custom Parent",
                                     description="The panel used as a custom parent panel for this subpanel",
                                     update=update_custom_parent)
     
@@ -171,8 +165,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.is_subpanel:
             if self.parent_type == "BLENDER":
                 parent = self.panel_parent
-            elif self.custom_parent_ntree and self.custom_parent in self.custom_parent_ntree.nodes:
-                parent_node = self.custom_parent_ntree.nodes[self.custom_parent]
+            elif self.custom_parent_ntree and self.ref_SN_PanelNode in self.custom_parent_ntree.nodes:
+                parent_node = self.custom_parent_ntree.nodes[self.ref_SN_PanelNode]
                 if not parent_node.is_subpanel:
                     parent = parent_node.last_idname
                 
@@ -221,20 +215,20 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op.node = self.name
             else:
                 subrow = row.row()
-                subrow.enabled = self.custom_parent_ntree != None and self.custom_parent in self.custom_parent_ntree.nodes
+                subrow.enabled = self.custom_parent_ntree != None and self.ref_SN_PanelNode in self.custom_parent_ntree.nodes
                 op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
                 op.node_tree = self.custom_parent_ntree.name if self.custom_parent_ntree else ""
-                op.node = self.custom_parent
+                op.node = self.ref_SN_PanelNode
             
                 parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
                 row.prop_search(self, "custom_parent_ntree", bpy.data, "node_groups", text="")
                 subrow = row.row(align=True)
                 subrow.enabled = self.custom_parent_ntree != None
-                subrow.prop_search(self, "custom_parent", bpy.data.node_groups[parent_tree.name].node_collection(self.bl_idname), "refs", text="")
-                if self.custom_parent == self.name and self.custom_parent_ntree == self.node_tree:
+                subrow.prop_search(self, "ref_SN_PanelNode", bpy.data.node_groups[parent_tree.name].node_collection(self.bl_idname), "refs", text="")
+                if self.ref_SN_PanelNode == self.name and self.custom_parent_ntree == self.node_tree:
                     layout.label(text="Can't use self as panel parent!", icon="ERROR")
-                elif self.custom_parent and self.custom_parent_ntree and self.custom_parent in self.custom_parent_ntree.nodes:
-                    if self.custom_parent_ntree.nodes[self.custom_parent].is_subpanel:
+                elif self.ref_SN_PanelNode and self.custom_parent_ntree and self.ref_SN_PanelNode in self.custom_parent_ntree.nodes:
+                    if self.custom_parent_ntree.nodes[self.ref_SN_PanelNode].is_subpanel:
                         layout.label(text="Can't use subpanel as parent!", icon="ERROR")
 
             row.prop(self, "parent_type", text="", icon_only=True)

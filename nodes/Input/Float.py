@@ -10,7 +10,7 @@ class SN_FloatNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "FLOAT"
 
     def on_create(self, context):
-        self.add_float_input("Float").hide = True
+        self.add_float_input("Float").set_hide(True)
         self.add_float_output("Float")
 
     def evaluate(self, context):

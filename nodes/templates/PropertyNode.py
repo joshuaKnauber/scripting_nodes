@@ -27,9 +27,6 @@ class SN_NodeProperty(FullBasicProperty, bpy.types.PropertyGroup):
             code = f"bpy.utils.register_class(SNA_GROUP_{self.python_name})"
             if not bpy.context.scene.sn.is_exporting:
                 code += f"\nbpy.context.scene.sn.unregister_cache['{self.as_pointer()}'] = SNA_GROUP_{self.python_name}"
-            # add register code from prop settings
-            if hasattr(self.settings, "register_code"):
-                return self.settings.register_code(code)
             return code
         return ""
     

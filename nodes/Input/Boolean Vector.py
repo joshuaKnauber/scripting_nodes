@@ -10,7 +10,7 @@ class SN_BooleanVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "VECTOR"
 
     def on_create(self, context):
-        self.add_boolean_vector_input("Boolean").hide = True
+        self.add_boolean_vector_input("Boolean").set_hide(True)
         self.add_boolean_vector_output("Boolean")
 
     def evaluate(self, context):

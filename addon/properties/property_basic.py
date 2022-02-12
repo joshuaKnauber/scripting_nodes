@@ -127,12 +127,12 @@ class BasicProperty():
 
         # get nodes to update references
         to_update_nodes = []
+        key = "prop_group" if self.property_type == "Group" else "prop_name"
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
-                    for key in ["prop_name", "prop_group"]:
-                        if hasattr(node, key) and getattr(node, key) == self.name:
-                            to_update_nodes.append((node, key))
+                    if hasattr(node, key) and getattr(node, key) == self.name:
+                        to_update_nodes.append((node, key))
 
         # get properties to update references
         to_update_props = []
@@ -159,8 +159,7 @@ class BasicProperty():
                                     default="Prop Default",
                                     get=get_name,
                                     set=set_name,
-                                    update=_compile,
-                                    subtype="FILE_NAME")
+                                    update=_compile)
     
     
     description: bpy.props.StringProperty(name="Description",
@@ -173,9 +172,24 @@ class BasicProperty():
         return property_icons[self.property_type]
     
     
+    def trigger_reference_update(self, context):
+        # get nodes to update references
+        to_update_nodes = []
+        key = "prop_group" if self.property_type == "Group" else "prop_name"
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                for node in ntree.nodes:
+                    if hasattr(node, key) and getattr(node, key) == self.name:
+                        to_update_nodes.append((node, key))
+                            
+        for node, key in to_update_nodes:
+            # trigger an update on the affected nodes
+            setattr(node, key, self.name)
+        self._compile()
+        
     property_type: bpy.props.EnumProperty(name="Type",
                                     description="The type of data this property can store",
-                                    update=_compile,
+                                    update=trigger_reference_update,
                                     items=[("String", "String", "Stores text, can display a text input or a filepath field", property_icons["String"], 0),
                                            ("Boolean", "Boolean", "Stores True or False, can be used for a checkbox", property_icons["Boolean"], 1),
                                            ("Float", "Float", "Stores a decimal number or a vector", property_icons["Float"], 2),
@@ -189,7 +203,7 @@ class BasicProperty():
         items = [("HIDDEN", "Hidden", "Hide property from operator popups"),
                 ("SKIP_SAVE", "Skip Save", "Don't save this property between calls"),
                 ("ANIMATABLE", "Animatable", "Enable if this property should be animatable"),
-                ("TEXTEDIT_UPDATE", "Textedit Update", "Calls the update function every time the property is edited (Only string properties, not operator popups)")]
+                ("TEXTEDIT_UPDATE", "Textedit Update", "Calls the update function every time the property is edited (Only string properties; not operator popups)")]
         return items
 
     prop_options: bpy.props.EnumProperty(name="Options",

@@ -17,15 +17,21 @@ class SN_OT_GetPythonName(bpy.types.Operator):
 
 class SN_PT_GraphPanel(bpy.types.Panel):
     bl_idname = "SN_PT_GraphPanel"
-    bl_label = "Node Trees"
+    bl_label = ""
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
     bl_category = "Serpens"
     bl_order = 0
+    bl_options = {"HEADER_LAYOUT_EXPAND"}
 
     @classmethod
     def poll(cls, context):
         return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+    
+    def draw_header(self, context):
+        layout = self.layout
+        layout.label(text="Node Trees")
+        layout.operator("wm.url_open", text="", icon="QUESTION", emboss=False).url = "https://joshuaknauber.notion.site/Workflow-Introduction-d235d03178124dc9b752088d75a25192"
 
     def draw(self, context):
         layout = self.layout

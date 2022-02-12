@@ -21,18 +21,29 @@ def register_keymaps():
     addon_keyconfig = wm.keyconfigs.addon
     kc = addon_keyconfig
 
-    # km = kc.keymaps.new(name="Node Editor", space_type="NODE_EDITOR")
+    km = kc.keymaps.new(name="Node Editor", space_type="NODE_EDITOR")
 
     # shortcut for compiling
-    # kmi = km.keymap_items.new(
-    #     idname="sn.compile",
-    #     type="R",
-    #     value="PRESS",
-    #     shift=True,
-    #     ctrl=False,
-    #     alt=False,
-    #     )
-    # addon_keymaps["compile"] = (km, kmi)
+    kmi = km.keymap_items.new(
+        idname="sn.force_compile",
+        type="R",
+        value="PRESS",
+        shift=True,
+        ctrl=False,
+        alt=False,
+        )
+    addon_keymaps["compile"] = (km, kmi)
+
+    # shortcut for docs
+    kmi = km.keymap_items.new(
+        idname="sn.open_node_docs",
+        type="F1",
+        value="PRESS",
+        shift=False,
+        ctrl=False,
+        alt=False,
+        )
+    addon_keymaps["docs"] = (km, kmi)
 
 
 def unregister_keymaps():

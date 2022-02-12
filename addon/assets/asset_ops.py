@@ -10,16 +10,23 @@ class SN_OT_AddAsset(bpy.types.Operator, ImportHelper):
     bl_description = "Adds a asset to the addon"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
     
+    add_type: bpy.props.EnumProperty(default="FILE",
+                                items=[("FILE", "File", "Import a single file"),
+                                       ("DIRECTORY", "Directory", "Import a full directory")],
+                                name="Type",
+                                description="Add this directory or this file as an asset",
+                                options={"SKIP_SAVE"})
+    
     def execute(self, context):
-        _, extension = os.path.splitext(self.filepath)
-        # TODO you should be able to select full directories as assets (e.g. a folder of images)
-        if extension:
-            sn = context.scene.sn
-            new_asset = sn.assets.add()
+        sn = context.scene.sn
+        new_asset = sn.assets.add()
+        if self.add_type == "DIRECTORY":
+            new_asset.path = os.path.dirname(self.filepath)
+        else:
             new_asset.path = self.filepath
-            for index, asset in enumerate(sn.assets):
-                if asset == new_asset:
-                    sn.asset_index = index
+        for index, asset in enumerate(sn.assets):
+            if asset == new_asset:
+                sn.asset_index = index
         return {"FINISHED"}
 
 

@@ -132,7 +132,11 @@ class SN_OT_ForceCompile(bpy.types.Operator):
     def execute(self, context):
         unregister_all()
         compile_all(hard=True)
-        # TODO purge references that don't have a node anymore which got lost for whatever reason
+        
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                for refs in ntree.node_refs:
+                    refs.clear_unused_refs()
         return {"FINISHED"}
 
     def invoke(self, context, event):

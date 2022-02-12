@@ -10,7 +10,7 @@ class SN_StringNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "STRING"
 
     def on_create(self, context):
-        self.add_string_input("String").hide = True
+        self.add_string_input("String").set_hide(True)
         self.add_string_output("String")
 
     def evaluate(self, context):

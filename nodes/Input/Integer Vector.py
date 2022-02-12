@@ -10,7 +10,7 @@ class SN_IntegerVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "VECTOR"
 
     def on_create(self, context):
-        self.add_integer_vector_input("Integer").hide = True
+        self.add_integer_vector_input("Integer").set_hide(True)
         self.add_integer_vector_output("Integer")
 
     def evaluate(self, context):

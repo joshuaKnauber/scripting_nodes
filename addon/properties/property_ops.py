@@ -165,3 +165,34 @@ class SN_OT_AddPropertyItem(bpy.types.Operator):
         new_prop = prop.settings.properties.add()
         new_prop.name = "New Property"
         return {"FINISHED"}
+
+
+
+class SN_OT_AddPropertyNode(bpy.types.Operator):
+    bl_idname = "sn.add_property_node"
+    bl_label = "Add Property Node"
+    bl_description = "Opens a popup to let you choose a property node"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        return {"FINISHED"}
+    
+    def draw(self, context):
+        layout = self.layout
+        col = layout.column(align=True)
+        col.scale_y = 1.5
+        op = col.operator("node.add_node", text="Interface", icon="ADD")
+        op.type = "SN_PropertyNode"
+        op.use_transform = True
+        op = col.operator("node.add_node", text="Get Value", icon="ADD")
+        op.type = "SN_PropertyNode"
+        op.use_transform = True
+        op = col.operator("node.add_node", text="Set Value", icon="ADD")
+        op.type = "SN_PropertyNode"
+        op.use_transform = True
+        op = col.operator("node.add_node", text="On Property Update", icon="ADD")
+        op.type = "SN_PropertyNode"
+        op.use_transform = True
+        
+    def invoke(self, context, event):
+        return context.window_manager.invoke_popup(self)

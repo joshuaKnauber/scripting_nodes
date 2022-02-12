@@ -5,18 +5,7 @@ import os
 
 class SN_AssetProperties(bpy.types.PropertyGroup):
 
-    def update_file_path(self, context):
-        if not self.path == bpy.path.abspath(self.path):
-            self["path"] = bpy.path.abspath(self.path)
-        else:
-            if self.name == "Asset" and self.path:
-                self.name = os.path.basename(self.path)
-
-    def get_asset_name(self):
-        return self.get("name", "Asset")
-    
-    def set_asset_name(self, new_name):
-        # update asset nodes that had this asset
+    def get_to_update(self):
         to_update = []
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
@@ -24,6 +13,23 @@ class SN_AssetProperties(bpy.types.PropertyGroup):
                     if node.bl_idname == "SN_AssetNode":
                         if node.asset == self.name:
                             to_update.append(node)
+        return to_update
+
+    def update_file_path(self, context):
+        if not self.path == bpy.path.abspath(self.path):
+            self["path"] = bpy.path.abspath(self.path)
+        else:
+            if self.name == "Asset" and self.path:
+                self.name = os.path.basename(self.path)
+        for node in self.get_to_update():
+            node._evaluate(context)
+
+    def get_asset_name(self):
+        return self.get("name", "Asset")
+    
+    def set_asset_name(self, new_name):
+        # update asset nodes that had this asset
+        to_update = self.get_to_update()
         self["name"] = new_name
         for node in to_update:
             node.asset = new_name

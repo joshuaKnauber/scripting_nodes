@@ -6,6 +6,7 @@ from ..templates.PropertyReferenceNode import PropertyReferenceNode
 
 _item_map = dict() # item map to store enum items while debugging. this is moved to generated code for enum props on export
 
+
 class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferenceNode):
 
     bl_idname = "SN_GenerateEnumItemsNode"
@@ -13,6 +14,9 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
     node_color = "PROGRAM"
     bl_width_default = 250
     is_trigger = True
+    
+    
+    enum_item_funcs = {}
     
 
     def on_create(self, context):
@@ -27,12 +31,10 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
         return _item_map[lookup]
 
 
-    def evaluate(self, context):
-        self.code_imperative = ""
-        self.code = ""
-
+    def evaluate(self, context):        
         enum_src = self.get_prop_source()
         if enum_src and self.prop_name in enum_src.properties and enum_src.properties[self.prop_name].property_type == "Enum":
+            prop = enum_src.properties[self.prop_name]
             self.code_imperative = f"""
                 _item_map = dict()
                 def make_enum_item(_id, name, descr, preview_id, uid):
@@ -49,9 +51,20 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
             else:
                 list_code = self.inputs[0].python_value
             
-            self.code = f"[(item[0], item[1], item[2], item[3], i) for i, item in enumerate({list_code})]"
-            # TODO on export use this:
-            # self.code = f"[make_enum_item(item[0], item[1], item[2], item[3], i) for i, item in enumerate({list_code})]"
+            enum_item_func_name = f"items_{prop.python_name}_{self.static_uid}"
+            self.code = f"""
+                        # this code doesn't reflect how you would usually write this
+                        def {enum_item_func_name}(self, context):
+                            return [make_enum_item(item[0], item[1], item[2], item[3], {'2**i' if prop.settings.enum_flag else 'i'}) for i, item in enumerate({list_code})]
+                        """
+            self.code_register = f"""
+                        bpy.context.scene.sn.node_function_cache['{self.static_uid}'] = {enum_item_func_name}
+                        """
+            self.code_unregister = f"""
+                        if '{self.static_uid}' in bpy.context.scene.sn.node_function_cache:
+                            del bpy.context.scene.sn.node_function_cache['{self.static_uid}']
+                        """
+            # TODO export
 
 
     def draw_node(self, context, layout):

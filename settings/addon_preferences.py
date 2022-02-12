@@ -24,11 +24,9 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         row = layout.row()
 
         col = row.column(heading="General")
-        col.use_property_split = True
         col.prop(self, "check_for_updates")
         
         col = row.column(heading="Debugging")
-        col.use_property_split = True
         col.prop(self, "keep_last_error_file")
 
 
