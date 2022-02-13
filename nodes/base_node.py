@@ -90,9 +90,6 @@ class SN_ScriptingBaseNode:
                         if getattr(node, f"ref_{self.bl_idname}") == self.name:
                             node.on_ref_update(self, data)
     
-    
-    def get_collection_uuid(self):
-        return self.get("static_uid", "")
 
     # uid for finding this node in the collection. Avoid using this for things that do not need to be static, use uuid instead
     static_uid: bpy.props.StringProperty(name="Static UID",
@@ -847,15 +844,15 @@ class SN_YourNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_link_remove(self, socket): pass
 
-		def on_dynamic_socket_add(self, socket): pass
+	def on_dynamic_socket_add(self, socket): pass
 
     def on_dynamic_socket_remove(self, index, is_output): pass
 
-		def on_socket_type_change(self, socket): pass
+	def on_socket_type_change(self, socket): pass
 
     def on_socket_name_change(self, socket): pass
 
-		def on_ref_update(self, node, data=None): pass
+	def on_ref_update(self, node, data=None): pass
 
     def evaluate(self, context):
 				# generate the code here
