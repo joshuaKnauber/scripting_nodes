@@ -4,12 +4,12 @@ from ..templates.VariableReferenceNode import VariableReferenceNode
 
 
 
-class SN_ToggleVariableNode(bpy.types.Node, SN_ScriptingBaseNode, VariableReferenceNode):
+class SN_ResetVariableNode(bpy.types.Node, SN_ScriptingBaseNode, VariableReferenceNode):
 
-    bl_idname = "SN_ToggleVariableNode"
-    bl_label = "Toggle Variable"
+    bl_idname = "SN_ResetVariableNode"
+    bl_label = "Reset Variable"
     node_color = "PROPERTY"
-        
+
 
     def on_create(self, context):
         self.add_execute_input()
@@ -20,15 +20,17 @@ class SN_ToggleVariableNode(bpy.types.Node, SN_ScriptingBaseNode, VariableRefere
     def evaluate(self, context):
         var = self.get_var()
         if var:
-            if var.variable_type != "Boolean":
+            if var.variable_type == "String":
                 self.code = f"""
+                            {var.data_path} = '{var.var_default}'
                             {self.indent(self.outputs[0].python_value, 7)}
                             """
             else:
                 self.code = f"""
-                            {var.data_path} = not {var.data_path}
+                            {var.data_path} = {var.var_default}
                             {self.indent(self.outputs[0].python_value, 7)}
                             """
+                
         else:
             self.code = f"""
                         {self.indent(self.outputs[0].python_value, 6)}
@@ -37,8 +39,3 @@ class SN_ToggleVariableNode(bpy.types.Node, SN_ScriptingBaseNode, VariableRefere
 
     def draw_node(self, context, layout):
         self.draw_variable_reference(layout)
-        var = self.get_var()
-        if var and not var.variable_type == "Boolean":
-            row = layout.row()
-            row.alert = True
-            row.label(text="Not a boolean variable!", icon="ERROR")
