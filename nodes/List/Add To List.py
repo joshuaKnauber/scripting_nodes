@@ -50,6 +50,10 @@ class SN_AddToListNode(bpy.types.Node, SN_ScriptingBaseNode, VariableReferenceNo
                             {var.data_path}.insert({self.inputs['Index'].python_value}, {self.inputs[1].python_value})
                             {self.indent(self.outputs[0].python_value, 7)}
                             """
+        else:
+            self.code = f"""
+                        {self.indent(self.outputs[0].python_value, 6)}
+                        """
 
 
     def draw_node(self, context, layout):

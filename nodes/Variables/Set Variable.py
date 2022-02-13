@@ -33,6 +33,10 @@ class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode, VariableReference
                         {var.data_path} = {self.inputs[1].python_value}
                         {self.indent(self.outputs[0].python_value, 6)}
                         """
+        else:
+            self.code = f"""
+                        {self.indent(self.outputs[0].python_value, 6)}
+                        """
 
 
     def draw_node(self, context, layout):

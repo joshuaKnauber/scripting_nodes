@@ -11,13 +11,9 @@ class SN_JoinStringsNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 200
 
     def on_create(self, context):
-        self.add_string_input("Delimiter")
-        self.add_string_input("String")
-        self.add_string_input("String")
-        self.add_dynamic_string_input("String")
+        self.add_list_input("String List")
+        self.add_string_input("Join On")
         self.add_string_output("String")
 
     def evaluate(self, context):
-        values = [inp.python_value for inp in self.inputs[1:-1]]
-        join_op = f"+{self.inputs['Delimiter'].python_value}+".join(values)
-        self.outputs["String"].python_value = join_op
+        self.outputs["String"].python_value = f"{self.inputs['Join On'].python_value}.join({self.inputs['String List'].python_value})"

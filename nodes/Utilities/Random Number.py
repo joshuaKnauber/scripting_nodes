@@ -27,7 +27,7 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         if self.number_type == "Integer":
             self.code_import = "from random import randint"
-            self.outputs[0].python_value = f"randint({self.inputs['Minimum'].python_value}, {self.inputs['Maximum'].python_value})"
+            self.outputs[0].python_value = f"randint(int({self.inputs['Minimum'].python_value}), int({self.inputs['Maximum'].python_value}))"
         else:
             self.code_import = "from random import uniform"
             self.outputs[0].python_value = f"uniform({self.inputs['Minimum'].python_value}, {self.inputs['Maximum'].python_value})"
