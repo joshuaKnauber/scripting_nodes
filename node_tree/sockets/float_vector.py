@@ -35,25 +35,44 @@ class SN_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     size: bpy.props.IntProperty(default=3, min=2, max=32,
                                 name="Size",
-                                description="Size of this integer vector",
+                                description="Size of this float vector",
                                 update=update_size)
 
     default_value: bpy.props.FloatVectorProperty(name="Value",
                                             size=32,
-                                            description="Value of this socket",
-                                            get=_get_value,
-                                            set=_set_value)
+                                            description="Value of this socket")
 
-    subtypes = ["NONE"]
-    subtype_values = {"NONE": "default_value"}
+    color_value: bpy.props.FloatVectorProperty(name="Value",
+                                            description="Value of this socket",
+                                            size=3, min=0, max=1,
+                                            default=(0.5,0.5,0.5),
+                                            subtype="COLOR",
+                                            update=ScriptingSocket._update_value)
+
+    color_alpha_value: bpy.props.FloatVectorProperty(name="Value",
+                                            description="Value of this socket",
+                                            size=4, min=0, max=1,
+                                            default=(0.5,0.5,0.5,0.5),
+                                            subtype="COLOR",
+                                            update=ScriptingSocket._update_value)
+
+
+    subtypes = ["NONE", "COLOR", "COLOR_ALPHA"]
+    subtype_values = {"NONE": "default_value", "COLOR": "color_value", "COLOR_ALPHA": "color_alpha_value"}
     
-    
+
     def get_color(self, context, node):
         return (0.38, 0.34, 0.84)
 
     def draw_socket(self, context, layout, node, text):
         if self.is_output or self.is_linked:
             layout.label(text=text)
+        elif self.subtype == "COLOR":
+            col = layout.column(heading=text, align=True)
+            col.prop(self, "color_value", text="")
+        elif self.subtype == "COLOR_ALPHA":
+            col = layout.column(heading=text, align=True)
+            col.prop(self, "color_alpha_value", text="")
         else:
             col = layout.column(heading=text, align=True)
             for i in range(self.size):

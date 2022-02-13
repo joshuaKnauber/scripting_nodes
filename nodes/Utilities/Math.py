@@ -68,6 +68,7 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.outputs[1].python_value = f"int({self.operation.join(values)})"
 
         else:
+            self.code_import = "import math"
             expression = self.expression
             for inp in self.inputs:
                 expression = self.replace_in_expression(expression, inp.name, inp.python_value)
