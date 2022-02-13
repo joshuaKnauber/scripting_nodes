@@ -62,6 +62,8 @@ class SN_PT_FilterDataSettings(bpy.types.Panel):
 
 
 
+global_items = { "filter": None, "items": [] }
+local_items = { "path": { "filter": None, "items": [] } }
 class SN_PT_data_search(bpy.types.Panel):
     bl_space_type = 'PREFERENCES'
     bl_region_type = 'WINDOW'
@@ -116,11 +118,20 @@ class SN_PT_data_search(bpy.types.Panel):
             split.label(text="")
             col = split.column(align=True)
             
-            to_show_items = list(sorted(sorted(filter(lambda item: item.parent_path == curr_item.path, sn.data_items), key=lambda item: item.type), key=lambda item: item.has_properties, reverse=True))
-            for item in to_show_items:
+            filter_key = ""
+            if not curr_item.path in local_items or (curr_item.path in local_items and local_items[curr_item.path]["filter"] != filter_key):
+                items = filter(lambda item: item.parent_path == curr_item.path, sn.data_items)
+                items = sorted(items, key=lambda item: item.type)
+                items = list(sorted(items, key=lambda item: item.has_properties, reverse=True))
+                local_items[curr_item.path] = {
+                    "filter": filter_key,
+                    "items": items
+                }
+                
+            for item in local_items[curr_item.path]["items"]:
                 if curr_item.data_search in item.name.lower():
                     self.draw_item(sn, col, prev_items+[item])
-            if not to_show_items:
+            if not local_items[curr_item.path]["items"]:
                 row = col.row()
                 row.enabled = False
                 row.label(text="No items found", icon="INFO")
@@ -130,7 +141,13 @@ class SN_PT_data_search(bpy.types.Panel):
         sn = context.scene.sn
         
         col = layout.column(align=True)
-        for item in filter(lambda item: item.type in sn.data_filter, sorted(sorted(sn.data_items, key=lambda item: item.type), key=lambda item: item.has_properties, reverse=True)):
+        filter_key = str(sn.data_filter) + sn.data_search
+        if global_items["filter"] != filter_key:
+            global_items["filter"] = filter_key
+            items = sorted(sn.data_items, key=lambda item: item.type)
+            items = sorted(items, key=lambda item: item.has_properties, reverse=True)
+            global_items["items"] = list(filter(lambda item: item.type in sn.data_filter and sn.data_search in item.name.lower(), items))
+
+        for item in global_items["items"]:
             if item.parent_path == f"bpy.{sn.data_category}":
-                if sn.data_search in item.name.lower():
-                    self.draw_item(sn, col, [item])
+                self.draw_item(sn, col, [item])
