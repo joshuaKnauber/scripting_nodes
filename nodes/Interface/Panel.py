@@ -27,8 +27,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self["space"] = parent["space"]
         self["region"] = parent["region"]
         self["context"] = parent["context"]
-                
-        
+
+
     def update_custom_parent(self, context):
         """ Updates the nodes settings when a new parent panel is selected """
         if self.custom_parent_ntree and self.ref_SN_PanelNode in self.custom_parent_ntree.nodes:
