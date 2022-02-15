@@ -58,7 +58,7 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                             {self.indent(props_unregister_list, 7)}
                             """
 
-    def evalute_export(self, context):
+    def evaluate_export(self, context):
         # TODO overwrite this for export
         self.evaluate(context)
 

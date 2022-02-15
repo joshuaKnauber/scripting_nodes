@@ -35,5 +35,5 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefer
             self.code = f"{self.active_layout}.label(text='No Property connected!', icon='ERROR')"
 
 
-    def evalute_export(self, context):
+    def evaluate_export(self, context):
         self.code = f"{self.active_layout}.prop({self.inputs['Property'].python_value_source}, '{self.inputs['Property'].python_value_name}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})"

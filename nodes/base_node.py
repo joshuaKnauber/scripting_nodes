@@ -382,7 +382,7 @@ class SN_ScriptingBaseNode:
 
         # evaluate node
         if bpy.context.scene.sn.is_exporting:
-            self.evalute_export(bpy.context)
+            self.evaluate_export(bpy.context)
         else:
             self.evaluate(bpy.context)
 
@@ -418,7 +418,7 @@ class SN_ScriptingBaseNode:
         """
 
 
-    def evalute_export(self, context):
+    def evaluate_export(self, context):
         """ Used to overwrite evaluate for exporting if required """
         self.evaluate(context)
 

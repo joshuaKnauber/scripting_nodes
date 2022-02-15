@@ -23,7 +23,7 @@ class SN_AssetNode(bpy.types.Node, SN_ScriptingBaseNode):
             if context.scene.sn.assets[self.asset].path:
                 self.outputs["Path"].python_value = f"r\'{context.scene.sn.assets[self.asset].path}\'"
                 
-    def evalute_export(self, context):
+    def evaluate_export(self, context):
         self.outputs["Path"].python_value = "\'\'"
         if self.asset and self.asset in context.scene.sn.assets:
             if context.scene.sn.assets[self.asset].path: # TODO when doing export put asset folder here
