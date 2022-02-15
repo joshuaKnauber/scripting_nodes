@@ -38,3 +38,13 @@ class SN_BeforeExitNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if '{self.static_uid}' in bpy.context.scene.sn.node_function_cache:
                         del bpy.context.scene.sn.node_function_cache['{self.static_uid}']
                     """
+
+    def evaluate_export(self, context):
+        self.code_import = f"import atexit"
+        self.code = f"""
+                        def before_exit_handler_{self.static_uid}(dummy):
+                            {self.indent(self.outputs[0].python_value, 6) if self.outputs[0].python_value else 'pass'}
+                        """
+
+        self.code_register = f"""atexit.register(before_exit_handler_{self.static_uid})"""
+        self.code_unregister = f"""atexit.unregister(before_exit_handler_{self.static_uid})"""

@@ -1,3 +1,4 @@
+from xml.dom.minidom import Element
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.VariableReferenceNode import VariableReferenceNode
@@ -35,6 +36,7 @@ class SN_RemoveFromListNode(bpy.types.Node, SN_ScriptingBaseNode, VariableRefere
 
     def evaluate(self, context):
         method = "pop" if self.method == "INDEX" else "remove"
+
         var = self.get_var()
         if var and var.variable_type == "List":
             self.code = f"""
