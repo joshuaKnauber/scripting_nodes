@@ -2,7 +2,8 @@ import bpy
 from bl_ui import space_userpref
 from uuid import uuid4
 
-from .data_properties import SN_DataProperty, is_valid_attribute, filter_items, filter_defaults
+
+from .data_properties import is_valid_attribute, filter_items, filter_defaults, find_path_in_json, get_item_type
 from ..addon.properties.properties import SN_GeneralProperties
 from ..addon.properties.settings.settings import property_icons
 from ..addon.assets.assets import SN_AssetProperties
@@ -184,67 +185,64 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="Your custom category")
     
     
-    def create_data_items(self, data, data_path):
+    data_items = {"app": {}, "context": {}, "data": {}, "path": {}, "utils": {}}
+
+    def get_new_item(self, name, path, has_properties, item_type):
+        new_item = {
+            "DETAILS": {
+                "expanded": False,
+                "type": item_type,
+                "name": name,
+                "description": "",
+                "path": path,
+                "has_properties": has_properties,
+                "data_search": "",
+                "data_filter": filter_defaults,
+            }}
+        return new_item
+    
+    def get_data_items(self, data, path):
+        new_items = {}
+        # get attributes
         for attr in dir(data):
             if is_valid_attribute(attr):
-                prop = None if not hasattr(data, "bl_rna") or not attr in data.bl_rna.properties else data.bl_rna.properties[attr]
-                item = self.data_items.add()
-                item.identifier = attr
-                item.path = f"{data_path}.{attr}"
-                item.parent_path = data_path
-                item.has_properties = hasattr(getattr(data, attr), "bl_rna")
-                # doesnt show empty colls TODO
-                # context is a mess
-
-                if prop:
-                    item.name = prop.name if prop.name else prop.identifier
-                    item.description = prop.description if prop.description else item.name
-                    item.type = prop.type.title()
-                    if item.type == "Int": item.type = "Integer"
-                    if getattr(prop, "is_array", False): item.type += " Vector"
-                else:
-                    item.name = attr
-                    item.description = attr
-                
-                    value = getattr(data, attr)
-                    type_name = getattr(type(value), "__name__", "")
-                    item.type = type_name
-                    if hasattr(type(value), "bl_rna"): item.type = "Pointer"
-                    elif type(value) == type(None): item.type = "Pointer"
-                    elif type(value) == list: item.type = "List"
-                    elif type(value) == str: item.type = "String"
-                    elif type(value) == bytes: item.type = "String"
-                    elif type(value) == int: item.type = "Integer"
-                    elif type(value) == float: item.type = "Float"
-                    elif type(value) == bool: item.type = "Boolean"
-                    elif type(value) == tuple:
-                        if len(value) > 0:
-                            if type(value[0]) == int: item.type = "Integer Vector"
-                            elif type(value[0]) == float: item.type = "Float Vector"
-                            elif type(value[0]) == bool: item.type = "Boolean Vector"
-                        else:
-                            item.type = "List"
-                    else:
-                        if type_name == "builtin_function_or_method":
-                            item.type = "Built In Function"
-                        elif type_name == "bpy_func" or type_name == "method" or type_name == "function":
-                            item.type = "Function"
-                        elif type_name == "frozenset":
-                            item.type = "List"
-                            item.path = f"list({item.path})"
+                value = getattr(data, attr)
+                name = attr
+                item_type = get_item_type(str(type(value)), False)
+                if hasattr(data, "bl_rna") and attr in data.bl_rna.properties:
+                    prop = data.bl_rna.properties[attr]
+                    name = prop.name
+                    item_type = get_item_type(prop.type, getattr(prop, "is_array", False))
+                new_items[attr] = self.get_new_item(name, f"{path}.{attr}", hasattr(value, "bl_rna"), item_type)
+        # get items
         if hasattr(data, "__iter__"):
             for i, indexed in enumerate(data):
-                item = self.data_items.add()
-                item.name = f"'{indexed.name}'" if hasattr(indexed, "name") else f"[{i}]"
-                item.description = indexed.bl_rna.description
-                item.type = indexed.bl_rna.name
-                item.path = f"{data_path}['{indexed.name}']" if hasattr(indexed, "name") else f"{data_path}[{i}]" 
-                item.parent_path = data_path
-                item.has_properties = True
+                name = f"'{indexed.name}'" if hasattr(indexed, "name") else f"[{i}]"
+                item_type = get_item_type("Pointer", False)
+                new_items[f"{name}"] = self.get_new_item(name, f"{path}[{name}]", True, item_type)
+        # sort items
+        sorted_keys = sorted(new_items.keys(), key=lambda s: new_items[s]["DETAILS"]["type"])
+        sorted_keys = sorted(sorted_keys, key=lambda s: new_items[s]["DETAILS"]["has_properties"], reverse=True)
+        sorted_items = {}
+        for key in sorted_keys: sorted_items[key] = new_items[key]
+        return sorted_items
+    
+    def generate_items(self, path):
+        json_path = path.replace("[",".").replace("]","")
+        parent = find_path_in_json(".".join(json_path.split(".")[:-1]), self.data_items)
+        key = json_path.split(".")[-1]
+        data = eval(path)
+        details = parent[key]["DETAILS"]
+        parent[key] = self.get_data_items(data, path)
+        parent[key]["DETAILS"] = details
     
     def update_data_category(self, context):
-        self.data_items.clear()
-        self.create_data_items(getattr(bpy, self.data_category), f"bpy.{self.data_category}")
+        self.data_items[self.data_category] = self.get_data_items(getattr(bpy, self.data_category), f"bpy.{self.data_category}")
+        # if self.data_category == "context":
+        #     # context here could be replaced with context from somewhere else
+        #     self.create_data_items(context.copy(), f"bpy.{self.data_category}")
+        # else:
+        #     self.data_items[self.data_category] = self.get_data_items(getattr(bpy, self.data_category), f"bpy.{self.data_category}")
 
     def update_hide_preferences(self, context):
         for cls in space_userpref.classes:
@@ -269,8 +267,6 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         default="context",
                                         description="Category of blend data",
                                         update=update_data_category)
-    
-    data_items: bpy.props.CollectionProperty(type=SN_DataProperty)
     
     data_filter: bpy.props.EnumProperty(name="Type",
                                         options={"ENUM_FLAG"},

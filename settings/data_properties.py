@@ -22,60 +22,31 @@ filter_items = [("Pointer", "Pointer", "Pointer", property_icons["Property"], 1)
 
 filter_defaults = {"Pointer","Collection","List","String","Enum","Boolean","Boolean Vector",
     "Integer","Integer Vector","Float","Float Vector","Function"}
-    
 
 
-class SN_DataProperty(bpy.types.PropertyGroup):
-    
-    def create_items(self):
-        if not self.items_added:
-            bpy.context.scene.sn.create_data_items(eval(self.path), self.path)
-            
-    def delete_items(self):
-        sn = bpy.context.scene.sn
-        for i in range(len(sn.data_items)-1, -1, -1):
-            if self.path in sn.data_items[i].parent_path:
-                sn.data_items.remove(i)
-        self.items_added = False
-    
-    def update_expand(self, context):
-        if not self.items_added and self.has_properties:
-            self.create_items()
-            self.items_added = True
-            
-    def reload_items(self):
-        self.delete_items()
-        self.create_items()
+
+def find_path_in_json(path, json):
+    keys = path.replace("[", ".").replace("]", "").split('.')[1:]
+    item = json
+    for key in keys:
+        item = item[key]
+    return item
 
 
-    name: bpy.props.StringProperty()
 
-    identifier: bpy.props.StringProperty()
-
-    description: bpy.props.StringProperty()
-
-    type: bpy.props.StringProperty()
-
-    path: bpy.props.StringProperty()
-
-    parent_path: bpy.props.StringProperty()
-    
-        
-    has_properties: bpy.props.BoolProperty()
-    
-    items_added: bpy.props.BoolProperty(default=False)
-    
-    expand: bpy.props.BoolProperty(default=False,
-                                update=update_expand,
-                                name="Expand",
-                                description="Expand the items of this property")
-    
-    data_filter: bpy.props.EnumProperty(name="Type",
-                                        options={"ENUM_FLAG"},
-                                        description="Filter by data type",
-                                        items=filter_items,
-                                        default=filter_defaults)
-
-    data_search: bpy.props.StringProperty(name="Search",
-                                        description="Search data",
-                                        options={"TEXTEDIT_UPDATE"})
+def get_item_type(item_type, is_array):
+    prop_types = {
+        "COLLECTION": "Collection",
+        "POINTER": "Pointer",
+        str(type(None)): "Pointer",
+        "INT": "Integer",
+        "FLOAT": "Float",
+        "STRING": "String",
+        "ENUM": "Enum",
+        "BOOLEAN": "Boolean",
+    }
+    if item_type in prop_types:
+        item_type = prop_types[item_type]
+    if is_array:
+        item_type += " Vector"
+    return item_type

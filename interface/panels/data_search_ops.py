@@ -1,4 +1,5 @@
 import bpy
+from ...settings.data_properties import find_path_in_json, filter_items, filter_defaults
 
 
 
@@ -29,6 +30,66 @@ class SN_OT_ExitDataSearch(bpy.types.Operator):
     def execute(self, context):
         context.scene.sn.hide_preferences = False
         return {"FINISHED"}
+
+
+    
+class SN_OT_ExpandData(bpy.types.Operator):
+    bl_idname = "sn.expand_data"
+    bl_label = "Expand Data"
+    bl_description = "Loads the items for the given item"
+    bl_options = {"REGISTER", "INTERNAL"}
+    
+    path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context): 
+        sn = context.scene.sn
+        item = find_path_in_json(self.path, sn.data_items)
+        item["DETAILS"]["expanded"] = not item["DETAILS"]["expanded"]
+        if len(item.keys()) == 1:
+            sn.generate_items(self.path)
+        return {"FINISHED"}
+
+
+
+class SN_OT_FilterData(bpy.types.Operator):
+    bl_idname = "sn.filter_data"
+    bl_label = "Filter Data"
+    bl_description = "Filters this items data"
+    bl_options = {"REGISTER", "INTERNAL"}
+    
+    path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def update_filters(self, context):
+        item = find_path_in_json(self.path, context.scene.sn.data_items)
+        item["DETAILS"]["data_search"] = self.data_search
+        item["DETAILS"]["data_filter"] = self.data_filter
+
+    data_search: bpy.props.StringProperty(default="",
+                                    options={"SKIP_SAVE", "HIDDEN", "TEXTEDIT_UPDATE"},
+                                    update=update_filters)
+    
+    data_filter: bpy.props.EnumProperty(name="Type",
+                                        options={"ENUM_FLAG"},
+                                        description="Filter by data type",
+                                        items=filter_items,
+                                        default=filter_defaults,
+                                        update=update_filters)
+
+    def execute(self, context):
+        return {"FINISHED"}
+    
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Search:")
+        layout.prop(self, "data_search", text="")
+        layout.separator()
+        col = layout.column()
+        col.prop(self, "data_filter", expand=True)
+    
+    def invoke(self, context, event):
+        item = find_path_in_json(self.path, context.scene.sn.data_items)
+        self.data_search = item["DETAILS"]["data_search"]
+        return context.window_manager.invoke_popup(self, width=300)
 
 
 

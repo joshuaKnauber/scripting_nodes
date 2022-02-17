@@ -1,6 +1,6 @@
 import bpy
-import json
 from ...addon.properties.settings.settings import property_icons
+from ...settings.data_properties import filter_defaults
         
         
         
@@ -62,8 +62,6 @@ class SN_PT_FilterDataSettings(bpy.types.Panel):
 
 
 
-global_items = { "filter": None, "items": [] }
-local_items = { "path": { "filter": None, "items": [] } }
 class SN_PT_data_search(bpy.types.Panel):
     bl_space_type = 'PREFERENCES'
     bl_region_type = 'WINDOW'
@@ -74,80 +72,54 @@ class SN_PT_data_search(bpy.types.Panel):
     def poll(cls, context):
         return context.scene.sn.hide_preferences
     
-    def draw_item(self, sn, layout, prev_items):
-        curr_item = prev_items[-1]
+    def should_draw(self, item, search_value, filters):
+        if search_value.lower() in item["DETAILS"]["name"].lower():
+            # return item["DETAILS"]["type"] in filters
+            return True
+        return False
+    
+    def draw_item(self, layout, item):
         box = layout.box()
         row = box.row()
-        if not curr_item.has_properties:
-            row.scale_y = 0.7
-
-        if curr_item.has_properties:
-            row.prop(curr_item, "expand", text="", icon="DISCLOSURE_TRI_DOWN" if curr_item.expand else "DISCLOSURE_TRI_RIGHT", emboss=False)
-        else:
-            row.label(text="", icon=property_icons[curr_item.type.title()] if curr_item.type.title() in property_icons.keys() else "ERROR")
-
-        subrow = row.row(align=True)
-        subrow.alignment = "LEFT"
-        parts = list(map(lambda x: x.name.replace("_", " ").title(), prev_items))
-        for i, part in enumerate(parts):
-            if i < len(parts)-1:
-                subcol = subrow.column(align=True)
-                subcol.alignment = "LEFT"
-                subcol.enabled = False
-                subcol.label(text=f"{part} |")
-            else:
-                subrow.label(text=f"{part}")
-
-        row = row.row()
-        row.alignment = "RIGHT"
-        
+        if item["DETAILS"]["has_properties"]:
+            op = row.operator("sn.expand_data", text="", icon="TRIA_DOWN" if item["DETAILS"]["expanded"] else "TRIA_RIGHT", emboss=False)
+            op.path = item["DETAILS"]["path"]
+            has_filters = item["DETAILS"]["data_search"] != "" or item["DETAILS"]["data_filter"] != filter_defaults
+            op = row.operator("sn.filter_data", text="", icon="FILTER", emboss=has_filters, depress=has_filters)
+            op.path = item["DETAILS"]["path"]
+        row.label(text=item["DETAILS"]["name"])
+        icon = property_icons[item["DETAILS"]["type"]] if item["DETAILS"]["type"] in property_icons else "ERROR"
+        row.label(text=item["DETAILS"]["type"], icon=icon)
         subrow = row.row()
         subrow.enabled = False
-        subrow.label(text=curr_item.type)
+        subrow.label(text=item["DETAILS"]["path"])
+        row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False).name = item["DETAILS"]["path"]
         
-        row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False).name = curr_item.path
-        if curr_item.has_properties:
-            row.context_pointer_set("sn_filter_path", curr_item)
-            row.popover("SN_PT_FilterDataSettings", text="", icon="FILTER")
-        row.operator("sn.reload_item_data", text="", icon="FILE_REFRESH", emboss=False).path = curr_item.path
-        row.operator("sn.tooltip", text="", icon="QUESTION", emboss=False).text = curr_item.description
-
-        if curr_item.expand:
+        if item["DETAILS"]["expanded"]:
             row = box.row()
-            split = row.split(factor=0.025)
+            split = row.split(factor=0.015)
             split.label(text="")
-            col = split.column(align=True)
-            
-            filter_key = ""
-            if not curr_item.path in local_items or (curr_item.path in local_items and local_items[curr_item.path]["filter"] != filter_key):
-                items = filter(lambda item: item.parent_path == curr_item.path, sn.data_items)
-                items = sorted(items, key=lambda item: item.type)
-                items = list(sorted(items, key=lambda item: item.has_properties, reverse=True))
-                local_items[curr_item.path] = {
-                    "filter": filter_key,
-                    "items": items
-                }
-                
-            for item in local_items[curr_item.path]["items"]:
-                if curr_item.data_search in item.name.lower():
-                    self.draw_item(sn, col, prev_items+[item])
-            if not local_items[curr_item.path]["items"]:
-                row = col.row()
-                row.enabled = False
-                row.label(text="No items found", icon="INFO")
+            col = split.column()
+            is_empty = True
+            for key in item.keys():
+                if not key == "DETAILS":
+                    draw_item = item[key]
+                    if self.should_draw(draw_item, item["DETAILS"]["data_search"], item["DETAILS"]["data_filter"]):
+                        self.draw_item(col, draw_item)
+                        is_empty = False
+            if is_empty:
+                col.label(text="No Items for these filters!", icon="INFO")
 
     def draw(self, context):
         layout = self.layout
         sn = context.scene.sn
         
-        col = layout.column(align=True)
-        filter_key = str(sn.data_filter) + sn.data_search
-        if global_items["filter"] != filter_key:
-            global_items["filter"] = filter_key
-            items = sorted(sn.data_items, key=lambda item: item.type)
-            items = sorted(items, key=lambda item: item.has_properties, reverse=True)
-            global_items["items"] = list(filter(lambda item: item.type in sn.data_filter and sn.data_search in item.name.lower(), items))
-
-        for item in global_items["items"]:
-            if item.parent_path == f"bpy.{sn.data_category}":
-                self.draw_item(sn, col, [item])
+        is_empty = True
+        for key in sn.data_items[sn.data_category].keys():
+            item = sn.data_items[sn.data_category][key]
+            if self.should_draw(item, sn.data_search, sn.data_filter):
+                self.draw_item(layout, item)
+                is_empty = False
+                
+        if is_empty:
+            layout.label(text="No Items for these filters!", icon="INFO")
