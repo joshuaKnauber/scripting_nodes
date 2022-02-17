@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_IsInListNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_IsInListNode"
-    bl_label = "Is In List"
+    bl_label = "Element In List"
     node_color = "LIST"
 
     def on_create(self, context):

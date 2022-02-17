@@ -40,6 +40,21 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket, PropertySocket):
         return self.default_python_value
     
     
+    @property
+    def python_attr(self):
+        value = self.python_value
+        if "." in value:
+            return value.split(".")[-1]
+        return value
+    
+    @property
+    def python_source(self):
+        value = self.python_value
+        if "." in value:
+            return ".".join(value.split(".")[:-1])
+        return value
+    
+    
     subtypes = ["NONE"]
     subtype_values = {"NONE": "default_value"}
     
