@@ -81,7 +81,9 @@ class SN_PT_data_search(bpy.types.Panel):
     def draw_item(self, layout, item):
         box = layout.box()
         row = box.row()
-        if item["DETAILS"]["has_properties"]:
+        if not item["DETAILS"]["has_properties"]:
+            row.scale_y = 0.75
+        else:
             op = row.operator("sn.expand_data", text="", icon="TRIA_DOWN" if item["DETAILS"]["expanded"] else "TRIA_RIGHT", emboss=False)
             op.path = item["DETAILS"]["path"]
             has_filters = item["DETAILS"]["data_search"] != "" or item["DETAILS"]["data_filter"] != filter_defaults
@@ -99,13 +101,18 @@ class SN_PT_data_search(bpy.types.Panel):
             row = box.row()
             split = row.split(factor=0.015)
             split.label(text="")
-            col = split.column()
+            col = split.column(align=True)
             is_empty = True
             for key in item.keys():
                 if not key == "DETAILS":
-                    draw_item = item[key]
-                    if self.should_draw(draw_item, item["DETAILS"]["data_search"], item["DETAILS"]["data_filter"]):
-                        self.draw_item(col, draw_item)
+                    sub_item = item[key]
+                    if self.should_draw(sub_item, item["DETAILS"]["data_search"], item["DETAILS"]["data_filter"]):
+                        self.draw_item(col, sub_item)
+                        if sub_item["DETAILS"]["shortened_coll"]:
+                            box = col.box()
+                            box.scale_y = 0.75
+                            box.label(text="... Shortened because of too many items", icon="PLUS")
+                            col.separator()
                         is_empty = False
             if is_empty:
                 col.label(text="No Items for these filters!", icon="INFO")
@@ -115,10 +122,11 @@ class SN_PT_data_search(bpy.types.Panel):
         sn = context.scene.sn
         
         is_empty = True
+        col = layout.column(align=True)
         for key in sn.data_items[sn.data_category].keys():
             item = sn.data_items[sn.data_category][key]
             if self.should_draw(item, sn.data_search, sn.data_filter):
-                self.draw_item(layout, item)
+                self.draw_item(col, item)
                 is_empty = False
                 
         if is_empty:
