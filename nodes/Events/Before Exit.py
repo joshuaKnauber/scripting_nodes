@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_BeforeExitNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_BeforeExitNode"
-    bl_label = "On Exit"
+    bl_label = "On Blender Close"
     is_trigger = True
     bl_width_default = 200
 
@@ -20,6 +20,7 @@ class SN_BeforeExitNode(bpy.types.Node, SN_ScriptingBaseNode):
         row.scale_y = 1.2
         op = row.operator("sn.run_event",text="Run Event",icon="PLAY")
         op.uid = self.static_uid
+        op.handler = "EXIT"
 
 
     def evaluate(self, context):
@@ -31,12 +32,9 @@ class SN_BeforeExitNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         self.code_register = f"""
                     atexit.register(before_exit_handler_{self.static_uid})
-                    bpy.context.scene.sn.node_function_cache['{self.static_uid}'] = before_exit_handler_{self.static_uid}
                     """
         self.code_unregister = f"""
                     atexit.unregister(before_exit_handler_{self.static_uid})
-                    if '{self.static_uid}' in bpy.context.scene.sn.node_function_cache:
-                        del bpy.context.scene.sn.node_function_cache['{self.static_uid}']
                     """
 
     def evaluate_export(self, context):

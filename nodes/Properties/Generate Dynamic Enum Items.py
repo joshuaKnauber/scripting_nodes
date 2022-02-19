@@ -22,14 +22,6 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
     def on_create(self, context):
         self.add_list_input("Items")
         
-        
-    def make_enum_item(self, _id, name, descr, preview_id, uid):
-        """ Function for making an enum item while debugging. This is moved to generated code on export in the enum register """
-        lookup = f"{str(_id)}\0{str(name)}\0{str(descr)}\0{str(preview_id)}\0{str(uid)}"
-        if not lookup in _item_map:
-            _item_map[lookup] = (_id, name, descr, preview_id, uid)
-        return _item_map[lookup]
-
 
     def evaluate(self, context):        
         enum_src = self.get_prop_source()
@@ -51,20 +43,11 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
             else:
                 list_code = self.inputs[0].python_value
             
-            enum_item_func_name = f"items_{prop.python_name}_{self.static_uid}"
             self.code = f"""
-                        # this code doesn't reflect how you would usually write this
-                        def {enum_item_func_name}(self, context):
-                            return [make_enum_item(item[0], item[1], item[2], item[3], {'2**i' if prop.settings.enum_flag else 'i'}) for i, item in enumerate({list_code})]
-                        """
-            self.code_register = f"""
-                        bpy.context.scene.sn.node_function_cache['{self.static_uid}'] = {enum_item_func_name}
-                        """
-            self.code_unregister = f"""
-                        if '{self.static_uid}' in bpy.context.scene.sn.node_function_cache:
-                            del bpy.context.scene.sn.node_function_cache['{self.static_uid}']
-                        """
-            # TODO export
+                def {prop.settings.item_func_name}(self, context):
+                    enum_items = {list_code}
+                    return [make_enum_item(item[0], item[1], item[2], item[3], {'2**i' if prop.settings.enum_flag else 'i'}) for i, item in enumerate(enum_items)]
+                """
 
 
     def draw_node(self, context, layout):

@@ -99,7 +99,7 @@ class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
         return f""
     
     
-    def register_code(self, raw):
+    def imperative_code(self):
         code = f"class {self.prop_type_name}(bpy.types.PropertyGroup):\n\n"
         for prop in self.properties:
             for line in prop.register_code.split("\n"):
@@ -107,7 +107,6 @@ class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
             code += "\n"
         if not len(self.properties):
             code += " "*4 + "pass\n\n"
-        code += raw
         return code
     
     

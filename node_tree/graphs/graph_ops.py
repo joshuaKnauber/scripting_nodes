@@ -1,7 +1,7 @@
 from bpy_extras.io_utils import ImportHelper
 import bpy
 import os
-from .node_tree import compile_all, unregister_all
+from ...nodes.compiler import unregister_addon, compile_addon
 
 
 
@@ -44,9 +44,9 @@ class SN_OT_RemoveGraph(bpy.types.Operator):
     def execute(self, context):
         sn = context.scene.sn
         group = bpy.data.node_groups[sn.node_tree_index]
-        group.graph_unregister()
         bpy.data.node_groups.remove(group)
         sn.node_tree_index -= 1
+        compile_addon()
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -105,8 +105,8 @@ class SN_OT_AppendPopup(bpy.types.Operator):
             # register new graph
             new_groups = set(prev_groups) ^ set(bpy.data.node_groups.values())
             for group in new_groups:
-                group.compile(hard=True)
                 context.scene.sn.node_tree_index = bpy.data.node_groups.values().index(group)
+            compile_addon()
             
             # redraw screen
             context.area.tag_redraw()
@@ -130,13 +130,11 @@ class SN_OT_ForceCompile(bpy.types.Operator):
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context):
-        unregister_all()
-        compile_all(hard=True)
-        
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for refs in ntree.node_refs:
                     refs.clear_unused_refs()
+                ntree.reevaluate()
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -151,5 +149,5 @@ class SN_OT_ForceUnregister(bpy.types.Operator):
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context):
-        unregister_all()
+        unregister_addon()
         return {"FINISHED"}

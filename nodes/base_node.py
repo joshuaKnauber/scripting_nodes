@@ -1,8 +1,8 @@
 import bpy
 from uuid import uuid4
-from ..utils import normalize_code, print_debug_code, unique_collection_name
-from ..node_tree.sockets.conversions import CONVERT_UTILS
-
+from ..utils import normalize_code, indent_code, format_paragraphs
+from .compiler import compile_addon
+    
 
 
 class SN_ScriptingBaseNode:
@@ -127,165 +127,13 @@ class SN_ScriptingBaseNode:
             linked = node._get_linked_nodes(linked=linked, started_at_trigger=started_at_trigger)
 
         return linked
-    
-    
-    def _format_paragraphs(self, code):
-        """ Adjusts the spacing in the code paragraphs """
-        # remove blank lines
-        code = code.split("\n")
-        code = list(filter(lambda line: not line.strip() == "", code))
-        # add blank lines
-        spaced = []
-        prev_indents = 0
-        for i, line in enumerate(code):
-            curr_indents = len(line) - len(line.lstrip())
-            # add line if less indents
-            if curr_indents < prev_indents:
-                spaced.append("")
-            # add line if decorator
-            elif line.lstrip()[0] == "@":
-                spaced.append("")
-            # add line before comment
-            elif line.lstrip()[0] == "#":
-                spaced.append("")
-            spaced.append(line)
-            prev_indents = curr_indents
-        return "\n".join(spaced)
-
-
-    def _get_import_list(self, linked=[]):
-        """ Returns the imports for this node as a list of import lines """
-        if not linked: linked = self._get_linked_nodes()
-        import_list = []
-        for node in linked:
-            imports = node.code_import
-            for imp in imports.split("\n"):
-                imp = imp.strip()
-                if imp and not imp in import_list:
-                    import_list.append(imp)
-        return import_list
-
-    def _format_imports(self, linked=[]):
-        """ Returns the imports for this node formatted for a python file """
-        if not linked: linked = self._get_linked_nodes()
-        import_list = ["import bpy", "from blender_visual_scripting_addon.addon import sna_globals"]
-        import_list += self._get_import_list(linked)
-        return "\n".join(import_list) + "\n"
-
-
-    def _format_imperative(self, linked=[]):
-        """ Returns the imperative code for this node formatted for a python file """
-        # TODO there can still be duplicates in here. Maybe find a good way of removing those
-        if not linked: linked = self._get_linked_nodes()
-        full_imperative = "\n" + CONVERT_UTILS + "\n"
-        for node in linked:
-            imperative = node.code_imperative
-            if imperative:
-                full_imperative += imperative + "\n"
-        return full_imperative
-
-
-    def _format_register(self, linked=[]):
-        """ Returns the register code for this node formatted for a python file """
-        if not linked: linked = self._get_linked_nodes()
-        full_register = ""
-        for node in linked:
-            register = node.code_register
-            if register:
-                full_register += register + "\n"
-        if not full_register.strip():
-            full_register = "pass\n" + full_register
-        return "\ndef register():\n" + self.indent(full_register, 1, 0) + "\n"
-
-
-    def _format_unregister(self, linked=[]):
-        """ Returns the unregister code for this node formatted for a python file """
-        if not linked: linked = self._get_linked_nodes()
-        full_unregister = ""
-        for node in linked:
-            unregister = node.code_unregister
-            if unregister:
-                full_unregister += unregister + "\n"
-        if not full_unregister.strip():
-            full_unregister = "pass\n" + full_unregister
-        return "\ndef unregister():\n" + self.indent(full_unregister, 1, 0) + "\n"
-
-
-    def _format_node_code(self):
-        """ Formats this nodes and its connected nodes code ready to register in a separate file """
-        linked = self._get_linked_nodes(started_at_trigger=True)
-        linked = sorted(linked, key=lambda node: node.order)
-        imports = self._format_imports(linked)
-        imperative = self._format_imperative(linked)
-        main_code = self.code
-        register = self._format_register(linked)
-        unregister = self._format_unregister(linked)
-
-        run_register = "\nregister()\n"
-        store_unregister = f"bpy.context.scene.sn.unregister_cache['{self.as_pointer()}'] = unregister\n"
-
-        return imports + imperative + f"\n{main_code}\n" + register + unregister + run_register + store_unregister
-
-
-    def pointer_unregister(self, pointer):
-        """ Unregisters the given pointers function """
-        sn = bpy.context.scene.sn
-        if pointer in sn.unregister_cache:
-            # run unregister
-            try:
-                sn.unregister_cache[pointer]()
-            except Exception as error:
-                print(error)
-            # remove unregister function
-            del sn.unregister_cache[pointer]
-
-
-    def node_unregister(self):
-        """ Unregisters this trigger nodes current code """
-        if self.is_trigger:
-            self.pointer_unregister(f"{self.as_pointer()}")
- 
-
-    def compile(self):
-        """ Registers or unregisters this trigger nodes current code and stores results """
-        if self.is_trigger:
-            # unregister
-            self.node_unregister()
-
-            # create text file
-            txt = bpy.data.texts.new("tmp_serpens")
-            code = self._format_node_code()
-            txt.write(code)
-            print_debug_code(code)
-
-            # run text file
-            ctx = bpy.context.copy()
-            ctx['edit_text'] = txt
-            try:
-                bpy.ops.text.run_script(ctx)
-            except Exception as error:
-                print("")
-                print(f"--- Serpens error in node tree of '{self.name}' ---")
-                print(error)
-                print("----------------------------------------------------")
-                print("")
-                if bpy.context.preferences.addons[__name__.partition('.')[0]].preferences.keep_last_error_file:
-                    if not "serpens_error" in bpy.data.texts:
-                        bpy.data.texts.new("serpens_error")
-                    err = bpy.data.texts["serpens_error"]
-                    err.clear()
-                    err.write(code)
-
-            # remove text file
-            bpy.data.texts.remove(txt)
 
 
     def _node_code_changed(self):
         """ Triggers an update on all affected, program nodes connected to this node. Called when the code of the node itself changes """
         print(f"Serpens Log: {self.label if self.label else self.name} received an update")
         if self.is_trigger:
-            self.compile()
-            self.trigger_ref_update()
+            compile_addon()
         else:
             # update the code of all program inputs to reflect the nodes code
             for inp in self.inputs:
@@ -298,26 +146,18 @@ class SN_ScriptingBaseNode:
         print(f"Serpens Log: {self.label if self.label else self.name} received an update")
         roots = self.root_nodes
         for root in roots:
-            root.compile()
+            root._evaluate(bpy.context)
 
 
     def indent(self, code, indents, start_line_index=1):
         """ Indents the given code by the given amount of indents. Use this when inserting multiline blocks into code """
-        # join code blocks if given
-        if type(code) == list:
-            code = "\n".join(code)
-
-        # split code and indent properly
-        lines = code.split("\n")
-        for i in range(start_line_index, len(lines)):
-            lines[i] = " "*(4*indents) + lines[i]
-        return "\n".join(lines)
+        return indent_code(code, indents, start_line_index)
 
 
     def _set_any_code(self, key, raw_code):
         """ Checks if the given code is different from the current code. If required it triggers a code update """
         normalized = normalize_code(raw_code)
-        normalized = self._format_paragraphs(normalized)
+        normalized = format_paragraphs(normalized)
         if self.get(key) == None or normalized != self[key]:
             self[key] = normalized
 
@@ -359,6 +199,23 @@ class SN_ScriptingBaseNode:
                                     description="The current compiled code for this nodes unregistrations",
                                     set=_set_code_unregister,
                                     get=_get_code_unregister)
+    
+    
+    def _evaluate_include_connected(self):
+        """ Includes connected nodes code in this node if this is a trigger node """
+        if self.is_trigger:
+            linked = self._get_linked_nodes(started_at_trigger=True)
+            linked = sorted(linked, key=lambda node: node.order)
+            for node in linked:
+                if not node == self:
+                    if node.code_import:
+                        self.code_import += "\n" + node.code_import
+                    if node.code_imperative:
+                        self.code_imperative += "\n" + node.code_imperative
+                    if node.code_register:
+                        self.code_register += "\n" + node.code_register
+                    if node.code_unregister:
+                        self.code_unregister += "\n" + node.code_unregister
 
 
     def _evaluate(self, context):
@@ -385,6 +242,10 @@ class SN_ScriptingBaseNode:
             self.evaluate_export(bpy.context)
         else:
             self.evaluate(bpy.context)
+            
+        # include connected nodes code for trigger nodes
+        if self.is_trigger:
+            self._evaluate_include_connected()
 
         # trigger compiler if code changed
         other_code_changed = not (prev_code_import == self.code_import and prev_code_imperative == self.code_imperative \
@@ -392,10 +253,10 @@ class SN_ScriptingBaseNode:
         node_code_changed = prev_code != self.code
 
         # trigger compiler updates
-        if node_code_changed:
-            self._node_code_changed()
         if other_code_changed and not self.is_trigger:
             self._trigger_root_nodes()
+        if node_code_changed:
+            self._node_code_changed()
 
 
     def evaluate(self, context):
@@ -495,11 +356,10 @@ class SN_ScriptingBaseNode:
     def free(self):
         # remove node reference from node tree references
         self._remove_node_collection_item()
-        # unregister the nodes content
-        if self.is_trigger:
-            self.node_unregister()
         # free node
         self.on_free()
+        # recompile without node
+        compile_addon()
 
 
     ### NODE UPDATE

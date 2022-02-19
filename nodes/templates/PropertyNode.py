@@ -1,6 +1,6 @@
 import bpy
 from ...addon.properties.properties import FullBasicProperty
-from ...addon.properties.property_ops import get_sorted_props
+from ...addon.properties.property_utils import get_sorted_props
 
 
 
@@ -24,10 +24,7 @@ class SN_NodeProperty(FullBasicProperty, bpy.types.PropertyGroup):
     def register_code(self):
         # register group properties
         if self.property_type == "Group":
-            code = f"bpy.utils.register_class(SNA_GROUP_{self.python_name})"
-            if not bpy.context.scene.sn.is_exporting:
-                code += f"\nbpy.context.scene.sn.unregister_cache['{self.as_pointer()}'] = SNA_GROUP_{self.python_name}"
-            return code
+            return f"bpy.utils.register_class(SNA_GROUP_{self.python_name})"
         return ""
     
     
@@ -47,12 +44,7 @@ class SN_NodeProperty(FullBasicProperty, bpy.types.PropertyGroup):
     def unregister_code(self):
         # unregister group properties
         if self.property_type == "Group":
-            if bpy.context.scene.sn.is_exporting:
-                return f"bpy.utils.unregister_class(SNA_GROUP_{self.python_name})"
-            else:
-                code = f"bpy.utils.unregister_class(bpy.context.scene.sn.unregister_cache['{self.as_pointer()}'])\n"
-                code += f"del bpy.context.scene.sn.unregister_cache['{self.as_pointer()}']"
-                return code
+            return f"bpy.utils.unregister_class(SNA_GROUP_{self.python_name})"
         return ""
     
     

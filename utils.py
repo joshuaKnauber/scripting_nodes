@@ -42,16 +42,6 @@ def unique_collection_name(name, default, name_list, separator=""):
 
 
 
-def print_debug_code(code):
-    """ Prints the given code with line numbers """
-    if bpy.context.scene.sn.debug_code:
-        print("\n--- CODE START")
-        for i, line in enumerate(code.split("\n")):
-            print(f"{i+1}: {line}")
-        print("--- CODE END\n")
-
-
-
 def get_indents(line):
     """ Returns the amount of spaces at the start of the given line """
     return len(line) - len(line.lstrip())
@@ -74,6 +64,43 @@ def normalize_code(raw_code):
         if new_line:
             indented.append(new_line)
     return "\n".join(indented)
+
+
+def indent_code(code, indents, start_line_index=1):
+    """ Indents the given code by the given amount of indents. Use this when inserting multiline blocks into code """
+    # join code blocks if given
+    if type(code) == list:
+        code = "\n".join(code)
+
+    # split code and indent properly
+    lines = code.split("\n")
+    for i in range(start_line_index, len(lines)):
+        lines[i] = " "*(4*indents) + lines[i]
+    return "\n".join(lines)
+
+
+def format_paragraphs(code):
+    """ Adjusts the spacing in the code paragraphs """
+    # remove blank lines
+    code = code.split("\n")
+    code = list(filter(lambda line: not line.strip() == "", code))
+    # add blank lines
+    spaced = []
+    prev_indents = 0
+    for i, line in enumerate(code):
+        curr_indents = len(line) - len(line.lstrip())
+        # add line if less indents
+        if curr_indents < prev_indents:
+            spaced.append("")
+        # add line if decorator
+        elif line.lstrip()[0] == "@":
+            spaced.append("")
+        # add line before comment
+        elif line.lstrip()[0] == "#":
+            spaced.append("")
+        spaced.append(line)
+        prev_indents = curr_indents
+    return "\n".join(spaced)
 
 
 

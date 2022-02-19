@@ -1,7 +1,6 @@
 import bpy
-from ...utils import print_debug_code
+from ...nodes.compiler import compile_addon
 from .property_basic import BasicProperty
-from .property_ops import get_sorted_props
 from .settings.settings import id_items, id_data, property_icons
 from .settings.group import SN_PT_GroupProperty
 
@@ -52,11 +51,7 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
             layout.prop(self, "attach_to")
             layout.prop(self, "description")
             layout.prop(self, "prop_options")
-        
-    
-    # stores the unregister code for the addon properties with the property as a pointer
-    unregister_cache = {}
-    
+            
     
     @property
     def data_path(self):
@@ -71,11 +66,6 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
         # register group properties
         else:
             code = f"bpy.utils.register_class(SNA_GROUP_{self.python_name})"
-            if not bpy.context.scene.sn.is_exporting:
-                code += f"\nbpy.context.scene.sn.unregister_cache['{self.as_pointer()}'] = SNA_GROUP_{self.python_name}"
-        # add register code from prop settings
-        if hasattr(self.settings, "register_code"):
-            return self.settings.register_code(code)
         return code
     
     @property
@@ -85,59 +75,19 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
             return f"del bpy.types.{self.attach_to}.{self.python_name}"
         # unregister group properties
         else:
-            if bpy.context.scene.sn.is_exporting:
-                return f"bpy.utils.unregister_class(SNA_GROUP_{self.python_name})"
-            else:
-                code = f"bpy.utils.unregister_class(bpy.context.scene.sn.unregister_cache['{self.as_pointer()}'])\n"
-                code += f"del bpy.context.scene.sn.unregister_cache['{self.as_pointer()}']"
-                return code
-    
+            return f"bpy.utils.unregister_class(SNA_GROUP_{self.python_name})"
 
-    def unregister_all(self):
-        """ Unregisters all scene properties """
-        if "properties" in bpy.context.scene.sn.unregister_cache:
-            try: bpy.context.scene.sn.unregister_cache["properties"]()
-            except Exception as err:
-                print("Serpens Log: Failed to unregister properties. Restart blender to clean the file!")
-                print(err)
-            del bpy.context.scene.sn.unregister_cache["properties"]
-        
-
-    def register_all(self):
-        """ Registers all scene properties """
-        props = get_sorted_props(bpy.context.scene.sn.properties.values())
-
-        # get register code
-        reg_code = "def register():\n"
-        for prop in props:
-            for line in prop.register_code.split("\n"):
-                reg_code += " "*4 + line + "\n"
-        
-        # get unregister code
-        unreg_code = "\ndef unregister():\n"
-        props.reverse()
-        for prop in props:
-            for line in prop.unregister_code.split("\n"):
-                unreg_code += " "*4 + line + "\n"
-        
-        store_unregister = f"bpy.context.scene.sn.unregister_cache['properties'] = unregister\n"
-        assembled = "import bpy\n\n" + reg_code + unreg_code + "\nregister()\n" + store_unregister
-
-        # register
-        print_debug_code(assembled)
-        try: exec(assembled)
-        except Exception as err:
-            print("Serpens Log: Failed to register properties. Restart blender to clean the file!")
-            print(err)
+    @property
+    def imperative_code(self):
+        if hasattr(self.settings, "imperative_code"):
+            return self.settings.imperative_code()
+        return ""
     
     
     def compile(self, context=None):
         """ Registers the property and unregisters previous version """
-        # unregister previous
-        self.unregister_all()
-        # register
-        self.register_all()
         print(f"Serpens Log: Property {self.name} received an update")
+        compile_addon()
         
 
     def get_attach_to_items(self, context):

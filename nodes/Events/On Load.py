@@ -21,34 +21,21 @@ class SN_OnLoadNode(bpy.types.Node, SN_ScriptingBaseNode):
         row.scale_y = 1.2
         op = row.operator("sn.run_event",text="Run Event",icon="PLAY")
         op.uid = self.static_uid
+        op.handler = self.action
         layout.prop(self, "action", expand=True)
 
+
+    @property
+    def handler_name(self):
+        return f"{self.action}_handler_{self.static_uid}"
 
     def evaluate(self, context):
         self.code_import = f"from bpy.app.handlers import persistent"
         self.code = f"""
                         @persistent
-                        def {self.action}_handler_{self.static_uid}(dummy):
+                        def {self.handler_name}(dummy):
                             {self.indent(self.outputs[0].python_value, 6) if self.outputs[0].python_value else 'pass'}
                         """
 
-        self.code_register = f"""
-                    bpy.app.handlers.{self.action}.append({self.action}_handler_{self.static_uid})
-                    bpy.context.scene.sn.node_function_cache['{self.static_uid}'] = {self.action}_handler_{self.static_uid}
-                    """
-        self.code_unregister = f"""
-                    bpy.app.handlers.{self.action}.remove({self.action}_handler_{self.static_uid})
-                    if '{self.static_uid}' in bpy.context.scene.sn.node_function_cache:
-                        del bpy.context.scene.sn.node_function_cache['{self.static_uid}']
-                    """
-
-    def evaluate_export(self, context):
-        self.code_import = f"from bpy.app.handlers import persistent"
-        self.code = f"""
-                        @persistent
-                        def {self.action}_handler_{self.static_uid}(dummy):
-                            {self.indent(self.outputs[0].python_value, 6) if self.outputs[0].python_value else 'pass'}
-                        """
-
-        self.code_register = f"bpy.app.handlers.{self.action}.append({self.action}_handler_{self.static_uid})"
-        self.code_unregister = f"bpy.app.handlers.{self.action}.remove({self.action}_handler_{self.static_uid})"
+        self.code_register = f"bpy.app.handlers.{self.action}.append({self.handler_name})"
+        self.code_unregister = f"bpy.app.handlers.{self.action}.remove({self.handler_name})"

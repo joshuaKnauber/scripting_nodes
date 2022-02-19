@@ -119,23 +119,19 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
         return options
     
     
-    def register_code(self, code):
-        # TODO this is different on export (find node and just return func name (return this props item_func_name from node))
-        
-        # enum in property group
+    def imperative_code(self):
+        # node exists for this property
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                for ref in ntree.node_collection("SN_GenerateEnumItemsNode").refs:
+                    node = ref.node
+                    enum_src = node.get_prop_source()
+                    if enum_src and node.prop_name in enum_src.properties and enum_src.properties[node.prop_name] == self.prop:
+                        return ""
+
         code = f"""
-            # this code doesn't reflect how you would usually write this
             def {self.item_func_name}(self, context):
-                for ntree in bpy.data.node_groups:
-                    if ntree.bl_idname == "ScriptingNodesTree":
-                        for ref in ntree.node_collection("SN_GenerateEnumItemsNode").refs:
-                            node = ref.node
-                            enum_src = node.get_prop_source()
-                            if enum_src and '{self.prop.name}' in enum_src.properties and enum_src.properties['{self.prop.name}'].property_type == "Enum":
-                                if node.static_uid in bpy.context.scene.sn.node_function_cache:
-                                    return bpy.context.scene.sn.node_function_cache[node.static_uid](self, context)
                 return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
-            {code}
             """
         return normalize_code(code)
     

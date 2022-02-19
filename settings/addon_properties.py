@@ -5,16 +5,15 @@ from uuid import uuid4
 
 from .data_properties import is_valid_attribute, filter_items, filter_defaults, find_path_in_json, get_item_type
 from ..addon.properties.properties import SN_GeneralProperties
-from ..addon.properties.settings.settings import property_icons
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
             
 
 
 class SN_AddonProperties(bpy.types.PropertyGroup):
-
-    # stores the unregister functions for nodes with their memory adress as the key to recall them when reregistering
-    unregister_cache = {}
+    
+    # stores the unregister function for the addon when its compiled
+    addon_unregister = []
 
 
     # stores the preferences draw function while compiling the addon to draw in the serpens preferences
@@ -25,8 +24,8 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     preview_collections = {}
     
     
-    # stores functions that are needed to be stored while developing an addon
-    node_function_cache = {}
+    compile_time: bpy.props.FloatProperty(name="Compile Time",
+                                        description="Time the addon took to compile")
 
 
     @property
@@ -76,8 +75,8 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="Debug internal socket code")
 
     debug_code: bpy.props.BoolProperty(default=False,
-                                        name="Log Code",
-                                        description="Prints the code that is being run when a node changes")
+                                        name="Keep Code",
+                                        description="Keeps a python file in the text editor when the code changes")
 
     debug_python_properties: bpy.props.BoolProperty(default=False,
                                         name="Debug Properties",

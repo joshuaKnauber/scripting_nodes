@@ -48,6 +48,12 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             
     def update_function_reference(self, context):
         parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
+        # remember connections
+        links = []
+        for inp in self.inputs[1:]:
+            links.append(None)
+            if inp.is_linked:
+                links[-1] = inp.from_socket()
         # remove current data inputs
         for i in range(len(self.inputs)-1, 0, -1):
             self.inputs.remove(self.inputs[i])
@@ -55,10 +61,21 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.ref_SN_FunctionNode in parent_tree.nodes:
             for out in parent_tree.nodes[self.ref_SN_FunctionNode].outputs[1:-1]:
                 self.add_input_from_socket(out)
+        # restore connections
+        if len(links) == len(self.inputs)-1:
+            for i, from_socket in enumerate(links):
+                if from_socket:
+                    self.node_tree.links.new(from_socket, self.inputs[i+1])
         self._evaluate(context)
     
     def update_function_return_reference(self, context):
         parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
+        # remember connections
+        links = []
+        for out in self.outputs[1:]:
+            links.append([])
+            if out.is_linked:
+                links[-1] = out.to_sockets()
         # remove current data outputs
         for i in range(len(self.outputs)-1, 0, -1):
             self.outputs.remove(self.outputs[i])
@@ -66,8 +83,13 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.ref_SN_FunctionReturnNode in parent_tree.nodes:
             for out in parent_tree.nodes[self.ref_SN_FunctionReturnNode].inputs[1:-1]:
                 self.add_output_from_socket(out)
+        # restore connections
+        if len(links) == len(self.outputs)-1:
+            for i, to_sockets in enumerate(links):
+                for to_socket in to_sockets:
+                    self.node_tree.links.new(self.outputs[i+1], to_socket)
         self._evaluate(context)
-        
+    
     ref_SN_FunctionNode: bpy.props.StringProperty(name="Function",
                                             description="The function to run",
                                             update=update_function_reference)
@@ -111,7 +133,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     return_names = ", ".join(return_values)
 
                     # set values with execute
-                    self.code = f"{return_names} = sna_globals.{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})"
+                    self.code = f"{return_names} = {parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})"
                     for i, out in enumerate(self.outputs[1:]):
                         out.python_value = return_values[i]
                 else:
@@ -120,7 +142,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 # set values without execute
                 for i, out in enumerate(self.outputs[1:]):
-                    out.python_value = f"sna_globals.{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})[{i}]"
+                    out.python_value = f"{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})[{i}]"
         else:
             for out in self.outputs[1:]:
                 out.reset_value()

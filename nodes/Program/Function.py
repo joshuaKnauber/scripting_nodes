@@ -37,7 +37,6 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, context):
-        # TODO export
         out_values = []
         for i, out in enumerate(self.outputs[1:-1]):
             out_values.append(get_python_name(out.name, f"parameter_{i}"))
@@ -46,9 +45,6 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.code = f"""
                     def {self.func_name}({out_names}):
                         {self.indent(self.outputs[0].python_value, 6) if self.outputs[0].python_value else 'pass'}
-                    """
-        self.code_register = f"""
-                    sna_globals.{self.func_name} = {self.func_name}
                     """
 
         for i, out in enumerate(self.outputs[1:-1]):

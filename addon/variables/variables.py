@@ -1,7 +1,7 @@
 import bpy
 from ...utils import get_python_name, unique_collection_name
 from ..properties.settings.settings import property_icons
-from .. import sna_globals
+from ...nodes.compiler import compile_addon
 
 
 
@@ -27,7 +27,7 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
 
     @property
     def data_path(self):
-        return f"sna_globals.{self.python_name}"
+        return f"{self.node_tree.python_name}['{self.python_name}']"
     
     
     @property
@@ -37,8 +37,8 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
     
     def compile(self, context=None):
         """ Registers the variable and unregisters previous version """
-        setattr(sna_globals, self.python_name, self.var_default)
         print(f"Serpens Log: Variable {self.name} received an update")
+        compile_addon()
     
     
     def get_name(self):

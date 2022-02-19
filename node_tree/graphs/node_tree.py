@@ -2,39 +2,7 @@ import bpy
 from ..sockets.conversions import CONVERSIONS
 from .node_refs import NodeRefCollection
 from ...addon.variables.variables import SN_VariableProperties
-
-
-
-def compile_all(hard=False):
-    """ Compile all node trees in this file """
-    # compile properties
-    if len(bpy.context.scene.sn.properties):
-        bpy.context.scene.sn.properties[0].register_all()
-    # compile variables
-    for group in bpy.data.node_groups:
-        if group.bl_idname == "ScriptingNodesTree":
-            for var in group.variables:
-                var.compile()
-    # compile node trees
-    for group in bpy.data.node_groups:
-        if group.bl_idname == "ScriptingNodesTree":
-            group.compile(hard)
-
-
-
-def unregister_all():
-    """ Unregister all node trees in this file """
-    # TODO remove variables
-    if len(bpy.context.scene.sn.properties):
-        bpy.context.scene.sn.properties[0].unregister_all()
-    for group in bpy.data.node_groups:
-        if group.bl_idname == "ScriptingNodesTree":
-            group.graph_unregister()
-    for key in bpy.context.scene.sn.unregister_cache:
-        try:
-            bpy.context.scene.sn.unregister_cache[key]()
-        except Exception as error:
-            print(error)
+from ...utils import unique_collection_name, get_python_name
 
 
 
@@ -59,6 +27,19 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     node_refs: bpy.props.CollectionProperty(type=NodeRefCollection,
                                         name="Node References",
                                         description="A collection of groups that hold references to nodes of a specific idname")
+
+
+    @property
+    def python_name(self):
+        names = []
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                if ntree == self:
+                    break
+            names.append(ntree.python_name)
+        
+        name = unique_collection_name(f"{get_python_name(self.name, 'node_tree')}", "node_tree", names, "_")
+        return name
 
     
     def node_collection(self, idname):
@@ -195,32 +176,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
 
     def update(self):
-        # add empty collection for node drawing
-        if not "empty" in self.node_refs:
-            self.node_refs.add().name = "empty"
         # update tree links
         self._update_tree_links()
 
 
-    def compile(self, hard=False):
-        """ Compile all nodes in this node tree. If hard is true every node is also reevaluated. Use this if duplicates in other graphs could exist """
+    def reevaluate(self):
+        """ Reevaluates all nodes in this node tree """
         # evaluate all nodes
-        if hard:
-            for node in self.nodes:
-                if hasattr(node, "is_trigger"):
-                    node._evaluate(bpy.context)
-        # get trigger nodes
-        compile_nodes = []
         for node in self.nodes:
-            if getattr(node, "is_trigger", False):
-                compile_nodes.append(node)
-        # compile sorted nodes
-        for node in sorted(compile_nodes, key=lambda node: node.order):
-            node.compile()
-
-
-    def graph_unregister(self):
-        """ Unregister all nodes in this node tree """
-        for node in self.nodes:
-            if getattr(node, "is_trigger", False):
-                node.node_unregister()
+            node._evaluate(bpy.context)
