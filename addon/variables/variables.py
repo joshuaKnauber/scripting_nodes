@@ -103,7 +103,7 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
     def var_default(self):
         return {
             "Data": None,
-            "String": self.string_default,
+            "String": f"'{self.string_default}'",
             "Boolean": self.boolean_default,
             "Float": self.float_default,
             "Integer": self.integer_default,
