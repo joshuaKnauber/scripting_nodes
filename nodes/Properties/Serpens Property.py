@@ -4,15 +4,15 @@ from ..templates.PropertyReferenceNode import PropertyReferenceNode
 
 
 
-class SN_CustomPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferenceNode):
+class SN_SerpensPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferenceNode):
 
-    bl_idname = "SN_CustomPropertyNode"
-    bl_label = "Custom Property"
+    bl_idname = "SN_SerpensPropertyNode"
+    bl_label = "Serpens Property"
     bl_width_default = 200
     node_color = "PROPERTY"
-    
+
     add_indexing_inputs = True
-        
+
 
     def on_create(self, context):
         self.add_property_output("Property")
