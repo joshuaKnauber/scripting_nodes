@@ -15,11 +15,20 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         if socket in self.inputs[2:-1]:
             socket["name"] = get_python_name(socket.name, "variable")
             socket["name"] = unique_collection_name(socket.name, "variable", [inp.name for inp in self.inputs[2:-1]], "_", includes_name=True)
+        elif socket in self.outputs[1:-1]:
+            socket["name"] = get_python_name(socket.name, "variable")
+            socket["name"] = unique_collection_name(socket.name, "variable", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+
         self._evaluate(bpy.context)
 
     def on_dynamic_socket_add(self, socket):
-        self.inputs[-2]["name"] = get_python_name(self.inputs[-2].name, "variable")
-        self.inputs[-2]["name"] = unique_collection_name(self.inputs[-2].name, "variable", [inp.name for inp in self.inputs[2:-1]], "_", includes_name=True)
+        if socket in self.inputs[2:-1]:
+            socket["name"] = get_python_name(socket.name, "variable")
+            socket["name"] = unique_collection_name(socket.name, "variable", [inp.name for inp in self.inputs[2:-1]], "_", includes_name=True)
+        elif socket in self.outputs[1:-1]:
+            socket["name"] = get_python_name(socket.name, "variable")
+            socket["name"] = unique_collection_name(socket.name, "variable", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+
 
     def on_create(self, context):
         self.add_execute_input()
@@ -28,6 +37,9 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp.subtype = "FILE_PATH"
         inp.set_hide(True)
         self.add_dynamic_data_input("Variable").is_variable = True
+        out = self.add_dynamic_data_output("Variable")
+        out.is_variable = True
+        out.changeable = True
 
     def update_source(self, context):
         self.inputs["Script Path"].set_hide(self.source == "BLENDER")
@@ -47,6 +59,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
             if self.script:
                 self.code = f"""
                             {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
+                            {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 7)}
                             try:
                                 exec("\\n".join([line.body for line in bpy.data.texts["{self.script.name}"].lines]))
                             except:
@@ -57,6 +70,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.code_import = "import os"
             self.code = f"""
                         {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
+                        {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 7)}
                         if os.path.exists({self.inputs['Script Path'].python_value}):
                             with open({self.inputs['Script Path'].python_value}, "r") as script_file:
                                 exec(script_file.read())
