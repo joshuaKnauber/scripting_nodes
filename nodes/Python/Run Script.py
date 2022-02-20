@@ -45,6 +45,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.source == "BLENDER":
             if self.script:
                 self.code = f"""
+                            {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
                             try:
                                 exec("\\n".join([line.body for line in bpy.data.texts["{self.script.name}"].lines]))
                             except:
@@ -54,6 +55,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         elif self.source == "EXTERNAL":
             self.code_import = "import os"
             self.code = f"""
+                        {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
                         if os.path.exists({self.inputs['Script Path'].python_value}):
                             with open({self.inputs['Script Path'].python_value}, "r") as script_file:
                                 exec(script_file.read())
