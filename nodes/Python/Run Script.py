@@ -15,6 +15,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         if socket in self.inputs[2:-1]:
             socket["name"] = get_python_name(socket.name, "variable")
             socket["name"] = unique_collection_name(socket.name, "variable", [inp.name for inp in self.inputs[2:-1]], "_")
+        self._evaluate(bpy.context)
 
     def on_dynamic_socket_add(self, socket):
         self.inputs[-2]["name"] = get_python_name(self.inputs[-2].name, "variable")
