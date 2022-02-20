@@ -108,13 +108,23 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     def _insert_define_data_nodes(self, links):
         """ Inserts define data nodes for all links invalid links """
         for link in links:
-            node = self.nodes.new("SN_DefineDataType")
-            if link.to_socket.bl_idname in list(map(lambda item: item[0], node.get_data_items(bpy.context))):
-                node.convert_to = link.to_socket.bl_idname
-            node.location = ((link.from_node.location[0] + link.to_node.location[0]) / 2,
-                             (link.from_node.location[1] + link.to_node.location[1]) / 2)
-            self.links.new(link.from_socket, node.inputs[0])
-            self.links.new(node.outputs[0], link.to_socket)
+            # add define data node
+            if not getattr(link.from_socket, "changeable", False):
+                node = self.nodes.new("SN_DefineDataType")
+                if link.to_socket.bl_idname in list(map(lambda item: item[0], node.get_data_items(bpy.context))):
+                    node.convert_to = link.to_socket.bl_idname
+                node.location = ((link.from_node.location[0] + link.to_node.location[0]) / 2,
+                                (link.from_node.location[1] + link.to_node.location[1]) / 2)
+                self.links.new(link.from_socket, node.inputs[0])
+                self.links.new(node.outputs[0], link.to_socket)
+            # change data output
+            elif link.from_socket.bl_label == "Data":
+                to_sockets = link.from_socket.to_sockets(False)
+                if len(to_sockets) == 1:
+                    to_socket = to_sockets[0]
+                    if to_socket.bl_idname in list(map(lambda item: item[0], link.from_socket.get_data_type_items(bpy.context))):
+                        link.from_socket.data_type = to_socket.bl_idname
+                
 
 
     def _update_post(self):

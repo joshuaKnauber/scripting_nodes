@@ -41,6 +41,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     "Boolean Vector": {
         "Data": lambda from_out, to_inp: from_out.python_value,
         "String": lambda from_out, to_inp: f"str(tuple({from_out.python_value}))",
+        "List": lambda from_out, to_inp: f"list({from_out.python_value})",
     },
     "Icon": {
         "Data": lambda from_out, to_inp: from_out.python_value,
@@ -70,6 +71,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     "Integer Vector": {
         "Data": lambda from_out, to_inp: from_out.python_value,
         "String": lambda from_out, to_inp: f"str(tuple({from_out.python_value}))",
+        "List": lambda from_out, to_inp: f"list({from_out.python_value})",
     },
     "Float": {
         "Data": lambda from_out, to_inp: from_out.python_value,
@@ -80,23 +82,28 @@ CONVERSIONS = { # convert KEY to OPTIONS
     "Float Vector": {
         "Data": lambda from_out, to_inp: from_out.python_value,
         "String": lambda from_out, to_inp: f"str(tuple({from_out.python_value}))",
+        "List": lambda from_out, to_inp: f"list({from_out.python_value})",
     },
     "List": {
         "Data": lambda from_out, to_inp: from_out.python_value,
+        "Boolean": lambda from_out, to_inp: from_out.python_value,
         "String": lambda from_out, to_inp: f"str({from_out.python_value})",
         "Enum": lambda from_out, to_inp: f"set({from_out.python_value})",
-        "Float Vector": lambda from_out, to_inp: f"list({from_out.python_value})",
-        "Integer Vector": lambda from_out, to_inp: f"list({from_out.python_value})",
-        "Boolean Vector": lambda from_out, to_inp: f"list({from_out.python_value})",
+        "Float Vector": lambda from_out, to_inp: f"tuple({from_out.python_value})",
+        "Integer Vector": lambda from_out, to_inp: f"tuple({from_out.python_value})",
+        "Boolean Vector": lambda from_out, to_inp: f"tuple({from_out.python_value})",
+        "Property": lambda from_out, to_inp: f"{from_out.python_value}[0]",
     },
     "Property": {
         "Data": lambda from_out, to_inp: from_out.python_value,
+        "Boolean": lambda from_out, to_inp: from_out.python_value,
         "Collection Property": lambda from_out, to_inp: from_out.python_value,
         "String": lambda from_out, to_inp: f"str({from_out.python_value})",
     },
     "Collection Property": {
         "Data": lambda from_out, to_inp: from_out.python_value,
-        "Property": lambda from_out, to_inp: from_out.python_value,
+        "Boolean": lambda from_out, to_inp: from_out.python_value,
+        "Property": lambda from_out, to_inp: f"{from_out.python_value}[0]",
         "String": lambda from_out, to_inp: f"str({from_out.python_value}.keys())",
         "List": lambda from_out, to_inp: f"{from_out.python_value}.values()",
     },
