@@ -14,12 +14,12 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_socket_name_change(self, socket):
         if socket in self.inputs[2:-1]:
             socket["name"] = get_python_name(socket.name, "variable")
-            socket["name"] = unique_collection_name(socket.name, "variable", [inp.name for inp in self.inputs[2:-1]], "_")
+            socket["name"] = unique_collection_name(socket.name, "variable", [inp.name for inp in self.inputs[2:-1]], "_", includes_name=True)
         self._evaluate(bpy.context)
 
     def on_dynamic_socket_add(self, socket):
         self.inputs[-2]["name"] = get_python_name(self.inputs[-2].name, "variable")
-        self.inputs[-2]["name"] = unique_collection_name(self.inputs[-2].name, "variable", [inp.name for inp in self.inputs[2:-1]], "_")
+        self.inputs[-2]["name"] = unique_collection_name(self.inputs[-2].name, "variable", [inp.name for inp in self.inputs[2:-1]], "_", includes_name=True)
 
     def on_create(self, context):
         self.add_execute_input()

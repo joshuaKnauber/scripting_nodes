@@ -21,19 +21,18 @@ def get_python_name(name, replacement="", separator="_"):
 
 
 
-def unique_collection_name(name, default, name_list, separator=""):
+def unique_collection_name(name, default, name_list, separator="", includes_name=False):
     """ Returns a unique name based for the given list of names """
     if not name:
         name = default
+
+    if name in name_list and includes_name:
+        name_list.remove(name)
         
     if name in name_list:
         number = 1
-        if len(name) > 3 and name[:-3].isdigit():
-            if separator and name[-4] == separator:
-                number = int(name.split(separator)[-1])
-            else:
-                number = int(name[-3:])
-
+        if len(name) > 3 and name[-3:].isdigit() and name[-4] == separator:
+            name = name[:-4]
         while f"{name}{separator}{str(number).zfill(3)}" in name_list:
             number += 1
         
