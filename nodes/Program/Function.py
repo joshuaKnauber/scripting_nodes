@@ -7,7 +7,7 @@ from ...utils import get_python_name
 class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_FunctionNode"
-    bl_label = "Function Execute"
+    bl_label = "Function (Execute)"
     is_trigger = True
     bl_width_default = 200
 

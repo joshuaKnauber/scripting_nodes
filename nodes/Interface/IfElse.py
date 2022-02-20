@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_IfElseInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_IfElseInterfaceNode"
-    bl_label = "If/Else Interface"
+    bl_label = "If/Else (Interface)"
     bl_width_default = 200
     node_color = "INTERFACE"
     layout_type = "layout"

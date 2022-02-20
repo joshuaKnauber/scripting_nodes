@@ -9,11 +9,14 @@ class SN_SetAttributeNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Set Attribute"
     bl_width_default = 200
 
-    # TODO
     def on_create(self, context):
-        self.add_property_input()
-        self.add_string_input("Property")
-        self.add_data_output("Data").changeable = True
+        self.add_execute_input()
+        self.add_data_input()
+        self.add_string_input("Attribute")
+        self.add_execute_output()
         
     def evaluate(self, context):
-        self.outputs[0].python_value = f"getattr({self.inputs[0].python_value}, {self.inputs['Property'].python_value}, None)"
+        self.code = f"""
+                    setattr({self.inputs[1].python_value}, {self.inputs['Attribute'].python_value})
+                    {self.indent(self.outputs[0].python_value, 5)}
+                    """

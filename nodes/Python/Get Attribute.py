@@ -10,9 +10,10 @@ class SN_GetAttributeNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 200
 
     def on_create(self, context):
-        self.add_property_input()
+        self.add_data_input()
         self.add_string_input("Attribute")
+        self.add_data_input("Fallback")
         self.add_data_output("Data").changeable = True
         
     def evaluate(self, context):
-        self.outputs[0].python_value = f"getattr({self.inputs[0].python_value}, {self.inputs['Attribute'].python_value}, None)"
+        self.outputs[0].python_value = f"getattr({self.inputs[0].python_value}, {self.inputs['Attribute'].python_value}, {self.inputs['Fallback'].python_value})"

@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_RepeatInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RepeatInterfaceNode"
-    bl_label = "Repeat Interface"
+    bl_label = "Loop Repeat (Interface)"
     bl_width_default = 200
     node_color = "INTERFACE"
     layout_type = "layout"

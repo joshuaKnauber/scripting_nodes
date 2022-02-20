@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_ForInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_ForInterfaceNode"
-    bl_label = "For Interface"
+    bl_label = "Loop For (Interface)"
     bl_width_default = 200
     node_color = "INTERFACE"
     layout_type = "layout"
