@@ -103,15 +103,31 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                 link.to_node.inputs[0].display_shape = link.from_socket.display_shape
                 link.to_node.outputs[0].display_shape = link.from_socket.display_shape
                 self._update_reroute_type(link.to_node.outputs[0])
+                
+                
+    def _insert_define_data_nodes(self, links):
+        """ Inserts define data nodes for all links invalid links """
+        for link in links:
+            node = self.nodes.new("SN_DefineDataType")
+            if link.to_socket.bl_idname in list(map(lambda item: item[0], node.get_data_items(bpy.context))):
+                node.convert_to = link.to_socket.bl_idname
+            node.location = ((link.from_node.location[0] + link.to_node.location[0]) / 2,
+                             (link.from_node.location[1] + link.to_node.location[1]) / 2)
+            self.links.new(link.from_socket, node.inputs[0])
+            self.links.new(node.outputs[0], link.to_socket)
 
 
     def _update_post(self):
         """ Only do visual aspects in here as this is run after evaluating the nodes """
         # TODO check time of this function to see if it impacts performance (when more complex node setups are possible)
         # mark links as invalid
+        data_links = []
         for link in self.links:
             if not self.is_valid_link(link):
                 link.is_valid = False
+                if link.from_socket.bl_label == "Data":
+                    data_links.append(link)
+        self._insert_define_data_nodes(data_links)
 
 
     def _update_changed_links(self, links):
@@ -128,7 +144,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def _call_link_inserts(self, added):
         """ Calls link_insert for all new links """
-        for from_output, to_inp, from_real, _ in added:
+        for _, to_inp, from_real, _ in added:
             if from_real:
                 from_real.node.link_insert(from_real, to_inp, is_output=True)
                 to_inp.node.link_insert(from_real, to_inp, is_output=False)
