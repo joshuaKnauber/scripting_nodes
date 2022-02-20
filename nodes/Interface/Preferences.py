@@ -63,7 +63,7 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         self.evaluate(context)
 
     def draw_node(self, context, layout):
-        layout.operator("sn.open_preferences", icon="PREFERENCES")
+        layout.operator("sn.open_preferences", icon="PREFERENCES").navigation = "CUSTOM"
         amount = 0
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
