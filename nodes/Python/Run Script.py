@@ -1,5 +1,6 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
+from ...utils import unique_collection_name, get_python_name
 
 
 
@@ -10,12 +11,22 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "PROGRAM"
     bl_width_default = 200
 
+    def on_socket_name_change(self, socket):
+        if socket in self.inputs[2:-1]:
+            socket["name"] = get_python_name(socket.name, "variable")
+            socket["name"] = unique_collection_name(socket.name, "variable", [inp.name for inp in self.inputs[2:-1]], "_")
+
+    def on_dynamic_socket_add(self, socket):
+        self.inputs[-2]["name"] = get_python_name(self.inputs[-2].name, "variable")
+        self.inputs[-2]["name"] = unique_collection_name(self.inputs[-2].name, "variable", [inp.name for inp in self.inputs[2:-1]], "_")
+
     def on_create(self, context):
         self.add_execute_input()
         self.add_execute_output()
         inp = self.add_string_input("Script Path")
         inp.subtype = "FILE_PATH"
         inp.set_hide(True)
+        self.add_dynamic_data_input("Variable").is_variable = True
 
     def update_source(self, context):
         self.inputs["Script Path"].set_hide(self.source == "BLENDER")
