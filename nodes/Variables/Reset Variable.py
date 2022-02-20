@@ -20,16 +20,10 @@ class SN_ResetVariableNode(bpy.types.Node, SN_ScriptingBaseNode, VariableReferen
     def evaluate(self, context):
         var = self.get_var()
         if var:
-            if var.variable_type == "String":
-                self.code = f"""
-                            {var.data_path} = '{var.var_default}'
-                            {self.indent(self.outputs[0].python_value, 7)}
-                            """
-            else:
-                self.code = f"""
-                            {var.data_path} = {var.var_default}
-                            {self.indent(self.outputs[0].python_value, 7)}
-                            """
+            self.code = f"""
+                        {var.data_path} = {var.var_default}
+                        {self.indent(self.outputs[0].python_value, 6)}
+                        """
                 
         else:
             self.code = f"""
