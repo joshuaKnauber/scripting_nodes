@@ -3,8 +3,8 @@ from ...packages import package_ops
 
 
 
-class SN_PT_PackagesPanel(bpy.types.Panel):
-    bl_idname = "SN_PT_PackagesPanel"
+class SN_PT_ExtensionsPanel(bpy.types.Panel):
+    bl_idname = "SN_PT_ExtensionsPanel"
     bl_label = ""
     bl_space_type = 'NODE_EDITOR'
     bl_region_type = 'UI'
@@ -18,8 +18,55 @@ class SN_PT_PackagesPanel(bpy.types.Panel):
     
     def draw_header(self, context):
         layout = self.layout
-        layout.label(text="Packages")
+        layout.label(text="Extensions")
         layout.operator("wm.url_open", text="", icon="QUESTION", emboss=False).url = "https://joshuaknauber.notion.site/Packages-Snippets-5fc9492b640146a2bcafb269d4a9e876"
+
+    def draw(self, context):
+        layout = self.layout
+            
+            
+            
+class SN_PT_SnippetsPanel(bpy.types.Panel):
+    bl_parent_id = "SN_PT_ExtensionsPanel"
+    bl_idname = "SN_PT_SnippetsPanel"
+    bl_label = ""
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_options = {"HEADER_LAYOUT_EXPAND"}
+    bl_order = 1
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+    
+    def draw_header(self, context):
+        layout = self.layout
+        layout.label(text="Snippets")
+
+    def draw(self, context):
+        layout = self.layout
+        sn = context.scene.sn
+            
+            
+            
+class SN_PT_PackagesPanel(bpy.types.Panel):
+    bl_parent_id = "SN_PT_ExtensionsPanel"
+    bl_idname = "SN_PT_PackagesPanel"
+    bl_label = ""
+    bl_space_type = 'NODE_EDITOR'
+    bl_region_type = 'UI'
+    bl_category = "Serpens"
+    bl_options = {"DEFAULT_CLOSED", "HEADER_LAYOUT_EXPAND"}
+    bl_order = 2
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
+    
+    def draw_header(self, context):
+        layout = self.layout
+        layout.label(text="Packages")
 
     def draw(self, context):
         layout = self.layout
@@ -27,15 +74,6 @@ class SN_PT_PackagesPanel(bpy.types.Panel):
         row.scale_y = 1.2
         row.operator("sn.open_preferences", text="Get Packages", icon="URL").navigation = "MARKET"
         layout.separator()
-
-        row = layout.row(align=True)
-        row.operator("sn.install_package", text="Install Package", icon="FILE_FOLDER")
-        row.operator("sn.reload_packages", text="", icon="FILE_REFRESH")
-
-        if package_ops.require_reload:
-            row = layout.row()
-            row.alert = True
-            row.label(text="Restart blender to see package!", icon="INFO")
 
         for i, package in enumerate(package_ops.loaded_packages):
             box = layout.box()
@@ -62,3 +100,12 @@ class SN_PT_PackagesPanel(bpy.types.Panel):
         if not package_ops.loaded_packages:
             box = layout.box()
             box.label(text="No packages installed!", icon="INFO")
+
+        row = layout.row(align=True)
+        row.operator("sn.install_package", text="Install Package", icon="FILE_FOLDER")
+        row.operator("sn.reload_packages", text="", icon="FILE_REFRESH")
+
+        if package_ops.require_reload:
+            row = layout.row()
+            row.alert = True
+            row.label(text="Restart blender to see package!", icon="INFO")
