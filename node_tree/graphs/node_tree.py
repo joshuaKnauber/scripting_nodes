@@ -210,4 +210,5 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         """ Reevaluates all nodes in this node tree """
         # evaluate all nodes
         for node in self.nodes:
-            node._evaluate(bpy.context)
+            if getattr(node, "is_sn", False):
+                node._evaluate(bpy.context)
