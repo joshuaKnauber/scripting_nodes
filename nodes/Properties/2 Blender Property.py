@@ -23,7 +23,7 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 segments.append(segment)
         # remove indexing from property name
-        segments[-1] = segments[-1].split("[")[0]
+        # segments[-1] = segments[-1].split("[")[0]
         return segments
     
     def _is_valid_data_path(self, path):
@@ -47,7 +47,6 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             for segment in data:
                 if self.segment_is_indexable(segment):
                     name = segment.split("[")[0].replace("_", " ").title()
-                    if name[-1] == "s": name = name[:-1]
                     if '"' in segment or "'" in segment:
                         inp = self.add_string_input(name)
                         inp["default_value"] = segment.split("[")[-1].split("]")[0][1:-1]

@@ -11,9 +11,10 @@ def string_to_icon(value):
     return string_to_int(value)
     
 def icon_to_string(value):
-    if value < len(bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items):
-        return bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items[value].name
-    return ""
+    for icon in bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items:
+        if icon.value == value:
+            return icon.name
+    return "NONE"
     
 def enum_set_to_string(value):
     if type(value) == set:
@@ -30,7 +31,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     "String": {
         "Data": lambda from_out, to_inp: from_out.python_value,
         "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",
-        "Icon": lambda from_out, to_inp: f"string_to_icon({from_out.python_value})",
+        "Icon": lambda from_out, to_inp: f"string_to_icon({from_out.python_value})" if to_inp.subtype == "NONE" else from_out.python_value,
         "Enum": lambda from_out, to_inp: from_out.python_value if to_inp.subtype == "NONE" else f"set([{from_out.python_value}])",
     },
     "Boolean": {
@@ -48,6 +49,13 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Integer": lambda from_out, to_inp: from_out.python_value,
         "String": lambda from_out, to_inp: f"icon_to_string({from_out.python_value})",
         "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",
+        
+        "NONE": {
+            "BLENDER_ONLY": lambda from_out, to_inp: f"icon_to_string({from_out.python_value})",
+        },
+        "BLENDER_ONLY": {
+            "NONE": lambda from_out, to_inp: f"string_to_icon({from_out.python_value})",
+        },
     },
     "Enum": {
         "Data": lambda from_out, to_inp: from_out.python_value,

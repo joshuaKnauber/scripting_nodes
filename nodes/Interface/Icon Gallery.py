@@ -18,6 +18,6 @@ class SN_IconGalleryNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         if self.inputs["Enum"].is_linked:
-            self.code = f"{self.active_layout}.template_icon_view({self.inputs['Enum'].python_value_source}, '{self.inputs['Enum'].python_value_name}', show_labels={self.inputs['Show Labels'].python_value}, scale={self.inputs['Scale'].python_value}, scale_popup={self.inputs['Scale Popup'].python_value})"
+            self.code = f"{self.active_layout}.template_icon_view({self.inputs['Enum'].python_source}, '{self.inputs['Enum'].python_attr}', show_labels={self.inputs['Show Labels'].python_value}, scale={self.inputs['Scale'].python_value}, scale_popup={self.inputs['Scale Popup'].python_value})"
         else:
             self.code = f"{self.active_layout}.label(text='No Property connected!', icon='ERROR')"
