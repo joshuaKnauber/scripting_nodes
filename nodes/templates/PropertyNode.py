@@ -66,7 +66,7 @@ class PropertyNode():
         code = ""
         props = get_sorted_props(self.properties.values())
         for prop in props:
-            code += prop.register_code_imperative
+            code += prop.register_code_imperative + "\n"
         return code
     
 
@@ -74,7 +74,7 @@ class PropertyNode():
         code = ""
         props = get_sorted_props(self.properties.values())
         for prop in props:
-            code += prop.register_code
+            code += prop.register_code + "\n"
         return code
     
 
@@ -83,7 +83,7 @@ class PropertyNode():
         props = get_sorted_props(self.properties.values())
         props.reverse()
         for prop in props:
-            code += prop.unregister_code
+            code += prop.unregister_code + "\n"
         return code
     
 
@@ -91,7 +91,7 @@ class PropertyNode():
         code = ""
         props = get_sorted_props(self.properties.values())
         for prop in props:
-            code += prop.register_code_props
+            code += prop.register_code_props + "\n"
         return code
     
 
