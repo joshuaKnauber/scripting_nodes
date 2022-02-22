@@ -16,7 +16,7 @@ class SN_PT_PointerProperty(PropertySettings, bpy.types.PropertyGroup):
     
     def draw(self, context, layout):
         """ Draws the settings for this property type """
-        src = self.prop.prop_collection_origin
+        src = context.scene.sn
         layout.prop(self, "use_prop_group")
         if not self.use_prop_group:
             layout.prop(self, "data_type")

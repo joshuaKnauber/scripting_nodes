@@ -1,10 +1,10 @@
 import bpy
-from ...addon.properties.properties import FullBasicProperty
+from ...addon.properties.property_basic import BasicProperty
 from ...addon.properties.property_utils import get_sorted_props
 
 
 
-class SN_NodeProperty(FullBasicProperty, bpy.types.PropertyGroup):
+class SN_NodeProperty(BasicProperty, bpy.types.PropertyGroup):
     
     @property
     def data_path(self):
@@ -15,8 +15,8 @@ class SN_NodeProperty(FullBasicProperty, bpy.types.PropertyGroup):
     @property
     def register_code_imperative(self):
         # create property groups
-        if self.property_type == "Group":
-            return self.settings.register_code("")
+        if self.property_type == "Group" and hasattr(self, "imperative_code"):
+            return self.settings.imperative_code()
         return ""
     
     
@@ -34,8 +34,8 @@ class SN_NodeProperty(FullBasicProperty, bpy.types.PropertyGroup):
         if not self.property_type == "Group":
             code = f"{self.python_name}: bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
             # add register code from prop settings
-            if hasattr(self.settings, "register_code"):
-                return self.settings.register_code(code)
+            if hasattr(self.settings, "imperative_code"):
+                return self.settings.imperative_code() + "\n" + code
             return code
         return ""
     

@@ -13,7 +13,7 @@ class SN_PT_CollectionProperty(PropertySettings, bpy.types.PropertyGroup):
     
     def draw(self, context, layout):
         """ Draws the settings for this property type """
-        src = self.prop.prop_collection_origin
+        src = context.scene.sn
         layout.prop_search(self, "prop_group", src, "properties")
         row = layout.row()
         row.alert = True

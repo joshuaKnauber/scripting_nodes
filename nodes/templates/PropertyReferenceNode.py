@@ -107,7 +107,7 @@ class PropertyReferenceNode():
         if draw_prop_source:
             layout.prop(self, "prop_source", expand=True)
 
-        if self.allow_prop_group:
+        if self.allow_prop_group and not self.prop_source == "NODE":
             layout.prop(self, "from_prop_group", text="From Property Group")
             
         prop_src = self.get_prop_source()
