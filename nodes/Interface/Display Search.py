@@ -15,9 +15,10 @@ class SN_DisplaySearchNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_collection_property_input("Collection")
         self.add_property_input("String/Pointer")
         self.add_string_input("Label")
+        self.add_icon_input("Blender Icon").subtype = "BLENDER_ONLY"
 
     def evaluate(self, context):
         if self.inputs["String/Pointer"].is_linked and self.inputs["Collection"].is_linked:
-            self.code = f"{self.active_layout}.prop_search({self.inputs['String/Pointer'].python_value_source}, '{self.inputs['String/Pointer'].python_value_name}', {self.inputs['Collection'].python_value_source}, '{self.inputs['Collection'].python_value_name}', text={self.inputs['Label'].python_value})"
+            self.code = f"{self.active_layout}.prop_search({self.inputs['String/Pointer'].python_source}, '{self.inputs['String/Pointer'].python_attr}', {self.inputs['Collection'].python_source}, '{self.inputs['Collection'].python_attr}', text={self.inputs['Label'].python_value}, icon={self.inputs['Blender Icon'].python_value})"
         else:
             self.code = f"{self.active_layout}.label(text='No Property connected!', icon='ERROR')"

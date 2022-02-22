@@ -25,4 +25,6 @@ def serpens_right_click(self, context):
             
     if button_value:
         layout.operator("sn.copy_operator", text="Get Serpens Operator", icon="FILE_SCRIPT")
-        
+    
+    if context:
+        layout.operator("sn.copy_context", text="Copy Context", icon="COPYDOWN")

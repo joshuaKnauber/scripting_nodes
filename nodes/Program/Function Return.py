@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_FunctionReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_FunctionReturnNode"
-    bl_label = "Function Return Execute"
+    bl_label = "Function Return (Execute)"
     bl_width_default = 200
 
     def on_create(self, context):

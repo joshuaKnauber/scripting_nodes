@@ -9,7 +9,13 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     navigation: bpy.props.EnumProperty(name="Navigation",
                                         description="Preferences Navigation",
                                         items=[("SETTINGS", "Settings", "Serpens settings", "PREFERENCES", 0),
-                                                ("CUSTOM", "Custom", "Preview your addons preferences", "FILE_SCRIPT", 1)])
+                                                ("MARKET", "Marketplace", "Get things from the marketplace", "OUTLINER_OB_GROUP_INSTANCE", 1),
+                                                ("CUSTOM", "Custom", "Preview your addons preferences", "FILE_SCRIPT", 2)])
+
+    market_navigation: bpy.props.EnumProperty(name="Navigation",
+                                        description="Marketplace Navigation",
+                                        items=[("PACKAGES", "Packages", "Get packages for Serpens"),
+                                                ("ADDONS", "Addons", "Get addons made with Serpens")])
 
     check_for_updates: bpy.props.BoolProperty(name="Check For Updates",
                                         description="Check for updates online when loading the addon",
@@ -28,6 +34,11 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         
         col = row.column(heading="Debugging")
         col.prop(self, "keep_last_error_file")
+        
+        
+    def draw_serpens_market(self, layout):
+        row = layout.row()
+        row.prop(self, "market_navigation", expand=True)
 
 
     def draw_custom_prefs(self, context, layout):
@@ -46,6 +57,8 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
         if self.navigation == "SETTINGS":
             self.draw_serpens_prefs(context, layout)
+        if self.navigation == "MARKET":
+            self.draw_serpens_market(layout)
         elif self.navigation == "CUSTOM":
             self.draw_custom_prefs(context, layout)
 

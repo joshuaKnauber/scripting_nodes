@@ -1,6 +1,5 @@
 import bpy
 from .base_socket import ScriptingSocket
-from .property_template import PropertySocket
 
 
 
@@ -21,7 +20,7 @@ blend_data_defaults = {
 
 
 
-class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket, PropertySocket):
+class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
 
     bl_idname = "SN_PropertySocket"
     group = "DATA"

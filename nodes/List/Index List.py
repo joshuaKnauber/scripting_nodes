@@ -12,7 +12,7 @@ class SN_IndexListNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_list_input()
         self.add_integer_input("Index")
-        self.add_data_output()
+        self.add_data_output().changeable = True
 
     def evaluate(self, context):
         self.outputs[0].python_value = f"{self.inputs[0].python_value}[{self.inputs[1].python_value}]"

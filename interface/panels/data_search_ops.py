@@ -119,3 +119,21 @@ class SN_OT_ReloadItemData(bpy.types.Operator):
                 item.reload_items()
                 break
         return {"FINISHED"}
+
+
+
+class SN_OT_CopyDataPath(bpy.types.Operator):
+    bl_idname = "sn.copy_data_path"
+    bl_label = "Copy Data Path"
+    bl_description = "Copy data path to paste in a node"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    type: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        context.window_manager.clipboard = self.path
+        context.scene.sn.last_copied_datapath = self.path
+        context.scene.sn.last_copied_datatype = self.type
+        self.report({"INFO"}, message="Copied!")
+        return {"FINISHED"}

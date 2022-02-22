@@ -1,6 +1,7 @@
 import bpy
 import time
 from ..utils import indent_code, format_paragraphs
+from ..node_tree.sockets.conversions import CONVERT_UTILS
 from ..addon.properties.compiler_properties import property_imperative_code, property_register_code, property_unregister_code
 from ..addon.variables.compiler_variables import variable_register_code
 
@@ -67,7 +68,7 @@ def compile_addon():
 
 def format_single_file():
     """ Returns the entire addon code (for development) formatted for a single python file """
-    imports, imperative, main, register, unregister = ("import bpy\n", "", "", "", "")
+    imports, imperative, main, register, unregister = ("import bpy\n", CONVERT_UTILS, "", "", "")
 
     # add property and variable code
     imperative += variable_register_code() + "\n"

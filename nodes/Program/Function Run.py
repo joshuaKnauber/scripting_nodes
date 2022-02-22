@@ -7,7 +7,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RunFunctionNode"
-    bl_label = "Run Function Execute"
+    bl_label = "Function Run (Execute)"
     bl_width_default = 200
 
     def on_create(self, context):

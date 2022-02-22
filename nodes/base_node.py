@@ -359,7 +359,8 @@ class SN_ScriptingBaseNode:
         # free node
         self.on_free()
         # recompile without node
-        compile_addon()
+        if not bpy.app.timers.is_registered(compile_addon):
+            bpy.app.timers.register(compile_addon, first_interval=0.25)
 
 
     ### NODE UPDATE
@@ -536,6 +537,7 @@ class SN_ScriptingBaseNode:
         "Collection Property": "SN_CollectionPropertySocket",
         "Collection": "SN_CollectionPropertySocket",
         "Property": "SN_PropertySocket",
+        "Pointer": "SN_PropertySocket",
     }
 
 

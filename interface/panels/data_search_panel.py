@@ -24,21 +24,28 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         layout.separator()
 
         layout.operator("wm.url_open", text="How to", icon="QUESTION").url = "https://joshuaknauber.notion.site/Blend-Data-33e9f2ea40f44c2498cb26838662b621"
-        layout.separator()
 
-        row = layout.row()
-        row.scale_y = 1.4
-        row.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH")
         layout.separator()
-
         layout.label(text="Source:")
         col = layout.column()
         col.scale_y = 1.4
         col.prop(context.scene.sn, "data_category", expand=True)
         layout.separator()
-        
+
+        col = layout.column(align=True)
+        row = col.row()
+        row.scale_y = 1.4
+        row.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH")
+        box = col.box()
+        if context.scene.sn.copied_context:
+            copied = context.scene.sn.copied_context[0]
+            box.label(text=f"Context: {copied['area'].type.replace('_', ' ').title()} {copied['region'].type.replace('_', ' ').title()}")
+        else:
+            box.label(text="No context copied!")
+
+        layout.separator()
         col = layout.column()
-        col.label(text="Filter:")
+        col.label(text="Filter Overview:")
         row = col.row()
         row.scale_y = 1.2
         row.prop(context.scene.sn, "data_search", text="", icon="VIEWZOOM")
@@ -95,7 +102,9 @@ class SN_PT_data_search(bpy.types.Panel):
         subrow = row.row()
         subrow.enabled = False
         subrow.label(text=item["DETAILS"]["path"])
-        row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False).name = item["DETAILS"]["path"]
+        op = row.operator("sn.copy_data_path", text="", icon="COPYDOWN", emboss=False)
+        op.path = item["DETAILS"]["path"]
+        op.type = item["DETAILS"]["type"]
         
         if item["DETAILS"]["expanded"]:
             row = box.row()

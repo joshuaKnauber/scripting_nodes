@@ -46,7 +46,9 @@ def header_append(self, context):
         col.scale_x = 1.5
         col.operator("sn.force_compile", text="", icon="FILE_REFRESH")
         sub_row.operator("sn.force_unregister", text="", icon="UNLINKED")
-        row.operator("wm.url_open", text="", icon_value=bpy.context.scene.sn_icons["discord"].icon_id).url = "https://discord.com/invite/NK6kyae"
+        sub_row = row.row(align=True)
+        sub_row.operator("wm.url_open", text="", icon_value=bpy.context.scene.sn_icons["discord"].icon_id).url = "https://discord.com/invite/NK6kyae"
+        sub_row.operator("wm.url_open", text="", icon="HELP").url = "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233"
         row.label(text=str(round(context.scene.sn.compile_time, 3))+"s")
 
 
