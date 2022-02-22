@@ -24,6 +24,12 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         layout.separator()
 
         layout.operator("wm.url_open", text="How to", icon="QUESTION").url = "https://joshuaknauber.notion.site/Blend-Data-33e9f2ea40f44c2498cb26838662b621"
+
+        layout.separator()
+        layout.label(text="Source:")
+        col = layout.column()
+        col.scale_y = 1.4
+        col.prop(context.scene.sn, "data_category", expand=True)
         layout.separator()
 
         col = layout.column(align=True)
@@ -38,14 +44,8 @@ class SN_PT_navigation_bar(bpy.types.Panel):
             box.label(text="No context copied!")
 
         layout.separator()
-        layout.label(text="Source:")
         col = layout.column()
-        col.scale_y = 1.4
-        col.prop(context.scene.sn, "data_category", expand=True)
-        layout.separator()
-        
-        col = layout.column()
-        col.label(text="Filter:")
+        col.label(text="Filter Overview:")
         row = col.row()
         row.scale_y = 1.2
         row.prop(context.scene.sn, "data_search", text="", icon="VIEWZOOM")

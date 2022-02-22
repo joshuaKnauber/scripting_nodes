@@ -4,10 +4,10 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_IndexInCollectionPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_IsIndexInCollectionPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_IndexInCollectionPropertyNode"
-    bl_label = "Index In Collection"
+    bl_idname = "SN_IsIndexInCollectionPropertyNode"
+    bl_label = "Is Index In Collection"
     node_color = "PROPERTY"
     
     def on_create(self, context):

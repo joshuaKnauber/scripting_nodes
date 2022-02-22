@@ -7,6 +7,7 @@ from ...addon.properties.settings.settings import prop_to_socket
 class PropertyReferenceNode():
     
     add_indexing_inputs = False
+    allow_prop_group = True
     
     
     def on_prop_change(self, context):
@@ -106,7 +107,9 @@ class PropertyReferenceNode():
         if draw_prop_source:
             layout.prop(self, "prop_source", expand=True)
 
-        layout.prop(self, "from_prop_group", text="From Property Group")
+        if self.allow_prop_group:
+            layout.prop(self, "from_prop_group", text="From Property Group")
+            
         prop_src = self.get_prop_source()
         prop_group_src = self.get_prop_group_src()
 

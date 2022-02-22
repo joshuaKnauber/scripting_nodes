@@ -1,10 +1,9 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
-from ..templates.PropertyReferenceNode import PropertyReferenceNode
 
 
 
-class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferenceNode):
+class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_DisplayPropertyNode"
     bl_label = "Display Property"

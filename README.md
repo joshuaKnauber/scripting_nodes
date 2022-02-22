@@ -61,9 +61,10 @@ read items in blend file node
 scene collections output on collections node
 
 
-[] blender property node needs output for value with right type
-[] you need to be able to add, remove and move items for collection easily
+[X] blender property node needs output for value with right type
+[X] you need to be able to add, remove and move items for collection easily
 [] test other display nodes
+[] reload with correct context
 [] run blender function on blend data
 [] get non property data (hide property output and only show value?)
 [] do filters in browser
