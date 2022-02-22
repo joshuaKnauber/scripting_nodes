@@ -3,7 +3,7 @@ from bl_ui import space_userpref
 from uuid import uuid4
 
 
-from .data_properties import is_valid_attribute, filter_items, filter_defaults, find_path_in_json, get_item_type
+from .data_properties import get_data_items, filter_items, filter_defaults, find_path_in_json
 from ..addon.properties.properties import SN_GeneralProperties
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
@@ -187,61 +187,6 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     
     data_items = {"app": {}, "context": {}, "data": {}, "path": {}, "utils": {}}
-
-    def get_new_item(self, name, path, has_properties, item_type):
-        new_item = {
-            "DETAILS": {
-                "expanded": False,
-                "type": item_type,
-                "name": name,
-                "description": "",
-                "path": path,
-                "has_properties": has_properties,
-                "shortened_coll": False,
-                "data_search": "",
-                "data_filter": filter_defaults,
-            }}
-        return new_item
-    
-    def get_data_items(self, data, path):
-        new_items = {}
-        # get attributes
-        for attr in dir(data):
-            if is_valid_attribute(attr):
-                value = getattr(data, attr)
-                item_type = get_item_type(str(type(value)), False)
-                name = attr
-                if hasattr(value, "bl_rna"):
-                    name = value.bl_rna.name
-                if hasattr(data, "bl_rna") and attr in data.bl_rna.properties:
-                    prop = data.bl_rna.properties[attr]
-                    name = prop.name
-                    item_type = get_item_type(prop.type, getattr(prop, "is_array", False))
-                name = name.replace("_", " ").title()
-                new_items[attr] = self.get_new_item(name, f"{path}.{attr}", hasattr(value, "bl_rna"), item_type)
-        # get items
-        if getattr(data, "__iter__", False) and hasattr(data, "keys") and hasattr(data, "values"):
-            data_amount = len(data)
-            key_amount = len(data.keys())
-            for i in range(data_amount):
-                indexed = data[i]
-                key = None
-                if key_amount == data_amount:
-                    key = data.keys()[i]
-                    
-                item_type = get_item_type("Pointer", False)
-                name = f"'{indexed.name}'" if hasattr(indexed, "name") else f"'{key}'" if key else str(i)
-                new_items[name] = self.get_new_item(name, f"{path}['{key}']" if key else f"{path}[{i}]", True, item_type)
-
-                if i >= 20 and data_amount > 25:
-                    new_items[name]["DETAILS"]["shortened_coll"] = True
-                    break
-        # sort items
-        sorted_keys = sorted(new_items.keys(), key=lambda s: new_items[s]["DETAILS"]["type"])
-        sorted_keys = sorted(sorted_keys, key=lambda s: new_items[s]["DETAILS"]["has_properties"], reverse=True)
-        sorted_items = {}
-        for key in sorted_keys: sorted_items[key] = new_items[key]
-        return sorted_items
     
     def generate_items(self, path):
         json_path = path.replace("[",".").replace("]","")
@@ -249,16 +194,16 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         key = json_path.split(".")[-1]
         data = eval(path)
         details = parent[key]["DETAILS"]
-        parent[key] = self.get_data_items(data, path)
+        parent[key] = get_data_items(data, path)
         parent[key]["DETAILS"] = details
     
     def update_data_category(self, context):
-        self.data_items[self.data_category] = self.get_data_items(getattr(bpy, self.data_category), f"bpy.{self.data_category}")
-        # if self.data_category == "context":
-        #     # context here could be replaced with context from somewhere else
-        #     self.create_data_items(context.copy(), f"bpy.{self.data_category}")
-        # else:
-        #     self.data_items[self.data_category] = self.get_data_items(getattr(bpy, self.data_category), f"bpy.{self.data_category}")
+        self.data_items[self.data_category] = get_data_items(getattr(bpy, self.data_category), f"bpy.{self.data_category}")
+        if self.data_category == "context":
+            ctxt = context.copy() if not self.copied_context else self.copied_context[0]
+            self.create_data_items(ctxt, f"bpy.{self.data_category}")
+        else:
+            self.data_items[self.data_category] = get_data_items(getattr(bpy, self.data_category), f"bpy.{self.data_category}")
 
     def update_hide_preferences(self, context):
         for cls in space_userpref.classes:
