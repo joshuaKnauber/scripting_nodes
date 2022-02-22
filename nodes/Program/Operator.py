@@ -9,6 +9,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
     bl_idname = "SN_OperatorNode"
     bl_label = "Operator"
+    layout_type = "layout"
     is_trigger = True
     bl_width_default = 200
     node_color = "PROGRAM"
@@ -29,13 +30,11 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         self._evaluate(context)
 
     def update_popup(self, context):
-        # width input
-        if self.invoke_option in ["none", "invoke_confirm","invoke_props_popup","invoke_search_popup"]:
-            if "Width" in self.inputs: self.inputs.remove(self.inputs["Width"])
-        else:
+        if self.invoke_option in ["invoke_props_dialog", "invoke_popup"]:
             if len(self.inputs) == 1: self.add_integer_input("Width").default_value = 300
+        else:
+            if "Width" in self.inputs: self.inputs.remove(self.inputs["Width"])
 
-        # interface output
         if self.invoke_option in ["none","invoke_confirm","invoke_popup","invoke_search_popup"]:
             for out in self.outputs[2:]:
                 self.outputs.remove(out)
@@ -69,25 +68,68 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
 
     def draw_node(self, context, layout):
-        layout.prop(self, "operator_name")
+        row = layout.row(align=True)
+        row.prop(self, "operator_name")
+        python_name = get_python_name(self.operator_name, replacement="my_generic_operator")
+        row.operator("sn.copy_python_name", text="", icon="COPYDOWN").name = "sna." + python_name
+
         layout.label(text="Description: ")
         layout.prop(self, "operator_description", text="")
         layout.prop(self, "invoke_option")
 
-        # if self.invoke_option == "invoke_search_popup":
-        #     layout.label(text="Search: ")
-        #     layout.prop_search(self,"select_property",self,"properties",text="")
-        # elif not self.invoke_option in ["none", "invoke_confirm"]:
-        layout.label(text="Selected: ")
-        layout.prop_search(self,"select_property",self,"properties",text="")
+        if self.invoke_option == "invoke_search_popup":
+            layout.label(text="Search: ")
+            layout.prop_search(self,"select_property",self,"properties",text="")
+            if self.select_property in self.properties and self.properties[self.select_property].property_type != "Enum":
+                row = layout.row()
+                row.alert = True
+                row.label(text="This property needs to be type Enum!")
+        elif not self.invoke_option in ["none", "invoke_confirm"]:
+            layout.label(text="Selected: ")
+            layout.prop_search(self,"select_property",self,"properties",text="")
+            if self.select_property in self.properties and not self.properties[self.select_property].property_type in ["Enum", "String"]:
+                row = layout.row()
+                row.alert = True
+                row.label(text="This property needs to be type Enum or String!")
 
         self.draw_list(layout)
 
 
     def evaluate(self, context):
         python_name = get_python_name(self.operator_name, replacement="my_generic_operator")
-        selected_property = ""
         props_code = self.props_code(context).split("\n")
+        selected_property = ""
+
+        invoke_return = "self.execute(context)"
+        invoke_inline = ""
+
+        if not self.invoke_option in ["none", "invoke_confirm"]:
+            if self.select_property in self.properties and self.properties[self.select_property].property_type in ["Enum", "String"]:
+                selected_property = f"bl_property = '{self.properties[self.select_property].python_name}'"
+
+        if self.invoke_option == "invoke_confirm":
+            invoke_return = "context.window_manager." + self.invoke_option + "(self, event)"
+
+        elif self.invoke_option in ["invoke_props_dialog","invoke_popup"]:
+            invoke_return = "context.window_manager." + self.invoke_option + f"(self, width={self.inputs[1].python_value})"
+
+        elif self.invoke_option == "invoke_search_popup":
+            if self.select_property in self.properties and self.properties[self.select_property].property_type == "Enum":
+                selected_property = f"bl_property = '{self.properties[self.select_property].python_name}'"
+            invoke_inline = "context.window_manager." + self.invoke_option + "(self)"
+
+        else:
+            if not self.invoke_option == "none":
+                invoke_inline = "context.window_manager." + self.invoke_option + "(self, event)"
+
+        draw_function = ""
+        if self.invoke_option in ["invoke_props_dialog","invoke_props_popup"]:
+            draw_function = f"""
+
+                        def draw(self, context):
+                            layout = self.layout
+                            {self.indent([out.python_value for out in self.outputs[2:-1]], 7)}"""
+
 
         self.code = f"""
                     class SNA_OT_{python_name.title()}(bpy.types.Operator):
@@ -101,25 +143,21 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                         @classmethod
                         def poll(cls, context):
                             return not {self.inputs[0].python_value}
+
                         def execute(self, context):
-                            try:
-                                {self.outputs[0].python_value if self.outputs[0].python_value.strip() else "pass"}
-                            except Exception as exc:
-                                print(str(exc) + " | Error in execute function of {self.operator_name}")
+                            {self.indent(self.outputs[0].python_value, 7)}
                             return {{"FINISHED"}}
+
+                        {draw_function}
+
                         def invoke(self, context, event):
-                            try:
-                                {self.outputs[1].python_value if self.outputs[1].python_value.strip() else "pass"}
-                            except Exception as exc:
-                                print(str(exc) + " | Error in invoke function of {self.operator_name}")
-                            return {{"FINISHED"}}
+                            {self.indent(self.outputs[1].python_value, 7)}
+                            {invoke_inline}
+                            return {invoke_return}
                     """
 
         self.code_register = f"bpy.utils.register_class(SNA_OT_{python_name.title()})"
         self.code_unregister = f"bpy.utils.unregister_class(SNA_OT_{python_name.title()})"
 
 
-# invoke options
-# select property
 # get_set_node_property
-# python copy buttons
