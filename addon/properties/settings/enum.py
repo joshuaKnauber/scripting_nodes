@@ -19,14 +19,14 @@ class EnumItem(bpy.types.PropertyGroup):
                             if prop.property_type == "Enum":
                                 for item in prop.settings.items:
                                     if item == self:
-                                        _enum_prop_cache[str(self.as_pointer())] = node
+                                        _enum_prop_cache[str(self.as_pointer())] = prop
                                         break
                             elif prop.property_type == "Group":
                                 for subprop in prop.settings.properties:
                                     if subprop.property_type == "Enum":
                                         for item in subprop.settings.items:
                                             if item == self:
-                                                _enum_prop_cache[str(self.as_pointer())] = node
+                                                _enum_prop_cache[str(self.as_pointer())] = prop
                                                 break
             return _enum_prop_cache[str(self.as_pointer())]
         
