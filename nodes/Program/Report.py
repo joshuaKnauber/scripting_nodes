@@ -23,8 +23,10 @@ class SN_ReportNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         self.code = f"""
-                    self.report({{{self.type}}}, message={self.inputs[1].python_value})
+                    self.report({{'{self.type}'}}, message={self.inputs[1].python_value})
+                    {self.indent(self.outputs[0].python_value, 5)}
                     """
                     
     def draw_node(self, context, layout):
+        layout.prop(self, "type")
         layout.label(text="This only works when connected to operators", icon="INFO")
