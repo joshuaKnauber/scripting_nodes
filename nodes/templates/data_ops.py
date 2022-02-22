@@ -13,7 +13,10 @@ class SN_OT_PasteDataPath(bpy.types.Operator):
 
     def execute(self, context):
         if "bpy." in context.window_manager.clipboard:
-            bpy.data.node_groups[self.node_tree].nodes[self.node].pasted_data_path = context.window_manager.clipboard
+            node = bpy.data.node_groups[self.node_tree].nodes[self.node]
+            node.pasted_data_path = context.window_manager.clipboard
+            if "Value" in node.outputs and context.scene.sn.last_copied_datapath == context.window_manager.clipboard:
+                node.outputs["Value"].data_type = node.socket_names[context.scene.sn.last_copied_datatype]
         else:
             self.report({"ERROR"}, message="Not a valid blender data path. Use the Rightclick Menu -> Get Serpens Property button")
         return {"FINISHED"}

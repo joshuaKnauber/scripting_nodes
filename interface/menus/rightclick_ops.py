@@ -38,7 +38,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
                 return {"FINISHED"}
 
         # error when property not available
-        self.report({"ERROR"}, message="We can't copy this property yet! Please report this to the developers!")
+        self.report({"ERROR"}, message="We can't copy this property yet! Please use the Blend Data browser to find it!")
         print("Serpens Log: ", property_pointer, property_value)
         return {"CANCELLED"}
 
@@ -81,3 +81,17 @@ class SN_OT_CopyOperator(bpy.types.Operator):
         self.report({"ERROR"}, message="We can't copy this operator yet! Please report this to the developers!")
         print("Serpens Log: ", button_value)
         return {"CANCELLED"}
+    
+    
+    
+class SN_OT_CopyContext(bpy.types.Operator):
+    bl_idname = "sn.copy_context"
+    bl_label = "Copy Context"
+    bl_description = "Copy the context from this area"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        context.scene.sn.copied_context.clear()
+        context.scene.sn.copied_context.append(context.copy())
+        self.report({"INFO"}, message="Copied!")
+        return {"FINISHED"}

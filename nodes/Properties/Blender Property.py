@@ -69,6 +69,7 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.label = name
         self.outputs[0].name = name 
         self.outputs[0].set_hide(self.pasted_data_path == "")
+        self.outputs[1].set_hide(self.pasted_data_path == "")
         self.create_inputs_from_path()
         self._evaluate(context)
         
@@ -79,6 +80,9 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_property_output("Property").set_hide(True)
+        out = self.add_data_output("Value")
+        out.changeable = True
+        out.set_hide(True)
 
 
     def evaluate(self, context):
@@ -88,7 +92,7 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             data_path = "bpy"
 
             inp_index = 0
-            data = self.get_data()                    
+            data = self.get_data()
             for segment in data:
                 data_path += f".{segment.split('[')[0]}"
                 
@@ -100,6 +104,7 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     inp_index += 1
             
             self.outputs[0].python_value = data_path
+            self.outputs[1].python_value = data_path
 
 
     def draw_node(self, context, layout):

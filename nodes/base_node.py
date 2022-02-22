@@ -537,6 +537,7 @@ class SN_ScriptingBaseNode:
         "Collection Property": "SN_CollectionPropertySocket",
         "Collection": "SN_CollectionPropertySocket",
         "Property": "SN_PropertySocket",
+        "Pointer": "SN_PropertySocket",
     }
 
 
