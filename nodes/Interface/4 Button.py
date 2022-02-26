@@ -20,17 +20,35 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_ref_update(self, node, data=None):
         if node.node_tree == self.custom_operator_ntree and node.name == self.ref_SN_OperatorNode:
-            pass
-        
-    
+            if "property_change" in data:
+                prop = data["property_change"]
+                for inp in self.inputs[5:]:
+                    if not inp.name in node.properties:
+                        inp.name = prop.name
+                    if inp.name == prop.name:
+                        self.convert_socket(inp, self.socket_names[prop.property_type])
+
+            if "property_add" in data:
+                prop = data["property_add"]
+                self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
+
+            if "property_remove" in data:
+                self.inputs.remove(self.inputs[data["property_remove"] + 4])
+
+            if "property_move" in data:
+                from_index = data["property_move"][0]
+                to_index = data["property_move"][1]
+                self.inputs.move(from_index+4, to_index+4)
+
+
     def reset_inputs(self):
         """ Remove all operator inputs """
         for i in range(len(self.inputs)-1, -1, -1):
             inp = self.inputs[i]
             if inp.can_be_disabled:
                 self.inputs.remove(inp)
-    
-    
+
+
     def create_inputs(self, op_rna):
         """ Create inputs for operator """
         for prop in op_rna.properties:
@@ -39,8 +57,8 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if inp:
                     inp.can_be_disabled = True
                     inp.disabled = not prop.is_required
-    
-    
+
+
     def update_custom_operator(self, context):
         """ Updates the nodes settings when a new parent panel is selected """
         self.reset_inputs()

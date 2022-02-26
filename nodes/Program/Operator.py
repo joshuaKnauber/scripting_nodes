@@ -14,17 +14,17 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     bl_width_default = 200
     node_color = "PROGRAM"
 
-    def on_dynamic_socket_add(self, socket):
-        self.trigger_ref_update({ "added": socket })
+    def on_node_property_change(self, property):
+        self.trigger_ref_update({ "property_change": property })
 
-    def on_dynamic_socket_remove(self, index, is_output):
-        self.trigger_ref_update({ "removed": index })
+    def on_node_property_add(self, property):
+        self.trigger_ref_update({ "property_add": property })
 
-    def on_socket_type_change(self, socket):
-        self.trigger_ref_update({ "changed": socket })
+    def on_node_property_remove(self, index):
+        self.trigger_ref_update({ "property_remove": index })
 
-    def on_socket_name_change(self, socket):
-        self.trigger_ref_update({ "updated": socket })
+    def on_node_property_move(self, from_index, to_index):
+        self.trigger_ref_update({ "property_move": (from_index, to_index) })
 
     # operator name change
     # property name change
@@ -39,7 +39,6 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     names.append(ref.node.operator_name)
 
         self["operator_name"] = unique_collection_name(self.operator_name, "My Operator", names, " ", includes_name=True)
-        self.trigger_ref_update({ "name_change": self.operator_name })
         self._evaluate(context)
 
     def update_description(self, context):
