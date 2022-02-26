@@ -17,7 +17,7 @@ class SN_GetCustomPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, context):
-        if self.inputs[0].links:
+        if self.inputs[0].is_linked:
             self.outputs[0].python_value = f"{self.inputs[0].python_value}[{self.inputs[1].python_value}]"
         else:
             self.outputs[0].python_value = f""
