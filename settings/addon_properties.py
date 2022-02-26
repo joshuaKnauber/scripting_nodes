@@ -3,7 +3,7 @@ from bl_ui import space_userpref
 from uuid import uuid4
 
 
-from .data_properties import get_data_items, filter_items, filter_defaults, find_path_in_json
+from .data_properties import get_data_items, filter_items, filter_defaults
 from ..addon.properties.properties import SN_GeneralProperties
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
@@ -187,23 +187,22 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     
     data_items = {"app": {}, "context": {}, "data": {}, "path": {}, "utils": {}}
-    
-    def generate_items(self, path):
-        json_path = path.replace("[",".").replace("]","")
-        parent = find_path_in_json(".".join(json_path.split(".")[:-1]), self.data_items)
-        key = json_path.split(".")[-1]
-        data = eval(path)
-        details = parent[key]["DETAILS"]
-        parent[key] = get_data_items(data, path)
-        parent[key]["DETAILS"] = details
-    
-    def update_data_category(self, context):
-        self.data_items[self.data_category] = get_data_items(getattr(bpy, self.data_category), f"bpy.{self.data_category}")
-        if self.data_category == "context":
-            ctxt = context.copy() if not self.copied_context else self.copied_context[0]
-            self.create_data_items(ctxt, f"bpy.{self.data_category}")
+        
+    def reload_data_category(self, category):
+        """ Reloads the basic data for a category """
+        if category != "context":
+            self.data_items[category] = get_data_items(f"bpy.{category}", getattr(bpy, category))
         else:
-            self.data_items[self.data_category] = get_data_items(getattr(bpy, self.data_category), f"bpy.{self.data_category}")
+            ctxt = self.copied_context[0] if self.copied_context else bpy.context.copy()
+            self.data_items[category] = get_data_items(f"bpy.context", ctxt)
+
+    def load_categories(self):
+        """ Loads the data for the bpy categories """
+        self.reload_data_category("app")
+        self.reload_data_category("context")
+        self.reload_data_category("data")
+        self.reload_data_category("path")
+        self.reload_data_category("utils")
 
     def update_hide_preferences(self, context):
         for cls in space_userpref.classes:
@@ -212,7 +211,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                 else: bpy.utils.register_class(cls)
             except: pass
         if self.hide_preferences:
-            self.update_data_category(context)
+            self.load_categories()
             
     hide_preferences: bpy.props.BoolProperty(default=False,
                                         name="Hide Preferences",
@@ -226,8 +225,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                                ("path", "Path", "bpy.path"),
                                                ("utils", "Utils", "bpy.utils")],
                                         default="context",
-                                        description="Category of blend data",
-                                        update=update_data_category)
+                                        description="Category of blend data")
     
     data_filter: bpy.props.EnumProperty(name="Type",
                                         options={"ENUM_FLAG"},

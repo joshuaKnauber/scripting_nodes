@@ -36,7 +36,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             if ntree.bl_idname == "ScriptingNodesTree":
                 if ntree == self:
                     break
-            names.append(ntree.python_name)
+                names.append(ntree.python_name)
         
         name = unique_collection_name(f"{get_python_name(self.name, 'node_tree')}", "node_tree", names, "_")
         return name

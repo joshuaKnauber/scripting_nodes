@@ -70,3 +70,4 @@ scene collections output on collections node
 [] do filters in browser
 [] add back blend data input nodes
 [] fix property output not showing properly when selecting collection as prop (blend to?, maybe fine?)
+[] paste in object prop -> shows objects as input and can't find default
