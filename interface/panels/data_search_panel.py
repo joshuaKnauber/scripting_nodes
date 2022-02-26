@@ -40,7 +40,11 @@ class SN_PT_navigation_bar(bpy.types.Panel):
             box = col.box()
             if context.scene.sn.copied_context:
                 copied = context.scene.sn.copied_context[0]
-                box.label(text=f"Context: {copied['area'].type.replace('_', ' ').title()} {copied['region'].type.replace('_', ' ').title()}")
+                col = box.column(align=True)
+                col.label(text=f"Reload Context:")
+                subrow = col.row()
+                subrow.enabled = False
+                subrow.label(text=f"{copied['area'].type.replace('_', ' ').title()} {copied['region'].type.replace('_', ' ').title()}")
             else:
                 box.label(text="No context copied!")
 
@@ -81,49 +85,62 @@ class SN_PT_data_search(bpy.types.Panel):
         return context.scene.sn.hide_preferences
     
     def should_draw(self, item, search_value, filters):
-        if search_value.lower() in item["DETAILS"]["name"].lower():
-            # return item["DETAILS"]["type"] in filters
+        if search_value.lower() in item["name"].lower():
+            return item["type"] in filters
             return True
         return False
     
     def draw_item(self, layout, item):
         box = layout.box()
         row = box.row()
-        if not item["DETAILS"]["has_properties"]:
+        
+        if not item["has_properties"]:
             row.scale_y = 0.75
         else:
-            op = row.operator("sn.expand_data", text="", icon="TRIA_DOWN" if item["DETAILS"]["expanded"] else "TRIA_RIGHT", emboss=False)
-            op.path = item["DETAILS"]["path"]
-            has_filters = item["DETAILS"]["data_search"] != "" or item["DETAILS"]["data_filter"] != filter_defaults
+            op = row.operator("sn.expand_data", text="", icon="TRIA_DOWN" if item["expanded"] else "TRIA_RIGHT", emboss=False)
+            op.path = item["path"]
+
+            has_filters = item["data_search"] != "" or item["data_filter"] != filter_defaults
             op = row.operator("sn.filter_data", text="", icon="FILTER", emboss=has_filters, depress=has_filters)
-            op.path = item["DETAILS"]["path"]
-        row.label(text=item["DETAILS"]["name"])
-        icon = property_icons[item["DETAILS"]["type"]] if item["DETAILS"]["type"] in property_icons else "ERROR"
-        row.label(text=item["DETAILS"]["type"], icon=icon)
+            op.path = item["path"]
+
+        row.label(text=item["name"])
+        
+        icon = property_icons[item["type"]] if item["type"] in property_icons else "ERROR"
         subrow = row.row()
         subrow.enabled = False
-        subrow.label(text=item["DETAILS"]["path"])
-        op = row.operator("sn.copy_data_path", text="", icon="COPYDOWN", emboss=False)
-        op.path = item["DETAILS"]["path"]
-        op.type = item["DETAILS"]["type"]
+        subrow.label(text=item["type"], icon=icon)
+
+        # subrow = row.row()
+        # subrow.enabled = False
+        # subrow.label(text=item["path"])
         
-        if item["DETAILS"]["expanded"]:
+        if item["has_properties"]:
+            op = row.operator("sn.reload_item_data", text="", icon="FILE_REFRESH", emboss=False)
+            op.path = item["path"]
+
+        op = row.operator("sn.copy_data_path", text="", icon="COPYDOWN", emboss=False)
+        op.path = item["path"]
+        op.type = item["type"]
+        
+        if item["expanded"]:
             row = box.row()
             split = row.split(factor=0.015)
             split.label(text="")
             col = split.column(align=True)
+            
             is_empty = True
-            for key in item.keys():
-                if not key == "DETAILS":
-                    sub_item = item[key]
-                    if self.should_draw(sub_item, item["DETAILS"]["data_search"], item["DETAILS"]["data_filter"]):
-                        self.draw_item(col, sub_item)
-                        if sub_item["DETAILS"]["shortened_coll"]:
-                            box = col.box()
-                            box.scale_y = 0.75
-                            box.label(text="... Shortened because of too many items", icon="PLUS")
-                            col.separator()
-                        is_empty = False
+            for key in item["properties"].keys():
+                sub_item = item["properties"][key]
+                if self.should_draw(sub_item, item["data_search"], item["data_filter"]):
+                    self.draw_item(col, sub_item)
+                    # if sub_item["shortened_coll"]:
+                    #     box = col.box()
+                    #     box.scale_y = 0.75
+                    #     box.label(text="... Shortened because of too many items", icon="PLUS")
+                    #     col.separator()
+                    is_empty = False
+
             if is_empty:
                 col.label(text="No Items for these filters!", icon="INFO")
 
@@ -131,8 +148,8 @@ class SN_PT_data_search(bpy.types.Panel):
         layout = self.layout
         sn = context.scene.sn
         
-        is_empty = True
         col = layout.column(align=True)
+        is_empty = True
         for key in sn.data_items[sn.data_category].keys():
             item = sn.data_items[sn.data_category][key]
             if self.should_draw(item, sn.data_search, sn.data_filter):

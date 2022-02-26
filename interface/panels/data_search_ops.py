@@ -1,5 +1,5 @@
 import bpy
-from ...settings.data_properties import find_path_in_json, filter_items, filter_defaults
+from ...settings.data_properties import get_data_items, item_from_path, filter_items, filter_defaults
 
 
 
@@ -43,10 +43,10 @@ class SN_OT_ExpandData(bpy.types.Operator):
 
     def execute(self, context): 
         sn = context.scene.sn
-        item = find_path_in_json(self.path, sn.data_items)
-        item["DETAILS"]["expanded"] = not item["DETAILS"]["expanded"]
-        if len(item.keys()) == 1:
-            sn.generate_items(self.path)
+        item = item_from_path(sn.data_items, self.path)
+        item["expanded"] = not item["expanded"]
+        if not item["properties"]:
+            item["properties"] = get_data_items(self.path, item["data"])
         return {"FINISHED"}
 
 
@@ -60,9 +60,9 @@ class SN_OT_FilterData(bpy.types.Operator):
     path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def update_filters(self, context):
-        item = find_path_in_json(self.path, context.scene.sn.data_items)
-        item["DETAILS"]["data_search"] = self.data_search
-        item["DETAILS"]["data_filter"] = self.data_filter
+        item = item_from_path(context.scene.sn.data_items, self.path)
+        item["data_search"] = self.data_search
+        item["data_filter"] = self.data_filter
 
     data_search: bpy.props.StringProperty(default="",
                                     options={"SKIP_SAVE", "HIDDEN", "TEXTEDIT_UPDATE"},
@@ -87,8 +87,9 @@ class SN_OT_FilterData(bpy.types.Operator):
         col.prop(self, "data_filter", expand=True)
     
     def invoke(self, context, event):
-        item = find_path_in_json(self.path, context.scene.sn.data_items)
-        self.data_search = item["DETAILS"]["data_search"]
+        item = item_from_path(context.scene.sn.data_items, self.path)
+        self.data_search = item["data_search"]
+        self.data_filter = item["data_filter"]
         return context.window_manager.invoke_popup(self, width=300)
 
 
@@ -114,10 +115,8 @@ class SN_OT_ReloadItemData(bpy.types.Operator):
     path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
-        for item in context.scene.sn.data_items:
-            if item.path == self.path:
-                item.reload_items()
-                break
+        item = item_from_path(context.scene.sn.data_items, self.path)
+        item["properties"] = get_data_items(self.path, item["data"])
         return {"FINISHED"}
 
 

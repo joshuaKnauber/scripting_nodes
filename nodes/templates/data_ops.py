@@ -14,11 +14,38 @@ class SN_OT_PasteDataPath(bpy.types.Operator):
     def execute(self, context):
         if "bpy." in context.window_manager.clipboard:
             node = bpy.data.node_groups[self.node_tree].nodes[self.node]
-            node.pasted_data_path = context.window_manager.clipboard
-            if "Value" in node.outputs and context.scene.sn.last_copied_datapath == context.window_manager.clipboard:
-                node.outputs["Value"].data_type = node.socket_names[context.scene.sn.last_copied_datatype]
+
+            # paste in blender property
+            if node.bl_idname == "SN_BlenderPropertyNode":
+                node.pasted_data_path = context.window_manager.clipboard
+                # can set data type
+                if context.window_manager.clipboard == context.scene.sn.last_copied_datapath and \
+                    context.scene.sn.last_copied_datatype in node.socket_names:
+                    node.outputs["Value"].data_type = node.socket_names[context.scene.sn.last_copied_datatype]
+                # data type is function
+                elif context.scene.sn.last_copied_datatype == "Function":
+                    loc = node.location
+                    ntree = node.node_tree
+                    ntree.nodes.remove(node)
+                    node = ntree.nodes.new("SN_RunPropertyFunctionNode")
+                    node.location = loc
+                    node.pasted_data_path = context.window_manager.clipboard
+                # can't set data type
+                else:
+                    node.outputs["Value"].data_type = node.socket_names["Data"]
+                    self.report({"WARNING"}, message="Couldn't set the output value data type!")
+            
+            # paste in run property function
+            elif node.bl_idname == "SN_RunPropertyFunctionNode":
+                # is function
+                if context.window_manager.clipboard == context.scene.sn.last_copied_datapath:
+                    if context.scene.sn.last_copied_datatype == "Function":
+                        node.pasted_data_path = context.window_manager.clipboard
+                # isn't function
+                else:
+                    self.report({"ERROR"}, message="Can only paste functions in this node!")
         else:
-            self.report({"ERROR"}, message="Not a valid blender data path. Use the Rightclick Menu -> Get Serpens Property button")
+            self.report({"ERROR"}, message="Not a valid blender data path. Use the blend data browser.")
         return {"FINISHED"}
 
 

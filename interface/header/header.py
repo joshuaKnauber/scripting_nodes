@@ -49,7 +49,8 @@ def header_append(self, context):
         sub_row = row.row(align=True)
         sub_row.operator("wm.url_open", text="", icon_value=bpy.context.scene.sn_icons["discord"].icon_id).url = "https://discord.com/invite/NK6kyae"
         sub_row.operator("wm.url_open", text="", icon="HELP").url = "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233"
-        row.label(text=str(round(context.scene.sn.compile_time, 3))+"s")
+        ms = round(context.scene.sn.compile_time*1000, 2)
+        row.label(text=str(ms)+"ms")
 
 
 

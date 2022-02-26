@@ -49,6 +49,7 @@ class SN_NodeProperty(BasicProperty, bpy.types.PropertyGroup):
     
     
     def compile(self, context=None):
+        self.prop_collection_origin.on_node_property_change(self)
         self.prop_collection_origin._evaluate(bpy.context)
 
 
