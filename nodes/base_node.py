@@ -504,6 +504,8 @@ class SN_ScriptingBaseNode:
                 new.prev_dynamic = socket.prev_dynamic
                 if socket.subtype in new.subtypes:
                     new.subtype = socket.subtype
+                new.can_be_disabled = socket.can_be_disabled
+                new.disabled = socket.disabled
                 new.indexable = socket.indexable
                 new.index_type = socket.index_type
                 new.changeable = socket.changeable

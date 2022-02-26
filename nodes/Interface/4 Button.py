@@ -41,6 +41,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.inputs.move(from_index+4, to_index+4)
             self._evaluate(bpy.context)
 
+
     def reset_inputs(self):
         """ Remove all operator inputs """
         for i in range(len(self.inputs)-1, -1, -1):
