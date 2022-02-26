@@ -5,88 +5,16 @@ from ...utils import get_python_name, unique_collection_name
 
 
 
-class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
+class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
-    bl_idname = "SN_OperatorNode"
-    bl_label = "Operator"
-    layout_type = "layout"
-    is_trigger = True
+    bl_idname = "SN_RunOperatorNode"
+    bl_label = "Run Operator"
     bl_width_default = 200
     node_color = "PROGRAM"
 
-    def on_dynamic_socket_add(self, socket):
-        self.trigger_ref_update({ "added": socket })
-
-    def on_dynamic_socket_remove(self, index, is_output):
-        self.trigger_ref_update({ "removed": index })
-
-    def on_socket_type_change(self, socket):
-        self.trigger_ref_update({ "changed": socket })
-
-    def on_socket_name_change(self, socket):
-        self.trigger_ref_update({ "updated": socket })
-
-    # operator name change
-    # property name change
-    # property type change
-
-    def update_name(self, context):
-        self["operator_name"] = self.operator_name.replace("\"", "'")
-        names = []
-        for ntree in bpy.data.node_groups:
-            if ntree.bl_idname == "ScriptingNodesTree":
-                for ref in ntree.node_collection("SN_OperatorNode").refs:
-                    names.append(ref.node.operator_name)
-
-        self["operator_name"] = unique_collection_name(self.operator_name, "My Operator", names, " ", includes_name=True)
-        self.trigger_ref_update({ "name_change": self.operator_name })
-        self._evaluate(context)
-
-    def update_description(self, context):
-        self["operator_description"] = self.operator_description.replace("\"", "'")
-        self._evaluate(context)
-
-    def update_popup(self, context):
-        if self.invoke_option in ["invoke_props_dialog", "invoke_popup"]:
-            if len(self.inputs) == 1: self.add_integer_input("Width").default_value = 300
-        else:
-            if "Width" in self.inputs: self.inputs.remove(self.inputs["Width"])
-
-        if self.invoke_option in ["none","invoke_confirm","invoke_popup","invoke_search_popup"]:
-            for out in self.outputs[2:]:
-                self.outputs.remove(out)
-        else:
-            if not "Popup" in self.outputs:
-                self.add_dynamic_interface_output("Popup")
-
-        self._evaluate(context)
-
-    operator_name: bpy.props.StringProperty(default="My Operator", name="Name", description="Name of the operator", update=update_name)
-    operator_description: bpy.props.StringProperty(name="Description", description="Description of the operator", update=update_description)
-    invoke_option: bpy.props.EnumProperty(name="Popup",items=[("none","None","None"),
-                                                            ("invoke_confirm","Confirm","Shows a confirmation option for this operator"),
-                                                            ("invoke_props_dialog","Popup","Opens a customizable property dialog"),
-                                                            # ("invoke_popup", "Show Properties", "Shows a popup with the operators properties"),
-                                                            ("invoke_props_popup", "Property Update", "Show a customizable dialog and execute the operator on property changes"),
-                                                            ("invoke_search_popup", "Search Popup", "Opens a search menu from a selected enum property")],update=update_popup)
-
-
-    select_property: bpy.props.StringProperty(name="Preselected Property",description="The property that is preselected when the popup is opened. This can only be a String or Enum Property!", update=SN_ScriptingBaseNode._evaluate)
-
-
-    @property
-    def operator_python_name(self):
-        return get_python_name(self.operator_name, replacement="my_generic_operator")
-
     def on_create(self, context):
-        self.add_boolean_input("Disable")
-        self.add_execute_output("Execute")
-        self.add_execute_output("Before Popup")
-        self.update_name(context)
-
-    def on_copy(self, old):
-        self.update_name(None)
-
+        self.add_execute_input()
+        self.add_execute_output()
 
     def draw_node(self, context, layout):
         row = layout.row(align=True)
@@ -117,6 +45,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
 
     def evaluate(self, context):
+        python_name = get_python_name(self.operator_name, replacement="my_generic_operator")
         props_code = self.props_code(context).split("\n")
         selected_property = ""
 
@@ -152,8 +81,8 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
 
         self.code = f"""
-                    class SNA_OT_{self.operator_python_name.title()}(bpy.types.Operator):
-                        bl_idname = "sna.{self.operator_python_name}"
+                    class SNA_OT_{python_name.title()}(bpy.types.Operator):
+                        bl_idname = "sna.{python_name}"
                         bl_label = "{self.operator_name}"
                         bl_description = "{self.operator_description}"
                         bl_options = {"{" + '"REGISTER", "UNDO"' + "}"}
@@ -176,8 +105,8 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                             return {invoke_return}
                     """
 
-        self.code_register = f"bpy.utils.register_class(SNA_OT_{self.operator_python_name.title()})"
-        self.code_unregister = f"bpy.utils.unregister_class(SNA_OT_{self.operator_python_name.title()})"
+        self.code_register = f"bpy.utils.register_class(SNA_OT_{python_name.title()})"
+        self.code_unregister = f"bpy.utils.unregister_class(SNA_OT_{python_name.title()})"
 
 
 # get_set_node_property ?

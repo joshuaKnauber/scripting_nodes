@@ -16,8 +16,8 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_input("Emboss").default_value = True
         self.add_boolean_input("Depress")
         self.add_icon_input("Icon")
-        
-        
+
+
     def on_ref_update(self, node, data=None):
         if node.node_tree == self.custom_operator_ntree and node.name == self.ref_SN_OperatorNode:
             pass
@@ -47,9 +47,9 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.custom_operator_ntree and self.ref_SN_OperatorNode in self.custom_operator_ntree.nodes:
             parent = self.custom_operator_ntree.nodes[self.ref_SN_OperatorNode]
             for prop in parent.properties:
-                pass
+                self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
         self._evaluate(context)
-        
+
     def update_source_type(self, context):
         self.hide_disabled_inputs = False
         if self.source_type == "BLENDER":

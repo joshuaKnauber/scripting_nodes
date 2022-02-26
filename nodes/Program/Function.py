@@ -16,17 +16,17 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         out = self.add_dynamic_data_output("Input")
         out.is_variable = True
         out.changeable = True
-        
+
 
     def on_dynamic_socket_add(self, socket):
         self.trigger_ref_update({ "added": socket })
-    
+
     def on_dynamic_socket_remove(self, index, is_output):
         self.trigger_ref_update({ "removed": index })
-        
+
     def on_socket_type_change(self, socket):
         self.trigger_ref_update({ "changed": socket })
-        
+
     def on_socket_name_change(self, socket):
         self.trigger_ref_update({ "updated": socket })
 
