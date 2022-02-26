@@ -30,9 +30,11 @@ def compile_addon():
     # create text file
     txt = bpy.data.texts.new("tmp_serpens")
     
+    t2 = time.time()
     code = format_single_file()
     code += "\nbpy.context.scene.sn.addon_unregister.append(unregister)"
     code += "\nregister()"
+    print(f"Generated code in {round((time.time()-t2)*1000, 2)}ms")
     txt.write(code)
     
     if sn.debug_code:

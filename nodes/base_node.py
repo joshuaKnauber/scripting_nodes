@@ -413,6 +413,13 @@ class SN_ScriptingBaseNode:
     ### SOCKET ATTRIBUTES CHANGE
     def on_socket_type_change(self, socket): pass
     def on_socket_name_change(self, socket): pass
+    
+    
+    ### NODE PROPERTIES CHANGE
+    def on_node_property_change(self, property): pass
+    def on_node_property_add(self, property): pass
+    def on_node_property_remove(self, index): pass
+    def on_node_property_move(self, from_index, to_index): pass
 
 
     ### DRAW NODE

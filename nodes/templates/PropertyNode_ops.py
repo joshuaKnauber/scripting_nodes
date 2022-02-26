@@ -17,6 +17,7 @@ class SN_OT_AddNodeProperty(bpy.types.Operator):
         new_prop = node.properties.add()
         new_prop.name = "New Property"
         node.property_index = len(node.properties) - 1
+        node.on_node_property_add(new_prop)
         return {"FINISHED"}
 
 
@@ -35,6 +36,7 @@ class SN_OT_RemoveNodeProperty(bpy.types.Operator):
         node = ntree.nodes[self.node]
         if node.property_index < len(node.properties):
             node.properties.remove(node.property_index)
+        node.on_node_property_remove(node.property_index)
         node.property_index -= 1
         return {"FINISHED"}
 
@@ -55,9 +57,11 @@ class SN_OT_MoveNodeProperty(bpy.types.Operator):
         node = bpy.data.node_groups[self.node_tree].nodes[self.node]
         if self.move_up:
             node.properties.move(node.property_index, node.property_index - 1)
+            node.on_node_property_move(node.property_index, node.property_index-1)
             node.property_index -= 1
         else:
             node.properties.move(node.property_index, node.property_index + 1)
+            node.on_node_property_move(node.property_index, node.property_index+1)
             node.property_index += 1
         return {"FINISHED"}
 
