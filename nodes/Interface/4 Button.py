@@ -26,6 +26,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if not inp.name in node.properties:
                         inp.name = prop.name
                     if inp.name == prop.name:
+                        # TODO vector sockets + subtypes
                         self.convert_socket(inp, self.socket_names[prop.property_type])
 
             if "property_add" in data:
@@ -117,7 +118,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                                         name="Hide Disabled Inputs",
                                         description="Hides the disabled inputs of this node",
                                         update=udpate_hide_disabled_inputs)
-    
+
 
     def evaluate(self, context):
         if self.source_type == "BLENDER":
@@ -131,9 +132,17 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                     for prop in op_rna.properties:
                         if prop.name == inp.name:
                             self.code += "\n" + f"op.{prop.identifier} = {inp.python_value}"
-        
+
         else:
-            pass
+            if self.custom_operator_ntree and self.ref_SN_OperatorNode:
+                node = self.custom_operator_ntree.nodes[self.ref_SN_OperatorNode]
+                self.code = f"op = {self.active_layout}.operator('sna.{node.operator_python_name}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"
+
+                for inp in self.inputs:
+                    if inp.can_be_disabled and not inp.disabled:
+                        for prop in node.properties:
+                            if prop.name == inp.name:
+                                self.code += "\n" + f"op.{prop.python_name} = {inp.python_value}"
 
 
     def draw_node(self, context, layout):

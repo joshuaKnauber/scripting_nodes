@@ -179,5 +179,6 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         self.code_unregister = f"bpy.utils.unregister_class(SNA_OT_{self.operator_python_name.title()})"
 
 
+# TODO
 # get_set_node_property ?
 # options ?
