@@ -33,12 +33,12 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
 
             if "property_remove" in data:
-                self.inputs.remove(self.inputs[data["property_remove"] + 4])
+                self.inputs.remove(self.inputs[data["property_remove"] + 5])
 
             if "property_move" in data:
                 from_index = data["property_move"][0]
                 to_index = data["property_move"][1]
-                self.inputs.move(from_index+4, to_index+4)
+                self.inputs.move(from_index+5, to_index+5)
             self._evaluate(bpy.context)
 
 
