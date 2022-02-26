@@ -19,7 +19,7 @@ class SN_SetCustomPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, context):
-        if self.inputs[1].links:
+        if self.inputs[1].is_linked:
             self.code = f"""
                         {self.inputs[1].python_value}[{self.inputs[2].python_value}] = {self.inputs[3].python_value}
                         {self.indent(self.outputs[0].python_value, 6)}
