@@ -10,12 +10,14 @@ from ..addon.variables.compiler_variables import variable_register_code
 def unregister_addon():
     """ Unregisters this addon """
     sn = bpy.context.scene.sn
+    t1 = time.time()
     if sn.addon_unregister:
         try:
             sn.addon_unregister[0]()
         except Exception as error:
             print("error when unregister:", error)
         sn.addon_unregister.clear()
+    if sn.debug_compile_time: print(f"---\nUnregister took {round((time.time()-t1)*1000, 2)}ms")
 
 
 
@@ -34,7 +36,7 @@ def compile_addon():
     code = format_single_file()
     code += "\nbpy.context.scene.sn.addon_unregister.append(unregister)"
     code += "\nregister()"
-    print(f"Generated code in {round((time.time()-t2)*1000, 2)}ms")
+    if sn.debug_compile_time: print(f"Generating code took {round((time.time()-t2)*1000, 2)}ms")
     txt.write(code)
     
     if sn.debug_code:
@@ -46,6 +48,7 @@ def compile_addon():
         
 
     # run text file
+    t2 = time.time()
     ctx = bpy.context.copy()
     ctx['edit_text'] = txt
     try:
@@ -61,6 +64,7 @@ def compile_addon():
             err = bpy.data.texts["serpens_error"]
             err.clear()
             err.write(code)
+    if sn.debug_compile_time: print(f"Register took {round((time.time()-t2)*1000, 2)}ms\n---")
 
     # remove text file
     bpy.data.texts.remove(txt)

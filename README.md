@@ -71,3 +71,5 @@ scene collections output on collections node
 [] add back blend data input nodes
 [] fix property output not showing properly when selecting collection as prop (blend to?, maybe fine?)
 [] paste in object prop -> shows objects as input and can't find default
+[] enum items on function parameter
+[] enum items from operator to button/run operator

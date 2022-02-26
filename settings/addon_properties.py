@@ -84,6 +84,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Debug Properties",
                                         description="Debug internal property code")
 
+    debug_compile_time: bpy.props.BoolProperty(default=False,
+                                        name="Debug Compile Time",
+                                        description="Prints the time it takes to compile the code")
+
 
     insert_sockets: bpy.props.BoolProperty(default=False,
                                         name="Insert Socket Buttons",
