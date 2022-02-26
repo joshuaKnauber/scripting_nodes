@@ -39,7 +39,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                 from_index = data["property_move"][0]
                 to_index = data["property_move"][1]
                 self.inputs.move(from_index+4, to_index+4)
-
+            self._evaluate(bpy.context)
 
     def reset_inputs(self):
         """ Remove all operator inputs """
@@ -75,23 +75,23 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         elif self.source_type == "CUSTOM":
             self.ref_SN_OperatorNode = self.ref_SN_OperatorNode
         self._evaluate(context)
-    
+
     custom_operator_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Panel Node Tree",
                                     description="The node tree to select the operator from",
                                     poll=SN_ScriptingBaseNode.ntree_poll,
                                     update=SN_ScriptingBaseNode._evaluate)
-                    
+
     source_type: bpy.props.EnumProperty(name="Source Type",
                                     description="Use a custom operator or a blender internal",
                                     items=[("BLENDER", "Blender", "Blender", "BLENDER", 0),
                                            ("CUSTOM", "Custom", "Custom", "FILE_SCRIPT", 1)],
                                     update=update_source_type)
-    
+
     ref_SN_OperatorNode: bpy.props.StringProperty(name="Custom Operator",
                                     description="The operator ran by this button",
                                     update=update_custom_operator)
-        
+
 
     def update_pasted_operator(self, context):
         self.reset_inputs()
