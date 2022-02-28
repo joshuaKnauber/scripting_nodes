@@ -162,6 +162,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_node(self, context, layout):
         row = layout.row(align=True)
+        row.prop(self, "source_type", text="", icon_only=True)
         
         if self.source_type == "BLENDER":
             op = row.operator("sn.paste_operator", text=self.pasted_name if self.pasted_operator else "Paste Operator", icon="PASTEDOWN")
@@ -175,5 +176,4 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             subrow.enabled = self.custom_operator_ntree != None
             subrow.prop_search(self, "ref_SN_OperatorNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_OperatorNode"), "refs", text="")
 
-        row.prop(self, "source_type", text="", icon_only=True)
-        row.prop(self, "hide_disabled_inputs", text="", icon="HIDE_ON" if self.hide_disabled_inputs else "HIDE_OFF")
+        row.prop(self, "hide_disabled_inputs", text="", icon="HIDE_ON" if self.hide_disabled_inputs else "HIDE_OFF", emboss=False)
