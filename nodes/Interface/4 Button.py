@@ -36,6 +36,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 socket.subtype = prop.settings.subtype
                             else:
                                 socket.subtype = "NONE"
+                        # TODO enum items (same for run operator)
 
             if "property_add" in data:
                 prop = data["property_add"]
@@ -117,15 +118,15 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     pasted_name: bpy.props.StringProperty(default="Paste Operator")
     
     
-    def udpate_hide_disabled_inputs(self, context):
+    def update_hide_disabled_inputs(self, context):
         for inp in self.inputs:
-            if inp.can_be_disabled:
+            if inp.can_be_disabled and inp.disabled:
                 inp.set_hide(self.hide_disabled_inputs)
     
     hide_disabled_inputs: bpy.props.BoolProperty(default=False,
                                         name="Hide Disabled Inputs",
                                         description="Hides the disabled inputs of this node",
-                                        update=udpate_hide_disabled_inputs)
+                                        update=update_hide_disabled_inputs)
 
 
     def evaluate(self, context):

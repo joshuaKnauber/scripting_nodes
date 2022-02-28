@@ -639,14 +639,15 @@ class SN_ScriptingBaseNode:
                 if prop.is_enum_flag:
                     inp.subtype = "ENUM_FLAG"
             # get property default
-            default = prop.default
-            if getattr(prop, "is_array", False):
-                default = tuple([prop.default]*32)
-                inp.size = prop.array_length
-            if prop_type == "Enum" and prop.is_enum_flag:
-                pass
-            else:
-                inp.default_value = default
+            if not prop_type in ["Collection", "Pointer"]:
+                default = prop.default
+                if getattr(prop, "is_array", False):
+                    default = tuple([prop.default]*32)
+                    inp.size = prop.array_length
+                if prop_type == "Enum" and prop.is_enum_flag:
+                    pass
+                else:
+                    inp.default_value = default
 
             return inp
         return None

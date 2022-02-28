@@ -40,7 +40,9 @@ class SN_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     default_value: bpy.props.FloatVectorProperty(name="Value",
                                             size=32,
-                                            description="Value of this socket")
+                                            description="Value of this socket",
+                                            get=_get_value,
+                                            set=_set_value)
 
     color_value: bpy.props.FloatVectorProperty(name="Value",
                                             description="Value of this socket",
