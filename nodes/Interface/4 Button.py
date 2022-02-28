@@ -26,11 +26,16 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if not inp.name in node.properties:
                         inp.name = prop.name
                     if inp.name == prop.name:
-                        if prop.property_type in ["Integer", "Float"] and prop.settings.is_vector:
-                            self.convert_socket(inp, self.socket_names[prop.property_type])
+                        if prop.property_type in ["Integer", "Float", "Boolean"] and prop.settings.is_vector:
+                            socket = self.convert_socket(inp, self.socket_names[prop.property_type + " Vector"])
+                            socket.size = prop.settings.size
                         else:
-                            self.convert_socket(inp, self.socket_names[prop.property_type])
-                        # TODO vector sockets + subtypes
+                            socket = self.convert_socket(inp, self.socket_names[prop.property_type])
+                        if hasattr(prop.settings, "subtype"):
+                            if prop.settings.subtype in socket.subtypes:
+                                socket.subtype = prop.settings.subtype
+                            else:
+                                socket.subtype = "NONE"
 
             if "property_add" in data:
                 prop = data["property_add"]
