@@ -26,4 +26,4 @@ class SN_DisplayPreviewNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self, context, layout):
         box = layout.box()
         box.label(text="Careful! This element is prone to crashes!", icon="INFO")
-        box.label(text="Only materials, textures, lightsm worlds and line styles can be displayed")
+        box.label(text="Only materials, textures, lights, worlds and line styles can be displayed")
