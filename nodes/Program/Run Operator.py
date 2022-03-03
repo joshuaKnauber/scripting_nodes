@@ -17,34 +17,35 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_ref_update(self, node, data=None):
         if node.node_tree == self.custom_operator_ntree and node.name == self.ref_SN_OperatorNode:
-            if "property_change" in data:
-                prop = data["property_change"]
-                for inp in self.inputs[1:]:
-                    if not inp.name in node.properties:
-                        inp.name = prop.name
-                    if inp.name == prop.name:
-                        if prop.property_type in ["Integer", "Float", "Boolean"] and prop.settings.is_vector:
-                            socket = self.convert_socket(inp, self.socket_names[prop.property_type + " Vector"])
-                            socket.size = prop.settings.size
-                        else:
-                            socket = self.convert_socket(inp, self.socket_names[prop.property_type])
-                        if hasattr(prop.settings, "subtype"):
-                            if prop.settings.subtype in socket.subtypes:
-                                socket.subtype = prop.settings.subtype
+            if data:
+                if "property_change" in data:
+                    prop = data["property_change"]
+                    for inp in self.inputs[1:]:
+                        if not inp.name in node.properties:
+                            inp.name = prop.name
+                        if inp.name == prop.name:
+                            if prop.property_type in ["Integer", "Float", "Boolean"] and prop.settings.is_vector:
+                                socket = self.convert_socket(inp, self.socket_names[prop.property_type + " Vector"])
+                                socket.size = prop.settings.size
                             else:
-                                socket.subtype = "NONE"
+                                socket = self.convert_socket(inp, self.socket_names[prop.property_type])
+                            if hasattr(prop.settings, "subtype"):
+                                if prop.settings.subtype in socket.subtypes:
+                                    socket.subtype = prop.settings.subtype
+                                else:
+                                    socket.subtype = "NONE"
 
-            if "property_add" in data:
-                prop = data["property_add"]
-                self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
+                if "property_add" in data:
+                    prop = data["property_add"]
+                    self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
 
-            if "property_remove" in data:
-                self.inputs.remove(self.inputs[data["property_remove"] + 1])
+                if "property_remove" in data:
+                    self.inputs.remove(self.inputs[data["property_remove"] + 1])
 
-            if "property_move" in data:
-                from_index = data["property_move"][0]
-                to_index = data["property_move"][1]
-                self.inputs.move(from_index+1, to_index+1)
+                if "property_move" in data:
+                    from_index = data["property_move"][0]
+                    to_index = data["property_move"][1]
+                    self.inputs.move(from_index+1, to_index+1)
             self._evaluate(bpy.context)
 
 

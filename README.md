@@ -68,3 +68,4 @@ Visual Scripting addon for blender with nodes
 [] enum items from operator to button/run operator
 [] property update
 [] replace space data in paths with screen/area stuff
+[] operator/preference properties
