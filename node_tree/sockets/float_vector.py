@@ -64,6 +64,8 @@ class SN_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
     
 
     def get_color(self, context, node):
+        if "COLOR" in self.subtype:
+            return (0.93, 0.85, 0.25)
         return (0.38, 0.34, 0.84)
 
     def draw_socket(self, context, layout, node, text):

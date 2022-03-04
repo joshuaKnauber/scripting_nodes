@@ -12,8 +12,10 @@ class SN_ColorNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_size(self, context):
         if self.use_four:
             self.inputs[0].subtype = "COLOR_ALPHA"
+            self.outputs[0].subtype = "COLOR_ALPHA"
         else:
             self.inputs[0].subtype = "COLOR"
+            self.outputs[0].subtype = "COLOR"
 
     use_four: bpy.props.BoolProperty(default=False,
                                      name="Use Alpha",
@@ -23,7 +25,7 @@ class SN_ColorNode(bpy.types.Node, SN_ScriptingBaseNode):
         socket = self.add_float_vector_input("Color")
         socket.set_hide(True)
         socket.subtype = "COLOR"
-        self.add_float_vector_output("Color")
+        self.add_float_vector_output("Color").subtype = "COLOR"
 
     def evaluate(self, context):
         self.outputs["Color"].python_value = self.inputs["Color"].python_value
