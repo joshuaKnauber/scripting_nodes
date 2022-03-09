@@ -84,7 +84,7 @@ class SN_PT_FloatProperty(PropertySettings, bpy.types.PropertyGroup):
         if self.use_soft_max: options += f", soft_max={self.soft_max}"
         options += f", step={self.step}"
         options += f", precision={self.precision}"
-        return options
+        return options + self.update_option
     
     
     default: bpy.props.FloatProperty(name="Default",

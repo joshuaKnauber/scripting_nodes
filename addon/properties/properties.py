@@ -86,7 +86,7 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
     
     def compile(self, context=None):
         """ Registers the property and unregisters previous version """
-        print(f"Serpens Log: Property {self.name} received an update")
+        # print(f"Serpens Log: Property {self.name} received an update")
         compile_addon()
         
 

@@ -75,7 +75,7 @@ class SN_PT_IntegerProperty(PropertySettings, bpy.types.PropertyGroup):
         if self.use_soft_min: options += f", soft_min={self.soft_min}"
         if self.use_max: options += f", max={self.max}"
         if self.use_soft_max: options += f", soft_max={self.soft_max}"
-        return options
+        return options + self.update_option
     
     
     default: bpy.props.IntProperty(name="Default",

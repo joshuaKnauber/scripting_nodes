@@ -26,7 +26,7 @@ class SN_PT_StringProperty(PropertySettings, bpy.types.PropertyGroup):
     
     @property
     def register_options(self):
-        return f"default='{self.default}', subtype='{self.subtype}', maxlen={self.maxlen}"
+        return f"default='{self.default}', subtype='{self.subtype}', maxlen={self.maxlen}{self.update_option}"
     
     
     default: bpy.props.StringProperty(name="Default",
@@ -50,13 +50,3 @@ class SN_PT_StringProperty(PropertySettings, bpy.types.PropertyGroup):
                                   min=0,
                                   default=0,
                                   update=PropertySettings.compile)
-    
-    
-    # options: bpy.props.EnumProperty(name="Options",
-    #                                 description="Options for this property",
-    #                                 items=[("HIDDEN", "Hide property from operator popups (only relevant for operators)"),
-    #                                        ("SKIP_SAVE", "Skip Save", "Don't save this property for running operators (only relevant for operators)"),
-    #                                        ("ANIMATABLE", "Animatable", "If the property can be animated or not"),
-    #                                        ("LIBRARY_EDITABLE", "Animatable", "If the property can be animated or not"),
-    #                                        ("PROPORTIONAL", "Animatable", "If the property can be animated or not"),
-    #                                        ("TEXTEDIT_UPDATE", "Animatable", "If the property can be animated or not")])

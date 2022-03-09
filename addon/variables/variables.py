@@ -37,7 +37,7 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
     
     def compile(self, context=None):
         """ Registers the variable and unregisters previous version """
-        print(f"Serpens Log: Variable {self.name} received an update")
+        # print(f"Serpens Log: Variable {self.name} received an update")
         compile_addon()
     
     

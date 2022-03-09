@@ -102,3 +102,44 @@ class PropertySettings:
     def compile(self, context=None):
         """ Compile the property for these settings """
         self.prop.compile()
+        
+    def imperative_code(self):
+        return self.update_function
+        
+    def _update_function_names(self):
+        """ Returns the code for the on property update function """
+        updates = []
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                for node in ntree.node_collection("SN_OnPropertyUpdateNode").nodes:
+                    prop_src = node.get_prop_source()
+                    if prop_src and node.prop_name in prop_src.properties:
+                        prop = prop_src.properties[node.prop_name]
+                        if prop == self.prop:
+                            updates.append(node.update_func_name(prop))
+        return updates
+        
+    
+    @property
+    def update_function(self):
+        """ Returns the code for the update function """
+        update_names = self._update_function_names()
+        if len(update_names) < 2:
+            return ""
+        else:
+            code = f"def sna_update_{self.prop.python_name}(self, context):"
+            for func in update_names:
+                code += " "*4 + f"{func}(self, context)"
+            return code
+        
+        
+    @property
+    def update_option(self):
+        """ Returns the code for the update function option """
+        update_names = self._update_function_names()
+        if len(update_names) == 0 or self.prop.property_type in ["Group", "Collection"]:
+            return ""
+        elif len(update_names) == 1:
+            return f", update={update_names[0]}"
+        return f", update=sna_update_{self.prop.python_name}"
+        

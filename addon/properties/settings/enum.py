@@ -116,7 +116,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
             
         if self.enum_flag:
             options += ", options={'ENUM_FLAG'}"
-        return options
+        return options + self.update_option
     
     
     def imperative_code(self):
@@ -133,7 +133,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
             def {self.item_func_name}(self, context):
                 return [("No Items", "No Items", "No generate enum items node found to create items!", "ERROR", 0)]
             """
-        return normalize_code(code)
+        return normalize_code(code) + "\n" + self.update_function
     
     
     enum_flag: bpy.props.BoolProperty(name="Select Multiple",
