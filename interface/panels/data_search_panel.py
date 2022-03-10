@@ -56,6 +56,9 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         row.prop(context.scene.sn, "data_search", text="", icon="VIEWZOOM")
         col.prop(context.scene.sn, "data_filter", expand=True)
         
+        layout.separator()
+        layout.prop(context.scene.sn, "show_path")
+        
         
         
 class SN_PT_FilterDataSettings(bpy.types.Panel):
@@ -87,7 +90,6 @@ class SN_PT_data_search(bpy.types.Panel):
     def should_draw(self, item, search_value, filters):
         if search_value.lower() in item["name"].lower():
             return item["type"] in filters
-            return True
         return False
     
     def draw_item(self, layout, item):
@@ -111,9 +113,10 @@ class SN_PT_data_search(bpy.types.Panel):
         subrow.enabled = False
         subrow.label(text=item["type"], icon=icon)
 
-        # subrow = row.row()
-        # subrow.enabled = False
-        # subrow.label(text=item["path"])
+        if bpy.context.scene.sn.show_path:
+            subrow = row.row()
+            subrow.enabled = False
+            subrow.label(text=item["path"])
         
         if item["has_properties"]:
             op = row.operator("sn.reload_item_data", text="", icon="FILE_REFRESH", emboss=False)
@@ -134,11 +137,11 @@ class SN_PT_data_search(bpy.types.Panel):
                 sub_item = item["properties"][key]
                 if self.should_draw(sub_item, item["data_search"], item["data_filter"]):
                     self.draw_item(col, sub_item)
-                    # if sub_item["shortened_coll"]:
-                    #     box = col.box()
-                    #     box.scale_y = 0.75
-                    #     box.label(text="... Shortened because of too many items", icon="PLUS")
-                    #     col.separator()
+                    if sub_item["clamped"]:
+                        box = col.box()
+                        box.scale_y = 0.75
+                        box.label(text="... Shortened because of too many items", icon="PLUS")
+                        col.separator()
                     is_empty = False
 
             if is_empty:

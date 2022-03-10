@@ -46,7 +46,7 @@ Visual Scripting addon for blender with nodes
 - [X] Enum Flag enum returns
 - [X] Path icons on startup
 - [X] Generate dynamic enum items on startup
-- [ ] Property source and name split when there is brackets at the end
+- [x] Property source and name split when there is brackets at the end
 - [X] Undo is real fucking slow
 
 
@@ -58,7 +58,7 @@ Visual Scripting addon for blender with nodes
 [X] test other display nodes
 [X] reload with correct context
 [] run blender function on blend data
-[] get non property data (hide property output and only show value?)
+[X] get non property data (hide property output and only show value?)
 [X] do filters in browser
 [] add back blend data input nodes
 [] fix property output not showing properly when selecting collection as prop (blend to?, maybe fine?)
@@ -69,6 +69,6 @@ Visual Scripting addon for blender with nodes
 [] property update
 [] replace space data in paths with screen/area stuff
 [] operator/preference properties
-[] changing order doesn't hard compile
+[] changing nodes order doesn't hard compile
 [] add node buttons
 [] find node buttons

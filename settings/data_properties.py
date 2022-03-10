@@ -47,8 +47,11 @@ def get_data_items(path, data):
                     data_items[f"'{key}'"] = get_data_item(data[key], path, f"'{key}'")
         # get indexed items
         else:
-            for i in range(len(data.values())):
+            max_items = 21
+            for i in range(min(len(data.values()), max_items)):
                 data_items[f"{i}"] = get_data_item(data[i], path, f"{i}")
+                if i == max_items-1 and len(data.values()) > max_items:
+                    data_items[f"{i}"]["clamped"] = True
 
     # sort items
     sorted_keys = sorted(data_items.keys(), key=lambda s: data_items[s]["type"])
@@ -85,7 +88,8 @@ def get_data_item(data, path, attribute):
         "data_filter": filter_defaults,
         "expanded": False,
         "has_properties": has_properties,
-        "properties": {}
+        "properties": {},
+        "clamped": False
     }
     return data_item
 
@@ -126,16 +130,6 @@ def get_item_type(data):
     return item_type
 
 
-def separate_attribute_from_path(path):
-    """ Returns the last attribute from the path and the path before """
-    attr_path = ".".join(path.split(".")[:-1])
-    attribute = path.split(".")[-1]
-    if path[-1] == "]":
-        attribute = path.split("['")[-1][:-2]
-        attr_path = "['".join(path.split("['")[:-1])
-    return attr_path, f"'{attribute}'"
-
-
 def item_from_path(data, path):
     """ Returns the item in the data for the given path. Works for anything above bpy.xyz """
     # after bpy.xyz
@@ -155,17 +149,28 @@ def item_from_path(data, path):
 
 def bpy_to_path_sections(path):
     """ Takes a blender python data path and converts it to json path sections """
-    # TODO this needs to be different e.g for:
-    # - bpy.context.window_manager.keyconfigs.addon.keymaps['Node Editor'].keymap_items['sn.force_compile']
-    # - bpy.data.objects["Cube"].modifiers["GeometryNodes"]["Output_2_attribute_name"]
-    path = path.replace('"', "'").replace("bpy.", "")
-    split_path = []
-    for section in path.split("['"):
-        if not "']" in section:
-            split_path += list(filter(lambda s: s, section.split(".")))
+    path = path.replace('"', "'").replace("bpy.", "")    
+    
+    sections = []
+    curr_section = ""
+    in_string = False
+    for char in path:
+        print(char, in_string, curr_section)
+        if char == "." and not in_string:
+            sections.append(curr_section)
+            curr_section = ""
+        elif char == "[" and not in_string:
+            sections.append(curr_section)
+            curr_section = ""
+        elif char == "]" and not in_string:
+            sections.append(curr_section)
+            curr_section = ""
+        elif char == "'":
+            curr_section += "'"
+            in_string = not in_string
         else:
-            section = list(filter(lambda s: s, section.split("']")))
-            split_path.append(f"'{section[0]}'")
-            if len(section) > 1:
-                split_path += list(filter(lambda s: s, section[1].split(".")))
-    return split_path
+            curr_section += char
+    sections.append(curr_section)
+    sections = list(filter(lambda item: item, sections))
+                
+    return sections
