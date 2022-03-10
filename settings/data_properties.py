@@ -43,7 +43,8 @@ def get_data_items(path, data):
         # get keyed items
         if len(data.keys()) == len(data.values()):
             for key in data.keys():
-                data_items[f"'{key}'"] = get_data_item(data[key], path, f"'{key}'")
+                if hasattr(data[key], "bl_rna"):
+                    data_items[f"'{key}'"] = get_data_item(data[key], path, f"'{key}'")
         # get indexed items
         else:
             for i in range(len(data.values())):
