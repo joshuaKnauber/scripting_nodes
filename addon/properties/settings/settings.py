@@ -116,8 +116,8 @@ class PropertySettings:
                     if prop_src and node.prop_name in prop_src.properties:
                         prop = prop_src.properties[node.prop_name]
                         if prop == self.prop:
-                            updates.append(node.update_func_name(prop))
-        return updates
+                            updates.append((node.update_func_name(prop), node.order))
+        return list(map(lambda item: item[0], sorted(updates, key=lambda i: i[1])))
         
     
     @property
@@ -127,9 +127,9 @@ class PropertySettings:
         if len(update_names) < 2:
             return ""
         else:
-            code = f"def sna_update_{self.prop.python_name}(self, context):"
+            code = f"def sna_update_{self.prop.python_name}(self, context):\n"
             for func in update_names:
-                code += " "*4 + f"{func}(self, context)"
+                code += " "*4 + f"{func}(self, context)\n"
             return code
         
         

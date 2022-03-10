@@ -29,14 +29,15 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
         if prop_src and self.prop_name in prop_src.properties and not prop_src.properties[self.prop_name].property_type in ["Group", "Collection"]:
             prop = prop_src.properties[self.prop_name]
             
+            self.outputs["Updated Property"].python_value = f"self.{prop.python_name}"
+            self.outputs["Attached To Item"].python_value = f"self"
+            self.outputs["Property Value"].python_value = "sna_updated_prop"
+            
             self.code = f"""
                 def {self.update_func_name(prop)}(self, context):
                     sna_updated_prop = self.{prop.python_name}
                     {self.indent(self.outputs[0].python_value, 5)}
                 """
-            self.outputs["Updated Property"].python_value = f"self.{prop.python_name}"
-            self.outputs["Attached To Item"].python_value = f"self"
-            self.outputs["Property Value"].python_value = "sna_updated_prop"
         else:
             self.outputs["Updated Property"].reset_value()
             self.outputs["Attached To Item"].reset_value()
@@ -44,7 +45,7 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
 
 
     def draw_node(self, context, layout):
-        self.draw_reference_selection(layout, True)
+        self.draw_reference_selection(layout)
         prop_src = self.get_prop_source()
         if self.prop_name and prop_src and self.prop_name in prop_src.properties:
             prop = prop_src.properties[self.prop_name]

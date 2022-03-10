@@ -19,7 +19,7 @@ Visual Scripting addon for blender with nodes
 ### Blend Data
 - [X] Get Data Node
 - [X] Set Data Node
-- [ ] bpy.data Nodes
+- [X] bpy.data Nodes
 - [X] bpy.context Nodes
 - [X] Consider missing blend data
 
@@ -69,3 +69,6 @@ Visual Scripting addon for blender with nodes
 [] property update
 [] replace space data in paths with screen/area stuff
 [] operator/preference properties
+[] changing order doesn't hard compile
+[] add node buttons
+[] find node buttons
