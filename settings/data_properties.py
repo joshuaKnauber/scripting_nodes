@@ -4,7 +4,8 @@ from ..addon.properties.settings.settings import property_icons
 
 
 def is_valid_attribute(attr):
-    return not attr in ["rna_type", "original", "bl_rna"] and not attr[0] == "_"
+    ignore_attributes = ["rna_type", "original", "bl_rna", "evaluated_depsgraph_get"]
+    return not attr in ignore_attributes and not attr[0] == "_"
 
 
 filter_items = [("Pointer", "Pointer", "Pointer", property_icons["Property"], 1),
@@ -34,9 +35,9 @@ def get_data_items(path, data):
     data_items = {}
 
     # get attributes
-    data_dict = data if type(data) == dict else data_to_dict(data)
+    data_dict = validate_data_dict(data) if type(data) == dict else data_to_dict(data)
     for key in data_dict.keys():
-        data_items[key] = get_data_item(data_dict[key], path, key)
+        data_items[key] = get_data_item(data, data_dict[key], path, key)
 
     # get items for iterable
     if is_iterable(data) and not type(data) == dict:
@@ -44,12 +45,12 @@ def get_data_items(path, data):
         if len(data.keys()) == len(data.values()):
             for key in data.keys():
                 if hasattr(data[key], "bl_rna"):
-                    data_items[f"'{key}'"] = get_data_item(data[key], path, f"'{key}'")
+                    data_items[f"'{key}'"] = get_data_item(data, data[key], path, f"'{key}'")
         # get indexed items
         else:
             max_items = 21
             for i in range(min(len(data.values()), max_items)):
-                data_items[f"{i}"] = get_data_item(data[i], path, f"{i}")
+                data_items[f"{i}"] = get_data_item(data, data[i], path, f"{i}")
                 if i == max_items-1 and len(data.values()) > max_items:
                     data_items[f"{i}"]["clamped"] = True
 
@@ -61,6 +62,17 @@ def get_data_items(path, data):
     return sorted_items
 
 
+def validate_data_dict(data):
+    """ Removes all attributes that aren't valid """
+    to_delete = []
+    for key in data.keys():
+        if not is_valid_attribute(key):
+            to_delete.append(key)
+    for key in to_delete:
+        del data[key]
+    return data
+
+
 def data_to_dict(data):
     """ Converts the given data to a dictionary with keys for the path section and the data """
     data_dict = {}
@@ -70,7 +82,7 @@ def data_to_dict(data):
     return data_dict
         
         
-def get_data_item(data, path, attribute):
+def get_data_item(parent_data, data, path, attribute):
     """ Returns a data object for the given data its path and the datas attribute """
     has_properties = hasattr(data, "bl_rna")
     if (attribute[0] == "'" and attribute[-1] == "'") or attribute.isdigit():
@@ -93,7 +105,7 @@ def get_data_item(data, path, attribute):
         "parameters": {}
     }
     if data_item["type"] == "Function":
-        data_item["parameters"] = get_function_parameters(data)
+        data_item["parameters"] = get_function_parameters(parent_data, attribute)
     return data_item
 
 
@@ -107,9 +119,9 @@ def get_data_name(data, attribute):
     return name
 
 
-def get_item_type(data):
+def get_item_type(data, item_type=""):
     """ Returns the item type for the given data """
-    item_type = str(type(data))
+    if item_type == "": item_type = str(type(data))
     if "bpy_prop_collection" in item_type: item_type = "Collection"
     elif "bpy_types" in item_type: item_type = "Pointer"
     elif "bpy.types" in item_type: item_type = "Pointer"
@@ -133,10 +145,17 @@ def get_item_type(data):
     return item_type
 
 
-def get_function_parameters(function):
+def get_function_parameters(parent_data, name):
     """ Returns a dictionary with function parameters """
-    
-    return {}
+    params = {}
+    if hasattr(parent_data, "bl_rna") and hasattr(parent_data.bl_rna, "functions"):
+        if name in parent_data.bl_rna.functions:
+            for param in parent_data.bl_rna.functions[name].parameters:
+                params[param.identifier] = {
+                    "type": get_item_type(param, param.type.lower()), # TODO
+                }
+                if getattr(param, "is_array", False): params[param.identifier]["type"] += " Vector"
+    return params
 
 
 def item_from_path(data, path):

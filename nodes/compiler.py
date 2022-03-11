@@ -31,6 +31,7 @@ def compile_addon():
                     
     # create text file
     txt = bpy.data.texts.new("tmp_serpens")
+    txt.use_fake_user = False
     
     t2 = time.time()
     code = format_single_file()

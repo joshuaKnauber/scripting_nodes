@@ -63,13 +63,13 @@ Visual Scripting addon for blender with nodes
 [] add back blend data input nodes
 [] fix property output not showing properly when selecting collection as prop (blend to?, maybe fine?)
 [] paste in object prop -> shows objects as input and can't find default
-[] geo node like props / attributes in blender property node
+[] geo node like props / attributes in blender property node -> display
 [] enum items on function parameter
 [] enum items from operator to button/run operator
-[] property update
+[X] property update
 [] replace space data in paths with screen/area stuff
 [] operator/preference properties
 [] changing nodes order doesn't hard compile
 [] add node buttons
 [] find node buttons
-[] property exists node -> takes parts and does and boolean to return if parts of prop exist or not
+[X] property exists node -> takes parts and does and boolean to return if parts of prop exist or not
