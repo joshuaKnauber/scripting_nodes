@@ -75,12 +75,13 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
 
             for i, item in enumerate(self.items):
                 box = layout.box()
+                col = box.column(align=True)
                 box.use_property_split = False
-                row = box.row()
+                row = col.row()
                 row.prop(item, "name")
                 op = row.operator("sn.select_icon", icon_value=item.icon if item.icon != 0 else 101, text="", emboss=item.icon==0)
                 op.icon_data_path = f"{self.prop.full_prop_path}.settings.items[{i}]"
-                box.prop(item, "description")
+                col.prop(item, "description")
                 
         else:
             op = row.operator("node.add_node", text="Generate Items", icon="ADD")
