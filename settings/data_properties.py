@@ -89,8 +89,11 @@ def get_data_item(data, path, attribute):
         "expanded": False,
         "has_properties": has_properties,
         "properties": {},
-        "clamped": False
+        "clamped": False,
+        "parameters": {}
     }
+    if data_item["type"] == "Function":
+        data_item["parameters"] = get_function_parameters(data)
     return data_item
 
 
@@ -130,6 +133,12 @@ def get_item_type(data):
     return item_type
 
 
+def get_function_parameters(function):
+    """ Returns a dictionary with function parameters """
+    
+    return {}
+
+
 def item_from_path(data, path):
     """ Returns the item in the data for the given path. Works for anything above bpy.xyz """
     # after bpy.xyz
@@ -155,7 +164,6 @@ def bpy_to_path_sections(path):
     curr_section = ""
     in_string = False
     for char in path:
-        print(char, in_string, curr_section)
         if char == "." and not in_string:
             sections.append(curr_section)
             curr_section = ""

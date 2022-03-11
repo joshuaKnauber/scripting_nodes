@@ -72,3 +72,4 @@ Visual Scripting addon for blender with nodes
 [] changing nodes order doesn't hard compile
 [] add node buttons
 [] find node buttons
+[] property exists node -> takes parts and does and boolean to return if parts of prop exist or not

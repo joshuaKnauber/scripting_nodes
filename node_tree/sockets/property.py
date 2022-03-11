@@ -1,5 +1,6 @@
 import bpy
 from .base_socket import ScriptingSocket
+from ...settings.data_properties import bpy_to_path_sections
 
 
 
@@ -52,6 +53,13 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
         if "." in value:
             return ".".join(value.split(".")[:-1])
         return value
+    
+    @property
+    def python_sections(self):
+        sections = bpy_to_path_sections(self.python_value)
+        if sections:
+            return ["bpy"] + sections
+        return []
     
     
     subtypes = ["NONE"]
