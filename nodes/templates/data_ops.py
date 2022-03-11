@@ -23,7 +23,7 @@ class SN_OT_PasteDataPath(bpy.types.Operator):
                     context.scene.sn.last_copied_datatype in node.socket_names:
                     node.outputs["Value"].data_type = node.socket_names[context.scene.sn.last_copied_datatype]
                 # data type is function
-                elif context.scene.sn.last_copied_datatype == "Function":
+                elif "(" in  context.window_manager.clipboard and ")" in context.window_manager.clipboard:
                     loc = node.location
                     ntree = node.node_tree
                     ntree.nodes.remove(node)
@@ -38,9 +38,8 @@ class SN_OT_PasteDataPath(bpy.types.Operator):
             # paste in run property function
             elif node.bl_idname == "SN_RunPropertyFunctionNode":
                 # is function
-                if context.window_manager.clipboard == context.scene.sn.last_copied_datapath:
-                    if context.scene.sn.last_copied_datatype == "Function":
-                        node.pasted_data_path = context.window_manager.clipboard
+                if "(" in  context.window_manager.clipboard and ")" in context.window_manager.clipboard:
+                    node.pasted_data_path = context.window_manager.clipboard
                 # isn't function
                 else:
                     self.report({"ERROR"}, message="Can only paste functions in this node!")

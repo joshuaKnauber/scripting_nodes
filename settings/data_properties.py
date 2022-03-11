@@ -102,10 +102,9 @@ def get_data_item(parent_data, data, path, attribute):
         "has_properties": has_properties,
         "properties": {},
         "clamped": False,
-        "parameters": {}
     }
     if data_item["type"] == "Function":
-        data_item["parameters"] = get_function_parameters(parent_data, attribute)
+        data_item["path"] += get_function_parameters(parent_data, attribute)
     return data_item
 
 
@@ -119,9 +118,9 @@ def get_data_name(data, attribute):
     return name
 
 
-def get_item_type(data, item_type=""):
+def get_item_type(data):
     """ Returns the item type for the given data """
-    if item_type == "": item_type = str(type(data))
+    item_type = str(type(data))
     if "bpy_prop_collection" in item_type: item_type = "Collection"
     elif "bpy_types" in item_type: item_type = "Pointer"
     elif "bpy.types" in item_type: item_type = "Pointer"
@@ -147,14 +146,26 @@ def get_item_type(data, item_type=""):
 
 def get_function_parameters(parent_data, name):
     """ Returns a dictionary with function parameters """
-    params = {}
+    params = ""
+    outputs = ""
     if hasattr(parent_data, "bl_rna") and hasattr(parent_data.bl_rna, "functions"):
         if name in parent_data.bl_rna.functions:
             for param in parent_data.bl_rna.functions[name].parameters:
-                params[param.identifier] = {
-                    "type": get_item_type(param, param.type.lower()), # TODO
-                }
-                if getattr(param, "is_array", False): params[param.identifier]["type"] += " Vector"
+                param_type = param.type.title()
+                if param_type == "Str": param_type = "String"
+                elif param_type == "Int": param_type = "Integer"
+                if getattr(param, "is_array", False): param_type += " Vector"
+                if param_type == "Enum":
+                    items = ", ".join(list(map(lambda item: f"'{item.identifier}'", param.enum_items_static)))
+                    param_type += f"[{items}]"
+                if param.is_output:
+                    outputs += f"{param.identifier}: {param_type}, "
+                else:
+                    params += f"{param.identifier}: {param_type}, "
+    if params: params = params[:-2]
+    if outputs: outputs = outputs[:-2]
+    params = f"({params})"
+    if outputs: params += f" = {outputs}"
     return params
 
 

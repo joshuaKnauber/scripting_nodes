@@ -5,12 +5,13 @@ from ...settings.data_properties import bpy_to_path_sections
 
 
 blend_data_defaults = {
-    "Scene": {
+    "Scenes": {
         "value": "bpy.context.scene",
         "name": "Using Active"},
-    "Object": {
+    "Objects": {
         "value": "bpy.context.active_object",
         "name": "Using Active"},
+        
     "Preferences": {
         "value": "self",
         "name": "Using Self"},
