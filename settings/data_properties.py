@@ -4,7 +4,8 @@ from ..addon.properties.settings.settings import property_icons
 
 
 def is_valid_attribute(attr):
-    return not attr in ["rna_type", "original", "bl_rna"] and not attr[0] == "_"
+    ignore_attributes = ["rna_type", "original", "bl_rna", "evaluated_depsgraph_get"]
+    return not attr in ignore_attributes and not attr[0] == "_"
 
 
 filter_items = [("Pointer", "Pointer", "Pointer", property_icons["Property"], 1),
@@ -34,20 +35,24 @@ def get_data_items(path, data):
     data_items = {}
 
     # get attributes
-    data_dict = data if type(data) == dict else data_to_dict(data)
+    data_dict = validate_data_dict(data) if type(data) == dict else data_to_dict(data)
     for key in data_dict.keys():
-        data_items[key] = get_data_item(data_dict[key], path, key)
+        data_items[key] = get_data_item(data, data_dict[key], path, key)
 
     # get items for iterable
     if is_iterable(data) and not type(data) == dict:
         # get keyed items
         if len(data.keys()) == len(data.values()):
             for key in data.keys():
-                data_items[f"'{key}'"] = get_data_item(data[key], path, f"'{key}'")
+                if hasattr(data[key], "bl_rna"):
+                    data_items[f"'{key}'"] = get_data_item(data, data[key], path, f"'{key}'")
         # get indexed items
         else:
-            for i in range(len(data.values())):
-                data_items[f"{i}"] = get_data_item(data[i], path, f"{i}")
+            max_items = 21
+            for i in range(min(len(data.values()), max_items)):
+                data_items[f"{i}"] = get_data_item(data, data[i], path, f"{i}")
+                if i == max_items-1 and len(data.values()) > max_items:
+                    data_items[f"{i}"]["clamped"] = True
 
     # sort items
     sorted_keys = sorted(data_items.keys(), key=lambda s: data_items[s]["type"])
@@ -55,6 +60,17 @@ def get_data_items(path, data):
     sorted_items = {}
     for key in sorted_keys: sorted_items[key] = data_items[key]
     return sorted_items
+
+
+def validate_data_dict(data):
+    """ Removes all attributes that aren't valid """
+    to_delete = []
+    for key in data.keys():
+        if not is_valid_attribute(key):
+            to_delete.append(key)
+    for key in to_delete:
+        del data[key]
+    return data
 
 
 def data_to_dict(data):
@@ -66,7 +82,7 @@ def data_to_dict(data):
     return data_dict
         
         
-def get_data_item(data, path, attribute):
+def get_data_item(parent_data, data, path, attribute):
     """ Returns a data object for the given data its path and the datas attribute """
     has_properties = hasattr(data, "bl_rna")
     if (attribute[0] == "'" and attribute[-1] == "'") or attribute.isdigit():
@@ -84,8 +100,11 @@ def get_data_item(data, path, attribute):
         "data_filter": filter_defaults,
         "expanded": False,
         "has_properties": has_properties,
-        "properties": {}
+        "properties": {},
+        "clamped": False,
     }
+    if data_item["type"] == "Function":
+        data_item["path"] += get_function_parameters(parent_data, attribute)
     return data_item
 
 
@@ -125,14 +144,29 @@ def get_item_type(data):
     return item_type
 
 
-def separate_attribute_from_path(path):
-    """ Returns the last attribute from the path and the path before """
-    attr_path = ".".join(path.split(".")[:-1])
-    attribute = path.split(".")[-1]
-    if path[-1] == "]":
-        attribute = path.split("['")[-1][:-2]
-        attr_path = "['".join(path.split("['")[:-1])
-    return attr_path, f"'{attribute}'"
+def get_function_parameters(parent_data, name):
+    """ Returns a dictionary with function parameters """
+    params = ""
+    outputs = ""
+    if hasattr(parent_data, "bl_rna") and hasattr(parent_data.bl_rna, "functions"):
+        if name in parent_data.bl_rna.functions:
+            for param in parent_data.bl_rna.functions[name].parameters:
+                param_type = param.type.title()
+                if param_type == "Str": param_type = "String"
+                elif param_type == "Int": param_type = "Integer"
+                if getattr(param, "is_array", False): param_type += " Vector"
+                if param_type == "Enum":
+                    items = ", ".join(list(map(lambda item: f"'{item.identifier}'", param.enum_items_static)))
+                    param_type += f"[{items}]"
+                if param.is_output:
+                    outputs += f"{param.identifier}: {param_type}, "
+                else:
+                    params += f"{param.identifier}: {param_type}, "
+    if params: params = params[:-2]
+    if outputs: outputs = outputs[:-2]
+    params = f"({params})"
+    if outputs: params += f" = {outputs}"
+    return params
 
 
 def item_from_path(data, path):
@@ -154,17 +188,27 @@ def item_from_path(data, path):
 
 def bpy_to_path_sections(path):
     """ Takes a blender python data path and converts it to json path sections """
-    # TODO this needs to be different e.g for:
-    # - bpy.context.window_manager.keyconfigs.addon.keymaps['Node Editor'].keymap_items['sn.force_compile']
-    # - bpy.data.objects["Cube"].modifiers["GeometryNodes"]["Output_2_attribute_name"]
-    path = path.replace('"', "'").replace("bpy.", "")
-    split_path = []
-    for section in path.split("['"):
-        if not "']" in section:
-            split_path += list(filter(lambda s: s, section.split(".")))
+    path = path.replace('"', "'").replace("bpy.", "")    
+    
+    sections = []
+    curr_section = ""
+    in_string = False
+    for char in path:
+        if char == "." and not in_string:
+            sections.append(curr_section)
+            curr_section = ""
+        elif char == "[" and not in_string:
+            sections.append(curr_section)
+            curr_section = ""
+        elif char == "]" and not in_string:
+            sections.append(curr_section)
+            curr_section = ""
+        elif char == "'":
+            curr_section += "'"
+            in_string = not in_string
         else:
-            section = list(filter(lambda s: s, section.split("']")))
-            split_path.append(f"'{section[0]}'")
-            if len(section) > 1:
-                split_path += list(filter(lambda s: s, section[1].split(".")))
-    return split_path
+            curr_section += char
+    sections.append(curr_section)
+    sections = list(filter(lambda item: item, sections))
+                
+    return sections

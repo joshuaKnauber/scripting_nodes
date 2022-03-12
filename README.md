@@ -2,20 +2,13 @@
 Visual Scripting addon for blender with nodes
 
 
-TODO
-- You can't access nested blend data !!!
-- You can't access some blender properties (is that ok? improve get data scriptline instead?)
-
-- could get blend data from realtime stuff and then freeze nodes. you can only access things that exist right now and can then abstract for addon
-
-
 ## Tasks
 ### Interface
 - [X] Display Property Node
 - [X] Generate Dynamic Enum Items Node (Fix imperative)
 - [ ] Menu Nodes
 - [X] Split Node
-- [ ] Button Node (Custom Operators)
+- [X] Button Node (Custom Operators)
 - [ ] Interface Functions
 - [X] If Interface (& Program with dropdown)
 - [X] For Interface (& Program with dropdown)
@@ -24,17 +17,17 @@ TODO
 - [X] UI List
 
 ### Blend Data
-- [ ] Get Data Node
-- [ ] Set Data Node
-- [ ] bpy.data Nodes
-- [ ] bpy.context Nodes
-- [ ] Consider missing blend data
+- [X] Get Data Node
+- [X] Set Data Node
+- [X] bpy.data Nodes
+- [X] bpy.context Nodes
+- [X] Consider missing blend data
 
 ### Program
-- [ ] Operator Node
-- [ ] Run Operator (Template from Button)
+- [X] Operator Node
+- [X] Run Operator (Template from Button)
 - [X] Functions
-- [ ] App Handlers
+- [X] App Handlers
 - [ ] On Keypress
 
 ### Variables
@@ -53,23 +46,30 @@ TODO
 - [X] Enum Flag enum returns
 - [X] Path icons on startup
 - [X] Generate dynamic enum items on startup
-- [ ] Property source and name split when there is brackets at the end
-- [ ] Undo is real fucking slow
+- [x] Property source and name split when there is brackets at the end
+- [X] Undo is real fucking slow
 
 
-read items in blend file node
-scene collections output on collections node
+- [ ] scene collections output on collections node
 
-
+    
 [X] blender property node needs output for value with right type
 [X] you need to be able to add, remove and move items for collection easily
 [X] test other display nodes
 [X] reload with correct context
-[] run blender function on blend data
-[] get non property data (hide property output and only show value?)
+[X] run blender function on blend data
+[X] get non property data (hide property output and only show value?)
 [X] do filters in browser
 [] add back blend data input nodes
 [] fix property output not showing properly when selecting collection as prop (blend to?, maybe fine?)
-[] paste in object prop -> shows objects as input and can't find default
+[X] paste in object prop -> shows objects as input and can't find default
+[] geo node like props / attributes in blender property node -> display
 [] enum items on function parameter
 [] enum items from operator to button/run operator
+[X] property update
+[] replace space data in paths with screen/area stuff
+[] operator/preference properties
+[] changing nodes order doesn't hard compile
+[] add node buttons
+[] find node buttons
+[X] property exists node -> takes parts and does and boolean to return if parts of prop exist or not

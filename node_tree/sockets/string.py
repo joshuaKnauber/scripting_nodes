@@ -20,7 +20,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_python_repr(self):
         self.string_repr_warning = False
         value = getattr(self, self.subtype_attr)
-        if self.subtype == "DIR_PATH" and value[-1] == "\\":
+        if self.subtype == "DIR_PATH" and value and value[-1] == "\\":
             value = value[:-1]
         if "'" in value and not '"' in value:
             value = f"\"{value}\""

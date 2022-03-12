@@ -39,6 +39,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     names.append(ref.node.operator_name)
 
         self["operator_name"] = unique_collection_name(self.operator_name, "My Operator", names, " ", includes_name=True)
+        self.trigger_ref_update()
         self._evaluate(context)
 
     def update_description(self, context):

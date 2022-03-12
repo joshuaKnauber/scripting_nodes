@@ -42,4 +42,4 @@ def undo_post(dummy=None):
     if hasattr(bpy.context, "space_data") and hasattr(bpy.context.space_data, "node_tree"):
         ntree = bpy.context.space_data.node_tree
         if ntree.bl_idname == "ScriptingNodesTree":
-            ntree.reevaluate()
+            compile_addon()

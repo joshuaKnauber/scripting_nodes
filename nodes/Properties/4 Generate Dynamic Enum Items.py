@@ -4,9 +4,6 @@ from ..templates.PropertyReferenceNode import PropertyReferenceNode
 
 
 
-_item_map = dict() # item map to store enum items while debugging. this is moved to generated code for enum props on export
-
-
 class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferenceNode):
 
     bl_idname = "SN_GenerateEnumItemsNode"
@@ -14,10 +11,7 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
     node_color = "PROGRAM"
     bl_width_default = 250
     is_trigger = True
-    
-    
-    enum_item_funcs = {}
-    
+        
 
     def on_create(self, context):
         self.add_list_input("Items")

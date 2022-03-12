@@ -14,31 +14,38 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_execute_input()
         self.add_execute_output()
+        
+    use_invoke: bpy.props.BoolProperty(name="Use Invoke",
+                                    description="This will run the before popup output and keep the interactive elements. It won't wait for the operations you connect to this nodes output",
+                                    default=True,
+                                    update=SN_ScriptingBaseNode._evaluate)
 
     def on_ref_update(self, node, data=None):
         if node.node_tree == self.custom_operator_ntree and node.name == self.ref_SN_OperatorNode:
-            if "property_change" in data:
-                prop = data["property_change"]
-                for inp in self.inputs[1:]:
-                    if not inp.name in node.properties:
-                        inp.name = prop.name
-                    if inp.name == prop.name:
-                        if prop.property_type in ["Integer", "Float", "Boolean"] and prop.settings.is_vector:
-                            socket = self.convert_socket(inp, self.socket_names[prop.property_type + " Vector"])
-                            socket.size = prop.settings.size
-                        else:
-                            socket = self.convert_socket(inp, self.socket_names[prop.property_type])
-                        if hasattr(prop.settings, "subtype"):
-                            if prop.settings.subtype in socket.subtypes:
-                                socket.subtype = prop.settings.subtype
+            if data:
+                if "property_change" in data:
+                    prop = data["property_change"]
+                    for inp in self.inputs[1:]:
+                        if not inp.name in node.properties:
+                            inp.name = prop.name
+                        if inp.name == prop.name:
+                            if prop.property_type in ["Integer", "Float", "Boolean"] and prop.settings.is_vector:
+                                socket = self.convert_socket(inp, self.socket_names[prop.property_type + " Vector"])
+                                socket.size = prop.settings.size
                             else:
-                                socket.subtype = "NONE"
+                                socket = self.convert_socket(inp, self.socket_names[prop.property_type])
+                        
+                            if hasattr(prop.settings, "subtype"):
+                                if prop.settings.subtype in socket.subtypes:
+                                    socket.subtype = prop.settings.subtype
+                                else:
+                                    socket.subtype = "NONE"
 
-                        if prop.property_type == "Enum":
-                            socket.subtype = "CUSTOM_ITEMS"
-                            socket.custom_items.clear()
-                            for item in prop.settings.items:
-                                socket.custom_items.add().name = item.name
+                            if prop.property_type == "Enum":
+                                socket.subtype = "CUSTOM_ITEMS"
+                                socket.custom_items.clear()
+                                for item in prop.settings.items:
+                                    socket.custom_items.add().name = item.name
 
             if "property_add" in data:
                 prop = data["property_add"]
@@ -51,6 +58,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                 from_index = data["property_move"][0]
                 to_index = data["property_move"][1]
                 self.inputs.move(from_index+1, to_index+1)
+
             self._evaluate(bpy.context)
 
 
@@ -130,6 +138,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, context):
+        invoke = "" if not self.use_invoke else "'INVOKE_DEFAULT', "
         if self.source_type == "BLENDER":
             op_name = self.pasted_operator[8:].split("(")[0]
             op = eval(self.pasted_operator.split("(")[0])
@@ -142,7 +151,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                             parameters += f"{prop.identifier}={inp.python_value}, "
 
             self.code = f"""
-                        bpy.ops.{op_name}({parameters[:-2]})
+                        bpy.ops.{op_name}({invoke}{parameters[:-2]})
                         {self.indent(self.outputs[0].python_value, 6)}
                         """
 
@@ -161,7 +170,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 parameters += f"{prop.python_name}={inp.python_value}, "
 
                 self.code = f"""
-                            bpy.ops.sna.{node.operator_python_name}({parameters[:-2]})
+                            bpy.ops.sna.{node.operator_python_name}({invoke}{parameters[:-2]})
                             {self.indent(self.outputs[0].python_value, 7)}
                             """
 
@@ -183,3 +192,5 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             subrow.prop_search(self, "ref_SN_OperatorNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_OperatorNode"), "refs", text="")
 
         row.prop(self, "hide_disabled_inputs", text="", icon="HIDE_ON" if self.hide_disabled_inputs else "HIDE_OFF", emboss=False)
+        
+        layout.prop(self, "use_invoke")

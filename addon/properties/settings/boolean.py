@@ -38,7 +38,7 @@ class SN_PT_BooleanProperty(PropertySettings, bpy.types.PropertyGroup):
             options = f"size={self.size}, default={tuple(list(self.vector_default)[:self.size])}"
         else:
             options = f"default={self.default}"
-        return options
+        return options + self.update_option
     
     
     default: bpy.props.BoolProperty(name="Default",

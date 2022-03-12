@@ -151,6 +151,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.idname_override:
             idname = self.idname_override
         self.last_idname = idname
+        self.trigger_ref_update()
 
 
     def evaluate(self, context):

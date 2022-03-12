@@ -48,7 +48,7 @@ class SN_PT_PointerProperty(PropertySettings, bpy.types.PropertyGroup):
             if self.prop_group in src.properties and src.properties[self.prop_group].property_type == "Group":
                 if not hasattr(self.prop, "group_prop_parent") or (hasattr(self.prop, "group_prop_parent") and self.prop.group_prop_parent.name != self.prop_group):
                     data_type = f"SNA_GROUP_{bpy.context.scene.sn.properties[self.prop_group].python_name}"
-        return f"type={data_type}"
+        return f"type={data_type}{self.update_option}"
     
     
     def get_data_items(self, context):

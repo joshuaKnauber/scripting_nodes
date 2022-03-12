@@ -12,7 +12,7 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def _disect_data_path(self, path):
         # remove assign part
-        path = path.split("=")[0]
+        path = "(".join(path.split("(")[:-1])
         path = path.strip()
         # replace escaped quotes
         path = path.replace('\\"', '"')
@@ -40,9 +40,22 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         """ Returns if a segment can be indexed. A segment is a string part of a data path """
         return "[" in segment and "]" in segment
     
+    def add_socket_from_param(self, param, callback):
+        """ Adds a socket from the given parameter with the given add callback """
+        socket_type = param.split(": ")[1].split("[")[0]
+        socket_name = param.split(": ")[0].replace("_", " ").title()
+        socket = callback(self.socket_names[socket_type], socket_name)
+        socket.can_be_disabled = True
+        socket.disabled = True
+        if socket_type == "Enum":
+            socket.items = f"[{param.split(': ')[1].split('[')[1]}"
+    
     def create_inputs_from_path(self):
         """ Creates the inputs for the given data path """
-        self.inputs.clear()
+        # remove existing inputs
+        for _ in range(len(self.inputs)-1):
+            self.inputs.remove(self.inputs[1])
+        # create blend data path inputs
         data = self.get_data()
         if data:
             for segment in data:
@@ -57,16 +70,31 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                         inp["default_value"] = int(segment.split("[")[-1].split("]")[0])
                         inp.index_type = "Integer"
                     inp.indexable = True
+        # create parameter inputs
+        params = self.pasted_data_path.split("(")[-1].split(")")[0].split(", ")
+        for param in params:
+            self.add_socket_from_param(param, self._add_input)
+                    
+    def create_outputs_from_path(self):
+        # remove existing outputs
+        for _ in range(len(self.outputs)-1):
+            self.outputs.remove(self.outputs[1])
+        # add new outputs
+        if " = " in self.pasted_data_path:
+            params = self.pasted_data_path.split(" = ")[-1].split(", ")
+            for param in params:
+                self.add_socket_from_param(param, self._add_output)
         
         
     def get_pasted_prop_name(self):
         if self.pasted_data_path:
-            return self.pasted_data_path.split(".")[-1].replace("_", " ").title()
+            return self.pasted_data_path.split(".")[-1].split("(")[0].replace("_", " ").title()
         return "Property Function"
     
     def on_prop_change(self, context):
         self.label = self.get_pasted_prop_name()
         self.create_inputs_from_path()
+        self.create_outputs_from_path()
         self._evaluate(context)
         
     pasted_data_path: bpy.props.StringProperty(name="Pasted Path",
@@ -91,7 +119,39 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         if self.pasted_data_path:
-            pass
+            function = "(".join(self.pasted_data_path.split("(")[:-1]) + "("
+
+            # add function parameters
+            inp_params = self.pasted_data_path.split("(")[-1].split(")")[0].split(", ")
+            for i, param in enumerate(inp_params):
+                param_inp = self.inputs[len(self.inputs) - len(inp_params)+i]
+                if not param_inp.disabled:
+                    function += f"{param.split(': ')[0]}={param_inp.python_value}, "
+            function += ")"
+            
+            # add output parameters
+            out_params = self.pasted_data_path.split(" = ")[-1].split(", ")
+            if self.require_execute:
+                results = ""
+                if " = " in self.pasted_data_path:
+                    for i, param in enumerate(out_params):
+                        name = param.split(": ")[0]
+                        results += f"{name}, "
+                        self.outputs[i+1].python_value = name
+                if results: results = results[:-2] + " = "
+                # code
+                self.code = f"""
+                            {results}{function}
+                            {self.indent(self.outputs[0].python_value, 7)}
+                            """           
+            # no execute
+            else:
+                if len(self.outputs) == 2:
+                    self.outputs[1].python_value = function
+                elif len(self.outputs) > 2:
+                    for i, out in enumerate(self.outputs):
+                        if not i == 0:
+                            out.python_value = f"{function}[{i-1}]"
         
 
     def draw_node(self, context, layout):

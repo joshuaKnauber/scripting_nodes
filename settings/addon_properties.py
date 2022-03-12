@@ -190,7 +190,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="Your custom category")
     
     
-    data_items = {"app": {}, "context": {}, "data": {}, "path": {}, "utils": {}}
+    data_items = {"app": {}, "context": {}, "data": {},}# "path": {}, "utils": {}}
         
     def reload_data_category(self, category):
         """ Reloads the basic data for a category """
@@ -205,8 +205,8 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         self.reload_data_category("app")
         self.reload_data_category("context")
         self.reload_data_category("data")
-        self.reload_data_category("path")
-        self.reload_data_category("utils")
+        # self.reload_data_category("path")
+        # self.reload_data_category("utils")
 
     def update_hide_preferences(self, context):
         for cls in space_userpref.classes:
@@ -225,9 +225,9 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     data_category: bpy.props.EnumProperty(name="Category",
                                         items=[("app", "App", "bpy.app"),
                                                ("context", "Context", "bpy.context"),
-                                               ("data", "Data", "bpy.data"),
-                                               ("path", "Path", "bpy.path"),
-                                               ("utils", "Utils", "bpy.utils")],
+                                               ("data", "Data", "bpy.data")],
+                                            #    ("path", "Path", "bpy.path"),
+                                            #    ("utils", "Utils", "bpy.utils")],
                                         default="context",
                                         description="Category of blend data")
     
@@ -240,3 +240,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     data_search: bpy.props.StringProperty(name="Search",
                                         description="Search data",
                                         options={"TEXTEDIT_UPDATE"})
+    
+    show_path: bpy.props.BoolProperty(name="Show Path",
+                                        description="Show python path of properties",
+                                        default=False)

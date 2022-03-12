@@ -20,27 +20,30 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_ref_update(self, node, data=None):
         if node.node_tree == self.custom_operator_ntree and node.name == self.ref_SN_OperatorNode:
-            if "property_change" in data:
-                prop = data["property_change"]
-                for inp in self.inputs[5:]:
-                    if not inp.name in node.properties:
-                        inp.name = prop.name
-                    if inp.name == prop.name:
-                        if prop.property_type in ["Integer", "Float", "Boolean"] and prop.settings.is_vector:
-                            socket = self.convert_socket(inp, self.socket_names[prop.property_type + " Vector"])
-                            socket.size = prop.settings.size
-                        else:
-                            socket = self.convert_socket(inp, self.socket_names[prop.property_type])
-                        if hasattr(prop.settings, "subtype"):
-                            if prop.settings.subtype in socket.subtypes:
-                                socket.subtype = prop.settings.subtype
+            if data:
+                if "property_change" in data:
+                    prop = data["property_change"]
+                    for inp in self.inputs[5:]:
+                        if not inp.name in node.properties:
+                            inp.name = prop.name
+                        if inp.name == prop.name:
+                            if prop.property_type in ["Integer", "Float", "Boolean"] and prop.settings.is_vector:
+                                socket = self.convert_socket(inp, self.socket_names[prop.property_type + " Vector"])
+                                socket.size = prop.settings.size
                             else:
-                                socket.subtype = "NONE"
-                        if prop.property_type == "Enum":
-                            socket.subtype = "CUSTOM_ITEMS"
-                            socket.custom_items.clear()
-                            for item in prop.settings.items:
-                                socket.custom_items.add().name = item.name
+                                socket = self.convert_socket(inp, self.socket_names[prop.property_type])
+
+                            if hasattr(prop.settings, "subtype"):
+                                if prop.settings.subtype in socket.subtypes:
+                                    socket.subtype = prop.settings.subtype
+                                else:
+                                    socket.subtype = "NONE"
+
+                            if prop.property_type == "Enum":
+                                socket.subtype = "CUSTOM_ITEMS"
+                                socket.custom_items.clear()
+                                for item in prop.settings.items:
+                                    socket.custom_items.add().name = item.name
 
             if "property_add" in data:
                 prop = data["property_add"]
@@ -53,6 +56,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                 from_index = data["property_move"][0]
                 to_index = data["property_move"][1]
                 self.inputs.move(from_index+5, to_index+5)
+
             self._evaluate(bpy.context)
 
 
