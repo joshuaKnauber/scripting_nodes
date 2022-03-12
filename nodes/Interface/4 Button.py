@@ -36,7 +36,11 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 socket.subtype = prop.settings.subtype
                             else:
                                 socket.subtype = "NONE"
-                        # TODO enum items (same for run operator)
+                        if prop.property_type == "Enum":
+                            socket.subtype = "CUSTOM_ITEMS"
+                            socket.custom_items.clear()
+                            for item in prop.settings.items:
+                                socket.custom_items.add().name = item.name
 
             if "property_add" in data:
                 prop = data["property_add"]

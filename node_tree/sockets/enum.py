@@ -33,7 +33,7 @@ class SN_EnumSocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_items(self, _):
         items = [("NONE", "NONE", "NONE")]
         if self.subtype == "CUSTOM_ITEMS":
-            [(item.name, item.name, item.name) for item in self.custom_items]
+            items = [(item.name, item.name, item.name) for item in self.custom_items]
         else:
             names = eval(self.items)
             if names:

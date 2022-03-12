@@ -34,6 +34,12 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                             else:
                                 socket.subtype = "NONE"
 
+                        if prop.property_type == "Enum":
+                            socket.subtype = "CUSTOM_ITEMS"
+                            socket.custom_items.clear()
+                            for item in prop.settings.items:
+                                socket.custom_items.add().name = item.name
+
             if "property_add" in data:
                 prop = data["property_add"]
                 self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
