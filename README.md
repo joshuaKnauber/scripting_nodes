@@ -49,6 +49,7 @@ Visual Scripting addon for blender with nodes
 - [x] Property source and name split when there is brackets at the end
 - [X] Undo is real fucking slow
 - [ ] Serpens shortcut node to get property for displaying shortcut
+- [ ] Conversions
 
 
 
@@ -70,8 +71,8 @@ Visual Scripting addon for blender with nodes
 [X] property exists node -> takes parts and does and boolean to return if parts of prop exist or not
 
 [X] Fix insert sockets
-[] add back blend data input nodes
-[] scene collections output on collections node
+[X] add back blend data input nodes
+[X] scene collections output on collections node
 [] enum items on function parameter
 [] enum items from operator to button/run operator
 [] changing nodes order doesn't hard compile

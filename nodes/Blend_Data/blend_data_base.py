@@ -1,18 +1,20 @@
 import bpy
-from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_MeshBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
+class BlendDataBaseNode():
 
-    bl_idname = "SN_MeshBlendDataNode"
-    bl_label = "Mesh"
+    data_type = ""
+    data_type_plural = ""
+    
+    active_path = ""
+    data_path = ""
+    
     node_color = "PROPERTY"
     
     def on_create(self, context):
-        self.add_collection_property_output("All Meshes")
-        self.add_list_output("Active Scene Meshes")
-        self.add_property_output("Active Object Mesh")
+        self.add_collection_property_output(f"All {self.data_type_plural}")
+        if self.active_path: self.add_property_output(f"Active {self.data_type}")
         self.add_property_output("Indexed")
         self.add_integer_input("Index")
 
@@ -28,10 +30,9 @@ class SN_MeshBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 update=update_index_type)
         
     def evaluate(self, context):
-        self.outputs["All Meshes"].python_value = f"bpy.data.meshes"
-        self.outputs["Active Scene Meshes"].python_value = f"list(filter(lambda obj: obj, [obj.data if obj.type == 'MESH' else None for obj in bpy.context.scene.objects]))"
-        self.outputs["Active Object Mesh"].python_value = f"(bpy.context.active_object.data if bpy.context.active_object.type == 'MESH' else None)"
-        self.outputs["Indexed"].python_value = f"bpy.data.meshes[{self.inputs[0].python_value}]"
+        self.outputs[f"All {self.data_type_plural}"].python_value = self.data_path
+        if self.active_path: self.outputs[f"Active {self.data_type}"].python_value = self.active_path
+        self.outputs["Indexed"].python_value = f"{self.data_path}[{self.inputs[0].python_value}]"
 
     def draw_node(self, context, layout):
         layout.prop(self, "index_type", expand=True)

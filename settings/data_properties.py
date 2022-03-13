@@ -84,7 +84,7 @@ def data_to_dict(data):
         
 def get_data_item(parent_data, data, path, attribute):
     """ Returns a data object for the given data its path and the datas attribute """
-    has_properties = hasattr(data, "bl_rna")
+    has_properties = hasattr(data, "bl_rna") or "bpy_prop_collection" in str(type(data))
     if (attribute[0] == "'" and attribute[-1] == "'") or attribute.isdigit():
         new_path = f"{path}[{attribute}]"
         has_properties = True

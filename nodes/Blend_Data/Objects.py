@@ -1,4 +1,3 @@
-from pickle import TUPLE
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 
