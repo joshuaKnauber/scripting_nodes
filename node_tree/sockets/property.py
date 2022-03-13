@@ -16,7 +16,7 @@ blend_data_defaults = {
         "name": "Using Active"},
         
     "Preferences": {
-        "value": "self",
+        "value": lambda: "bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences" if bpy.context.scene.sn.is_exporting else "bpy.context.scene.sna_addon_prefs_temp",
         "name": "Using Self"},
     "Operator": {
         "value": "self",
@@ -35,7 +35,9 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     @property
     def default_python_value(self):
         if self.name in blend_data_defaults:
-            return blend_data_defaults[self.name]["value"]
+            value = blend_data_defaults[self.name]["value"]
+            if type(value) == str: return value
+            else: return value()
         return "None"
     
     default_prop_value = ""

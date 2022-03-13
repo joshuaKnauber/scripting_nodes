@@ -233,4 +233,6 @@ def bpy_to_indexed_sections(path):
             combined[-1] += section
         else:
             combined.append(section)
+            
+    if not "bpy." in path: combined = combined[1:]
     return combined

@@ -48,6 +48,8 @@ Visual Scripting addon for blender with nodes
 - [X] Generate dynamic enum items on startup
 - [x] Property source and name split when there is brackets at the end
 - [X] Undo is real fucking slow
+- [ ] Serpens shortcut node to get property for displaying shortcut
+- [ ] Fix insert sockets
 
 
 - [ ] scene collections output on collections node
@@ -56,7 +58,7 @@ Visual Scripting addon for blender with nodes
 [X] geo node like props / attributes in blender property node -> display
 [X] fix property output not showing properly when selecting collection as prop (blend to?, maybe fine?)
 [X] replace space data in paths with screen/area stuff
-[] operator/preference properties
+[X] operator/preference properties
 
 [X] blender property node needs output for value with right type
 [X] you need to be able to add, remove and move items for collection easily
