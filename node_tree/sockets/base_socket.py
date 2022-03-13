@@ -169,6 +169,7 @@ class ScriptingSocket:
             op.node = node.name
             op.is_output = self.is_output
             op.insert_above = True
+            op.index = self.index
 
     def draw(self, context, layout, node, text):
         """ Draws this socket """
