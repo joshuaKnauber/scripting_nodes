@@ -28,8 +28,8 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.inputs.clear()
         data = self.get_data()
         if data:
-            for i, segment in enumerate(data):
-                if self.segment_is_indexable(segment) and not i == len(data)-1:
+            for segment in data[:-1]:
+                if self.segment_is_indexable(segment):
                     name = segment.split("[")[0].replace("_", " ").title()
                     if '"' in segment or "'" in segment:
                         inp = self.add_string_input(name)
@@ -79,7 +79,7 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             inp_index = 0
             data = self.get_data()
-            for segment in data:
+            for segment in data[:-1]:
                 if data_path and not segment[0] == "[":
                     data_path += f".{segment.split('[')[0]}"
                 else:
@@ -91,6 +91,11 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     else:
                         data_path += f"[{self.inputs[inp_index].python_value}]"
                     inp_index += 1
+            
+            if self.segment_is_indexable(data[-1]):
+                data_path += data[-1]
+            else:
+                data_path += f".{data[-1]}"
             
             self.outputs[0].python_value = data_path
             self.outputs[1].python_value = data_path
