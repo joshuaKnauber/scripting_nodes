@@ -11,6 +11,9 @@ blend_data_defaults = {
     "Objects": {
         "value": "bpy.context.active_object",
         "name": "Using Active"},
+    "Areas": {
+        "value": "bpy.context.area",
+        "name": "Using Active"},
         
     "Preferences": {
         "value": "self",

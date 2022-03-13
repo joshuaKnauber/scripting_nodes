@@ -19,12 +19,13 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_input("Slider").default_value = False
         self.add_boolean_input("Toggle").default_value = False
         self.add_boolean_input("Invert Checkbox").default_value = False
+        self.add_boolean_input("Full Shortcut").default_value = False
 
 
     def evaluate(self, context):
         if self.inputs["Property"].is_linked:
             self.code = f"""
-                        {self.active_layout}.prop({self.inputs['Property'].python_source}, '{self.inputs['Property'].python_attr.replace("'",'"')}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, expand={self.inputs['Expand'].python_value}, slider={self.inputs['Slider'].python_value}, toggle={self.inputs['Toggle'].python_value}, invert_checkbox={self.inputs['Invert Checkbox'].python_value})
+                        {self.active_layout}.prop({self.inputs['Property'].python_source}, '{self.inputs['Property'].python_attr.replace("'",'"')}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, expand={self.inputs['Expand'].python_value}, slider={self.inputs['Slider'].python_value}, toggle={self.inputs['Toggle'].python_value}, invert_checkbox={self.inputs['Invert Checkbox'].python_value}, full_event={self.inputs['Full Shortcut'].python_value})
                         """
         else:
             self.code = f"""
