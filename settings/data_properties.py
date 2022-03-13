@@ -212,3 +212,25 @@ def bpy_to_path_sections(path):
     sections = list(filter(lambda item: item, sections))
                 
     return sections
+
+
+def bpy_to_path_sections_with_brackets(path):
+    """ Returns bpy_to_path_sections with brackets for the indexed sections """
+    sections = bpy_to_path_sections(path)
+    # add brackets to indexing
+    for i in range(len(sections)):
+        if (sections[i][0] == "'" and sections[i][-1] == "'") or sections[i].isdigit():
+            sections[i] = f"[{sections[i]}]"
+    return sections
+
+
+def bpy_to_indexed_sections(path):
+    """ Takes a blender python data path and converts it to indexed path sections """
+    # combine indexed sections
+    combined = ["bpy"]
+    for section in bpy_to_path_sections_with_brackets(path):
+        if (section[0] == "[" and section[-1] == "]") and not combined[-1][-1] == "]":
+            combined[-1] += section
+        else:
+            combined.append(section)
+    return combined

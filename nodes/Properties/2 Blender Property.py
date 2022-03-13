@@ -1,5 +1,6 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
+from ...settings.data_properties import bpy_to_indexed_sections
 
 
 
@@ -8,30 +9,13 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_BlenderPropertyNode"
     bl_label = "Blender Property"
     node_color = "PROPERTY"
-        
-    def _disect_data_path(self, path):
-        # remove assign part
-        path = path.split("=")[0]
-        path = path.strip()
-        # replace escaped quotes
-        path = path.replace('\\"', '"')
-        # split data path in segments
-        segments = []
-        for segment in path.split(".")[1:]:
-            if segments and "[" in segments[-1] and not "]" in segments[-1]:
-                segments[-1] += f".{segment}"
-            else:
-                segments.append(segment)
-        # remove indexing from property name
-        # segments[-1] = segments[-1].split("[")[0]
-        return segments
-    
+            
     def _is_valid_data_path(self, path):
         return path and "bpy." in path and not ".ops." in path
 
     def get_data(self):
         if self._is_valid_data_path(self.pasted_data_path):
-            return self._disect_data_path(self.pasted_data_path)
+            return bpy_to_indexed_sections(self.pasted_data_path)
         return None
     
     
@@ -44,8 +28,8 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.inputs.clear()
         data = self.get_data()
         if data:
-            for segment in data:
-                if self.segment_is_indexable(segment):
+            for i, segment in enumerate(data):
+                if self.segment_is_indexable(segment) and not i == len(data)-1:
                     name = segment.split("[")[0].replace("_", " ").title()
                     if '"' in segment or "'" in segment:
                         inp = self.add_string_input(name)
@@ -60,7 +44,10 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def get_pasted_prop_name(self):
         if self.pasted_data_path:
-            return self.pasted_data_path.split(".")[-1].replace("_", " ").split("[")[0].title()
+            data = self.get_data()
+            if data[-1][0] == "[":
+                return data[-1]
+            return data[-1].title()
         return "Property"
     
     def on_prop_change(self, context):
@@ -88,12 +75,15 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         if not self.pasted_data_path:
             self.outputs[0].reset_value()
         else:
-            data_path = "bpy"
+            data_path = ""
 
             inp_index = 0
             data = self.get_data()
             for segment in data:
-                data_path += f".{segment.split('[')[0]}"
+                if data_path and not segment[0] == "[":
+                    data_path += f".{segment.split('[')[0]}"
+                else:
+                    data_path += f"{segment.split('[')[0]}"
                 
                 if self.segment_is_indexable(segment):
                     if self.inputs[inp_index].bl_label == "Property":

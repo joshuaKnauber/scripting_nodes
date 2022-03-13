@@ -1,5 +1,6 @@
 import bpy
 from .base_socket import ScriptingSocket
+from ...settings.data_properties import bpy_to_path_sections, bpy_to_indexed_sections
 
 
 
@@ -20,17 +21,24 @@ class SN_CollectionPropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     
     @property
     def python_attr(self):
-        value = self.python_value
-        if "." in value:
-            return value.split(".")[-1]
-        return value
+        sections = bpy_to_indexed_sections(self.python_value)
+        if sections:
+            return sections[-1]
+        return self.python_value
     
     @property
     def python_source(self):
-        value = self.python_value
-        if "." in value:
-            return ".".join(value.split(".")[:-1])
-        return value
+        sections = bpy_to_indexed_sections(self.python_value)
+        if sections:
+            return ".".join(sections[:-1])
+        return self.python_value
+    
+    @property
+    def python_sections(self):
+        sections = bpy_to_path_sections(self.python_value)
+        if sections:
+            return ["bpy"] + sections
+        return []
 
 
     subtypes = ["NONE"]

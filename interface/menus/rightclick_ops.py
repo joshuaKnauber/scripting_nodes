@@ -23,6 +23,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
         # copy data path if available
         if bpy.ops.ui.copy_data_path_button.poll():
             bpy.ops.ui.copy_data_path_button("INVOKE_DEFAULT", full_path=True)
+            context.window_manager.clipboard = context.window_manager.clipboard.replace('"', "'")
             context.scene.sn.last_copied_datatype = property_value.type.title()
             context.scene.sn.last_copied_datapath = context.window_manager.clipboard
             self.report({"INFO"}, message="Copied!")
@@ -32,6 +33,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
         if property_pointer and property_value:
             if property_pointer.bl_rna.identifier in REPLACE_NAMES:
                 context.window_manager.clipboard = f"{REPLACE_NAMES[property_pointer.bl_rna.identifier]}.{property_value.identifier}"
+                context.window_manager.clipboard = context.window_manager.clipboard.replace('"', "'")
                 context.scene.sn.last_copied_datatype = property_value.type.title()
                 context.scene.sn.last_copied_datapath = context.window_manager.clipboard
                 self.report({"INFO"}, message="Copied!")

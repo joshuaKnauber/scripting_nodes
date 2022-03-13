@@ -24,7 +24,7 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         if self.inputs["Property"].is_linked:
             self.code = f"""
-                        {self.active_layout}.prop({self.inputs['Property'].python_source}, '{self.inputs['Property'].python_attr}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, expand={self.inputs['Expand'].python_value}, slider={self.inputs['Slider'].python_value}, toggle={self.inputs['Toggle'].python_value}, invert_checkbox={self.inputs['Invert Checkbox'].python_value})
+                        {self.active_layout}.prop({self.inputs['Property'].python_source}, '{self.inputs['Property'].python_attr.replace("'",'"')}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, expand={self.inputs['Expand'].python_value}, slider={self.inputs['Slider'].python_value}, toggle={self.inputs['Toggle'].python_value}, invert_checkbox={self.inputs['Invert Checkbox'].python_value})
                         """
         else:
             self.code = f"""

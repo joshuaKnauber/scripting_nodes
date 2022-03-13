@@ -53,8 +53,8 @@ Visual Scripting addon for blender with nodes
 - [ ] scene collections output on collections node
 
     
-[] geo node like props / attributes in blender property node -> display
-[] fix property output not showing properly when selecting collection as prop (blend to?, maybe fine?)
+[X] geo node like props / attributes in blender property node -> display
+[X] fix property output not showing properly when selecting collection as prop (blend to?, maybe fine?)
 [] replace space data in paths with screen/area stuff
 [] operator/preference properties
 

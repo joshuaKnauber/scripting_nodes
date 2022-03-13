@@ -29,7 +29,7 @@ class SN_InterfaceScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     script: bpy.props.PointerProperty(name="File", type=bpy.types.Text)
 
     def evaluate(self, context):
-        # TODO import code on export
+        # TODO import code on export, pointer doesn't update
         if self.source == "BLENDER":
             if self.script:
                 self.code = f"""
