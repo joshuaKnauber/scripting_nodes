@@ -34,7 +34,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     @property
     def func_name(self):
         return f"sna_{get_python_name(self.name, 'func')}_{self.static_uid}"
-
+# TODO fixed name and copy python name btn
 
     def evaluate(self, context):
         out_values = []
