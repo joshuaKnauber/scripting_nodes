@@ -255,7 +255,7 @@ class SN_ScriptingBaseNode:
         # trigger compiler updates
         if other_code_changed and not self.is_trigger:
             self._trigger_root_nodes()
-        if node_code_changed:
+        if node_code_changed or (other_code_changed and self.is_trigger):
             self._node_code_changed()
 
 

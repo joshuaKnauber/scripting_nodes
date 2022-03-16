@@ -162,7 +162,10 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 update=SN_ScriptingBaseNode._evaluate)
     
     def on_ref_update(self, node, data=None):
-        on_operator_ref_update(self, node, data, self.ref_ntree, self.ref_SN_OperatorNode, 0)
+        if node.bl_idname == "SN_PanelNode":
+            self._evaluate(bpy.context)
+        elif node.bl_idname == "SN_OperatorNode":
+            on_operator_ref_update(self, node, data, self.ref_ntree, self.ref_SN_OperatorNode, 0)
             
     def update_custom_operator(self, context):
         """ Updates the nodes settings when a new parent panel is selected """
@@ -177,19 +180,29 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 description="The operator to run with this shortcut",
                                 update=update_custom_operator)
 
-    def evaluate(self, context):
-        self.code_register = f"""
-            kc = bpy.context.window_manager.keyconfigs.addon
-            km = kc.keymaps.new(name='Window', space_type='EMPTY', region_type='WINDOW')
-            kmi = km.keymap_items.new('sn.force_compile',
-                                    'F6',
-                                    'PRESS',
-                                    ctrl=False,
-                                    alt=False,
-                                    shift=False)
-            kmi.active = True
-            addon_keymaps.append((km, kmi))
-        """
+    def evaluate(self, context): # TODO update this node when node idnames change for op, menu, pie
+        if self.key:
+            input_code = ""
+            operator = ""
+            if self.action == "PANEL":
+                if self.parent_type == "BLENDER" and self.panel:
+                    operator = "wm.call_panel"
+                    input_code = f"kmi.properties.name = '{self.panel}'\n"
+                    input_code += f"kmi.properties.keep_open = {self.keep_open}\n"
+                elif self.parent_type == "CUSTOM" and self.ref_ntree and self.ref_SN_PanelNode in self.ref_ntree.nodes:
+                    operator = "wm.call_panel"
+                    node = self.ref_ntree.nodes[self.ref_SN_PanelNode]
+                    input_code = f"kmi.properties.name = '{node.last_idname}'\n"
+                    input_code += f"kmi.properties.keep_open = {self.keep_open}\n"
+            if operator:
+                self.code_register = f"""
+                    kc = bpy.context.window_manager.keyconfigs.addon
+                    km = kc.keymaps.new(name='{space_names[self.space]}', space_type='{self.space}')
+                    kmi = km.keymap_items.new('{operator}', '{self.key}', '{self.value}',
+                        ctrl={self.ctrl}, alt={self.alt}, shift={self.shift}, repeat={self.repeat})
+                    {self.indent(input_code, 5)}
+                    addon_keymaps.append((km, kmi))
+                """
 
     def draw_node(self, context, layout):
         row = layout.row(align=True)
