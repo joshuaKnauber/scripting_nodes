@@ -142,9 +142,9 @@ class SN_OT_AddPropertyItem(bpy.types.Operator):
 
 
 
-class SN_OT_AddPropertyNode(bpy.types.Operator):
-    bl_idname = "sn.add_property_node"
-    bl_label = "Add Property Node"
+class SN_OT_AddPropertyNodePopup(bpy.types.Operator):
+    bl_idname = "sn.add_property_node_popup"
+    bl_label = "Add Property Node Popup"
     bl_description = "Opens a popup to let you choose a property node"
     bl_options = {"REGISTER", "INTERNAL"}
 
@@ -155,18 +155,37 @@ class SN_OT_AddPropertyNode(bpy.types.Operator):
         layout = self.layout
         col = layout.column(align=True)
         col.scale_y = 1.5
-        op = col.operator("node.add_node", text="Interface", icon="ADD")
-        op.type = "SN_PropertyNode"
-        op.use_transform = True
-        op = col.operator("node.add_node", text="Get Value", icon="ADD")
-        op.type = "SN_PropertyNode"
-        op.use_transform = True
-        op = col.operator("node.add_node", text="Set Value", icon="ADD")
-        op.type = "SN_PropertyNode"
-        op.use_transform = True
-        op = col.operator("node.add_node", text="On Property Update", icon="ADD")
-        op.type = "SN_PropertyNode"
-        op.use_transform = True
+        op = col.operator("sn.add_property_node", text="Property", icon="ADD")
+        op.type = "SN_SerpensPropertyNode"
+        op = col.operator("sn.add_property_node", text="Display Property", icon="ADD")
+        op.type = "SN_DisplayPropertyNode"
+        op = col.operator("sn.add_property_node", text="Set Property", icon="ADD")
+        op.type = "SN_SetPropertyNode"
+        op = col.operator("sn.add_property_node", text="On Property Update", icon="ADD")
+        op.type = "SN_OnPropertyUpdateNode"
         
     def invoke(self, context, event):
         return context.window_manager.invoke_popup(self)
+    
+    
+
+class SN_OT_AddPropertyNode(bpy.types.Operator):
+    bl_idname = "sn.add_property_node"
+    bl_label = "Add Property Node"
+    bl_description = "Adds this node to the editor"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    type: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        bpy.ops.node.add_node("INVOKE_DEFAULT", type=self.type, use_transform=True)
+        node = context.space_data.node_tree.nodes.active
+
+        if context.scene.sn.property_index < len(context.scene.sn.properties):
+            prop = context.scene.sn.properties[context.scene.sn.property_index]
+
+            if self.type == "SN_SerpensPropertyNode":
+                node.prop_name = prop.name
+            elif self.type == "SN_OnPropertyUpdateNode":
+                node.prop_name = prop.name
+        return {"FINISHED"}

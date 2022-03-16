@@ -6,7 +6,7 @@ Visual Scripting addon for blender with nodes
 
 - [ ] On Keypress
 - [ ] Serpens shortcut node to get property for displaying shortcut
-- [ ] add node buttons
+- [X] add node buttons
 - [ ] find node buttons
 - [ ] Conversions
 - [ ] Proper error logging
@@ -18,5 +18,6 @@ Visual Scripting addon for blender with nodes
 - [ ] Complete ToDo's (in code)
 - [ ] changing nodes order doesn't hard compile
 - [ ] Fix known bugs
+- [ ] Update output type on on property update node
 
 - [ ] New Demo version

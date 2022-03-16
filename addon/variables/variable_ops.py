@@ -60,13 +60,11 @@ class SN_OT_MoveVariable(bpy.types.Operator):
 
 
 
-class SN_OT_AddVariableNode(bpy.types.Operator):
-    bl_idname = "sn.add_variable_node"
-    bl_label = "Add Variable Node"
+class SN_OT_AddVariableNodePopup(bpy.types.Operator):
+    bl_idname = "sn.add_variable_node_popup"
+    bl_label = "Add Variable Node Popup"
     bl_description = "Opens a popup to let you choose a variable node"
     bl_options = {"REGISTER", "INTERNAL"}
-    
-    node_tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
         return {"FINISHED"}
@@ -75,6 +73,32 @@ class SN_OT_AddVariableNode(bpy.types.Operator):
         layout = self.layout
         col = layout.column(align=True)
         col.scale_y = 1.5
+        op = col.operator("sn.add_variable_node", text="Get Variable", icon="ADD")
+        op.type = "SN_GetVariableNode"
+        op = col.operator("sn.add_variable_node", text="Set Variable", icon="ADD")
+        op.type = "SN_SetVariableNode"
+        op = col.operator("sn.add_variable_node", text="Reset Variable", icon="ADD")
+        op.type = "SN_ResetVariableNode"
         
     def invoke(self, context, event):
         return context.window_manager.invoke_popup(self)
+    
+    
+
+class SN_OT_AddVariableNode(bpy.types.Operator):
+    bl_idname = "sn.add_variable_node"
+    bl_label = "Add Variable Node"
+    bl_description = "Adds this node to the editor"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    type: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        bpy.ops.node.add_node("INVOKE_DEFAULT", type=self.type, use_transform=True)
+        node = context.space_data.node_tree.nodes.active
+
+        if context.space_data.node_tree.variable_index < len(context.space_data.node_tree.variables):
+            var = context.space_data.node_tree.variables[context.space_data.node_tree.variable_index]
+            node.var_ntree = context.space_data.node_tree
+            node.var_name = var.name
+        return {"FINISHED"}

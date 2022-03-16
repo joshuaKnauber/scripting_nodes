@@ -28,7 +28,7 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
         row = layout.row(align=False)
         col = row.column(align=True)
         col.template_list("SN_UL_PropertyList", "Properties", sn, "properties", sn, "property_index", rows=4)
-        col.operator("sn.add_property_node", text="Add Node", icon="ADD")
+        col.operator("sn.add_property_node_popup", text="Add Node", icon="ADD")
         col = row.column(align=True)
         col.operator("sn.add_property", text="", icon="ADD")
         col.operator("sn.add_property", text="", icon="VIEWZOOM")

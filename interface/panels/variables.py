@@ -29,7 +29,7 @@ class SN_PT_VariablePanel(bpy.types.Panel):
         row = layout.row(align=False)
         col = row.column(align=True)
         col.template_list("SN_UL_VariableList", "Variables", ntree, "variables", ntree, "variable_index", rows=4)
-        col.operator("sn.add_variable_node", text="Add Node", icon="ADD").node_tree = ntree.name
+        col.operator("sn.add_variable_node_popup", text="Add Node", icon="ADD")
         col = row.column(align=True)
         col.operator("sn.add_variable", text="", icon="ADD").node_tree = ntree.name
         col.operator("sn.add_variable", text="", icon="VIEWZOOM").node_tree = ntree.name
