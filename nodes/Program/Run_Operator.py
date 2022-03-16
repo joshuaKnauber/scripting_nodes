@@ -4,6 +4,49 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
+def on_operator_ref_update(self, node, data, ntree, node_ref_name, input_offset=1):
+    if node.node_tree == ntree and node.name == node_ref_name:
+        if data:
+            if "property_change" in data:
+                prop = data["property_change"]
+                for inp in self.inputs[input_offset:]:
+                    if not inp.name in node.properties:
+                        inp.name = prop.name
+                    if inp.name == prop.name:
+                        if prop.property_type in ["Integer", "Float", "Boolean"] and prop.settings.is_vector:
+                            socket = self.convert_socket(inp, self.socket_names[prop.property_type + " Vector"])
+                            socket.size = prop.settings.size
+                        else:
+                            socket = self.convert_socket(inp, self.socket_names[prop.property_type])
+                    
+                        if hasattr(prop.settings, "subtype"):
+                            if prop.settings.subtype in socket.subtypes:
+                                socket.subtype = prop.settings.subtype
+                            else:
+                                socket.subtype = "NONE"
+
+                        if prop.property_type == "Enum":
+                            socket.subtype = "CUSTOM_ITEMS"
+                            socket.custom_items.clear()
+                            for item in prop.settings.items:
+                                socket.custom_items.add().name = item.name
+
+        if "property_add" in data:
+            prop = data["property_add"]
+            self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
+
+        if "property_remove" in data:
+            self.inputs.remove(self.inputs[data["property_remove"] + input_offset])
+
+        if "property_move" in data:
+            from_index = data["property_move"][0]
+            to_index = data["property_move"][1]
+            self.inputs.move(from_index+input_offset, to_index+input_offset)
+
+        self._evaluate(bpy.context)
+
+
+
 class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RunOperatorNode"
@@ -21,46 +64,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     update=SN_ScriptingBaseNode._evaluate)
 
     def on_ref_update(self, node, data=None):
-        if node.node_tree == self.custom_operator_ntree and node.name == self.ref_SN_OperatorNode:
-            if data:
-                if "property_change" in data:
-                    prop = data["property_change"]
-                    for inp in self.inputs[1:]:
-                        if not inp.name in node.properties:
-                            inp.name = prop.name
-                        if inp.name == prop.name:
-                            if prop.property_type in ["Integer", "Float", "Boolean"] and prop.settings.is_vector:
-                                socket = self.convert_socket(inp, self.socket_names[prop.property_type + " Vector"])
-                                socket.size = prop.settings.size
-                            else:
-                                socket = self.convert_socket(inp, self.socket_names[prop.property_type])
-                        
-                            if hasattr(prop.settings, "subtype"):
-                                if prop.settings.subtype in socket.subtypes:
-                                    socket.subtype = prop.settings.subtype
-                                else:
-                                    socket.subtype = "NONE"
-
-                            if prop.property_type == "Enum":
-                                socket.subtype = "CUSTOM_ITEMS"
-                                socket.custom_items.clear()
-                                for item in prop.settings.items:
-                                    socket.custom_items.add().name = item.name
-
-            if "property_add" in data:
-                prop = data["property_add"]
-                self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
-
-            if "property_remove" in data:
-                self.inputs.remove(self.inputs[data["property_remove"] + 1])
-
-            if "property_move" in data:
-                from_index = data["property_move"][0]
-                to_index = data["property_move"][1]
-                self.inputs.move(from_index+1, to_index+1)
-
-            self._evaluate(bpy.context)
-
+        on_operator_ref_update(self, node, data, self.custom_operator_ntree, self.ref_SN_OperatorNode)
 
     def reset_inputs(self):
         """ Remove all operator inputs """
@@ -115,10 +119,11 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_pasted_operator(self, context):
         self.reset_inputs()
         
-        op = eval(self.pasted_operator.split("(")[0])
-        op_rna = op.get_rna_type()
-        self.pasted_name = op_rna.name
-        self.create_inputs(op_rna)
+        if self.pasted_operator:
+            op = eval(self.pasted_operator.split("(")[0])
+            op_rna = op.get_rna_type()
+            self.pasted_name = op_rna.name
+            self.create_inputs(op_rna)
     
     pasted_operator: bpy.props.StringProperty(default="bpy.ops.sn.dummy_button_operator()",
                                         update=update_pasted_operator)

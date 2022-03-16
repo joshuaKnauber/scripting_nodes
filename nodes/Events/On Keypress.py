@@ -1,5 +1,6 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
+from ..Program.Run_Operator import on_operator_ref_update
 
 
 
@@ -63,6 +64,12 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                    default=False,
                                    update=SN_ScriptingBaseNode._evaluate)
     
+    def reset_inputs(self, context=None):
+        self.inputs.clear()
+        self.pasted_operator = ""
+        self.ref_SN_OperatorNode = ""
+        self._evaluate(context)
+    
     def get_spaces(self, context):
         items = [("EMPTY","Any Space","Run this shortcut in any space")]
         for item in list(space_names.keys())[1:]:
@@ -80,13 +87,13 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     ("PIE_MENU","Pie Menu","Pie Menu")],
                                 name="Shortcut Type",
                                 description="The type of action to run from this shortcut",
-                                update=SN_ScriptingBaseNode._evaluate)
+                                update=reset_inputs)
     
     parent_type: bpy.props.EnumProperty(name="Parent Type",
                                 description="Use a custom panel as a parent",
                                 items=[("BLENDER", "Blender", "Blender", "BLENDER", 0),
                                         ("CUSTOM", "Custom", "Custom", "FILE_SCRIPT", 1)],
-                                update=SN_ScriptingBaseNode._evaluate)
+                                update=reset_inputs)
     
     def update_picked(self,context):
         if self.picked:
@@ -116,10 +123,28 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     pie: bpy.props.StringProperty(name="Pie Menu",
                                 description="The pie menu to open when the key is pressed",
                                 update=SN_ScriptingBaseNode._evaluate)
+
+    def create_inputs(self, op_rna):
+        """ Create inputs for operator """
+        for prop in op_rna.properties:
+            if not prop.identifier in ["rna_type", "settings"]:
+                inp = self.add_input_from_property(prop)
+                if inp:
+                    inp.can_be_disabled = not prop.is_required
+                    inp.disabled = not prop.is_required
+
+    def update_pasted_operator(self, context):
+        self.inputs.clear()
+        
+        if self.pasted_operator:
+            op = eval(self.pasted_operator.split("(")[0])
+            op_rna = op.get_rna_type()
+            self.create_inputs(op_rna)
+        self._evaluate(context)
     
     pasted_operator: bpy.props.StringProperty(name="Operator",
                                 description="The operator to run when the key is pressed",
-                                update=SN_ScriptingBaseNode._evaluate)
+                                update=update_pasted_operator)
     
     keep_open: bpy.props.BoolProperty(name="Keep Open",
                                 description="Keep the panel open after a property is changed",
@@ -136,9 +161,21 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 description="The panel to open with this shortcut",
                                 update=SN_ScriptingBaseNode._evaluate)
     
+    def on_ref_update(self, node, data=None):
+        on_operator_ref_update(self, node, data, self.ref_ntree, self.ref_SN_OperatorNode, 0)
+            
+    def update_custom_operator(self, context):
+        """ Updates the nodes settings when a new parent panel is selected """
+        self.inputs.clear()
+        if self.ref_ntree and self.ref_SN_OperatorNode in self.ref_ntree.nodes:
+            parent = self.ref_ntree.nodes[self.ref_SN_OperatorNode]
+            for prop in parent.properties:
+                self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
+        self._evaluate(context)
+    
     ref_SN_OperatorNode: bpy.props.StringProperty(name="Operator",
                                 description="The operator to run with this shortcut",
-                                update=SN_ScriptingBaseNode._evaluate)
+                                update=update_custom_operator)
 
     def evaluate(self, context):
         self.code_register = f"""
@@ -180,7 +217,11 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op.node = self.name
                 op.selection = "PANELS"
             else:
-                layout.prop_search(self, "ref_SN_PanelNode", parent_tree.node_collection("SN_PanelNode"), "refs", text="", icon="VIEWZOOM")
+                row = layout.row(align=True)
+                row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
+                subrow = row.row(align=True)
+                subrow.enabled = self.ref_ntree != None
+                subrow.prop_search(self, "ref_SN_PanelNode", parent_tree.node_collection("SN_PanelNode"), "refs", text="", icon="VIEWZOOM")
             layout.prop(self, "keep_open")
 
         elif self.action == "MENU":
@@ -190,7 +231,11 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op.node = self.name
                 op.selection = "MENUS"
             else: # TODO menu node
-                layout.prop_search(self, "ref_SN_PanelNode", parent_tree.node_collection("SN_PanelNode"), "refs", text="", icon="VIEWZOOM")
+                row = layout.row(align=True)
+                row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
+                subrow = row.row(align=True)
+                subrow.enabled = self.ref_ntree != None
+                subrow.prop_search(self, "ref_SN_PanelNode", parent_tree.node_collection("SN_PanelNode"), "refs", text="", icon="VIEWZOOM")
 
         elif self.action == "PIE_MENU":
             if self.parent_type == "BLENDER":
@@ -199,13 +244,21 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op.node = self.name
                 op.selection = "MENUS"
             else: # TODO pie menu
-                layout.prop_search(self, "ref_SN_PanelNode", parent_tree.node_collection("SN_PanelNode"), "refs", text="", icon="VIEWZOOM")
+                row = layout.row(align=True)
+                row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
+                subrow = row.row(align=True)
+                subrow.enabled = self.ref_ntree != None
+                subrow.prop_search(self, "ref_SN_PanelNode", parent_tree.node_collection("SN_PanelNode"), "refs", text="", icon="VIEWZOOM")
                 
         elif self.action == "OPERATOR":
             if self.parent_type == "BLENDER":
-                name = self.pasted_operator.split(".")[-1].split("(")[0].replace("_"," ").title() if self.pasted_operator else "Paste Operator"
+                name = self.pasted_operator.split("(")[0].split(".")[-1].replace("_"," ").title() if self.pasted_operator else "Paste Operator"
                 op = layout.operator("sn.paste_operator", text=name, icon="PASTEDOWN")
                 op.node_tree = self.node_tree.name
                 op.node = self.name
             else:
-                layout.prop_search(self, "ref_SN_OperatorNode", parent_tree.node_collection("SN_OperatorNode"), "refs", text="", icon="VIEWZOOM")
+                row = layout.row(align=True)
+                row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
+                subrow = row.row(align=True)
+                subrow.enabled = self.ref_ntree != None
+                subrow.prop_search(self, "ref_SN_OperatorNode", parent_tree.node_collection("SN_OperatorNode"), "refs", text="", icon="VIEWZOOM")
