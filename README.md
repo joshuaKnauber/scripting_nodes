@@ -3,20 +3,21 @@ Visual Scripting addon for blender with nodes
 
 - [X] Interface Functions
 - [X] Menu Nodes
-
 - [X] On Keypress
-- [ ] Popover
-- [ ] Portal
-- [ ] Serpens shortcut node to get property for displaying shortcut
 - [X] add node buttons
 - [X] find node buttons
 - [X] Conversions
 - [X] Proper error logging
-- [ ] enum items on function parameter
-- [ ] enum items from operator to button/run operator
+
+- [ ] Popover
+- [ ] Portals
+- [ ] Serpens shortcut node to get property for displaying shortcut
 - [ ] Snippets
 - [ ] Save Addon
-- [ ] Folders as assets
+
+- [ ] enum items on function parameter
+- [ ] enum items from operator to button/run operator
+- [ ] Export for asset folders
 - [ ] Complete ToDo's (in code)
 - [ ] changing nodes order doesn't hard compile
 - [ ] Update output type on on property update node

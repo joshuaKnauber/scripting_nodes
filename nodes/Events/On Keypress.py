@@ -188,7 +188,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 description="The operator to run with this shortcut",
                                 update=update_custom_operator)
 
-    def evaluate(self, context): # TODO update this node when node idnames change for op, menu, pie
+    def evaluate(self, context):
         if self.key:
             input_code = ""
             operator = ""
