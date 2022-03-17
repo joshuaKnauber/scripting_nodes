@@ -1,4 +1,5 @@
 import bpy
+from ...nodes.compiler import compile_addon
 
 
 
@@ -31,10 +32,9 @@ class SN_OT_RemoveVariable(bpy.types.Operator):
 
     def execute(self, context):
         ntree = bpy.data.node_groups[self.node_tree]
-        # TODO unregister
         ntree.variables.remove(ntree.variable_index)
         ntree.variable_index -= 1
-        # TODO register
+        compile_addon()
         return {"FINISHED"}
 
 

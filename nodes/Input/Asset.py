@@ -18,16 +18,19 @@ class SN_AssetNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 update=SN_ScriptingBaseNode._evaluate)
 
     def evaluate(self, context):
-        self.outputs["Path"].python_value = "\'\'"
         if self.asset and self.asset in context.scene.sn.assets:
             if context.scene.sn.assets[self.asset].path:
                 self.outputs["Path"].python_value = f"r\'{context.scene.sn.assets[self.asset].path}\'"
+                return
+        self.outputs["Path"].python_value = "\'\'"
                 
     def evaluate_export(self, context):
-        self.outputs["Path"].python_value = "\'\'"
         if self.asset and self.asset in context.scene.sn.assets:
-            if context.scene.sn.assets[self.asset].path: # TODO when doing export put asset folder here
-                self.outputs["Path"].python_value = f"r\'{context.scene.sn.assets[self.asset].path}\'"
+            if context.scene.sn.assets[self.asset].path:
+                self.code_import = "import os"
+                self.outputs["Path"].python_value = f"os.path.join(os.path.dirname(__file__), 'assets', '{os.path.basename(context.scene.sn.assets[self.asset].path)}')"
+                return
+        self.outputs["Path"].python_value = "\'\'"
 
     def draw_node(self, context, layout):
         layout.prop_search(self, "asset", context.scene.sn, "assets")

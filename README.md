@@ -13,12 +13,12 @@ Visual Scripting addon for blender with nodes
 - [ ] enum items on function parameter
 - [ ] enum items from operator to button/run operator
 - [ ] Snippets
-- [ ] Folders as assets
 - [ ] Save Addon
+- [ ] Folders as assets
 - [ ] Complete ToDo's (in code)
 - [ ] changing nodes order doesn't hard compile
-- [ ] Fix known bugs
 - [ ] Update output type on on property update node
 - [ ] Icons with names
+- [ ] Fix known bugs
 
 - [ ] New Demo version
