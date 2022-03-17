@@ -43,7 +43,7 @@ def register_keymaps():
         )
     addon_keymaps["docs"] = (km, kmi)
 
-    # shortcut for docs
+    # shortcut for adding a blend property
     kmi = km.keymap_items.new(
         idname="sn.add_blend_property",
         type="V",

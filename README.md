@@ -8,7 +8,7 @@ Visual Scripting addon for blender with nodes
 - [ ] Serpens shortcut node to get property for displaying shortcut
 - [X] add node buttons
 - [X] find node buttons
-- [ ] Conversions
+- [X] Conversions
 - [ ] Proper error logging
 - [ ] enum items on function parameter
 - [ ] enum items from operator to button/run operator
@@ -19,5 +19,6 @@ Visual Scripting addon for blender with nodes
 - [ ] changing nodes order doesn't hard compile
 - [ ] Fix known bugs
 - [ ] Update output type on on property update node
+- [ ] Icons with names
 
 - [ ] New Demo version
