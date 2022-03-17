@@ -54,11 +54,8 @@ def compile_addon():
     ctx['edit_text'] = txt
     try:
         bpy.ops.text.run_script(ctx)
-    except Exception as error:
-        print("")
-        print(error)
-        print("----------------------------------------------------")
-        print("")
+    except Exception:
+        print("^ ERROR WHEN REGISTERING SERPENS ADDON ^\n")
         if bpy.context.preferences.addons[__name__.partition('.')[0]].preferences.keep_last_error_file:
             if not "serpens_error" in bpy.data.texts:
                 bpy.data.texts.new("serpens_error")

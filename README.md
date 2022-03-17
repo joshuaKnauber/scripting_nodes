@@ -9,7 +9,7 @@ Visual Scripting addon for blender with nodes
 - [X] add node buttons
 - [X] find node buttons
 - [X] Conversions
-- [ ] Proper error logging
+- [X] Proper error logging
 - [ ] enum items on function parameter
 - [ ] enum items from operator to button/run operator
 - [ ] Snippets
