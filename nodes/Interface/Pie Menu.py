@@ -3,17 +3,16 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_MenuNode"
-    bl_label = "Menu"
+    bl_idname = "SN_PieMenuNode"
+    bl_label = "Pie Menu"
     layout_type = "layout"
     is_trigger = True
     node_color = "INTERFACE"
     bl_width_default = 200
 
     def on_create(self, context):
-        self.add_integer_input("Columns")["default_value"] = 1
         self.add_boolean_input("Hide")
         self.add_interface_output("Menu")
         self.add_dynamic_interface_output("Menu")
@@ -46,7 +45,7 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
                     return not ({self.inputs["Hide"].python_value})
 
                 def draw(self, context):
-                    layout = self.layout.column_flow(columns={self.inputs["Columns"].python_value})
+                    layout = self.layout.menu_pie()
                     {self.indent([out.python_value for out in self.outputs], 5)}
             """
         

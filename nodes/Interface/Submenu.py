@@ -14,6 +14,10 @@ class SN_SubmenuNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_input()
         self.add_string_input("Label")
         self.add_icon_input()
+
+    def on_ref_update(self, node, data=None):
+        if node.bl_idname in ["SN_PanelNode", "SN_MenuNode", "SN_PieMenuNode"]:
+            self._evaluate(bpy.context)
             
     parent_type: bpy.props.EnumProperty(name="Parent Type",
                                     description="Use a custom panel as a parent",

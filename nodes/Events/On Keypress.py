@@ -161,8 +161,16 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 description="The panel to open with this shortcut",
                                 update=SN_ScriptingBaseNode._evaluate)
     
+    ref_SN_MenuNode: bpy.props.StringProperty(name="Menu",
+                                description="The menu to open with this shortcut",
+                                update=SN_ScriptingBaseNode._evaluate)
+    
+    ref_SN_PieMenuNode: bpy.props.StringProperty(name="Menu",
+                                description="The menu to open with this shortcut",
+                                update=SN_ScriptingBaseNode._evaluate)
+    
     def on_ref_update(self, node, data=None):
-        if node.bl_idname == "SN_PanelNode":
+        if node.bl_idname in ["SN_PanelNode", "SN_MenuNode", "SN_PieMenuNode"]:
             self._evaluate(bpy.context)
         elif node.bl_idname == "SN_OperatorNode":
             on_operator_ref_update(self, node, data, self.ref_ntree, self.ref_SN_OperatorNode, 0)
@@ -194,6 +202,22 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                     node = self.ref_ntree.nodes[self.ref_SN_PanelNode]
                     input_code = f"kmi.properties.name = '{node.last_idname}'\n"
                     input_code += f"kmi.properties.keep_open = {self.keep_open}\n"
+            elif self.action == "MENU":
+                if self.parent_type == "BLENDER" and self.menu:
+                    operator = "wm.call_menu"
+                    input_code = f"kmi.properties.name = '{self.menu}'\n"
+                elif self.parent_type == "CUSTOM" and self.ref_ntree and self.ref_SN_MenuNode in self.ref_ntree.nodes:
+                    operator = "wm.call_menu"
+                    node = self.ref_ntree.nodes[self.ref_SN_MenuNode]
+                    input_code = f"kmi.properties.name = '{node.idname}'\n"
+            elif self.action == "PIE_MENU":
+                if self.parent_type == "BLENDER" and self.pie:
+                    operator = "wm.call_menu_pie"
+                    input_code = f"kmi.properties.name = '{self.pie}'\n"
+                elif self.parent_type == "CUSTOM" and self.ref_ntree and self.ref_SN_PieMenuNode in self.ref_ntree.nodes:
+                    operator = "wm.call_menu_pie"
+                    node = self.ref_ntree.nodes[self.ref_SN_PieMenuNode]
+                    input_code = f"kmi.properties.name = '{node.idname}'\n"
             if operator:
                 self.code_register = f"""
                     kc = bpy.context.window_manager.keyconfigs.addon
@@ -243,12 +267,12 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op = layout.operator("sn.pick_interface", text=name, icon="EYEDROPPER")
                 op.node = self.name
                 op.selection = "MENUS"
-            else: # TODO menu node
+            else:
                 row = layout.row(align=True)
                 row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
                 subrow = row.row(align=True)
                 subrow.enabled = self.ref_ntree != None
-                subrow.prop_search(self, "ref_SN_PanelNode", parent_tree.node_collection("SN_PanelNode"), "refs", text="", icon="VIEWZOOM")
+                subrow.prop_search(self, "ref_SN_MenuNode", parent_tree.node_collection("SN_MenuNode"), "refs", text="", icon="VIEWZOOM")
 
         elif self.action == "PIE_MENU":
             if self.parent_type == "BLENDER":
@@ -256,12 +280,12 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op = layout.operator("sn.pick_interface", text=name, icon="EYEDROPPER")
                 op.node = self.name
                 op.selection = "MENUS"
-            else: # TODO pie menu
+            else:
                 row = layout.row(align=True)
                 row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
                 subrow = row.row(align=True)
                 subrow.enabled = self.ref_ntree != None
-                subrow.prop_search(self, "ref_SN_PanelNode", parent_tree.node_collection("SN_PanelNode"), "refs", text="", icon="VIEWZOOM")
+                subrow.prop_search(self, "ref_SN_PieMenuNode", parent_tree.node_collection("SN_PieMenuNode"), "refs", text="", icon="VIEWZOOM")
                 
         elif self.action == "OPERATOR":
             if self.parent_type == "BLENDER":
