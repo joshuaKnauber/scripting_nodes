@@ -34,6 +34,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         col.prop(self, "check_for_updates")
         col.prop(get_shortcut("sn.force_compile"), "type", full_event=True, text="Force Compile")
         col.prop(get_shortcut("sn.open_node_docs"), "type", full_event=True, text="Node Docs")
+        col.prop(get_shortcut("sn.add_blend_property"), "type", full_event=True, text="Add Property Node")
         
         col = row.column(heading="Debugging")
         col.prop(self, "keep_last_error_file")

@@ -43,6 +43,17 @@ def register_keymaps():
         )
     addon_keymaps["docs"] = (km, kmi)
 
+    # shortcut for docs
+    kmi = km.keymap_items.new(
+        idname="sn.add_blend_property",
+        type="V",
+        value="PRESS",
+        shift=True,
+        ctrl=False,
+        alt=False,
+        )
+    addon_keymaps["docs"] = (km, kmi)
+
 
 def unregister_keymaps():
     # unregister visual scripting keymaps
