@@ -31,7 +31,7 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
         col.operator("sn.add_property_node_popup", text="Add Node", icon="ADD")
         col = row.column(align=True)
         col.operator("sn.add_property", text="", icon="ADD")
-        col.operator("sn.add_property", text="", icon="VIEWZOOM")
+        col.operator("sn.find_property", text="", icon="VIEWZOOM")
         col.operator("sn.remove_property", text="", icon="REMOVE")
 
         col.separator()

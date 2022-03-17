@@ -7,7 +7,7 @@ Visual Scripting addon for blender with nodes
 - [ ] On Keypress
 - [ ] Serpens shortcut node to get property for displaying shortcut
 - [X] add node buttons
-- [ ] find node buttons
+- [X] find node buttons
 - [ ] Conversions
 - [ ] Proper error logging
 - [ ] enum items on function parameter

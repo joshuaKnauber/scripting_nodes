@@ -189,3 +189,69 @@ class SN_OT_AddPropertyNode(bpy.types.Operator):
             elif self.type == "SN_OnPropertyUpdateNode":
                 node.prop_name = prop.name
         return {"FINISHED"}
+    
+    
+    
+class SN_OT_FindProperty(bpy.types.Operator):
+    bl_idname = "sn.find_property"
+    bl_label = "Find Property"
+    bl_description = "Finds this property in the addon"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    def execute(self, context):
+        return {"FINISHED"}
+    
+    def draw(self, context):
+        layout = self.layout
+        
+        # init property nodes
+        empty_nodes = []
+        property_nodes = []
+        property = None
+        if context.scene.sn.property_index < len(context.scene.sn.properties):
+            property = context.scene.sn.properties[context.scene.sn.property_index]
+
+        # find property nodes
+        for ngroup in bpy.data.node_groups:
+            if ngroup.bl_idname == "ScriptingNodesTree":
+                for node in ngroup.nodes:
+                    if node.bl_idname == "SN_SerpensPropertyNode":
+                        prop_src = node.get_prop_source()
+                        if prop_src and node.prop_name in prop_src.properties:
+                            prop = prop_src.properties[node.prop_name]
+                            if prop == property:
+                                property_nodes.append(node)
+                        elif not prop_src or not node.prop_name:
+                            empty_nodes.append(node)
+                        
+        # draw nodes for selected property    
+        if context.scene.sn.property_index < len(context.scene.sn.properties):
+            col = layout.column()
+            row = col.row()
+            row.enabled = False
+            row.label(text=f"Property: {property.name}")
+            
+            for node in property_nodes:
+                op = col.operator("sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF")
+                op.node_tree = node.node_tree.name
+                op.node = node.name
+            
+            if not property_nodes:
+                col.label(text="No nodes found for this property", icon="INFO")
+        
+        # draw nodes with empty property
+        col = layout.column()
+        row = col.row()
+        row.label(text="Empty Propert Nodes")
+        row.enabled = False
+        
+        for node in empty_nodes:
+            op = col.operator("sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF")
+            op.node_tree = node.node_tree.name
+            op.node = node.name
+
+        if not empty_nodes:
+            col.label(text="No empty property nodes found", icon="INFO")
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_popup(self, width=250)
