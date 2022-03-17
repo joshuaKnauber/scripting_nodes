@@ -23,5 +23,6 @@ Visual Scripting addon for blender with nodes
 - [ ] Update output type on on property update node
 - [ ] Icons with names
 - [ ] Fix known bugs
+- [ ] New Tutorial
 
 - [ ] New Demo version
