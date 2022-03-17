@@ -1,6 +1,6 @@
 import bpy
 from .base_socket import ScriptingSocket
-from ...settings.data_properties import bpy_to_path_sections
+from ...settings.data_properties import bpy_to_path_sections, bpy_to_indexed_sections
 
 
 
@@ -11,9 +11,12 @@ blend_data_defaults = {
     "Objects": {
         "value": "bpy.context.active_object",
         "name": "Using Active"},
+    "Areas": {
+        "value": "bpy.context.area",
+        "name": "Using Active"},
         
     "Preferences": {
-        "value": "self",
+        "value": lambda: "bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences" if bpy.context.scene.sn.is_exporting else "bpy.context.scene.sna_addon_prefs_temp",
         "name": "Using Self"},
     "Operator": {
         "value": "self",
@@ -32,7 +35,9 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     @property
     def default_python_value(self):
         if self.name in blend_data_defaults:
-            return blend_data_defaults[self.name]["value"]
+            value = blend_data_defaults[self.name]["value"]
+            if type(value) == str: return value
+            else: return value()
         return "None"
     
     default_prop_value = ""
@@ -43,17 +48,17 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     
     @property
     def python_attr(self):
-        value = self.python_value
-        if "." in value:
-            return value.split(".")[-1]
-        return value
+        sections = bpy_to_indexed_sections(self.python_value)
+        if sections:
+            return sections[-1]
+        return self.python_value
     
     @property
     def python_source(self):
-        value = self.python_value
-        if "." in value:
-            return ".".join(value.split(".")[:-1])
-        return value
+        sections = bpy_to_indexed_sections(self.python_value)
+        if sections:
+            return ".".join(sections[:-1])
+        return self.python_value
     
     @property
     def python_sections(self):

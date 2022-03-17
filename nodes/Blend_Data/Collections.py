@@ -3,16 +3,17 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_MeshBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_CollectionsBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_MeshBlendDataNode"
-    bl_label = "Mesh"
+    bl_idname = "SN_CollectionsBlendDataNode"
+    bl_label = "Collections"
     node_color = "PROPERTY"
     
     def on_create(self, context):
-        self.add_collection_property_output("All Meshes")
-        self.add_list_output("Active Scene Meshes")
-        self.add_property_output("Active Object Mesh")
+        self.add_collection_property_output("All Collections")
+        self.add_collection_property_output("Scene Collections")
+        self.add_property_output("Scene Collection")
+        self.add_property_output("Active Collection")
         self.add_property_output("Indexed")
         self.add_integer_input("Index")
 
@@ -28,10 +29,11 @@ class SN_MeshBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 update=update_index_type)
         
     def evaluate(self, context):
-        self.outputs["All Meshes"].python_value = f"bpy.data.meshes"
-        self.outputs["Active Scene Meshes"].python_value = f"list(filter(lambda obj: obj, [obj.data if obj.type == 'MESH' else None for obj in bpy.context.scene.objects]))"
-        self.outputs["Active Object Mesh"].python_value = f"(bpy.context.active_object.data if bpy.context.active_object.type == 'MESH' else None)"
-        self.outputs["Indexed"].python_value = f"bpy.data.meshes[{self.inputs[0].python_value}]"
+        self.outputs["All Collections"].python_value = f"bpy.data.collections"
+        self.outputs["Scene Collections"].python_value = f"bpy.context.scene.collection.children"
+        self.outputs["Scene Collection"].python_value = f"bpy.context.scene.collection"
+        self.outputs["Active Collection"].python_value = f"bpy.context.collection"
+        self.outputs["Indexed"].python_value = f"bpy.data.collections[{self.inputs[0].python_value}]"
 
     def draw_node(self, context, layout):
         layout.prop(self, "index_type", expand=True)

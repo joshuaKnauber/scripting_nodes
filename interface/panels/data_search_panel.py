@@ -77,6 +77,11 @@ class SN_PT_FilterDataSettings(bpy.types.Panel):
 
 
 
+path_notes = {
+    "bpy.context.preferences.keymap": "Copy shortcuts from Context -> Window Manager -> Keyconfigs -> Your Shortcut -> Type",
+    "bpy.context.window_manager.keyconfigs": "To display a shortcut, find it in the User Key Config below, copy its Type property and check Full Shortcut on the node",
+}
+
 class SN_PT_data_search(bpy.types.Panel):
     bl_space_type = 'PREFERENCES'
     bl_region_type = 'WINDOW'
@@ -131,6 +136,11 @@ class SN_PT_data_search(bpy.types.Panel):
             split = row.split(factor=0.015)
             split.label(text="")
             col = split.column(align=True)
+                
+            if item["path"] in path_notes:
+                box = col.box()
+                box.scale_y = 0.75
+                box.label(text=path_notes[item["path"]], icon="INFO")
             
             is_empty = True
             for key in item["properties"].keys():

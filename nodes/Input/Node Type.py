@@ -18,7 +18,7 @@ class SN_NodeTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "STRING"
 
     def on_create(self, context):
-        self.add_string_output("Type")
+        self.add_string_output("Idname")
         
         # load python nodes
         for cls in bpy.types.NodeInternal.__subclasses__():
@@ -47,9 +47,9 @@ class SN_NodeTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         if self.node:
-            self.outputs["Type"].python_value = f"'{self.nodes[self.node].identifier}'"
+            self.outputs["Idname"].python_value = f"'{self.nodes[self.node].identifier}'"
         else:
-            self.outputs["Type"].python_value = "''"
+            self.outputs["Idname"].python_value = "''"
 
 
     def draw_node(self, context, layout):

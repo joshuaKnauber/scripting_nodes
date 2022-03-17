@@ -23,6 +23,12 @@ def enum_set_to_string(value):
         return "[]"
     return value
     
+def string_to_type(value, to_type, default):
+    try:
+        value = to_type(value)
+    except:
+        value = default
+    return value
 """
 
 
@@ -31,12 +37,16 @@ CONVERSIONS = { # convert KEY to OPTIONS
     "String": {
         "Data": lambda from_out, to_inp: from_out.python_value,
         "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",
+        "Integer": lambda from_out, to_inp: f"string_to_type({from_out.python_value}, int, 0)",
+        "Float": lambda from_out, to_inp: f"string_to_type({from_out.python_value}, float, 0)",
         "Icon": lambda from_out, to_inp: f"string_to_icon({from_out.python_value})" if to_inp.subtype == "NONE" else from_out.python_value,
         "Enum": lambda from_out, to_inp: from_out.python_value if to_inp.subtype == "NONE" else f"set([{from_out.python_value}])",
     },
     "Boolean": {
         "Data": lambda from_out, to_inp: from_out.python_value,
         "String": lambda from_out, to_inp: f"str({from_out.python_value})",
+        "Integer": lambda from_out, to_inp: f"int({from_out.python_value})",
+        "Float": lambda from_out, to_inp: f"int({from_out.python_value})",
         "Icon": lambda from_out, to_inp: f"int({from_out.python_value})",
     },
     "Boolean Vector": {
@@ -47,6 +57,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     "Icon": {
         "Data": lambda from_out, to_inp: from_out.python_value,
         "Integer": lambda from_out, to_inp: from_out.python_value,
+        "Float": lambda from_out, to_inp: from_out.python_value,
         "String": lambda from_out, to_inp: f"icon_to_string({from_out.python_value})",
         "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",
         
@@ -80,6 +91,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Data": lambda from_out, to_inp: from_out.python_value,
         "String": lambda from_out, to_inp: f"str(tuple({from_out.python_value}))",
         "List": lambda from_out, to_inp: f"list({from_out.python_value})",
+        "Float Vector": lambda from_out, to_inp: f"{from_out.python_value}",
     },
     "Float": {
         "Data": lambda from_out, to_inp: from_out.python_value,
@@ -91,6 +103,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Data": lambda from_out, to_inp: from_out.python_value,
         "String": lambda from_out, to_inp: f"str(tuple({from_out.python_value}))",
         "List": lambda from_out, to_inp: f"list({from_out.python_value})",
+        "Integer Vector": lambda from_out, to_inp: f"tuple(map(lambda v: int(v), {from_out.python_value}))",
     },
     "List": {
         "Data": lambda from_out, to_inp: from_out.python_value,

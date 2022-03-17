@@ -13,6 +13,9 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     is_trigger = True
     node_color = "INTERFACE"
     
+    def on_node_property_change(self, property):
+        pass # TODO update property nodes and compile this node properly
+    
     def on_create(self, context):
         self.add_boolean_input("Hide").default_value = False
         self.add_interface_output("Preferences")
@@ -25,7 +28,7 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         props_unregister_list = self.props_unregister(context).split("\n")
         
         idname = f"SNA_TempAddonPreferences_{self.static_uid}"
-        prop_name = f"sna_addon_prefs_temp_{self.static_uid}"
+        prop_name = f"sna_addon_prefs_temp"
 
         self.code_imperative = f"""
                                 {self.indent(props_imperative_list, 8)}

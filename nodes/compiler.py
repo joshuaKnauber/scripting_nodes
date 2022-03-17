@@ -54,11 +54,8 @@ def compile_addon():
     ctx['edit_text'] = txt
     try:
         bpy.ops.text.run_script(ctx)
-    except Exception as error:
-        print("")
-        print(error)
-        print("----------------------------------------------------")
-        print("")
+    except Exception:
+        print("^ ERROR WHEN REGISTERING SERPENS ADDON ^\n")
         if bpy.context.preferences.addons[__name__.partition('.')[0]].preferences.keep_last_error_file:
             if not "serpens_error" in bpy.data.texts:
                 bpy.data.texts.new("serpens_error")
@@ -73,9 +70,25 @@ def compile_addon():
 
 
 
+DEFAULT_IMPORTS = """
+import bpy
+"""
+
+GLOBAL_VARS = """
+addon_keymaps = []
+"""
+
+UNREGISTER_KEYMAPS = """
+wm = bpy.context.window_manager
+kc = wm.keyconfigs.addon
+for km, kmi in addon_keymaps:
+    km.keymap_items.remove(kmi)
+addon_keymaps.clear()
+"""
+
 def format_single_file():
     """ Returns the entire addon code (for development) formatted for a single python file """
-    imports, imperative, main, register, unregister = ("import bpy\n", CONVERT_UTILS, "", "", "")
+    imports, imperative, main, register, unregister = (DEFAULT_IMPORTS, CONVERT_UTILS + GLOBAL_VARS, "", "", UNREGISTER_KEYMAPS)
 
     # add property and variable code
     imperative += variable_register_code() + "\n"

@@ -84,7 +84,7 @@ def data_to_dict(data):
         
 def get_data_item(parent_data, data, path, attribute):
     """ Returns a data object for the given data its path and the datas attribute """
-    has_properties = hasattr(data, "bl_rna")
+    has_properties = hasattr(data, "bl_rna") or "bpy_prop_collection" in str(type(data))
     if (attribute[0] == "'" and attribute[-1] == "'") or attribute.isdigit():
         new_path = f"{path}[{attribute}]"
         has_properties = True
@@ -212,3 +212,27 @@ def bpy_to_path_sections(path):
     sections = list(filter(lambda item: item, sections))
                 
     return sections
+
+
+def bpy_to_path_sections_with_brackets(path):
+    """ Returns bpy_to_path_sections with brackets for the indexed sections """
+    sections = bpy_to_path_sections(path)
+    # add brackets to indexing
+    for i in range(len(sections)):
+        if (sections[i][0] == "'" and sections[i][-1] == "'") or sections[i].isdigit():
+            sections[i] = f"[{sections[i]}]"
+    return sections
+
+
+def bpy_to_indexed_sections(path):
+    """ Takes a blender python data path and converts it to indexed path sections """
+    # combine indexed sections
+    combined = ["bpy"]
+    for section in bpy_to_path_sections_with_brackets(path):
+        if (section[0] == "[" and section[-1] == "]") and not combined[-1][-1] == "]":
+            combined[-1] += section
+        else:
+            combined.append(section)
+            
+    if not "bpy." in path: combined = combined[1:]
+    return combined

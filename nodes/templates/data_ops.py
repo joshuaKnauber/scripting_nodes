@@ -12,6 +12,18 @@ class SN_OT_PasteDataPath(bpy.types.Operator):
     node_tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
+        # replace bpy.data.screens for space data NOTE: maybe abstract this in the future to a dict like in rightclick ops
+        new_path = None
+        if "bpy.data.screens[" in context.window_manager.clipboard:
+            new_path = "]".join(context.window_manager.clipboard.split("]")[1:])
+            new_path = f"bpy.context.screen.areas[0].spaces[0].{new_path}"
+        elif "bpy.context.area.spaces.active":
+            new_path = context.window_manager.clipboard.replace("bpy.context.area.spaces.active", "bpy.context.screen.areas[0].spaces[0]")
+        if new_path:
+            if context.scene.sn.last_copied_datapath == context.window_manager.clipboard:
+                context.scene.sn.last_copied_datapath = new_path
+            context.window_manager.clipboard = new_path
+
         if "bpy." in context.window_manager.clipboard:
             node = bpy.data.node_groups[self.node_tree].nodes[self.node]
 

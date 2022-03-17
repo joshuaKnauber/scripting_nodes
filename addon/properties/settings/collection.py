@@ -37,7 +37,7 @@ class SN_PT_CollectionProperty(PropertySettings, bpy.types.PropertyGroup):
         if self.prop_group in src.properties and src.properties[self.prop_group].property_type == "Group":
             if not hasattr(self.prop, "group_prop_parent") or (hasattr(self.prop, "group_prop_parent") and self.prop.group_prop_parent.name != self.prop_group):
                 return f"type=SNA_GROUP_{src.properties[self.prop_group].python_name}"
-        return "type=None" # TODO replace this with always existing group
+        return "type=bpy.types.PropertyGroup.__subclasses__()[0]"
     
     
     prop_group: bpy.props.StringProperty(name="Property Group",

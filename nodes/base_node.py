@@ -223,7 +223,6 @@ class SN_ScriptingBaseNode:
         if self.disable_evaluation: return
         
         # keep track of code before changes
-        # TODO this seems to be buggy. didn't reset the code for some node, no idea how to reproduce
         prev_code = self.code
         prev_code_import = self.code_import
         prev_code_imperative = self.code_imperative
@@ -255,7 +254,7 @@ class SN_ScriptingBaseNode:
         # trigger compiler updates
         if other_code_changed and not self.is_trigger:
             self._trigger_root_nodes()
-        if node_code_changed:
+        if node_code_changed or (other_code_changed and self.is_trigger):
             self._node_code_changed()
 
 

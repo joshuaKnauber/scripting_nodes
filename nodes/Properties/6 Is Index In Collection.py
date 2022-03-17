@@ -14,6 +14,7 @@ class SN_IsIndexInCollectionPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_collection_property_input()
         self.add_integer_input("Index")
         self.add_boolean_output("In Collection")
+        self.add_integer_output("Index")
 
     def update_index_type(self, context):
         self.convert_socket(self.inputs[1], self.socket_names[self.index_type])
@@ -26,10 +27,16 @@ class SN_IsIndexInCollectionPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 update=update_index_type)
         
     def evaluate(self, context):
-        if self.index_type == "Integer":
-            self.outputs[0].python_value = f"(len({self.inputs[0].python_value}) > {self.inputs[1].python_value})"
+        if self.inputs[0].is_linked:
+            if self.index_type == "Integer":
+                self.outputs["In Collection"].python_value = f"(len({self.inputs[0].python_value}) > {self.inputs[1].python_value})"
+                self.outputs["Index"].python_value = self.inputs[1].python_value
+            else:
+                self.outputs["In Collection"].python_value = f"({self.inputs[1].python_value} in {self.inputs[0].python_value})"
+                self.outputs["Index"].python_value = f"{self.inputs[0].python_value}.find({self.inputs[1].python_value})"
         else:
-            self.outputs[0].python_value = f"({self.inputs[1].python_value} in {self.inputs[0].python_value})"
+            self.outputs[0].reset_value()
+            self.outputs[1].reset_value()
 
     def draw_node(self, context, layout):
         layout.prop(self, "index_type", expand=True)

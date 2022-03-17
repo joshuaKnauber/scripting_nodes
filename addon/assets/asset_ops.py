@@ -142,3 +142,18 @@ class SN_OT_FindAsset(bpy.types.Operator):
     
     def invoke(self, context, event):
         return context.window_manager.invoke_popup(self, width=250)
+    
+    
+
+class SN_OT_AddAssetNode(bpy.types.Operator):
+    bl_idname = "sn.add_asset_node"
+    bl_label = "Add Asset Node"
+    bl_description = "Adds an asset node"
+    bl_options = {"REGISTER", "INTERNAL"}
+    
+    def execute(self, context):
+        bpy.ops.node.add_node("INVOKE_DEFAULT", type="SN_AssetNode", use_transform=True)
+        node = context.space_data.node_tree.nodes.active
+        if context.scene.sn.asset_index < len(context.scene.sn.assets):
+            node.asset = context.scene.sn.assets[context.scene.sn.asset_index].name
+        return {"FINISHED"}

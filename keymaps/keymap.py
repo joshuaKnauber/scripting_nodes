@@ -5,9 +5,9 @@ import bpy
 addon_keymaps = {}
 
 
-def get_shortcut(key):
-    """ Returns the shortcut struct for the given key """
-    return addon_keymaps[key][1]
+def get_shortcut(idname):
+    """ Returns the shortcut struct for the given idname """
+    return bpy.context.window_manager.keyconfigs.user.keymaps["Node Editor"].keymap_items[idname]
 
 
 def register_keymaps():
@@ -15,11 +15,9 @@ def register_keymaps():
 
     # create keymap
     global addon_keymaps
-    addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[0]].preferences
     
     wm = bpy.context.window_manager
-    addon_keyconfig = wm.keyconfigs.addon
-    kc = addon_keyconfig
+    kc = wm.keyconfigs.addon
 
     km = kc.keymaps.new(name="Node Editor", space_type="NODE_EDITOR")
 
@@ -40,6 +38,17 @@ def register_keymaps():
         type="F1",
         value="PRESS",
         shift=False,
+        ctrl=False,
+        alt=False,
+        )
+    addon_keymaps["docs"] = (km, kmi)
+
+    # shortcut for adding a blend property
+    kmi = km.keymap_items.new(
+        idname="sn.add_blend_property",
+        type="V",
+        value="PRESS",
+        shift=True,
         ctrl=False,
         alt=False,
         )
