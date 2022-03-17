@@ -102,3 +102,67 @@ class SN_OT_AddVariableNode(bpy.types.Operator):
             node.var_ntree = context.space_data.node_tree
             node.var_name = var.name
         return {"FINISHED"}
+    
+    
+
+class SN_OT_FindVariable(bpy.types.Operator):
+    bl_idname = "sn.find_variable"
+    bl_label = "Find Variable"
+    bl_description = "Finds this variable in the addon"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    def execute(self, context):
+        return {"FINISHED"}
+    
+    def draw(self, context):
+        layout = self.layout
+        ntree = context.space_data.node_tree
+        
+        # init variable nodes
+        empty_nodes = []
+        variable_nodes = []
+        variable = None
+        if ntree.variable_index < len(ntree.variables):
+            variable = ntree.variables[ntree.variable_index]
+
+        # find variable nodes
+        for ngroup in bpy.data.node_groups:
+            if ngroup.bl_idname == "ScriptingNodesTree":
+                for node in ngroup.nodes:
+                    if hasattr(node, "var_name") and hasattr(node, "var_ntree"):
+                        if variable and node.var_name == variable.name and node.var_ntree == ntree:
+                            variable_nodes.append(node)
+                        elif not node.var_name or not node.var_ntree:
+                            empty_nodes.append(node)
+                        
+        # draw nodes for selected variable    
+        if ntree.variable_index < len(ntree.variables):
+            col = layout.column()
+            row = col.row()
+            row.enabled = False
+            row.label(text=f"Variable: {variable.name}")
+            
+            for node in variable_nodes:
+                op = col.operator("sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF")
+                op.node_tree = node.node_tree.name
+                op.node = node.name
+            
+            if not variable_nodes:
+                col.label(text="No nodes found for this variable", icon="INFO")
+        
+        # draw nodes with empty variable
+        col = layout.column()
+        row = col.row()
+        row.label(text="Empty Variable Nodes")
+        row.enabled = False
+        
+        for node in empty_nodes:
+            op = col.operator("sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF")
+            op.node_tree = node.node_tree.name
+            op.node = node.name
+
+        if not empty_nodes:
+            col.label(text="No empty variable nodes found", icon="INFO")
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_popup(self, width=250)

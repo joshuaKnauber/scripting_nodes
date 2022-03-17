@@ -33,4 +33,5 @@ class VariableReferenceNode():
         row.prop(self, "var_ntree", text="")
         subrow = row.row(align=True)
         subrow.enabled = self.var_ntree != None
-        subrow.prop_search(self, "var_name", self.node_tree, "variables", text="")
+        parent_tree = self.node_tree if not self.var_ntree else self.var_ntree
+        subrow.prop_search(self, "var_name", parent_tree, "variables", text="")

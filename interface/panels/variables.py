@@ -32,7 +32,7 @@ class SN_PT_VariablePanel(bpy.types.Panel):
         col.operator("sn.add_variable_node_popup", text="Add Node", icon="ADD")
         col = row.column(align=True)
         col.operator("sn.add_variable", text="", icon="ADD").node_tree = ntree.name
-        col.operator("sn.add_variable", text="", icon="VIEWZOOM").node_tree = ntree.name
+        col.operator("sn.find_variable", text="", icon="VIEWZOOM")
         col.operator("sn.remove_variable", text="", icon="REMOVE").node_tree = ntree.name
 
         col.separator()
