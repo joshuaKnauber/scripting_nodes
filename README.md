@@ -10,8 +10,8 @@ Visual Scripting addon for blender with nodes
 - [X] Proper error logging
 - [X] Portals
 - [X] Serpens shortcut node to get property for displaying shortcut
+- [X] Popover
 
-- [ ] Popover
 - [ ] Snippets
 - [ ] Save Addon
 
