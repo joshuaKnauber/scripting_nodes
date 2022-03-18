@@ -13,7 +13,6 @@ class SN_DisplaySerpensShortcutNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_interface_input()
         self.add_string_input("Label")
-        self.add_icon_input("Icon")
         
     src_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Panel Node Tree",
@@ -26,9 +25,18 @@ class SN_DisplaySerpensShortcutNode(bpy.types.Node, SN_ScriptingBaseNode):
                                                 update=SN_ScriptingBaseNode._evaluate)
 
     def evaluate(self, context):
-        self.code_imperative = ""
-        src = ""
-        self.code = f"{self.active_layout}.prop({src}, 'type', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, full_event=True)"
+        if self.src_ntree and self.ref_SN_OnKeypressNode in self.src_ntree.nodes:
+            self.code_imperative = """
+                def find_user_keyconfig(key):
+                    km, kmi = addon_keymaps[key]
+                    for item in bpy.context.window_manager.keyconfigs.user.keymaps[km.name].keymap_items:
+                        if item.compare(kmi):
+                            return item
+                    return kmi
+            """
+            node = self.src_ntree.nodes[self.ref_SN_OnKeypressNode]
+            src = f"find_user_keyconfig('{node.static_uid}')"
+            self.code = f"{self.active_layout}.prop({src}, 'type', text={self.inputs['Label'].python_value}, full_event=True)"
 
     def draw_node(self, context, layout):
         row = layout.row(align=True)

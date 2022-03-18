@@ -75,13 +75,13 @@ import bpy
 """
 
 GLOBAL_VARS = """
-addon_keymaps = []
+addon_keymaps = {}
 """
 
 UNREGISTER_KEYMAPS = """
 wm = bpy.context.window_manager
 kc = wm.keyconfigs.addon
-for km, kmi in addon_keymaps:
+for km, kmi in addon_keymaps.values():
     km.keymap_items.remove(kmi)
 addon_keymaps.clear()
 """

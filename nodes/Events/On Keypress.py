@@ -225,7 +225,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                     kmi = km.keymap_items.new('{operator}', '{self.key}', '{self.value}',
                         ctrl={self.ctrl}, alt={self.alt}, shift={self.shift}, repeat={self.repeat})
                     {self.indent(input_code, 5)}
-                    addon_keymaps.append((km, kmi))
+                    addon_keymaps['{self.static_uid}'] = (km, kmi)
                 """
 
     def draw_node(self, context, layout):
