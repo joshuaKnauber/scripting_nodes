@@ -111,8 +111,11 @@ class ScriptingSocket:
 
     def get_data_type_items(self, context):
         items = []
-        for i, name in enumerate(list(self.node.socket_names.keys())[2:]):
-            items.append((self.node.socket_names[name], name, name, property_icons[name], i))
+        used_idnames = []
+        for name in list(self.node.socket_names.keys())[2:]:
+            if not self.node.socket_names[name] in used_idnames:
+                items.append((self.node.socket_names[name], name, name, property_icons[name], len(items)))
+                used_idnames.append(self.node.socket_names[name])
         return items
             
     changeable: bpy.props.BoolProperty(default=False,
