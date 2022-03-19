@@ -218,6 +218,23 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                     operator = "wm.call_menu_pie"
                     node = self.ref_ntree.nodes[self.ref_SN_PieMenuNode]
                     input_code = f"kmi.properties.name = '{node.idname}'\n"
+            elif self.action == "OPERATOR":
+                if self.parent_type == "BLENDER" and self.pasted_operator:
+                    if not self.pasted_operator: return
+                    operator = self.pasted_operator.split("(")[0].replace("bpy.ops.", "")
+                    op = eval(self.pasted_operator.split("(")[0])
+                    op_rna = op.get_rna_type()
+                    for inp in self.inputs:
+                        if not inp.disabled:
+                            for prop in op_rna.properties:
+                                if prop.name == inp.name:
+                                    input_code += f"kmi.properties.{prop.identifier} = {inp.python_value}\n"
+                elif self.parent_type == "CUSTOM" and self.ref_ntree and self.ref_SN_OperatorNode in self.ref_ntree.nodes:
+                    node = self.ref_ntree.nodes[self.ref_SN_OperatorNode]
+                    operator = f"sna.{node.operator_python_name}"
+                    for i, inp in enumerate(self.inputs):
+                        if not inp.disabled:
+                            input_code += f"kmi.properties.{node.properties[i].python_name} = {inp.python_value}\n"
             if operator:
                 self.code_register = f"""
                     kc = bpy.context.window_manager.keyconfigs.addon

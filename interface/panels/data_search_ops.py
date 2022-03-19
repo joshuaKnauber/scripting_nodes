@@ -46,7 +46,13 @@ class SN_OT_ExpandData(bpy.types.Operator):
         item = item_from_path(sn.data_items, self.path)
         item["expanded"] = not item["expanded"]
         if not item["properties"]:
-            item["properties"] = get_data_items(self.path, item["data"])
+            try:
+                item["data"]
+                item["properties"] = get_data_items(self.path, item["data"])
+            except:
+                item["has_properties"] = False
+                item["expanded"] = False
+                self.report({"ERROR"}, message="This data doesn't exist anymore!")
         return {"FINISHED"}
 
 
@@ -116,7 +122,13 @@ class SN_OT_ReloadItemData(bpy.types.Operator):
 
     def execute(self, context):
         item = item_from_path(context.scene.sn.data_items, self.path)
-        item["properties"] = get_data_items(self.path, item["data"])
+        try:
+            item["data"]
+            item["properties"] = get_data_items(self.path, item["data"])
+        except:
+            item["has_properties"] = False
+            item["expanded"] = False
+            self.report({"ERROR"}, message="This data doesn't exist anymore!")
         return {"FINISHED"}
 
 

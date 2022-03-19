@@ -93,7 +93,6 @@ def format_single_file():
 
     # add property and variable code
     imperative += variable_register_code() + "\n"
-    main += property_imperative_code() + "\n"
     register += property_register_code() + "\n"
     unregister += property_unregister_code() + "\n"
     
@@ -105,6 +104,9 @@ def format_single_file():
         if node.code: main += "\n" + node.code
         if node.code_register: register += "\n" + node.code_register
         if node.code_unregister: unregister += "\n" + node.code_unregister
+        
+    # add property code
+    main += "\n" + property_imperative_code() + "\n"
 
     # format register functions
     if not register.strip():

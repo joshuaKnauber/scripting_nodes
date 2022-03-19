@@ -24,9 +24,9 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def update_from_parent(self, parent):
         """ Update this subpanels nodes values from the parent node """
-        self["space"] = parent["space"]
-        self["region"] = parent["region"]
-        self["context"] = parent["context"]
+        self["space"] = parent.space
+        self["region"] = parent.region
+        self["context"] = parent.context
 
 
     def update_custom_parent(self, context):
@@ -196,12 +196,15 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                             {self.indent([out.python_value for out in filter(lambda out: out.name=='Panel' and not out.dynamic, self.outputs)], 7)}
                     """
 
-        self.code_register = f"bpy.utils.register_class({self.last_idname})"
-        self.code_unregister = f"bpy.utils.unregister_class({self.last_idname})"
+        if self.is_subpanel and parent and not context.scene.sn.is_exporting:
+            self.code_register = f"if '{parent}' in globals(): bpy.utils.register_class({self.last_idname})"
+            self.code_unregister = f"if '{parent}' in globals(): bpy.utils.unregister_class({self.last_idname})"
+        else:
+            self.code_register = f"bpy.utils.register_class({self.last_idname})"
+            self.code_unregister = f"bpy.utils.unregister_class({self.last_idname})"
 
 
     def draw_node(self, context, layout):
-        
         if not self.is_subpanel:
             row = layout.row(align=True)
             row.scale_y = 1.4
@@ -236,6 +239,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         layout.prop(self, "is_subpanel")
 
+        layout.prop(self, "name")
         layout.prop(self, "panel_label")
         if not self.is_subpanel:
             layout.prop(self, "category")

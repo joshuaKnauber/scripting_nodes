@@ -419,6 +419,8 @@ class SN_ScriptingBaseNode:
     def on_node_property_add(self, property): pass
     def on_node_property_remove(self, index): pass
     def on_node_property_move(self, from_index, to_index): pass
+    
+    def on_node_name_change(self): pass
 
 
     ### DRAW NODE

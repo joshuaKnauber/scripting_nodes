@@ -30,17 +30,21 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     # property name change
     # property type change
 
-    def update_name(self, context):
-        self["operator_name"] = self.operator_name.replace("\"", "'")
-        names = []
-        for ntree in bpy.data.node_groups:
-            if ntree.bl_idname == "ScriptingNodesTree":
-                for ref in ntree.node_collection("SN_OperatorNode").refs:
-                    names.append(ref.node.operator_name)
+    def on_node_name_change(self):
+        new_name = self.name.replace("\"", "'")
+        if not self.name == new_name:
+            self.name = new_name
+            names = []
+            for ntree in bpy.data.node_groups:
+                if ntree.bl_idname == "ScriptingNodesTree":
+                    for ref in ntree.node_collection("SN_OperatorNode").refs:
+                        names.append(ref.node.name)
 
-        self["operator_name"] = unique_collection_name(self.operator_name, "My Operator", names, " ", includes_name=True)
-        self.trigger_ref_update()
-        self._evaluate(context)
+            new_name = unique_collection_name(self.name, "My Operator", names, " ", includes_name=True)
+            if not self.name == new_name:
+                self.name = new_name
+            self.trigger_ref_update()
+            self._evaluate(bpy.context)
 
     def update_description(self, context):
         self["operator_description"] = self.operator_description.replace("\"", "'")
@@ -61,7 +65,6 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
         self._evaluate(context)
 
-    operator_name: bpy.props.StringProperty(default="My Operator", name="Name", description="Name of the operator", update=update_name)
     operator_description: bpy.props.StringProperty(name="Description", description="Description of the operator", update=update_description)
     invoke_option: bpy.props.EnumProperty(name="Popup",items=[("none","None","None"),
                                                             ("invoke_confirm","Confirm","Shows a confirmation option for this operator"),
@@ -76,7 +79,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
     @property
     def operator_python_name(self):
-        return get_python_name(self.operator_name, replacement="my_generic_operator")
+        return get_python_name(self.name, replacement="my_generic_operator")
 
     def on_create(self, context):
         self.add_boolean_input("Disable")
@@ -90,8 +93,8 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
     def draw_node(self, context, layout):
         row = layout.row(align=True)
-        row.prop(self, "operator_name")
-        python_name = get_python_name(self.operator_name, replacement="my_generic_operator")
+        row.prop(self, "name")
+        python_name = get_python_name(self.name, replacement="my_generic_operator")
         row.operator("sn.copy_python_name", text="", icon="COPYDOWN").name = "sna." + python_name
 
         layout.label(text="Description: ")
@@ -154,7 +157,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         self.code = f"""
                     class SNA_OT_{self.operator_python_name.title()}(bpy.types.Operator):
                         bl_idname = "sna.{self.operator_python_name}"
-                        bl_label = "{self.operator_name}"
+                        bl_label = "{self.name}"
                         bl_description = "{self.operator_description}"
                         bl_options = {"{" + '"REGISTER", "UNDO"' + "}"}
                         {selected_property}
