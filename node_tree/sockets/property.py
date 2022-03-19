@@ -8,10 +8,19 @@ blend_data_defaults = {
     "Scenes": {
         "value": "bpy.context.scene",
         "name": "Using Active"},
+    "Scene": {
+        "value": "bpy.context.scene",
+        "name": "Using Active"},
     "Objects": {
         "value": "bpy.context.active_object",
         "name": "Using Active"},
+    "Object": {
+        "value": "bpy.context.active_object",
+        "name": "Using Active"},
     "Areas": {
+        "value": "bpy.context.area",
+        "name": "Using Active"},
+    "Area": {
         "value": "bpy.context.area",
         "name": "Using Active"},
         

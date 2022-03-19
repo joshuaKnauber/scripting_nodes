@@ -25,5 +25,6 @@ Visual Scripting addon for blender with nodes
 - [ ] Icons with names
 - [ ] Fix known bugs
 - [ ] New Tutorial
+- [ ] Catch error of items that don't exist anymore in blend data browser
 
 - [ ] New Demo version
