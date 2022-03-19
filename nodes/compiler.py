@@ -53,6 +53,7 @@ def compile_addon():
     ctx = bpy.context.copy()
     ctx['edit_text'] = txt
     try:
+        # exec(txt.as_string())
         bpy.ops.text.run_script(ctx)
     except Exception:
         print("^ ERROR WHEN REGISTERING SERPENS ADDON ^\n")

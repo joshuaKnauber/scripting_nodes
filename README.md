@@ -17,6 +17,7 @@ Visual Scripting addon for blender with nodes
 
 - [ ] enum items on function parameter
 - [ ] enum items from operator to button/run operator
+- [ ] packages, snippets and addons in prefs
 - [ ] Export for asset folders
 - [ ] Complete ToDo's (in code)
 - [ ] changing nodes order doesn't hard compile
