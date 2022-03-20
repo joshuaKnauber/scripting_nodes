@@ -15,8 +15,10 @@ Visual Scripting addon for blender with nodes
 - [ ] Snippets
 - [ ] Save Addon
 
+- [X] enum items from operator to button/run operator
 - [ ] enum items on function parameter
-- [ ] enum items from operator to button/run operator
+- [ ] delete enum items button on properties
+- [ ] function and return parameters unique names
 - [ ] packages, snippets and addons in prefs
 - [ ] Export for asset folders
 - [ ] Complete ToDo's (in code)

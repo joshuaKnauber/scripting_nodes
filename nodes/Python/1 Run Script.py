@@ -54,27 +54,61 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     script: bpy.props.PointerProperty(name="File", type=bpy.types.Text, update=SN_ScriptingBaseNode._evaluate)
 
+
+    def _get_code_register(self):
+        return super()._get_code_register()
+
     def evaluate(self, context):
         # TODO import code on export
         if self.source == "BLENDER":
             if self.script:
+                self.code_register = f"""
+                                    try:
+                                        text = "\\n".join([line.body for line in bpy.data.texts["{self.script.name}"].lines])
+                                        text = text.split('def register():')[1].split('def unregister(')[0]
+                                        exec('def register():' + text + '\\nregister()')
+                                    except:
+                                        pass
+                """
+                self.code_unregister = f"""
+                                    try:
+                                        text = "\\n".join([line.body for line in bpy.data.texts["{self.script.name}"].lines])
+                                        text = text.split('def unregister():')[1]
+                                        exec('def unregister():' + text + '\\nunregister()')
+                                    except:
+                                        pass
+                """
                 self.code = f"""
                             {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
                             {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 7)}
                             try:
-                                exec("\\n".join([line.body for line in bpy.data.texts["{self.script.name}"].lines]))
+                                text = "\\n".join([line.body for line in bpy.data.texts["{self.script.name}"].lines])
+                                exec(text.split('def register(')[0])
                             except:
                                 print(text="Error when running script!")
                             {self.indent(self.outputs[0].python_value, 7)}
                             """
         elif self.source == "EXTERNAL":
             self.code_import = "import os"
+            self.code_register = f"""
+                                if os.path.exists({self.inputs['Script Path'].python_value}):
+                                    with open({self.inputs['Script Path'].python_value}, "r") as script_file:
+                                        text = script_file.read().split('def register():')[1].split('def unregister(')[0]
+                                        exec('def register():' + text + '\\nregister()')
+                                """
+            self.code_unregister = f"""
+                                if os.path.exists({self.inputs['Script Path'].python_value}):
+                                    with open({self.inputs['Script Path'].python_value}, "r") as script_file:
+                                        text = script_file.read().split('def unregister():')[1]
+                                        exec('def unregister():' + text + '\\nunregister()')
+                                """
             self.code = f"""
                         {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
                         {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 7)}
                         if os.path.exists({self.inputs['Script Path'].python_value}):
                             with open({self.inputs['Script Path'].python_value}, "r") as script_file:
-                                exec(script_file.read())
+                                text = script_file.read().split('def register(')[0]
+                                exec(text)
                         else:
                             print(text="Couldn't find script path!")
                         {self.indent(self.outputs[0].python_value, 6)}
