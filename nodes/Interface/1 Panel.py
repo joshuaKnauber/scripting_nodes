@@ -168,8 +168,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 parent = self.panel_parent
             elif self.custom_parent_ntree and self.ref_SN_PanelNode in self.custom_parent_ntree.nodes:
                 parent_node = self.custom_parent_ntree.nodes[self.ref_SN_PanelNode]
-                if not parent_node.is_subpanel:
-                    parent = parent_node.last_idname
+                parent = parent_node.last_idname
                 
         self.code = f"""
                     class {self.last_idname}(bpy.types.Panel):
@@ -231,9 +230,6 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 subrow.prop_search(self, "ref_SN_PanelNode", bpy.data.node_groups[parent_tree.name].node_collection(self.bl_idname), "refs", text="")
                 if self.ref_SN_PanelNode == self.name and self.custom_parent_ntree == self.node_tree:
                     layout.label(text="Can't use self as panel parent!", icon="ERROR")
-                elif self.ref_SN_PanelNode and self.custom_parent_ntree and self.ref_SN_PanelNode in self.custom_parent_ntree.nodes:
-                    if self.custom_parent_ntree.nodes[self.ref_SN_PanelNode].is_subpanel:
-                        layout.label(text="Can't use subpanel as parent!", icon="ERROR")
 
             row.prop(self, "parent_type", text="", icon_only=True)
         
