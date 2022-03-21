@@ -18,6 +18,7 @@ def name_change_callback(cls):
 
 
 def subscribe_to_name_change():
+    unsubscribe_from_name_change()
     for cls in bpy.types.Node.__subclasses__():
         if getattr(cls, "is_sn", False):
             subscribe_to = (cls, "name")

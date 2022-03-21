@@ -40,7 +40,7 @@ from .interface.header.header import header_prepend, header_append, node_info_ap
 from .interface.panels.warnings import append_warning
 from .interface.menus.rightclick import serpens_right_click
 from .interface.menus.snippets import snippet_menu
-from .msgbus import unsubscribe_from_name_change
+from .msgbus import subscribe_to_name_change, unsubscribe_from_name_change
 
 from .settings.addon_properties import SN_AddonProperties
 
@@ -94,6 +94,9 @@ def register():
 
     # add to the node add menu
     # bpy.types.NODE_MT_category_snippets.append(snippet_menu)
+    
+    # add name change update
+    subscribe_to_name_change()
 
     # app handlers
     bpy.app.handlers.depsgraph_update_post.append(handlers.depsgraph_handler)
