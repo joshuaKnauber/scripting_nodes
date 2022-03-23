@@ -85,10 +85,6 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         self.add_boolean_input("Disable")
         self.add_execute_output("Execute")
         self.add_execute_output("Before Popup")
-        self.update_name(context)
-
-    def on_copy(self, old):
-        self.update_name(None)
 
 
     def draw_node(self, context, layout):

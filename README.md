@@ -28,7 +28,7 @@ Visual Scripting addon for blender with nodes
 - [ ] Fix known bugs
 - [ ] New Tutorial
 
-- [ ] Run Operator ref name not working
+- [X] Run Operator ref name not working
 - [ ] Run Operator context
 - [ ] enable required on run function
 
