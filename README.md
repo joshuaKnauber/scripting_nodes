@@ -24,7 +24,7 @@ Visual Scripting addon for blender with nodes
 - [ ] Complete ToDo's (in code)
 - [ ] changing nodes order doesn't hard compile
 - [ ] Update output type on on property update node
-- [ ] Icons with names
+- [X] Icons with names
 - [ ] Fix known bugs
 - [ ] New Tutorial
 
