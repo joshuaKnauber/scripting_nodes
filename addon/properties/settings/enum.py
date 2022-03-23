@@ -82,6 +82,10 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
                 op = row.operator("sn.select_icon", icon_value=item.icon if item.icon != 0 else 101, text="", emboss=item.icon==0)
                 op.icon_data_path = f"{self.prop.full_prop_path}.settings.items[{i}]"
                 col.prop(item, "description")
+                row.separator()
+                op = row.operator("sn.remove_enum_item", text="", icon="PANEL_CLOSE", emboss=False)
+                op.settings_data_path = f"{self.prop.full_prop_path}.settings"
+                op.icon_index = i
                 
         else:
             op = row.operator("node.add_node", text="Generate Items", icon="ADD")

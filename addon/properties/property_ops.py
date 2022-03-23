@@ -126,6 +126,23 @@ class SN_OT_AddEnumItem(bpy.types.Operator):
 
 
 
+class SN_OT_RemoveEnumItem(bpy.types.Operator):
+    bl_idname = "sn.remove_enum_item"
+    bl_label = "Remove Enum Item"
+    bl_description = "Removes an enum item from this property"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    settings_data_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    icon_index: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        settings = eval(self.settings_data_path)
+        settings.items.remove(self.icon_index)
+        settings.compile(context)
+        return {"FINISHED"}
+
+
+
 class SN_OT_AddPropertyItem(bpy.types.Operator):
     bl_idname = "sn.add_property_item"
     bl_label = "Add Property"

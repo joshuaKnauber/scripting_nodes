@@ -13,24 +13,27 @@ Visual Scripting addon for blender with nodes
 - [X] Popover
 
 - [ ] Snippets
+
+- [ ] Export for asset folders
 - [ ] Save Addon
 
 - [X] enum items from operator to button/run operator
+- [X] delete enum items button on properties
+- [X] Icons with names
+
 - [ ] enum items on function parameter
-- [ ] delete enum items button on properties
 - [ ] function and return parameters unique names
 - [ ] packages, snippets and addons in prefs
-- [ ] Export for asset folders
-- [ ] Complete ToDo's (in code)
-- [ ] changing nodes order doesn't hard compile
 - [ ] Update output type on on property update node
-- [X] Icons with names
+- [ ] changing nodes order doesn't hard compile
+- [ ] Run script register, unregister
+- [ ] enable required on run function
+
+- [ ] Complete ToDo's (in code)
 - [ ] Fix known bugs
 - [ ] New Tutorial
 
 - [X] Run Operator ref name not working
 - [X] Run Operator context
-- [ ] enable required on run function
 
-- [ ] Register and Unregister on run script? @Finn
 - [ ] New Demo version
