@@ -29,7 +29,7 @@ Visual Scripting addon for blender with nodes
 - [ ] New Tutorial
 
 - [X] Run Operator ref name not working
-- [ ] Run Operator context
+- [X] Run Operator context
 - [ ] enable required on run function
 
 - [ ] Register and Unregister on run script? @Finn

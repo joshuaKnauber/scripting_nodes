@@ -58,6 +58,19 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_execute_input()
         self.add_execute_output()
         
+    def get_context_items(self,context):
+        items = []
+        areas = ["DEFAULT", "VIEW_3D", "IMAGE_EDITOR", "NODE_EDITOR", "SEQUENCE_EDITOR", "CLIP_EDITOR", "DOPESHEET_EDITOR",
+                "DOPESHEET_ACTION_EDITOR", "DOPESHEET_SHAPEKEY_EDITOR", "DOPESHEET_GREASE_PENCIL", "DOPESHEET_MASK_EDITOR", "DOPESHEET_CACHE_FILE",
+                "GRAPH_EDITOR", "NLA_EDITOR", "TEXT_EDITOR", "CONSOLE", "INFO", "TOPBAR", "STATUSBAR", "OUTLINER",
+                "PROPERTIES", "FILE_BROWSER", "PREFERENCES"]
+        for area in areas:
+            items.append((area,area.replace("_"," ").title(),area.replace("_"," ").title()))
+        return items
+    
+    context: bpy.props.EnumProperty(name="Operator Context", description="The context this operator should run in",
+                                    items=get_context_items, update=SN_ScriptingBaseNode._evaluate)
+        
     use_invoke: bpy.props.BoolProperty(name="Use Invoke",
                                     description="This will run the before popup output and keep the interactive elements. It won't wait for the operations you connect to this nodes output",
                                     default=True,
@@ -143,6 +156,22 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, context):
+        context_modes = {
+            "DOPESHEET_ACTION_EDITOR": "ACTION",
+            "DOPESHEET_SHAPEKEY_EDITOR": "SHAPEKEY",
+            "DOPESHEET_GREASE_PENCIL": "GPENCIL",
+            "DOPESHEET_MASK_EDITOR": "MASK",
+            "DOPESHEET_CACHE_FILE": "CACHEFILE"
+        }
+
+        set_context_mode = ""
+        set_context = ""
+        if self.context != "DEFAULT":
+            set_context = f"bpy.context.area.type = '{self.context}'"
+            if self.context in context_modes:
+                set_context_mode = f"bpy.context.space_data.mode = '{context_modes[self.context]}'"
+                set_context = "bpy.context.area.type = 'DOPESHEET_EDITOR'"
+        
         invoke = "" if not self.use_invoke else "'INVOKE_DEFAULT', "
         if self.source_type == "BLENDER":
             op_name = self.pasted_operator[8:].split("(")[0]
@@ -156,7 +185,11 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                             parameters += f"{prop.identifier}={inp.python_value}, "
 
             self.code = f"""
+                        {'prev_context = bpy.context.area.type' if set_context else ''}
+                        {set_context}
+                        {set_context_mode}
                         bpy.ops.{op_name}({invoke}{parameters[:-2]})
+                        {'bpy.context.area.type = prev_context' if set_context else ''}
                         {self.indent(self.outputs[0].python_value, 6)}
                         """
 
@@ -175,7 +208,11 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 parameters += f"{prop.python_name}={inp.python_value}, "
 
                 self.code = f"""
+                            {'prev_context = bpy.context.area.type' if set_context else ''}
+                            {set_context}
+                            {set_context_mode}
                             bpy.ops.sna.{node.operator_python_name}({invoke}{parameters[:-2]})
+                            {'bpy.context.area.type = prev_context' if set_context else ''}
                             {self.indent(self.outputs[0].python_value, 7)}
                             """
 
@@ -198,4 +235,5 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
         row.prop(self, "hide_disabled_inputs", text="", icon="HIDE_ON" if self.hide_disabled_inputs else "HIDE_OFF", emboss=False)
         
+        layout.prop(self, "context")
         layout.prop(self, "use_invoke")
