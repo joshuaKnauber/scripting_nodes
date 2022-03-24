@@ -99,7 +99,7 @@ class SN_ScriptingBaseNode:
     @property
     def root_nodes(self):
         """ Returns the trigger nodes that are connected to this node """
-        return filter(lambda node: node.is_trigger, self._get_linked_nodes())
+        return list(filter(lambda node: node.is_trigger, self._get_linked_nodes()))
 
 
     def _get_linked_nodes(self, linked=None, started_at_trigger=False):

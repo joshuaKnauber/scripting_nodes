@@ -161,3 +161,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         row.prop_search(self, "ref_SN_FunctionReturnNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_FunctionReturnNode"), "refs", text="Return")
 
         layout.prop(self, "require_execute")
+        
+        if self.custom_parent_ntree and self.ref_SN_FunctionNode and self.ref_SN_FunctionReturnNode:
+            return_node = self.custom_parent_ntree.nodes[self.ref_SN_FunctionReturnNode]
+            if not self.custom_parent_ntree.nodes[self.ref_SN_FunctionNode] in return_node.root_nodes:
+                row = layout.row()
+                row.alert = True
+                row.label(text="Return node not connected to function node!", icon="ERROR")
