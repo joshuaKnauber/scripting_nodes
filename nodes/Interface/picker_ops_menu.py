@@ -42,7 +42,7 @@ class SN_OT_ActivateMenuPicker(bpy.types.Operator):
 
     def execute(self, context):
         # register menus
-        for menu in bpy.types.Menu.__subclasses__():
+        for menu in bpy.types.Menu.__subclasses__() + bpy.types.Header.__subclasses__():
             register_dummy_interface(self.node_tree, self.node,menu)
         
         # redraw screen
