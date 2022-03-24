@@ -133,7 +133,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     return_names = ", ".join(return_values)
 
                     # set values with execute
-                    self.code = f"{return_names} = {parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})"
+                    if return_names:
+                        self.code = f"{return_names} = {parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})"
+                    else:
+                        self.code = f"{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})"
                     for i, out in enumerate(self.outputs[1:]):
                         out.python_value = return_values[i]
                 else:
