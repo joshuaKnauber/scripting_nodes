@@ -32,7 +32,7 @@ class SN_ObjectBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.outputs["All Objects"].python_value = f"bpy.data.objects"
         self.outputs["Active Scene Objects"].python_value = f"bpy.context.scene.objects"
         self.outputs["Selected Objects"].python_value = f"bpy.context.selected_objects"
-        self.outputs["Active Object"].python_value = f"bpy.context.active_object"
+        self.outputs["Active Object"].python_value = f"bpy.context.view_layer.objects.active"
         self.outputs["Indexed"].python_value = f"bpy.data.objects[{self.inputs[0].python_value}]"
 
     def draw_node(self, context, layout):

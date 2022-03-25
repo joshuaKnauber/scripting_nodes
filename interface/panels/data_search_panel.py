@@ -80,6 +80,7 @@ class SN_PT_FilterDataSettings(bpy.types.Panel):
 path_notes = {
     "bpy.context.preferences.keymap": "Copy shortcuts from Context -> Window Manager -> Keyconfigs -> Your Shortcut -> Type",
     "bpy.context.window_manager.keyconfigs": "To display a shortcut, find it in the User Key Config below, copy its Type property and check Full Shortcut on the node",
+    "bpy.context.active_object": "To set the active object use the active object output on the Objects node or copy the active object from the active view layer",
 }
 
 class SN_PT_data_search(bpy.types.Panel):
