@@ -186,7 +186,7 @@ def item_from_path(data, path):
         return data[path.split(".")[-1]]
 
 
-def bpy_to_path_sections(path):
+def bpy_to_path_sections(path, keep_brackets=False):
     """ Takes a blender python data path and converts it to json path sections """
     path = path.replace('"', "'").replace("bpy.", "")    
     
@@ -199,8 +199,9 @@ def bpy_to_path_sections(path):
             curr_section = ""
         elif char == "[" and not in_string:
             sections.append(curr_section)
-            curr_section = ""
+            curr_section = "" if not keep_brackets else "["
         elif char == "]" and not in_string:
+            if keep_brackets: curr_section += "]" 
             sections.append(curr_section)
             curr_section = ""
         elif char == "'":
@@ -214,21 +215,11 @@ def bpy_to_path_sections(path):
     return sections
 
 
-def bpy_to_path_sections_with_brackets(path):
-    """ Returns bpy_to_path_sections with brackets for the indexed sections """
-    sections = bpy_to_path_sections(path)
-    # add brackets to indexing
-    for i in range(len(sections)):
-        if (sections[i][0] == "'" and sections[i][-1] == "'") or sections[i].isdigit():
-            sections[i] = f"[{sections[i]}]"
-    return sections
-
-
 def bpy_to_indexed_sections(path):
     """ Takes a blender python data path and converts it to indexed path sections """
     # combine indexed sections
     combined = ["bpy"]
-    for section in bpy_to_path_sections_with_brackets(path):
+    for section in bpy_to_path_sections(path, True):
         if (section[0] == "[" and section[-1] == "]") and not combined[-1][-1] == "]":
             combined[-1] += section
         else:
@@ -236,3 +227,16 @@ def bpy_to_indexed_sections(path):
             
     if not "bpy." in path: combined = combined[1:]
     return combined
+
+
+def join_sections(sections):
+    """ Returns the given sections joined to a valid data path """
+    if not sections[0] == "bpy":
+        sections.insert(0, "bpy")
+    data_path = ""
+    for i, section in enumerate(sections):
+        if i == 0 or section[0] == "[":
+            data_path += section
+        else:
+            data_path += f".{section}"
+    return data_path

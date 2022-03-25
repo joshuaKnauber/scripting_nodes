@@ -119,7 +119,10 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         if self.pasted_data_path:
-            function = "(".join(self.pasted_data_path.split("(")[:-1]) + "("
+            function_name = "(".join(self.pasted_data_path.split("(")[:-1]).split(".")[-1] + "("
+
+            data_path = ""
+            function = data_path + function_name
 
             # add function parameters
             inp_params = self.pasted_data_path.split("(")[-1].split(")")[0].split(", ")

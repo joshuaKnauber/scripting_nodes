@@ -1,6 +1,6 @@
 import bpy
 from .base_socket import ScriptingSocket
-from ...settings.data_properties import bpy_to_path_sections, bpy_to_indexed_sections
+from ...settings.data_properties import bpy_to_path_sections, bpy_to_indexed_sections, join_sections
 
 
 
@@ -64,14 +64,14 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     
     @property
     def python_source(self):
-        sections = bpy_to_indexed_sections(self.python_value)
-        if sections: #BUG
-            return ".".join(sections[:-1])
+        sections = bpy_to_path_sections(self.python_value, True)
+        if sections:
+            return join_sections(sections[:-1])
         return self.python_value
     
     @property
     def python_sections(self):
-        sections = bpy_to_path_sections(self.python_value)
+        sections = bpy_to_path_sections(self.python_value, True)
         if sections:
             return ["bpy"] + sections
         return []
