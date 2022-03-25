@@ -28,7 +28,7 @@ class SN_CollectionPropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     
     @property
     def python_source(self):
-        sections = bpy_to_indexed_sections(self.python_value, True)
+        sections = bpy_to_indexed_sections(self.python_value)
         if sections:
             return join_sections(sections[:-1])
         return self.python_value
