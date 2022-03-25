@@ -46,9 +46,17 @@ class SN_PT_SnippetsPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        sn = context.scene.sn
-            
-            
+        row = layout.row()
+        row.scale_y = 1.2
+        row.operator("sn.open_preferences", text="Get Snippets", icon="URL").navigation = "MARKET"
+        layout.separator()
+        
+        # TODO draw installed snippets
+
+        row = layout.row(align=True)
+        row.operator("sn.install_package", text="Install Snippets", icon="FILE_FOLDER")
+        row.operator("sn.reload_packages", text="", icon="FILE_REFRESH")
+        
             
 class SN_PT_PackagesPanel(bpy.types.Panel):
     bl_parent_id = "SN_PT_ExtensionsPanel"
