@@ -468,17 +468,17 @@ class SN_ScriptingBaseNode:
     def _add_input(self, idname, label, dynamic=False):
         """ Adds an input for this node. This function itself doesn't evaluate as it may be used before the node is ready """
         socket = self.inputs.new(idname, label)
-        socket.name = label
-        socket.dynamic = dynamic
-        socket.display_shape = socket.socket_shape
+        socket["name"] = label
+        socket["dynamic"] = dynamic
+        socket["display_shape"] = socket.socket_shape
         return socket
     
     def _add_output(self, idname, label, dynamic=False):
         """ Adds an output for this node. This function itself doesn't evaluate as it may be used before the node is ready """
         socket = self.outputs.new(idname, label)
-        socket.name = label
-        socket.dynamic = dynamic
-        socket.display_shape = socket.socket_shape
+        socket["name"] = label
+        socket["dynamic"] = dynamic
+        socket["display_shape"] = socket.socket_shape
         return socket
     
     
@@ -524,7 +524,7 @@ class SN_ScriptingBaseNode:
                 # relink sockets
                 for link in links:
                     self.node_tree.links.new(socket, link)
-                self.on_socket_type_change(new)
+                self.on_socket_type_change(socket)
         self.disable_evaluation = False
         self._evaluate(bpy.context)
         return new

@@ -129,7 +129,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     # get return variable names
                     return_values = []
                     for i, out in enumerate(self.outputs[1:]):
-                        return_values.append(get_python_name(out.name, f"parameter_{i}"))
+                        return_values.append(get_python_name(f"{out.name}_{i}_{self.static_uid}", f"parameter_{i}_{self.static_uid}"))
                     return_names = ", ".join(return_values)
 
                     # set values with execute

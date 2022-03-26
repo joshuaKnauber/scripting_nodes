@@ -1,11 +1,10 @@
 # blender_visual_scripting_addon
 Visual Scripting addon for blender with nodes
 
-- [X] Update output type on on property update node
-- [ ] function and return parameters unique names
 - [ ] changing nodes order doesn't hard compile
 - [ ] enable required on run function
 - [ ] Run script register, unregister
+- [ ] Multiple items on enum properties
 
 - [ ] enum items on function parameter
 - [ ] Snippets
