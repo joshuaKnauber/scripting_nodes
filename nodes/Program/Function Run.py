@@ -149,6 +149,9 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             for out in self.outputs[1:]:
                 out.reset_value()
+        
+        if self.require_execute:
+            self.code += f"\n{self.outputs[0].python_value}"
 
     
     def draw_node(self, context, layout):
