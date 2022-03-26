@@ -13,7 +13,7 @@ Visual Scripting addon for blender with nodes
 - [ ] Export for asset folders
 - [ ] Save Addon
 
-- [ ] Complete TODOs
-
 - [ ] New Tutorial
 - [ ] New Demo version
+
+- [ ] Complete TODOs

@@ -471,7 +471,7 @@ class SN_ScriptingBaseNode:
         socket = self.inputs.new(idname, label)
         socket["name"] = label
         socket["dynamic"] = dynamic
-        socket["display_shape"] = socket.socket_shape
+        socket.display_shape = socket.socket_shape
         return socket
     
     def _add_output(self, idname, label, dynamic=False):
@@ -479,7 +479,7 @@ class SN_ScriptingBaseNode:
         socket = self.outputs.new(idname, label)
         socket["name"] = label
         socket["dynamic"] = dynamic
-        socket["display_shape"] = socket.socket_shape
+        socket.display_shape = socket.socket_shape
         return socket
     
     
