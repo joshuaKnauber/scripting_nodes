@@ -101,9 +101,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
                 col.prop(item, "description")
                 
         else:
-            op = row.operator("node.add_node", text="Generate Items", icon="ADD")
-            op.type = "SN_GenerateEnumItemsNode"
-            op.use_transform = True
+            op = row.operator("sn.add_generate_items_node", text="Generate Items", icon="ADD")
         
     
     @property

@@ -46,9 +46,12 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.code = f"""
                     print({", ".join(values)})
                     # This part is only added during development to display the messages on the node
-                    if '{self.node_tree.name}' in bpy.data.node_groups and '{self.name}' in bpy.data.node_groups['{self.node_tree.name}'].nodes:
-                        msg = bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}'].messages.add()
-                        msg.text = str(({", ".join(values)}))
+                    try:
+                        if '{self.node_tree.name}' in bpy.data.node_groups and '{self.name}' in bpy.data.node_groups['{self.node_tree.name}'].nodes:
+                            msg = bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}'].messages.add()
+                            msg.text = str(({", ".join(values)}))
+                    except:
+                        print("Can't add print outputs to the node when the print is run in an interface!")
                     {self.indent(self.outputs[0].python_value, 5)}
                     """
                     
