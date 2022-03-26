@@ -1,5 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
+from .Blender_Property import segment_is_indexable, data_path_from_inputs
+from ...settings.data_properties import bpy_to_indexed_sections
 
 
 
@@ -10,35 +12,14 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "PROPERTY"
     
     
-    def _disect_data_path(self, path):
-        # remove assign part
-        path = "(".join(path.split("(")[:-1])
-        path = path.strip()
-        # replace escaped quotes
-        path = path.replace('\\"', '"')
-        # split data path in segments
-        segments = []
-        for segment in path.split(".")[1:]:
-            if segments and "[" in segments[-1] and not "]" in segments[-1]:
-                segments[-1] += f".{segment}"
-            else:
-                segments.append(segment)
-        # remove indexing from property name
-        # segments[-1] = segments[-1].split("[")[0]
-        return segments
-    
     def _is_valid_data_path(self, path):
         return path and "bpy." in path and not ".ops." in path
 
     def get_data(self):
         if self._is_valid_data_path(self.pasted_data_path):
-            return self._disect_data_path(self.pasted_data_path)
+            return bpy_to_indexed_sections(self.pasted_data_path.split("(")[0])
         return None
     
-    
-    def segment_is_indexable(self, segment):
-        """ Returns if a segment can be indexed. A segment is a string part of a data path """
-        return "[" in segment and "]" in segment
     
     def add_socket_from_param(self, param, callback):
         """ Adds a socket from the given parameter with the given add callback """
@@ -59,7 +40,7 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         data = self.get_data()
         if data:
             for segment in data:
-                if self.segment_is_indexable(segment):
+                if segment_is_indexable(segment):
                     name = segment.split("[")[0].replace("_", " ").title()
                     if '"' in segment or "'" in segment:
                         inp = self.add_string_input(name)
@@ -119,10 +100,8 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         if self.pasted_data_path:
-            function_name = "(".join(self.pasted_data_path.split("(")[:-1]).split(".")[-1] + "("
-
-            data_path = ""
-            function = data_path + function_name
+            inps = list(filter(lambda inp: inp.indexable, list(self.inputs)))
+            function = data_path_from_inputs(inps, self.get_data()) + "("
 
             # add function parameters
             inp_params = self.pasted_data_path.split("(")[-1].split(")")[0].split(", ")

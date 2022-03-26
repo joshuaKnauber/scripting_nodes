@@ -4,6 +4,29 @@ from ...settings.data_properties import bpy_to_indexed_sections
 
 
 
+def segment_is_indexable(segment):
+    """ Returns if a segment can be indexed. A segment is a string part of a data path """
+    return "[" in segment and "]" in segment
+    
+def data_path_from_inputs(inputs, data):
+    """ Returns the data path based on the given inputs and data """
+    data_path = ""
+
+    inp_index = 0
+    for segment in data:
+        if data_path and not segment[0] == "[":
+            data_path += f".{segment.split('[')[0]}"
+        else:
+            data_path += f"{segment.split('[')[0]}"
+        
+        if segment_is_indexable(segment):
+            if inputs[inp_index].bl_label == "Property":
+                data_path = inputs[inp_index].python_value
+            else:
+                data_path += f"[{inputs[inp_index].python_value}]"
+            inp_index += 1
+    return data_path
+
 class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_BlenderPropertyNode"
@@ -19,17 +42,13 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         return None
     
     
-    def segment_is_indexable(self, segment):
-        """ Returns if a segment can be indexed. A segment is a string part of a data path """
-        return "[" in segment and "]" in segment
-    
     def create_inputs_from_path(self):
         """ Creates the inputs for the given data path """
         self.inputs.clear()
         data = self.get_data()
         if data:
             for segment in data[:-1]:
-                if self.segment_is_indexable(segment):
+                if segment_is_indexable(segment):
                     name = segment.split("[")[0].replace("_", " ").title()
                     if '"' in segment or "'" in segment:
                         inp = self.add_string_input(name)
@@ -69,30 +88,16 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         out = self.add_data_output("Value")
         out.changeable = True
         out.set_hide(True)
-
+        
 
     def evaluate(self, context):
         if not self.pasted_data_path:
             self.outputs[0].reset_value()
         else:
-            data_path = ""
-
-            inp_index = 0
             data = self.get_data()
-            for segment in data[:-1]:
-                if data_path and not segment[0] == "[":
-                    data_path += f".{segment.split('[')[0]}"
-                else:
-                    data_path += f"{segment.split('[')[0]}"
-                
-                if self.segment_is_indexable(segment):
-                    if self.inputs[inp_index].bl_label == "Property":
-                        data_path = self.inputs[inp_index].python_value
-                    else:
-                        data_path += f"[{self.inputs[inp_index].python_value}]"
-                    inp_index += 1
+            data_path = data_path_from_inputs(self.inputs, data[:-1])
             
-            if self.segment_is_indexable(data[-1]):
+            if segment_is_indexable(data[-1]):
                 data_path += data[-1]
             else:
                 data_path += f".{data[-1]}"
