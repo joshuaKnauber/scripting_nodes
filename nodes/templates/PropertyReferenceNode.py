@@ -31,9 +31,10 @@ class PropertyReferenceNode():
                     else:
                         self.inputs[0].name = prop_src.bl_label
                 # convert output to correct type
-                socket_name, subtype = prop_to_socket(prop)
-                out = self.convert_socket(self.outputs["Value"], self.socket_names[socket_name])
-                out.subtype = subtype
+                if "Value" in self.outputs:
+                    socket_name, subtype = prop_to_socket(prop)
+                    out = self.convert_socket(self.outputs["Value"], self.socket_names[socket_name])
+                    out.subtype = subtype
         self._evaluate(context)
     
     

@@ -12,14 +12,6 @@ class SN_DebugDataNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_data_input("Data")
         
-    def on_link_insert(self, from_socket, to_socket, is_output):
-        if not is_output:
-            self.convert_socket(self.outputs[0], from_socket.bl_idname)
-            
-    def on_link_remove(self, from_socket, to_socket, is_output):
-        if not is_output:
-            self.convert_socket(self.outputs[0], self.socket_names["Data"])
-        
     def draw_node(self, context, layout):
         if not self.inputs[0].is_linked:
             layout.label(text="This node might slow down your viewport!", icon="INFO")

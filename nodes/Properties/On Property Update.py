@@ -17,7 +17,7 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
         self.add_execute_output()
         self.add_property_output("Attached To Item")
         self.add_property_output("Updated Property")
-        self.add_data_output("Value").changeable = True
+        self.add_data_output("Value")
         
         
     def update_func_name(self, prop):
