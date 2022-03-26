@@ -20,10 +20,10 @@ Visual Scripting addon for blender with nodes
 - [X] enum items from operator to button/run operator
 - [X] delete enum items button on properties
 - [X] Icons with names
+- [X] packages, snippets and addons in prefs
 
 - [ ] enum items on function parameter
 - [ ] function and return parameters unique names
-- [ ] packages, snippets and addons in prefs
 - [ ] Update output type on on property update node
 - [ ] changing nodes order doesn't hard compile
 - [ ] Run script register, unregister

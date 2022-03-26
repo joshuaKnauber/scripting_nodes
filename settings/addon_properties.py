@@ -7,6 +7,7 @@ from .data_properties import get_data_items, filter_items, filter_defaults
 from ..addon.properties.properties import SN_GeneralProperties
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
+from .load_markets import SN_Addon, SN_Package, SN_Snippet
             
 
 
@@ -244,3 +245,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     show_path: bpy.props.BoolProperty(name="Show Path",
                                         description="Show python path of properties",
                                         default=False)
+    
+    
+    addons: bpy.props.CollectionProperty(type=SN_Addon)
+
+    packages: bpy.props.CollectionProperty(type=SN_Package)
+
+    snippets: bpy.props.CollectionProperty(type=SN_Snippet)
