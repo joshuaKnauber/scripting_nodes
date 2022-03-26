@@ -94,8 +94,10 @@ class SN_OT_FilterData(bpy.types.Operator):
     
     def invoke(self, context, event):
         item = item_from_path(context.scene.sn.data_items, self.path)
-        self.data_search = item["data_search"]
-        self.data_filter = item["data_filter"]
+        last_filter = item["data_filter"]
+        last_search = item["data_search"]
+        self.data_filter = last_filter
+        self.data_search = last_search
         return context.window_manager.invoke_popup(self, width=300)
 
 
