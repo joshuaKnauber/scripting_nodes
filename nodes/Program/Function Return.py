@@ -35,9 +35,12 @@ class SN_FunctionReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
             for inp in self.inputs[1:-1]:
                 returns.append(inp.python_value)
             returns = ", ".join(returns)
-            self.code = f"return [{returns}]"
+            if len(self.inputs) == 3:
+                self.code = f"return {returns}"
+            else:
+                self.code = f"return [{returns}]"
         else:
-            self.code = f"return []"
+            self.code = f"return"
     
     
     def draw_node(self, context, layout):

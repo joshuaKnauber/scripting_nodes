@@ -21,13 +21,8 @@ Visual Scripting addon for blender with nodes
 
 
 
-
-print in interface
-
 operator prop options hidden
 
 serpens property node doesnt update node name
 
 operator name turns on inputs
-
-print output is a list
