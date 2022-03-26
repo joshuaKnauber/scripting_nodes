@@ -37,7 +37,8 @@ def get_data_items(path, data):
     # get attributes
     data_dict = validate_data_dict(data) if type(data) == dict else data_to_dict(data)
     for key in data_dict.keys():
-        data_items[key] = get_data_item(data, data_dict[key], path, key)
+        item = get_data_item(data, data_dict[key], path, key)
+        if item: data_items[key] = item
 
     # get items for iterable
     if is_iterable(data) and not type(data) == dict:
@@ -45,14 +46,17 @@ def get_data_items(path, data):
         if len(data.keys()) == len(data.values()):
             for key in data.keys():
                 if hasattr(data[key], "bl_rna"):
-                    data_items[f"'{key}'"] = get_data_item(data, data[key], path, f"'{key}'")
+                    item = get_data_item(data, data[key], path, f"'{key}'")
+                    if item: data_items[f"'{key}'"] = item
         # get indexed items
         else:
             max_items = 21
             for i in range(min(len(data.values()), max_items)):
-                data_items[f"{i}"] = get_data_item(data, data[i], path, f"{i}")
-                if i == max_items-1 and len(data.values()) > max_items:
-                    data_items[f"{i}"]["clamped"] = True
+                item = get_data_item(data, data[i], path, f"{i}")
+                if item:
+                    data_items[f"{i}"] = item
+                    if i == max_items-1 and len(data.values()) > max_items:
+                        data_items[f"{i}"]["clamped"] = True
 
     # sort items
     sorted_keys = sorted(data_items.keys(), key=lambda s: data_items[s]["type"])
@@ -84,28 +88,32 @@ def data_to_dict(data):
         
 def get_data_item(parent_data, data, path, attribute):
     """ Returns a data object for the given data its path and the datas attribute """
-    has_properties = hasattr(data, "bl_rna") or "bpy_prop_collection" in str(type(data))
-    if (attribute[0] == "'" and attribute[-1] == "'") or attribute.isdigit():
-        new_path = f"{path}[{attribute}]"
-        has_properties = True
-    else:
-        new_path = f"{path}.{attribute}"
+    try:
+        data
+        has_properties = hasattr(data, "bl_rna") or "bpy_prop_collection" in str(type(data))
+        if (attribute[0] == "'" and attribute[-1] == "'") or attribute.isdigit():
+            new_path = f"{path}[{attribute}]"
+            has_properties = True
+        else:
+            new_path = f"{path}.{attribute}"
 
-    data_item = {
-        "name": get_data_name(data, attribute),
-        "path": new_path,
-        "type": get_item_type(data),
-        "data": data,
-        "data_search": "",
-        "data_filter": filter_defaults,
-        "expanded": False,
-        "has_properties": has_properties,
-        "properties": {},
-        "clamped": False,
-    }
-    if data_item["type"] == "Function":
-        data_item["path"] += get_function_parameters(parent_data, attribute)
-    return data_item
+        data_item = {
+            "name": get_data_name(data, attribute),
+            "path": new_path,
+            "type": get_item_type(data),
+            "data": data,
+            "data_search": "",
+            "data_filter": filter_defaults,
+            "expanded": False,
+            "has_properties": has_properties,
+            "properties": {},
+            "clamped": False,
+        }
+        if data_item["type"] == "Function":
+            data_item["path"] += get_function_parameters(parent_data, attribute)
+        return data_item
+    except:
+        return None
 
 
 def get_data_name(data, attribute):
@@ -231,8 +239,6 @@ def bpy_to_indexed_sections(path):
 
 def join_sections(sections):
     """ Returns the given sections joined to a valid data path """
-    if not sections[0] == "bpy":
-        sections.insert(0, "bpy")
     data_path = ""
     for i, section in enumerate(sections):
         if i == 0 or section[0] == "[":
