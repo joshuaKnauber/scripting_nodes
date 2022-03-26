@@ -17,7 +17,7 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
         self.add_execute_output()
         self.add_property_output("Attached To Item")
         self.add_property_output("Updated Property")
-        self.add_data_output("Property Value").changeable = True
+        self.add_data_output("Value").changeable = True
         
         
     def update_func_name(self, prop):
@@ -31,7 +31,7 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
             
             self.outputs["Updated Property"].python_value = f"self.{prop.python_name}"
             self.outputs["Attached To Item"].python_value = f"self"
-            self.outputs["Property Value"].python_value = "sna_updated_prop"
+            self.outputs["Value"].python_value = "sna_updated_prop"
             
             self.code = f"""
                 def {self.update_func_name(prop)}(self, context):
@@ -41,7 +41,7 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
         else:
             self.outputs["Updated Property"].reset_value()
             self.outputs["Attached To Item"].reset_value()
-            self.outputs["Property Value"].reset_value()
+            self.outputs["Value"].reset_value()
 
 
     def draw_node(self, context, layout):

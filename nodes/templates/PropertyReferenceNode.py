@@ -11,16 +11,18 @@ class PropertyReferenceNode():
     
     
     def on_prop_change(self, context):
-        if self.add_indexing_inputs:
-            prop_src = self.get_prop_source()
+        # if self.add_indexing_inputs:
+        prop_src = self.get_prop_source()
+        if self.inputs and self.inputs[0].bl_label == "Property":
             self.inputs[0].name = "Data"
-            self.label = "Custom Property"
-            if self.prop_name and prop_src:
-                if self.prop_name in prop_src.properties:
-                    prop = prop_src.properties[self.prop_name]
-                    self.label = prop.name
-                    # property from group -> input is pointer
-                    if self.from_prop_group:
+        self.label = self.name.split(".")[0]
+        if self.prop_name and prop_src:
+            if self.prop_name in prop_src.properties:
+                prop = prop_src.properties[self.prop_name]
+                self.label = prop.name
+                # property from group -> input is pointer
+                if self.inputs and self.inputs[0].bl_label == "Property":
+                    if self.from_prop_group and self.inputs:
                         self.inputs[0].name = "Pointer Property"
                     # addon property
                     elif hasattr(prop, "attach_to"):
@@ -28,10 +30,10 @@ class PropertyReferenceNode():
                     # node property
                     else:
                         self.inputs[0].name = prop_src.bl_label
-                    # convert output to correct type
-                    socket_name, subtype = prop_to_socket(prop)
-                    out = self.convert_socket(self.outputs["Value"], self.socket_names[socket_name])
-                    out.subtype = subtype
+                # convert output to correct type
+                socket_name, subtype = prop_to_socket(prop)
+                out = self.convert_socket(self.outputs["Value"], self.socket_names[socket_name])
+                out.subtype = subtype
         self._evaluate(context)
     
     
