@@ -75,17 +75,30 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
 
             for i, item in enumerate(self.items):
                 box = layout.box()
-                col = box.column(align=True)
+                col = box.column()
                 box.use_property_split = False
                 row = col.row()
-                row.prop(item, "name")
-                op = row.operator("sn.select_icon", icon_value=item.icon if item.icon != 0 else 101, text="", emboss=item.icon==0)
+                subrow = row.row(align=True)
+                subrow.prop(item, "name", text="")
+                op = subrow.operator("sn.select_icon", icon_value=item.icon if item.icon != 0 else 101, text="", emboss=item.icon==0)
                 op.icon_data_path = f"{self.prop.full_prop_path}.settings.items[{i}]"
-                col.prop(item, "description")
-                row.separator()
-                op = row.operator("sn.remove_enum_item", text="", icon="PANEL_CLOSE", emboss=False)
+                subrow = row.row(align=True)
+                subcol = subrow.column(align=True)
+                subcol.enabled = i > 0
+                op = subcol.operator("sn.move_enum_item", text="", icon="TRIA_UP", emboss=False)
                 op.settings_data_path = f"{self.prop.full_prop_path}.settings"
-                op.icon_index = i
+                op.item_index = i
+                op.move_up = True
+                subcol = subrow.column(align=True)
+                subcol.enabled = i < len(self.items)-1
+                op = subcol.operator("sn.move_enum_item", text="", icon="TRIA_DOWN", emboss=False)
+                op.settings_data_path = f"{self.prop.full_prop_path}.settings"
+                op.item_index = i
+                op.move_up = False
+                op = subrow.operator("sn.remove_enum_item", text="", icon="PANEL_CLOSE", emboss=False)
+                op.settings_data_path = f"{self.prop.full_prop_path}.settings"
+                op.item_index = i
+                col.prop(item, "description")
                 
         else:
             op = row.operator("node.add_node", text="Generate Items", icon="ADD")

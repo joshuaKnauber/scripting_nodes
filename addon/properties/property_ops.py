@@ -133,11 +133,33 @@ class SN_OT_RemoveEnumItem(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
     settings_data_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
-    icon_index: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
+    item_index: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
         settings = eval(self.settings_data_path)
-        settings.items.remove(self.icon_index)
+        settings.items.remove(self.item_index)
+        settings.compile(context)
+        return {"FINISHED"}
+
+
+
+class SN_OT_MoveEnumItem(bpy.types.Operator):
+    bl_idname = "sn.move_enum_item"
+    bl_label = "Move Enum Item"
+    bl_description = "Moves this enum item"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    settings_data_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    item_index: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
+    
+    move_up: bpy.props.BoolProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        settings = eval(self.settings_data_path)
+        if self.move_up:
+            settings.items.move(self.item_index, self.item_index-1)
+        else:
+            settings.items.move(self.item_index, self.item_index+1)
         settings.compile(context)
         return {"FINISHED"}
 
