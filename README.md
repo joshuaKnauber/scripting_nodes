@@ -1,13 +1,14 @@
 # blender_visual_scripting_addon
 Visual Scripting addon for blender with nodes
 
-- [ ] Enable required inputs on run function
+- [ ] Enable required inputs on run property function
 - [ ] Run script register, unregister
 
-- [ ] Multiple items on enum properties
-- [ ] Enum items on function parameter
+- [ ] Correct outputs for multiple items on enum properties
+- [ ] Editable enum items on function parameter
 
-- [ ] Snippets
+- [ ] Allow old snippet import
+- [ ] Add snippet export
 
 - [ ] Export for asset folders
 - [ ] Save Addon
