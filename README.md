@@ -1,12 +1,12 @@
 # blender_visual_scripting_addon
 Visual Scripting addon for blender with nodes
 
-- [ ] changing nodes order doesn't hard compile
-- [ ] enable required on run function
+- [ ] Enable required on run function
 - [ ] Run script register, unregister
 - [ ] Multiple items on enum properties
 
-- [ ] enum items on function parameter
+- [ ] Move enum items
+- [ ] Enum items on function parameter
 - [ ] Snippets
 
 - [ ] Save Addon
