@@ -68,7 +68,7 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             data = self.get_data()
             if data[-1][0] == "[":
                 return data[-1]
-            return data[-1].title()
+            return data[-1].replace("_", " ").title()
         return "Property"
     
     def on_prop_change(self, context):
