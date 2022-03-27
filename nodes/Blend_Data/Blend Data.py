@@ -172,7 +172,7 @@ class SN_CamerasBlendDataNode(bpy.types.Node, BlendDataBaseNode, SN_ScriptingBas
     data_type_plural = "Cameras"
     
     data_path = "bpy.data.cameras"
-    active_path = "bpy.context.scene.camera"
+    active_path = "bpy.context.scene.camera.data"
 
 
 

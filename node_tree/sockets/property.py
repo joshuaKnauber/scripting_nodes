@@ -23,6 +23,12 @@ blend_data_defaults = {
     "Area": {
         "value": "bpy.context.area",
         "name": "Using Active"},
+    "View Layers": {
+        "value": "bpy.context.view_layer",
+        "name": "Using Active"},
+    "View Layer": {
+        "value": "bpy.context.view_layer",
+        "name": "Using Active"},
         
     "Preferences": {
         "value": lambda: "bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences" if bpy.context.scene.sn.is_exporting else "bpy.context.scene.sna_addon_prefs_temp",
@@ -57,23 +63,25 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     
     @property
     def python_attr(self):
-        sections = bpy_to_indexed_sections(self.python_value)
+        sections = bpy_to_path_sections(self.python_value, True)
         if sections:
             return sections[-1]
         return self.python_value
     
     @property
     def python_source(self):
-        sections = bpy_to_indexed_sections(self.python_value)
+        sections = bpy_to_path_sections(self.python_value, True)
         if sections:
+            if "bpy." in self.python_value: sections.insert(0, "bpy")
             return join_sections(sections[:-1])
         return self.python_value
     
     @property
     def python_sections(self):
-        sections = bpy_to_indexed_sections(self.python_value)
+        sections = bpy_to_path_sections(self.python_value, True)
         if sections:
-            return ["bpy"] + sections
+            if "bpy." in self.python_value: sections.insert(0, "bpy")
+            return sections
         return []
     
     

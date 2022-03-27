@@ -31,6 +31,8 @@ class NodeRef(bpy.types.PropertyGroup):
                     for node in ntree.nodes:
                         if getattr(node, f"ref_{ref_node.bl_idname}", None) == prev_name:
                             setattr(node, f"ref_{ref_node.bl_idname}", value)
+                        elif getattr(node, "from_node", None) == prev_name:
+                            setattr(node, f"from_node", value)
     
     def get_name(self):
         return self.get("name", "")

@@ -15,13 +15,17 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
 
     def on_create(self, context):
         self.add_execute_output()
+        self.add_data_output("Value")
         self.add_property_output("Attached To Item")
         self.add_property_output("Updated Property")
-        self.add_data_output("Value")
         
         
     def update_func_name(self, prop):
         return f"sna_update_{prop.python_name}_{self.static_uid}"
+    
+    
+    def on_free(self):
+        pass
         
 
     def evaluate(self, context):        

@@ -20,9 +20,12 @@ Visual Scripting addon for blender with nodes
 
 
 
-
 operator prop options hidden
+run functions dont update when you enter fixed name for function
 
-serpens property node doesnt update node name
+snap elements in viewport not in blend data browser
 
-operator name turns on inputs
+
+KNOWN ISSUES:
+
+- Updating a custom operators name resets the inputs on its button and run operator nodes

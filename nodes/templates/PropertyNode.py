@@ -32,7 +32,7 @@ class SN_NodeProperty(BasicProperty, bpy.types.PropertyGroup):
     def register_code_props(self):
         # register non group properties
         if not self.property_type == "Group":
-            code = f"{self.python_name}: bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}', {self.settings.register_options})"
+            code = f"{self.python_name}: bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}',{self.get_prop_options} {self.settings.register_options})"
             # add register code from prop settings
             if hasattr(self.settings, "imperative_code"):
                 return self.settings.imperative_code() + "\n" + code

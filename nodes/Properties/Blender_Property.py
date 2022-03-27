@@ -1,6 +1,6 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
-from ...settings.data_properties import bpy_to_indexed_sections
+from ...settings.data_properties import bpy_to_indexed_sections, bpy_to_path_sections
 
 
 
@@ -38,7 +38,9 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def get_data(self):
         if self._is_valid_data_path(self.pasted_data_path):
-            return bpy_to_indexed_sections(self.pasted_data_path)
+            sections = bpy_to_path_sections(self.pasted_data_path, True)
+            if "bpy." in self.pasted_data_path: sections.insert(0, "bpy")
+            return sections
         return None
     
     
@@ -47,7 +49,7 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.inputs.clear()
         data = self.get_data()
         if data:
-            for segment in data[:-1]:
+            for segment in data:
                 if segment_is_indexable(segment):
                     name = segment.split("[")[0].replace("_", " ").title()
                     if '"' in segment or "'" in segment:
@@ -95,12 +97,7 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.outputs[0].reset_value()
         else:
             data = self.get_data()
-            data_path = data_path_from_inputs(self.inputs, data[:-1])
-            
-            if segment_is_indexable(data[-1]):
-                data_path += data[-1]
-            else:
-                data_path += f".{data[-1]}"
+            data_path = data_path_from_inputs(self.inputs, data)
             
             self.outputs[0].python_value = data_path
             self.outputs[1].python_value = data_path
