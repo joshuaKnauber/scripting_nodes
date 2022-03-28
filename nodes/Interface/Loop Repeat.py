@@ -9,7 +9,10 @@ class SN_RepeatInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Loop Repeat (Interface)"
     bl_width_default = 200
     node_color = "INTERFACE"
-    layout_type = "layout"
+    
+    @property
+    def layout_type(self):
+        return self.active_layout
     
     def on_create(self, context):
         self.add_interface_input()
@@ -20,7 +23,10 @@ class SN_RepeatInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def on_link_insert(self, from_socket, to_socket, is_output):
         if to_socket == self.inputs[0]:
-            self.layout_type = self.active_layout
+            for out in self.outputs:
+                if out.bl_label == "Interface":
+                    for socket in out.to_sockets():
+                        socket.node._evaluate(bpy.context)
 
     def evaluate(self, context):
         self.outputs["Step"].python_value = f"i_{self.static_uid}"

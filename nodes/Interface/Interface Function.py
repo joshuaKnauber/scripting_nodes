@@ -11,6 +11,7 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     layout_type = "layout_function"
     is_trigger = True
     bl_width_default = 200
+    node_color = "INTERFACE"
 
     def on_create(self, context):
         self.add_interface_output()
