@@ -4,7 +4,7 @@ import bpy
 
 REPLACE_NAMES = {
     "ObjectBase": "bpy.data.objects['Object']", # outliner object hide
-    "LayerCollection": "bpy.data.collections['Collection']", # outliner collection hide
+    "LayerCollection": "bpy.context.view_layer.active_layer_collection", # outliner collection hide
     "SpaceView3D": "bpy.context.screen.areas[0].spaces[0]", # 3d space data
 }
 
