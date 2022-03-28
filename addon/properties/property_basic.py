@@ -130,12 +130,13 @@ class BasicProperty():
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
-                    if self.property_type == "Group":
-                        if hasattr(node, "get_prop_source") and node.get_prop_source() == self.settings:
-                            to_update_nodes.append((node, "prop_group"))
-                    else:
-                        if hasattr(node, "get_prop_source") and node.get_prop_source() and node.get_prop_source().properties == self.prop_collection and self.name in node.get_prop_source().properties:
-                            to_update_nodes.append((node, "prop_name"))
+                    if getattr(node, "prop_name", None) == self.name:
+                        if self.property_type == "Group":
+                            if hasattr(node, "get_prop_source") and node.get_prop_source() == self.settings:
+                                to_update_nodes.append((node, "prop_group"))
+                        else:
+                            if hasattr(node, "get_prop_source") and node.get_prop_source() and node.get_prop_source().properties == self.prop_collection and self.name in node.get_prop_source().properties:
+                                to_update_nodes.append((node, "prop_name"))
 
         # get properties to update references
         to_update_props = []
