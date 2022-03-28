@@ -38,9 +38,7 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def get_data(self):
         if self._is_valid_data_path(self.pasted_data_path):
-            sections = bpy_to_path_sections(self.pasted_data_path, True)
-            if "bpy." in self.pasted_data_path: sections.insert(0, "bpy")
-            return sections
+            return bpy_to_indexed_sections(self.pasted_data_path)
         return None
     
     

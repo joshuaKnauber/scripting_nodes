@@ -17,7 +17,7 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def get_data(self):
         if self._is_valid_data_path(self.pasted_data_path):
-            return bpy_to_indexed_sections(self.pasted_data_path.split("(")[0])
+            return bpy_to_indexed_sections(self.pasted_data_path)
         return None
     
     
