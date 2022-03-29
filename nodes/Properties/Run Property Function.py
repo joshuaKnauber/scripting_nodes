@@ -1,7 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from .Blender_Property import segment_is_indexable, data_path_from_inputs
-from ...settings.data_properties import bpy_to_indexed_sections
+from ...settings.data_properties import bpy_to_indexed_sections, bpy_to_path_sections
 
 
 
@@ -12,12 +12,24 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "PROPERTY"
     
     
+    def _disect_data_path(self, path):
+        # remove assign part
+        path = "(".join(path.split("(")[:-1])
+        path = path.strip()
+        # replace escaped quotes
+        path = path.replace('\\"', '"')
+        # split data path in segments
+        segments = bpy_to_indexed_sections(path)
+        return segments
+    
+    
     def _is_valid_data_path(self, path):
         return path and "bpy." in path and not ".ops." in path
 
     def get_data(self):
         if self._is_valid_data_path(self.pasted_data_path):
-            return bpy_to_indexed_sections(self.pasted_data_path)
+            # return bpy_to_indexed_sections(self.pasted_data_path)
+            return self._disect_data_path(self.pasted_data_path)
         return None
     
     
@@ -54,7 +66,8 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         # create parameter inputs
         params = self.pasted_data_path.split("(")[-1].split(")")[0].split(", ")
         for param in params:
-            self.add_socket_from_param(param, self._add_input)
+            if param.strip():
+                self.add_socket_from_param(param, self._add_input)
                     
     def create_outputs_from_path(self):
         # remove existing outputs
@@ -73,9 +86,11 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         return "Property Function"
     
     def on_prop_change(self, context):
+        self.disable_evaluation = True
         self.label = self.get_pasted_prop_name()
         self.create_inputs_from_path()
         self.create_outputs_from_path()
+        self.disable_evaluation = False
         self._evaluate(context)
         
     pasted_data_path: bpy.props.StringProperty(name="Pasted Path",
@@ -104,7 +119,7 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             function = data_path_from_inputs(inps, self.get_data()) + "("
 
             # add function parameters
-            inp_params = self.pasted_data_path.split("(")[-1].split(")")[0].split(", ")
+            inp_params = list(filter(lambda inp: inp.strip(), self.pasted_data_path.split("(")[-1].split(")")[0].split(", ")))
             for i, param in enumerate(inp_params):
                 param_inp = self.inputs[len(self.inputs) - len(inp_params)+i]
                 if not param_inp.disabled:
@@ -112,12 +127,12 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             function += ")"
             
             # add output parameters
-            out_params = self.pasted_data_path.split(" = ")[-1].split(", ")
+            out_params = list(filter(lambda inp: inp.strip(), self.pasted_data_path.split(" = ")[-1].split(", ")))
             if self.require_execute:
                 results = ""
                 if " = " in self.pasted_data_path:
                     for i, param in enumerate(out_params):
-                        name = param.split(": ")[0]
+                        name = param.split(": ")[0] + f"_{self.static_uid}"
                         results += f"{name}, "
                         self.outputs[i+1].python_value = name
                 if results: results = results[:-2] + " = "
