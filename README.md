@@ -5,7 +5,6 @@ Visual Scripting addon for blender with nodes
 - [ ] Operator property options
 - [ ] On property update functions aren't properly updating
 
-- [ ] Enable required inputs on run property function
 - [ ] Run script register, unregister
     - [ ] Breaks when no register or unregister function in script
     - [ ] Could be improved when register and unregister aren't last in script or code is messy

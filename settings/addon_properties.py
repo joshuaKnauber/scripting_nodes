@@ -52,6 +52,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Last Copied Data Path",
                                         description="The path of data last copied with the copy property button")
                                         
+    last_copied_required: bpy.props.StringProperty(default="",
+                                        name="Last Copied Required Properties",
+                                        description="The identifiers of the last copied required properties separated by ;")
+                                        
     copied_context = []
 
 

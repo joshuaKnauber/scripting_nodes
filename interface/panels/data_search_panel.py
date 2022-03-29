@@ -131,6 +131,7 @@ class SN_PT_data_search(bpy.types.Panel):
         op = row.operator("sn.copy_data_path", text="", icon="COPYDOWN", emboss=False)
         op.path = item["path"]
         op.type = item["type"]
+        op.required = item["required"]
         
         if item["expanded"]:
             row = box.row()

@@ -100,6 +100,7 @@ def get_data_item(parent_data, data, path, attribute):
         data_item = {
             "name": get_data_name(data, attribute),
             "path": new_path,
+            "required": "",
             "type": get_item_type(data),
             "data": data,
             "data_search": "",
@@ -111,6 +112,7 @@ def get_data_item(parent_data, data, path, attribute):
         }
         if data_item["type"] == "Function":
             data_item["path"] += get_function_parameters(parent_data, attribute)
+            data_item["required"] += get_required_function_parameters(parent_data, attribute)
         return data_item
     except:
         return None
@@ -175,6 +177,17 @@ def get_function_parameters(parent_data, name):
     params = f"({params})"
     if outputs: params += f" = {outputs}"
     return params
+
+
+def get_required_function_parameters(parent_data, name):
+    """ Returns a string separated by ; with the required function parameters """
+    required = ""
+    if hasattr(parent_data, "bl_rna") and hasattr(parent_data.bl_rna, "functions"):
+        if name in parent_data.bl_rna.functions:
+            for param in parent_data.bl_rna.functions[name].parameters:
+                if param.is_required:
+                    required += param.identifier if not required else f";{param.identifier}"
+    return required
 
 
 def item_from_path(data, path):

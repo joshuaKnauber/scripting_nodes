@@ -35,11 +35,15 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def add_socket_from_param(self, param, callback):
         """ Adds a socket from the given parameter with the given add callback """
+        sn = bpy.context.scene.sn
         socket_type = param.split(": ")[1].split("[")[0]
-        socket_name = param.split(": ")[0].replace("_", " ").title()
+        param_name = param.split(": ")[0]
+        socket_name = param_name.replace("_", " ").title()
         socket = callback(self.socket_names[socket_type], socket_name)
         socket.can_be_disabled = True
         socket.disabled = True
+        if sn.last_copied_datapath == self.pasted_data_path and param_name in sn.last_copied_required.split(";"):
+            socket.disabled = False
         if socket_type == "Enum":
             socket.items = f"[{param.split(': ')[1].split('[')[1]}"
     

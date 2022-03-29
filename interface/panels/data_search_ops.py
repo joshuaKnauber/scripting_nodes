@@ -143,10 +143,12 @@ class SN_OT_CopyDataPath(bpy.types.Operator):
 
     path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
     type: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    required: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
         context.window_manager.clipboard = self.path
         context.scene.sn.last_copied_datapath = self.path
         context.scene.sn.last_copied_datatype = self.type
+        context.scene.sn.last_copied_required = self.required
         self.report({"INFO"}, message="Copied!")
         return {"FINISHED"}
