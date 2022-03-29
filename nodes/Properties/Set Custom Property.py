@@ -25,4 +25,6 @@ class SN_SetCustomPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {self.indent(self.outputs[0].python_value, 6)}
                         """
         else:
-            self.code = f""
+            self.code = f"""
+                        {self.indent(self.outputs[0].python_value, 6)}
+                        """

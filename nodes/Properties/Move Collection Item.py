@@ -24,6 +24,7 @@ class SN_MoveCollectionItemNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.code = f"""
                         {self.inputs[1].python_value}.move({self.inputs['Move From'].python_value}, {self.inputs['Move To'].python_value})
                         item_{self.static_uid} = {self.inputs[1].python_value}[{self.inputs['Move To'].python_value}]
+                        {self.indent(self.outputs[0].python_value, 6)}
                         """
             self.outputs["Item"].python_value = f"item_{self.static_uid}"
         else:

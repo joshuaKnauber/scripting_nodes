@@ -41,6 +41,7 @@ class SN_RemoveCollectionItemNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.code = f"""
                             if len({self.inputs[1].python_value}) > {self.inputs[2].python_value}:
                                 {self.inputs[1].python_value}.remove({self.inputs[2].python_value})
+                            {self.indent(self.outputs[0].python_value, 7)}
                             """
             elif self.remove_type == "Item":
                 self.code = f"""
@@ -48,10 +49,12 @@ class SN_RemoveCollectionItemNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 if {self.inputs[1].python_value}[i_{self.static_uid}] == {self.inputs[2].python_value}:
                                     {self.inputs[1].python_value}.remove(i_{self.static_uid})
                                     break
+                            {self.indent(self.outputs[0].python_value, 7)}
                             """
             elif self.remove_type == "All":
                 self.code = f"""
                             {self.inputs[1].python_value}.clear()
+                            {self.indent(self.outputs[0].python_value, 7)}
                             """
             
             
