@@ -29,8 +29,14 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                                         description="A collection of groups that hold references to nodes of a specific idname")
 
 
+    # cache python names so they only have to be generated once
+    cached_python_name: bpy.props.StringProperty()
+    cached_human_name: bpy.props.StringProperty()
+    
     @property
     def python_name(self):
+        if self.name == self.cached_human_name and self.cached_python_name: return self.cached_python_name
+        
         names = []
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
@@ -39,6 +45,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                 names.append(ntree.python_name)
         
         name = unique_collection_name(f"{get_python_name(self.name, 'node_tree')}", "node_tree", names, "_")
+        self.cached_python_name = name
+        self.cached_human_name = self.name
         return name
 
     

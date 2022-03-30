@@ -89,12 +89,17 @@ addon_keymaps.clear()
 
 def format_single_file():
     """ Returns the entire addon code (for development) formatted for a single python file """
+    sn = bpy.context.scene.sn
     imports, imperative, main, register, unregister = (DEFAULT_IMPORTS, CONVERT_UTILS + GLOBAL_VARS, "", "", UNREGISTER_KEYMAPS)
 
     # add property and variable code
+    t1 = time.time()
     imperative += variable_register_code() + "\n"
+    t2 = time.time()
     register += property_register_code() + "\n"
+    t3 = time.time()
     unregister += property_unregister_code() + "\n"
+    t4 = time.time()
     
     # add node code
     for node in get_trigger_nodes():
@@ -104,9 +109,11 @@ def format_single_file():
         if node.code: main += "\n" + node.code
         if node.code_register: register += "\n" + node.code_register
         if node.code_unregister: unregister += "\n" + node.code_unregister
+    t5 = time.time()
         
     # add property code
     main += "\n" + property_imperative_code() + "\n"
+    t6 = time.time()
 
     # format register functions
     if not register.strip():
@@ -115,7 +122,17 @@ def format_single_file():
         unregister = "pass\n"
     
     code = f"{imports}\n{imperative}\n{main}\n\ndef register():\n{indent_code(register, 1, 0)}\n\ndef unregister():\n{indent_code(unregister, 1, 0)}\n\n"
-    return format_paragraphs(code)
+    code = format_paragraphs(code)
+    t7 = time.time()
+
+    if sn.debug_compile_time:
+        print(f"--Variable register code generation took {round((t2-t1)*1000, 2)}ms")
+        print(f"--Property register code generation took {round((t3-t2)*1000, 2)}ms")
+        print(f"--Property unregister code generation took {round((t4-t3)*1000, 2)}ms")
+        print(f"--Node code generation took {round((t5-t4)*1000, 2)}ms")
+        print(f"--Property imperative code generation took {round((t6-t5)*1000, 2)}ms")
+        print(f"--Code formatting took {round((t7-t6)*1000, 2)}ms")
+    return code
     
     
     

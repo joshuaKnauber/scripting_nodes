@@ -13,8 +13,14 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
         return self.id_data
     
     
+    # cache python names so they only have to be generated once
+    cached_python_name: bpy.props.StringProperty()
+    cached_human_name: bpy.props.StringProperty()
+    
     @property
     def python_name(self):
+        if self.name == self.cached_human_name and self.cached_python_name: return self.cached_python_name
+        
         names = []
         for var in self.node_tree.variables:
             if var == self:
@@ -22,6 +28,8 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
             names.append(var.python_name)
         
         name = unique_collection_name(f"sna_{get_python_name(self.name, 'sna_new_variable')}", "sna_new_variable", names, "_")
+        self.cached_python_name = name
+        self.cached_human_name = self.name
         return name
 
 

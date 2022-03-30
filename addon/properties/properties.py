@@ -60,6 +60,7 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
     
     @property
     def register_code(self):
+        self.python_name
         # register non group properties
         if not self.property_type == "Group":
             code = f"bpy.types.{self.attach_to}.{self.python_name} = bpy.props.{self.settings.prop_type_name}(name='{self.name}', description='{self.description}',{self.get_prop_options} {self.settings.register_options})"

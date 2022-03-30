@@ -24,8 +24,14 @@ class BasicProperty():
         layout.prop(self, "prop_options")
 
     
+    # cache python names so they only have to be generated once
+    cached_python_name: bpy.props.StringProperty()
+    cached_human_name: bpy.props.StringProperty()
+    
     @property
     def python_name(self):
+        if self.name == self.cached_human_name and self.cached_python_name: return self.cached_python_name
+
         names = []
         for prop in self.prop_collection:
             if prop == self:
@@ -33,6 +39,8 @@ class BasicProperty():
             names.append(prop.python_name)
         
         name = unique_collection_name(f"sna_{get_python_name(self.name, 'new_property')}", "new_property", names, "_")
+        self.cached_python_name = name
+        self.cached_human_name = self.name
         return name
     
     
