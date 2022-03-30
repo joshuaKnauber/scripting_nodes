@@ -79,7 +79,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
     @property
     def operator_python_name(self):
-        return get_python_name(self.name, replacement="my_generic_operator")
+        return get_python_name(self.name, replacement="my_generic_operator") + f"_{self.static_uid.lower()}"
 
     def on_create(self, context):
         self.add_boolean_input("Disable")
