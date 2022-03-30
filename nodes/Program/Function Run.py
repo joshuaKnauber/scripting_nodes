@@ -125,23 +125,19 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             inp_values = ", ".join(inp_values)
 
             if self.require_execute:
-                if self.inputs[0].is_linked:
-                    # get return variable names
-                    return_values = []
-                    for i, out in enumerate(self.outputs[1:]):
-                        return_values.append(get_python_name(f"{out.name}_{i}_{self.static_uid}", f"parameter_{i}_{self.static_uid}"))
-                    return_names = ", ".join(return_values)
+                # get return variable names
+                return_values = []
+                for i, out in enumerate(self.outputs[1:]):
+                    return_values.append(get_python_name(f"{out.name}_{i}_{self.static_uid}", f"parameter_{i}_{self.static_uid}"))
+                return_names = ", ".join(return_values)
 
-                    # set values with execute
-                    if return_names:
-                        self.code = f"{return_names} = {parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})"
-                    else:
-                        self.code = f"{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})"
-                    for i, out in enumerate(self.outputs[1:]):
-                        out.python_value = return_values[i]
+                # set values with execute
+                if return_names:
+                    self.code = f"{return_names} = {parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})"
                 else:
-                    for out in self.outputs[1:]:
-                        out.reset_value()
+                    self.code = f"{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})"
+                for i, out in enumerate(self.outputs[1:]):
+                    out.python_value = return_values[i]
             else:
                 # set values without execute
                 for i, out in enumerate(self.outputs[1:]):

@@ -30,11 +30,15 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_socket_name_change(self, socket):
         self.trigger_ref_update({ "updated": socket })
         
+    
+    def update_fixed_name(self, context):
+        self.trigger_ref_update()
+        self._evaluate(context)
         
     fixed_func_name: bpy.props.StringProperty(default="",
                                         name="Fixed Name",
                                         description="A fixed python name that will be used for this function",
-                                        update=SN_ScriptingBaseNode._evaluate)
+                                        update=update_fixed_name)
 
 
     @property

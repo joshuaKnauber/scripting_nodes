@@ -1,7 +1,6 @@
 # blender_visual_scripting_addon
 Visual Scripting addon for blender with nodes
 
-- [ ] Run functions don't update when you enter fixed name for function
 - [ ] Operator property options
 - [ ] On property update functions aren't properly updating
 
@@ -12,7 +11,7 @@ Visual Scripting addon for blender with nodes
 
 - [ ] Correct outputs for multiple items on enum properties
 - [ ] Editable enum items on function parameter
-. [ ] Snap elements in viewport not in blend data browser (because of enum set)
+- [ ] Snap elements in viewport not in blend data browser (because of enum set)
 
 - [ ] Allow old snippet import
 - [ ] Add snippet export
