@@ -19,7 +19,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_ref_update(self, node, data=None):
-        if node.node_tree == self.custom_operator_ntree and node.name == self.ref_SN_OperatorNode:
+        if node.node_tree == self.ref_ntree and node.name == self.ref_SN_OperatorNode:
             if data:
                 if "property_change" in data:
                     prop = data["property_change"]
@@ -81,8 +81,8 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     def update_custom_operator(self, context):
         """ Updates the nodes settings when a new parent panel is selected """
         self.reset_inputs()
-        if self.custom_operator_ntree and self.ref_SN_OperatorNode in self.custom_operator_ntree.nodes:
-            parent = self.custom_operator_ntree.nodes[self.ref_SN_OperatorNode]
+        if self.ref_ntree and self.ref_SN_OperatorNode in self.ref_ntree.nodes:
+            parent = self.ref_ntree.nodes[self.ref_SN_OperatorNode]
             for prop in parent.properties:
                 self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
         self._evaluate(context)
@@ -95,7 +95,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.ref_SN_OperatorNode = self.ref_SN_OperatorNode
         self._evaluate(context)
 
-    custom_operator_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
+    ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Panel Node Tree",
                                     description="The node tree to select the operator from",
                                     poll=SN_ScriptingBaseNode.ntree_poll,
@@ -151,8 +151,8 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                             self.code += "\n" + f"op.{prop.identifier} = {inp.python_value}"
 
         else:
-            if self.custom_operator_ntree and self.ref_SN_OperatorNode:
-                node = self.custom_operator_ntree.nodes[self.ref_SN_OperatorNode]
+            if self.ref_ntree and self.ref_SN_OperatorNode:
+                node = self.ref_ntree.nodes[self.ref_SN_OperatorNode]
                 self.code = f"op = {self.active_layout}.operator('sna.{node.operator_python_name}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"
 
                 for inp in self.inputs:
@@ -172,10 +172,10 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
             op.node = self.name
         
         elif self.source_type == "CUSTOM":
-            parent_tree = self.custom_operator_ntree if self.custom_operator_ntree else self.node_tree
-            row.prop_search(self, "custom_operator_ntree", bpy.data, "node_groups", text="")
+            parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
+            row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
             subrow = row.row(align=True)
-            subrow.enabled = self.custom_operator_ntree != None
+            subrow.enabled = self.ref_ntree != None
             subrow.prop_search(self, "ref_SN_OperatorNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_OperatorNode"), "refs", text="")
 
         row.prop(self, "hide_disabled_inputs", text="", icon="HIDE_ON" if self.hide_disabled_inputs else "HIDE_OFF", emboss=False)

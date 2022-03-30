@@ -30,7 +30,7 @@ class SN_SubmenuNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="The panel used as a custom parent panel for this subpanel",
                                     update=SN_ScriptingBaseNode._evaluate)
     
-    menu_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
+    ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Panel Node Tree",
                                     description="The node tree to select the panel from",
                                     poll=SN_ScriptingBaseNode.ntree_poll,
@@ -43,8 +43,8 @@ class SN_SubmenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         if self.parent_type == "CUSTOM":
-            if self.menu_ntree and self.ref_SN_MenuNode in self.menu_ntree.nodes:
-                self.code = f"{self.active_layout}.menu('{self.menu_ntree.nodes[self.ref_SN_MenuNode].idname}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})"
+            if self.ref_ntree and self.ref_SN_MenuNode in self.ref_ntree.nodes:
+                self.code = f"{self.active_layout}.menu('{self.ref_ntree.nodes[self.ref_SN_MenuNode].idname}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})"
         else:
             self.code = f"{self.active_layout}.menu('{self.menu_parent}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})"
 
@@ -52,10 +52,10 @@ class SN_SubmenuNode(bpy.types.Node, SN_ScriptingBaseNode):
         row = layout.row(align=True)
         
         if self.parent_type == "CUSTOM":
-            parent_tree = self.menu_ntree if self.menu_ntree else self.node_tree
-            row.prop_search(self, "menu_ntree", bpy.data, "node_groups", text="")
+            parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
+            row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
             subrow = row.row(align=True)
-            subrow.enabled = self.menu_ntree != None
+            subrow.enabled = self.ref_ntree != None
             subrow.prop_search(self, "ref_SN_MenuNode", parent_tree.node_collection("SN_MenuNode"), "refs", text="")
         else:
             name = f"{self.menu_parent.replace('_MT_', ' ').replace('_', ' ').title()}"

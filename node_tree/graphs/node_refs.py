@@ -29,10 +29,13 @@ class NodeRef(bpy.types.PropertyGroup):
             for ntree in bpy.data.node_groups:
                 if ntree.bl_idname == "ScriptingNodesTree":
                     for node in ntree.nodes:
-                        if getattr(node, f"ref_{ref_node.bl_idname}", None) == prev_name:
-                            setattr(node, f"ref_{ref_node.bl_idname}", value)
-                        elif getattr(node, "from_node", None) == prev_name:
-                            setattr(node, f"from_node", value)
+                        if getattr(node, "ref_ntree", None) == ref_node.node_tree:
+                            # update specific node type references
+                            if getattr(node, f"ref_{ref_node.bl_idname}", None) == prev_name:
+                                setattr(node, f"ref_{ref_node.bl_idname}", value)
+                            # update node names for any type of node
+                            elif getattr(node, "from_node", None) == prev_name:
+                                setattr(node, f"from_node", value)
     
     def get_name(self):
         return self.get("name", "")

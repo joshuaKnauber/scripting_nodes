@@ -11,7 +11,7 @@ class VariableReferenceNode():
         self.on_var_changed()
         self._evaluate(context)
     
-    var_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
+    ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Node Tree",
                                     description="Node Tree to get the variable from",
                                     update=var_update)
@@ -24,14 +24,14 @@ class VariableReferenceNode():
         pass
     
     def get_var(self):
-        if self.var_ntree and self.var_name in self.var_ntree.variables:
-            return self.var_ntree.variables[self.var_name]
+        if self.ref_ntree and self.var_name in self.ref_ntree.variables:
+            return self.ref_ntree.variables[self.var_name]
         return None
     
     def draw_variable_reference(self, layout):
         row = layout.row(align=True)
-        row.prop(self, "var_ntree", text="")
+        row.prop(self, "ref_ntree", text="")
         subrow = row.row(align=True)
-        subrow.enabled = self.var_ntree != None
-        parent_tree = self.node_tree if not self.var_ntree else self.var_ntree
+        subrow.enabled = self.ref_ntree != None
+        parent_tree = self.node_tree if not self.ref_ntree else self.ref_ntree
         subrow.prop_search(self, "var_name", parent_tree, "variables", text="")

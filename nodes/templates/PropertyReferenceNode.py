@@ -61,7 +61,7 @@ class PropertyReferenceNode():
                                 description="Select the property group to select the property from",
                                 update=on_prop_change)
     
-    from_node_tree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
+    ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                 name="Node Tree", description="Node Tree to select the property node from",
                                 poll=lambda _, ntree: ntree.bl_idname == "ScriptingNodesTree",
                                 update=on_prop_change)
@@ -76,8 +76,8 @@ class PropertyReferenceNode():
         if self.prop_source == "ADDON":
             src = bpy.context.scene.sn
         elif self.prop_source == "NODE":
-            if self.from_node_tree and self.from_node and self.from_node in self.from_node_tree.nodes:
-                src = self.from_node_tree.nodes[self.from_node]
+            if self.ref_ntree and self.from_node and self.from_node in self.ref_ntree.nodes:
+                src = self.ref_ntree.nodes[self.from_node]
             else:
                 return None
         
@@ -93,8 +93,8 @@ class PropertyReferenceNode():
         if self.prop_source == "ADDON":
             return bpy.context.scene.sn
         elif self.prop_source == "NODE":
-            if self.from_node_tree and self.from_node and self.from_node in self.from_node_tree.nodes:
-                node = self.from_node_tree.nodes[self.from_node]
+            if self.ref_ntree and self.from_node and self.from_node in self.ref_ntree.nodes:
+                node = self.ref_ntree.nodes[self.from_node]
                 if hasattr(node, "properties"):
                     return node
         return None
@@ -119,11 +119,11 @@ class PropertyReferenceNode():
         # select node
         if self.prop_source == "NODE":
             row = layout.row(align=True)
-            row.prop_search(self, "from_node_tree", bpy.data, "node_groups", text="")
-            if self.from_node_tree:
-                row.prop_search(self, "from_node", self.from_node_tree, "nodes", text="")
-                if self.from_node in self.from_node_tree.nodes:
-                    if not hasattr(self.from_node_tree.nodes[self.from_node], "properties"):
+            row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
+            if self.ref_ntree:
+                row.prop_search(self, "from_node", self.ref_ntree, "nodes", text="")
+                if self.from_node in self.ref_ntree.nodes:
+                    if not hasattr(self.ref_ntree.nodes[self.from_node], "properties"):
                         self.draw_warning(layout, "The selected node has no properties!")
                 elif not self.from_node:
                     self.draw_warning(layout, "No node selected!")
@@ -155,7 +155,7 @@ class PropertyReferenceNode():
             if self.prop_name:
                 for node in self.collection.nodes: # TODO for NODE
                     if node != self and self.prop_source == node.prop_source and self.prop_name == node.prop_name:
-                        if self.prop_source == "ADDON" or (self.prop_source == "NODE" and self.from_node == node.from_node and self.from_node_tree == self.from_node_tree):
+                        if self.prop_source == "ADDON" or (self.prop_source == "NODE" and self.from_node == node.from_node and self.ref_ntree == self.ref_ntree):
                             if self.from_prop_group and node.from_prop_group and self.prop_group == node.prop_group:
                                 self.draw_warning(layout, "Multiple nodes found for this property!")
                                 break

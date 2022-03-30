@@ -39,7 +39,7 @@ class SN_RunInterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def update_function_reference(self, context):
-        parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
+        parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
         # remember connections
         links = []
         for inp in self.inputs[1:]:
@@ -65,7 +65,7 @@ class SN_RunInterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             description="The function to run",
                                             update=update_function_reference)
 
-    custom_parent_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
+    ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Panel Node Tree",
                                     description="The node tree to select the panel from",
                                     poll=SN_ScriptingBaseNode.ntree_poll,
@@ -73,7 +73,7 @@ class SN_RunInterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, context):
-        parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
+        parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
         if self.ref_SN_InterfaceFunctionNode in parent_tree.nodes:
             # get input values
             inp_values = []
@@ -91,8 +91,8 @@ class SN_RunInterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def draw_node(self, context, layout):
         row = layout.row(align=True)
-        parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
-        row.prop_search(self, "custom_parent_ntree", bpy.data, "node_groups", text="")
+        parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
+        row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
         subrow = row.row(align=True)
-        subrow.enabled = self.custom_parent_ntree != None
+        subrow.enabled = self.ref_ntree != None
         subrow.prop_search(self, "ref_SN_InterfaceFunctionNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_InterfaceFunctionNode"), "refs", text="")

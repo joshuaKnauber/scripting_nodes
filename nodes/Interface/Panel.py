@@ -19,7 +19,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_output("Panel")
         self.add_dynamic_interface_output("Panel")
         self.add_dynamic_interface_output("Header")
-        self.custom_parent_ntree = self.node_tree
+        self.ref_ntree = self.node_tree
         
         
     def update_from_parent(self, parent):
@@ -31,8 +31,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_custom_parent(self, context):
         """ Updates the nodes settings when a new parent panel is selected """
-        if self.custom_parent_ntree and self.ref_SN_PanelNode in self.custom_parent_ntree.nodes:
-            parent = self.custom_parent_ntree.nodes[self.ref_SN_PanelNode]
+        if self.ref_ntree and self.ref_SN_PanelNode in self.ref_ntree.nodes:
+            parent = self.ref_ntree.nodes[self.ref_SN_PanelNode]
             self.update_from_parent(parent)
         self._evaluate(context)
         
@@ -40,7 +40,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_ref_update(self, node, data=None):
         """ Called when a parent panel is updated, updates this nodes settings """
         if self.is_subpanel:
-            if node.node_tree == self.custom_parent_ntree and node.name == self.ref_SN_PanelNode:
+            if node.node_tree == self.ref_ntree and node.name == self.ref_SN_PanelNode:
                 self.update_from_parent(node)
                 self._evaluate(bpy.context)
                     
@@ -127,7 +127,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="The panel used as a custom parent panel for this subpanel",
                                     update=update_custom_parent)
     
-    custom_parent_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
+    ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Panel Node Tree",
                                     description="The node tree to select the panel from",
                                     poll=SN_ScriptingBaseNode.ntree_poll,
@@ -166,8 +166,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.is_subpanel:
             if self.parent_type == "BLENDER":
                 parent = self.panel_parent
-            elif self.custom_parent_ntree and self.ref_SN_PanelNode in self.custom_parent_ntree.nodes:
-                parent_node = self.custom_parent_ntree.nodes[self.ref_SN_PanelNode]
+            elif self.ref_ntree and self.ref_SN_PanelNode in self.ref_ntree.nodes:
+                parent_node = self.ref_ntree.nodes[self.ref_SN_PanelNode]
                 parent = parent_node.last_idname
                 
         self.code = f"""
@@ -218,17 +218,17 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op.node = self.name
             else:
                 subrow = row.row()
-                subrow.enabled = self.custom_parent_ntree != None and self.ref_SN_PanelNode in self.custom_parent_ntree.nodes
+                subrow.enabled = self.ref_ntree != None and self.ref_SN_PanelNode in self.ref_ntree.nodes
                 op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
-                op.node_tree = self.custom_parent_ntree.name if self.custom_parent_ntree else ""
+                op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
                 op.node = self.ref_SN_PanelNode
             
-                parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
-                row.prop_search(self, "custom_parent_ntree", bpy.data, "node_groups", text="")
+                parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
+                row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
                 subrow = row.row(align=True)
-                subrow.enabled = self.custom_parent_ntree != None
+                subrow.enabled = self.ref_ntree != None
                 subrow.prop_search(self, "ref_SN_PanelNode", bpy.data.node_groups[parent_tree.name].node_collection(self.bl_idname), "refs", text="")
-                if self.ref_SN_PanelNode == self.name and self.custom_parent_ntree == self.node_tree:
+                if self.ref_SN_PanelNode == self.name and self.ref_ntree == self.node_tree:
                     layout.label(text="Can't use self as panel parent!", icon="ERROR")
 
             row.prop(self, "parent_type", text="", icon_only=True)

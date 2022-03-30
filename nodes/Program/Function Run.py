@@ -47,7 +47,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             
             
     def update_function_reference(self, context):
-        parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
+        parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
         # remember connections
         links = []
         for inp in self.inputs[1:]:
@@ -69,7 +69,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self._evaluate(context)
     
     def update_function_return_reference(self, context):
-        parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
+        parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
         # remember connections
         links = []
         for out in self.outputs[1:]:
@@ -98,7 +98,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             description="The return node to get values from",
                                             update=update_function_return_reference)
     
-    custom_parent_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
+    ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Panel Node Tree",
                                     description="The node tree to select the panel from",
                                     poll=SN_ScriptingBaseNode.ntree_poll,
@@ -116,7 +116,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, context):
-        parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
+        parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
         if self.ref_SN_FunctionNode in parent_tree.nodes:
             # get input values
             inp_values = []
@@ -156,21 +156,21 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def draw_node(self, context, layout):
         row = layout.row(align=True)
-        parent_tree = self.custom_parent_ntree if self.custom_parent_ntree else self.node_tree
-        row.prop_search(self, "custom_parent_ntree", bpy.data, "node_groups", text="")
+        parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
+        row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
         subrow = row.row(align=True)
-        subrow.enabled = self.custom_parent_ntree != None
+        subrow.enabled = self.ref_ntree != None
         subrow.prop_search(self, "ref_SN_FunctionNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_FunctionNode"), "refs", text="")
 
         row = layout.row()
-        row.enabled = self.custom_parent_ntree != None
+        row.enabled = self.ref_ntree != None
         row.prop_search(self, "ref_SN_FunctionReturnNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_FunctionReturnNode"), "refs", text="Return")
 
         layout.prop(self, "require_execute")
         
-        if self.custom_parent_ntree and self.ref_SN_FunctionNode and self.ref_SN_FunctionReturnNode:
-            return_node = self.custom_parent_ntree.nodes[self.ref_SN_FunctionReturnNode]
-            if not self.custom_parent_ntree.nodes[self.ref_SN_FunctionNode] in return_node.root_nodes:
+        if self.ref_ntree and self.ref_SN_FunctionNode and self.ref_SN_FunctionReturnNode:
+            return_node = self.ref_ntree.nodes[self.ref_SN_FunctionReturnNode]
+            if not self.ref_ntree.nodes[self.ref_SN_FunctionNode] in return_node.root_nodes:
                 row = layout.row()
                 row.alert = True
                 row.label(text="Return node not connected to function node!", icon="ERROR")
