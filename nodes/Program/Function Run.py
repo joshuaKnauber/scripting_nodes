@@ -140,8 +140,11 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     out.python_value = return_values[i]
             else:
                 # set values without execute
-                for i, out in enumerate(self.outputs[1:]):
-                    out.python_value = f"{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})[{i}]"
+                if len(self.outputs) > 2:
+                    for i, out in enumerate(self.outputs[1:]):
+                        out.python_value = f"{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})[{i}]"
+                elif len(self.outputs) == 2:
+                    self.outputs[-1].python_value = f"{parent_tree.nodes[self.ref_SN_FunctionNode].func_name}({inp_values})"
         else:
             for out in self.outputs[1:]:
                 out.reset_value()
