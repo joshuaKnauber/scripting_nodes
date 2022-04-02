@@ -90,6 +90,8 @@ class SN_PortalNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "direction", expand=True)
         if self.direction == "INPUT":
             row = layout.row(align=True)
-            split = row.split(factor=0.8, align=True)
+            split = row.split(factor=0.6, align=True)
             split.prop(self, "var_name", text="")
-            split.prop(self, "custom_color", text="")
+            sub_split = split.split(factor=0.5, align=True)
+            sub_split.prop(self, "custom_color", text="")
+            sub_split.operator("sn.reset_portal", text="", icon="LOOP_BACK").node = self.name
