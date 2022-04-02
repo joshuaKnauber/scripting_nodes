@@ -7,9 +7,12 @@ class SN_LayoutSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_LayoutSplitNode"
     bl_label = "Split"
-    layout_type = "split"
     bl_width_default = 200
     node_color = "INTERFACE"
+    
+    @property
+    def layout_type(self):
+        return f"split_{self.static_uid}"
 
     def on_create(self, context):
         self.add_interface_input()
@@ -29,14 +32,14 @@ class SN_LayoutSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         self.code = f"""
-                    split = {self.active_layout}.split(factor={self.inputs["Factor"].python_value}, align={self.inputs["Align"].python_value})
-                    split.alert = {self.inputs["Alert"].python_value}
-                    split.enabled = {self.inputs["Enabled"].python_value}
-                    split.use_property_split = {self.inputs["Split Layout"].python_value}
-                    split.use_property_decorate = {self.inputs["Decorate Layout"].python_value}
-                    split.scale_x = {self.inputs["Scale X"].python_value}
-                    split.scale_y = {self.inputs["Scale Y"].python_value}
-                    split.alignment = {self.inputs["Alignment"].python_value}.upper()
+                    split_{self.static_uid} = {self.active_layout}.split(factor={self.inputs["Factor"].python_value}, align={self.inputs["Align"].python_value})
+                    split_{self.static_uid}.alert = {self.inputs["Alert"].python_value}
+                    split_{self.static_uid}.enabled = {self.inputs["Enabled"].python_value}
+                    split_{self.static_uid}.use_property_split = {self.inputs["Split Layout"].python_value}
+                    split_{self.static_uid}.use_property_decorate = {self.inputs["Decorate Layout"].python_value}
+                    split_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
+                    split_{self.static_uid}.scale_y = {self.inputs["Scale Y"].python_value}
+                    split_{self.static_uid}.alignment = {self.inputs["Alignment"].python_value}.upper()
                     {self.indent(self.outputs[0].python_value, 5)}
                     {self.indent(self.outputs[1].python_value, 5)}
                     """

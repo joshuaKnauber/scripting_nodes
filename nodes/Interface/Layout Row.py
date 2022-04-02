@@ -7,9 +7,12 @@ class SN_LayoutRowNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_LayoutRowNode"
     bl_label = "Row"
-    layout_type = "row"
     bl_width_default = 200
     node_color = "INTERFACE"
+    
+    @property
+    def layout_type(self):
+        return f"row_{self.static_uid}"
 
     def on_create(self, context):
         self.add_interface_input()
@@ -27,13 +30,13 @@ class SN_LayoutRowNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         self.code = f"""
-                    row = {self.active_layout}.row(heading={self.inputs["Label"].python_value}, align={self.inputs["Align"].python_value})
-                    row.alert = {self.inputs["Alert"].python_value}
-                    row.enabled = {self.inputs["Enabled"].python_value}
-                    row.use_property_split = {self.inputs["Split Layout"].python_value}
-                    row.use_property_decorate = {self.inputs["Decorate Layout"].python_value}
-                    row.scale_x = {self.inputs["Scale X"].python_value}
-                    row.scale_y = {self.inputs["Scale Y"].python_value}
-                    row.alignment = {self.inputs["Alignment"].python_value}.upper()
+                    row_{self.static_uid} = {self.active_layout}.row(heading={self.inputs["Label"].python_value}, align={self.inputs["Align"].python_value})
+                    row_{self.static_uid}.alert = {self.inputs["Alert"].python_value}
+                    row_{self.static_uid}.enabled = {self.inputs["Enabled"].python_value}
+                    row_{self.static_uid}.use_property_split = {self.inputs["Split Layout"].python_value}
+                    row_{self.static_uid}.use_property_decorate = {self.inputs["Decorate Layout"].python_value}
+                    row_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
+                    row_{self.static_uid}.scale_y = {self.inputs["Scale Y"].python_value}
+                    row_{self.static_uid}.alignment = {self.inputs["Alignment"].python_value}.upper()
                     {self.indent([out.python_value for out in self.outputs[:-1]], 5)}
                     """

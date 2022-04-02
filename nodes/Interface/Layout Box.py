@@ -7,9 +7,12 @@ class SN_LayoutBoxNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_LayoutBoxNode"
     bl_label = "Box"
-    layout_type = "box"
     bl_width_default = 200
     node_color = "INTERFACE"
+    
+    @property
+    def layout_type(self):
+        return f"box_{self.static_uid}"
 
     def on_create(self, context):
         self.add_interface_input()
@@ -25,13 +28,13 @@ class SN_LayoutBoxNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         self.code = f"""
-                    box = {self.active_layout}.box()
-                    box.alert = {self.inputs["Alert"].python_value}
-                    box.enabled = {self.inputs["Enabled"].python_value}
-                    box.use_property_split = {self.inputs["Split Layout"].python_value}
-                    box.use_property_decorate = {self.inputs["Decorate Layout"].python_value}
-                    box.alignment = {self.inputs["Alignment"].python_value}.upper()
-                    box.scale_x = {self.inputs["Scale X"].python_value}
-                    box.scale_y = {self.inputs["Scale Y"].python_value}
+                    box_{self.static_uid} = {self.active_layout}.box()
+                    box_{self.static_uid}.alert = {self.inputs["Alert"].python_value}
+                    box_{self.static_uid}.enabled = {self.inputs["Enabled"].python_value}
+                    box_{self.static_uid}.use_property_split = {self.inputs["Split Layout"].python_value}
+                    box_{self.static_uid}.use_property_decorate = {self.inputs["Decorate Layout"].python_value}
+                    box_{self.static_uid}.alignment = {self.inputs["Alignment"].python_value}.upper()
+                    box_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
+                    box_{self.static_uid}.scale_y = {self.inputs["Scale Y"].python_value}
                     {self.indent([out.python_value for out in self.outputs[:-1]], 5)}
                     """
