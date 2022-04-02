@@ -31,14 +31,16 @@ class SN_EnumSocket(bpy.types.NodeSocket, ScriptingSocket):
 
 
     def get_items(self, _):
-        items = [("NONE", "NONE", "NONE")]
         if self.subtype == "CUSTOM_ITEMS":
-            items = [(item.name, item.name, item.name) for item in self.custom_items]
+            items = [(item.name, item.name, item.name, i) for i, item  in enumerate(self.custom_items)]
+            if len(items) > 32 and self.subtype == "ENUM_FLAG": items = items[:32]
+            return items
         else:
             names = eval(self.items)
             if names:
-                items = [(name, name, name) for name in names]
-        return items
+                if len(names) > 32 and self.subtype == "ENUM_FLAG": names = names[:32]
+                return [(name, name, name, i) for i, name in enumerate(names)]
+        return [("NONE", "NONE", "NONE")]
 
 
     def _get_value(self):

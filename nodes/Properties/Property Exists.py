@@ -20,12 +20,12 @@ class SN_PropertyExistsNode(bpy.types.Node, SN_ScriptingBaseNode):
         parts = []
         path = ""
         for section in sections:
-            if section.isdigit():
-                parts.append(f"len({path}) > {section}")
-                path += f"[{section}]"
-            elif section[0] == "'" and section[-1] == "'":
-                parts.append(f"{section} in {path}")
-                path += f"[{section}]"
+            if section[0] == "[" and section[-1] == "]":
+                if section[1:-1].isdigit():
+                    parts.append(f"len({path}) > {section[1:-1]}")
+                else:
+                    parts.append(f"{section[1:-1]} in {path}")
+                path += section
             else:
                 if path:
                     parts.append(f"hasattr({path}, '{section}')")
