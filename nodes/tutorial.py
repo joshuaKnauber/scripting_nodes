@@ -7,95 +7,6 @@ from .base_node import SN_ScriptingBaseNode
 
 
 
-tutorial = [
-    {
-        "image": "size_adjust.jpg"
-    },
-    {
-        "image": "get_started.jpg"
-    },
-    {
-        "image": "what_is_it.jpg"
-    },
-    {
-        "image": "structure.jpg"
-    },
-    {
-        "image": "graphs.jpg"
-    },
-    {
-        "image": "bookmark.jpg"
-    },
-    {
-        "image": "switch_addon.jpg"
-    },
-    {
-        "image": "links.jpg"
-    },
-    {
-        "image": "compile.jpg"
-    },
-    {
-        "image": "panel_start.jpg",
-    },
-    {
-        "image": "label.jpg"
-    },
-    {
-        "image": "seeing_the_label.jpg"
-    },
-    {
-        "image": "adventure.jpg"
-    },
-    {
-        "image": "interface.jpg",
-    },
-    {
-        "image": "execute.jpg",
-    },
-    {
-        "image": "function.jpg"
-    },
-    {
-        "image": "data.jpg"
-    },
-    {
-        "image": "variables.jpg"
-    },
-    {
-        "image": "get_property.jpg",
-    },
-    {
-        "image": "blend_data.jpg"
-    },
-    {
-        "image": "properties.jpg"
-    },
-    {
-        "image": "operator.jpg"
-    },
-    {
-        "image": "custom_files.jpg"
-    },
-    {
-        "image": "save.jpg"
-    },
-    {
-        "image": "marketplace.jpg"
-    },
-    {
-        "image": "packages.jpg"
-    },
-    {
-        "image": "console.jpg"
-    },
-    {
-        "image": "have_fun.jpg"
-    },
-]
-
-
-
 class SN_OT_StartTutorial(bpy.types.Operator):
     bl_idname = "sn.start_tutorial"
     bl_label = "Start Tutorial"
@@ -156,11 +67,19 @@ class SN_OT_SetTutorial(bpy.types.Operator):
         return {"FINISHED"}
 
 
+def load_images():
+    images = []
+    for file in os.listdir(os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "tutorial")):
+        if file.split(".")[-1] == "jpg":
+            images.append(file)
+    return images
 
 shader = None
 batch = None
 image = None
 handler = None
+
+images = load_images()
 
 
 
@@ -220,100 +139,23 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     chapters = [
-        ("Overview", "what_is_it"),
-        ("Nodes", "panel_start"),
-        ("Interface", "interface"),
-        ("Execute", "execute"),
-        ("Functions", "function"),
-        ("Data", "data"),
-        ("Variables", "variables"),
-        ("Blend Data", "blend_data"),
-        ("Properties", "properties"),
-        ("Operators", "operator"),
-        ("Assets", "custom_files"),
-        ("Export", "save"),
-        ("Marketplace", "marketplace"),
-        ("Packages", "packages"),
-        ("Console", "console"),
+        ("Overview", "0.jpg"),
+        ("Nodes", "2.jpg"),
     ]
     
     
     def remove_images(self):
-        for step in tutorial:
-            if step["image"] in bpy.data.images:
-                bpy.data.images.remove(bpy.data.images[step["image"]])
+        for image in images:
+            if image in bpy.data.images:
+                bpy.data.images.remove(bpy.data.images[image])
                 
-                
-    def remove_sockets(self):
-        self.inputs.clear()
-        self.outputs.clear()
-                
-                
-    def update_sockets(self):
-        if not "sockets" in tutorial[self.index]:
-            self.remove_sockets()
-        elif tutorial[self.index]["sockets"] != None:
-            self.remove_sockets()
-
-            for socket in tutorial[self.index]["sockets"]:
-                exec(socket)
-                
-                
-    def remove_nodes(self):
-        next_nodes = []
-        if "nodes" in tutorial[self.index]:
-            for node in tutorial[self.index]["nodes"]:
-                next_nodes.append(node["name"])
-        for node in self.node_tree.nodes:
-            if not node == self and not node.name in next_nodes:
-                self.node_tree.nodes.remove(node)
-            
-    
-    def update_nodes(self):
-        if not "nodes" in tutorial[self.index]:
-            self.remove_nodes()
-        elif tutorial[self.index]["nodes"] != None:
-            self.remove_nodes()
-        
-            for node in tutorial[self.index]["nodes"]:
-                if not node["name"] in self.node_tree.nodes:
-                    new_node = self.node_tree.nodes.new(node["idname"])
-                    new_node.name = node["name"]
-                    new_node.location = (self.location[0]+node["offset_x"],self.location[1]+node["offset_y"])
-            
-    
-    def remove_links(self):
-        for link in self.node_tree.links:
-            self.node_tree.links.remove(link)
-            
-            
-    def update_links(self):
-        if not "links" in tutorial[self.index]:
-            self.remove_links()
-        elif tutorial[self.index]["links"] != None:
-            self.remove_links()
-
-            for link in tutorial[self.index]["links"]:
-                if link["out_name"] == "self":
-                    out_socket = self.outputs[link["out_socket"]]
-                else:
-                    out_socket = self.node_tree.nodes[link["out_name"]].outputs[link["out_socket"]]
-                if link["in_name"] == "self":
-                    in_socket = self.inputs[link["in_socket"]]
-                else:
-                    in_socket = self.node_tree.nodes[link["in_name"]].inputs[link["in_socket"]]
-                self.node_tree.links.new(out_socket,in_socket)
-    
     
     def update_shader(self,context):
         self.remove_images()
         dir_path = os.path.join(os.path.dirname(os.path.dirname(__file__)),"assets","tutorial")
-        img = bpy.data.images.load(os.path.join(dir_path, tutorial[self.index]["image"]),check_existing=True)
+        img = bpy.data.images.load(os.path.join(dir_path, images[self.index]),check_existing=True)
         img.colorspace_settings.name = "Linear"
         load_shader(img,self.x,self.y,self.size)
-        self.update_sockets()
-        self.update_nodes()
-        self.update_links()
     
     
     x: bpy.props.IntProperty(default=100, update=update_shader, min=0)
@@ -347,9 +189,9 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def current_chapter(self):
         current_chapter = "Tutorial"
-        for i, step in enumerate(tutorial):
+        for i, image in enumerate(images):
             for el in self.chapters:
-                if step["image"] == el[1] + ".jpg":
+                if image == el[1]:
                     current_chapter = el[0]
             if i == self.index:
                 return current_chapter
@@ -361,7 +203,10 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
         row.alignment = "CENTER"
         row.label(text=self.current_chapter())
         
-        if "adventure" in tutorial[self.index]:
+        CHAPTER_INDEX = 1
+        ADVENTURE_INDEX = 999
+        
+        if self.index == ADVENTURE_INDEX:
             col = layout.column()
             col.scale_y = 2
             op = col.operator("sn.move_tutorial",text="Keep Going!",icon="OUTLINER_DATA_LIGHT")
@@ -383,7 +228,7 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
             op.node = self.name
             op.forward = False
             col = row.column(align=True)
-            col.enabled = self.index < len(tutorial)-1
+            col.enabled = self.index < len(images)-1
             op = col.operator("sn.move_tutorial",icon="TRIA_RIGHT",text="Next")
             op.node = self.name
             op.forward = True
@@ -399,19 +244,17 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
                 col.prop(self,"size",text="Size")
                 row.prop(self,"x",text="X")
                 row.prop(self,"y",text="Y")
+            
+        layout.operator("wm.url_open",text="See Docs",icon="URL").url = "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233"
         
-        if self.index == 1:            
+        if self.index == CHAPTER_INDEX:            
             layout.label(text="Chapters")
             col = layout.column(align=True)
             col.scale_y = 1.2
             for index, chapter in enumerate(self.chapters):
                 op = col.operator("sn.set_tutorial",text=str(index+1) + " | " + chapter[0])
                 op.node = self.name
-                for i, step in enumerate(tutorial):
-                    if step["image"] == chapter[1] + ".jpg":
+                for i, image in enumerate(images):
+                    if image == chapter[1]:
                         op.index = i
                         break
-                    
-        elif tutorial[self.index]["image"] == "packages.jpg":
-            row = layout.row()
-            row.operator("wm.url_open",text="See Docs",icon="URL").url = "https://joshuaknauber.github.io/visual_scripting_addon_docs/visual_scripting_docs/site/"
