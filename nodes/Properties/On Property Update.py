@@ -17,7 +17,6 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
         self.add_execute_output()
         self.add_data_output("Value")
         self.add_property_output("Attached To Item")
-        self.add_property_output("Updated Property")
         
         
     def update_func_name(self, prop):
@@ -33,7 +32,6 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
         if prop_src and self.prop_name in prop_src.properties and not prop_src.properties[self.prop_name].property_type in ["Group", "Collection"]:
             prop = prop_src.properties[self.prop_name]
             
-            self.outputs["Updated Property"].python_value = f"self.{prop.python_name}"
             self.outputs["Attached To Item"].python_value = f"self"
             self.outputs["Value"].python_value = "sna_updated_prop"
             
@@ -43,7 +41,6 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
                     {self.indent(self.outputs[0].python_value, 5)}
                 """
         else:
-            self.outputs["Updated Property"].reset_value()
             self.outputs["Attached To Item"].reset_value()
             self.outputs["Value"].reset_value()
 

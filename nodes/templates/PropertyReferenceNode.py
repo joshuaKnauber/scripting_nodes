@@ -15,11 +15,9 @@ class PropertyReferenceNode():
         prop_src = self.get_prop_source()
         if self.inputs and self.inputs[0].bl_label == "Property":
             self.inputs[0].name = "Data"
-        self.label = self.name.split(".")[0]
         if self.prop_name and prop_src:
             if self.prop_name in prop_src.properties:
                 prop = prop_src.properties[self.prop_name]
-                self.label = prop.name
                 # property from group -> input is pointer
                 if self.inputs and self.inputs[0].bl_label == "Property":
                     if self.from_prop_group and self.inputs:
