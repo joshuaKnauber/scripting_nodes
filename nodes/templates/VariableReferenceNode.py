@@ -14,6 +14,7 @@ class VariableReferenceNode():
     ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Node Tree",
                                     description="Node Tree to get the variable from",
+                                    poll=lambda _, ntree: ntree.bl_idname == "ScriptingNodesTree",
                                     update=var_update)
 
     var_name: bpy.props.StringProperty(name="Variable",
