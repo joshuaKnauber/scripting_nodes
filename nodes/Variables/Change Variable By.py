@@ -15,7 +15,7 @@ class SN_ChangeVariableByNode(bpy.types.Node, SN_ScriptingBaseNode, VariableRefe
         self.add_execute_input()
         self.add_execute_output()
         self.add_data_input("Change By")
-        self.var_ntree = self.node_tree
+        self.ref_ntree = self.node_tree
 
     operation: bpy.props.EnumProperty(items=[("+=", "Add", "Add to variable value"),
                                             ("-=", "Subtract", "Subtract from variable value")],

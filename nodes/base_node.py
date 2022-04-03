@@ -1,6 +1,6 @@
 import bpy
 from uuid import uuid4
-from ..utils import normalize_code, indent_code, format_paragraphs
+from ..utils import normalize_code, indent_code
 from .compiler import compile_addon
     
 
@@ -157,7 +157,6 @@ class SN_ScriptingBaseNode:
     def _set_any_code(self, key, raw_code):
         """ Checks if the given code is different from the current code. If required it triggers a code update """
         normalized = normalize_code(raw_code)
-        normalized = format_paragraphs(normalized)
         if self.get(key) == None or normalized != self[key]:
             self[key] = normalized
 

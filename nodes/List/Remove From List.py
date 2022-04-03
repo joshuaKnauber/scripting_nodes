@@ -16,7 +16,7 @@ class SN_RemoveFromListNode(bpy.types.Node, SN_ScriptingBaseNode, VariableRefere
         self.add_execute_input()
         self.add_execute_output()
         self.add_data_input("Element")
-        self.var_ntree = self.node_tree
+        self.ref_ntree = self.node_tree
                 
     def update_method(self, context):
         if self.method == "INDEX":

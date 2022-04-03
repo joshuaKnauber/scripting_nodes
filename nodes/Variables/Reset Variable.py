@@ -14,7 +14,7 @@ class SN_ResetVariableNode(bpy.types.Node, SN_ScriptingBaseNode, VariableReferen
     def on_create(self, context):
         self.add_execute_input()
         self.add_execute_output()
-        self.var_ntree = self.node_tree
+        self.ref_ntree = self.node_tree
 
 
     def evaluate(self, context):

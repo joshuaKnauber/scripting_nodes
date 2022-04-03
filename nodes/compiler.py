@@ -1,6 +1,6 @@
 import bpy
 import time
-from ..utils import indent_code, format_paragraphs
+from ..utils import indent_code
 from ..node_tree.sockets.conversions import CONVERT_UTILS
 from ..addon.properties.compiler_properties import property_imperative_code, property_register_code, property_unregister_code
 from ..addon.variables.compiler_variables import variable_register_code
@@ -122,7 +122,6 @@ def format_single_file():
         unregister = "pass\n"
     
     code = f"{imports}\n{imperative}\n{main}\n\ndef register():\n{indent_code(register, 1, 0)}\n\ndef unregister():\n{indent_code(unregister, 1, 0)}\n\n"
-    code = format_paragraphs(code)
     t7 = time.time()
 
     if sn.debug_compile_time:

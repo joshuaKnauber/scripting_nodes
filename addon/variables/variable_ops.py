@@ -99,7 +99,7 @@ class SN_OT_AddVariableNode(bpy.types.Operator):
 
         if context.space_data.node_tree.variable_index < len(context.space_data.node_tree.variables):
             var = context.space_data.node_tree.variables[context.space_data.node_tree.variable_index]
-            node.var_ntree = context.space_data.node_tree
+            node.ref_ntree = context.space_data.node_tree
             node.var_name = var.name
         return {"FINISHED"}
     
@@ -129,10 +129,10 @@ class SN_OT_FindVariable(bpy.types.Operator):
         for ngroup in bpy.data.node_groups:
             if ngroup.bl_idname == "ScriptingNodesTree":
                 for node in ngroup.nodes:
-                    if hasattr(node, "var_name") and hasattr(node, "var_ntree"):
-                        if variable and node.var_name == variable.name and node.var_ntree == ntree:
+                    if hasattr(node, "var_name") and hasattr(node, "ref_ntree"):
+                        if variable and node.var_name == variable.name and node.ref_ntree == ntree:
                             variable_nodes.append(node)
-                        elif not node.var_name or not node.var_ntree:
+                        elif not node.var_name or not node.ref_ntree:
                             empty_nodes.append(node)
                         
         # draw nodes for selected variable    
