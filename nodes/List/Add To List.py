@@ -17,7 +17,7 @@ class SN_AddToListNode(bpy.types.Node, SN_ScriptingBaseNode, VariableReferenceNo
         self.add_data_input("Item")
         self.add_integer_input("Index").set_hide(True)
         self.add_list_input("List").set_hide(True)
-        self.var_ntree = self.node_tree
+        self.ref_ntree = self.node_tree
         
         
     def update_method(self, context):

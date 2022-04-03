@@ -78,30 +78,6 @@ def indent_code(code, indents, start_line_index=1):
     return "\n".join(lines)
 
 
-def format_paragraphs(code):
-    """ Adjusts the spacing in the code paragraphs """
-    # remove blank lines
-    code = code.split("\n")
-    code = list(filter(lambda line: not line.strip() == "", code))
-    # add blank lines
-    spaced = []
-    prev_indents = 0
-    for i, line in enumerate(code):
-        curr_indents = len(line) - len(line.lstrip())
-        # add line if less indents
-        if curr_indents < prev_indents:
-            spaced.append("")
-        # add line if decorator
-        elif line.lstrip()[0] == "@":
-            spaced.append("")
-        # add line before comment
-        elif line.lstrip()[0] == "#":
-            spaced.append("")
-        spaced.append(line)
-        prev_indents = curr_indents
-    return "\n".join(spaced)
-
-
 
 class SN_OT_Tooltip(bpy.types.Operator):
     bl_idname = "sn.tooltip"

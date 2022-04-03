@@ -107,6 +107,19 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="Closes the panel by default",
                                     update=SN_ScriptingBaseNode._evaluate)
 
+    def update_shortcut_only(self, context):
+        if self.shortcut_only:
+            self.space = "VIEW_3D"
+            self.region = "WINDOW"
+            self.context = ""
+            self.category = ""
+        self._evaluate(context)
+
+    shortcut_only: bpy.props.BoolProperty(default=False,
+                                    name="Shortcut Only",
+                                    description="Only displays this panel when opened with a shortcut and not in the interface",
+                                    update=update_shortcut_only)
+
     is_subpanel: bpy.props.BoolProperty(default=False,
                                     name="Is Subpanel",
                                     description="If this panel should be a subpanel",
@@ -199,51 +212,64 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.code_register = f"if '{parent}' in globals(): bpy.utils.register_class({self.last_idname})"
             self.code_unregister = f"if '{parent}' in globals(): bpy.utils.unregister_class({self.last_idname})"
         else:
-            self.code_register = f"bpy.utils.register_class({self.last_idname})"
-            self.code_unregister = f"bpy.utils.unregister_class({self.last_idname})"
+            if bpy.context.scene.sn.is_exporting:
+                self.code_register = f"bpy.utils.register_class({self.last_idname})"
+                self.code_unregister = f"bpy.utils.unregister_class({self.last_idname})"
+            else:
+                self.code_register = f"""
+                                    try: bpy.utils.register_class({self.last_idname})
+                                    except: pass
+                                    """
+                self.code_unregister = f"""
+                                    try: bpy.utils.unregister_class({self.last_idname})
+                                    except: pass
+                                    """
 
 
     def draw_node(self, context, layout):
-        if not self.is_subpanel:
-            row = layout.row(align=True)
-            row.scale_y = 1.4
-            op = row.operator("sn.activate_panel_picker", text=f"{self.space.replace('_', ' ').title()} {self.region.replace('_', ' ').title()} {self.context.replace('_', ' ').title()}", icon="EYEDROPPER")
-            op.node_tree = self.node_tree.name
-            op.node = self.name
-        else:
-            row = layout.row(align=True)
-            if self.parent_type == "BLENDER":
-                op = row.operator("sn.activate_subpanel_picker", text=f"{self.panel_parent.replace('_PT_', ' ').replace('_', ' ').title()}", icon="EYEDROPPER")
+        if not self.shortcut_only:
+            if not self.is_subpanel:
+                row = layout.row(align=True)
+                row.scale_y = 1.4
+                op = row.operator("sn.activate_panel_picker", text=f"{self.space.replace('_', ' ').title()} {self.region.replace('_', ' ').title()} {self.context.replace('_', ' ').title()}", icon="EYEDROPPER")
                 op.node_tree = self.node_tree.name
                 op.node = self.name
             else:
-                subrow = row.row()
-                subrow.enabled = self.ref_ntree != None and self.ref_SN_PanelNode in self.ref_ntree.nodes
-                op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
-                op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
-                op.node = self.ref_SN_PanelNode
-            
-                parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
-                row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
-                subrow = row.row(align=True)
-                subrow.enabled = self.ref_ntree != None
-                subrow.prop_search(self, "ref_SN_PanelNode", bpy.data.node_groups[parent_tree.name].node_collection(self.bl_idname), "refs", text="")
-                if self.ref_SN_PanelNode == self.name and self.ref_ntree == self.node_tree:
-                    layout.label(text="Can't use self as panel parent!", icon="ERROR")
+                row = layout.row(align=True)
+                if self.parent_type == "BLENDER":
+                    op = row.operator("sn.activate_subpanel_picker", text=f"{self.panel_parent.replace('_PT_', ' ').replace('_', ' ').title()}", icon="EYEDROPPER")
+                    op.node_tree = self.node_tree.name
+                    op.node = self.name
+                else:
+                    subrow = row.row()
+                    subrow.enabled = self.ref_ntree != None and self.ref_SN_PanelNode in self.ref_ntree.nodes
+                    op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+                    op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
+                    op.node = self.ref_SN_PanelNode
+                
+                    parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
+                    row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
+                    subrow = row.row(align=True)
+                    subrow.enabled = self.ref_ntree != None
+                    subrow.prop_search(self, "ref_SN_PanelNode", bpy.data.node_groups[parent_tree.name].node_collection(self.bl_idname), "refs", text="")
+                    if self.ref_SN_PanelNode == self.name and self.ref_ntree == self.node_tree:
+                        layout.label(text="Can't use self as panel parent!", icon="ERROR")
 
-            row.prop(self, "parent_type", text="", icon_only=True)
-        
-        layout.prop(self, "is_subpanel")
+                row.prop(self, "parent_type", text="", icon_only=True)
+            
+            layout.prop(self, "is_subpanel")
 
         layout.prop(self, "name")
         layout.prop(self, "panel_label")
-        if not self.is_subpanel:
-            layout.prop(self, "category")
+        if not self.shortcut_only:
+            if not self.is_subpanel:
+                layout.prop(self, "category")
 
-        layout.prop(self, "panel_order")
-        layout.prop(self, "hide_header")
-        layout.prop(self, "expand_header")
-        layout.prop(self, "default_closed")
+            layout.prop(self, "panel_order")
+            layout.prop(self, "hide_header")
+            layout.prop(self, "expand_header")
+            layout.prop(self, "default_closed")
+        layout.prop(self, "shortcut_only")
 
         
     def draw_node_panel(self, context, layout):

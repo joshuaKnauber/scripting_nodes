@@ -16,6 +16,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_input("Emboss").default_value = True
         self.add_boolean_input("Depress")
         self.add_icon_input("Icon")
+        self.ref_ntree = self.node_tree
 
 
     def on_ref_update(self, node, data=None):
@@ -151,7 +152,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                             self.code += "\n" + f"op.{prop.identifier} = {inp.python_value}"
 
         else:
-            if self.ref_ntree and self.ref_SN_OperatorNode:
+            if self.ref_ntree and self.ref_SN_OperatorNode in self.ref_ntree.nodes:
                 node = self.ref_ntree.nodes[self.ref_SN_OperatorNode]
                 self.code = f"op = {self.active_layout}.operator('sna.{node.operator_python_name}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"
 
@@ -160,6 +161,8 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                         for prop in node.properties:
                             if prop.name == inp.name:
                                 self.code += "\n" + f"op.{prop.python_name} = {inp.python_value}"
+            else:
+                self.code = f"op = {self.active_layout}.operator('sn.dummy_button_operator', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"
 
 
     def draw_node(self, context, layout):

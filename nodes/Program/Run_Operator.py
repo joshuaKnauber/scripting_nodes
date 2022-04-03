@@ -133,10 +133,13 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.reset_inputs()
         
         if self.pasted_operator:
+            self.disable_evaluation = True
             op = eval(self.pasted_operator.split("(")[0])
             op_rna = op.get_rna_type()
             self.pasted_name = op_rna.name
             self.create_inputs(op_rna)
+            self.disable_evaluation = False
+            self._evaluate(context)
     
     pasted_operator: bpy.props.StringProperty(default="bpy.ops.sn.dummy_button_operator()",
                                         update=update_pasted_operator)

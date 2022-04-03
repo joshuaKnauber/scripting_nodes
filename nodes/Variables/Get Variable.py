@@ -13,7 +13,7 @@ class SN_GetVariableNode(bpy.types.Node, SN_ScriptingBaseNode, VariableReference
 
     def on_create(self, context):
         self.add_data_output("Variable")
-        self.var_ntree = self.node_tree
+        self.ref_ntree = self.node_tree
         
         
     def on_var_changed(self):

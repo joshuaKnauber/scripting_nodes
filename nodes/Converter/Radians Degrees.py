@@ -28,5 +28,5 @@ class SN_RadiansNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "operation", text="")
 
     def evaluate(self, context):
-        self.code_import = "math"
+        self.code_import = "import math"
         self.outputs[0].python_value = f"math.{self.operation}({self.inputs[0].python_value})"
