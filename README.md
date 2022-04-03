@@ -1,12 +1,6 @@
 # blender_visual_scripting_addon
 Visual Scripting addon for blender with nodes
 
-- [ ] Run script register, unregister
-    - [ ] Breaks when no register or unregister function in script
-    - [ ] Could be improved when register and unregister aren't last in script or code is messy
-    - [ ] Could be moved to a utility function so generated code looks cleaner
-
-
 - [ ] Operator property options
 - [ ] On property update functions aren't properly updating
 

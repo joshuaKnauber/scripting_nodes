@@ -1,6 +1,7 @@
+import os
 import bpy
 from ..base_node import SN_ScriptingBaseNode
-from ...utils import unique_collection_name, get_python_name
+from ...utils import normalize_code, unique_collection_name, get_python_name
 
 
 
@@ -18,6 +19,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         elif socket in self.outputs[1:-1]:
             socket["name"] = get_python_name(socket.name, "variable")
             socket["name"] = unique_collection_name(socket.name, "variable", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+            socket.python_value = socket.name
 
         self._evaluate(bpy.context)
 
@@ -29,6 +31,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         elif socket in self.outputs[1:-1]:
             socket["name"] = get_python_name(socket.name, "variable")
             socket["name"] = unique_collection_name(socket.name, "variable", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+            socket.python_value = socket.name
 
 
     def on_create(self, context):
@@ -43,7 +46,6 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         out.changeable = True
 
     def update_source(self, context):
-        self.inputs["Script Path"].set_hide(self.source == "BLENDER")
         self._evaluate(context)
 
     source: bpy.props.EnumProperty(name="Source",
@@ -59,63 +61,141 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         return super()._get_code_register()
 
     def evaluate(self, context):
-        # TODO import code on export
+        for socket in self.outputs[1:-1]:
+            socket.python_value = socket.name
+        # TODO outputs dont work (globals()?)
+        self.code_imperative = f"""
+                                def run_internal_script(name, part):
+                                    try:
+                                        text = "\\n".join([line.body for line in bpy.data.texts[name].lines])
+                                        exec(get_script_code(text)[part])
+                                    except:
+                                        print("Error when registering/unregistering or running script '" + name + "'!")
+                                
+                                def run_external_script(path, part):
+                                    if os.path.exists(path):
+                                        with open(path) as script_file:
+                                            text = script_file.read()
+                                            exec(get_script_code(text)[part])
+                                    else:
+                                        print("Could not find script at '" + path + "'!")
+                                
+                                def get_script_code(script):
+                                    register = ""
+                                    unregister = ""
+
+                                    if not "def register()" in script and not "def unregister()" in script:
+                                        return (script, register, unregister)
+                                    if "def register()" in script:
+                                        register = "def register()" + script.split("def register()")[1]
+                                        for x, line in enumerate(register.split("\\n")[1:]):
+                                            if not len(line) - len(line.lstrip()) and line.strip():
+                                                register = "\\n".join(register.split("\\n")[:x])
+                                                break
+                                        script = script.replace(register, "")
+                                        register += "\\nregister()"
+                                    if "def unregister()" in script:
+                                        unregister = "def unregister()" + script.split("def unregister()")[1]
+                                        for x, line in enumerate(unregister.split("\\n")[1:]):
+                                            if not len(line) - len(line.lstrip()) and line.strip():
+                                                unregister = "\\n".join(unregister.split("\\n")[:x])
+                                                break
+                                        script = script.replace(unregister, "")
+                                        unregister += "\\nunregister()"
+                                    return (script, register, unregister)
+        """
         if self.source == "BLENDER":
             if self.script:
-                self.code_register = f"""
-                                    try:
-                                        text = "\\n".join([line.body for line in bpy.data.texts["{self.script.name}"].lines])
-                                        text = text.split('def register():')[1].split('def unregister(')[0]
-                                        exec('def register():' + text + '\\nregister()')
-                                    except:
-                                        pass
-                """
-                self.code_unregister = f"""
-                                    try:
-                                        text = "\\n".join([line.body for line in bpy.data.texts["{self.script.name}"].lines])
-                                        text = text.split('def unregister():')[1]
-                                        exec('def unregister():' + text + '\\nunregister()')
-                                    except:
-                                        pass
-                """
                 self.code = f"""
                             {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
                             {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 7)}
-                            try:
-                                text = "\\n".join([line.body for line in bpy.data.texts["{self.script.name}"].lines])
-                                exec(text.split('def register(')[0])
-                            except:
-                                print(text="Error when running script!")
+                            run_internal_script('{self.script.name}', 0)
                             {self.indent(self.outputs[0].python_value, 7)}
                             """
+                self.code_register = f"""run_internal_script('{self.script.name}', 1)"""
+                self.code_unregister = f"""run_internal_script('{self.script.name}', 2)"""
         elif self.source == "EXTERNAL":
             self.code_import = "import os"
-            self.code_register = f"""
-                                if os.path.exists({self.inputs['Script Path'].python_value}):
-                                    with open({self.inputs['Script Path'].python_value}, "r") as script_file:
-                                        text = script_file.read().split('def register():')[1].split('def unregister(')[0]
-                                        exec('def register():' + text + '\\nregister()')
-                                """
-            self.code_unregister = f"""
-                                if os.path.exists({self.inputs['Script Path'].python_value}):
-                                    with open({self.inputs['Script Path'].python_value}, "r") as script_file:
-                                        text = script_file.read().split('def unregister():')[1]
-                                        exec('def unregister():' + text + '\\nunregister()')
-                                """
             self.code = f"""
-                        {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
-                        {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 7)}
-                        if os.path.exists({self.inputs['Script Path'].python_value}):
-                            with open({self.inputs['Script Path'].python_value}, "r") as script_file:
-                                text = script_file.read().split('def register(')[0]
-                                exec(text)
-                        else:
-                            print(text="Couldn't find script path!")
+                        {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 6)}
+                        {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 6)}
+                        run_external_script({self.inputs['Script Path'].python_value}, 0)
                         {self.indent(self.outputs[0].python_value, 6)}
                         """
+            self.code_register = f"""run_external_script({self.inputs['Script Path'].python_value}, 1)"""
+            self.code_unregister = f"""run_external_script({self.inputs['Script Path'].python_value}, 2)"""
+
+    def get_script_code(self, script):
+        register = ""
+        unregister = ""
+
+        if not "def register()" in script and not "def unregister()" in script:
+            return (normalize_code(script), register, unregister)
+
+        if "def register()" in script:
+            register = "def register()" + script.split("def register()")[1]
+            register_lines = register.split("\n")
+            for x, line in enumerate(register.split("\n")[1:]):
+                if not len(line) - len(line.lstrip()) and line.strip():
+                    register_lines = register_lines[:x]
+                    break
+            script = script.replace("\n".join(register_lines), "")
+            register = normalize_code("\n".join(register_lines[1:]))
+
+        if "def unregister()" in script:
+            unregister = "def unregister()" + script.split("def unregister()")[1]
+            unregister_lines = unregister.split("\n")
+            for x, line in enumerate(unregister.split("\n")[1:]):
+                if not len(line) - len(line.lstrip()) and line.strip():
+                    unregister_lines = unregister_lines[:x]
+                    break
+            script = script.replace("\n".join(unregister_lines), "")
+            unregister = normalize_code("\n".join(unregister_lines[1:]))
+        
+        return (normalize_code(script), register, unregister)
+
+
+    def evaluate_export(self, context):
+        for socket in self.outputs[1:-1]:
+            socket.python_value = socket.name
+        if self.source == "BLENDER":
+            if self.script:
+                script = ("", "", "")
+                try:
+                    text = "\n".join([line.body for line in bpy.data.texts[self.script.name].lines])
+                    script = self.get_script_code(text)
+                except: pass
+
+                self.code_register = f"""{script[1]}"""
+                self.code_unregister = f"""{script[2]}"""
+                self.code = f"""
+                            {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
+                            {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 7)}
+                            {self.indent(script[0], 7)}
+                            {self.indent(self.outputs[0].python_value, 7)}
+                            """
+
+        elif self.source == "EXTERNAL":
+            script = ("", "", "")
+            if os.path.exists(eval(self.inputs['Script Path'].python_value)):
+                with open(eval(self.inputs['Script Path'].python_value), "r") as script_file:
+                    text = script_file.read()
+                    script = self.get_script_code(text)
+
+            self.code_register = f"""{script[1]}"""
+            self.code_unregister = f"""{script[2]}"""
+            self.code = f"""
+                        {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 6)}
+                        {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 6)}
+                        {self.indent(script[0], 6)}
+                        {self.indent(self.outputs[0].python_value, 6)}
+                        """
+
 
     def draw_node(self, context, layout):
         layout.prop(self, "source", expand=True)
         
         if self.source == "BLENDER":
             layout.template_ID(self, "script", open="text.open", new="text.new")
+        else:
+            layout.prop(self.inputs["Script Path"], "value_file_path", text="Path")
