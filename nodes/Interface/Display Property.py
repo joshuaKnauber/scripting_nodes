@@ -15,17 +15,39 @@ class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_string_input("Label")
         self.add_icon_input("Icon")
         self.add_boolean_input("Emboss").default_value = True
-        self.add_boolean_input("Expand").default_value = False
-        self.add_boolean_input("Slider").default_value = False
-        self.add_boolean_input("Toggle").default_value = False
-        self.add_boolean_input("Invert Checkbox").default_value = False
-        self.add_boolean_input("Full Shortcut").default_value = False
+        inp = self.add_boolean_input("Expand")
+        inp.default_value = False
+        inp.can_be_disabled = True
+        inp.disabled = True
+        inp = self.add_boolean_input("Slider")
+        inp.default_value = False
+        inp.can_be_disabled = True
+        inp.disabled = True
+        inp = self.add_boolean_input("Toggle")
+        inp.default_value = False
+        inp.can_be_disabled = True
+        inp.disabled = True
+        inp = self.add_boolean_input("Invert Checkbox")
+        inp.default_value = False
+        inp.can_be_disabled = True
+        inp.disabled = True
+        inp = self.add_boolean_input("Full Shortcut")
+        inp.default_value = False
+        inp.can_be_disabled = True
+        inp.disabled = True
+        inp = self.add_integer_input("Index")
+        inp.can_be_disabled = True
+        inp.disabled = True
 
 
     def evaluate(self, context):
         if self.inputs["Property"].is_linked:
+            attributes = ""
+            for inp in self.inputs:
+                if inp.can_be_disabled and not inp.disabled:
+                    attributes += f", {inp.name.lower().replace(' ', '_')}={inp.python_value}"
             self.code = f"""
-                        {self.active_layout}.prop({self.inputs['Property'].python_source}, '{self.inputs['Property'].python_attr.replace("'",'"')}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, expand={self.inputs['Expand'].python_value}, slider={self.inputs['Slider'].python_value}, toggle={self.inputs['Toggle'].python_value}, invert_checkbox={self.inputs['Invert Checkbox'].python_value}, full_event={self.inputs['Full Shortcut'].python_value})
+                        {self.active_layout}.prop({self.inputs['Property'].python_source}, '{self.inputs['Property'].python_attr.replace("'",'"')}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}{attributes})
                         """
         else:
             self.code = f"""
