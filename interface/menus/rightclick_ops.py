@@ -24,7 +24,10 @@ class SN_OT_CopyProperty(bpy.types.Operator):
         # copy data path if available
         if bpy.ops.ui.copy_data_path_button.poll():
             bpy.ops.ui.copy_data_path_button("INVOKE_DEFAULT", full_path=True)
-            context.window_manager.clipboard = context.window_manager.clipboard.replace('"', "'")
+            path = context.window_manager.clipboard.replace('"', "'")
+            if path and path[-1] == "]" and path[:-1].split("[")[-1].isdigit():
+                path = "[".join(path.split("[")[:-1])
+            context.window_manager.clipboard = path
             context.scene.sn.last_copied_datatype = property_value.type.title()
             context.scene.sn.last_copied_datapath = context.window_manager.clipboard
             self.report({"INFO"}, message="Copied!")
