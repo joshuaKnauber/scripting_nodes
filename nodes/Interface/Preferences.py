@@ -13,9 +13,6 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     is_trigger = True
     node_color = "INTERFACE"
     
-    def on_node_property_change(self, property):
-        pass # TODO update property nodes and compile this node properly
-    
     def on_create(self, context):
         self.add_boolean_input("Hide").default_value = False
         self.add_interface_output("Preferences")
@@ -30,15 +27,12 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         idname = f"SNA_TempAddonPreferences_{self.static_uid}"
         prop_name = f"sna_addon_prefs_temp"
 
-        self.code_imperative = f"""
-                                {self.indent(props_imperative_list, 8)}
-                                
-                                class {idname}(bpy.types.PropertyGroup):
-                                    pass
-                                    {self.indent(props_code_list, 9)}
-                                """
-
         self.code = f"""
+                    {self.indent(props_imperative_list, 5)}
+                    
+                    class {idname}(bpy.types.PropertyGroup):
+                        {self.indent(props_code_list, 6) if props_code_list else "pass"}
+
                     def sna_prefs(layout):
                         if not ({self.inputs["Hide"].python_value}):
                             self = bpy.context.scene.{prop_name}

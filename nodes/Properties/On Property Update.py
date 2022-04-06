@@ -35,7 +35,7 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
             self.outputs["Attached To Item"].python_value = f"self"
             self.outputs["Value"].python_value = "sna_updated_prop"
             
-            self.code = f"""
+            self.code_imperative = f"""
                 def {self.update_func_name(prop)}(self, context):
                     sna_updated_prop = self.{prop.python_name}
                     {self.indent(self.outputs[0].python_value, 5)}
