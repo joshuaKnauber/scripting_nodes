@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_DepsgraphUpdateNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_DepsgraphUpdateNode"
-    bl_label = "Depsgraph Update"
+    bl_label = "On Depsgraph Update"
     is_trigger = True
     bl_width_default = 200
 

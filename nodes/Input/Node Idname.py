@@ -11,10 +11,10 @@ class NodeType(bpy.types.PropertyGroup):
 
 
 
-class SN_NodeTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_NodeIdnameNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_NodeTypeNode"
-    bl_label = "Node Type"
+    bl_idname = "SN_NodeIdnameNode"
+    bl_label = "Node Idname"
     node_color = "STRING"
 
     def on_create(self, context):
