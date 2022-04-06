@@ -1,7 +1,6 @@
 # blender_visual_scripting_addon
 Visual Scripting addon for blender with nodes
 
-- [ ] Operator property options
 - [ ] On property update functions aren't properly updating
 
 - [ ] Correct outputs for multiple items on enum properties
