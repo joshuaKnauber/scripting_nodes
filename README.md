@@ -1,8 +1,6 @@
 # blender_visual_scripting_addon
 Visual Scripting addon for blender with nodes
 
-- [ ] On property update functions aren't properly updating
-
 - [ ] Correct outputs for multiple items on enum properties
 - [ ] Snap elements in viewport not in blend data browser (because of enum set)
 
@@ -21,8 +19,7 @@ Visual Scripting addon for blender with nodes
 
 
 Schedule:
-07: - on property update
-    - correct enum outputs
+07: - correct enum outputs
     - enum set for blend data
     - node documentation
 08: - snippet import

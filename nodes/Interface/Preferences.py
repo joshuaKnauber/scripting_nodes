@@ -31,7 +31,7 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     {self.indent(props_imperative_list, 5)}
                     
                     class {idname}(bpy.types.PropertyGroup):
-                        {self.indent(props_code_list, 6) if props_code_list else "pass"}
+                        {self.indent(props_code_list, 6) if self.indent(props_code_list, 6).strip() else "pass"}
 
                     def sna_prefs(layout):
                         if not ({self.inputs["Hide"].python_value}):

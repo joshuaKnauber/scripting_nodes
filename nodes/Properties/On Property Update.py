@@ -1,3 +1,4 @@
+from re import A
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.PropertyReferenceNode import PropertyReferenceNode
@@ -23,8 +24,23 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
         return f"sna_update_{prop.python_name}_{self.static_uid}"
     
     
+    def update_nodes_with_props(self):
+        # update all nodes with properties when this node changes
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                for node in ntree.nodes:
+                    if hasattr(node, "properties"):
+                        node._evaluate(bpy.context)
+    
+    
+    def on_ref_prop_change(self, context):
+        self.update_nodes_with_props()
+    
     def on_free(self):
-        pass
+        self.update_nodes_with_props()
+        
+    def on_copy(self, old):
+        self.update_nodes_with_props()
         
 
     def evaluate(self, context):        
