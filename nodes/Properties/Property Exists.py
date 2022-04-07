@@ -28,7 +28,7 @@ class SN_PropertyExistsNode(bpy.types.Node, SN_ScriptingBaseNode):
                 path += section
             else:
                 if path:
-                    parts.append(f"hasattr({path}, '{section}')")
+                    parts.append(f"""hasattr({path}, "{section}")""")
                     path += "." + section
                 else:
                     path += section

@@ -196,7 +196,7 @@ def item_from_path(data, path):
     """ Returns the item in the data for the given path. Works for anything above bpy.xyz """
     # after bpy.xyz
     if len(path.split(".")) > 2:
-        path_sections = bpy_to_path_sections(path)
+        path_sections = bpy_to_path_sections(path, False)
         curr_item = data[path_sections[0]][path_sections[1]]
         for key in path_sections[2:]:
             curr_item = curr_item["properties"][key]
@@ -209,32 +209,41 @@ def item_from_path(data, path):
         return data[path.split(".")[-1]]
 
 
-def bpy_to_path_sections(path, keep_brackets=False):
+def bpy_to_path_sections(path, keep_brackets=True):
     """ Takes a blender python data path and converts it to json path sections """
     path = path.replace('"', "'").replace("bpy.", "")    
-    
+
     sections = []
     curr_section = ""
+    bracket_level = 0
     in_string = False
     for char in path:
-        if char == "." and not in_string:
-            sections.append(curr_section)
-            curr_section = ""
-        elif char == "[" and not in_string:
-            sections.append(curr_section)
-            curr_section = "" if not keep_brackets else "["
-        elif char == "]" and not in_string:
-            if keep_brackets: curr_section += "]" 
-            sections.append(curr_section)
-            curr_section = ""
-        elif char == "'":
-            curr_section += "'"
-            in_string = not in_string
-        else:
+        if in_string:
             curr_section += char
+            if char == "'" or char == '"':
+                in_string = False
+        else:
+            if char == "." and bracket_level == 0:
+                sections.append(curr_section)
+                curr_section = ""
+            elif char == "'" or char == '"':
+                in_string = True
+                curr_section += char
+            elif char == "[":
+                if bracket_level == 0:
+                    sections.append(curr_section)
+                    curr_section = "[" if keep_brackets else ""
+                    bracket_level = 1
+                else:
+                    bracket_level += 1
+                    curr_section += "["
+            elif char == "]":
+                if keep_brackets or bracket_level > 0: curr_section += "]"
+                bracket_level -= 1
+            else:
+                curr_section += char
     sections.append(curr_section)
     sections = list(filter(lambda item: item, sections))
-                
     return sections
 
 
@@ -242,7 +251,7 @@ def bpy_to_indexed_sections(path):
     """ Takes a blender python data path and converts it to indexed path sections """
     # combine indexed sections
     combined = ["bpy"]
-    for section in bpy_to_path_sections(path, True):
+    for section in bpy_to_path_sections(path):
         if (section[0] == "[" and section[-1] == "]") and not combined[-1][-1] == "]":
             combined[-1] += section
         else:

@@ -63,14 +63,14 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     
     @property
     def python_attr(self):
-        sections = bpy_to_path_sections(self.python_value, True)
+        sections = bpy_to_path_sections(self.python_value)
         if sections:
             return sections[-1]
         return self.python_value if self.python_value else "None"
     
     @property
     def python_source(self):
-        sections = bpy_to_path_sections(self.python_value, True)
+        sections = bpy_to_path_sections(self.python_value)
         if sections:
             if "bpy." in self.python_value: sections.insert(0, "bpy")
             path = join_sections(sections[:-1])
@@ -79,7 +79,7 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     
     @property
     def python_sections(self):
-        sections = bpy_to_path_sections(self.python_value, True)
+        sections = bpy_to_path_sections(self.python_value)
         if sections:
             if "bpy." in self.python_value: sections.insert(0, "bpy")
             return sections

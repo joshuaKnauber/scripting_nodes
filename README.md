@@ -14,8 +14,6 @@ Visual Scripting addon for blender with nodes
 
 - [ ] Complete TODOs
 
-- combine string with property paths
-
 
 Schedule:
 07: - editable enum items
