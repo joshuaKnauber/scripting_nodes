@@ -1,9 +1,6 @@
 # blender_visual_scripting_addon
 Visual Scripting addon for blender with nodes
 
-- [X] Edit socket enum items
-- [ ] Editable enum items on function parameter
-
 - [ ] Allow old snippet import
 - [ ] Add snippet export
 
@@ -17,8 +14,7 @@ Visual Scripting addon for blender with nodes
 
 
 Schedule:
-07: - editable enum items
-    - node documentation
+07: - node documentation
 08: - snippet import
     - snippet export
     - tutorial

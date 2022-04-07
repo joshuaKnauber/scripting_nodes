@@ -189,6 +189,7 @@ class ScriptingSocket:
             if not self.is_output and self.prev_dynamic:
                 self._draw_prev_dynamic_socket(context, layout, node)
             layout.prop(self, "name", text="")
+            self.draw_socket(context, layout, node, text, minimal=True)
             # draw changeable socket
             if self.changeable:
                 layout.separator()

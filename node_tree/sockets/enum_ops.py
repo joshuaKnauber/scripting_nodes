@@ -17,6 +17,7 @@ class SN_OT_EditEnumItems(bpy.types.Operator):
     
     def draw(self, context):
         layout = self.layout
+        layout.label(text="Enum Items")
         node = context.space_data.node_tree.nodes[self.node]
         socket = node.outputs[self.index] if self.is_output else node.inputs[self.index]
         
@@ -52,6 +53,8 @@ class SN_OT_EditEnumItems(bpy.types.Operator):
         op.index = self.index
 
     def invoke(self, context, event):
+        node = context.space_data.node_tree.nodes[self.node]
+        context.space_data.node_tree.nodes.active = node
         return context.window_manager.invoke_popup(self, width=250)
 
 
@@ -70,6 +73,7 @@ class SN_OT_AddEnumItemSocket(bpy.types.Operator):
         node = context.space_data.node_tree.nodes[self.node]
         socket = node.outputs[self.index] if self.is_output else node.inputs[self.index]
         socket.custom_items.add()
+        socket.node.on_socket_type_change(socket)
         return {"FINISHED"}
 
 
@@ -89,6 +93,7 @@ class SN_OT_RemoveEnumItemSocket(bpy.types.Operator):
         node = context.space_data.node_tree.nodes[self.node]
         socket = node.outputs[self.index] if self.is_output else node.inputs[self.index]
         socket.custom_items.remove(self.item_index)
+        socket.node.on_socket_type_change(socket)
         return {"FINISHED"}
 
 
@@ -112,4 +117,5 @@ class SN_OT_MoveEnumItemSocket(bpy.types.Operator):
             socket.custom_items.move(self.item_index, self.item_index-1)
         else:
             socket.custom_items.move(self.item_index, self.item_index+1)
+        socket.node.on_socket_type_change(socket)
         return {"FINISHED"}

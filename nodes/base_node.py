@@ -659,10 +659,10 @@ class SN_ScriptingBaseNode:
     
     
     def add_input_from_socket(self, socket):
-        self._add_input(socket.bl_idname, socket.name)
+        return self._add_input(socket.bl_idname, socket.name)
     
     def add_output_from_socket(self, socket):
-        self._add_output(socket.bl_idname, socket.name)
+        return self._add_output(socket.bl_idname, socket.name)
 
 
     ### INTERFACE UTIL
