@@ -30,6 +30,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
                 path = "[".join(path.split("[")[:-1])
             context.window_manager.clipboard = path
             context.scene.sn.last_copied_datatype = property_value.type.title()
+            if property_value.type == "ENUM" and property_value.is_enum_flag: context.scene.sn.last_copied_datatype += " Set"
             context.scene.sn.last_copied_datapath = context.window_manager.clipboard
             self.report({"INFO"}, message="Copied!")
             return {"FINISHED"}
@@ -40,6 +41,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
                 context.window_manager.clipboard = f"{REPLACE_NAMES[property_pointer.bl_rna.identifier]}.{property_value.identifier}"
                 context.window_manager.clipboard = context.window_manager.clipboard.replace('"', "'")
                 context.scene.sn.last_copied_datatype = property_value.type.title()
+                if property_value.type == "ENUM" and property_value.is_enum_flag: context.scene.sn.last_copied_datatype += " Set"
                 context.scene.sn.last_copied_datapath = context.window_manager.clipboard
                 self.report({"INFO"}, message="Copied!")
                 return {"FINISHED"}

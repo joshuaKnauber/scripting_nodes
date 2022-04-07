@@ -11,17 +11,18 @@ def is_valid_attribute(attr):
 filter_items = [("Pointer", "Pointer", "Pointer", property_icons["Property"], 1),
     ("Collection", "Collection", "Collection", property_icons["Collection"], 2),
     ("List", "List", "List", property_icons["List"], 4),
-    ("String", "String", "String", property_icons["String"], 8),
-    ("Boolean", "Boolean", "Boolean", property_icons["Boolean"], 32),
-    ("Boolean Vector", "Boolean Vector", "Boolean Vector", property_icons["Boolean"], 64),
-    ("Integer", "Integer", "Integer", property_icons["Integer"], 128),
-    ("Integer Vector", "Integer Vector", "Integer Vector", property_icons["Integer"], 256),
-    ("Float", "Float", "Float", property_icons["Float"], 512),
-    ("Float Vector", "Float Vector", "Float Vector", property_icons["Float"], 1024),
-    ("Function", "Function", "Function", property_icons["Function"], 2048) ]
+    ("String", "String/Enum", "Strings and Enums", property_icons["String"], 8),
+    ("Enum Set", "Enum Set", "Enum Set", property_icons["Enum Set"], 32),
+    ("Boolean", "Boolean", "Boolean", property_icons["Boolean"], 64),
+    ("Boolean Vector", "Boolean Vector", "Boolean Vector", property_icons["Boolean"], 128),
+    ("Integer", "Integer", "Integer", property_icons["Integer"], 256),
+    ("Integer Vector", "Integer Vector", "Integer Vector", property_icons["Integer"], 512),
+    ("Float", "Float", "Float", property_icons["Float"], 1024),
+    ("Float Vector", "Float Vector", "Float Vector", property_icons["Float"], 2048),
+    ("Function", "Function", "Function", property_icons["Function"], 4096) ]
 
 
-filter_defaults = {"Pointer","Collection","List","String","Boolean","Boolean Vector",
+filter_defaults = {"Pointer","Collection","List","String","Enum Set","Boolean","Boolean Vector",
     "Integer","Integer Vector","Float","Float Vector","Function"}
 
 
@@ -137,6 +138,7 @@ def get_item_type(data):
     elif hasattr(type(data), "bl_rna"): item_type = "Pointer"
     elif "None" in item_type: item_type = "Pointer"
     elif "bpy_func" in item_type: item_type = "Function"
+    elif "set" in item_type: item_type = "Enum Set"
     elif "str" in item_type: item_type = "String"
     elif "bool" in item_type: item_type = "Boolean"
     elif "float" in item_type: item_type = "Float"
