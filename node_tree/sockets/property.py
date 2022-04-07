@@ -12,10 +12,10 @@ blend_data_defaults = {
         "value": "bpy.context.scene",
         "name": "Using Active"},
     "Objects": {
-        "value": "bpy.context.active_object",
+        "value": "bpy.context.view_layer.objects.active",
         "name": "Using Active"},
     "Object": {
-        "value": "bpy.context.active_object",
+        "value": "bpy.context.view_layer.objects.active",
         "name": "Using Active"},
     "Areas": {
         "value": "bpy.context.area",
