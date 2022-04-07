@@ -157,7 +157,7 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
         self.prop.trigger_reference_update(context)
         self.compile(context)
     
-    enum_flag: bpy.props.BoolProperty(name="Select Multiple",
+    enum_flag: bpy.props.BoolProperty(name="Select Multiple (Enum Set)",
                                 description="Lets you select multiple options from this property",
                                 update=update_enum_flag)
     
