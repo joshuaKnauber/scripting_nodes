@@ -73,3 +73,7 @@ class SN_EnumSocket(bpy.types.NodeSocket, ScriptingSocket):
             layout.label(text=text)
         else:
             layout.prop(self, self.subtype_attr, text=text)
+        op = layout.operator("sn.edit_enum_items", text="", icon="GREASEPENCIL")
+        op.node = self.node.name
+        op.is_output = self.is_output
+        op.index = self.index
