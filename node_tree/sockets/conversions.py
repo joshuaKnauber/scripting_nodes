@@ -70,7 +70,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
     },
     "Enum": {
         "Data": lambda from_out, to_inp: from_out.python_value,
-        "String": lambda from_out, to_inp: from_out.python_value if from_out.subtype == "NONE" else f"str({from_out.python_value})",
+        "String": lambda from_out, to_inp: from_out.python_value if from_out.subtype == "NONE" else f"str(list({from_out.python_value}))",
         "List": lambda from_out, to_inp: f"[{from_out.python_value}]" if from_out.subtype == "NONE" else f"list({from_out.python_value})",
         "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",
         "Integer": lambda from_out, to_inp: f"string_to_type({from_out.python_value}, int, 0)" if from_out.subtype == "NONE" else f"len({from_out.python_value})",

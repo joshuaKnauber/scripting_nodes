@@ -18,6 +18,10 @@ Visual Scripting addon for blender with nodes
 - [ ] Complete TODOs
 
 
+- can't set enum set properties
+- 
+
+
 Schedule:
 07: - correct enum outputs
     - enum set for blend data

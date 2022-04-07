@@ -6,6 +6,7 @@ REPLACE_NAMES = {
     "ObjectBase": "bpy.data.objects['Object']", # outliner object hide
     "LayerCollection": "bpy.context.view_layer.active_layer_collection", # outliner collection hide
     "SpaceView3D": "bpy.context.screen.areas[0].spaces[0]", # 3d space data
+    "ToolSettings": "bpy.context.scene.tool_settings", # any space tool settings
 }
 
 
