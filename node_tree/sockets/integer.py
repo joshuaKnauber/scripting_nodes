@@ -29,7 +29,7 @@ class SN_IntegerSocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_color(self, context, node):
         return (0.15, 0.52, 0.17)
 
-    def draw_socket(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text, minimal=False):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:

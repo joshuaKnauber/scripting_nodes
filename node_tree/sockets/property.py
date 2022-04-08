@@ -93,7 +93,7 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_color(self, context, node):
         return (0, 0.87, 0.7)
 
-    def draw_socket(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text, minimal=False):
         if not self.is_output and not self.is_linked:
             if self.name in blend_data_defaults:
                 text += f" ({blend_data_defaults[self.name]['name']})"

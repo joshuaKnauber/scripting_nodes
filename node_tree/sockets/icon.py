@@ -36,7 +36,7 @@ class SN_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_color(self, context, node):
         return (1,0.4,0.2)
 
-    def draw_socket(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text, minimal=False):
         layout.label(text=text)
         if (not self.is_linked or self.subtype == "BLENDER_ONLY") and not self.is_output:
             row = layout.row()

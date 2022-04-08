@@ -51,7 +51,7 @@ class SN_IntegerVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_color(self, context, node):
         return (0.38, 0.34, 0.84)
 
-    def draw_socket(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text, minimal=False):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:

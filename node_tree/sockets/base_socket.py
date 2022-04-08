@@ -135,7 +135,7 @@ class ScriptingSocket:
     
     ### DRAW SOCKET
     # OVERWRITE
-    def draw_socket(self, context, layout, node, text): pass
+    def draw_socket(self, context, layout, node, text, minimal=False): pass
 
     def _draw_removable_socket(self, layout, node):
         """ Draws the operators for removable sockets """

@@ -65,7 +65,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_color(self, context, node):
         return (0.44, 0.7, 1)
 
-    def draw_socket(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text, minimal=False):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:
