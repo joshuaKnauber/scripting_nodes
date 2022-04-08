@@ -25,11 +25,12 @@ class SN_OT_CopyProperty(bpy.types.Operator):
         # copy data path if available
         if bpy.ops.ui.copy_data_path_button.poll():
             bpy.ops.ui.copy_data_path_button("INVOKE_DEFAULT", full_path=True)
+            context.scene.sn.last_copied_datatype = property_value.type.title()
             path = context.window_manager.clipboard.replace('"', "'")
             if path and path[-1] == "]" and path[:-1].split("[")[-1].isdigit():
                 path = "[".join(path.split("[")[:-1])
+                context.scene.sn.last_copied_datatype += " Vector"
             context.window_manager.clipboard = path
-            context.scene.sn.last_copied_datatype = property_value.type.title()
             if property_value.type == "ENUM" and property_value.is_enum_flag: context.scene.sn.last_copied_datatype += " Set"
             context.scene.sn.last_copied_datapath = context.window_manager.clipboard
             self.report({"INFO"}, message="Copied!")

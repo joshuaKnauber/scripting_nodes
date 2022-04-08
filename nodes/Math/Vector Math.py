@@ -57,6 +57,7 @@ class SN_VectorMathNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_float_vector_output("Vector")
 
     def evaluate(self, context):
+        self.code_import = "import mathutils"
         if self.operation == "ADD":
             self.outputs[0].python_value = f"tuple(mathutils.Vector({self.inputs[0].python_value}) + mathutils.Vector({self.inputs[1].python_value}))"
         elif self.operation == "SUBTRACT":

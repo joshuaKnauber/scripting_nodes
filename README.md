@@ -14,7 +14,6 @@ Visual Scripting addon for blender with nodes
 
 
 Schedule:
-07: - node documentation
 08: - snippet import
     - snippet export
     - tutorial
