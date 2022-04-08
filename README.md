@@ -12,8 +12,6 @@ Visual Scripting addon for blender with nodes
 
 - [ ] Complete TODOs
 
-- blend data browser is fucked for indexed stuff
-
 
 Schedule:
 07: - node documentation
