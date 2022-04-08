@@ -6,8 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class StringMap(bpy.types.PropertyGroup):
 
     def update_item(self, context):
-        # TODO remove space_data.node_tree from this function
-        for node in context.space_data.node_tree.node_collection("SN_MapStringsNode").nodes:
+        for node in self.id_data.node_collection("SN_MapStringsNode").nodes:
             for item in node.map_collection:
                 if item == self:
                     node._evaluate(context)

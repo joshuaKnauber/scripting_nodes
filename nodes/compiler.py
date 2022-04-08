@@ -103,14 +103,15 @@ def format_single_file():
     
     # add node code
     for node in get_trigger_nodes():
-        if node.code_import: imports += "\n" + node.code_import
-        if node.code_imperative: imperative += "\n" + node.code_imperative
-        # TODO remove duplicates from import and imperative
+        if node.code_import and not node.code_import in imports: imports += "\n" + node.code_import
+        if node.code_imperative and not node.code_imperative in imperative: imperative += "\n" + node.code_imperative
         if node.code: main += "\n" + node.code
         if node.code_register: register += "\n" + node.code_register
         if node.code_unregister: unregister += "\n" + node.code_unregister
     t5 = time.time()
-        
+    
+    # TODO remove unused functions (at least on export)
+
     # add property code
     main += "\n" + property_imperative_code() + "\n"
     t6 = time.time()

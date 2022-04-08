@@ -136,7 +136,6 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
     
     
     def imperative_code(self):
-        # TODO should include on property update imperative?
         # node exists for this property
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":

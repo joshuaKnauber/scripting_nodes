@@ -14,12 +14,13 @@ Visual Scripting addon for blender with nodes
 
 
 Schedule:
-08: - snippet import
-    - snippet export
+08: - todos
+    - export addon
     - tutorial
+    - finish export docs
+09: - snippet import
+    - snippet export
     - finish docs
-    - non export todos
-09: - export addon
     - publish
 
 

@@ -111,8 +111,8 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     def update_node_tree_index(self, context):
         if len(bpy.data.node_groups):
-            # TODO only if node tree in space data
-            bpy.context.space_data.node_tree = bpy.data.node_groups[self.node_tree_index]
+            if hasattr(bpy.context.space_data, "node_tree"):
+                bpy.context.space_data.node_tree = bpy.data.node_groups[self.node_tree_index]
 
     node_tree_index: bpy.props.IntProperty(default=0, min=0, name="Active Node Tree", description="The node tree you're currently editing", update=update_node_tree_index)
 
