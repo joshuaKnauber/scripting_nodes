@@ -3,6 +3,7 @@ import bpy
 import os
 import shutil
 from ...nodes.compiler import format_single_file
+from ...utils import normalize_code
 
 
 
@@ -40,6 +41,25 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
                             ctx["edit_image"] = node.icon_file
                             bpy.ops.image.save_as(ctx, filepath=os.path.join(icon_path, node.icon_file.name))
 
+    def info(self):
+        """ Returns the bl_info for this addon """
+        sn = bpy.context.scene.sn
+        info = f"""
+        bl_info = {{
+            "name" : "{sn.addon_name}",
+            "author" : "{sn.author}", 
+            "description" : "{sn.description}",
+            "blender" : {tuple(sn.blender)},
+            "version" : {tuple(sn.version)},
+            "location" : "{sn.location}",
+            "waring" : "{sn.warning}",
+            "doc_url": "{sn.doc_url}", 
+            "tracker_url": "{sn.tracker_url}", 
+            "category" : "{sn.category if not sn.category == 'CUSTOM' else sn.custom_category}" 
+        }}
+        """
+        return normalize_code(info) + "\n" + "\n"
+
     def add_code(self, path):
         """ Creates the index file """
         bpy.context.scene.sn.is_exporting = True
@@ -48,6 +68,7 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
                 ntree.reevaluate()
         with open(os.path.join(path, "__init__.py"), "a") as init_file:
             code = format_single_file()
+            code = self.info() + code
             # TODO format code here
             init_file.write(code)
         bpy.context.scene.sn.is_exporting = False
