@@ -10,6 +10,13 @@ Visual Scripting addon for blender with nodes
 - [ ] New Demo version
 
 
+- default material on property socket
+- color type does not use the float vector when copying properties
+- subpanel doesnt work
+- blender close event doesnt work
+- minimum blender version is 10
+
+
 KNOWN ISSUES:
 
 - Updating a custom operators name resets the inputs on its button and run operator nodes
