@@ -56,8 +56,37 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                             """
 
     def evaluate_export(self, context):
-        # TODO overwrite this for export
-        self.evaluate(context)
+        props_imperative_list = self.props_imperative(context).split("\n")
+        props_code_list = self.props_code(context).split("\n")
+        props_register_list = self.props_register(context).split("\n")
+        props_unregister_list = self.props_unregister(context).split("\n")
+        
+        idname = f"SNA_AddonPreferences_{self.static_uid}"
+
+        self.code = f"""
+                    {self.indent(props_imperative_list, 5)}
+
+                    class {idname}(bpy.types.AddonPreferences):
+
+                        bl_idname = '{bpy.context.scene.sn.module_name}'
+                        
+                        {self.indent(props_code_list, 6)}
+
+                        def draw(self, context):
+                            if not ({self.inputs["Hide"].python_value}):
+                                layout = self.layout 
+                                {self.indent([out.python_value for out in self.outputs[:-1]], 8)}
+                    """
+
+        self.code_register = f"""
+                            {self.indent(props_register_list, 7)}
+                            bpy.utils.register_class({idname})
+                            """
+
+        self.code_unregister = f"""
+                            bpy.utils.unregister_class({idname})
+                            {self.indent(props_unregister_list, 7)}
+                            """
 
     def draw_node(self, context, layout):
         layout.operator("sn.open_preferences", icon="PREFERENCES").navigation = "CUSTOM"

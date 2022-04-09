@@ -31,7 +31,7 @@ blend_data_defaults = {
         "name": "Using Active"},
         
     "Preferences": {
-        "value": lambda: "bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences" if bpy.context.scene.sn.is_exporting else "bpy.context.scene.sna_addon_prefs_temp",
+        "value": lambda: f"bpy.context.preferences.addons['{bpy.context.scene.sn.module_name}'].preferences" if bpy.context.scene.sn.is_exporting else "bpy.context.scene.sna_addon_prefs_temp",
         "name": "Using Self"},
     "Operator": {
         "value": "self",
