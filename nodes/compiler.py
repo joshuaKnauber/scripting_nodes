@@ -77,6 +77,7 @@ import bpy
 
 GLOBAL_VARS = """
 addon_keymaps = {}
+_icons = []
 """
 
 UNREGISTER_KEYMAPS = """
