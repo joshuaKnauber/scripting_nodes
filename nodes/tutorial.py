@@ -140,7 +140,8 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     chapters = [
         ("Overview", "0.jpg"),
-        ("Nodes", "2.jpg"),
+        ("UI", "4.jpg"),
+        ("Nodes", "6.jpg"),
     ]
     
     

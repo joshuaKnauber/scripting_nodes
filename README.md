@@ -1,12 +1,6 @@
 # blender_visual_scripting_addon
 Visual Scripting addon for blender with nodes
 
-- [ ] Allow old snippet import
-- [ ] Add snippet export
-
-- [ ] Export for asset folders
-- [ ] Save Addon
-
 - [ ] New Tutorial
 - [ ] New Demo version
 
@@ -15,13 +9,15 @@ Visual Scripting addon for blender with nodes
 
 Schedule:
 08: - todos
-    - export addon
-    - tutorial
     - finish export docs
-09: - snippet import
-    - snippet export
-    - finish docs
+09: - finish docs
     - publish
+
+
+- [ ] Allow old snippet import
+- [ ] Add snippet export
+
+- [ ] full tutorial
 
 
 KNOWN ISSUES:
