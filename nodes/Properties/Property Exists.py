@@ -24,4 +24,4 @@ class SN_PropertyExistsNode(bpy.types.Node, SN_ScriptingBaseNode):
                 except:
                     return False
             """
-        self.outputs[0].python_value = f"property_exists('{self.inputs[0].python_value}')"
+        self.outputs[0].python_value = f"""property_exists("{self.inputs[0].python_value}")"""
