@@ -27,7 +27,7 @@ class SN_BeforeExitNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.code_import = f"import atexit"
         self.code = f"""
                         def before_exit_handler_{self.static_uid}():
-                            {self.indent(self.outputs[0].python_value, 7) if self.outputs[0].python_value else 'pass'}
+                            {self.indent(self.outputs[0].python_value, 7) if self.outputs[0].python_value.strip() else 'pass'}
                         """
 
         self.code_register = f"""atexit.register(before_exit_handler_{self.static_uid})"""

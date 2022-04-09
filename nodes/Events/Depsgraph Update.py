@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_DepsgraphUpdateNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_DepsgraphUpdateNode"
-    bl_label = "Depsgraph Update"
+    bl_label = "On Depsgraph Update"
     is_trigger = True
     bl_width_default = 200
 
@@ -34,7 +34,7 @@ class SN_DepsgraphUpdateNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.code = f"""
                         @persistent
                         def {self.handler_name}(dummy):
-                            {self.indent(self.outputs[0].python_value, 7) if self.outputs[0].python_value else 'pass'}
+                            {self.indent(self.outputs[0].python_value, 7) if self.outputs[0].python_value.strip() else 'pass'}
                         """
 
         self.code_register = f"bpy.app.handlers.{self.action}.append({self.handler_name})"

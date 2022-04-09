@@ -152,9 +152,13 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
         return normalize_code(code) + "\n" + self.update_function
     
     
-    enum_flag: bpy.props.BoolProperty(name="Select Multiple",
+    def update_enum_flag(self, context):
+        self.prop.trigger_reference_update(context)
+        self.compile(context)
+    
+    enum_flag: bpy.props.BoolProperty(name="Select Multiple (Enum Set)",
                                 description="Lets you select multiple options from this property",
-                                update=PropertySettings.compile)
+                                update=update_enum_flag)
     
     
     is_dynamic: bpy.props.BoolProperty(name="Dynamic Items",

@@ -536,6 +536,7 @@ class SN_ScriptingBaseNode:
         "Data": "SN_DataSocket",
         "String": "SN_StringSocket",
         "Enum": "SN_EnumSocket",
+        "Enum Set": "SN_EnumSetSocket",
         "Boolean": "SN_BooleanSocket",
         "Boolean Vector": "SN_BooleanVectorSocket",
         "Integer": "SN_IntegerSocket",
@@ -575,6 +576,11 @@ class SN_ScriptingBaseNode:
     def add_enum_output(self, label="Enum"): return self._add_output("SN_EnumSocket", label)
     def add_dynamic_enum_input(self, label="Enum"): return self._add_input("SN_EnumSocket", label, True)
     def add_dynamic_enum_output(self, label="Enum"): return self._add_output("SN_EnumSocket", label, True)
+
+    def add_enum_set_input(self, label="Enum Set"): return self._add_input("SN_EnumSetSocket", label)
+    def add_enum_set_output(self, label="Enum Set"): return self._add_output("SN_EnumSetSocket", label)
+    def add_dynamic_enum_set_input(self, label="Enum Set"): return self._add_input("SN_EnumSetSocket", label, True)
+    def add_dynamic_enum_set_output(self, label="Enum Set"): return self._add_output("SN_EnumSetSocket", label, True)
 
     def add_boolean_input(self, label="Boolean"): return self._add_input("SN_BooleanSocket", label)
     def add_boolean_output(self, label="Boolean"): return self._add_output("SN_BooleanSocket", label)
@@ -633,21 +639,19 @@ class SN_ScriptingBaseNode:
             if prop_type == "Enum":
                 if not prop.enum_items:
                     prop_type = "String"
+                if prop.is_enum_flag:
+                    prop_type = "Enum Set"
             inp = self._add_input(self.socket_names[prop_type], prop.name)
             # get enum items
             if prop_type == "Enum":
                 inp.items = str(list(map(lambda item: item.identifier, prop.enum_items)))
-                if prop.is_enum_flag:
-                    inp.subtype = "ENUM_FLAG"
             # get property default
             if not prop_type in ["Collection", "Pointer"]:
                 default = prop.default
                 if getattr(prop, "is_array", False):
                     default = tuple([prop.default]*32)
                     inp.size = prop.array_length
-                if prop_type == "Enum" and prop.is_enum_flag:
-                    pass
-                else:
+                if prop_type == "Enum":
                     inp.default_value = default
 
             return inp
@@ -655,15 +659,10 @@ class SN_ScriptingBaseNode:
     
     
     def add_input_from_socket(self, socket):
-        self._add_input(socket.bl_idname, socket.name)
+        return self._add_input(socket.bl_idname, socket.name)
     
     def add_output_from_socket(self, socket):
-        self._add_output(socket.bl_idname, socket.name)
-
-    
-    ### ERROR HANDLING
-    def add_error(self, title, description, fatal=False):
-        pass
+        return self._add_output(socket.bl_idname, socket.name)
 
 
     ### INTERFACE UTIL

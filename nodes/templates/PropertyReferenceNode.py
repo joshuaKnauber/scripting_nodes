@@ -10,6 +10,8 @@ class PropertyReferenceNode():
     allow_prop_group = True
     
     
+    def on_ref_prop_change(self, context): pass
+    
     def on_prop_change(self, context):
         # if self.add_indexing_inputs:
         prop_src = self.get_prop_source()
@@ -30,9 +32,9 @@ class PropertyReferenceNode():
                         self.inputs[0].name = prop_src.bl_label
                 # convert output to correct type
                 if "Value" in self.outputs:
-                    socket_name, subtype = prop_to_socket(prop)
-                    out = self.convert_socket(self.outputs["Value"], self.socket_names[socket_name])
-                    out.subtype = subtype
+                    socket_name = prop_to_socket(prop)
+                    self.convert_socket(self.outputs["Value"], self.socket_names[socket_name])
+        self.on_ref_prop_change(context)
         self._evaluate(context)
     
     

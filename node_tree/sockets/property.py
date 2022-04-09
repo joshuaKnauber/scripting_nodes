@@ -12,10 +12,10 @@ blend_data_defaults = {
         "value": "bpy.context.scene",
         "name": "Using Active"},
     "Objects": {
-        "value": "bpy.context.active_object",
+        "value": "bpy.context.view_layer.objects.active",
         "name": "Using Active"},
     "Object": {
-        "value": "bpy.context.active_object",
+        "value": "bpy.context.view_layer.objects.active",
         "name": "Using Active"},
     "Areas": {
         "value": "bpy.context.area",
@@ -31,7 +31,7 @@ blend_data_defaults = {
         "name": "Using Active"},
         
     "Preferences": {
-        "value": lambda: "bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences" if bpy.context.scene.sn.is_exporting else "bpy.context.scene.sna_addon_prefs_temp",
+        "value": lambda: f"bpy.context.preferences.addons['{bpy.context.scene.sn.module_name}'].preferences" if bpy.context.scene.sn.is_exporting else "bpy.context.scene.sna_addon_prefs_temp",
         "name": "Using Self"},
     "Operator": {
         "value": "self",
@@ -63,22 +63,23 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     
     @property
     def python_attr(self):
-        sections = bpy_to_path_sections(self.python_value, True)
+        sections = bpy_to_path_sections(self.python_value)
         if sections:
             return sections[-1]
-        return self.python_value
+        return self.python_value if self.python_value else "None"
     
     @property
     def python_source(self):
-        sections = bpy_to_path_sections(self.python_value, True)
+        sections = bpy_to_path_sections(self.python_value)
         if sections:
             if "bpy." in self.python_value: sections.insert(0, "bpy")
-            return join_sections(sections[:-1])
-        return self.python_value
+            path = join_sections(sections[:-1])
+            if path: return path
+        return self.python_value if self.python_value else "None"
     
     @property
     def python_sections(self):
-        sections = bpy_to_path_sections(self.python_value, True)
+        sections = bpy_to_path_sections(self.python_value)
         if sections:
             if "bpy." in self.python_value: sections.insert(0, "bpy")
             return sections
@@ -92,7 +93,7 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_color(self, context, node):
         return (0, 0.87, 0.7)
 
-    def draw_socket(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text, minimal=False):
         if not self.is_output and not self.is_linked:
             if self.name in blend_data_defaults:
                 text += f" ({blend_data_defaults[self.name]['name']})"

@@ -53,9 +53,13 @@ class SN_PT_SnippetsPanel(bpy.types.Panel):
         
         # TODO draw installed snippets
 
-        row = layout.row(align=True)
-        row.operator("sn.install_package", text="Install Snippets", icon="FILE_FOLDER")
-        row.operator("sn.reload_packages", text="", icon="FILE_REFRESH")
+        row = layout.row()
+        row.alert = True
+        row.label(text="Not yet in the release candidate!")
+
+        # row = layout.row(align=True)
+        # row.operator("sn.install_package", text="Install Snippets", icon="FILE_FOLDER")
+        # row.operator("sn.reload_packages", text="", icon="FILE_REFRESH")
         
             
 class SN_PT_PackagesPanel(bpy.types.Panel):

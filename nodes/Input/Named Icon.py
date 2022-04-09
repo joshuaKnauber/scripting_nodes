@@ -8,7 +8,6 @@ class SN_NamedIconNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_NamedIconNode"
     bl_label = "Named Icon"
     node_color = "ICON"
-    bl_width_default = 200
 
     def on_create(self, context):
         self.add_string_output("Icon")

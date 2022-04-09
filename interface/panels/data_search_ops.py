@@ -15,7 +15,8 @@ class SN_OT_ShowDataOverview(bpy.types.Operator):
                 break
         else:
             bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
-        context.scene.sn.hide_preferences = True
+        if not context.scene.sn.hide_preferences:
+            context.scene.sn.hide_preferences = True
         return {"FINISHED"}
 
 

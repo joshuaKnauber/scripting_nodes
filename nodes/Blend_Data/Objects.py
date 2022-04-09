@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_ObjectBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_ObjectBlendDataNode"
-    bl_label = "Object"
+    bl_label = "Objects"
     node_color = "PROPERTY"
     
     def on_create(self, context):

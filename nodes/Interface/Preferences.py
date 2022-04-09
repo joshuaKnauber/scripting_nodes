@@ -13,9 +13,6 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     is_trigger = True
     node_color = "INTERFACE"
     
-    def on_node_property_change(self, property):
-        pass # TODO update property nodes and compile this node properly
-    
     def on_create(self, context):
         self.add_boolean_input("Hide").default_value = False
         self.add_interface_output("Preferences")
@@ -30,15 +27,12 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         idname = f"SNA_TempAddonPreferences_{self.static_uid}"
         prop_name = f"sna_addon_prefs_temp"
 
-        self.code_imperative = f"""
-                                {self.indent(props_imperative_list, 8)}
-                                
-                                class {idname}(bpy.types.PropertyGroup):
-                                    pass
-                                    {self.indent(props_code_list, 9)}
-                                """
-
         self.code = f"""
+                    {self.indent(props_imperative_list, 5)}
+                    
+                    class {idname}(bpy.types.PropertyGroup):
+                        {self.indent(props_code_list, 6) if self.indent(props_code_list, 6).strip() else "pass"}
+
                     def sna_prefs(layout):
                         if not ({self.inputs["Hide"].python_value}):
                             self = bpy.context.scene.{prop_name}
@@ -62,8 +56,37 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                             """
 
     def evaluate_export(self, context):
-        # TODO overwrite this for export
-        self.evaluate(context)
+        props_imperative_list = self.props_imperative(context).split("\n")
+        props_code_list = self.props_code(context).split("\n")
+        props_register_list = self.props_register(context).split("\n")
+        props_unregister_list = self.props_unregister(context).split("\n")
+        
+        idname = f"SNA_AddonPreferences_{self.static_uid}"
+
+        self.code = f"""
+                    {self.indent(props_imperative_list, 5)}
+
+                    class {idname}(bpy.types.AddonPreferences):
+
+                        bl_idname = '{bpy.context.scene.sn.module_name}'
+                        
+                        {self.indent(props_code_list, 6)}
+
+                        def draw(self, context):
+                            if not ({self.inputs["Hide"].python_value}):
+                                layout = self.layout 
+                                {self.indent([out.python_value for out in self.outputs[:-1]], 8)}
+                    """
+
+        self.code_register = f"""
+                            {self.indent(props_register_list, 7)}
+                            bpy.utils.register_class({idname})
+                            """
+
+        self.code_unregister = f"""
+                            bpy.utils.unregister_class({idname})
+                            {self.indent(props_unregister_list, 7)}
+                            """
 
     def draw_node(self, context, layout):
         layout.operator("sn.open_preferences", icon="PREFERENCES").navigation = "CUSTOM"

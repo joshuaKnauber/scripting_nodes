@@ -34,6 +34,7 @@ property_icons = {
     "Integer": "DRIVER_TRANSFORM",
     "Integer Vector": "DRIVER_TRANSFORM",
     "Enum": "PRESET",
+    "Enum Set": "PRESET",
     "Pointer": "MONKEY",
     "Property": "MONKEY",
     "Collection": "ASSET_MANAGER",
@@ -62,12 +63,11 @@ property_socket = {
 
 def prop_to_socket(prop):
     socket_name = property_socket[prop.property_type]
-    subtype = "NONE"
     if getattr(prop.settings, "enum_flag", False):
-        subtype ="ENUM_FLAG"
+        socket_name = "Enum Set"
     if getattr(prop.settings, "is_vector", False):
         socket_name += " Vector"
-    return socket_name, subtype
+    return socket_name
 
 
 _prop_cache = {} # stores key, value of settings.as_pointer with prop for settings

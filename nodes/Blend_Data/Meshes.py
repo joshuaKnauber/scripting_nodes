@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_MeshBlendDataNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_MeshBlendDataNode"
-    bl_label = "Mesh"
+    bl_label = "Meshes"
     node_color = "PROPERTY"
     
     def on_create(self, context):

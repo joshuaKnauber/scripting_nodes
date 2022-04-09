@@ -6,6 +6,7 @@ REPLACE_NAMES = {
     "ObjectBase": "bpy.data.objects['Object']", # outliner object hide
     "LayerCollection": "bpy.context.view_layer.active_layer_collection", # outliner collection hide
     "SpaceView3D": "bpy.context.screen.areas[0].spaces[0]", # 3d space data
+    "ToolSettings": "bpy.context.scene.tool_settings", # any space tool settings
 }
 
 
@@ -24,8 +25,13 @@ class SN_OT_CopyProperty(bpy.types.Operator):
         # copy data path if available
         if bpy.ops.ui.copy_data_path_button.poll():
             bpy.ops.ui.copy_data_path_button("INVOKE_DEFAULT", full_path=True)
-            context.window_manager.clipboard = context.window_manager.clipboard.replace('"', "'")
             context.scene.sn.last_copied_datatype = property_value.type.title()
+            path = context.window_manager.clipboard.replace('"', "'")
+            if path and path[-1] == "]" and path[:-1].split("[")[-1].isdigit():
+                path = "[".join(path.split("[")[:-1])
+                context.scene.sn.last_copied_datatype += " Vector"
+            context.window_manager.clipboard = path
+            if property_value.type == "ENUM" and property_value.is_enum_flag: context.scene.sn.last_copied_datatype += " Set"
             context.scene.sn.last_copied_datapath = context.window_manager.clipboard
             self.report({"INFO"}, message="Copied!")
             return {"FINISHED"}
@@ -36,6 +42,7 @@ class SN_OT_CopyProperty(bpy.types.Operator):
                 context.window_manager.clipboard = f"{REPLACE_NAMES[property_pointer.bl_rna.identifier]}.{property_value.identifier}"
                 context.window_manager.clipboard = context.window_manager.clipboard.replace('"', "'")
                 context.scene.sn.last_copied_datatype = property_value.type.title()
+                if property_value.type == "ENUM" and property_value.is_enum_flag: context.scene.sn.last_copied_datatype += " Set"
                 context.scene.sn.last_copied_datapath = context.window_manager.clipboard
                 self.report({"INFO"}, message="Copied!")
                 return {"FINISHED"}

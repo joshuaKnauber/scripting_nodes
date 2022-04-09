@@ -1,5 +1,6 @@
 __pycache__/
 .vscode
+.VsCodeCounter
 *.pyc
 *.blend1
 update_log.json

@@ -73,13 +73,23 @@ def compile_addon():
 
 DEFAULT_IMPORTS = """
 import bpy
+import bpy.utils.previews
 """
 
 GLOBAL_VARS = """
 addon_keymaps = {}
+_icons = None
 """
 
-UNREGISTER_KEYMAPS = """
+REGISTER = """
+global _icons
+_icons = bpy.utils.previews.new()
+"""
+
+UNREGISTER = """
+global _icons
+bpy.utils.previews.remove(_icons)
+
 wm = bpy.context.window_manager
 kc = wm.keyconfigs.addon
 for km, kmi in addon_keymaps.values():
@@ -90,7 +100,7 @@ addon_keymaps.clear()
 def format_single_file():
     """ Returns the entire addon code (for development) formatted for a single python file """
     sn = bpy.context.scene.sn
-    imports, imperative, main, register, unregister = (DEFAULT_IMPORTS, CONVERT_UTILS + GLOBAL_VARS, "", "", UNREGISTER_KEYMAPS)
+    imports, imperative, main, register, unregister = (DEFAULT_IMPORTS, CONVERT_UTILS + GLOBAL_VARS, "", REGISTER, UNREGISTER)
 
     # add property and variable code
     t1 = time.time()
@@ -103,14 +113,15 @@ def format_single_file():
     
     # add node code
     for node in get_trigger_nodes():
-        if node.code_import: imports += "\n" + node.code_import
-        if node.code_imperative: imperative += "\n" + node.code_imperative
-        # TODO remove duplicates from import and imperative
+        if node.code_import and not node.code_import in imports: imports += "\n" + node.code_import
+        if node.code_imperative and not node.code_imperative in imperative: imperative += "\n" + node.code_imperative
         if node.code: main += "\n" + node.code
         if node.code_register: register += "\n" + node.code_register
         if node.code_unregister: unregister += "\n" + node.code_unregister
     t5 = time.time()
-        
+    
+    # TODO remove unused functions (at least on export)
+
     # add property code
     main += "\n" + property_imperative_code() + "\n"
     t6 = time.time()

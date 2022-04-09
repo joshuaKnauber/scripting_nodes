@@ -11,17 +11,18 @@ def is_valid_attribute(attr):
 filter_items = [("Pointer", "Pointer", "Pointer", property_icons["Property"], 1),
     ("Collection", "Collection", "Collection", property_icons["Collection"], 2),
     ("List", "List", "List", property_icons["List"], 4),
-    ("String", "String", "String", property_icons["String"], 8),
-    ("Boolean", "Boolean", "Boolean", property_icons["Boolean"], 32),
-    ("Boolean Vector", "Boolean Vector", "Boolean Vector", property_icons["Boolean"], 64),
-    ("Integer", "Integer", "Integer", property_icons["Integer"], 128),
-    ("Integer Vector", "Integer Vector", "Integer Vector", property_icons["Integer"], 256),
-    ("Float", "Float", "Float", property_icons["Float"], 512),
-    ("Float Vector", "Float Vector", "Float Vector", property_icons["Float"], 1024),
-    ("Function", "Function", "Function", property_icons["Function"], 2048) ]
+    ("String", "String/Enum", "Strings and Enums", property_icons["String"], 8),
+    ("Enum Set", "Enum Set", "Enum Set", property_icons["Enum Set"], 32),
+    ("Boolean", "Boolean", "Boolean", property_icons["Boolean"], 64),
+    ("Boolean Vector", "Boolean Vector", "Boolean Vector", property_icons["Boolean"], 128),
+    ("Integer", "Integer", "Integer", property_icons["Integer"], 256),
+    ("Integer Vector", "Integer Vector", "Integer Vector", property_icons["Integer"], 512),
+    ("Float", "Float", "Float", property_icons["Float"], 1024),
+    ("Float Vector", "Float Vector", "Float Vector", property_icons["Float"], 2048),
+    ("Function", "Function", "Function", property_icons["Function"], 4096) ]
 
 
-filter_defaults = {"Pointer","Collection","List","String","Boolean","Boolean Vector",
+filter_defaults = {"Pointer","Collection","List","String","Enum Set","Boolean","Boolean Vector",
     "Integer","Integer Vector","Float","Float Vector","Function"}
 
 
@@ -137,6 +138,7 @@ def get_item_type(data):
     elif hasattr(type(data), "bl_rna"): item_type = "Pointer"
     elif "None" in item_type: item_type = "Pointer"
     elif "bpy_func" in item_type: item_type = "Function"
+    elif "set" in item_type: item_type = "Enum Set"
     elif "str" in item_type: item_type = "String"
     elif "bool" in item_type: item_type = "Boolean"
     elif "float" in item_type: item_type = "Float"
@@ -194,7 +196,8 @@ def item_from_path(data, path):
     """ Returns the item in the data for the given path. Works for anything above bpy.xyz """
     # after bpy.xyz
     if len(path.split(".")) > 2:
-        path_sections = bpy_to_path_sections(path)
+        path_sections = bpy_to_path_sections(path, False)
+        print(path_sections)
         curr_item = data[path_sections[0]][path_sections[1]]
         for key in path_sections[2:]:
             curr_item = curr_item["properties"][key]
@@ -207,32 +210,41 @@ def item_from_path(data, path):
         return data[path.split(".")[-1]]
 
 
-def bpy_to_path_sections(path, keep_brackets=False):
+def bpy_to_path_sections(path, keep_brackets=True):
     """ Takes a blender python data path and converts it to json path sections """
     path = path.replace('"', "'").replace("bpy.", "")    
-    
+
     sections = []
     curr_section = ""
+    bracket_level = 0
     in_string = False
     for char in path:
-        if char == "." and not in_string:
-            sections.append(curr_section)
-            curr_section = ""
-        elif char == "[" and not in_string:
-            sections.append(curr_section)
-            curr_section = "" if not keep_brackets else "["
-        elif char == "]" and not in_string:
-            if keep_brackets: curr_section += "]" 
-            sections.append(curr_section)
-            curr_section = ""
-        elif char == "'":
-            curr_section += "'"
-            in_string = not in_string
-        else:
+        if in_string:
             curr_section += char
+            if char == "'" or char == '"':
+                in_string = False
+        else:
+            if char == "." and bracket_level == 0:
+                sections.append(curr_section)
+                curr_section = ""
+            elif char == "'" or char == '"':
+                in_string = True
+                curr_section += char
+            elif char == "[":
+                if bracket_level == 0:
+                    sections.append(curr_section)
+                    curr_section = "[" if keep_brackets else ""
+                    bracket_level = 1
+                else:
+                    bracket_level += 1
+                    curr_section += "["
+            elif char == "]":
+                bracket_level -= 1
+                if keep_brackets or bracket_level > 0: curr_section += "]"
+            else:
+                curr_section += char
     sections.append(curr_section)
     sections = list(filter(lambda item: item, sections))
-                
     return sections
 
 
@@ -240,7 +252,7 @@ def bpy_to_indexed_sections(path):
     """ Takes a blender python data path and converts it to indexed path sections """
     # combine indexed sections
     combined = ["bpy"]
-    for section in bpy_to_path_sections(path, True):
+    for section in bpy_to_path_sections(path):
         if (section[0] == "[" and section[-1] == "]") and not combined[-1][-1] == "]":
             combined[-1] += section
         else:

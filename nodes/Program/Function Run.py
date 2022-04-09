@@ -14,6 +14,14 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_execute_input()
         self.add_execute_output()
 
+
+    def update_enum_socket(self, from_socket, to_socket):
+        to_socket.subtype = "CUSTOM_ITEMS"
+        to_socket.custom_items_editable = False
+        to_socket.custom_items.clear()
+        for item in from_socket.custom_items:
+            new = to_socket.custom_items.add()
+            new.name = item.name
             
     def on_ref_update(self, node, data=None):
         if node.bl_idname == "SN_FunctionNode" and data:
@@ -26,6 +34,9 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             # input has changed
             elif "changed" in data:
                 self.convert_socket(self.inputs[data["changed"].index], data["changed"].bl_idname)
+                # update enum items
+                if data["changed"].bl_label == "Enum" or data["changed"].bl_label == "Enum Set":
+                    self.update_enum_socket(data["changed"], self.inputs[data["changed"].index])
             # input has updated
             elif "updated" in data:
                 self.inputs[data["updated"].index].name = data["updated"].name
@@ -60,7 +71,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         # add new data inputs
         if self.ref_SN_FunctionNode in parent_tree.nodes:
             for out in parent_tree.nodes[self.ref_SN_FunctionNode].outputs[1:-1]:
-                self.add_input_from_socket(out)
+                inp = self.add_input_from_socket(out)
+                # update enum items
+                if out.bl_label == "Enum" or out.bl_label == "Enum Set":
+                    self.update_enum_socket(out, inp)
         # restore connections
         if len(links) == len(self.inputs)-1:
             for i, from_socket in enumerate(links):

@@ -26,10 +26,6 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     def on_node_property_move(self, from_index, to_index):
         self.trigger_ref_update({ "property_move": (from_index, to_index) })
 
-    # operator name change
-    # property name change
-    # property type change
-
     def on_node_name_change(self):
         new_name = self.name.replace("\"", "'")
         if not self.name == new_name:
@@ -116,7 +112,10 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
 
     def evaluate(self, context):
-        props_code = self.props_code(context).split("\n")
+        props_imperative_list = self.props_imperative(context).split("\n")
+        props_code_list = self.props_code(context).split("\n")
+        props_register_list = self.props_register(context).split("\n")
+        props_unregister_list = self.props_unregister(context).split("\n")
         selected_property = ""
 
         invoke_return = "self.execute(context)"
@@ -151,13 +150,15 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
 
         self.code = f"""
+                    {self.indent(props_imperative_list, 5)}
+        
                     class SNA_OT_{self.operator_python_name.title()}(bpy.types.Operator):
                         bl_idname = "sna.{self.operator_python_name}"
                         bl_label = "{self.name}"
                         bl_description = "{self.operator_description}"
                         bl_options = {"{" + '"REGISTER", "UNDO"' + "}"}
                         {selected_property}
-                        {self.indent(props_code, 6)}
+                        {self.indent(props_code_list, 6)}
 
                         @classmethod
                         def poll(cls, context):
@@ -175,10 +176,11 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                             return {invoke_return}
                     """
 
-        self.code_register = f"bpy.utils.register_class(SNA_OT_{self.operator_python_name.title()})"
-        self.code_unregister = f"bpy.utils.unregister_class(SNA_OT_{self.operator_python_name.title()})"
-
-
-# TODO
-# get_set_node_property ?
-# options ?
+        self.code_register = f"""
+                            {self.indent(props_register_list, 7)}
+                            bpy.utils.register_class(SNA_OT_{self.operator_python_name.title()})
+                            """
+        self.code_unregister = f"""
+                            {self.indent(props_unregister_list, 7)}
+                            bpy.utils.unregister_class(SNA_OT_{self.operator_python_name.title()})
+                            """

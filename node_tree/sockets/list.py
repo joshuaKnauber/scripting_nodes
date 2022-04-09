@@ -30,5 +30,5 @@ class SN_ListSocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_color(self, context, node):
         return (0.85, 0.15, 1)
 
-    def draw_socket(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text, minimal=False):
         layout.label(text=text)

@@ -21,14 +21,14 @@ class SN_CollectionPropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     
     @property
     def python_attr(self):
-        sections = bpy_to_path_sections(self.python_value, True)
+        sections = bpy_to_path_sections(self.python_value)
         if sections:
             return sections[-1]
         return self.python_value
     
     @property
     def python_source(self):
-        sections = bpy_to_path_sections(self.python_value, True)
+        sections = bpy_to_path_sections(self.python_value)
         if sections:
             if "bpy." in self.python_value: sections.insert(0, "bpy")
             return join_sections(sections[:-1])
@@ -36,7 +36,7 @@ class SN_CollectionPropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     
     @property
     def python_sections(self):
-        sections = bpy_to_path_sections(self.python_value, True)
+        sections = bpy_to_path_sections(self.python_value)
         if sections:
             if "bpy." in self.python_value: sections.insert(0, "bpy")
             return sections
@@ -50,5 +50,5 @@ class SN_CollectionPropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     def get_color(self, context, node):
         return (0, 0.87, 0.7)
 
-    def draw_socket(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text, minimal=False):
         layout.label(text=text)

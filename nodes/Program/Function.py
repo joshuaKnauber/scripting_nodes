@@ -25,6 +25,8 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.trigger_ref_update({ "removed": index })
 
     def on_socket_type_change(self, socket):
+        if socket.bl_label == "Enum" or socket.bl_label == "Enum Set":
+            socket.subtype = "CUSTOM_ITEMS"
         self.trigger_ref_update({ "changed": socket })
 
     def on_socket_name_change(self, socket):

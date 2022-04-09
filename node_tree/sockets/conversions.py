@@ -40,7 +40,8 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Integer": lambda from_out, to_inp: f"string_to_type({from_out.python_value}, int, 0)",
         "Float": lambda from_out, to_inp: f"string_to_type({from_out.python_value}, float, 0)",
         "Icon": lambda from_out, to_inp: f"string_to_icon({from_out.python_value})" if to_inp.subtype == "NONE" else from_out.python_value,
-        "Enum": lambda from_out, to_inp: from_out.python_value if to_inp.subtype == "NONE" else f"set([{from_out.python_value}])",
+        "Enum": lambda from_out, to_inp: from_out.python_value,
+        "Enum Set": lambda from_out, to_inp: f"set([{from_out.python_value}])",
     },
     "Boolean": {
         "Data": lambda from_out, to_inp: from_out.python_value,
@@ -70,18 +71,23 @@ CONVERSIONS = { # convert KEY to OPTIONS
     },
     "Enum": {
         "Data": lambda from_out, to_inp: from_out.python_value,
-        "String": lambda from_out, to_inp: from_out.python_value if from_out.subtype == "NONE" else f"str({from_out.python_value})",
-        "List": lambda from_out, to_inp: f"[{from_out.python_value}]" if from_out.subtype == "NONE" else f"list({from_out.python_value})",
+        "String": lambda from_out, to_inp: from_out.python_value,
+        "List": lambda from_out, to_inp: f"[{from_out.python_value}]",
         "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",
-        "Integer": lambda from_out, to_inp: f"string_to_type({from_out.python_value}, int, 0)" if from_out.subtype == "NONE" else f"len({from_out.python_value})",
-        "Float": lambda from_out, to_inp: f"string_to_type({from_out.python_value}, float, 0)" if from_out.subtype == "NONE" else f"len({from_out.python_value})",
+        "Integer": lambda from_out, to_inp: f"string_to_type({from_out.python_value}, int, 0)",
+        "Float": lambda from_out, to_inp: f"string_to_type({from_out.python_value}, float, 0)",
 
-        "ENUM_FLAG": {
-            "NONE": lambda from_out, to_inp: f"{from_out.python_value}[0]",
-        },
-        "NONE": {
-            "ENUM_FLAG": lambda from_out, to_inp: f"set([{from_out.python_value}])",
-        }
+        "Enum Flag": lambda from_out, to_inp: f"set([{from_out.python_value}])",
+    },
+    "Enum Set": {
+        "Data": lambda from_out, to_inp: from_out.python_value,
+        "String": lambda from_out, to_inp: f"str(list({from_out.python_value}))",
+        "List": lambda from_out, to_inp: f"list({from_out.python_value})",
+        "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",
+        "Integer": lambda from_out, to_inp: f"len({from_out.python_value})",
+        "Float": lambda from_out, to_inp: f"len({from_out.python_value})",
+
+        "Enum": lambda from_out, to_inp: f"{from_out.python_value}[0]",
     },
     "Integer": {
         "Data": lambda from_out, to_inp: from_out.python_value,
@@ -112,7 +118,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Data": lambda from_out, to_inp: from_out.python_value,
         "Boolean": lambda from_out, to_inp: from_out.python_value,
         "String": lambda from_out, to_inp: f"str({from_out.python_value})",
-        "Enum": lambda from_out, to_inp: f"set({from_out.python_value})",
+        "Enum Set": lambda from_out, to_inp: f"set({from_out.python_value})",
         "Float Vector": lambda from_out, to_inp: f"tuple({from_out.python_value})",
         "Integer Vector": lambda from_out, to_inp: f"tuple({from_out.python_value})",
         "Boolean Vector": lambda from_out, to_inp: f"tuple({from_out.python_value})",
