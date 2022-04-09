@@ -63,23 +63,23 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         for socket in self.outputs[1:-1]:
             socket.python_value = socket.name
-        # TODO outputs dont work (globals()?)
         self.code_imperative = f"""
-                                def run_internal_script(name, part):
+                                def run_internal_script(name, part, script_locals={{}}):
                                     try:
                                         text = "\\n".join([line.body for line in bpy.data.texts[name].lines])
-                                        exec(get_script_code(text)[part])
+                                        exec(get_script_code(text)[part], script_locals)
                                     except:
                                         print("Error when registering/unregistering or running script '" + name + "'!")
-                                
-                                def run_external_script(path, part):
+
+                                def run_external_script(path, part, script_locals={{}}):
+                                    import os
                                     if os.path.exists(path):
                                         with open(path) as script_file:
                                             text = script_file.read()
-                                            exec(get_script_code(text)[part])
+                                            exec(get_script_code(text)[part], script_locals)
                                     else:
                                         print("Could not find script at '" + path + "'!")
-                                
+
                                 def get_script_code(script):
                                     register = ""
                                     unregister = ""
@@ -104,26 +104,43 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
                                         unregister += "\\nunregister()"
                                     return (script, register, unregister)
         """
+        script_locals = "script_locals = {"
+        for socket in self.inputs[2:-1]+self.outputs[1:-1]:
+            script_locals += f"'{socket.name}': {socket.name}, "
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                script_locals += f"'{ntree.python_name}': {ntree.python_name}"
+        script_locals += "}"
+
         if self.source == "BLENDER":
             if self.script:
                 self.code = f"""
                             {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
                             {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 7)}
-                            run_internal_script('{self.script.name}', 0)
+                            {script_locals}
+                            run_internal_script('{self.script.name}', 0, script_locals)
+                            {self.indent([f"{socket.name} = script_locals['{socket.name}']" for socket in self.inputs[2:-1] + self.outputs[1:-1]], 7)}
                             {self.indent(self.outputs[0].python_value, 7)}
                             """
-                self.code_register = f"""run_internal_script('{self.script.name}', 1)"""
-                self.code_unregister = f"""run_internal_script('{self.script.name}', 2)"""
+                self.code_register = f"""
+                                    run_internal_script('{self.script.name}', 1)
+                                    """
+                self.code_unregister = f"""
+                                    run_internal_script('{self.script.name}', 2)
+                                    """
         elif self.source == "EXTERNAL":
-            self.code_import = "import os"
             self.code = f"""
                         {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 6)}
                         {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 6)}
-                        run_external_script({self.inputs['Script Path'].python_value}, 0)
+                        run_external_script({self.inputs['Script Path'].python_value}, 0, script_locals)
                         {self.indent(self.outputs[0].python_value, 6)}
                         """
-            self.code_register = f"""run_external_script({self.inputs['Script Path'].python_value}, 1)"""
-            self.code_unregister = f"""run_external_script({self.inputs['Script Path'].python_value}, 2)"""
+            self.code_register = f"""
+                                run_external_script({self.inputs['Script Path'].python_value}, 1)
+                                """
+            self.code_unregister = f"""
+                                run_external_script({self.inputs['Script Path'].python_value}, 2)
+                                """
 
     def get_script_code(self, script):
         register = ""
