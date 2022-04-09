@@ -15,6 +15,7 @@ Visual Scripting addon for blender with nodes
 - subpanel doesnt work
 - blender close event doesnt work
 - minimum blender version is 10
+- export easy bpy
 
 
 KNOWN ISSUES:
