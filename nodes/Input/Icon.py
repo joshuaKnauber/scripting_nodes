@@ -1,4 +1,5 @@
 import bpy
+import os
 from ..base_node import SN_ScriptingBaseNode
 
 
@@ -54,42 +55,45 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
             else:
                 self.outputs["Icon"].python_value = "0"
         elif self.icon_source == "PATH":
-            self.code_import = """
-                                import bpy.utils.previews
-                                import os
-                                """
-            self.code_register = """
-                                if not 'custom_icons' in bpy.context.scene.sn.preview_collections:
-                                    pcoll = bpy.utils.previews.new()
-                                    bpy.context.scene.sn.preview_collections['custom_icons'] = pcoll
-                                """
+            self.code_import = "import os"
             self.code_imperative = f"""
                                     def load_preview_icon(path):
-                                        if not path in bpy.context.scene.sn.preview_collections['custom_icons']:
+                                        global _icons
+                                        if not path in _icons:
                                             if os.path.exists(path):
-                                                bpy.context.scene.sn.preview_collections['custom_icons'].load(path, path, "IMAGE")
+                                                _icons.load(path, path, "IMAGE")
                                             else:
                                                 return 0
-                                        return bpy.context.scene.sn.preview_collections['custom_icons'][path].icon_id
+                                        return _icons[path].icon_id
                                     """
             self.outputs["Icon"].python_value = f"load_preview_icon({self.inputs[0].python_value})"
     
     
     def evaluate_export(self, context):
-        # TODO save in global dict of preview collections and remove on unregister
         if self.icon_source == "BLENDER":
             self.outputs["Icon"].python_value = f"{self.icon}"
-        else:
+        elif self.icon_source == "CUSTOM":
             if self.icon_file:
-                uid = self.uuid
-                self.outputs["Icon"].python_value = f"bpy.context.scene.sn_icons_{uid}['{ self.icon_file.name.replace(' ', '_').upper() }'].icon_id"
+                self.outputs["Icon"].python_value = f"_icons['{self.icon_file.name}'].icon_id"
+                self.code_import = "import os"
                 self.code_register = f"""
-                        bpy.types.Scene.sn_icons_{uid} = {{}}
-                        bpy.types.Scene.sn_icons_{uid}['{self.icon_file.name.replace(' ', '_').upper()}'] = bpy.data.images['{self.icon_file.name}'].preview
+                        if not '{self.icon_file.name}' in _icons: _icons.load('{self.icon_file.name}', os.path.join(os.path.dirname(__file__), 'icons', '{self.icon_file.name}'), "IMAGE")
                         """
-                self.code_unregister = f"del bpy.types.Scene.sn_icons_{uid}"
             else:
                 self.outputs["Icon"].python_value = "0"
+        elif self.icon_source == "PATH":
+            self.code_import = "import os"
+            self.code_imperative = f"""
+                                    def load_preview_icon(path):
+                                        global _icons
+                                        if not path in _icons:
+                                            if os.path.exists(path):
+                                                _icons.load(path, path, "IMAGE")
+                                            else:
+                                                return 0
+                                        return _icons[path].icon_id
+                                    """
+            self.outputs["Icon"].python_value = f"load_preview_icon({self.inputs[0].python_value})"
 
 
     def draw_node(self, context, layout):

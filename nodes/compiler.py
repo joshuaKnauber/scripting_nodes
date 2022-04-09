@@ -73,14 +73,23 @@ def compile_addon():
 
 DEFAULT_IMPORTS = """
 import bpy
+import bpy.utils.previews
 """
 
 GLOBAL_VARS = """
 addon_keymaps = {}
-_icons = []
+_icons = None
 """
 
-UNREGISTER_KEYMAPS = """
+REGISTER = """
+global _icons
+_icons = bpy.utils.previews.new()
+"""
+
+UNREGISTER = """
+global _icons
+bpy.utils.previews.remove(_icons)
+
 wm = bpy.context.window_manager
 kc = wm.keyconfigs.addon
 for km, kmi in addon_keymaps.values():
@@ -91,7 +100,7 @@ addon_keymaps.clear()
 def format_single_file():
     """ Returns the entire addon code (for development) formatted for a single python file """
     sn = bpy.context.scene.sn
-    imports, imperative, main, register, unregister = (DEFAULT_IMPORTS, CONVERT_UTILS + GLOBAL_VARS, "", "", UNREGISTER_KEYMAPS)
+    imports, imperative, main, register, unregister = (DEFAULT_IMPORTS, CONVERT_UTILS + GLOBAL_VARS, "", REGISTER, UNREGISTER)
 
     # add property and variable code
     t1 = time.time()
