@@ -18,6 +18,11 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
 
     filename_ext = ".zip"
     filter_glob: bpy.props.StringProperty(default='*.zip', options={'HIDDEN'})
+    
+    def add_easy_bpy(self, path, code):
+        """ Adds the easybpy file to the addon if needed """
+        if "easybpy" in code and bpy.context.scene.sn.easy_bpy_path:
+            shutil.copyfile(src=bpy.context.scene.sn.easy_bpy_path, dst=os.path.join(path, "easybpy.py"))
 
     def add_assets(self, asset_path):
         """ Adds the addon assets to the folder """
@@ -70,18 +75,21 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
         with open(os.path.join(path, "__init__.py"), "a") as init_file:
             code = format_single_file()
             code = self.info() + code
+            code = code.replace("from easybpy import", "from .easybpy import")
             # TODO format code here
             init_file.write(code)
         bpy.context.scene.sn.is_exporting = False
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 ntree.reevaluate()
+        return code
 
     def create_files(self, path):
         """ Creates the addon files in the folder structure """
         self.add_assets(os.path.join(path, "assets"))
         self.add_icons(os.path.join(path, "icons"))
-        self.add_code(path)
+        code = self.add_code(path)
+        self.add_easy_bpy(path, code)
 
     def create_structure(self, path):
         """ Sets up the addons folder structure at the given filepath """
