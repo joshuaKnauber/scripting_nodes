@@ -18,6 +18,7 @@ Visual Scripting addon for blender with nodes
 - move run script imports to the top of the file
 - change run script to have a reload button
 - copy menu node
+- folder asset is weird (see bug reports)
 
 
 KNOWN ISSUES:
