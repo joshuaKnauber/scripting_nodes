@@ -37,6 +37,7 @@ class SN_IconNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def update_icon_file(self, context):
         if self.icon_file:
+            self.icon_file.use_fake_user = True
             self.icon_file.preview_ensure()
         self._evaluate(context)
 

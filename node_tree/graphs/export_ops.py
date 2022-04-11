@@ -37,6 +37,7 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
                 for node in ntree.nodes:
                     if node.bl_idname == "SN_IconNode":
                         if node.icon_source == "CUSTOM" and node.icon_file:
+                            node.icon_file.reload()
                             ctx = bpy.context.copy()
                             ctx["edit_image"] = node.icon_file
                             bpy.ops.image.save_as(ctx, filepath=os.path.join(icon_path, node.icon_file.name))
