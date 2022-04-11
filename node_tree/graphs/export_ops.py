@@ -112,7 +112,8 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
                 context.window_manager.progress_update(90)
                 self.zip_addon(name)
             context.window_manager.progress_end()
-        except:
+        except Exception as err:
+            print(err)
             context.window_manager.progress_end()
         return {"FINISHED"}
 
