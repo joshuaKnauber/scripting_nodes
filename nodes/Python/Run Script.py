@@ -73,12 +73,13 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         register = ""
         unregister = ""
         imports = ""
-        if not "import bpy" in script:
-            script = "import bpy\n" + script
 
-        for line in script.split("\\n"):
+        script = script.split("\n")
+        for line in script:
             if line.startswith("import ") or (line.startswith("from ") and "import " in line):
                 imports += line+"\n"
+                script.remove(line)
+        script = "\n".join(script)
 
         if not "def register()" in script and not "def unregister()" in script:
             return (normalize_code(script), register, unregister, imports)
