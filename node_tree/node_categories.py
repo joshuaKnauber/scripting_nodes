@@ -40,7 +40,8 @@ def get_node_categories():
                     if "class" in line and "SN_ScriptingBaseNode" in line:
                         name = line.split("class ")[-1].split("(")[0]
                         if not name in []:
-                            category_items.append(NodeItem(name))
+                            category_items.append(name)
+        category_items = list(map(lambda name: NodeItem(name), sorted(category_items)) )
         if category_items:
             node_categories.append(SN_ScriptingNodesCategory(category.replace(" ","_").lower(), category.replace("_", " "), items=category_items))
 
