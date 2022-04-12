@@ -41,9 +41,9 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp.subtype = "FILE_PATH"
         inp.set_hide(True)
         self.add_dynamic_data_input("Variable").is_variable = True
-        # out = self.add_dynamic_data_output("Variable")
-        # out.is_variable = True
-        # out.changeable = True
+        out = self.add_dynamic_data_output("Variable")
+        out.is_variable = True
+        out.changeable = True
 
     def update_source(self, context):
         self._evaluate(context)
@@ -99,7 +99,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
             script_locals += f"'{socket.name}': {socket.name}, "
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
-                script_locals += f"'{ntree.python_name}': {ntree.python_name}"
+                script_locals += f"'{ntree.python_name}': {ntree.python_name}, "
         script_locals += "}"
 
         if self.source == "BLENDER":
