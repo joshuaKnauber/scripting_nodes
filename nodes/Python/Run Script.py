@@ -4,6 +4,20 @@ from ..base_node import SN_ScriptingBaseNode
 from ...utils import normalize_code, unique_collection_name, get_python_name
 
 
+class SN_OT_ReloadScript(bpy.types.Operator):
+    bl_idname = "sn.reload_script"
+    bl_label = "Reload Script"
+    bl_description = "Reloads the script from the choosen source"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    node: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    node_tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        node = bpy.data.node_groups[self.node_tree].nodes[self.node]
+        node._evaluate(context)
+        return {"FINISHED"}
+
 
 class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
 
@@ -130,8 +144,12 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def draw_node(self, context, layout):
-        layout.prop(self, "source", expand=True)
-        
+        row = layout.row(align=True)
+        row.prop(self, "source", expand=True)
+        op = row.operator("sn.reload_script", text="", icon="FILE_REFRESH")
+        op.node = self.name
+        op.node_tree = self.node_tree.name
+
         if self.source == "BLENDER":
             layout.template_ID(self, "script", open="text.open", new="text.new")
         else:
