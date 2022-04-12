@@ -1,5 +1,6 @@
 import bpy
 from ...packages import package_ops
+from ...packages import snippet_ops
 
 
 
@@ -47,19 +48,44 @@ class SN_PT_SnippetsPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         row = layout.row()
-        row.scale_y = 1.2
+        row.scale_y = 1.1
         row.operator("sn.open_preferences", text="Get Snippets", icon="URL").navigation = "MARKET"
+
+        node = context.space_data.node_tree.nodes.active
+        row = layout.row()
+        row.scale_y = 1.1
+        if node and node.select and node.bl_idname in ["SN_RunFunctionNode", "SN_RunInterfaceFunctionNode"]:
+            row.operator("sn.open_preferences", text="Export Snippet", icon="EXPORT")
+        else:
+            box = row.box()
+            box.label(text="Select Run Function node to export a snippet", icon="EXPORT")
         layout.separator()
-        
-        # TODO draw installed snippets
 
         row = layout.row()
-        row.alert = True
-        row.label(text="Not yet in the release candidate!")
+        row.scale_y = 1.1
+        row.operator("sn.install_snippet", text="Install Snippets", icon="FILE_FOLDER")
+        
+        for i, snippet in enumerate(snippet_ops.loaded_snippets):
+            box = layout.box()
+            row = box.row()
+            if type(snippet) == str:
+                row.label(text=snippet.split(".")[0])
+                row.operator("sn.uninstall_snippet", text="", icon="PANEL_CLOSE", emboss=False).index = i
+            else:
+                row.label(text=snippet["name"])
+                row.operator("sn.uninstall_snippet", text="", icon="PANEL_CLOSE", emboss=False).index = i
+                row = box.row()
+                split = row.split(factor=0.1)
+                split.label(text="")
+                col = split.column(align=True)
+                col.enabled = False
+                for name in snippet["snippets"]:
+                    col.label(text=name.split(".")[0])
+                
+        if not snippet_ops.loaded_snippets:
+            box = layout.box()
+            box.label(text="No snippets installed!", icon="INFO")
 
-        # row = layout.row(align=True)
-        # row.operator("sn.install_package", text="Install Snippets", icon="FILE_FOLDER")
-        # row.operator("sn.reload_packages", text="", icon="FILE_REFRESH")
         
             
 class SN_PT_PackagesPanel(bpy.types.Panel):
@@ -83,9 +109,14 @@ class SN_PT_PackagesPanel(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         row = layout.row()
-        row.scale_y = 1.2
+        row.scale_y = 1.1
         row.operator("sn.open_preferences", text="Get Packages", icon="URL").navigation = "MARKET"
         layout.separator()
+
+        row = layout.row(align=True)
+        row.scale_y = 1.1
+        row.operator("sn.install_package", text="Install Package", icon="FILE_FOLDER")
+        row.operator("sn.reload_packages", text="", icon="FILE_REFRESH")
 
         for i, package in enumerate(package_ops.loaded_packages):
             box = layout.box()
@@ -112,10 +143,6 @@ class SN_PT_PackagesPanel(bpy.types.Panel):
         if not package_ops.loaded_packages:
             box = layout.box()
             box.label(text="No packages installed!", icon="INFO")
-
-        row = layout.row(align=True)
-        row.operator("sn.install_package", text="Install Package", icon="FILE_FOLDER")
-        row.operator("sn.reload_packages", text="", icon="FILE_REFRESH")
 
         if package_ops.require_reload:
             row = layout.row()

@@ -11,32 +11,22 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_SnippetNode"
     bl_label = "Snippet"
-    node_color = "STRING"
     bl_width_default = 200
 
     def setup_snippet_node(self, data):
+        """ This adds all in/outputs and settings to the snippet node """
         self.label = data["name"]
-        # setup inputs
         for inp in data["inputs"]:
             socket = self._add_input(inp["idname"], inp["name"])
-            socket.subtype = inp["subtype"]
-            for attr in inp["attributes"].keys():
-                setattr(socket, attr, inp["attributes"][attr])
-        # setup outputs
         for out in data["outputs"]:
             socket = self._add_output(out["idname"], out["name"])
-            socket.subtype = out["subtype"]
-            for attr in out["attributes"].keys():
-                setattr(socket, attr, out["attributes"][attr])
 
     def update_snippet_to_3(self, data):
-        # set execute socket name
+        """ This updates the snippet data to match with serpens 3 nodes """
         for inp in data["inputs"]:
-            if inp["idname"] == "SN_ExecuteSocket":
-                inp["name"] = "Execute"
+            if inp["idname"] == "SN_ExecuteSocket": inp["name"] = "Execute"
         for out in data["outputs"]:
-            if out["idname"] == "SN_ExecuteSocket":
-                out["name"] = "Execute"
+            if out["idname"] == "SN_ExecuteSocket": out["name"] = "Execute"
         return data
     
     def load_snippet_file(self, path):
@@ -74,6 +64,5 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.code_unregister = snippet["unregister"]
     
     def draw_node(self, context, layout):
-        layout.label(text="WIP", icon="ERROR")
         if not self.data:
             layout.prop(self, "path")

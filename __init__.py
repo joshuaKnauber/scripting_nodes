@@ -93,7 +93,7 @@ def register():
     bpy.types.NODE_PT_node_tree_interface_outputs.append(append_warning)
 
     # add to the node add menu
-    # bpy.types.NODE_MT_category_snippets.append(snippet_menu)
+    bpy.types.NODE_MT_category_snippets.append(snippet_menu)
     
     # add name change update
     subscribe_to_name_change()
@@ -120,7 +120,7 @@ def unregister():
     bpy.types.NODE_PT_node_tree_interface_outputs.remove(append_warning)
     
     # remove from the node add menu
-    # bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
+    bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
 
     # addon properties
     del bpy.types.Scene.sn
