@@ -10,8 +10,6 @@ Visual Scripting addon for blender with nodes
 - [ ] New Demo version
 
 
-- move run script imports to the top of the file
-- change run script to have a reload button
 
 
 KNOWN ISSUES:

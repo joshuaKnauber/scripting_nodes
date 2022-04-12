@@ -20,7 +20,6 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
             socket["name"] = get_python_name(socket.name, "variable")
             socket["name"] = unique_collection_name(socket.name, "variable", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
             socket.python_value = socket.name
-
         self._evaluate(bpy.context)
 
     def on_dynamic_socket_add(self, socket):
@@ -56,118 +55,19 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     script: bpy.props.PointerProperty(name="File", type=bpy.types.Text, update=SN_ScriptingBaseNode._evaluate)
 
-    def evaluate(self, context):
-        for socket in self.outputs[1:-1]:
-            socket.python_value = socket.name
-        self.code_imperative = f"""
-                                def get_script_code(script):
-                                    register = ""
-                                    unregister = ""
-                                    if not "import bpy" in script:
-                                        script = "import bpy\\n" + script
-
-                                    if not "def register()" in script and not "def unregister()" in script:
-                                        return (script, register, unregister)
-                                    if "def register()" in script:
-                                        imports = ""
-                                        for line in script.split("\\n"):
-                                            if line.startswith("import ") or (line.startswith("from ") and "import " in line):
-                                                imports += line+"\\n"
-                                        register = "def register()" + script.split("def register()")[1]
-                                        for x, line in enumerate(register.split("\\n")[1:]):
-                                            if not len(line) - len(line.lstrip()) and line.strip():
-                                                register = "\\n".join(register.split("\\n")[:x])
-                                                break
-                                        script = script.replace(register, "")
-                                        register += imports + unregister + "\\nregister()"
-                                    if "def unregister()" in script:
-                                        imports = ""
-                                        for line in script.split("\\n"):
-                                            if line.startswith("import ") or (line.startswith("from ") and "import " in line):
-                                                imports += line+"\\n"
-                                        unregister = "def unregister()" + script.split("def unregister()")[1]
-                                        for x, line in enumerate(unregister.split("\\n")[1:]):
-                                            if not len(line) - len(line.lstrip()) and line.strip():
-                                                unregister = "\\n".join(unregister.split("\\n")[:x])
-                                                break
-                                        script = script.replace(unregister, "")
-                                        unregister = imports + unregister + "\\nunregister()"
-                                    return (script, register, unregister)
-        """
-        script_locals = "script_locals = {"
-        for socket in self.inputs[2:-1]+self.outputs[1:-1]:
-            script_locals += f"'{socket.name}': {socket.name}, "
-        for ntree in bpy.data.node_groups:
-            if ntree.bl_idname == "ScriptingNodesTree":
-                script_locals += f"'{ntree.python_name}': {ntree.python_name}, "
-        script_locals += "}"
-
-        if self.source == "BLENDER":
-            if self.script:
-                self.code = f"""
-                            {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
-                            {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 7)}
-                            {script_locals}
-                            try:
-                                text = "\\n".join([line.body for line in bpy.data.texts['{self.script.name}'].lines])
-                                exec(get_script_code(text)[0])
-                            except:
-                                print("Error when running script '{self.script.name}'!")
-                            {self.indent([f"{socket.name} = script_locals['{socket.name}']" for socket in self.inputs[2:-1] + self.outputs[1:-1]], 7)}
-                            {self.indent(self.outputs[0].python_value, 7)}
-                            """
-                self.code_register = f"""
-                                    try:
-                                        text = "\\n".join([line.body for line in bpy.data.texts['{self.script.name}'].lines])
-                                        exec(get_script_code(text)[1])
-                                    except:
-                                        print("Error when registering script '{self.script.name}'!")
-                                    """
-                self.code_unregister = f"""
-                                    try:
-                                        text = "\\n".join([line.body for line in bpy.data.texts['{self.script.name}'].lines])
-                                        exec(get_script_code(text)[2])
-                                    except:
-                                        print("Error when unregistering script '{self.script.name}'!")
-                                    """
-        elif self.source == "EXTERNAL":
-            self.code_import = "import os"
-            self.code = f"""
-                        {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 6)}
-                        {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 6)}
-                        {script_locals}
-                        if os.path.exists({self.inputs['Script Path'].python_value}):
-                            with open({self.inputs['Script Path'].python_value}) as script_file:
-                                text = script_file.read()
-                                exec(get_script_code(text)[0])
-                        else:
-                            print("Could not find script at '" + {self.inputs['Script Path'].python_value} + "'!")
-                        {self.indent([f"{socket.name} = script_locals['{socket.name}']" for socket in self.inputs[2:-1] + self.outputs[1:-1]], 6)}
-                        {self.indent(self.outputs[0].python_value, 6)}
-                        """
-            self.code_register = f"""
-                                if os.path.exists({self.inputs['Script Path'].python_value}):
-                                    with open({self.inputs['Script Path'].python_value}) as script_file:
-                                        text = script_file.read()
-                                        exec(get_script_code(text)[1])
-                                else:
-                                    print("Could not find script at '" + {self.inputs['Script Path'].python_value} + "'!")
-                                """
-            self.code_unregister = f"""
-                                if os.path.exists({self.inputs['Script Path'].python_value}):
-                                    with open({self.inputs['Script Path'].python_value}) as script_file:
-                                        text = script_file.read()
-                                        exec(get_script_code(text)[2])
-                                else:
-                                    print("Could not find script at '" + {self.inputs['Script Path'].python_value} + "'!")
-                                """
-
     def get_script_code(self, script):
         register = ""
         unregister = ""
+        imports = ""
+        if not "import bpy" in script:
+            script = "import bpy\n" + script
+
+        for line in script.split("\\n"):
+            if line.startswith("import ") or (line.startswith("from ") and "import " in line):
+                imports += line+"\n"
 
         if not "def register()" in script and not "def unregister()" in script:
-            return (normalize_code(script), register, unregister)
+            return (normalize_code(script), register, unregister, imports)
 
         if "def register()" in script:
             register = "def register()" + script.split("def register()")[1]
@@ -188,23 +88,22 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
                     break
             script = script.replace("\n".join(unregister_lines), "")
             unregister = normalize_code("\n".join(unregister_lines[1:]))
-        
-        return (normalize_code(script), register, unregister)
+
+        return (normalize_code(script), register, unregister, imports)
 
 
-    def evaluate_export(self, context):
+    def evaluate(self, context):
         for socket in self.outputs[1:-1]:
             socket.python_value = socket.name
         if self.source == "BLENDER":
             if self.script:
-                script = ("", "", "")
-                try:
-                    text = "\n".join([line.body for line in bpy.data.texts[self.script.name].lines])
-                    script = self.get_script_code(text)
-                except: pass
+                script = ("", "", "", "")
+                text = "\n".join([line.body for line in bpy.data.texts[self.script.name].lines])
+                script = self.get_script_code(text)
 
                 self.code_register = f"""{script[1]}"""
                 self.code_unregister = f"""{script[2]}"""
+                self.code_import = f"""{script[3]}"""
                 self.code = f"""
                             {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 7)}
                             {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 7)}
@@ -213,7 +112,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
                             """
 
         elif self.source == "EXTERNAL":
-            script = ("", "", "")
+            script = ("", "", "", "")
             if os.path.exists(eval(self.inputs['Script Path'].python_value)):
                 with open(eval(self.inputs['Script Path'].python_value), "r") as script_file:
                     text = script_file.read()
@@ -221,6 +120,7 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             self.code_register = f"""{script[1]}"""
             self.code_unregister = f"""{script[2]}"""
+            self.code_import = f"""{script[3]}"""
             self.code = f"""
                         {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 6)}
                         {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 6)}
