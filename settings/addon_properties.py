@@ -145,13 +145,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Version",
                                         description="The author of this addon")
 
-    def update_blender(self,context):
-        if not self.blender[1] > 9:
-            self.blender = (self.blender[0],int(str(self.blender[1])+"0"),self.blender[2])
-        self.update_changes(context)
-
     blender: bpy.props.IntVectorProperty(default=(3, 0, 0),
-                                        update=update_blender,
                                         size=3,
                                         min=0,
                                         name="Minimum Blender",
