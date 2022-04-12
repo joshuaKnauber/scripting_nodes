@@ -27,7 +27,7 @@ class SN_OT_RunEventButton(bpy.types.Operator):
         if self.handler == "EXIT":
             for func in self.get_atexit_functions():
                 if self.uid in func.__name__:
-                    func(None)
+                    func()
                     return {"FINISHED"}
         
         else:
