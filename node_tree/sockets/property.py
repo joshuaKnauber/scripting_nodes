@@ -17,6 +17,12 @@ blend_data_defaults = {
     "Object": {
         "value": "bpy.context.view_layer.objects.active",
         "name": "Using Active"},
+    "Materials": {
+        "value": "bpy.context.view_layer.objects.active.active_material",
+        "name": "Using Active"},
+    "Material": {
+        "value": "bpy.context.view_layer.objects.active.active_material",
+        "name": "Using Active"},
     "Areas": {
         "value": "bpy.context.area",
         "name": "Using Active"},

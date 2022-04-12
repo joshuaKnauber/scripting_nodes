@@ -10,7 +10,6 @@ Visual Scripting addon for blender with nodes
 - [ ] New Demo version
 
 
-- default material on property socket
 - color type does not use the float vector when copying properties
 - subpanel doesnt work
 - blender close event doesnt work
