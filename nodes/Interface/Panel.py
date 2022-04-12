@@ -208,7 +208,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                             {self.indent([out.python_value for out in filter(lambda out: out.name=='Panel' and not out.dynamic, self.outputs)], 7)}
                     """
 
-        if self.is_subpanel and parent and not context.scene.sn.is_exporting:
+        if self.is_subpanel and parent and not context.scene.sn.is_exporting and self.parent_type == "CUSTOM":
             self.code_register = f"if '{parent}' in globals(): bpy.utils.register_class({self.last_idname})"
             self.code_unregister = f"if '{parent}' in globals(): bpy.utils.unregister_class({self.last_idname})"
         else:
