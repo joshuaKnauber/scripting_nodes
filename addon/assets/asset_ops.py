@@ -4,8 +4,34 @@ import os
 
 
 
-class SN_OT_AddAsset(bpy.types.Operator, ImportHelper):
+class SN_OT_AddAsset(bpy.types.Operator):
     bl_idname = "sn.add_asset"
+    bl_label = "Add Asset"
+    bl_description = "Adds a asset to the addon"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+    
+    add_type: bpy.props.EnumProperty(default="FILE",
+                                items=[("FILE", "File", "Import a single file"),
+                                       ("DIRECTORY", "Directory", "Import a full directory")],
+                                name="Type",
+                                description="Add this directory or this file as an asset",
+                                options={"SKIP_SAVE"})
+    
+    def execute(self, context):
+        bpy.ops.sn.load_asset("INVOKE_DEFAULT", add_type=self.add_type)
+        return {"FINISHED"}
+
+    def draw(self, context):
+        layout = self.layout
+        layout.prop(self, "add_type", expand=True)
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(self, width=200)
+
+
+
+class SN_OT_LoadAsset(bpy.types.Operator, ImportHelper):
+    bl_idname = "sn.load_asset"
     bl_label = "Add Asset"
     bl_description = "Adds a asset to the addon"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
@@ -28,6 +54,7 @@ class SN_OT_AddAsset(bpy.types.Operator, ImportHelper):
             if asset == new_asset:
                 sn.asset_index = index
         return {"FINISHED"}
+
 
 
 
