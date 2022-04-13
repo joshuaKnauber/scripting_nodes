@@ -2,10 +2,10 @@ import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..Input.Node_Idname import NodeType
 
-class SN_NodeIsId(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_NodeIsIdname(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_NodeIsId"
-    bl_label = "Node is ID"
+    bl_idname = "SN_NodeIsIdname"
+    bl_label = "Node is Idname"
     node_color = "PROPERTY"
 
 
