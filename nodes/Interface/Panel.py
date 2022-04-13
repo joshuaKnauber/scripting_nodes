@@ -150,6 +150,10 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     name="Idname Override",
                                     description="Use this if you want to define the idname of this panel yourself",
                                     update=SN_ScriptingBaseNode._evaluate)
+    
+    panel_width: bpy.props.IntProperty(name="Panel Width", default=0,
+                                    description="The panel width for popovers and popups",
+                                    update=SN_ScriptingBaseNode._evaluate)
 
 
     
@@ -194,6 +198,7 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         bl_order = {self.panel_order}
                         {f"bl_options = {{{', '.join(options)}}}" if options else ""}
                         {f"bl_parent_id = '{parent}'" if self.is_subpanel and parent else ""}
+                        bl_ui_units_x={self.panel_width}
 
                         @classmethod
                         def poll(cls, context):
@@ -282,3 +287,4 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
         row.enabled = self.is_subpanel
         row.prop(self, "panel_parent")
         layout.prop(self, "idname_override")
+        layout.prop(self, "panel_width")

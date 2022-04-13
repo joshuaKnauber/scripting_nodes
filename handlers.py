@@ -4,6 +4,7 @@ from . import bl_info
 from .nodes.compiler import compile_addon, unregister_addon
 from .settings.updates import check_serpens_updates
 from .settings.easybpy import check_easy_bpy_install
+from .packages.snippet_ops import load_snippets
 from .msgbus import subscribe_to_name_change
 
 
@@ -27,6 +28,7 @@ def load_handler(dummy):
         compile_addon()
     check_serpens_updates(bl_info["version"])
     bpy.ops.sn.reload_packages()
+    load_snippets()
     bpy.context.scene.sn.hide_preferences = False
 
 
