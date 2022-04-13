@@ -20,7 +20,7 @@ class SN_NodeIdnameNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_string_output("Idname")
         
-        # load python nodes
+        # load internal nodes
         for cls in bpy.types.NodeInternal.__subclasses__():
             item = self.nodes.add()
             item.name = cls.bl_rna.name
