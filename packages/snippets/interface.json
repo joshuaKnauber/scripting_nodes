@@ -1,0 +1,32 @@
+{
+    "version": 3,
+    "name": "This is a test",
+    "func_name": "sna_this_is_a_test_21A16",
+    "inputs": [
+        {
+            "idname": "SN_InterfaceSocket",
+            "name": "Interface",
+            "subtype": "NONE"
+        },
+        {
+            "idname": "SN_StringSocket",
+            "name": "asldkasd",
+            "subtype": "NONE"
+        }
+    ],
+    "outputs": [],
+    "function": "def sna_this_is_a_test_21A16(layout_function, asldkasd):\n    pass\n    layout_function.label(text=asldkasd, icon_value=0)\n    layout_function.label(text=str(nodetree_SNIPPET_VARS['sna_test']), icon_value=0)\n    layout_function.label(text='No Property connected!', icon='ERROR')",
+    "import": "",
+    "imperative": "",
+    "register": "",
+    "unregister": "",
+    "variables": {
+        "nodetree_SNIPPET_VARS": {
+            "sna_test": "True"
+        }
+    },
+    "properties": [
+        [],
+        []
+    ]
+}
