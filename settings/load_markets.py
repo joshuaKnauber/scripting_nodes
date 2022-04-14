@@ -118,7 +118,7 @@ class SN_OT_LoadSnippets(bpy.types.Operator):
             content = requests.get(url).json()
             snippets = content["snippets"]
             shuffle(snippets)
-           
+
             context.scene.sn.snippets.clear()
             for snippet in snippets:
                 item = context.scene.sn.snippets.add()
@@ -128,7 +128,7 @@ class SN_OT_LoadSnippets(bpy.types.Operator):
                 item.url = snippet["url"]
                 item.blend_url = snippet["blend_url"]
                 item.author = snippet["author"]
-                item.serpens_version = 2 if not "serpens_version" in snippet else 3
+                item.serpens_version = 2 if not "serpens_version" in snippet else snippet["serpens_version"]
 
         except:
             print("Couldn't load snippets!")

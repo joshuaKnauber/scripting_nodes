@@ -120,6 +120,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         op_rna = op.get_rna_type()
         self.pasted_name = op_rna.name
         self.create_inputs(op_rna)
+        self._evaluate(context)
     
     pasted_operator: bpy.props.StringProperty(default="bpy.ops.sn.dummy_button_operator()",
                                         update=update_pasted_operator)
