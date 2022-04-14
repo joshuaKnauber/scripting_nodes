@@ -1,5 +1,5 @@
 import bpy
-from bpy_extras.io_utils import ImportHelper
+from bpy_extras.io_utils import ImportHelper, ExportHelper
 import os
 import shutil
 import json
@@ -105,12 +105,100 @@ class SN_OT_AddSnippet(bpy.types.Operator):
 
 
 
-class SN_OT_ExportSnippet(bpy.types.Operator):
+class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
     bl_idname = "sn.export_snippet"
     bl_label = "Export Snippet"
     bl_description = "Export this node as a snippet"
     bl_options = {"REGISTER", "INTERNAL"}
 
+    filename_ext = ".json"
+    filter_glob: bpy.props.StringProperty(default="*.json", options={'HIDDEN'}, maxlen=255)
+    node: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def get_connected_functions(self, function_node):
+        nodes = []
+        for node in function_node._get_linked_nodes(started_at_trigger=True):
+            if node.bl_idname == "SN_RunFunctionNode":
+                parent_tree = node.ref_ntree if node.ref_ntree else node.node_tree
+                if node.ref_SN_FunctionNode in parent_tree.nodes:
+                    new_node = parent_tree.nodes[node.ref_SN_FunctionNode]
+                    nodes.append(new_node)
+                    nodes += self.get_connected_functions(new_node)
+        return nodes
+
     def execute(self, context):
-        
+        data = {}
+        node = bpy.data.node_groups[self.tree].nodes[self.node]
+        parent_tree = node.ref_ntree if node.ref_ntree else node.node_tree
+        function_node = None
+        if node.bl_idname == "SN_RunFunctionNode" and node.ref_SN_FunctionNode in parent_tree.nodes:
+            function_node = parent_tree.nodes[node.ref_SN_FunctionNode]
+            # elif node.bl_idname == "SN_RunInterfaceFunctionNode" and node.ref_SN_InterfaceFunctionNode in parent_tree.nodes:
+            #     function_node = parent_tree.nodes[node.ref_SN_InterfaceFunctionNode]
+            if not function_node:
+                self.report({"ERROR"}, message="No function selected!")
+                return {"CANCELLED"}
+
+            data["version"] = 3
+            data["name"] = function_node.name
+            data["func_name"] = function_node.func_name
+            data["inputs"] = []
+            data["outputs"] = []
+            for inp in node.inputs:
+                if not inp.hide:
+                    data["inputs"].append({"idname": inp.bl_idname,"name": inp.name,"subtype": inp.subtype})
+            for out in node.outputs:
+                if not out.hide:
+                    data["outputs"].append({"idname": out.bl_idname,"name": out.name,"subtype": out.subtype})
+
+            data["function"] = function_node._get_code()
+            data["import"] = function_node._get_code_import()
+            data["imperative"] = function_node._get_code_imperative()
+            data["register"] = function_node._get_code_register()
+            data["unregister"] = function_node._get_code_unregister()
+            function_nodes = self.get_connected_functions(function_node)
+            for func_node in function_nodes:
+                data["import"] += ("\n" + func_node._get_code_import()) if func_node._get_code_import() else ""
+                data["imperative"] += "\n" + func_node._get_code() + "\n" + func_node._get_code_imperative()
+                data["register"] += ("\n" + func_node._get_code_register()) if func_node._get_code_register() else ""
+                data["unregister"] += ("\n" + func_node._get_code_unregister()) if func_node._get_code_unregister() else ""
+
+            variables = {}
+            properties = [[], []]
+            for func_node in function_nodes + [function_node]:
+                for node in func_node._get_linked_nodes(started_at_trigger=True):
+                    if hasattr(node, "var_name") and hasattr(node, "ref_ntree"):
+                        var = node.get_var()
+                        if var:
+                            if not var.node_tree.python_name + "_SNIPPET_VARS" in variables:
+                                variables[var.node_tree.python_name + "_SNIPPET_VARS"] = {}
+                            variables[var.node_tree.python_name + "_SNIPPET_VARS"][var.python_name] = str(var.var_default)
+                            data["function"] = data["function"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+                            data["imperative"] = data["imperative"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+                            data["register"] = data["register"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+                            data["unregister"] = data["unregister"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+
+                    if hasattr(node, "prop_name"):
+                        prop_src = node.get_prop_source()
+                        if prop_src and node.prop_name in prop_src.properties:
+                            prop = prop_src.properties[node.prop_name]
+                            if not prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS") in properties[0]:
+                                properties[0].append(prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"))
+                                properties[1].append(prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"))
+                                data["function"] = data["function"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
+                                data["imperative"] = data["imperative"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
+                                data["register"] = data["register"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
+                                data["unregister"] = data["unregister"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
+
+            data["variables"] = variables
+            data["properties"] = properties
+
+
+        with open(self.filepath, "w") as data_file:
+            data_file.seek(0)
+            data_file.write(json.dumps(data, indent=4))
+            data_file.truncate()
+        if data:
+            self.report({"INFO"}, message="Snippet exported!")
         return {"FINISHED"}
