@@ -78,7 +78,16 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             index = 1 if len(self.inputs) and self.inputs[0].bl_idname in ["SN_InterfaceSocket", "SN_ExecuteSocket"] else 0
             if len(self.inputs) and self.inputs[0].bl_idname == "SN_InterfaceSocket":
-                pass
+                inp_values = []
+                for inp in self.inputs[1:]:
+                    inp_values.append(inp.python_value)
+                inp_values = ", ".join(inp_values)
+
+                self.code = f"""
+                            layout_function = {self.active_layout}
+                            {snippet['func_name']}_{self.static_uid}(layout_function,{inp_values})
+                            """
+
             else:
                 inp_values = []
                 for inp in self.inputs[index:]:
