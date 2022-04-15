@@ -110,5 +110,9 @@ class SN_OT_CopyContext(bpy.types.Operator):
     def execute(self, context):
         context.scene.sn.copied_context.clear()
         context.scene.sn.copied_context.append(context.copy())
-        self.report({"INFO"}, message="Copied!")
+        context.scene.sn.hide_preferences = True
+        for screen in bpy.data.screens:
+            for area in screen.areas:
+                area.tag_redraw()
+        self.report({"INFO"}, message="Copied and reloaded!")
         return {"FINISHED"}

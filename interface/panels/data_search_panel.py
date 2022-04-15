@@ -36,17 +36,6 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         row = col.row()
         row.scale_y = 1.4
         row.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH")
-        if context.scene.sn.data_category == "context":
-            box = col.box()
-            if context.scene.sn.copied_context:
-                copied = context.scene.sn.copied_context[0]
-                col = box.column(align=True)
-                col.label(text=f"Reload Context:")
-                subrow = col.row()
-                subrow.enabled = False
-                subrow.label(text=f"{copied['area'].type.replace('_', ' ').title()} {copied['region'].type.replace('_', ' ').title()}")
-            else:
-                box.label(text="No context copied!")
 
         layout.separator()
         col = layout.column()

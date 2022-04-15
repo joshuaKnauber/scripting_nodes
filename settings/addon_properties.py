@@ -221,14 +221,18 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Hide Preferences",
                                         description="Hides all panels in the preferences window",
                                         update=update_hide_preferences)
+
+    def get_categories(self, context):
+        ctxt = "Nothing Copied"
+        if context.scene.sn.copied_context:
+            ctxt = f"{self.copied_context[0]['area'].type.replace('_', ' ').title()} {self.copied_context[0]['region'].type.replace('_', ' ').title()}"
+        items = [("app", "App", "bpy.app"),
+                ("context", f"Context ({ctxt})", "bpy.context"),
+                ("data", "Data", "bpy.data")]
+        return items
     
     data_category: bpy.props.EnumProperty(name="Category",
-                                        items=[("app", "App", "bpy.app"),
-                                               ("context", "Context", "bpy.context"),
-                                               ("data", "Data", "bpy.data")],
-                                            #    ("path", "Path", "bpy.path"),
-                                            #    ("utils", "Utils", "bpy.utils")],
-                                        default="context",
+                                        items=get_categories,
                                         description="Category of blend data")
     
     data_filter: bpy.props.EnumProperty(name="Type",
