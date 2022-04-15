@@ -50,7 +50,9 @@ class SN_PT_navigation_bar(bpy.types.Panel):
 
         layout.separator()
         col = layout.column()
-        col.label(text="Filter Overview:")
+        row = col.row()
+        row.label(text="Filter Overview:")
+        row.operator("sn.reset_filters", text="", icon="LOOP_BACK", emboss=False)
         row = col.row()
         row.scale_y = 1.2
         row.prop(context.scene.sn, "data_search", text="", icon="VIEWZOOM")
@@ -71,7 +73,8 @@ class SN_PT_FilterDataSettings(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         if getattr(context, "sn_filter_path", None):
-            layout.prop(context.sn_filter_path, "data_search", text="", icon="VIEWZOOM")
+            row = layout.row()
+            row.prop(context.sn_filter_path, "data_search", text="", icon="VIEWZOOM")
             col = layout.column()
             col.prop(context.sn_filter_path, "data_filter")
 

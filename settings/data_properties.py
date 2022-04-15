@@ -197,7 +197,6 @@ def item_from_path(data, path):
     # after bpy.xyz
     if len(path.split(".")) > 2:
         path_sections = bpy_to_path_sections(path, False)
-        print(path_sections)
         curr_item = data[path_sections[0]][path_sections[1]]
         for key in path_sections[2:]:
             curr_item = curr_item["properties"][key]
