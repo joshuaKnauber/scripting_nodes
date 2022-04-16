@@ -124,6 +124,8 @@ class SN_OT_ResetFilters(bpy.types.Operator):
     def execute(self, context):
         context.scene.sn.data_filter = filter_defaults
         context.scene.sn.data_search = ""
+        for area in context.screen.areas:
+            area.tag_redraw()
         return {"FINISHED"}
 
 
