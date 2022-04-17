@@ -9,7 +9,7 @@ Visual Scripting addon for blender with nodes
 - [ ] Snippet marketplace popup on export
 - [ ] New Demo version
 
-
+- empty installed on export
 
 
 KNOWN ISSUES:

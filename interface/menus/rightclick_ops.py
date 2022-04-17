@@ -69,11 +69,13 @@ class SN_OT_CopyOperator(bpy.types.Operator):
 
     def find_ops_path_from_rna(self, rna_identifier):
         for cat_name in dir(bpy.ops):
-            cat = eval(f"bpy.ops.{cat_name}")
-            for op_name in dir(cat):
-                op = eval(f"bpy.ops.{cat_name}.{op_name}")
-                if op.get_rna_type().identifier == rna_identifier:
-                    return f"bpy.ops.{cat_name}.{op_name}()"
+            if cat_name[0].isalpha() and not cat_name == "class":
+                cat = eval(f"bpy.ops.{cat_name}")
+                for op_name in dir(cat):
+                    if op_name[0].isalpha():
+                        op = eval(f"bpy.ops.{cat_name}.{op_name}")
+                        if op.get_rna_type().identifier == rna_identifier:
+                            return f"bpy.ops.{cat_name}.{op_name}()"
         return None
     
     def execute(self, context):
@@ -110,5 +112,9 @@ class SN_OT_CopyContext(bpy.types.Operator):
     def execute(self, context):
         context.scene.sn.copied_context.clear()
         context.scene.sn.copied_context.append(context.copy())
-        self.report({"INFO"}, message="Copied!")
+        context.scene.sn.hide_preferences = True
+        for screen in bpy.data.screens:
+            for area in screen.areas:
+                area.tag_redraw()
+        self.report({"INFO"}, message="Copied and reloaded!")
         return {"FINISHED"}

@@ -82,13 +82,25 @@ class SN_OT_FilterData(bpy.types.Operator):
                                         default=filter_defaults,
                                         update=update_filters)
 
+    def update_reset(self, context):
+        if not self.reset:
+            self["reset"] = True
+            self.data_search = ""
+            self.data_filter = filter_defaults
+    
+    reset: bpy.props.BoolProperty(name="Reset", default=True,
+                                description="Reset the filters",
+                                update=update_reset)
+
     def execute(self, context):
         return {"FINISHED"}
     
     def draw(self, context):
         layout = self.layout
         layout.label(text="Search:")
-        layout.prop(self, "data_search", text="")
+        row = layout.row()
+        row.prop(self, "data_search", text="")
+        row.prop(self, "reset", text="", icon="LOOP_BACK", invert_checkbox=True)
         layout.separator()
         col = layout.column()
         col.prop(self, "data_filter", expand=True)
@@ -100,6 +112,21 @@ class SN_OT_FilterData(bpy.types.Operator):
         self.data_filter = last_filter
         self.data_search = last_search
         return context.window_manager.invoke_popup(self, width=300)
+    
+    
+
+class SN_OT_ResetFilters(bpy.types.Operator):
+    bl_idname = "sn.reset_filters"
+    bl_label = "Reset Filters"
+    bl_description = "Resets these filters"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        context.scene.sn.data_filter = filter_defaults
+        context.scene.sn.data_search = ""
+        for area in context.screen.areas:
+            area.tag_redraw()
+        return {"FINISHED"}
 
 
 
