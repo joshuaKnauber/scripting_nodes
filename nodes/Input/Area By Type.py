@@ -38,9 +38,10 @@ class SN_AreaByTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.code_imperative = f"""
             def find_areas_of_type(area_type):
                 areas = []
-                for area in bpy.context.screen.areas:
-                    if area.type == area_type:
-                        areas.append(area)
+                for screen in bpy.data.screens:
+                    for area in screen.areas:
+                        if area.type == area_type:
+                            areas.append(area)
                 return areas
 
             def find_area_by_type(area_type, index):
