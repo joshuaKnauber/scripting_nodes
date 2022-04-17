@@ -3,10 +3,10 @@ Visual Scripting addon for blender with nodes
 
 
 - [ ] Allow old snippet import
-- [ ] Add snippet export
 - [ ] Complete TODOs
 - [ ] Full tutorial
 - [ ] Marketplace button
+- [ ] Snippet marketplace popup on export
 - [ ] New Demo version
 
 

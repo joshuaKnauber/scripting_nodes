@@ -1,3 +1,4 @@
+from cgi import print_directory
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ...utils import get_python_name
@@ -26,10 +27,17 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.trigger_ref_update({ "added": socket })
 
     def on_dynamic_socket_remove(self, index, is_output):
-        if index+1 == len(self.outputs):
-            self.trigger_ref_update({ "removed": index })
-        elif self.outputs[index+1].bl_idname != "SN_InterfaceSocket":
-            self.trigger_ref_update({ "removed": index })
+        outputs = []
+        first_index = 0
+        for out in self.outputs:
+            if out.bl_idname in ["SN_InterfaceSocket", "SN_DynamicInterfaceSocket"]:
+                first_index += 1
+            else:
+                outputs.append(out)
+
+        if index >= first_index:
+            self.trigger_ref_update({ "removed": index - first_index + 1 })
+
 
     def on_socket_type_change(self, socket):
         if not socket.bl_idname == "SN_InterfaceSocket":
