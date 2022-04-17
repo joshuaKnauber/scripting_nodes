@@ -69,11 +69,13 @@ class SN_OT_CopyOperator(bpy.types.Operator):
 
     def find_ops_path_from_rna(self, rna_identifier):
         for cat_name in dir(bpy.ops):
-            cat = eval(f"bpy.ops.{cat_name}")
-            for op_name in dir(cat):
-                op = eval(f"bpy.ops.{cat_name}.{op_name}")
-                if op.get_rna_type().identifier == rna_identifier:
-                    return f"bpy.ops.{cat_name}.{op_name}()"
+            if cat_name[0].isalpha():
+                cat = eval(f"bpy.ops.{cat_name}")
+                for op_name in dir(cat):
+                    if op_name[0].isalpha():
+                        op = eval(f"bpy.ops.{cat_name}.{op_name}")
+                        if op.get_rna_type().identifier == rna_identifier:
+                            return f"bpy.ops.{cat_name}.{op_name}()"
         return None
     
     def execute(self, context):
