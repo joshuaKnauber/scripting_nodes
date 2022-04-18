@@ -15,17 +15,20 @@ loaded_snippets = [] # temp var for the loaded snippets
 
 def load_snippets():
     global loaded_snippets
-    installed_path = os.path.join(os.path.dirname(__file__),"installed.json")
-    with open(installed_path, "r") as installed:
-        data = json.loads(installed.read())
-        loaded_snippets = data["snippets"]
-        
-        bpy.context.scene.sn.snippet_categories.clear()
-        for snippet in data["snippets"]:
-            if not type(snippet) == str:
-                item = bpy.context.scene.sn.snippet_categories.add()
-                item.name = snippet["name"]
-                item.path = os.path.join(os.path.dirname(installed_path), "snippets", snippet["name"])
+    installed_path = os.path.join(os.path.dirname(__file__), "installed.json")
+    bpy.context.scene.sn.snippet_categories.clear()
+    if os.path.exists(installed_path):
+        with open(installed_path, "r") as installed:
+            data = json.loads(installed.read())
+            loaded_snippets = data["snippets"]
+            
+            for snippet in data["snippets"]:
+                if not type(snippet) == str:
+                    item = bpy.context.scene.sn.snippet_categories.add()
+                    item.name = snippet["name"]
+                    item.path = os.path.join(os.path.dirname(installed_path), "snippets", snippet["name"])
+    else:
+        loaded_snippets = []
 
 
 
@@ -40,7 +43,10 @@ class SN_OT_InstallSnippet(bpy.types.Operator, ImportHelper):
     def execute(self, context):
         _, extension = os.path.splitext(self.filepath)
         if extension in [".json", ".zip"]:
-            with open(os.path.join(os.path.dirname(__file__), "installed.json"), "r+") as data_file:
+            path = os.path.join(os.path.dirname(__file__), "installed.json")
+            if not os.path.exists(path):
+                with open(path, "w") as data_file: data_file.write(json.dumps({ "packages": [], "snippets": [] }))
+            with open(path, "r+") as data_file:
                 data = json.loads(data_file.read())
                 name = os.path.basename(self.filepath)
                 if not name in data["snippets"]:
@@ -78,6 +84,8 @@ class SN_OT_UninstallSnippet(bpy.types.Operator):
 
     def execute(self, context):
         path = os.path.join(os.path.dirname(__file__))
+        if not os.path.exists(path):
+            with open(path, "w") as data_file: data_file.write(json.dumps({ "packages": [], "snippets": [] }))
         with open(os.path.join(path, "installed.json"), "r+") as data_file:
             data = json.loads(data_file.read())
             snippet = data["snippets"].pop(self.index)

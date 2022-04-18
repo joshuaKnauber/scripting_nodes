@@ -32,7 +32,7 @@ class BasicProperty():
     @property
     def python_name(self):
         if self.name == self.cached_human_name and self.cached_python_name: return self.cached_python_name
-        # if self.name in self.cached_python_names: return self.cached_python_names[self.name]
+        if self.name in self.cached_python_names: return self.cached_python_names[self.name]
 
         names = []
         for prop in self.prop_collection:
@@ -41,11 +41,11 @@ class BasicProperty():
             names.append(prop.python_name)
         
         name = unique_collection_name(f"sna_{get_python_name(self.name, 'new_property')}", "new_property", names, "_")
-        # try:
-        self.cached_python_name = name
-        self.cached_human_name = self.name
-        # except AttributeError: pass
-        # self.cached_python_names[self.name] = name
+        try:
+            self.cached_python_name = name
+            self.cached_human_name = self.name
+        except AttributeError: pass
+        self.cached_python_names[self.name] = name
         return name
     
     

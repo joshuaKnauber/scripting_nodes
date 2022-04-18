@@ -4,3 +4,4 @@ __pycache__/
 *.pyc
 *.blend1
 update_log.json
+installed.json

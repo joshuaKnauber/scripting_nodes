@@ -1,0 +1,250 @@
+{
+    "name": "Add Node",
+    "uid": "24867",
+    "function": "                    SNIPPET_VARS = {\"node\": None, \"nodes\": [], }\n                    def add_node(node_tree_enum, name__index_enum, node_tree_name, node_tree_index, add_node_type, select_node, make_active_node, deselect_all_others, location, ):\n                        try:\n                             if node_tree_enum == r\"Object Material Node Tree\":\n                                if name__index_enum == r\"Use Node Tree Graph Name\":\n                                    SNIPPET_VARS[\"nodes\"] = bpy.data.materials[sn_cast_string(node_tree_name)].node_tree.nodes\n                                    new_return_F466E = bpy.data.materials[sn_cast_string(node_tree_name)].node_tree.nodes.new(type=sn_cast_string(add_node_type), )\n                                    SNIPPET_VARS[\"node\"] = new_return_F466E\n                                    \n                                    \n                                    \n                                    \n                                else:\n                                    SNIPPET_VARS[\"nodes\"] = bpy.data.materials[sn_cast_int(node_tree_index)].node_tree.nodes\n                                    new_return_321B6 = bpy.data.materials[sn_cast_int(node_tree_index)].node_tree.nodes.new(type=sn_cast_string(add_node_type), )\n                                    SNIPPET_VARS[\"node\"] = new_return_321B6\n                                    \n                                    \n                                    \n                                    \n                                \n                                \n                            else:\n                                pass\n                            if node_tree_enum == r\"World Shader Node Tree\":\n                                if name__index_enum == r\"Use Node Tree Graph Name\":\n                                    SNIPPET_VARS[\"nodes\"] = bpy.data.worlds[sn_cast_string(node_tree_name)].node_tree.nodes\n                                    new_return_0BB2D = bpy.data.worlds[sn_cast_string(node_tree_name)].node_tree.nodes.new(type=sn_cast_string(add_node_type), )\n                                    SNIPPET_VARS[\"node\"] = new_return_0BB2D\n                                    \n                                    \n                                    \n                                    \n                                else:\n                                    SNIPPET_VARS[\"nodes\"] = bpy.data.worlds[sn_cast_int(node_tree_index)].node_tree.nodes\n                                    new_return_92071 = bpy.data.worlds[sn_cast_int(node_tree_index)].node_tree.nodes.new(type=sn_cast_string(add_node_type), )\n                                    SNIPPET_VARS[\"node\"] = new_return_92071\n                                    \n                                    \n                                    \n                                    \n                                \n                                \n                            else:\n                                pass\n                            if node_tree_enum == r\"Line Style Node Tree\":\n                                if name__index_enum == r\"Use Node Tree Graph Name\":\n                                    SNIPPET_VARS[\"nodes\"] = bpy.data.linestyles[sn_cast_string(node_tree_name)].node_tree.nodes\n                                    new_return_C05F7 = bpy.data.linestyles[sn_cast_string(node_tree_name)].node_tree.nodes.new(type=sn_cast_string(add_node_type), )\n                                    SNIPPET_VARS[\"node\"] = new_return_C05F7\n                                    \n                                    \n                                    \n                                    \n                                else:\n                                    SNIPPET_VARS[\"nodes\"] = bpy.data.linestyles[sn_cast_int(node_tree_index)].node_tree.nodes\n                                    new_return_83C92 = bpy.data.linestyles[sn_cast_int(node_tree_index)].node_tree.nodes.new(type=sn_cast_string(add_node_type), )\n                                    SNIPPET_VARS[\"node\"] = new_return_83C92\n                                    \n                                    \n                                    \n                                    \n                                \n                                \n                            else:\n                                pass\n                            if node_tree_enum == r\"Texture Node Tree\":\n                                if name__index_enum == r\"Use Node Tree Graph Name\":\n                                    SNIPPET_VARS[\"nodes\"] = bpy.data.textures[sn_cast_string(node_tree_name)].node_tree.nodes\n                                    new_return_4B436 = bpy.data.textures[sn_cast_string(node_tree_name)].node_tree.nodes.new(type=sn_cast_string(add_node_type), )\n                                    SNIPPET_VARS[\"node\"] = new_return_4B436\n                                    \n                                    \n                                    \n                                    \n                                else:\n                                    SNIPPET_VARS[\"nodes\"] = bpy.data.textures[sn_cast_int(node_tree_index)].node_tree.nodes\n                                    new_return_624DB = bpy.data.textures[sn_cast_int(node_tree_index)].node_tree.nodes.new(type=sn_cast_string(add_node_type), )\n                                    SNIPPET_VARS[\"node\"] = new_return_624DB\n                                    \n                                    \n                                    \n                                    \n                                \n                                \n                            else:\n                                pass\n                            if node_tree_enum == r\"Compositor Node Tree\":\n                                SNIPPET_VARS[\"nodes\"] = bpy.context.scene.node_tree.nodes\n                                new_return_F1A85 = bpy.context.scene.node_tree.nodes.new(type=sn_cast_string(add_node_type), )\n                                SNIPPET_VARS[\"node\"] = new_return_F1A85\n                                \n                                \n                                \n                                \n                            else:\n                                pass\n                            if node_tree_enum == r\"Node Groups (Geometry/Serpens/Animation)\":\n                                if name__index_enum == r\"Use Node Tree Graph Name\":\n                                    SNIPPET_VARS[\"nodes\"] = bpy.data.node_groups[sn_cast_string(node_tree_name)].nodes\n                                    new_return_4D69E = bpy.data.node_groups[sn_cast_string(node_tree_name)].nodes.new(type=sn_cast_string(add_node_type), )\n                                    SNIPPET_VARS[\"node\"] = new_return_4D69E\n                                    \n                                    \n                                    \n                                    \n                                else:\n                                    SNIPPET_VARS[\"nodes\"] = bpy.data.node_groups[sn_cast_int(node_tree_index)].nodes\n                                    new_return_3F57A = bpy.data.node_groups[sn_cast_int(node_tree_index)].nodes.new(type=sn_cast_string(add_node_type), )\n                                    SNIPPET_VARS[\"node\"] = new_return_3F57A\n                                    \n                                    \n                                    \n                                    \n                                \n                                \n                            else:\n                                pass\n                            function_return_CA6BF = nested_function(sn_cast_blend_data(SNIPPET_VARS[\"nodes\"]), sn_cast_blend_data(SNIPPET_VARS[\"node\"]), sn_cast_boolean(deselect_all_others), sn_cast_boolean(select_node), sn_cast_boolean(make_active_node), sn_cast_float_vector(location, 2), )\n                            \n                            \n                            \n                            \n                            \n                            \n                            \n                            \n                        except Exception as exc:\n                            print(str(exc) + \" | Error in function Add Node\")\n                    ",
+    "register": "\nif not 'customhello' in bpy.types.Scene.bl_rna.properties: bpy.types.Scene.customhello = bpy.props.StringProperty(name='CustomHello',description='',subtype='NONE',options=set(),default='')\n",
+    "unregister": "\nif 'customhello' in bpy.types.Scene.bl_rna.properties: del bpy.types.Scene.customhello\n",
+    "properties": [],
+    "func_name": "add_node",
+    "inputs": [
+        {
+            "idname": "SN_ExecuteSocket",
+            "name": "Run Function",
+            "subtype": "NONE",
+            "attributes": {}
+        },
+        {
+            "idname": "SN_StringSocket",
+            "name": "Node Tree Enum",
+            "subtype": "ENUM",
+            "attributes": {
+                "value": "",
+                "value_file": "",
+                "value_directory": "",
+                "enum_values": "[(\"Object Material Node Tree\",\"Object Material Node Tree\",\"\"),(\"World Shader Node Tree\",\"World Shader Node Tree\",\"\"),(\"Line Style Node Tree\",\"Line Style Node Tree\",\"\"),(\"Texture Node Tree\",\"Texture Node Tree\",\"\"),(\"Compositor Node Tree\",\"Compositor Node Tree\",\"\"),(\"Node Groups (Geometry/Serpens/Animation)\",\"Node Groups (Geometry/Serpens/Animation)\",\"\"),]",
+                "value_enum": "Object Material Node Tree"
+            }
+        },
+        {
+            "idname": "SN_StringSocket",
+            "name": "Name / Index Enum",
+            "subtype": "ENUM",
+            "attributes": {
+                "value": "",
+                "value_file": "",
+                "value_directory": "",
+                "enum_values": "[(\"Use Node Tree Graph Name\",\"Use Node Tree Graph Name\",\"\"),(\"Use Node Tree Graph Index\",\"Use Node Tree Graph Index\",\"\"),]",
+                "value_enum": "Use Node Tree Graph Index"
+            }
+        },
+        {
+            "idname": "SN_StringSocket",
+            "name": "Node Tree Name",
+            "subtype": "NONE",
+            "attributes": {
+                "value": "",
+                "value_file": "",
+                "value_directory": "",
+                "enum_values": "",
+                "value_enum": "NONE"
+            }
+        },
+        {
+            "idname": "SN_IntegerSocket",
+            "name": "Node Tree Index",
+            "subtype": "NONE",
+            "attributes": {
+                "value": 1,
+                "value_two": [
+                    1,
+                    1
+                ],
+                "value_three": [
+                    1,
+                    1,
+                    1
+                ],
+                "value_four": [
+                    1,
+                    1,
+                    1,
+                    1
+                ]
+            }
+        },
+        {
+            "idname": "SN_StringSocket",
+            "name": "Add Node Type",
+            "subtype": "NONE",
+            "attributes": {
+                "value": "ShaderNodeCustomGroup",
+                "value_file": "",
+                "value_directory": "",
+                "enum_values": "",
+                "value_enum": "NONE"
+            }
+        },
+        {
+            "idname": "SN_BooleanSocket",
+            "name": "Select Node",
+            "subtype": "NONE",
+            "attributes": {
+                "value": true,
+                "value_two": [
+                    true,
+                    true
+                ],
+                "value_three": [
+                    true,
+                    true,
+                    true
+                ],
+                "value_four": [
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            }
+        },
+        {
+            "idname": "SN_BooleanSocket",
+            "name": "Make Active Node",
+            "subtype": "NONE",
+            "attributes": {
+                "value": true,
+                "value_two": [
+                    true,
+                    true
+                ],
+                "value_three": [
+                    true,
+                    true,
+                    true
+                ],
+                "value_four": [
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            }
+        },
+        {
+            "idname": "SN_BooleanSocket",
+            "name": "Deselect All Others",
+            "subtype": "NONE",
+            "attributes": {
+                "value": false,
+                "value_two": [
+                    true,
+                    true
+                ],
+                "value_three": [
+                    true,
+                    true,
+                    true
+                ],
+                "value_four": [
+                    true,
+                    true,
+                    true,
+                    true
+                ]
+            }
+        },
+        {
+            "idname": "SN_FloatSocket",
+            "name": "Location",
+            "subtype": "VECTOR2",
+            "attributes": {
+                "value": 1.0,
+                "value_factor": 1.0,
+                "value_color": [
+                    0.5,
+                    0.5,
+                    0.5
+                ],
+                "value_color_alpha": [
+                    0.5,
+                    0.5,
+                    0.5,
+                    1.0
+                ],
+                "value_two": [
+                    0.0,
+                    0.0
+                ],
+                "value_three": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "value_four": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        }
+    ],
+    "outputs": [
+        {
+            "idname": "SN_ExecuteSocket",
+            "name": "Execute",
+            "subtype": "NONE",
+            "attributes": {
+                "value": 1.0,
+                "value_factor": 1.0,
+                "value_color": [
+                    0.5,
+                    0.5,
+                    0.5
+                ],
+                "value_color_alpha": [
+                    0.5,
+                    0.5,
+                    0.5,
+                    1.0
+                ],
+                "value_two": [
+                    0.0,
+                    0.0
+                ],
+                "value_three": [
+                    1.0,
+                    1.0,
+                    1.0
+                ],
+                "value_four": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            }
+        }
+    ],
+    "code_imperative": "\n                    def sn_handle_script_line_exception(exc, line):\n                        print(\"# # # # # # # # SCRIPT LINE ERROR # # # # # # # #\")\n                        print(\"Line:\", line)\n                        raise exc\n                    ",
+    "variable_definitions": {
+        "node": [
+            "Node",
+            "BLEND_DATA"
+        ],
+        "nodes": [
+            "Nodes",
+            "BLEND_DATA"
+        ]
+    },
+    "function_definitions": {
+        "08C84": "\n                    def nested_function(nodes, node, deselect_others, select, make_active, location, ):\n                        try:\n                             if deselect_others:\n                                for_node_E9E39 = 0\n                                for_node_index_E9E39 = 0\n                                for for_node_index_E9E39, for_node_E9E39 in enumerate(sn_cast_list(nodes)):\n                                    sn_cast_blend_data(for_node_E9E39).select=False\n                                    \n                                    \n            \n                                \n                                \n                            else:\n                                pass\n                            node.select=select\n                            \n                            if make_active:\n                                try: exec(r\"SNIPPET_VARS['nodes'].active = SNIPPET_VARS['node']\")\n                                except Exception as exc: sn_handle_script_line_exception(exc, r\"SNIPPET_VARS['nodes'].active = SNIPPET_VARS['node']\")\n                                \n                                \n                            else:\n                                pass\n                            node.location=location\n                            \n                            bpy.context.scene.customhello = r\"Hello\"\n                            return bpy.context.scene.customhello, \n                            \n                            \n            \n                            \n            \n                            \n                        except Exception as exc:\n                            print(str(exc) + \" | Error in function Nested Function\")\n                    "
+    },
+    "property_identifiers": {
+        "customhello": [
+            "CustomHello",
+            "STRING",
+            "Scene"
+        ]
+    }
+}
