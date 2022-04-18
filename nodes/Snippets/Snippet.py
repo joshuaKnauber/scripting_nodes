@@ -13,7 +13,7 @@ class SN_SnippetVarsPropertyGroup(bpy.types.PropertyGroup):
     tree_name: bpy.props.StringProperty(name="Old Tree Name")
     type: bpy.props.StringProperty(name="Variable Type")
 
-    def var_update(self, context):
+    def var_prop_update(self, context):
         for node in self.id_data.node_collection("SN_SnippetNode").nodes:
             for item in node.var_collection:
                 if item == self:
@@ -21,12 +21,13 @@ class SN_SnippetVarsPropertyGroup(bpy.types.PropertyGroup):
                     return
 
     use_custom: bpy.props.BoolProperty(name="Use Custom", description="Use custom variable instead of the standalone snippet variable", default=False)
-    var_name: bpy.props.StringProperty(name="Name", update=var_update)
+    var_name: bpy.props.StringProperty(name="Name", update=var_prop_update)
+    prop_name: bpy.props.StringProperty(name="Name", update=var_prop_update)
     ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Node Tree",
                                     description="Node Tree to get the variable from",
                                     poll=lambda _, ntree: ntree.bl_idname == "ScriptingNodesTree",
-                                    update=var_update)
+                                    update=var_prop_update)
 
 
 
@@ -54,6 +55,12 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             item.python_name = var["python_name"]
             item.tree_name = var["tree"]
             item.type = var["type"]
+        for prop in data["properties"]:
+            item = self.prop_collection.add()
+            item.og_name = prop["name"]
+            item.python_name = prop["python_name"]
+            item.type = prop["type"]
+
 
     def load_snippet_file(self, path):
         _, extension = os.path.splitext(path)
@@ -97,15 +104,17 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             for var in snippet["variable_defs"][var_tree]:
                 for col_var in self.var_collection:
                     if var == col_var.python_name:
-                        if not (col_var.use_custom) or not (bool(col_var.ref_ntree) and bool(col_var.var_name)) or not (col_var.type == col_var.ref_ntree.variables[col_var.var_name].variable_type):
+                        if not col_var.use_custom or (col_var.use_custom and (not col_var.ref_ntree or not col_var.var_name in col_var.ref_ntree.variables or col_var.type != col_var.ref_ntree.variables[col_var.var_name].variable_type)):
                             self.code_imperative += f"'{var}': {snippet['variable_defs'][var_tree][var]}, "
             self.code_imperative += "}\n"
 
     def property_evaluate(self, snippet):
-        for prop in snippet["properties_defs"][0]:
-            self.code_register += prop.replace("SNIPPET_VARS", f"vars_{self.static_uid}") + "\n"
-        for prop in snippet["properties_defs"][1]:
-            self.code_unregister += prop.replace("SNIPPET_VARS", f"vars_{self.static_uid}") + "\n"
+        for prop in snippet["properties_defs"]:
+            for col_prop in self.prop_collection:
+                if prop == col_prop.python_name:
+                    if not col_prop.use_custom or (col_prop.use_custom and (not col_prop.prop_name in bpy.context.scene.sn.properties or col_prop.type != bpy.context.scene.sn.properties[col_prop.prop_name].property_type)):
+                        self.code_register += snippet["properties_defs"][prop][0].replace("SNIPPET_VARS", f"vars_{self.static_uid}") + "\n"
+                        self.code_unregister += snippet["properties_defs"][prop][1].replace("SNIPPET_VARS", f"vars_{self.static_uid}") + "\n"
 
     def custom_var_props_evaluate(self, code):
         for var in self.var_collection:
@@ -113,6 +122,14 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                 code = code.replace(var.tree_name + f"_vars_{self.static_uid}['" + var.python_name + "']", var.ref_ntree.variables[var.var_name].data_path)
                 self.code_register = self.code_register.replace(var.tree_name + f"_vars_{self.static_uid}['" + var.python_name + "']", var.ref_ntree.variables[var.var_name].data_path)
                 self.code_unregister = self.code_unregister.replace(var.tree_name + f"_vars_{self.static_uid}['" + var.python_name + "']", var.ref_ntree.variables[var.var_name].data_path)
+
+        for prop in self.prop_collection:
+            if prop.use_custom and prop.prop_name in bpy.context.scene.sn.properties and prop.type == bpy.context.scene.sn.properties[prop.prop_name].property_type:
+                code = code.replace( + f"_vars_{self.static_uid}['" + var.python_name + "']", var.ref_ntree.variables[var.var_name].data_path)
+
+                self.code_register = self.code_register.replace(var.tree_name + f"_vars_{self.static_uid}['" + var.python_name + "']", var.ref_ntree.variables[var.var_name].data_path)
+                self.code_unregister = self.code_unregister.replace(var.tree_name + f"_vars_{self.static_uid}['" + var.python_name + "']", var.ref_ntree.variables[var.var_name].data_path)
+
         return code
 
     def evaluate(self, context):
@@ -200,15 +217,24 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                 col.enabled = bool(var.ref_ntree)
                 parent_tree = var.ref_ntree if var.ref_ntree else self.node_tree
                 col.prop_search(var, "var_name", parent_tree, "variables", text="")
-                row.operator("sn.tooltip", text="", icon="QUESTION").text = "Choose a '" + var.type.replace("_", " ").title() + "' variable to assign this snippet variable to."
+                row.operator("sn.tooltip", text="", icon="QUESTION").text = "Choose a '" + var.type + "' variable to assign this snippet variable to."
                 if var.ref_ntree and var.var_name in var.ref_ntree.variables:
                     if var.type != var.ref_ntree.variables[var.var_name].variable_type:
                         row = layout.row()
                         row.alert = True
-                        row.label(text=f"Choose a variable of type '{var.type.replace('_', ' ').title()}'")
+                        row.label(text=f"Choose a variable of type '{var.type}'")
 
-        # for prop in self.prop_collection:
-        #     row = layout.row(align=True)
-        #     row.label(text=prop.og_name+":")
-        #     row.prop_search(prop, "name", self.node_tree, "sn_properties", text="")
-        #     row.operator("sn.question_mark", text="", icon="QUESTION").to_display = "Choose a '" + prop.type.replace("_", " ").title() + "' property to assign this snippet property to.\nIf you don't choose anything it will use the snippets standalone property."
+        for prop in self.prop_collection:
+            row = layout.row(align=True)
+            row.prop(prop, "use_custom", text="")
+            row.label(text=prop.og_name)
+            if prop.use_custom:
+                row = layout.row(align=True)
+                row.prop_search(prop, "prop_name", context.scene.sn, "properties", text="")
+                row.operator("sn.tooltip", text="", icon="QUESTION").text = "Choose a '" + prop.type + "' property to assign this snippet property to."
+
+                if prop.prop_name in context.scene.sn.properties:
+                    if prop.type != context.scene.sn.properties[prop.prop_name].property_type:
+                        row = layout.row()
+                        row.alert = True
+                        row.label(text=f"Choose a property of type '{prop.type}'")
