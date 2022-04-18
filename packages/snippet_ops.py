@@ -177,7 +177,7 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                 data["unregister"] += ("\n" + func_node._get_code_unregister()) if func_node._get_code_unregister() else ""
 
             variables = {}
-            properties = [[], []]
+            properties = {}
             data["variables"] = []
             data["properties"] = []
             for func_node in function_nodes + [function_node]:
@@ -198,9 +198,9 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                         prop_src = node.get_prop_source()
                         if prop_src and node.prop_name in prop_src.properties:
                             prop = prop_src.properties[node.prop_name]
-                            if not prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS") in properties[0]:
-                                properties[0].append(prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"))
-                                properties[1].append(prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"))
+                            if not prop.name in properties:
+                                properties[prop.name] = [prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"), prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS")]
+                                data["properties"].append({"name": prop.name, "python_name": prop.python_name, "type": prop.property_type})
                                 data["function"] = data["function"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["imperative"] = data["imperative"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["register"] = data["register"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
@@ -236,7 +236,9 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                 data["unregister"] += ("\n" + func_node._get_code_unregister()) if func_node._get_code_unregister() else ""
 
             variables = {}
-            properties = [[], []]
+            properties = {}
+            data["variables"] = []
+            data["properties"] = []
             for func_node in function_nodes + [function_node]:
                 for node in func_node._get_linked_nodes(started_at_trigger=True):
                     if hasattr(node, "var_name") and hasattr(node, "ref_ntree"):
@@ -244,6 +246,7 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                         if var:
                             if not var.node_tree.python_name + "_SNIPPET_VARS" in variables:
                                 variables[var.node_tree.python_name + "_SNIPPET_VARS"] = {}
+                            data["variables"].append({"name": var.name,"python_name": var.python_name, "tree": var.node_tree.python_name, "type": var.variable_type})
                             variables[var.node_tree.python_name + "_SNIPPET_VARS"][var.python_name] = str(var.var_default)
                             data["function"] = data["function"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
                             data["imperative"] = data["imperative"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
@@ -254,9 +257,9 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                         prop_src = node.get_prop_source()
                         if prop_src and node.prop_name in prop_src.properties:
                             prop = prop_src.properties[node.prop_name]
-                            if not prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS") in properties[0]:
-                                properties[0].append(prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"))
-                                properties[1].append(prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"))
+                            if not prop.name in properties:
+                                properties[prop.name] = [prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"), prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS")]
+                                data["properties"].append({"name": prop.name, "python_name": prop.python_name, "type": prop.property_type})
                                 data["function"] = data["function"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["imperative"] = data["imperative"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["register"] = data["register"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
