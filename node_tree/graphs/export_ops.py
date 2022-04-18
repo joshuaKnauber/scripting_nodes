@@ -121,6 +121,7 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
                 context.window_manager.progress_update(90)
                 self.zip_addon(name)
             context.window_manager.progress_end()
+            bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
         except Exception as err:
             print(err)
             context.window_manager.progress_end()
