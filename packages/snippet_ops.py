@@ -39,27 +39,31 @@ class SN_OT_InstallSnippet(bpy.types.Operator, ImportHelper):
 
     def execute(self, context):
         _, extension = os.path.splitext(self.filepath)
-        with open(os.path.join(os.path.dirname(__file__), "installed.json"), "r+") as data_file:
-            data = json.loads(data_file.read())
-            name = os.path.basename(self.filepath)
-            if not name in data["snippets"]:
-                if extension == ".json":
-                    data["snippets"].append(name)
-                    shutil.copyfile(self.filepath, os.path.join(os.path.dirname(__file__), "snippets", name))
-                if extension == ".zip":
-                    name = name.split(".")[0]
-                    path = os.path.join(os.path.dirname(__file__), "snippets", name)
-                    with zipfile.ZipFile(self.filepath, 'r') as zip_ref:
-                        zip_ref.extractall(path)
-                    data["snippets"].append({
-                            "name": name,
-                            "snippets": os.listdir(path)
-                        })
-            data_file.seek(0)
-            data_file.write(json.dumps(data, indent=4))
-            data_file.truncate()
-            load_snippets()
-            self.report({"INFO"}, message="Snippet installed!")
+        if extension in [".json", ".zip"]:
+            with open(os.path.join(os.path.dirname(__file__), "installed.json"), "r+") as data_file:
+                data = json.loads(data_file.read())
+                name = os.path.basename(self.filepath)
+                if not name in data["snippets"]:
+                    if extension == ".json":
+                        data["snippets"].append(name)
+                        shutil.copyfile(self.filepath, os.path.join(os.path.dirname(__file__), "snippets", name))
+                    if extension == ".zip":
+                        name = name.split(".")[0]
+                        path = os.path.join(os.path.dirname(__file__), "snippets", name)
+                        with zipfile.ZipFile(self.filepath, 'r') as zip_ref:
+                            zip_ref.extractall(path)
+                        data["snippets"].append({
+                                "name": name,
+                                "snippets": os.listdir(path)
+                            })
+                data_file.seek(0)
+                data_file.write(json.dumps(data, indent=4))
+                data_file.truncate()
+                load_snippets()
+                self.report({"INFO"}, message="Snippet installed!")
+        else:
+            self.report({"ERROR"}, message="Please only install .json files!")
+            return {"CANCELLED"}
         return {"FINISHED"}
     
     
@@ -174,6 +178,8 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
 
             variables = {}
             properties = [[], []]
+            data["variables"] = []
+            data["properties"] = []
             for func_node in function_nodes + [function_node]:
                 for node in func_node._get_linked_nodes(started_at_trigger=True):
                     if hasattr(node, "var_name") and hasattr(node, "ref_ntree"):
@@ -181,6 +187,7 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                         if var:
                             if not var.node_tree.python_name + "_SNIPPET_VARS" in variables:
                                 variables[var.node_tree.python_name + "_SNIPPET_VARS"] = {}
+                            data["variables"].append({"name": var.name,"python_name": var.python_name, "tree": var.node_tree.python_name, "type": var.variable_type})
                             variables[var.node_tree.python_name + "_SNIPPET_VARS"][var.python_name] = str(var.var_default)
                             data["function"] = data["function"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
                             data["imperative"] = data["imperative"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
@@ -199,8 +206,8 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                                 data["register"] = data["register"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["unregister"] = data["unregister"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
 
-            data["variables"] = variables
-            data["properties"] = properties
+            data["variable_defs"] = variables
+            data["properties_defs"] = properties
         elif node.bl_idname == "SN_RunInterfaceFunctionNode" and node.ref_SN_InterfaceFunctionNode in parent_tree.nodes:
             function_node = parent_tree.nodes[node.ref_SN_InterfaceFunctionNode]
             if not function_node:
@@ -255,8 +262,8 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                                 data["register"] = data["register"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["unregister"] = data["unregister"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
 
-            data["variables"] = variables
-            data["properties"] = properties
+            data["variable_defs"] = variables
+            data["properties_defs"] = properties
 
 
         with open(self.filepath, "w") as data_file:
