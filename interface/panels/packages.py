@@ -55,9 +55,13 @@ class SN_PT_SnippetsPanel(bpy.types.Panel):
         row = layout.row()
         row.scale_y = 1.1
         if node and node.select and node.bl_idname in ["SN_RunFunctionNode", "SN_RunInterfaceFunctionNode"]:
-            op = row.operator("sn.export_snippet", text="Export Snippet", icon="EXPORT")
-            op.node = node.name
-            op.tree = node.node_tree.name
+            if getattr(node, "ref_SN_FunctionNode", None) or getattr(node, "ref_SN_InterfaceFunctionNode", None):
+                op = row.operator("sn.export_snippet", text="Export Snippet", icon="EXPORT", depress=True)
+                op.node = node.name
+                op.tree = node.node_tree.name
+            else:
+                box = row.box()
+                box.label(text="Select a valid Run Function node to export a snippet", icon="EXPORT")
         else:
             box = row.box()
             box.label(text="Select Run Function node to export a snippet", icon="EXPORT")

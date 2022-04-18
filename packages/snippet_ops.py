@@ -283,4 +283,28 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
             data_file.truncate()
         if data:
             self.report({"INFO"}, message="Snippet exported!")
+        bpy.ops.sn.snippet_info("INVOKE_DEFAULT")
         return {"FINISHED"}
+
+
+
+class SN_OT_SnippetInfo(bpy.types.Operator):
+    bl_idname = "sn.snippet_info"
+    bl_label = "Snippet Info"
+    bl_description = "Info"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        return {"FINISHED"}
+
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text="Awesome snippet!", icon="FUND")
+        col = layout.column(align=True)
+        col.label(text="Do you think others could use this too?")
+        col.label(text="Why not share it with the Serpens community?")
+        row = col.row()
+        row.operator("wm.url_open", text="Upload it to the #marketplace channel!", icon_value=bpy.context.scene.sn_icons["discord"].icon_id).url = "https://discord.com/invite/NK6kyae"
+    
+    def invoke(self, context, event):
+        return context.window_manager.invoke_popup(self, width=300)
