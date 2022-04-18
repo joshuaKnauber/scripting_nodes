@@ -208,7 +208,7 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                             prop = prop_src.properties[node.prop_name]
                             if not prop.name in properties:
                                 properties[prop.name] = [prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"), prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS")]
-                                data["properties"].append({"name": prop.name, "python_name": prop.python_name, "type": prop.property_type})
+                                data["properties"].append({"name": prop.name, "python_name": prop.python_name, "type": prop.property_type, "attach_to": prop.attach_to})
                                 data["function"] = data["function"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["imperative"] = data["imperative"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["register"] = data["register"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
