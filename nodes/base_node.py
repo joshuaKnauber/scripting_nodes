@@ -385,7 +385,10 @@ class SN_ScriptingBaseNode:
             to_socket.trigger_dynamic()
 
     def link_insert(self, from_socket, to_socket, is_output):
-        self._insert_link_layout_update(from_socket, is_output)
+        if not is_output:
+            self._insert_link_layout_update(from_socket, is_output)
+        else:
+            self._evaluate(bpy.context)
         self.on_link_insert(from_socket, to_socket, is_output)
         self._insert_trigger_dynamic(from_socket, to_socket)
 
