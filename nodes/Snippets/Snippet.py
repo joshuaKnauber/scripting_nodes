@@ -20,6 +20,7 @@ class SN_SnippetVarsPropertyGroup(bpy.types.PropertyGroup):
                     node._evaluate(context)
                     return
 
+    attach_to: bpy.props.StringProperty()
     use_custom: bpy.props.BoolProperty(name="Use Custom", description="Use custom variable instead of the standalone snippet variable", default=False)
     var_name: bpy.props.StringProperty(name="Name", update=var_prop_update)
     prop_name: bpy.props.StringProperty(name="Name", update=var_prop_update)
@@ -60,6 +61,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             item.og_name = prop["name"]
             item.python_name = prop["python_name"]
             item.type = prop["type"]
+            item.attach_to = prop["attach_to"]
 
 
     def load_snippet_file(self, path):
@@ -112,7 +114,7 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
         for prop in snippet["properties_defs"]:
             for col_prop in self.prop_collection:
                 if prop == col_prop.python_name:
-                    if not col_prop.use_custom or (col_prop.use_custom and (not col_prop.prop_name in bpy.context.scene.sn.properties or col_prop.type != bpy.context.scene.sn.properties[col_prop.prop_name].property_type)):
+                    if not col_prop.use_custom or (col_prop.use_custom and (not col_prop.prop_name in bpy.context.scene.sn.properties or col_prop.type != bpy.context.scene.sn.properties[col_prop.prop_name].property_type or col_prop.attach_to != bpy.context.scene.sn.properties[col_prop.prop_name].attach_to)):
                         self.code_register += snippet["properties_defs"][prop][0].replace("SNIPPET_VARS", f"vars_{self.static_uid}") + "\n"
                         self.code_unregister += snippet["properties_defs"][prop][1].replace("SNIPPET_VARS", f"vars_{self.static_uid}") + "\n"
 
@@ -124,11 +126,10 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.code_unregister = self.code_unregister.replace(var.tree_name + f"_vars_{self.static_uid}['" + var.python_name + "']", var.ref_ntree.variables[var.var_name].data_path)
 
         for prop in self.prop_collection:
-            if prop.use_custom and prop.prop_name in bpy.context.scene.sn.properties and prop.type == bpy.context.scene.sn.properties[prop.prop_name].property_type:
-                code = code.replace( + f"_vars_{self.static_uid}['" + var.python_name + "']", var.ref_ntree.variables[var.var_name].data_path)
-
-                self.code_register = self.code_register.replace(var.tree_name + f"_vars_{self.static_uid}['" + var.python_name + "']", var.ref_ntree.variables[var.var_name].data_path)
-                self.code_unregister = self.code_unregister.replace(var.tree_name + f"_vars_{self.static_uid}['" + var.python_name + "']", var.ref_ntree.variables[var.var_name].data_path)
+            if prop.use_custom and prop.prop_name in bpy.context.scene.sn.properties and prop.type == bpy.context.scene.sn.properties[prop.prop_name].property_type and prop.attach_to == bpy.context.scene.sn.properties[prop.prop_name].attach_to:
+                code = code.replace(prop.python_name + "_vars_" + self.static_uid, bpy.context.scene.sn.properties[prop.prop_name].python_name)
+                self.code_register = self.code_register.replace(prop.python_name + "_vars_" + self.static_uid, bpy.context.scene.sn.properties[prop.prop_name].python_name)
+                self.code_unregister = self.code_unregister.replace(prop.python_name + "_vars_" + self.static_uid, bpy.context.scene.sn.properties[prop.prop_name].python_name)
 
         return code
 
@@ -231,10 +232,10 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             if prop.use_custom:
                 row = layout.row(align=True)
                 row.prop_search(prop, "prop_name", context.scene.sn, "properties", text="")
-                row.operator("sn.tooltip", text="", icon="QUESTION").text = "Choose a '" + prop.type + "' property to assign this snippet property to."
+                row.operator("sn.tooltip", text="", icon="QUESTION").text = f"Choose a '{prop.type}' property thats attached to '{prop.attach_to}' to assign this snippet property to."
 
                 if prop.prop_name in context.scene.sn.properties:
-                    if prop.type != context.scene.sn.properties[prop.prop_name].property_type:
+                    if prop.type != context.scene.sn.properties[prop.prop_name].property_type or prop.attach_to != context.scene.sn.properties[prop.prop_name].attach_to:
                         row = layout.row()
                         row.alert = True
-                        row.label(text=f"Choose a property of type '{prop.type}'")
+                        row.label(text=f"Choose a property of type '{prop.type}', that's attached to '{prop.attach_to}'!")
