@@ -39,7 +39,9 @@ class SN_OT_InstallPackage(bpy.types.Operator, ImportHelper):
     
     def write_to_installed(self, new_package, extracted):
         installed_path = os.path.join(os.path.dirname(__file__),"installed.json")
-        with open(installed_path,"r+") as installed:
+        if not os.path.exists(installed_path):
+            with open(installed_path, "w") as data_file: data_file.write(json.dumps({ "packages": [], "snippets": [] }))
+        with open(installed_path, "r+") as installed:
             data = json.loads(installed.read())
             new_package["nodes"] = extracted
             data["packages"].append(new_package)
@@ -77,9 +79,12 @@ class SN_OT_ReloadPackages(bpy.types.Operator):
     def execute(self, context):
         global loaded_packages
         installed_path = os.path.join(os.path.dirname(__file__),"installed.json")
-        with open(installed_path, "r") as installed:
-            data = json.loads(installed.read())
-            loaded_packages = data["packages"]
+        if os.path.exists(installed_path):
+            with open(installed_path, "r") as installed:
+                data = json.loads(installed.read())
+                loaded_packages = data["packages"]
+        else:
+            loaded_packages = []
         return {"FINISHED"}
 
 
@@ -94,6 +99,8 @@ class SN_OT_UninstallPackage(bpy.types.Operator):
     
     def get_package(self):
         installed_path = os.path.join(os.path.dirname(__file__),"installed.json")
+        if not os.path.exists(installed_path):
+            with open(installed_path, "w") as data_file: data_file.write(json.dumps({ "packages": [], "snippets": [] }))
         package = None
         with open(installed_path,"r+") as installed:
             data = json.loads(installed.read())
