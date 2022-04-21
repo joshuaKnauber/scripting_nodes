@@ -420,6 +420,7 @@ class ScriptingSocket:
             socket.subtype = self.subtype
             socket.changeable = self.changeable
             socket.is_variable = self.is_variable
+            socket.data_type = self.data_type
 
             # set this socket
             self.dynamic = False
