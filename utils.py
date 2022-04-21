@@ -3,10 +3,12 @@ import re
 
 
 
-def get_python_name(name, replacement="", separator="_"):
+def get_python_name(name, replacement="", separator="_", lower=True):
     """ Returns the given name as a valid python represention to use as variable names in scripts """
     # format string
-    name = name.replace(" ", separator).lower()
+    name = name.replace(" ", separator)
+    if lower:
+        name = name.lower()
 
     # Remove invalid characters
     name = re.sub('[^0-9a-zA-Z_]', '', name)

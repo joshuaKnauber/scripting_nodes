@@ -24,9 +24,9 @@ class SN_PT_ExtensionsPanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-            
-            
-            
+
+
+
 class SN_PT_SnippetsPanel(bpy.types.Panel):
     bl_parent_id = "SN_PT_ExtensionsPanel"
     bl_idname = "SN_PT_SnippetsPanel"
@@ -70,7 +70,7 @@ class SN_PT_SnippetsPanel(bpy.types.Panel):
         row = layout.row()
         row.scale_y = 1.1
         row.operator("sn.install_snippet", text="Install Snippets", icon="FILE_FOLDER")
-        
+
         for i, snippet in enumerate(snippet_ops.loaded_snippets):
             box = layout.box()
             row = box.row()
