@@ -100,7 +100,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     def draw_market_package(self, package_data):
         if not package_data.name == "placeholder" and \
-            (not self.only_serpens_3 or self.only_serpens_3 and package_data.serpens_version == 3) and \
+            (not self.only_serpens_3 or self.only_serpens_3 and package_data.serpens_version != 2) and \
             (self.search_packages.lower() in package_data.name.lower() or \
             self.search_packages.lower() in package_data.description.lower() or \
             self.search_packages.lower() in package_data.author.lower()):
@@ -113,7 +113,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
             row = box.row()
             row.enabled = False
             row.label(text=package_data.description)
-            serpens_version = "" if package_data.serpens_version == 3 else " (Serpens 2)"
+            serpens_version = "" if package_data.serpens_version != 2 else " (Serpens 2)"
             box.operator("wm.url_open", text=f"{package_data.price}{serpens_version}" if package_data.price else f"Free {serpens_version}", icon="URL").url = package_data.url
             return True
         return False
