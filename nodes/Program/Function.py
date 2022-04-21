@@ -19,7 +19,6 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_dynamic_socket_add(self, socket):
-        socket = self.outputs[-2]
         socket["name"] = get_python_name(socket.name, "Input", lower=False)
         socket["name"] = unique_collection_name(socket.name, "Input", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
         socket.python_value = socket.name
