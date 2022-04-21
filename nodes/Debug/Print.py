@@ -33,6 +33,11 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "PROGRAM"
     
     messages: bpy.props.CollectionProperty(type=PrintProperty)
+
+    print_on_node: bpy.props.BoolProperty(default=True,
+                                    name="Print On Node", 
+                                    description="Show print results on this node",
+                                    update=SN_ScriptingBaseNode._evaluate)
     
     def on_create(self, context):
         self.add_execute_input()
@@ -46,13 +51,14 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.code = f"""
                     print({", ".join(values)})
                     # This part is only added during development to display the messages on the node
-                    try:
-                        if '{self.node_tree.name}' in bpy.data.node_groups and '{self.name}' in bpy.data.node_groups['{self.node_tree.name}'].nodes:
-                            msg = bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}'].messages.add()
-                            msg.text = str([{", ".join(values)}])[1:-1]
-                        for area in bpy.context.screen.areas: area.tag_redraw()
-                    except:
-                        print("Can't add print outputs to the node when the print is run in an interface!")
+                    if {self.print_on_node}:
+                        try:
+                            if '{self.node_tree.name}' in bpy.data.node_groups and '{self.name}' in bpy.data.node_groups['{self.node_tree.name}'].nodes:
+                                msg = bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}'].messages.add()
+                                msg.text = str([{", ".join(values)}])[1:-1]
+                            for area in bpy.context.screen.areas: area.tag_redraw()
+                        except:
+                            print("Can't add print outputs to the node when the print is run in an interface!")
                     {self.indent(self.outputs[0].python_value, 5)}
                     """
                     
@@ -65,17 +71,19 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
                     """
         
     def draw_node(self, context, layout):
-        if not self.messages:
-            box = layout.box()
-            box.label(text="Nothing printed!")
-        else:
-            row = layout.row()
-            row.label(text="Messages:")
-            op = row.operator("sn.clear_prints", text="", icon="TRASH", emboss=False)
-            op.node_tree = self.node_tree.name
-            op.node = self.name
-            col = layout.column(align=True)
-            col.scale_y = 0.9
-            for msg in self.messages:
-                box = col.box()
-                box.label(text=msg.text)
+        layout.prop(self, "print_on_node", text="Print On Node")
+        if self.print_on_node:
+            if not self.messages:
+                box = layout.box()
+                box.label(text="Nothing printed!")
+            else:
+                row = layout.row()
+                row.label(text="Messages:")
+                op = row.operator("sn.clear_prints", text="", icon="TRASH", emboss=False)
+                op.node_tree = self.node_tree.name
+                op.node = self.name
+                col = layout.column(align=True)
+                col.scale_y = 0.9
+                for msg in self.messages:
+                    box = col.box()
+                    box.label(text=msg.text)
