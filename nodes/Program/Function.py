@@ -1,6 +1,6 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
-from ...utils import get_python_name
+from ...utils import get_python_name, unique_collection_name
 
 
 
@@ -19,20 +19,34 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def on_dynamic_socket_add(self, socket):
+        socket = self.outputs[-2]
+        socket["name"] = get_python_name(socket.name, "Input", lower=False)
+        socket["name"] = unique_collection_name(socket.name, "Input", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+        socket.python_value = socket.name
         self.trigger_ref_update({ "added": socket })
+        self._evaluate(bpy.context)
+
 
     def on_dynamic_socket_remove(self, index, is_output):
         self.trigger_ref_update({ "removed": index })
+        self._evaluate(bpy.context)
+
 
     def on_socket_type_change(self, socket):
         if socket.bl_label == "Enum" or socket.bl_label == "Enum Set":
             socket.subtype = "CUSTOM_ITEMS"
         self.trigger_ref_update({ "changed": socket })
+        self._evaluate(bpy.context)
+
 
     def on_socket_name_change(self, socket):
+        socket["name"] = get_python_name(socket.name, "Input", lower=False)
+        socket["name"] = unique_collection_name(socket.name, "Input", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+        socket.python_value = socket.name
         self.trigger_ref_update({ "updated": socket })
-        
-    
+        self._evaluate(bpy.context)
+
+
     def update_fixed_name(self, context):
         self.trigger_ref_update()
         self._evaluate(context)
@@ -52,7 +66,7 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         out_values = []
         for i, out in enumerate(self.outputs[1:-1]):
-            out_values.append(get_python_name(out.name, f"parameter_{i}"))
+            out_values.append(get_python_name(out.name, f"parameter_{i}", lower=False))
         out_names = ", ".join(out_values)
             
         self.code = f"""
