@@ -58,6 +58,7 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
             """
 
     def draw_node(self, context, layout):
+        layout.prop(self, "name")
         layout.prop(self, "title")
     
     def draw_node_panel(self, context, layout):
