@@ -17,14 +17,13 @@ class SN_InterfaceScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     
     def on_socket_name_change(self, socket):
-        socket["name"] = get_python_name(socket.name, "variable", lower=False)
-        socket["name"] = unique_collection_name(socket.name, "variable", [inp.name for inp in self.inputs[1:-1]], "_", includes_name=True)
+        socket["name"] = get_python_name(socket.name, "Variable", lower=False)
+        socket["name"] = unique_collection_name(socket.name, "Variable", [inp.name for inp in self.inputs[1:-1]], "_", includes_name=True)
         self._evaluate(bpy.context)
 
     def on_dynamic_socket_add(self, socket):
-        socket = self.inputs[-2]
-        socket["name"] = get_python_name(socket.name, "variable", lower=False)
-        socket["name"] = unique_collection_name(socket.name, "variable", [inp.name for inp in self.inputs[1:-1]], "_", includes_name=True)
+        socket["name"] = get_python_name(socket.name, "Variable", lower=False)
+        socket["name"] = unique_collection_name(socket.name, "Variable", [inp.name for inp in self.inputs[1:-1]], "_", includes_name=True)
         self._evaluate(bpy.context)
 
 

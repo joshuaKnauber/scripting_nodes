@@ -1,7 +1,6 @@
-from cgi import print_directory
 import bpy
 from ..base_node import SN_ScriptingBaseNode
-from ...utils import get_python_name
+from ...utils import get_python_name, unique_collection_name
 
 
 
@@ -24,20 +23,23 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_dynamic_socket_add(self, socket):
         if not socket.bl_idname == "SN_InterfaceSocket":
+            sockets = []
+            for out in self.outputs:
+                if not out.bl_idname in ["SN_InterfaceSocket", "SN_DynamicInterfaceSocket"]:
+                    sockets.append(out.name)
+            socket["name"] = get_python_name(socket.name, "Input", lower=False)
+            socket["name"] = unique_collection_name(socket.name, "Input", sockets[:-1], "_", includes_name=True)
             self.trigger_ref_update({ "added": socket })
+        self._evaluate(bpy.context)
 
     def on_dynamic_socket_remove(self, index, is_output):
-        outputs = []
         first_index = 0
         for out in self.outputs:
             if out.bl_idname in ["SN_InterfaceSocket", "SN_DynamicInterfaceSocket"]:
                 first_index += 1
-            else:
-                outputs.append(out)
 
         if index >= first_index:
             self.trigger_ref_update({ "removed": index - first_index + 1 })
-
 
     def on_socket_type_change(self, socket):
         if not socket.bl_idname == "SN_InterfaceSocket":
@@ -45,6 +47,12 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_socket_name_change(self, socket):
         if not socket.bl_idname == "SN_InterfaceSocket":
+            sockets = []
+            for out in self.outputs:
+                if not out.bl_idname in ["SN_InterfaceSocket", "SN_DynamicInterfaceSocket"]:
+                    sockets.append(out.name)
+            socket["name"] = get_python_name(socket.name, "Input", lower=False)
+            socket["name"] = unique_collection_name(socket.name, "Input", sockets[:-1], "_", includes_name=True)
             self.trigger_ref_update({ "updated": socket })
         self._evaluate(bpy.context)
 

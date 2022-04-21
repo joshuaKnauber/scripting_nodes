@@ -1,5 +1,6 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
+from ...utils import get_python_name, unique_collection_name
 
 
 
@@ -17,16 +18,24 @@ class SN_FunctionReturnNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         
     def on_dynamic_socket_add(self, socket):
+        socket["name"] = get_python_name(socket.name, "Output", lower=False)
+        socket["name"] = unique_collection_name(socket.name, "Output", [inp.name for inp in self.inputs[1:-1]], "_", includes_name=True)
         self.trigger_ref_update({ "added": socket })
+        self._evaluate(bpy.context)
     
     def on_dynamic_socket_remove(self, index, is_output):
         self.trigger_ref_update({ "removed": index })
+        self._evaluate(bpy.context)
         
     def on_socket_type_change(self, socket):
         self.trigger_ref_update({ "changed": socket })
+        self._evaluate(bpy.context)
         
     def on_socket_name_change(self, socket):
+        socket["name"] = get_python_name(socket.name, "Output", lower=False)
+        socket["name"] = unique_collection_name(socket.name, "Output", [inp.name for inp in self.inputs[1:-1]], "_", includes_name=True)
         self.trigger_ref_update({ "updated": socket })
+        self._evaluate(bpy.context)
 
 
     def evaluate(self, context):

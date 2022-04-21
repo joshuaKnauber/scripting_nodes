@@ -3,6 +3,8 @@ from .conversions import CONVERSIONS
 from ...addon.properties.settings.settings import property_icons
 
 
+import time
+
 
 class ScriptingSocket:
     
@@ -189,7 +191,7 @@ class ScriptingSocket:
             if not self.is_output and self.prev_dynamic:
                 self._draw_prev_dynamic_socket(context, layout, node)
             layout.prop(self, "name", text="")
-            self.draw_socket(context, layout, node, text, minimal=True)
+            self.draw_socket(context, layout, node, "", minimal=True)
             # draw changeable socket
             if self.changeable:
                 layout.separator()
@@ -418,10 +420,15 @@ class ScriptingSocket:
             socket.subtype = self.subtype
             socket.changeable = self.changeable
             socket.is_variable = self.is_variable
+            socket.data_type = self.data_type
 
             # set this socket
             self.dynamic = False
             self.prev_dynamic = True
-            
-            self.node.on_dynamic_socket_add(socket)
-            self.node._evaluate(bpy.context)
+
+            if socket.dynamic:
+                self.node.on_dynamic_socket_add(self)
+            else:
+                self.node.on_dynamic_socket_add(socket)
+
+            socket.node._evaluate(bpy.context)

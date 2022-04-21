@@ -13,10 +13,10 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_dynamic_socket_add(self, socket):
         alphabet = list(string.ascii_lowercase)
-        if self.inputs[-1].name == "z":
-            self.inputs[-1].set_hide(True)
-        else:
-            self.inputs[-1].name = alphabet[alphabet.index(self.inputs[-2].name)+1]
+        if len(self.inputs) > 26:
+            self.inputs.remove(socket)
+        for x, socket in enumerate(self.inputs):
+            socket.name = alphabet[x]
 
     def on_dynamic_socket_remove(self, index, is_output):
         alphabet = list(string.ascii_lowercase)

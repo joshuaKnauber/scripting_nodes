@@ -24,7 +24,9 @@ class SN_RunInterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                     break
             # inputs has been added
             if "added" in data:
+                socket_index = list(data["added"].node.outputs).index(data["added"])
                 self.add_input_from_socket(data["added"])
+                self.inputs.move(len(self.inputs)-1, socket_index-index)
             # input has been removed
             elif "removed" in data:
                 self.inputs.remove(self.inputs[data["removed"]])

@@ -27,7 +27,9 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         if node.bl_idname == "SN_FunctionNode" and data:
             # inputs has been added
             if "added" in data:
+                socket_index = list(data["added"].node.outputs).index(data["added"])
                 self.add_input_from_socket(data["added"])
+                self.inputs.move(len(self.inputs)-1, socket_index)
             # input has been removed
             elif "removed" in data:
                 self.inputs.remove(self.inputs[data["removed"]])
@@ -44,7 +46,9 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         elif node.bl_idname == "SN_FunctionReturnNode" and data:
             # output has been added
             if "added" in data:
+                socket_index = list(data["added"].node.inputs).index(data["added"])
                 self.add_output_from_socket(data["added"])
+                self.outputs.move(len(self.outputs)-1, socket_index)
             # output has been removed
             elif "removed" in data:
                 self.outputs.remove(self.outputs[data["removed"]])
@@ -55,8 +59,8 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             elif "updated" in data:
                 self.outputs[data["updated"].index].name = data["updated"].name
             self._evaluate(bpy.context)
-            
-            
+
+
     def update_function_reference(self, context):
         parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
         # remember connections
