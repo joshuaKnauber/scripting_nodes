@@ -1,4 +1,5 @@
 import bpy
+import re
 import gpu
 import bgl
 from gpu_extras.batch import batch_for_shader
@@ -67,11 +68,15 @@ class SN_OT_SetTutorial(bpy.types.Operator):
         return {"FINISHED"}
 
 
+def num_sort(test_string):
+    return list(map(int, re.findall(r'\d+', test_string)))[0]
+
 def load_images():
     images = []
     for file in os.listdir(os.path.join(os.path.dirname(os.path.dirname(__file__)), "assets", "tutorial")):
         if file.split(".")[-1] == "jpg":
             images.append(file)
+    images.sort(key=num_sort)
     return images
 
 shader = None
@@ -142,6 +147,14 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
         ("Overview", "0.jpg"),
         ("UI", "4.jpg"),
         ("Nodes", "6.jpg"),
+        ("Interface", "9.jpg"),
+        ("Execute", "10.jpg"),
+        ("Data", "12.jpg"),
+        ("Variables", "13.jpg"),
+        ("Blender Data", "14.jpg"),
+        ("Properties", "16.jpg"),
+        ("Operators", "17.jpg"),
+        ("Export", "18.jpg"),
     ]
     
     
@@ -205,7 +218,7 @@ class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
         row.label(text=self.current_chapter())
         
         CHAPTER_INDEX = 1
-        ADVENTURE_INDEX = 999
+        ADVENTURE_INDEX = 8
         
         if self.index == ADVENTURE_INDEX:
             col = layout.column()
