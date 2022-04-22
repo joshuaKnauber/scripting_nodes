@@ -5,5 +5,5 @@ __pycache__/
 *.blend1
 update_log.json
 installed.json
-packages/snippets/*
-!packages/snippets/__init__.py
+extensions/snippets/*
+!extensions/snippets/__init__.py

@@ -17,7 +17,7 @@ class SN_MT_SnippetMenu(bpy.types.Menu):
                     for snippet in data["snippets"]:
                         layout.operator("sn.add_snippet", text=snippet.split(".")[0]).path = os.path.join(context.snippet.path, snippet)
         else:
-            path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "packages", "snippets")
+            path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "extensions", "snippets")
             for name in snippet_ops.loaded_snippets:
                 if type(name) == str:
                     layout.operator("sn.add_snippet", text=name.split(".")[0]).path = os.path.join(path, name)
