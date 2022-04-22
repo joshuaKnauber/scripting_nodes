@@ -203,17 +203,26 @@ class BasicProperty():
             # trigger an update on the affected nodes
             setattr(node, key, self.name)
         self._compile()
+
+    
+    def get_types(self, context):
+        items = [("String", "String", "Stores text, can display a text input or a filepath field", property_icons["String"], 0),
+            ("Boolean", "Boolean", "Stores True or False, can be used for a checkbox", property_icons["Boolean"], 1),
+            ("Float", "Float", "Stores a decimal number or a vector", property_icons["Float"], 2),
+            ("Integer", "Integer", "Stores an integer number or a vector", property_icons["Integer"], 3),
+            ("Enum", "Enum", "Stores multiple entries to be used as dropdowns", property_icons["Enum"], 4),
+            ("Pointer", "Pointer", "Stores a reference to certain types of blend data, collection or group properties", property_icons["Pointer"], 5),
+            ("Collection", "Collection", "Stores a list of certain blend data or property groups to be displayed in lists", property_icons["Collection"], 6)]
+        if not self.allow_pointers:
+            items.pop(5)
+        return items
         
     property_type: bpy.props.EnumProperty(name="Type",
                                     description="The type of data this property can store",
                                     update=trigger_reference_update,
-                                    items=[("String", "String", "Stores text, can display a text input or a filepath field", property_icons["String"], 0),
-                                           ("Boolean", "Boolean", "Stores True or False, can be used for a checkbox", property_icons["Boolean"], 1),
-                                           ("Float", "Float", "Stores a decimal number or a vector", property_icons["Float"], 2),
-                                           ("Integer", "Integer", "Stores an integer number or a vector", property_icons["Integer"], 3),
-                                           ("Enum", "Enum", "Stores multiple entries to be used as dropdowns", property_icons["Enum"], 4),
-                                           ("Pointer", "Pointer", "Stores a reference to certain types of blend data, collection or group properties", property_icons["Pointer"], 5),
-                                           ("Collection", "Collection", "Stores a list of certain blend data or property groups to be displayed in lists", property_icons["Collection"], 6)])
+                                    items=get_types)
+
+    allow_pointers: bpy.props.BoolProperty(default=True)
 
 
     def get_prop_option_items(self, context):

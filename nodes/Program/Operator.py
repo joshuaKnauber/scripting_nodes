@@ -18,6 +18,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         self.trigger_ref_update({ "property_change": property })
 
     def on_node_property_add(self, property):
+        property.allow_pointers = False
         self.trigger_ref_update({ "property_add": property })
 
     def on_node_property_remove(self, index):
