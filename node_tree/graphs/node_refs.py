@@ -70,6 +70,14 @@ class NodeRefCollection(bpy.types.PropertyGroup):
         for i in range(len(self.refs)-1, -1, -1):
             if not self.refs[i].node:
                 self.refs.remove(i)
+                
+    def fix_ref_names(self):
+        """ Makes sure all ref names match the node names """
+        for ref in self.refs:
+            if ref.name != ref.node.name:
+                ref.name = ref.node.name
+                ref.node.on_node_name_change()
+                ref.node._evaluate(bpy.context)
     
     @property
     def nodes(self):

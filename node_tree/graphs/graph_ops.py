@@ -134,6 +134,7 @@ class SN_OT_ForceCompile(bpy.types.Operator):
             if ntree.bl_idname == "ScriptingNodesTree":
                 for refs in ntree.node_refs:
                     refs.clear_unused_refs()
+                    refs.fix_ref_names()
                 ntree.reevaluate()
         return {"FINISHED"}
 
