@@ -43,9 +43,31 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
                     if node.bl_idname == "SN_IconNode":
                         if node.icon_source == "CUSTOM" and node.icon_file:
                             node.icon_file.reload()
-                            ctx = bpy.context.copy()
-                            ctx["edit_image"] = node.icon_file
-                            bpy.ops.image.save_as(ctx, filepath=os.path.join(icon_path, node.icon_file.name))
+                            # ctx = bpy.context.copy()
+                            # ctx["edit_image"] = node.icon_file
+                            # bpy.ops.image.save_as(ctx, filepath=os.path.join(icon_path, node.icon_file.name))
+
+                            filepath = os.path.join(icon_path, node.icon_file.name)
+
+                            # Store current render settings
+                            settings = bpy.context.scene.render.image_settings
+                            format = settings.file_format
+                            mode = settings.color_mode
+                            depth = settings.color_depth
+
+                            # Change render settings to our target format
+                            settings.file_format = 'PNG'
+                            settings.color_mode = 'RGBA'
+                            settings.color_depth = '8'
+
+                            # Save image to TIF, this does NOT render anything!
+                            # It only means that the save command will use the current scene's render settings.
+                            node.icon_file.save_render(filepath)
+
+                            # Restore previous render settings
+                            settings.file_format = format
+                            settings.color_mode = mode
+                            settings.color_depth = depth
 
     def info(self):
         """ Returns the bl_info for this addon """
