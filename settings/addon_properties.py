@@ -8,7 +8,7 @@ from ..addon.properties.properties import SN_GeneralProperties
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
 from .load_markets import SN_Addon, SN_Package, SN_Snippet
-from ..packages.snippet_ops import SN_SnippetCategory
+from ..extensions.snippet_ops import SN_SnippetCategory
             
 
 

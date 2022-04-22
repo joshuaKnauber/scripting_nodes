@@ -1,6 +1,6 @@
 import bpy
-from ...packages import package_ops
-from ...packages import snippet_ops
+from ...extensions import package_ops
+from ...extensions import snippet_ops
 
 
 
