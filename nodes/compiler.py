@@ -4,6 +4,7 @@ from ..utils import indent_code
 from ..node_tree.sockets.conversions import CONVERT_UTILS
 from ..addon.properties.compiler_properties import property_imperative_code, property_register_code, property_unregister_code
 from ..addon.variables.compiler_variables import variable_register_code
+from ..yapf.yapflib.yapf_api import FormatCode
 
 
 
@@ -133,6 +134,9 @@ def format_single_file():
         unregister = "pass\n"
     
     code = f"{imports}\n{imperative}\n{main}\n\ndef register():\n{indent_code(register, 1, 0)}\n\ndef unregister():\n{indent_code(unregister, 1, 0)}\n\n"
+
+    if (sn.debug_code and sn.format_code) or sn.is_exporting:
+        code = FormatCode(code, style_config='pep8')[0]
     t7 = time.time()
 
     if sn.debug_compile_time:

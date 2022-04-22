@@ -74,6 +74,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         default=False)
 
 
+    format_code: bpy.props.BoolProperty(default=False,
+                                        name="Format Code",
+                                        description="This will format the code during debugging")
+
     debug_python_nodes: bpy.props.BoolProperty(default=False,
                                         name="Debug Nodes",
                                         description="Debug internal node code")
