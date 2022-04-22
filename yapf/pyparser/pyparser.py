@@ -29,7 +29,6 @@ out.
   ParseCode(): parse the code producing a list of logical lines.
 """
 
-# TODO: Call from yapf_api.FormatCode.
 
 import ast
 import os

@@ -1204,7 +1204,6 @@ class _ParenState(object):
       Each subsequent line split gets an increasing penalty.
   """
 
-  # TODO(morbo): This doesn't track "bin packing."
 
   def __init__(self, indent, last_space):
     self.indent = indent

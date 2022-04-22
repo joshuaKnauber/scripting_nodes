@@ -24,7 +24,6 @@ from ..yapflib import py3compat
 from ..yapflib import style
 from ..yapflib import subtypes
 
-# TODO(morbo): Document the annotations in a centralized place. E.g., the
 # README file.
 UNBREAKABLE = 1000 * 1000
 NAMED_ASSIGN = 15000

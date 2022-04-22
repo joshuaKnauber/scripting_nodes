@@ -77,7 +77,6 @@ def CanMergeMultipleLines(lines, last_was_merged=False):
     if last_was_merged and lines[0].first.value in {'elif', 'else'}:
       return _CanMergeLineIntoIfStatement(lines, limit)
 
-  # TODO(morbo): Other control statements?
 
   return False
 

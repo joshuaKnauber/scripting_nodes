@@ -848,7 +848,6 @@ SETUP_CONFIG = 'setup.cfg'
 # in the '[tool.yapf]' section.
 PYPROJECT_TOML = 'pyproject.toml'
 
-# TODO(eliben): For now we're preserving the global presence of a style dict.
 # Refactor this so that the style is passed around through yapf rather than
 # being global.
 _style = None

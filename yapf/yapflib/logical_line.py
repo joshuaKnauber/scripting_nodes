@@ -154,7 +154,6 @@ class LogicalLine(object):
 
     The code representation shows how the line would be printed out as code.
 
-    TODO(eliben): for now this is rudimentary for debugging - once we add
     formatting capabilities, this method will have other uses (not all tokens
     have spaces around them, for example).
 

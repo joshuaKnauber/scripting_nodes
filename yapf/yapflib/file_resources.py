@@ -212,7 +212,6 @@ def _FindPythonFiles(filenames, recursive, exclude):
         raise errors.YapfError(
             "directory specified without '--recursive' flag: %s" % filename)
 
-      # TODO(morbo): Look into a version of os.walk that can handle recursion.
       excluded_dirs = []
       for dirpath, dirnames, filelist in os.walk(filename):
         if dirpath != '.' and exclude and IsIgnored(dirpath, exclude):

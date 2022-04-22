@@ -121,8 +121,6 @@ def format_single_file():
         if node.code_unregister: unregister += "\n" + node.code_unregister
     t5 = time.time()
     
-    # TODO remove unused functions (at least on export)
-
     # add property code
     main += "\n" + property_imperative_code() + "\n"
     t6 = time.time()

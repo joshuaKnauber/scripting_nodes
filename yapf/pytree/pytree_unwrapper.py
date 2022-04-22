@@ -140,7 +140,6 @@ class PyTreeUnwrapper(pytree_visitor.PyTreeVisitor):
     # depth of we have a simple_stmt that's a comment node. This represents a
     # standalone comment and in the case of it coming directly after the
     # funcdef, it is a "top" comment for the whole function.
-    # TODO(eliben): add more relevant compound statements here.
     single_stmt_suite = (
         node.parent and pytree_utils.NodeName(node.parent) in self._STMT_TYPES)
     is_comment_stmt = pytree_utils.IsCommentStatement(node)

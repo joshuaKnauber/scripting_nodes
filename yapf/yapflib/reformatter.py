@@ -427,7 +427,6 @@ class _StateNode(object):
     previous: (_StateNode) The previous state node in the graph.
   """
 
-  # TODO(morbo): Add a '__cmp__' method.
 
   def __init__(self, state, newline, previous):
     self.state = state.Clone()
@@ -622,8 +621,6 @@ def _CalculateNumberOfNewlines(first_token, indent_depth, prev_line,
   Returns:
     The number of newlines needed before the first token.
   """
-  # TODO(morbo): Special handling for imports.
-  # TODO(morbo): Create a knob that can tune these.
   if prev_line is None:
     # The first line in the file. Don't add blank lines.
     # FIXME(morbo): Is this correct?
@@ -668,7 +665,6 @@ def _CalculateNumberOfNewlines(first_token, indent_depth, prev_line,
       return ONE_BLANK_LINE
 
   if _IsClassOrDef(first_token):
-    # TODO(morbo): This can go once the blank line calculator is more
     # sophisticated.
     if not indent_depth:
       # This is a top-level class or function.
@@ -746,7 +742,6 @@ def _SingleOrMergedLines(lines):
         index += 1
       yield line
     elif line_joiner.CanMergeMultipleLines(lines[index:], last_was_merged):
-      # TODO(morbo): This splice is potentially very slow. Come up with a more
       # performance-friendly way of determining if two lines can be merged.
       next_line = lines[index + 1]
       for tok in next_line.tokens:

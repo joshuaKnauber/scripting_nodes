@@ -33,7 +33,6 @@ from lib2to3.pgen2 import driver
 from lib2to3.pgen2 import parse
 from lib2to3.pgen2 import token
 
-# TODO(eliben): We may want to get rid of this filtering at some point once we
 # have a better understanding of what information we need from the tree. Then,
 # these tokens may be filtered out from the tree before the tree gets to the
 # unwrapper.
