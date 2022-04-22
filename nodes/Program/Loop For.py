@@ -30,6 +30,11 @@ class SN_ForExecuteNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 items=[("List", "List", "List"),
                                        ("Collection", "Collection", "Collection")],
                                 update=update_type)
+
+    reverse: bpy.props.BoolProperty(name="Reverse",
+                                description="Reverse the order the loop runs through the items",
+                                default=False,
+                                update=SN_ScriptingBaseNode._evaluate)
     
 
     def evaluate(self, context):
@@ -37,7 +42,7 @@ class SN_ForExecuteNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.outputs["Index"].python_value = f"i_{self.static_uid}"
             self.outputs["Item"].python_value = f"{self.inputs[1].python_value}[i_{self.static_uid}]"
             self.code = f"""
-                        for i_{self.static_uid} in range(len({self.inputs[1].python_value})):
+                        for i_{self.static_uid} in range({f"len({self.inputs[1].python_value})" if not self.reverse else f"len({self.inputs[1].python_value})-1,-1,-1"}):
                             {self.indent(self.outputs['Repeat'].python_value, 7) if self.outputs['Repeat'].python_value.strip() else 'pass'}
                         {self.indent(self.outputs['Continue'].python_value, 6)}
                         """
@@ -48,3 +53,4 @@ class SN_ForExecuteNode(bpy.types.Node, SN_ScriptingBaseNode):
             
     def draw_node(self, context, layout):
         layout.prop(self, "for_type")
+        layout.prop(self, "reverse")
