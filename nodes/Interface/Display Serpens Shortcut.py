@@ -30,8 +30,16 @@ class SN_DisplaySerpensShortcutNode(bpy.types.Node, SN_ScriptingBaseNode):
                 def find_user_keyconfig(key):
                     km, kmi = addon_keymaps[key]
                     for item in bpy.context.window_manager.keyconfigs.user.keymaps[km.name].keymap_items:
-                        if item.compare(kmi):
+                        found_item = False
+                        if kmi.idname == item.idname:
+                            found_item = True
+                            for name in dir(kmi.properties):
+                                if not name in ["bl_rna", "rna_type"] and not name[0] == "_":
+                                    if not kmi.properties[name] == item.properties[name]:
+                                        found_item = False
+                        if found_item:
                             return item
+                    print("Couldn't find keymap item, using addon keymap instead. This won't be saved across sessions!")
                     return kmi
             """
             node = self.ref_ntree.nodes[self.ref_SN_OnKeypressNode]
