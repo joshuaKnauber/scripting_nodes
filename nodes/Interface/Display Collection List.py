@@ -35,7 +35,7 @@ class SN_DisplayCollectionListNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.code_unregister = f"""
                                     bpy.utils.unregister_class({ui_list_idname})
                                     """
-            self.code = f"{self.active_layout}.template_list('{ui_list_idname}', '{self.name}', {self.inputs['Collection Property'].python_source}, '{self.inputs['Collection Property'].python_attr}', {self.inputs['Index Property'].python_source}, '{self.inputs['Index Property'].python_attr}', rows={self.inputs['Rows'].python_value})"
+            self.code = f"{self.active_layout}.template_list('{ui_list_idname}', '{self.static_uid}', {self.inputs['Collection Property'].python_source}, '{self.inputs['Collection Property'].python_attr}', {self.inputs['Index Property'].python_source}, '{self.inputs['Index Property'].python_attr}', rows={self.inputs['Rows'].python_value})"
             self.outputs["Item"].python_value = f"{self.inputs['Collection Property'].python_value}[index_{self.static_uid}]"
         else:
             self.code = f"{self.active_layout}.label(text='No Property connected!', icon='ERROR')"
