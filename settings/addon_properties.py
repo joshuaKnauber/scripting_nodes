@@ -76,7 +76,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     format_code: bpy.props.BoolProperty(default=False,
                                         name="Format Code",
-                                        description="This will format the code during debugging")
+                                        description="This will format the code during debugging (This will substantially increase your compile time!)")
 
     debug_python_nodes: bpy.props.BoolProperty(default=False,
                                         name="Debug Nodes",
