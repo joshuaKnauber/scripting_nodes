@@ -37,9 +37,6 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         col.prop(sn, "debug_python_sockets")
         col.prop(sn, "debug_python_properties")
         col.prop(sn, "debug_code")
-        sub_row = col.row()
-        sub_row.enabled = sn.debug_code
-        sub_row.prop(sn, "format_code")
         
         
         
