@@ -143,7 +143,7 @@ class BasicProperty():
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
-                    if getattr(node, "prop_name", None) == self.name:
+                    if getattr(node, "prop_name", None) == self.name or getattr(node, "prop_group", None) == self.name:
                         if self.property_type == "Group":
                             if hasattr(node, "get_prop_source") and node.get_prop_source() == self.settings:
                                 to_update_nodes.append((node, "prop_group"))
