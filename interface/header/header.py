@@ -51,6 +51,7 @@ def header_append(self, context):
         sub_row.operator("wm.url_open", text="", icon="HELP").url = "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233"
         ms = round(context.scene.sn.compile_time*1000, 2)
         row.label(text=str(ms)+"ms")
+        row.prop(context.scene.sn, "pause_reregister", text="", icon="PLAY" if context.scene.sn.pause_reregister else "PAUSE")
 
 
 
