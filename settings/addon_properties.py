@@ -1,3 +1,4 @@
+from email.policy import default
 import bpy
 from bl_ui import space_userpref
 from uuid import uuid4
@@ -9,6 +10,7 @@ from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
 from .load_markets import SN_Addon, SN_Package, SN_Snippet
 from ..extensions.snippet_ops import SN_SnippetCategory
+from ..nodes.compiler import compile_addon
             
 
 
@@ -33,6 +35,16 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     @property
     def module_name(self):
         return get_python_name(bpy.context.scene.sn.addon_name, replacement=f"addon_{uuid4().hex[:5].upper()}")
+    
+    
+    def update_reregister(self, context):
+        if not self.pause_reregister:
+            compile_addon()
+            
+    pause_reregister: bpy.props.BoolProperty(default=False,
+                                        name="Pause Reregistering",
+                                        description="Pauses reregistering the addon when changes are made",
+                                        update=update_reregister)
 
 
     is_exporting: bpy.props.BoolProperty(default=False,

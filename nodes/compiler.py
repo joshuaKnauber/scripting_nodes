@@ -23,51 +23,52 @@ def unregister_addon():
 
 def compile_addon():
     """ Reregisters the current addon code and stores results """
-    t1 = time.time()
-    sn = bpy.context.scene.sn
+    if not bpy.context.scene.sn.pause_reregister:
+        t1 = time.time()
+        sn = bpy.context.scene.sn
 
-    # Unregister previous version
-    unregister_addon()
-                    
-    # create text file
-    txt = bpy.data.texts.new("tmp_serpens")
-    txt.use_fake_user = False
-    
-    t2 = time.time()
-    code = format_single_file()
-    code += "\nbpy.context.scene.sn.addon_unregister.append(unregister)"
-    code += "\nregister()"
-    if sn.debug_compile_time: print(f"Generating code took {round((time.time()-t2)*1000, 2)}ms")
-    txt.write(code)
-    
-    if sn.debug_code:
-        if not "serpens_code_log" in bpy.data.texts:
-            log = bpy.data.texts.new("serpens_code_log")
-        log = bpy.data.texts["serpens_code_log"]
-        log.clear()
-        log.write(code)
+        # Unregister previous version
+        unregister_addon()
+                        
+        # create text file
+        txt = bpy.data.texts.new("tmp_serpens")
+        txt.use_fake_user = False
         
+        t2 = time.time()
+        code = format_single_file()
+        code += "\nbpy.context.scene.sn.addon_unregister.append(unregister)"
+        code += "\nregister()"
+        if sn.debug_compile_time: print(f"Generating code took {round((time.time()-t2)*1000, 2)}ms")
+        txt.write(code)
+        
+        if sn.debug_code:
+            if not "serpens_code_log" in bpy.data.texts:
+                log = bpy.data.texts.new("serpens_code_log")
+            log = bpy.data.texts["serpens_code_log"]
+            log.clear()
+            log.write(code)
+            
 
-    # run text file
-    t2 = time.time()
-    ctx = bpy.context.copy()
-    ctx['edit_text'] = txt
-    try:
-        # exec(txt.as_string())
-        bpy.ops.text.run_script(ctx)
-    except Exception:
-        print("^ ERROR WHEN REGISTERING SERPENS ADDON ^\n")
-        if bpy.context.preferences.addons[__name__.partition('.')[0]].preferences.keep_last_error_file:
-            if not "serpens_error" in bpy.data.texts:
-                bpy.data.texts.new("serpens_error")
-            err = bpy.data.texts["serpens_error"]
-            err.clear()
-            err.write(code)
-    if sn.debug_compile_time: print(f"Register took {round((time.time()-t2)*1000, 2)}ms\n---")
+        # run text file
+        t2 = time.time()
+        ctx = bpy.context.copy()
+        ctx['edit_text'] = txt
+        try:
+            # exec(txt.as_string())
+            bpy.ops.text.run_script(ctx)
+        except Exception:
+            print("^ ERROR WHEN REGISTERING SERPENS ADDON ^\n")
+            if bpy.context.preferences.addons[__name__.partition('.')[0]].preferences.keep_last_error_file:
+                if not "serpens_error" in bpy.data.texts:
+                    bpy.data.texts.new("serpens_error")
+                err = bpy.data.texts["serpens_error"]
+                err.clear()
+                err.write(code)
+        if sn.debug_compile_time: print(f"Register took {round((time.time()-t2)*1000, 2)}ms\n---")
 
-    # remove text file
-    bpy.data.texts.remove(txt)
-    sn.compile_time = time.time() - t1
+        # remove text file
+        bpy.data.texts.remove(txt)
+        sn.compile_time = time.time() - t1
 
 
 
