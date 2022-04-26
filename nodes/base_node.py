@@ -437,8 +437,10 @@ class SN_ScriptingBaseNode:
                 box = layout.box()
                 col = box.column(align=True)
                 row = col.row()
-                row.enabled = False
-                row.label(text=key.replace("_", " ").title())
+                row.operator("sn.copy_python_name", icon="COPYDOWN", text="", emboss=False).name = getattr(self, key)
+                subrow = row.row()
+                subrow.enabled = False
+                subrow.label(text=key.replace("_", " ").title())
                 for line in getattr(self, key).split("\n"):
                     col.label(text=line)
 
