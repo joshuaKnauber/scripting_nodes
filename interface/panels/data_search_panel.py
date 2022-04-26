@@ -100,9 +100,13 @@ class SN_PT_data_search(bpy.types.Panel):
             op = row.operator("sn.expand_data", text="", icon="TRIA_DOWN" if item["expanded"] else "TRIA_RIGHT", emboss=False)
             op.path = item["path"]
 
+            subrow = row.row(align=True)
             has_filters = item["data_search"] != "" or item["data_filter"] != filter_defaults
-            op = row.operator("sn.filter_data", text="", icon="FILTER", emboss=has_filters, depress=has_filters)
+            op = subrow.operator("sn.filter_data", text="", icon="FILTER", emboss=has_filters, depress=has_filters)
             op.path = item["path"]
+            if has_filters:
+                op = subrow.operator("sn.reset_item_filters", text="", icon="LOOP_BACK", depress=True)
+                op.path = item["path"]
 
         row.label(text=item["name"])
         

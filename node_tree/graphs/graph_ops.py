@@ -136,6 +136,7 @@ class SN_OT_ForceCompile(bpy.types.Operator):
                     refs.clear_unused_refs()
                     refs.fix_ref_names()
                 ntree.reevaluate()
+        self.report({"INFO"}, message="Compiled successfully!")
         return {"FINISHED"}
 
     def invoke(self, context, event):

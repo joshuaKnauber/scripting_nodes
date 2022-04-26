@@ -139,12 +139,34 @@ class SN_OT_ReloadData(bpy.types.Operator):
     def execute(self, context):
         context.scene.sn.hide_preferences = True
         return {"FINISHED"}
+    
+    
+    
+class SN_OT_ResetItemFilters(bpy.types.Operator):
+    bl_idname = "sn.reset_item_filters"
+    bl_label = "Reset Item Filters"
+    bl_description = "Reset this items filters"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        item = item_from_path(context.scene.sn.data_items, self.path)
+        try:
+            item["data"]
+            item["data_filter"] = filter_defaults
+            item["data_search"] = ""
+        except:
+            item["has_properties"] = False
+            item["expanded"] = False
+            self.report({"ERROR"}, message="This data doesn't exist anymore!")
+        return {"FINISHED"}
 
 
 
 class SN_OT_ReloadItemData(bpy.types.Operator):
     bl_idname = "sn.reload_item_data"
-    bl_label = "Reload ItemData"
+    bl_label = "Reload Item Data"
     bl_description = "Reloads this items data"
     bl_options = {"REGISTER", "INTERNAL"}
 
