@@ -12,6 +12,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     bl_label = "Visual Scripting"
     bl_icon = 'FILE_SCRIPT'
     is_sn = True
+    type: bpy.props.EnumProperty(items=[("SCRIPTING", "Scripting", "Scripting")], name="Type")
 
     link_cache = {} # stores cache of the links from the previous update for all node trees based on their memory adress
 
