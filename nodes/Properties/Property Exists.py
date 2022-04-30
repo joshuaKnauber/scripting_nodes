@@ -17,11 +17,11 @@ class SN_PropertyExistsNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         self.code_imperative = f"""
-            def property_exists(prop_path):
+            def property_exists(prop_path, glob, loc):
                 try:
-                    eval(prop_path)
+                    eval(prop_path, glob, loc)
                     return True
                 except:
                     return False
             """
-        self.outputs[0].python_value = f"""property_exists("{self.inputs[0].python_value}")"""
+        self.outputs[0].python_value = f"""property_exists("{self.inputs[0].python_value}", globals(), locals())"""
