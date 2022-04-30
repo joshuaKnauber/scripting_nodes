@@ -168,6 +168,7 @@ def get_function_parameters(parent_data, name):
                 elif param_type == "Int": param_type = "Integer"
                 if getattr(param, "is_array", False): param_type += " Vector"
                 if param_type == "Enum":
+                    if param.is_enum_flag: param_type = "Enum Set"
                     items = ",".join(list(map(lambda item: f"'{item.identifier}'", param.enum_items_static)))
                     param_type += f"[{items}]"
                 if param.is_output:

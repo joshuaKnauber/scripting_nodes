@@ -44,7 +44,7 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         socket.disabled = True
         if sn.last_copied_datapath == self.pasted_data_path and param_name in sn.last_copied_required.split(";"):
             socket.disabled = False
-        if socket_type == "Enum":
+        if socket_type == "Enum" or socket_type == "Enum Set":
             socket.items = f"[{param.split(': ')[-1].split('[')[-1]}"
     
     def create_inputs_from_path(self):
