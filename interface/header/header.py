@@ -25,8 +25,11 @@ def header_prepend(self, context):
         row.operator("sn.show_data_overview", text="Blend Data", icon="RNA")
 
         subrow = row.row(align=True)
-        subrow.operator("sn.clear_console", text="", icon="TRASH")
-        subrow.operator("wm.console_toggle", text="Console", icon="CONSOLE")
+        try:
+            subrow.operator("sn.clear_console", text="", icon="TRASH")
+            subrow.operator("wm.console_toggle", text="Console", icon="CONSOLE")
+        except:
+            pass
         row.prop(context.preferences.view, "show_tooltips_python", text="", icon="INFO")
         row.popover("SN_PT_HeaderSettings", text="", icon="PREFERENCES")
 
