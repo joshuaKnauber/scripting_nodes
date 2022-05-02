@@ -56,8 +56,7 @@ def get_all_submodules(directory):
 
 def iter_submodules(path, package_name):
     for name in sorted(iter_submodule_names(path)):
-        if not "yapf" in name:
-            yield importlib.import_module("." + name, package_name)
+        yield importlib.import_module("." + name, package_name)
 
 def iter_submodule_names(path, root=""):
     for _, module_name, is_package in pkgutil.iter_modules([str(path)]):
