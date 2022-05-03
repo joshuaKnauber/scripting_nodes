@@ -14,7 +14,7 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "INTERFACE"
 
     def on_create(self, context):
-        self.add_interface_output()
+        self.add_interface_output().prev_dynamic = True
         self.add_dynamic_interface_output()
         out = self.add_dynamic_data_output("Input")
         out.is_variable = True

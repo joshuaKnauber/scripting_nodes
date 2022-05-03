@@ -14,7 +14,7 @@ class SN_AddToMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_boolean_input("Hide")
-        self.add_interface_output("Menu")
+        self.add_interface_output("Menu").prev_dynamic = True
         self.add_dynamic_interface_output("Menu")
 
 

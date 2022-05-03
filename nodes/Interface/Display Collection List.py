@@ -17,6 +17,7 @@ class SN_DisplayCollectionListNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_collection_property_input()
         self.add_property_input("Index Property")
         self.add_integer_input("Rows")
+        self.add_interface_output("Item Row").prev_dynamic = True
         self.add_dynamic_interface_output("Item Row")
         self.add_property_output("Item")
 

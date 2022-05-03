@@ -15,7 +15,7 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     
     def on_create(self, context):
         self.add_boolean_input("Hide").default_value = False
-        self.add_interface_output("Preferences")
+        self.add_interface_output("Preferences").prev_dynamic = True
         self.add_dynamic_interface_output("Preferences")
 
     def evaluate(self, context):
