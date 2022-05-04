@@ -28,3 +28,6 @@ class SN_StripStringNode(bpy.types.Node, SN_ScriptingBaseNode):
             self.outputs["Stripped String"].python_value = f"{self.inputs['String'].python_value}.lstrip()"
         elif self.position == "RIGHT":
             self.outputs["Stripped String"].python_value = f"{self.inputs['String'].python_value}.rstrip()"
+            
+    def draw_node(self, context, layout):
+        layout.prop(self, "position", expand=True)
