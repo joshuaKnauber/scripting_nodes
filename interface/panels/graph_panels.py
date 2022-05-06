@@ -37,18 +37,28 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         layout = self.layout
         sn = context.scene.sn
 
+        tree = None
+        trees = []
+        for ngroup in bpy.data.node_groups:
+            if ngroup.bl_idname == "ScriptingNodesTree":
+                trees.append(ngroup)
+                
+        if sn.node_tree_index < len(bpy.data.node_groups) and bpy.data.node_groups[sn.node_tree_index].bl_idname == "ScriptingNodesTree":
+            tree = bpy.data.node_groups[sn.node_tree_index]
+
         row = layout.row(align=False)
         row.template_list("SN_UL_GraphList", "Graphs", bpy.data, "node_groups", sn, "node_tree_index", rows=4)
         col = row.column(align=True)
         col.operator("sn.add_graph", text="", icon="ADD")
         col.operator("sn.append_graph", text="", icon="APPEND_BLEND")
-        col.operator("sn.remove_graph", text="", icon="REMOVE")
-
-
-        # col.separator()
-        # row = col.row(align=True)
-        # row.enabled = addon_tree.sn_graph_index > 1
-        # row.operator("sn.move_graph", text="", icon="TRIA_UP").up = True
-        # row = col.row(align=True)
-        # row.enabled = addon_tree.sn_graph_index < len(addon_tree.sn_graphs)-1
-        # row.operator("sn.move_graph", text="", icon="TRIA_DOWN").up = False
+        col.separator()
+        subrow = col.row(align=True)
+        subrow.enabled = tree != None
+        subrow.operator("sn.remove_graph", text="", icon="REMOVE")
+        col.separator()
+        subrow = col.row(align=True)
+        subrow.enabled = tree != None and tree.index > 0
+        subrow.operator("sn.move_node_tree", text="", icon="TRIA_UP").move_up = True
+        subrow = col.row(align=True)
+        subrow.enabled = tree != None and tree.index < len(trees)-1
+        subrow.operator("sn.move_node_tree", text="", icon="TRIA_DOWN").move_up = False

@@ -14,6 +14,10 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     is_sn = True
     type: bpy.props.EnumProperty(items=[("SCRIPTING", "Scripting", "Scripting")], name="Type")
 
+    index: bpy.props.IntProperty(default=0,
+                            description="The index of this node tree in the node tree list",
+                            name="Index")
+
     link_cache = {} # stores cache of the links from the previous update for all node trees based on their memory adress
 
 
