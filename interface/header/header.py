@@ -30,8 +30,10 @@ def header_prepend(self, context):
             subrow.operator("wm.console_toggle", text="Console", icon="CONSOLE")
         except:
             pass
+
+        row.operator("screen.userpref_show", text="", icon="PREFERENCES")
         row.prop(context.preferences.view, "show_tooltips_python", text="", icon="INFO")
-        row.popover("SN_PT_HeaderSettings", text="", icon="PREFERENCES")
+        row.popover("SN_PT_HeaderSettings", text="", icon="WINDOW")
 
         if context.scene.sn.has_update:
             row.separator()
