@@ -642,11 +642,11 @@ class SN_ScriptingBaseNode:
         if prop_type in self.socket_names:
             # dynamic enums
             if prop_type == "Enum":
-                if not prop.enum_items:
-                    prop_type = "String"
                 if prop.is_enum_flag:
                     prop_type = "Enum Set"
-            inp = self._add_input(self.socket_names[prop_type], prop.name)
+                if len(prop.enum_items) == 0:
+                    prop_type = "String"
+            inp = self._add_input(self.socket_names[prop_type], prop.name if prop.name else prop.identifier.replace("_", " ").title())
             # get enum items
             if prop_type == "Enum":
                 inp.items = str(list(map(lambda item: item.identifier, prop.enum_items)))
@@ -657,8 +657,10 @@ class SN_ScriptingBaseNode:
                     default = tuple([prop.default]*32)
                     inp.size = prop.array_length
                 if prop_type == "Enum":
-                    inp.default_value = default
-
+                    if default:
+                        inp.default_value = default
+                    else:
+                        inp.default_value = prop.enum_items[0].identifier
             return inp
         return None
     
