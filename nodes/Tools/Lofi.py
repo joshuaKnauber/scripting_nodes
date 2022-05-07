@@ -21,8 +21,8 @@ class SN_OT_RandomIndex(bpy.types.Operator):
 class SN_LofiNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_LofiNode"
-    bl_label = "Lofi"
-    bl_width_default = 225
+    bl_label = "LoFi"
+    bl_width_default = 300
 
     links = [
         ("Potsu Mix", "https://www.youtube.com/watch?v=FSnuF1FPSIU&list=PLp7HpIyLajPJM1np34q3Sad8DjDq2gkJd&ab_channel=potsu-Topic"),
@@ -55,8 +55,8 @@ class SN_LofiNode(bpy.types.Node, SN_ScriptingBaseNode):
     def draw_node(self, context, layout):
         box = layout.box()
         col = box.column()
-        col.label(text="This node is for your enjoyment!",icon="FUND")
-        col.label(text="Have a really nice day!",icon="BLANK1")
+        col.label(text="This node is purely for your enjoyment!",icon="FUND")
+        col.label(text="Have a really nice day and enjoy the music!",icon="BLANK1")
 
         row = layout.row(align=True)
         row.scale_y = 1.5

@@ -10,7 +10,8 @@ class SN_PT_HeaderSettings(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(context.scene.sn, "insert_sockets", icon="TRIA_UP")
+        layout.prop(context.scene.sn, "insert_sockets")
+        layout.prop(context.preferences.view, "show_tooltips_python", text="Show Python Tooltips")
 
 
 
@@ -32,7 +33,6 @@ def header_prepend(self, context):
             pass
 
         row.operator("screen.userpref_show", text="", icon="PREFERENCES")
-        row.prop(context.preferences.view, "show_tooltips_python", text="", icon="INFO")
         row.popover("SN_PT_HeaderSettings", text="", icon="WINDOW")
 
         if context.scene.sn.has_update:
