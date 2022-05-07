@@ -28,6 +28,7 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         layout.use_property_decorate = False
 
         col = layout.column(heading="General")
+        col.prop(sn, "show_property_categories")
         col.prop(sn, "compile_on_load")
 
         layout.separator()

@@ -6,6 +6,7 @@ from uuid import uuid4
 
 from .data_properties import get_data_items, filter_items, filter_defaults
 from ..addon.properties.properties import SN_GeneralProperties
+from ..addon.properties.property_category import SN_PropertyCategory
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
 from .load_markets import SN_Addon, SN_Package, SN_Snippet
@@ -133,6 +134,37 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     properties: bpy.props.CollectionProperty(type=SN_GeneralProperties)
 
     property_index: bpy.props.IntProperty(default=0, min=0, name="Active Property", description="The property you're currently editing")
+
+    def update_show_property_categories(self, context):
+        self.active_prop_category = "ALL"
+
+    show_property_categories: bpy.props.BoolProperty(name="Show Property Categories",
+                                        description="Show categories for your addon properties",
+                                        default=False, update=update_show_property_categories)
+
+    property_categories: bpy.props.CollectionProperty(type=SN_PropertyCategory)
+
+    def category_items(self, context):
+        cat_list = list(map(lambda cat: cat.name, self.property_categories))
+        no_cat = 0
+        for prop in self.properties:
+            if not prop.category or prop.category == "OTHER" or not prop.category in cat_list:
+                no_cat += 1
+
+        items = [("ALL", f"All Properties ({len(self.properties)})", "Show all properties"),
+                ("OTHER", f"Uncategorized Properties ({no_cat})", "Properties without a category")]
+
+        for item in self.property_categories:
+            amount = 0
+            for prop in self.properties:
+                if prop.category and prop.category == item.name:
+                    amount += 1
+            items.append((item.name if item.name else "-", f"{item.name} ({amount})", item.name))
+        return items
+    
+    active_prop_category: bpy.props.EnumProperty(name="Category",
+                                        description="The properties shown",
+                                        items=category_items)
 
 
     assets: bpy.props.CollectionProperty(type=SN_AssetProperties)

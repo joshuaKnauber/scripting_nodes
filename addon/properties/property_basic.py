@@ -258,3 +258,7 @@ class BasicProperty():
     stngs_enum: bpy.props.PointerProperty(type=SN_PT_EnumProperty)
     stngs_pointer: bpy.props.PointerProperty(type=SN_PT_PointerProperty)
     stngs_collection: bpy.props.PointerProperty(type=SN_PT_CollectionProperty)
+    
+    
+    category: bpy.props.StringProperty(name="Category", default="OTHER",
+                                description="The category this property is displayed in")
