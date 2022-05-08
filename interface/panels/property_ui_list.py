@@ -50,7 +50,7 @@ class SN_UL_PropertyList(bpy.types.UIList):
         if not item.property_type == "Group":
             row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False).name = item.data_path
         if context.scene.sn.show_property_categories:
-            row.operator("sn.move_property_category", text="", icon="FORWARD", emboss=False)
+            row.operator("sn.move_property_category", text="", icon="FORWARD", emboss=False).index = index
 
     def filter_items(self, context, data, propname):
         sn = context.scene.sn

@@ -1,6 +1,8 @@
 from bpy_extras.io_utils import ImportHelper
 import bpy
 import os
+
+from ...interface.panels.graph_ui_list import get_selected_graph, get_selected_graph_offset
 from ...nodes.compiler import unregister_addon, compile_addon
 
 
@@ -204,17 +206,20 @@ class SN_OT_MoveNodeTree(bpy.types.Operator):
     move_up: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
-        trees = reassign_tree_indices()
+        reassign_tree_indices()
+
+        ntree = get_selected_graph()
+        before = get_selected_graph_offset(-1)
+        after = get_selected_graph_offset(1)
 
         # move trees
-        if context.scene.sn.node_tree_index >= 0 and context.scene.sn.node_tree_index < len(bpy.data.node_groups):
-            ntree = bpy.data.node_groups[context.scene.sn.node_tree_index]
-            if self.move_up:
-                if ntree.index > 0:
-                    trees[ntree.index-1].index += 1
-                    ntree.index -= 1
-            else:
-                if ntree.index < len(trees)-1:
-                    trees[ntree.index+1].index -= 1
-                    ntree.index += 1
+        if ntree:
+            if self.move_up and before:
+                temp_index = ntree.index
+                ntree.index = before.index
+                before.index = temp_index
+            elif not self.move_up and after:
+                temp_index = ntree.index
+                ntree.index = after.index
+                after.index = temp_index
         return {"FINISHED"}

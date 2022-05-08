@@ -1,4 +1,3 @@
-from email.policy import default
 import bpy
 from bl_ui import space_userpref
 from uuid import uuid4
@@ -7,6 +6,7 @@ from uuid import uuid4
 from .data_properties import get_data_items, filter_items, filter_defaults
 from ..addon.properties.properties import SN_GeneralProperties
 from ..addon.properties.property_category import SN_PropertyCategory
+from ..node_tree.graphs.graph_category_ops import SN_GraphCategory
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
 from .load_markets import SN_Addon, SN_Package, SN_Snippet
@@ -144,7 +144,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     property_categories: bpy.props.CollectionProperty(type=SN_PropertyCategory)
 
-    def category_items(self, context):
+    def prop_category_items(self, context):
         cat_list = list(map(lambda cat: cat.name, self.property_categories))
         no_cat = 0
         for prop in self.properties:
@@ -164,7 +164,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     active_prop_category: bpy.props.EnumProperty(name="Category",
                                         description="The properties shown",
-                                        items=category_items)
+                                        items=prop_category_items)
 
 
     assets: bpy.props.CollectionProperty(type=SN_AssetProperties)
@@ -301,3 +301,39 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     snippets: bpy.props.CollectionProperty(type=SN_Snippet)
     
     snippet_categories: bpy.props.CollectionProperty(type=SN_SnippetCategory)
+    
+    
+    def update_show_graph_categories(self, context):
+        self.active_graph_category = "ALL"
+        
+    show_graph_categories: bpy.props.BoolProperty(name="Show Graph Categories",
+                                        description="Show categories for your addon graphs",
+                                        default=False, update=update_show_graph_categories)
+
+    graph_categories: bpy.props.CollectionProperty(type=SN_GraphCategory)
+
+    def graph_category_items(self, context):
+        cat_list = list(map(lambda cat: cat.name, self.graph_categories))
+        no_cat = 0
+        ntree_amount = 0
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                ntree_amount += 1
+                if not ntree.category or ntree.category == "OTHER" or not ntree.category in cat_list:
+                    no_cat += 1
+
+        items = [("ALL", f"All Graphs ({ntree_amount})", "Show all graphs"),
+                ("OTHER", f"Uncategorized Graphs ({no_cat})", "Graphs without a category")]
+
+        for item in self.graph_categories:
+            amount = 0
+            for ntree in bpy.data.node_groups:
+                if ntree.bl_idname == "ScriptingNodesTree":
+                    if ntree.category and ntree.category == item.name:
+                        amount += 1
+            items.append((item.name if item.name else "-", f"{item.name} ({amount})", item.name))
+        return items
+    
+    active_graph_category: bpy.props.EnumProperty(name="Category",
+                                        description="The graphs shown",
+                                        items=graph_category_items)

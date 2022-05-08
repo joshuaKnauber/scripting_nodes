@@ -102,6 +102,8 @@ class SN_OT_MovePropertyCategory(bpy.types.Operator):
     bl_label = "Move Property Category"
     bl_description = "Move the selected property to a different category"
     bl_options = {"REGISTER", "INTERNAL"}
+    
+    index: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
         return {"FINISHED"}
@@ -128,5 +130,6 @@ class SN_OT_MovePropertyCategory(bpy.types.Operator):
             row.label(text="No categories added", icon="ERROR")
     
     def invoke(self, context, event):
+        context.scene.sn.property_index = self.index
         return context.window_manager.invoke_popup(self, width=250)
 

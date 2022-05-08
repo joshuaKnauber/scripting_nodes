@@ -1,4 +1,5 @@
 import bpy
+from .graph_ui_list import get_selected_graph, get_selected_graph_offset
 
 
 class SN_OT_GetPythonName(bpy.types.Operator):
@@ -37,17 +38,20 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         layout = self.layout
         sn = context.scene.sn
 
-        tree = None
-        trees = []
-        for ngroup in bpy.data.node_groups:
-            if ngroup.bl_idname == "ScriptingNodesTree":
-                trees.append(ngroup)
-                
-        if sn.node_tree_index < len(bpy.data.node_groups) and bpy.data.node_groups[sn.node_tree_index].bl_idname == "ScriptingNodesTree":
-            tree = bpy.data.node_groups[sn.node_tree_index]
+        tree = get_selected_graph()
+        before = get_selected_graph_offset(-1)
+        after = get_selected_graph_offset(1)
 
         row = layout.row(align=False)
-        row.template_list("SN_UL_GraphList", "Graphs", bpy.data, "node_groups", sn, "node_tree_index", rows=4)
+        col = row.column(align=True)
+        
+        if sn.show_graph_categories:
+            subrow = col.row(align=True)
+            subrow.prop(sn, "active_graph_category", text="")
+            subrow.operator("sn.edit_graph_categories", text="", icon="GREASEPENCIL")
+            
+        col.template_list("SN_UL_GraphList", "Graphs", bpy.data, "node_groups", sn, "node_tree_index", rows=4)
+
         col = row.column(align=True)
         col.operator("sn.add_graph", text="", icon="ADD")
         col.operator("sn.append_graph", text="", icon="APPEND_BLEND")
@@ -57,8 +61,8 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         subrow.operator("sn.remove_graph", text="", icon="REMOVE")
         col.separator()
         subrow = col.row(align=True)
-        subrow.enabled = tree != None and tree.index > 0
+        subrow.enabled = tree != None and before != None
         subrow.operator("sn.move_node_tree", text="", icon="TRIA_UP").move_up = True
         subrow = col.row(align=True)
-        subrow.enabled = tree != None and tree.index < len(trees)-1
+        subrow.enabled = tree != None and after != None
         subrow.operator("sn.move_node_tree", text="", icon="TRIA_DOWN").move_up = False
