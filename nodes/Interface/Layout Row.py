@@ -20,6 +20,7 @@ class SN_LayoutRowNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_input("Align")
         self.add_boolean_input("Alert")
         self.add_boolean_input("Enabled")["default_value"] = True
+        self.add_boolean_input("Active")["default_value"] = True
         self.add_boolean_input("Split Layout")
         self.add_boolean_input("Decorate Layout")
         self.add_float_input("Scale X")["default_value"] = 1
@@ -33,6 +34,7 @@ class SN_LayoutRowNode(bpy.types.Node, SN_ScriptingBaseNode):
                     row_{self.static_uid} = {self.active_layout}.row(heading={self.inputs["Label"].python_value}, align={self.inputs["Align"].python_value})
                     row_{self.static_uid}.alert = {self.inputs["Alert"].python_value}
                     row_{self.static_uid}.enabled = {self.inputs["Enabled"].python_value}
+                    {f"row_{self.static_uid}.active = {self.inputs['Active'].python_value}" if "Active" in self.inputs else ""}
                     row_{self.static_uid}.use_property_split = {self.inputs["Split Layout"].python_value}
                     row_{self.static_uid}.use_property_decorate = {self.inputs["Decorate Layout"].python_value}
                     row_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
