@@ -45,7 +45,9 @@ class SN_OT_AddGraph(bpy.types.Operator):
                 trees[i].index += 1
 
         graph = bpy.data.node_groups.new("NodeTree", "ScriptingNodesTree")
-        graph.index = curr_index + 1
+        graph.index = curr_index - 1
+        if sn.active_graph_category != "ALL":
+            graph.category = sn.active_graph_category
 
         for i, group in enumerate(bpy.data.node_groups):
             if group == graph:
