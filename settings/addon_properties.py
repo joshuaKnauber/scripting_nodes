@@ -337,3 +337,19 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     active_graph_category: bpy.props.EnumProperty(name="Category",
                                         description="The graphs shown",
                                         items=graph_category_items)
+    
+    
+    overwrite_variable_graph: bpy.props.BoolProperty(name="Overwrite Variable Graph",
+                                        description="Let's you pick a graph to show the variable list from",
+                                        default=False)
+
+    def get_variable_graph_items(self, context):
+        items = []
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                items.append((ntree.name, ntree.name, ntree.name))
+        return items
+    
+    variable_graph: bpy.props.EnumProperty(name="Variable Graph",
+                                        description="Graph to display variables from",
+                                        items=get_variable_graph_items)

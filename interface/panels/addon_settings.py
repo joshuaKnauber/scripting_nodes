@@ -30,6 +30,7 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         col = layout.column(heading="General")
         col.prop(sn, "show_graph_categories")
         col.prop(sn, "show_property_categories")
+        col.prop(sn, "overwrite_variable_graph")
         col.prop(sn, "compile_on_load")
 
         layout.separator()

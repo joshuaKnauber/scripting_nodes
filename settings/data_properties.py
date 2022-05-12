@@ -212,7 +212,8 @@ def item_from_path(data, path):
 
 def bpy_to_path_sections(path, keep_brackets=True):
     """ Takes a blender python data path and converts it to json path sections """
-    path = path.replace('"', "'").replace("bpy.", "")    
+    if len(path) >= 4 and path[:4] == "bpy.":
+        path = path[4:]    
 
     sections = []
     curr_section = ""
