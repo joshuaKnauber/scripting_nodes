@@ -270,9 +270,9 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         ctxt = "Nothing Copied"
         if context.scene.sn.copied_context:
             ctxt = f"{self.copied_context[0]['area'].type.replace('_', ' ').title()} {self.copied_context[0]['region'].type.replace('_', ' ').title()}"
-        items = [("app", "App", "bpy.app"),
-                ("context", f"Context ({ctxt})", "bpy.context"),
-                ("data", "Data", "bpy.data")]
+        items = [("app", "App", "bpy.app", 0),
+                ("context", f"Context ({ctxt})", "bpy.context", 1),
+                ("data", "Data", "bpy.data", 2)]
         return items
     
     data_category: bpy.props.EnumProperty(name="Category",
