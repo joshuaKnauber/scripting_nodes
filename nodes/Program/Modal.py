@@ -13,6 +13,7 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     is_trigger = True
     bl_width_default = 200
     node_color = "PROGRAM"
+    collection_key_overwrite = "SN_OperatorNode"
 
     def on_create(self, context):
         self.add_boolean_input("Disable")

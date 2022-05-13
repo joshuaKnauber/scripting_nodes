@@ -31,8 +31,8 @@ class NodeRef(bpy.types.PropertyGroup):
                     for node in ntree.nodes:
                         if getattr(node, "ref_ntree", None) == ref_node.node_tree:
                             # update specific node type references
-                            if getattr(node, f"ref_{ref_node.bl_idname}", None) == prev_name:
-                                setattr(node, f"ref_{ref_node.bl_idname}", value)
+                            if getattr(node, f"ref_{ref_node.collection_key}", None) == prev_name:
+                                setattr(node, f"ref_{ref_node.collection_key}", value)
                             # update node names for any type of node
                             elif getattr(node, "from_node", None) == prev_name:
                                 setattr(node, f"from_node", value)
