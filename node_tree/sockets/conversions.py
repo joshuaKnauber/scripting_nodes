@@ -80,7 +80,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Enum Flag": lambda from_out, to_inp: f"set([{from_out.python_value}])",
     },
     "Enum Set": {
-        "Data": lambda from_out, to_inp: from_out.python_value,
+        "Data": lambda from_out, to_inp: f"list({from_out.python_value})",
         "String": lambda from_out, to_inp: f"str(list({from_out.python_value}))",
         "List": lambda from_out, to_inp: f"list({from_out.python_value})",
         "Boolean": lambda from_out, to_inp: f"bool({from_out.python_value})",

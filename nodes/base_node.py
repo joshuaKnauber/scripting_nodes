@@ -14,6 +14,14 @@ class SN_ScriptingBaseNode:
 
     bl_icon = "NONE"
     bl_label = "Node"
+    
+    collection_key_overwrite = ""
+
+    @property
+    def collection_key(self):
+        if self.collection_key_overwrite:
+            return self.collection_key_overwrite
+        return self.bl_idname
 
     _colors = {
         "DEFAULT": (0.18, 0.18, 0.18),
@@ -74,7 +82,7 @@ class SN_ScriptingBaseNode:
     @property
     def collection(self):
         """ Returns the collection for the nodes of this type """
-        return self.node_tree.node_refs[self.bl_idname]
+        return self.node_tree.node_refs[self.collection_key]
     
     
     # Called by any trigger node when its code updates. Use this to catch changes to nodes that you're holding references to and modify your own values
@@ -86,8 +94,8 @@ class SN_ScriptingBaseNode:
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
-                    if hasattr(node, f"ref_{self.bl_idname}") and not node == self:
-                        if getattr(node, f"ref_{self.bl_idname}") == self.name:
+                    if hasattr(node, f"ref_{self.collection_key}") and not node == self:
+                        if getattr(node, f"ref_{self.collection_key}") == self.name:
                             node.on_ref_update(self, data)
     
 
@@ -307,9 +315,9 @@ class SN_ScriptingBaseNode:
         # set a new collection uid for this node
         self.static_uid = uuid4().hex[:5].upper()
         # add a new collection if it doesn't exist yet
-        if not self.bl_idname in self.node_tree.node_refs:
+        if not self.collection_key in self.node_tree.node_refs:
             collection = self.node_tree.node_refs.add()
-            collection.name = self.bl_idname
+            collection.name = self.collection_key
         # clear unused references
         self.collection.clear_unused_refs()
         # add the node to the collection
@@ -437,8 +445,10 @@ class SN_ScriptingBaseNode:
                 box = layout.box()
                 col = box.column(align=True)
                 row = col.row()
-                row.enabled = False
-                row.label(text=key.replace("_", " ").title())
+                row.operator("sn.copy_python_name", icon="COPYDOWN", text="", emboss=False).name = getattr(self, key)
+                subrow = row.row()
+                subrow.enabled = False
+                subrow.label(text=key.replace("_", " ").title())
                 for line in getattr(self, key).split("\n"):
                     col.label(text=line)
 
@@ -640,11 +650,11 @@ class SN_ScriptingBaseNode:
         if prop_type in self.socket_names:
             # dynamic enums
             if prop_type == "Enum":
-                if not prop.enum_items:
-                    prop_type = "String"
                 if prop.is_enum_flag:
                     prop_type = "Enum Set"
-            inp = self._add_input(self.socket_names[prop_type], prop.name)
+                if len(prop.enum_items) == 0:
+                    prop_type = "String"
+            inp = self._add_input(self.socket_names[prop_type], prop.name if prop.name else prop.identifier.replace("_", " ").title())
             # get enum items
             if prop_type == "Enum":
                 inp.items = str(list(map(lambda item: item.identifier, prop.enum_items)))
@@ -655,8 +665,10 @@ class SN_ScriptingBaseNode:
                     default = tuple([prop.default]*32)
                     inp.size = prop.array_length
                 if prop_type == "Enum":
-                    inp.default_value = default
-
+                    if default:
+                        inp.default_value = default
+                    else:
+                        inp.default_value = prop.enum_items[0].identifier
             return inp
         return None
     

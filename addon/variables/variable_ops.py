@@ -15,9 +15,9 @@ class SN_OT_AddVariable(bpy.types.Operator):
         ntree = bpy.data.node_groups[self.node_tree]
         new_var = ntree.variables.add()
         new_var.name = "New Variable"
-        for index, variable in enumerate(ntree.variables):
-            if variable == new_var:
-                ntree.variable_index = index
+        ntree.variables.move(len(ntree.variables)-1, ntree.variable_index+1)
+        ntree.variable_index += 1
+        ntree.variable_index = min(ntree.variable_index, len(ntree.variables)-1)
         return {"FINISHED"}
 
 
@@ -66,6 +66,8 @@ class SN_OT_AddVariableNodePopup(bpy.types.Operator):
     bl_description = "Opens a popup to let you choose a variable node"
     bl_options = {"REGISTER", "INTERNAL"}
 
+    node_tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
     def execute(self, context):
         return {"FINISHED"}
     
@@ -75,10 +77,13 @@ class SN_OT_AddVariableNodePopup(bpy.types.Operator):
         col.scale_y = 1.5
         op = col.operator("sn.add_variable_node", text="Get Variable", icon="ADD")
         op.type = "SN_GetVariableNode"
+        op.node_tree = self.node_tree
         op = col.operator("sn.add_variable_node", text="Set Variable", icon="ADD")
         op.type = "SN_SetVariableNode"
+        op.node_tree = self.node_tree
         op = col.operator("sn.add_variable_node", text="Reset Variable", icon="ADD")
         op.type = "SN_ResetVariableNode"
+        op.node_tree = self.node_tree
         
     def invoke(self, context, event):
         return context.window_manager.invoke_popup(self)
@@ -91,15 +96,17 @@ class SN_OT_AddVariableNode(bpy.types.Operator):
     bl_description = "Adds this node to the editor"
     bl_options = {"REGISTER", "INTERNAL"}
 
+    node_tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
     type: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
         bpy.ops.node.add_node("INVOKE_DEFAULT", type=self.type, use_transform=True)
         node = context.space_data.node_tree.nodes.active
+        ntree = bpy.data.node_groups[self.node_tree]
 
-        if context.space_data.node_tree.variable_index < len(context.space_data.node_tree.variables):
-            var = context.space_data.node_tree.variables[context.space_data.node_tree.variable_index]
-            node.ref_ntree = context.space_data.node_tree
+        if ntree.variable_index < len(ntree.variables):
+            var = ntree.variables[ntree.variable_index]
+            node.ref_ntree = ntree
             node.var_name = var.name
         return {"FINISHED"}
     
@@ -111,12 +118,14 @@ class SN_OT_FindVariable(bpy.types.Operator):
     bl_description = "Finds this variable in the addon"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
+    node_tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
     def execute(self, context):
         return {"FINISHED"}
     
     def draw(self, context):
         layout = self.layout
-        ntree = context.space_data.node_tree
+        ntree = bpy.data.node_groups[self.node_tree]
         
         # init variable nodes
         empty_nodes = []

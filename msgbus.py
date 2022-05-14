@@ -7,7 +7,8 @@ owner = object()
 def name_change_callback(cls):
     for ntree in bpy.data.node_groups:
         if ntree.bl_idname == "ScriptingNodesTree":
-            for ref in ntree.node_collection(cls.bl_idname).refs:
+            key = cls.collection_key_overwrite if cls.collection_key_overwrite else cls.bl_idname
+            for ref in ntree.node_collection(key).refs:
                 node = ref.node
                 if node and node.name != ref.name:
                     ref.name = node.name

@@ -1,5 +1,6 @@
 import bpy
 from ...nodes.compiler import compile_addon
+from ...interface.panels.property_ui_list import get_selected_property_offset
 
 
 
@@ -13,6 +14,7 @@ class SN_OT_AddProperty(bpy.types.Operator):
         sn = context.scene.sn
         new_prop = sn.properties.add()
         new_prop.name = "New Property"
+        if sn.active_prop_category: new_prop.category = sn.active_prop_category
         for index, property in enumerate(sn.properties):
             if property == new_prop:
                 sn.property_index = index
@@ -66,11 +68,15 @@ class SN_OT_MoveProperty(bpy.types.Operator):
     def execute(self, context):
         sn = context.scene.sn
         if self.move_up:
-            sn.properties.move(sn.property_index, sn.property_index - 1)
-            sn.property_index -= 1
+            before = get_selected_property_offset(-1)
+            new_index = list(sn.properties).index(before)
+            sn.properties.move(sn.property_index, new_index)
+            sn.property_index = new_index
         else:
-            sn.properties.move(sn.property_index, sn.property_index + 1)
-            sn.property_index += 1
+            after = get_selected_property_offset(1)
+            new_index = list(sn.properties).index(after)
+            sn.properties.move(sn.property_index, new_index)
+            sn.property_index = new_index
         return {"FINISHED"}
 
 

@@ -5,12 +5,17 @@ from uuid import uuid4
 
 from .data_properties import get_data_items, filter_items, filter_defaults
 from ..addon.properties.properties import SN_GeneralProperties
+from ..addon.properties.property_category import SN_PropertyCategory
+from ..node_tree.graphs.graph_category_ops import SN_GraphCategory
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
 from .load_markets import SN_Addon, SN_Package, SN_Snippet
 from ..extensions.snippet_ops import SN_SnippetCategory
+from ..nodes.compiler import compile_addon
             
 
+
+_item_map = dict()
 
 class SN_AddonProperties(bpy.types.PropertyGroup):
     
@@ -33,6 +38,16 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     @property
     def module_name(self):
         return get_python_name(bpy.context.scene.sn.addon_name, replacement=f"addon_{uuid4().hex[:5].upper()}")
+    
+    
+    def update_reregister(self, context):
+        if not self.pause_reregister:
+            compile_addon()
+            
+    pause_reregister: bpy.props.BoolProperty(default=False,
+                                        name="Pause Reregistering",
+                                        description="Pauses reregistering the addon when changes are made",
+                                        update=update_reregister)
 
 
     is_exporting: bpy.props.BoolProperty(default=False,
@@ -73,10 +88,6 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="If Serpens has an available update or not. This is set on file load.",
                                         default=False)
 
-
-    format_code: bpy.props.BoolProperty(default=False,
-                                        name="Format Code",
-                                        description="This will format the code during debugging (This will substantially increase your compile time!)")
 
     debug_python_nodes: bpy.props.BoolProperty(default=False,
                                         name="Debug Nodes",
@@ -125,6 +136,37 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     properties: bpy.props.CollectionProperty(type=SN_GeneralProperties)
 
     property_index: bpy.props.IntProperty(default=0, min=0, name="Active Property", description="The property you're currently editing")
+
+    def update_show_property_categories(self, context):
+        self.active_prop_category = "ALL"
+
+    show_property_categories: bpy.props.BoolProperty(name="Show Property Categories",
+                                        description="Show categories for your addon properties",
+                                        default=False, update=update_show_property_categories)
+
+    property_categories: bpy.props.CollectionProperty(type=SN_PropertyCategory)
+
+    def prop_category_items(self, context):
+        cat_list = list(map(lambda cat: cat.name, self.property_categories))
+        no_cat = 0
+        for prop in self.properties:
+            if not prop.category or prop.category == "OTHER" or not prop.category in cat_list:
+                no_cat += 1
+
+        items = [("ALL", f"All Properties ({len(self.properties)})", "Show all properties"),
+                ("OTHER", f"Uncategorized Properties ({no_cat})", "Properties without a category")]
+
+        for item in self.property_categories:
+            amount = 0
+            for prop in self.properties:
+                if prop.category and prop.category == item.name:
+                    amount += 1
+            items.append((item.name if item.name else "-", f"{item.name} ({amount})", item.name))
+        return items
+    
+    active_prop_category: bpy.props.EnumProperty(name="Category",
+                                        description="The properties shown",
+                                        items=prop_category_items)
 
 
     assets: bpy.props.CollectionProperty(type=SN_AssetProperties)
@@ -225,14 +267,20 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Hide Preferences",
                                         description="Hides all panels in the preferences window",
                                         update=update_hide_preferences)
+    
+    def make_enum_item(self, _id, name, descr, preview_id, uid):
+        lookup = str(_id)+"\\0"+str(name)+"\\0"+str(descr)+"\\0"+str(preview_id)+"\\0"+str(uid)
+        if not lookup in _item_map:
+            _item_map[lookup] = (_id, name, descr, preview_id, uid)
+        return _item_map[lookup]
 
     def get_categories(self, context):
         ctxt = "Nothing Copied"
         if context.scene.sn.copied_context:
             ctxt = f"{self.copied_context[0]['area'].type.replace('_', ' ').title()} {self.copied_context[0]['region'].type.replace('_', ' ').title()}"
-        items = [("app", "App", "bpy.app"),
-                ("context", f"Context ({ctxt})", "bpy.context"),
-                ("data", "Data", "bpy.data")]
+        items = [self.make_enum_item("app", "App", "bpy.app", 0, 0),
+                self.make_enum_item("context", f"Context ({ctxt})", "bpy.context", 0, 1),
+                self.make_enum_item("data", "Data", "bpy.data", 0, 2)]
         return items
     
     data_category: bpy.props.EnumProperty(name="Category",
@@ -261,3 +309,55 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     snippets: bpy.props.CollectionProperty(type=SN_Snippet)
     
     snippet_categories: bpy.props.CollectionProperty(type=SN_SnippetCategory)
+    
+    
+    def update_show_graph_categories(self, context):
+        self.active_graph_category = "ALL"
+        
+    show_graph_categories: bpy.props.BoolProperty(name="Show Graph Categories",
+                                        description="Show categories for your addon graphs",
+                                        default=False, update=update_show_graph_categories)
+
+    graph_categories: bpy.props.CollectionProperty(type=SN_GraphCategory)
+
+    def graph_category_items(self, context):
+        cat_list = list(map(lambda cat: cat.name, self.graph_categories))
+        no_cat = 0
+        ntree_amount = 0
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                ntree_amount += 1
+                if not ntree.category or ntree.category == "OTHER" or not ntree.category in cat_list:
+                    no_cat += 1
+
+        items = [("ALL", f"All Graphs ({ntree_amount})", "Show all graphs"),
+                ("OTHER", f"Uncategorized Graphs ({no_cat})", "Graphs without a category")]
+
+        for item in self.graph_categories:
+            amount = 0
+            for ntree in bpy.data.node_groups:
+                if ntree.bl_idname == "ScriptingNodesTree":
+                    if ntree.category and ntree.category == item.name:
+                        amount += 1
+            items.append((item.name if item.name else "-", f"{item.name} ({amount})", item.name))
+        return items
+    
+    active_graph_category: bpy.props.EnumProperty(name="Category",
+                                        description="The graphs shown",
+                                        items=graph_category_items)
+    
+    
+    overwrite_variable_graph: bpy.props.BoolProperty(name="Overwrite Variable Graph",
+                                        description="Let's you pick a graph to show the variable list from",
+                                        default=False)
+
+    def get_variable_graph_items(self, context):
+        items = []
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                items.append((ntree.name, ntree.name, ntree.name))
+        return items
+    
+    variable_graph: bpy.props.EnumProperty(name="Variable Graph",
+                                        description="Graph to display variables from",
+                                        items=get_variable_graph_items)

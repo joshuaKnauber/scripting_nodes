@@ -10,7 +10,8 @@ class SN_PT_HeaderSettings(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(context.scene.sn, "insert_sockets", icon="TRIA_UP")
+        layout.prop(context.scene.sn, "insert_sockets")
+        layout.prop(context.preferences.view, "show_tooltips_python", text="Show Python Tooltips")
 
 
 
@@ -25,10 +26,14 @@ def header_prepend(self, context):
         row.operator("sn.show_data_overview", text="Blend Data", icon="RNA")
 
         subrow = row.row(align=True)
-        subrow.operator("sn.clear_console", text="", icon="TRASH")
-        subrow.operator("wm.console_toggle", text="Console", icon="CONSOLE")
-        row.prop(context.preferences.view, "show_tooltips_python", text="", icon="INFO")
-        row.popover("SN_PT_HeaderSettings", text="", icon="PREFERENCES")
+        try:
+            subrow.operator("sn.clear_console", text="", icon="TRASH")
+            subrow.operator("wm.console_toggle", text="Console", icon="CONSOLE")
+        except:
+            pass
+
+        row.operator("screen.userpref_show", text="", icon="PREFERENCES")
+        row.popover("SN_PT_HeaderSettings", text="", icon="WINDOW")
 
         if context.scene.sn.has_update:
             row.separator()
@@ -51,6 +56,7 @@ def header_append(self, context):
         sub_row.operator("wm.url_open", text="", icon="HELP").url = "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233"
         ms = round(context.scene.sn.compile_time*1000, 2)
         row.label(text=str(ms)+"ms")
+        row.prop(context.scene.sn, "pause_reregister", text="", icon="PLAY" if context.scene.sn.pause_reregister else "PAUSE")
 
 
 

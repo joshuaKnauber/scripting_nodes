@@ -190,7 +190,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             for inp in self.inputs[1:]:
                 if not inp.disabled:
                     for prop in op_rna.properties:
-                        if prop.name == inp.name:
+                        if (prop.name and prop.name == inp.name) or (not prop.name and prop.identifier.replace("_", " ").title() == inp.name):
                             parameters += f"{prop.identifier}={inp.python_value}, "
 
             self.code = f"""

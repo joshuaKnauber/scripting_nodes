@@ -5,7 +5,7 @@ from ..Input.Node_Idname import NodeType
 class SN_NodeIsIdname(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_NodeIsIdname"
-    bl_label = "Node is Idname"
+    bl_label = "Node Is Idname"
     node_color = "PROPERTY"
 
 

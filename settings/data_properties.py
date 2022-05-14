@@ -168,6 +168,7 @@ def get_function_parameters(parent_data, name):
                 elif param_type == "Int": param_type = "Integer"
                 if getattr(param, "is_array", False): param_type += " Vector"
                 if param_type == "Enum":
+                    if param.is_enum_flag: param_type = "Enum Set"
                     items = ",".join(list(map(lambda item: f"'{item.identifier}'", param.enum_items_static)))
                     param_type += f"[{items}]"
                 if param.is_output:
@@ -211,7 +212,8 @@ def item_from_path(data, path):
 
 def bpy_to_path_sections(path, keep_brackets=True):
     """ Takes a blender python data path and converts it to json path sections """
-    path = path.replace('"', "'").replace("bpy.", "")    
+    if len(path) >= 4 and path[:4] == "bpy.":
+        path = path[4:]    
 
     sections = []
     curr_section = ""

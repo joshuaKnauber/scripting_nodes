@@ -23,16 +23,25 @@ class SN_PT_VariablePanel(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+        sn = context.scene.sn
         ntree = context.space_data.node_tree
         
         # draw variable ui list
         row = layout.row(align=False)
         col = row.column(align=True)
+        
+        if sn.overwrite_variable_graph:
+            col.prop(sn, "variable_graph", text="")
+            ntree = bpy.data.node_groups[sn.variable_graph]
+
         col.template_list("SN_UL_VariableList", "Variables", ntree, "variables", ntree, "variable_index", rows=4)
-        col.operator("sn.add_variable_node_popup", text="Add Node", icon="ADD")
+
+        op = col.operator("sn.add_variable_node_popup", text="Add Node", icon="ADD")
+        op.node_tree = ntree.name
+
         col = row.column(align=True)
         col.operator("sn.add_variable", text="", icon="ADD").node_tree = ntree.name
-        col.operator("sn.find_variable", text="", icon="VIEWZOOM")
+        col.operator("sn.find_variable", text="", icon="VIEWZOOM").node_tree = ntree.name
         col.operator("sn.remove_variable", text="", icon="REMOVE").node_tree = ntree.name
 
         col.separator()

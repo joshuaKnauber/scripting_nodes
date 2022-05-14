@@ -43,16 +43,16 @@ def register_keymaps():
         )
     addon_keymaps["docs"] = (km, kmi)
 
-    # shortcut for adding a blend property
+    # shortcut for adding a node from copied path
     kmi = km.keymap_items.new(
-        idname="sn.add_blend_property",
+        idname="sn.add_copied_node",
         type="V",
         value="PRESS",
         shift=True,
         ctrl=False,
         alt=False,
         )
-    addon_keymaps["docs"] = (km, kmi)
+    addon_keymaps["copied"] = (km, kmi)
 
 
 def unregister_keymaps():

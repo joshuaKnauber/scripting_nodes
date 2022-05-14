@@ -45,10 +45,12 @@ class SN_PT_BooleanProperty(PropertySettings, bpy.types.PropertyGroup):
                                     description="Default value of this property (This may not reset automatically for existing attached items)",
                                     update=PropertySettings.compile)
     
+    def update_vector(self, context):
+        self.prop.trigger_reference_update(context)
     
     is_vector: bpy.props.BoolProperty(name="Is Vector",
                                     description="If this property is a vector",
-                                    update=PropertySettings.compile)
+                                    update=update_vector)
     
     size: bpy.props.IntProperty(name="Vector Size", min=2, max=32, default=3,
                                     description="Length of the vector property",

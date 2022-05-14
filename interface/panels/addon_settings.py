@@ -28,6 +28,9 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         layout.use_property_decorate = False
 
         col = layout.column(heading="General")
+        col.prop(sn, "show_graph_categories")
+        col.prop(sn, "show_property_categories")
+        col.prop(sn, "overwrite_variable_graph")
         col.prop(sn, "compile_on_load")
 
         layout.separator()
@@ -37,9 +40,6 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         col.prop(sn, "debug_python_sockets")
         col.prop(sn, "debug_python_properties")
         col.prop(sn, "debug_code")
-        sub_row = col.row()
-        sub_row.enabled = sn.debug_code
-        sub_row.prop(sn, "format_code")
         
         
         

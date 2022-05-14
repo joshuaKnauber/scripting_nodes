@@ -1,6 +1,8 @@
 from bpy_extras.io_utils import ImportHelper
 import bpy
 import os
+
+from ...interface.panels.graph_ui_list import get_selected_graph, get_selected_graph_offset
 from ...nodes.compiler import unregister_addon, compile_addon
 
 
@@ -13,6 +15,18 @@ def get_serpens_graphs():
     return graphs
 
 
+def reassign_tree_indices():
+    trees = []
+    for ngroup in bpy.data.node_groups:
+        if ngroup.bl_idname == "ScriptingNodesTree":
+            trees.append(ngroup)
+    trees = sorted(trees, key=lambda tree: tree.index)
+
+    for i in range(len(trees)):
+        trees[i].index = i
+    return trees
+
+
 
 class SN_OT_AddGraph(bpy.types.Operator):
     bl_idname = "sn.add_graph"
@@ -22,10 +36,22 @@ class SN_OT_AddGraph(bpy.types.Operator):
 
     def execute(self, context):
         sn = context.scene.sn
+        trees = reassign_tree_indices()
+        
+        curr_index = 0
+        if sn.node_tree_index < len(bpy.data.node_groups) and bpy.data.node_groups[sn.node_tree_index].bl_idname == "ScriptingNodesTree":
+            curr_index = bpy.data.node_groups[sn.node_tree_index].index
+            for i in range(curr_index+1, len(trees)):
+                trees[i].index += 1
+
         graph = bpy.data.node_groups.new("NodeTree", "ScriptingNodesTree")
-        for index, group in enumerate(bpy.data.node_groups):
+        graph.index = curr_index - 1
+        if sn.active_graph_category != "ALL":
+            graph.category = sn.active_graph_category
+
+        for i, group in enumerate(bpy.data.node_groups):
             if group == graph:
-                sn.node_tree_index = index
+                sn.node_tree_index = i
         return {"FINISHED"}
 
 
@@ -44,8 +70,25 @@ class SN_OT_RemoveGraph(bpy.types.Operator):
     def execute(self, context):
         sn = context.scene.sn
         group = bpy.data.node_groups[sn.node_tree_index]
+        curr_index = group.index
         bpy.data.node_groups.remove(group)
-        sn.node_tree_index -= 1
+
+        trees = reassign_tree_indices()
+        for tree in trees:
+            if tree.index == curr_index:
+                for i, ntree in enumerate(bpy.data.node_groups):
+                    if ntree == tree:
+                        sn.node_tree_index = i
+                break
+            elif tree.index == curr_index - 1:
+                for i, ntree in enumerate(bpy.data.node_groups):
+                    if ntree == tree:
+                        sn.node_tree_index = i
+                break
+        else:
+            sn.node_tree_index = 0
+            
+
         compile_addon()
         return {"FINISHED"}
 
@@ -134,7 +177,9 @@ class SN_OT_ForceCompile(bpy.types.Operator):
             if ntree.bl_idname == "ScriptingNodesTree":
                 for refs in ntree.node_refs:
                     refs.clear_unused_refs()
+                    refs.fix_ref_names()
                 ntree.reevaluate()
+        self.report({"INFO"}, message="Compiled successfully!")
         return {"FINISHED"}
 
     def invoke(self, context, event):
@@ -150,4 +195,33 @@ class SN_OT_ForceUnregister(bpy.types.Operator):
 
     def execute(self, context):
         unregister_addon()
+        return {"FINISHED"}
+
+
+
+class SN_OT_MoveNodeTree(bpy.types.Operator):
+    bl_idname = "sn.move_node_tree"
+    bl_label = "Move Node Tree"
+    bl_description = "Moves this node tree in the list"
+    bl_options = {"REGISTER", "INTERNAL"}
+    
+    move_up: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        reassign_tree_indices()
+
+        ntree = get_selected_graph()
+        before = get_selected_graph_offset(-1)
+        after = get_selected_graph_offset(1)
+
+        # move trees
+        if ntree:
+            if self.move_up and before:
+                temp_index = ntree.index
+                ntree.index = before.index
+                before.index = temp_index
+            elif not self.move_up and after:
+                temp_index = ntree.index
+                ntree.index = after.index
+                after.index = temp_index
         return {"FINISHED"}

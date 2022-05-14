@@ -27,6 +27,7 @@ class SN_CreateFolderNode(bpy.types.Node, SN_ScriptingBaseNode):
                     """
 
         if path and name:
+            self.code_import = "import os"
             self.outputs[1].python_value = f"os.path.join({path},{name})" if path and name else ""
             self.code = f"""
                         if not os.path.exists(os.path.join({path},{name})):
