@@ -21,6 +21,9 @@ class SN_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
     def _get_value(self):
         value = ScriptingSocket._get_value(self)
         value = tuple(map(lambda x: float(x), value))
+        value = list(value)
+        while len(value) < 32:
+            value.append(1.0)
         return tuple(value)
     
     def _set_value(self, value):
