@@ -181,8 +181,8 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     self.save_event(event)
                     {"context.area.tag_redraw()" if self.draw_text else ""}
                     context.window.cursor_set('{self.cursor}')
-                    {self.indent(self.outputs['Modal'].python_value, 6)}
-                    {self.indent(normalize_code(escape), 6) if self.enable_escape else ""}
+                    {self.indent(self.outputs['Modal'].python_value, 5)}
+                    {self.indent(normalize_code(escape), 5) if self.enable_escape else ""}
                     return {"{'PASS_THROUGH'}" if self.keep_interactive else "{'RUNNING_MODAL'}"}
 
                 def invoke(self, context, event):
