@@ -13,7 +13,6 @@ class SN_SerpensPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefer
 
     add_indexing_inputs = True
 
-
     def on_create(self, context):
         self.add_property_output("Property")
         self.add_data_output("Value")
