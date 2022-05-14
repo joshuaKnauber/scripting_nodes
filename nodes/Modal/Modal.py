@@ -178,7 +178,8 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     return {{"FINISHED"}}
                     
                 def modal(self, context, event):
-                    if not context.area:
+                    global _{self.static_uid}_running
+                    if not context.area or not _{self.static_uid}_running:
                         self.execute(context)
                         return {{'CANCELLED'}}
                     self.save_event(event)
@@ -191,6 +192,7 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                 def invoke(self, context, event):
                     global _{self.static_uid}_running
                     if _{self.static_uid}_running:
+                        _{self.static_uid}_running = False
                         return {{'FINISHED'}}
                     else:
                         self.save_event(event)
