@@ -144,6 +144,7 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         self.code = f"""
             {self.indent(props_imperative_list, 3)}
         
+            _{self.static_uid}_running = False
             class SNA_OT_{self.operator_python_name.title()}(bpy.types.Operator):
                 bl_idname = "sna.{self.operator_python_name}"
                 bl_label = "{self.name}"
@@ -167,6 +168,8 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     for option in event_options: self._event[option] = getattr(event, option)
 
                 def execute(self, context):
+                    global _{self.static_uid}_running
+                    _{self.static_uid}_running = False
                     context.window.cursor_set("DEFAULT")
                     {f"bpy.types.{self.draw_space}.draw_handler_remove(self._handle, 'WINDOW')" if self.draw_text else ""}
                     {self.indent(self.outputs['After Modal'].python_value, 5)}
@@ -186,13 +189,18 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     return {"{'PASS_THROUGH'}" if self.keep_interactive else "{'RUNNING_MODAL'}"}
 
                 def invoke(self, context, event):
-                    self.save_event(event)
-                    self.start_pos = (event.mouse_x, event.mouse_y)
-                    {self.indent(self.outputs['Before Modal'].python_value, 5)}
-                    {"args = (self, context)" if self.draw_text else ""}
-                    {f"self._handle = bpy.types.{self.draw_space}.draw_handler_add(draw_callback_px_{self.static_uid}, args, 'WINDOW', 'POST_PIXEL')" if self.draw_text else ""}
-                    context.window_manager.modal_handler_add(self)
-                    return {{'RUNNING_MODAL'}}
+                    global _{self.static_uid}_running
+                    if _{self.static_uid}_running:
+                        return {{'FINISHED'}}
+                    else:
+                        self.save_event(event)
+                        self.start_pos = (event.mouse_x, event.mouse_y)
+                        {self.indent(self.outputs['Before Modal'].python_value, 6)}
+                        {"args = (self, context)" if self.draw_text else ""}
+                        {f"self._handle = bpy.types.{self.draw_space}.draw_handler_add(draw_callback_px_{self.static_uid}, args, 'WINDOW', 'POST_PIXEL')" if self.draw_text else ""}
+                        context.window_manager.modal_handler_add(self)
+                        _{self.static_uid}_running = True
+                        return {{'RUNNING_MODAL'}}
             """
         
         if self.draw_text:    
