@@ -47,6 +47,7 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         self.add_boolean_input("Disable")
         self.add_execute_output("Before Modal")
         self.add_execute_output("Modal")
+        self.add_execute_output("Draw Text").set_hide(True)
         self.add_execute_output("After Modal")
     
     def update_description(self, context):
@@ -75,16 +76,24 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                             update=SN_ScriptingBaseNode._evaluate)
     
     enable_escape: bpy.props.BoolProperty(default=True,
-                            name="Default Escape Modal Options",
+                            name="Default Escape",
                             description="Finish the modal automatically when pressing escape or rightclicking. If this is turned off you need to add a way to finish a modal yourself",
                             update=SN_ScriptingBaseNode._evaluate)
+
+    def update_draw_text(self, context):
+        self.outputs["Draw Text"].set_hide(not self.draw_text)
+        self._evaluate(context)
+    
+    draw_text: bpy.props.BoolProperty(default=False,
+                            name="Draw Text",
+                            description="Lets you draw text to the interface while the modal is running",
+                            update=update_draw_text)
 
     @property
     def operator_python_name(self):
         return get_python_name(self.name, replacement="my_generic_operator") + f"_{self.static_uid.lower()}"
 
     def draw_node(self, context, layout):
-        layout.label(text="ESC or Rightclick to cancel the modal", icon="INFO")
         row = layout.row(align=True)
         row.prop(self, "name")
         python_name = get_python_name(self.name, replacement="my_generic_operator")
@@ -95,8 +104,11 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
         layout.prop(self, "cursor")
         layout.prop(self, "keep_interactive")
+        layout.prop(self, "draw_text")
 
         layout.prop(self, "enable_escape")
+        if self.enable_escape:
+            layout.label(text="ESC or Rightclick to cancel the modal", icon="INFO")
 
         self.draw_list(layout)
 
@@ -108,6 +120,7 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         
         escape = """
         if event.type in ['RIGHTMOUSE', 'ESC']:
+            self.execute(context)
             return {'CANCELLED'}
         """
         
@@ -123,31 +136,57 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                 {self.indent(props_code_list, 4)}
                 
                 cursor = "{self.cursor}"
+                _handle = None
+                _event = {{}}
 
                 @classmethod
                 def poll(cls, context):
                     return not {self.inputs[0].python_value}
-
-                def __del__(self):
-                    context = bpy.context
-                    context.window.cursor_set("DEFAULT")
-                    {self.indent(self.outputs['After Modal'].python_value, 5)}
+                    
+                def save_event(self, event):
+                    event_options = ["type", "value", "alt", "shift", "ctrl", "oskey", "mouse_region_x", "mouse_region_y", "mouse_x", "mouse_y", "pressure", "tilt"]
+                    for option in event_options: self._event[option] = getattr(event, option)
 
                 def execute(self, context):
+                    context.window.cursor_set("DEFAULT")
+                    {"bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')" if self.draw_text else ""}
+                    {self.indent(self.outputs['After Modal'].python_value, 5)}
+                    for area in context.screen.areas:
+                        area.tag_redraw()
                     return {{"FINISHED"}}
                     
                 def modal(self, context, event):
+                    self.save_event(event)
+                    {"context.area.tag_redraw()" if self.draw_text else ""}
                     context.window.cursor_set('{self.cursor}')
                     {self.indent(self.outputs['Modal'].python_value, 5)}
                     {self.indent(normalize_code(escape), 5) if self.enable_escape else ""}
                     return {"{'PASS_THROUGH'}" if self.keep_interactive else "{'RUNNING_MODAL'}"}
 
                 def invoke(self, context, event):
+                    self.save_event(event)
                     self.start_pos = (event.mouse_x, event.mouse_y)
                     {self.indent(self.outputs['Before Modal'].python_value, 5)}
+                    {"args = (self, context)" if self.draw_text else ""}
+                    {f"self._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_px_{self.static_uid}, args, 'WINDOW', 'POST_PIXEL')" if self.draw_text else ""}
                     context.window_manager.modal_handler_add(self)
                     return {{'RUNNING_MODAL'}}
             """
+        
+        if self.draw_text:    
+            self.code_imperative = f"""
+                class dotdict(dict):
+                    __getattr__ = dict.get
+                    __setattr__ = dict.__setitem__
+                    __delattr__ = dict.__delitem__
+    
+                def draw_callback_px_{self.static_uid}(self, context):
+                    event = self._event
+                    if event.keys():
+                        event = dotdict(event)
+                        {self.indent(self.outputs["Draw Text"].python_value, 6)}
+            """
+            self.code_import = "import blf"
 
         self.code_register = f"""
                 {self.indent(props_register_list, 4)}

@@ -42,10 +42,12 @@ class SN_ReturnModalNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         escape = """
         if event.type in ['RIGHTMOUSE', 'ESC']:
+            self.execute(context)
             return {'CANCELLED'}
         """
         
         self.code = f"""
         {self.indent(normalize_code(escape), 2) if self.enable_escape else ""}
+        {"self.execute(context)" if self.return_type == "FINISHED" else ""}
         return {{"{self.return_type}"}}
         """

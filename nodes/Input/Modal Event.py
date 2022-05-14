@@ -16,14 +16,15 @@ class SN_ModalEventNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_output("Shift")
         self.add_boolean_output("Ctrl")
         self.add_boolean_output("Os Key")
-        self.add_boolean_output("Mouse Region X")
-        self.add_boolean_output("Mouse Region Y")
-        self.add_boolean_output("Mouse X")
-        self.add_boolean_output("Mouse Y")
-        self.add_boolean_output("Mouse Offset X")
-        self.add_boolean_output("Mouse Offset Y")
-        self.add_boolean_output("Pressure")
-        self.add_boolean_output("Tilt")
+        self.add_integer_output("Mouse Region X")
+        self.add_integer_output("Mouse Region Y")
+        self.add_integer_output("Mouse X")
+        self.add_integer_output("Mouse Y")
+        self.add_integer_output("Mouse Offset X")
+        self.add_integer_output("Mouse Offset Y")
+        self.add_float_output("Pressure")
+        self.add_float_output("Tilt")
+        # When adding options here, also add them to the modal call where it's saved
         
     def draw_node(self, context, layout):
         for node in self.root_nodes:
