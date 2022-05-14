@@ -15,10 +15,6 @@ class SN_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
     default_prop_value = tuple([1.0]*32)
 
     def get_python_repr(self):
-        if self.subtype == "COLOR":
-            return f"{tuple(self.color_value)}"
-        elif self.subtype == "COLOR_ALPHA":
-            return f"{tuple(self.color_alpha_value)}"
         return f"{tuple(getattr(self, self.subtype_attr))[:self.size]}"
     
     
@@ -29,13 +25,20 @@ class SN_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
     
     def _set_value(self, value):
         value = list(value)
-        while len(value) < 32:
+        while len(value) < self.size:
             value.append(1.0)
+        value = value[:self.size]
         ScriptingSocket._set_value(self, tuple(value))
         
     def update_size(self, context):
-        self.default_python_value = str(tuple([False]*self.size))
+        self.default_python_value = str(tuple([1]*self.size))
         self._set_value(self.default_value)
+        
+    def on_subtype_update(self):
+        if self.subtype == "COLOR":
+            self.size = 3
+        elif self.subtype == "COLOR_ALPHA":
+            self.size = 4
 
     size: bpy.props.IntProperty(default=3, min=2, max=32,
                                 name="Size",

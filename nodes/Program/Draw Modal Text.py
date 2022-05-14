@@ -17,10 +17,12 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_integer_input("X").default_value = 100
         self.add_integer_input("Y").default_value = 100
         self.add_integer_input("Z").default_value = 0
+        self.add_float_input("Rotation")
         self.add_integer_input("Size").default_value = 20
         self.add_integer_input("DPI").default_value = 72
         inp = self.add_float_vector_input("Color")
         inp.subtype = "COLOR_ALPHA"
+        inp.default_value = tuple([1]*32)
         
     def draw_node(self, context, layout):        
         for node in self.root_nodes:
@@ -36,8 +38,10 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
             font_id = 0
             blf.position(font_id, {self.inputs["X"].python_value}, {self.inputs["Y"].python_value}, {self.inputs["Z"].python_value})
             blf.size(font_id, {self.inputs["Size"].python_value}, {self.inputs["DPI"].python_value})
+            blf.rotation(font_id, {self.inputs["Rotation"].python_value})
             clr = {self.inputs["Color"].python_value}
             blf.color(font_id, clr[0], clr[1], clr[2], clr[3])
             blf.draw(font_id, {self.inputs["Text"].python_value})
+            blf.rotation(font_id, {self.inputs["Rotation"].python_value})
             {self.indent(self.outputs[0].python_value, 3)}
         """

@@ -15,6 +15,8 @@ from ..nodes.compiler import compile_addon
             
 
 
+_item_map = dict()
+
 class SN_AddonProperties(bpy.types.PropertyGroup):
     
     # stores the unregister function for the addon when its compiled
@@ -265,14 +267,20 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Hide Preferences",
                                         description="Hides all panels in the preferences window",
                                         update=update_hide_preferences)
+    
+    def make_enum_item(self, _id, name, descr, preview_id, uid):
+        lookup = str(_id)+"\\0"+str(name)+"\\0"+str(descr)+"\\0"+str(preview_id)+"\\0"+str(uid)
+        if not lookup in _item_map:
+            _item_map[lookup] = (_id, name, descr, preview_id, uid)
+        return _item_map[lookup]
 
     def get_categories(self, context):
         ctxt = "Nothing Copied"
         if context.scene.sn.copied_context:
             ctxt = f"{self.copied_context[0]['area'].type.replace('_', ' ').title()} {self.copied_context[0]['region'].type.replace('_', ' ').title()}"
-        items = [("app", "App", "bpy.app", 0),
-                ("context", f"Context ({ctxt})", "bpy.context", 1),
-                ("data", "Data", "bpy.data", 2)]
+        items = [self.make_enum_item("app", "App", "bpy.app", 0, 0),
+                self.make_enum_item("context", f"Context ({ctxt})", "bpy.context", 0, 1),
+                self.make_enum_item("data", "Data", "bpy.data", 0, 2)]
         return items
     
     data_category: bpy.props.EnumProperty(name="Category",
