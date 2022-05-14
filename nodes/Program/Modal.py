@@ -1,4 +1,3 @@
-from email.policy import default
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.PropertyNode import PropertyNode
@@ -70,6 +69,8 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                 bl_label = "{self.name}"
                 bl_description = "{self.operator_description}"
                 bl_options = {"{" + '"REGISTER", "UNDO"' + "}"}
+                
+                cursor = "{self.cursor}"
 
                 @classmethod
                 def poll(cls, context):
@@ -84,13 +85,14 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     return {{"FINISHED"}}
                     
                 def modal(self, context, event):
-                    context.window.cursor_set("{self.cursor}")
+                    context.window.cursor_set('{self.cursor}')
                     {self.indent(self.outputs['Modal'].python_value, 5)}
-                    if event.type in {'RIGHTMOUSE', 'ESC'}:
+                    if event.type in ['RIGHTMOUSE', 'ESC']:
                         return {{'CANCELLED'}}
                     return {"{'PASS_THROUGH'}" if self.keep_interactive else "{'RUNNING_MODAL'}"}
 
                 def invoke(self, context, event):
+                    self.start_pos = (event.mouse_x, event.mouse_y)
                     {self.indent(self.outputs['Before Modal'].python_value, 5)}
                     context.window_manager.modal_handler_add(self)
                     return {{'RUNNING_MODAL'}}

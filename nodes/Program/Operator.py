@@ -1,4 +1,3 @@
-from email.policy import default
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.PropertyNode import PropertyNode

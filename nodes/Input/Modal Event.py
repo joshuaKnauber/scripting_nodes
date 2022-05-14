@@ -20,6 +20,8 @@ class SN_ModalEventNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_output("Mouse Region Y")
         self.add_boolean_output("Mouse X")
         self.add_boolean_output("Mouse Y")
+        self.add_boolean_output("Mouse Offset X")
+        self.add_boolean_output("Mouse Offset Y")
         self.add_boolean_output("Pressure")
         self.add_boolean_output("Tilt")
         
@@ -43,5 +45,7 @@ class SN_ModalEventNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.outputs["Mouse Region Y"].python_value = f"event.mouse_region_y"
         self.outputs["Mouse X"].python_value = f"event.mouse_x"
         self.outputs["Mouse Y"].python_value = f"event.mouse_y"
+        self.outputs["Mouse Offset X"].python_value = f"(event.mouse_x - self.start_pos[0])"
+        self.outputs["Mouse Offset Y"].python_value = f"(event.mouse_y - self.start_pos[1])"
         self.outputs["Pressure"].python_value = f"event.pressure"
         self.outputs["Tilt"].python_value = f"event.tilt"
