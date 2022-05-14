@@ -203,10 +203,10 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     __delattr__ = dict.__delitem__
     
                 def draw_callback_px_{self.static_uid}(self, context):
-                    # event = self._event
-                    # if event.keys():
-                    #     event = dotdict(event)
-                    {self.indent(self.outputs["Draw Text"].python_value, 5)}
+                    event = self._event
+                    if event.keys():
+                        event = dotdict(event)
+                        {self.indent(self.outputs["Draw Text"].python_value, 6)}
             """
             self.code_import = "import blf"
 
