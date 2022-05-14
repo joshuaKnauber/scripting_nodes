@@ -19,10 +19,9 @@ class SN_2DViewZoomNode(bpy.types.Node, SN_ScriptingBaseNode):
                     if region.type == "WINDOW":
                         probe = 1000
                         ui_scale = bpy.context.preferences.system.ui_scale
-                        x0, _ = region.view2d.view_to_region(0, 0, clip=False)
-                        x1, _ = region.view2d.view_to_region(probe * ui_scale, probe * ui_scale, clip=False)
-                        deltaX = x1 - x0
-                        return x1 / probe
+                        x0, y0 = region.view2d.view_to_region(0, 0, clip=False)
+                        x1, y1 = region.view2d.view_to_region(probe * ui_scale, probe * ui_scale, clip=False)
+                        return math.sqrt((x1-x0)**2 + (y1-y0)**2) / probe
                 return 1
         """
         self.code_import = "import math"
