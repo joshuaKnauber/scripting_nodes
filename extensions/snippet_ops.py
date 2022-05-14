@@ -235,7 +235,8 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
             for inp in node.inputs:
                 if not inp.hide:
                     if inp.bl_idname == "SN_EnumSocket":
-                        data["inputs"].append({"idname": inp.bl_idname,"name": inp.name,"subtype": inp.subtype, "enum_items": str(inp.get_items(None))})
+                        items = [item[0] for item in inp.get_items(None)]
+                        data["inputs"].append({"idname": inp.bl_idname,"name": inp.name,"subtype": inp.subtype, "enum_items": str(items)})
                     else:
                         data["inputs"].append({"idname": inp.bl_idname,"name": inp.name,"subtype": inp.subtype})
 
