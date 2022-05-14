@@ -135,11 +135,23 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         props_register_list = self.props_register(context).split("\n")
         props_unregister_list = self.props_unregister(context).split("\n")
         
+        if self.draw_text:
+            self.code_imperative = f"""
+            class dotdict(dict):
+                __getattr__ = dict.get
+                __setattr__ = dict.__setitem__
+                __delattr__ = dict.__delitem__
+            """
+            self.code_import = "import blf"
+        
         escape = """
-        if event.type in ['RIGHTMOUSE', 'ESC']:
-            self.execute(context)
-            return {'CANCELLED'}
-        """
+            if event.type in ['RIGHTMOUSE', 'ESC']:
+                self.execute(context)
+                return {'CANCELLED'}
+            """
+        
+        modal_code = self.outputs['Modal'].python_value
+        draw_code = self.outputs["Draw Text"].python_value
         
         self.code = f"""
             {self.indent(props_imperative_list, 3)}
@@ -166,6 +178,15 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                 def save_event(self, event):
                     event_options = ["type", "value", "alt", "shift", "ctrl", "oskey", "mouse_region_x", "mouse_region_y", "mouse_x", "mouse_y", "pressure", "tilt"]
                     for option in event_options: self._event[option] = getattr(event, option)
+                    
+                def draw_callback_px(self, context):
+                    event = self._event
+                    if event.keys():
+                        event = dotdict(event)
+                        try:
+                            {self.indent(draw_code, 7) if draw_code.strip() else "pass"}
+                        except Exception as error:
+                            print(error)
 
                 def execute(self, context):
                     global _{self.static_uid}_running
@@ -185,7 +206,10 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     self.save_event(event)
                     {"context.area.tag_redraw()" if self.draw_text else ""}
                     context.window.cursor_set('{self.cursor}')
-                    {self.indent(self.outputs['Modal'].python_value, 5)}
+                    try:
+                        {self.indent(modal_code, 6) if modal_code.strip() else "pass"}
+                    except Exception as error:
+                        print(error)
                     {self.indent(normalize_code(escape), 5) if self.enable_escape else ""}
                     return {"{'PASS_THROUGH'}" if self.keep_interactive else "{'RUNNING_MODAL'}"}
 
@@ -198,27 +222,12 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                         self.save_event(event)
                         self.start_pos = (event.mouse_x, event.mouse_y)
                         {self.indent(self.outputs['Before Modal'].python_value, 6)}
-                        {"args = (self, context)" if self.draw_text else ""}
-                        {f"self._handle = bpy.types.{self.draw_space}.draw_handler_add(draw_callback_px_{self.static_uid}, args, 'WINDOW', 'POST_PIXEL')" if self.draw_text else ""}
+                        {"args = (context,)" if self.draw_text else ""}
+                        {f"self._handle = bpy.types.{self.draw_space}.draw_handler_add(self.draw_callback_px, args, 'WINDOW', 'POST_PIXEL')" if self.draw_text else ""}
                         context.window_manager.modal_handler_add(self)
                         _{self.static_uid}_running = True
                         return {{'RUNNING_MODAL'}}
             """
-        
-        if self.draw_text:    
-            self.code_imperative = f"""
-                class dotdict(dict):
-                    __getattr__ = dict.get
-                    __setattr__ = dict.__setitem__
-                    __delattr__ = dict.__delitem__
-    
-                def draw_callback_px_{self.static_uid}(self, context):
-                    event = self._event
-                    if event.keys():
-                        event = dotdict(event)
-                        {self.indent(self.outputs["Draw Text"].python_value, 6)}
-            """
-            self.code_import = "import blf"
 
         self.code_register = f"""
                 {self.indent(props_register_list, 4)}
