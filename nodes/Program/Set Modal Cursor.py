@@ -27,6 +27,13 @@ class SN_SetModalCursorNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def draw_node(self, context, layout):
         layout.prop(self, "cursor")
+        for node in self.root_nodes:
+            if node.bl_idname == "SN_ModalOperatorNode":
+                break
+        else:
+            row = layout.row()
+            row.alert = True
+            row.label(text="This node only works with modal operators!", icon="ERROR")
     
     def evaluate(self, context):
         self.code = f"""
