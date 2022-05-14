@@ -15,6 +15,7 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_execute_output()
         
         self.add_string_input("Text").default_value = "My Modal Text"
+        self.add_string_input("Font").subtype = "FILE_PATH"
         
         inp = self.add_float_vector_input("Text Color")
         inp.subtype = "COLOR_ALPHA"
@@ -39,10 +40,17 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         self.code = f"""
             font_id = 0
-            blf.position(font_id, {self.inputs["X"].python_value}, {self.inputs["Y"].python_value}, {self.inputs["Z"].python_value})
-            blf.size(font_id, {self.inputs["Size"].python_value}, {self.inputs["DPI"].python_value})
-            clr = {self.inputs["Text Color"].python_value}
-            blf.color(font_id, clr[0], clr[1], clr[2], clr[3])
-            blf.draw(font_id, {self.inputs["Text"].python_value})
+            if {self.inputs["Font"].python_value} and os.path.exists({self.inputs["Font"].python_value}):
+                font_id = blf.load({self.inputs["Font"].python_value})
+            print(font_id)
+            if font_id == -1:
+                print("Couldn't load font!")
+            else:
+                blf.position(font_id, {self.inputs["X"].python_value}, {self.inputs["Y"].python_value}, {self.inputs["Z"].python_value})
+                blf.size(font_id, {self.inputs["Size"].python_value}, {self.inputs["DPI"].python_value})
+                clr = {self.inputs["Text Color"].python_value}
+                blf.color(font_id, clr[0], clr[1], clr[2], clr[3])
+                blf.draw(font_id, {self.inputs["Text"].python_value})
             {self.indent(self.outputs[0].python_value, 3)}
         """
+        self.code_import = "import os"
