@@ -1,7 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.PropertyNode import PropertyNode
-from ...utils import get_python_name, unique_collection_name
+from ...utils import get_python_name, normalize_code, unique_collection_name
 
 
 
@@ -44,6 +44,11 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                             name="Keep Interactive",
                             description="If this is enabled, the ui is still interactive when the modal is running",
                             update=SN_ScriptingBaseNode._evaluate)
+    
+    enable_escape: bpy.props.BoolProperty(default=True,
+                            name="Default Escape Modal Options",
+                            description="Finish the modal automatically when pressing escape or rightclicking. If this is turned off you need to add a way to finish a modal yourself",
+                            update=SN_ScriptingBaseNode._evaluate)
 
     @property
     def operator_python_name(self):
@@ -62,7 +67,15 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         layout.prop(self, "cursor")
         layout.prop(self, "keep_interactive")
 
+        layout.prop(self, "enable_escape")
+
     def evaluate(self, context):
+        
+        escape = """
+        if event.type in ['RIGHTMOUSE', 'ESC']:
+            return {'CANCELLED'}
+        """
+        
         self.code = f"""
             class SNA_OT_{self.operator_python_name.title()}(bpy.types.Operator):
                 bl_idname = "sna.{self.operator_python_name}"
@@ -87,8 +100,7 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                 def modal(self, context, event):
                     context.window.cursor_set('{self.cursor}')
                     {self.indent(self.outputs['Modal'].python_value, 5)}
-                    if event.type in ['RIGHTMOUSE', 'ESC']:
-                        return {{'CANCELLED'}}
+                    {self.indent(normalize_code(escape), 5) if self.enable_escape else ""}
                     return {"{'PASS_THROUGH'}" if self.keep_interactive else "{'RUNNING_MODAL'}"}
 
                 def invoke(self, context, event):
