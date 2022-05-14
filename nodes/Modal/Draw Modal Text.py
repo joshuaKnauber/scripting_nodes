@@ -20,7 +20,7 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp.subtype = "COLOR_ALPHA"
         inp.default_value = tuple([1]*32)
         
-        self.add_integer_input("Size").default_value = 20
+        self.add_float_input("Size").default_value = 20
         self.add_integer_input("DPI").default_value = 72
 
         inp = self.add_integer_vector_input("Position")
