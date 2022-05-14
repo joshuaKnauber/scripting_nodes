@@ -14,6 +14,35 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     node_color = "PROGRAM"
     collection_key_overwrite = "SN_OperatorNode"
 
+    def on_node_property_change(self, property):
+        self.trigger_ref_update({ "property_change": property })
+
+    def on_node_property_add(self, property):
+        property.allow_pointers = False
+        self.trigger_ref_update({ "property_add": property })
+
+    def on_node_property_remove(self, index):
+        self.trigger_ref_update({ "property_remove": index })
+
+    def on_node_property_move(self, from_index, to_index):
+        self.trigger_ref_update({ "property_move": (from_index, to_index) })
+
+    def on_node_name_change(self):
+        new_name = self.name.replace("\"", "'")
+        if not self.name == new_name:
+            self.name = new_name
+            names = []
+            for ntree in bpy.data.node_groups:
+                if ntree.bl_idname == "ScriptingNodesTree":
+                    for ref in ntree.node_collection("SN_OperatorNode").refs:
+                        names.append(ref.node.name)
+
+            new_name = unique_collection_name(self.name, "My Operator", names, " ", includes_name=True)
+            if not self.name == new_name:
+                self.name = new_name
+            self.trigger_ref_update()
+            self._evaluate(bpy.context)
+
     def on_create(self, context):
         self.add_boolean_input("Disable")
         self.add_execute_output("Before Modal")
@@ -69,7 +98,13 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
         layout.prop(self, "enable_escape")
 
+        self.draw_list(layout)
+
     def evaluate(self, context):
+        props_imperative_list = self.props_imperative(context).split("\n")
+        props_code_list = self.props_code(context).split("\n")
+        props_register_list = self.props_register(context).split("\n")
+        props_unregister_list = self.props_unregister(context).split("\n")
         
         escape = """
         if event.type in ['RIGHTMOUSE', 'ESC']:
@@ -77,11 +112,15 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         """
         
         self.code = f"""
+            {self.indent(props_imperative_list, 3)}
+        
             class SNA_OT_{self.operator_python_name.title()}(bpy.types.Operator):
                 bl_idname = "sna.{self.operator_python_name}"
                 bl_label = "{self.name}"
                 bl_description = "{self.operator_description}"
                 bl_options = {"{" + '"REGISTER", "UNDO"' + "}"}
+                
+                {self.indent(props_code_list, 4)}
                 
                 cursor = "{self.cursor}"
 
@@ -111,8 +150,10 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
             """
 
         self.code_register = f"""
+                {self.indent(props_register_list, 4)}
                 bpy.utils.register_class(SNA_OT_{self.operator_python_name.title()})
                 """
         self.code_unregister = f"""
+                {self.indent(props_unregister_list, 4)}
                 bpy.utils.unregister_class(SNA_OT_{self.operator_python_name.title()})
                 """

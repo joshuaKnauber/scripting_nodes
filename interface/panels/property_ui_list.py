@@ -49,13 +49,13 @@ class SN_UL_PropertyList(bpy.types.UIList):
         row.prop(item, "name", emboss=False, text="")
         if not item.property_type == "Group":
             row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False).name = item.data_path
-        if context.scene.sn.show_property_categories:
+        if context.scene.sn.show_property_categories and item.prop_collection_origin == context.scene.sn:
             row.operator("sn.move_property_category", text="", icon="FORWARD", emboss=False).index = index
 
     def filter_items(self, context, data, propname):
         sn = context.scene.sn
         
-        if sn.active_prop_category == "ALL":
+        if sn.active_prop_category == "ALL" or data != context.scene.sn.properties:
             return [], []
         
         elif sn.active_prop_category == "OTHER":
