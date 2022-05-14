@@ -15,6 +15,10 @@ class SN_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
     default_prop_value = tuple([1.0]*32)
 
     def get_python_repr(self):
+        if self.subtype == "COLOR":
+            return f"{tuple(self.color_value)}"
+        elif self.subtype == "COLOR_ALPHA":
+            return f"{tuple(self.color_alpha_value)}"
         return f"{tuple(getattr(self, self.subtype_attr))[:self.size]}"
     
     

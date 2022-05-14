@@ -89,6 +89,20 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                             description="Lets you draw text to the interface while the modal is running",
                             update=update_draw_text)
 
+    def draw_space_items(self, context):
+        items = []
+        names = ["SpaceNodeEditor", "SpaceView3D", "SpaceClipEditor", "SpaceConsole", "SpaceDopeSheetEditor", "SpaceFileBrowser",
+                "SpaceGraphEditor", "SpaceImageEditor", "SpaceInfo", "SpaceNLA", "SpaceOutliner", "SpacePreferences",
+                "SpaceProperties", "SpaceSequenceEditor", "SpaceSpreadsheet", "SpaceTextEditor"]
+        for name in names:
+            items.append((name, name, name))
+        return items
+    
+    draw_space: bpy.props.EnumProperty(name="Draw Space",
+                            description="The space this operator can run in and the text is drawn in",
+                            update=SN_ScriptingBaseNode._evaluate,
+                            items=draw_space_items)
+
     @property
     def operator_python_name(self):
         return get_python_name(self.name, replacement="my_generic_operator") + f"_{self.static_uid.lower()}"
@@ -104,7 +118,10 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
         layout.prop(self, "cursor")
         layout.prop(self, "keep_interactive")
+
         layout.prop(self, "draw_text")
+        if self.draw_text:
+            layout.prop(self, "draw_space", text="Space")
 
         layout.prop(self, "enable_escape")
         if self.enable_escape:
@@ -141,7 +158,9 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
                 @classmethod
                 def poll(cls, context):
-                    return not {self.inputs[0].python_value}
+                    if context.area.spaces[0].bl_rna.identifier == '{self.draw_space}':
+                        return not {self.inputs[0].python_value}
+                    return False
                     
                 def save_event(self, event):
                     event_options = ["type", "value", "alt", "shift", "ctrl", "oskey", "mouse_region_x", "mouse_region_y", "mouse_x", "mouse_y", "pressure", "tilt"]
@@ -149,7 +168,7 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
                 def execute(self, context):
                     context.window.cursor_set("DEFAULT")
-                    {"bpy.types.SpaceView3D.draw_handler_remove(self._handle, 'WINDOW')" if self.draw_text else ""}
+                    {f"bpy.types.{self.draw_space}.draw_handler_remove(self._handle, 'WINDOW')" if self.draw_text else ""}
                     {self.indent(self.outputs['After Modal'].python_value, 5)}
                     for area in context.screen.areas:
                         area.tag_redraw()
@@ -168,7 +187,7 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     self.start_pos = (event.mouse_x, event.mouse_y)
                     {self.indent(self.outputs['Before Modal'].python_value, 5)}
                     {"args = (self, context)" if self.draw_text else ""}
-                    {f"self._handle = bpy.types.SpaceView3D.draw_handler_add(draw_callback_px_{self.static_uid}, args, 'WINDOW', 'POST_PIXEL')" if self.draw_text else ""}
+                    {f"self._handle = bpy.types.{self.draw_space}.draw_handler_add(draw_callback_px_{self.static_uid}, args, 'WINDOW', 'POST_PIXEL')" if self.draw_text else ""}
                     context.window_manager.modal_handler_add(self)
                     return {{'RUNNING_MODAL'}}
             """
