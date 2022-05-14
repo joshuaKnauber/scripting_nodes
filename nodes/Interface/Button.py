@@ -85,7 +85,13 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.ref_ntree and self.ref_SN_OperatorNode in self.ref_ntree.nodes:
             parent = self.ref_ntree.nodes[self.ref_SN_OperatorNode]
             for prop in parent.properties:
-                self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
+                if prop.property_type in ["Integer", "Float", "Boolean"] and prop.settings.is_vector:
+                    socket = self._add_input(self.socket_names[prop.property_type + " Vector"], prop.name)
+                    socket.size = prop.settings.size
+                    socket.can_be_disabled = True
+                else:
+                    self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
+
         self._evaluate(context)
 
     def update_source_type(self, context):

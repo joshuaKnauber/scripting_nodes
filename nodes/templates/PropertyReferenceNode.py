@@ -34,6 +34,7 @@ class PropertyReferenceNode():
                 if "Value" in self.outputs:
                     socket_name = prop_to_socket(prop)
                     self.convert_socket(self.outputs["Value"], self.socket_names[socket_name])
+
         self.on_ref_prop_change(context)
         self._evaluate(context)
     

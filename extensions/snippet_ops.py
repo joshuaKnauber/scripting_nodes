@@ -167,7 +167,12 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
             data["outputs"] = []
             for inp in node.inputs:
                 if not inp.hide:
-                    data["inputs"].append({"idname": inp.bl_idname,"name": inp.name,"subtype": inp.subtype})
+                    if inp.bl_idname == "SN_EnumSocket":
+                        items = [item[0] for item in inp.get_items(None)]
+                        data["inputs"].append({"idname": inp.bl_idname,"name": inp.name,"subtype": inp.subtype, "enum_items": str(items)})
+                    else:
+                        data["inputs"].append({"idname": inp.bl_idname,"name": inp.name,"subtype": inp.subtype})
+
             for out in node.outputs:
                 if not out.hide:
                     data["outputs"].append({"idname": out.bl_idname,"name": out.name,"subtype": out.subtype})
@@ -229,7 +234,11 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
             data["outputs"] = []
             for inp in node.inputs:
                 if not inp.hide:
-                    data["inputs"].append({"idname": inp.bl_idname,"name": inp.name,"subtype": inp.subtype})
+                    if inp.bl_idname == "SN_EnumSocket":
+                        items = [item[0] for item in inp.get_items(None)]
+                        data["inputs"].append({"idname": inp.bl_idname,"name": inp.name,"subtype": inp.subtype, "enum_items": str(items)})
+                    else:
+                        data["inputs"].append({"idname": inp.bl_idname,"name": inp.name,"subtype": inp.subtype})
 
             data["function"] = function_node._get_code()
             data["import"] = function_node._get_code_import()
