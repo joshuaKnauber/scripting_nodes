@@ -19,7 +19,7 @@ class SN_ReturnModalNode(bpy.types.Node, SN_ScriptingBaseNode):
                             update=SN_ScriptingBaseNode._evaluate)
     
     enable_escape: bpy.props.BoolProperty(default=True,
-                            name="Default Escape Modal Options",
+                            name="Default Escape",
                             description="Finish the modal automatically when pressing escape or rightclicking. If this is turned off you need to add a way to finish a modal yourself",
                             update=SN_ScriptingBaseNode._evaluate)
 
