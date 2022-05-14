@@ -42,7 +42,6 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
             font_id = 0
             if {self.inputs["Font"].python_value} and os.path.exists({self.inputs["Font"].python_value}):
                 font_id = blf.load({self.inputs["Font"].python_value})
-            print(font_id)
             if font_id == -1:
                 print("Couldn't load font!")
             else:
