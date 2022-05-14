@@ -142,6 +142,11 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         """
         
         self.code = f"""
+            class dotdict(dict):
+                __getattr__ = dict.get
+                __setattr__ = dict.__setitem__
+                __delattr__ = dict.__delitem__
+            
             {self.indent(props_imperative_list, 3)}
         
             class SNA_OT_{self.operator_python_name.title()}(bpy.types.Operator):
@@ -158,13 +163,19 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
                 @classmethod
                 def poll(cls, context):
-                    if context.area.spaces[0].bl_rna.identifier == '{self.draw_space}':
+                    if not {self.draw_text} or context.area.spaces[0].bl_rna.identifier == '{self.draw_space}':
                         return not {self.inputs[0].python_value}
                     return False
                     
                 def save_event(self, event):
                     event_options = ["type", "value", "alt", "shift", "ctrl", "oskey", "mouse_region_x", "mouse_region_y", "mouse_x", "mouse_y", "pressure", "tilt"]
                     for option in event_options: self._event[option] = getattr(event, option)
+                    
+                def draw_callback_px(self, context):
+                    event = self._event
+                    if event.keys():
+                        event = dotdict(event)
+                        {self.indent(self.outputs["Draw Text"].python_value, 6)}
 
                 def execute(self, context):
                     context.window.cursor_set("DEFAULT")
@@ -175,36 +186,25 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     return {{"FINISHED"}}
                     
                 def modal(self, context, event):
-                    self.save_event(event)
-                    {"context.area.tag_redraw()" if self.draw_text else ""}
-                    context.window.cursor_set('{self.cursor}')
-                    {self.indent(self.outputs['Modal'].python_value, 5)}
-                    {self.indent(normalize_code(escape), 5) if self.enable_escape else ""}
+                    if context.area:
+                        self.save_event(event)
+                        {"context.area.tag_redraw()" if self.draw_text else ""}
+                        context.window.cursor_set('{self.cursor}')
+                        {self.indent(self.outputs['Modal'].python_value, 6)}
+                        {self.indent(normalize_code(escape), 6) if self.enable_escape else ""}
                     return {"{'PASS_THROUGH'}" if self.keep_interactive else "{'RUNNING_MODAL'}"}
 
                 def invoke(self, context, event):
                     self.save_event(event)
                     self.start_pos = (event.mouse_x, event.mouse_y)
                     {self.indent(self.outputs['Before Modal'].python_value, 5)}
-                    {"args = (self, context)" if self.draw_text else ""}
-                    {f"self._handle = bpy.types.{self.draw_space}.draw_handler_add(draw_callback_px_{self.static_uid}, args, 'WINDOW', 'POST_PIXEL')" if self.draw_text else ""}
+                    {"args = (context,)" if self.draw_text else ""}
+                    {f"self._handle = bpy.types.{self.draw_space}.draw_handler_add(self.draw_callback_px, args, 'WINDOW', 'POST_PIXEL')" if self.draw_text else ""}
                     context.window_manager.modal_handler_add(self)
                     return {{'RUNNING_MODAL'}}
             """
         
         if self.draw_text:    
-            self.code_imperative = f"""
-                class dotdict(dict):
-                    __getattr__ = dict.get
-                    __setattr__ = dict.__setitem__
-                    __delattr__ = dict.__delitem__
-    
-                def draw_callback_px_{self.static_uid}(self, context):
-                    event = self._event
-                    if event.keys():
-                        event = dotdict(event)
-                        {self.indent(self.outputs["Draw Text"].python_value, 6)}
-            """
             self.code_import = "import blf"
 
         self.code_register = f"""

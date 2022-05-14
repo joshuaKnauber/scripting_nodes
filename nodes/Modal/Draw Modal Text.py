@@ -1,5 +1,4 @@
 import bpy
-from ...utils import normalize_code
 from ..base_node import SN_ScriptingBaseNode
 
 
@@ -24,8 +23,9 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_integer_input("Size").default_value = 20
         self.add_integer_input("DPI").default_value = 72
 
-        self.add_integer_input("X").default_value = 100
-        self.add_integer_input("Y").default_value = 100
+        inp = self.add_integer_vector_input("Position")
+        inp.size = 2
+        inp.default_value = [100]*32
         self.add_integer_input("Z").default_value = 0
                 
     def draw_node(self, context, layout):        
@@ -45,7 +45,7 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
             if font_id == -1:
                 print("Couldn't load font!")
             else:
-                blf.position(font_id, {self.inputs["X"].python_value}, {self.inputs["Y"].python_value}, {self.inputs["Z"].python_value})
+                blf.position(font_id, {self.inputs["Position"].python_value}[0], {self.inputs["Position"].python_value}[1], {self.inputs["Z"].python_value})
                 blf.size(font_id, {self.inputs["Size"].python_value}, {self.inputs["DPI"].python_value})
                 clr = {self.inputs["Text Color"].python_value}
                 blf.color(font_id, clr[0], clr[1], clr[2], clr[3])
