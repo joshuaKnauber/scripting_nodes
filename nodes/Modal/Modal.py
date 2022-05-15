@@ -102,6 +102,10 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                             description="The space this operator can run in and the text is drawn in",
                             update=SN_ScriptingBaseNode._evaluate,
                             items=draw_space_items)
+    
+
+    hide_properties: bpy.props.BoolProperty(default=False, name="Hide Properties",
+                                        description="Hide the properties section of this operator")
 
     @property
     def operator_python_name(self):
@@ -127,7 +131,11 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         if self.enable_escape:
             layout.label(text="ESC or Rightclick to cancel the modal", icon="INFO")
 
-        self.draw_list(layout)
+        if not self.hide_properties:
+            self.draw_list(layout)
+            
+    def draw_node_panel(self, context, layout):
+        layout.prop(self, "hide_properties")
 
     def evaluate(self, context):
         props_imperative_list = self.props_imperative(context).split("\n")
