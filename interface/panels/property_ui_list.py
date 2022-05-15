@@ -55,7 +55,7 @@ class SN_UL_PropertyList(bpy.types.UIList):
     def filter_items(self, context, data, propname):
         sn = context.scene.sn
         
-        if sn.active_prop_category == "ALL" or data != context.scene.sn.properties:
+        if sn.active_prop_category == "ALL" or data != context.scene.sn:
             return [], []
         
         elif sn.active_prop_category == "OTHER":
