@@ -52,4 +52,7 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
                 blf.draw(font_id, {self.inputs["Text"].python_value})
             {self.indent(self.outputs[0].python_value, 3)}
         """
-        self.code_import = "import os"
+        self.code_import = """
+            import blf
+            import os
+            """

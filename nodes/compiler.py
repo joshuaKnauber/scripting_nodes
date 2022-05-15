@@ -71,6 +71,20 @@ def compile_addon():
         sn.compile_time = time.time() - t1
 
 
+LICENSE = """
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+"""
 
 DEFAULT_IMPORTS = """
 import bpy
@@ -131,8 +145,11 @@ def format_single_file():
     if not unregister.strip():
         unregister = "pass\n"
     
-    code = f"{imports}\n{imperative}\n{main}\n\ndef register():\n{indent_code(register, 1, 0)}\n\ndef unregister():\n{indent_code(unregister, 1, 0)}\n\n"
+    code = f"{LICENSE}\n{imports}\n{imperative}\n{main}\n\ndef register():\n{indent_code(register, 1, 0)}\n\ndef unregister():\n{indent_code(unregister, 1, 0)}\n\n"
     t7 = time.time()
+    
+    # code = format_linebreaks(code)
+    t8 = time.time()
 
     if sn.debug_compile_time:
         print(f"--Variable register code generation took {round((t2-t1)*1000, 2)}ms")
@@ -141,8 +158,24 @@ def format_single_file():
         print(f"--Node code generation took {round((t5-t4)*1000, 2)}ms")
         print(f"--Property imperative code generation took {round((t6-t5)*1000, 2)}ms")
         print(f"--Code formatting took {round((t7-t6)*1000, 2)}ms")
+        # print(f"--Formatting linebreaks took {round((t8-t7)*1000, 2)}ms")
     return code
-    
+
+
+
+def format_linebreaks(code):
+    lines = code.split("\n")
+    lines = list(map(lambda line: line.replace('\n', '').replace('\r', ''), filter(lambda line: line.strip(), lines)))
+    start_keywords = ["def", "class", "import"]
+    end_keywords = ["return"]
+    for i in range(1, len(lines)-1):
+        for key in start_keywords:
+            if lines[i].strip().startswith(key):
+                lines[i] = f"\n{lines[i]}"
+        for key in end_keywords:
+            if lines[i].strip().startswith(key):
+                lines[i] = f"{lines[i]}\n"
+    return "\n".join(lines)
     
     
 def get_trigger_nodes():
