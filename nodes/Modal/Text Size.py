@@ -17,15 +17,6 @@ class SN_TextSizeNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         self.add_float_output("Width")
         self.add_float_output("Height")
-        
-    def draw_node(self, context, layout):        
-        for node in self.root_nodes:
-            if node.bl_idname == "SN_ModalOperatorNode":
-                break
-        else:
-            row = layout.row()
-            row.alert = True
-            row.label(text="This node only works with modal operators!", icon="ERROR")
     
     def evaluate(self, context):
         self.code_imperative = f"""

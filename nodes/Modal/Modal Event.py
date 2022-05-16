@@ -22,15 +22,6 @@ class SN_ModalEventNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_float_output("Pressure")
         self.add_float_output("Tilt")
         # When adding options here, also add them to the modal call where it's saved
-        
-    def draw_node(self, context, layout):
-        for node in self.root_nodes:
-            if node.bl_idname == "SN_ModalOperatorNode":
-                break
-        else:
-            row = layout.row()
-            row.alert = True
-            row.label(text="This node only works with modal operators!", icon="ERROR")
 
     def evaluate(self, context):
         self.outputs["Type"].python_value = f"event.type"

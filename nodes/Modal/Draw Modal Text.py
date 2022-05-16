@@ -27,15 +27,6 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp.size = 2
         inp.default_value = [100]*32
         self.add_integer_input("Z").default_value = 0
-        
-    def draw_node(self, context, layout):        
-        for node in self.root_nodes:
-            if node.bl_idname == "SN_ModalOperatorNode":
-                break
-        else:
-            row = layout.row()
-            row.alert = True
-            row.label(text="This node only works with modal operators!", icon="ERROR")
     
     def evaluate(self, context):
         self.code = f"""
