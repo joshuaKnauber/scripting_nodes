@@ -42,6 +42,9 @@ blend_data_defaults = {
     "Operator": {
         "value": "self",
         "name": "Using Self"},
+    "Modal Operator": {
+        "value": "self",
+        "name": "Using Self"},
 }
 
 
