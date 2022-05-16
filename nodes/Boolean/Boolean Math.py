@@ -45,4 +45,4 @@ class SN_BooleanMathNode(bpy.types.Node, SN_ScriptingBaseNode):
                     values.append(inp.python_value)
             # join input values on operation name
             join_op = f" {'and' if self.operation == 'AND' else 'or'} ".join(values)
-            self.outputs["Boolean"].python_value = join_op
+            self.outputs["Boolean"].python_value = f"({join_op})"

@@ -14,4 +14,4 @@ class SN_InvertBooleanNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_output("Boolean")
 
     def evaluate(self, context):
-        self.outputs[0].python_value = f"not {self.inputs[0].python_value}"
+        self.outputs[0].python_value = f"(not {self.inputs[0].python_value})"

@@ -16,4 +16,4 @@ class SN_SwitchIconNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_icon_output("Icon")
 
     def evaluate(self, context):
-        self.outputs[0].python_value = f"{self.inputs[2].python_value} if {self.inputs[0].python_value} else {self.inputs[1].python_value}"
+        self.outputs[0].python_value = f"({self.inputs[2].python_value} if {self.inputs[0].python_value} else {self.inputs[1].python_value})"
