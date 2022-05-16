@@ -13,8 +13,9 @@ class SN_ReturnModalNode(bpy.types.Node, SN_ScriptingBaseNode):
     return_type: bpy.props.EnumProperty(name="Return Type",
                             description="The way this modal should be finished",
                             items=[("FINISHED", "Finish", "End the modal"),
-                                   ("PASS_THROUGH", "Interactive", "Keep the modal running and let the events be used by other operators"),
-                                   ("RUNNING_MODAL", "Not Interactive", "Keep the modal running but block other uses of the event")],
+                                ("CANCELLED", "Cancel", "Cancel the modal"),
+                                ("PASS_THROUGH", "Interactive", "Keep the modal running and let the events be used by other operators"),
+                                ("RUNNING_MODAL", "Not Interactive", "Keep the modal running but block other uses of the event")],
                             default="FINISHED",
                             update=SN_ScriptingBaseNode._evaluate)
     
