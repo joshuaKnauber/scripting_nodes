@@ -172,7 +172,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_ref_update(self, node, data=None):
         if node.bl_idname in ["SN_PanelNode", "SN_MenuNode", "SN_PieMenuNode"]:
             self._evaluate(bpy.context)
-        elif node.bl_idname == "SN_OperatorNode":
+        elif node.bl_idname in ["SN_OperatorNode", "SN_ModalOperatorNode"]:
             on_operator_ref_update(self, node, data, self.ref_ntree, self.ref_SN_OperatorNode, 0)
             
     def update_custom_operator(self, context):

@@ -1,4 +1,3 @@
-from sqlite3 import paramstyle
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 
