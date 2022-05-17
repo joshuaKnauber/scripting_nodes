@@ -43,7 +43,10 @@ class SN_ScriptingBaseNode:
     is_trigger = False
 
     # set this for any interface nodes that change the layout type (nodes like row, column, split, ...)
-    layout_type = None
+    @property
+    def layout_type(self):
+        return self.active_layout
+    passthrough_layout_type = False
     
     
     # disables evaluation, only use this when the node is being initialized
@@ -383,7 +386,7 @@ class SN_ScriptingBaseNode:
     def _insert_link_layout_update(self, from_socket, is_output):
         """ Updates the layout type of this node when a node with layout type gets connected """
         if not is_output and from_socket.node.layout_type:
-            self._evaluate(bpy.context)
+            self.active_layout = from_socket.node.layout_type
 
     def _insert_trigger_dynamic(self, from_socket, to_socket):
         """ Triggers dynamic sockets to add new ones """
@@ -395,8 +398,6 @@ class SN_ScriptingBaseNode:
     def link_insert(self, from_socket, to_socket, is_output):
         if not is_output:
             self._insert_link_layout_update(from_socket, is_output)
-        else:
-            self._evaluate(bpy.context)
         self.on_link_insert(from_socket, to_socket, is_output)
         self._insert_trigger_dynamic(from_socket, to_socket)
 
@@ -406,8 +407,10 @@ class SN_ScriptingBaseNode:
 
     def _remove_link_layout_update(self, from_socket, is_output):
         """ Updates the layout type of this node when a connected node with layout type gets removed """
-        if not is_output and not from_socket.node or (from_socket.node and from_socket.node.layout_type):
-            self._evaluate(bpy.context)
+        if not is_output and not from_socket.node:
+            self.active_layout = "layout"
+        elif from_socket.node and from_socket.node.layout_type:
+            self.active_layout = from_socket.node.layout_type
 
     def link_remove(self, from_socket, to_socket, is_output):
         self._remove_link_layout_update(from_socket, is_output)
@@ -681,16 +684,22 @@ class SN_ScriptingBaseNode:
 
 
     ### INTERFACE UTIL
-    @property
-    def active_layout(self):
-        """ Returns the last connected layout type for this node """
-        for inp in self.inputs:
-            if inp.bl_label == "Interface":
-                from_out = inp.from_socket()
-                if from_out:
-                    assert from_out.node.layout_type != None, f"Layout type not set on {from_out.node.bl_label}"
-                    return from_out.node.layout_type
-        return "layout"
+    def get_active_layout(self):
+        return self.get("active_layout", "layout")
+
+    def set_active_layout(self, value):
+        if self.get_active_layout() != value:
+            self["active_layout"] = value
+            self._evaluate(bpy.context)
+            
+            # trigger layout updates if passthrough
+            if self.passthrough_layout_type:
+                for out in self.outputs:
+                    if out.bl_label == "Interface":
+                        out.node.active_layout = value
+
+    active_layout: bpy.props.StringProperty(default="layout",
+                            get=get_active_layout, set=set_active_layout)
 
 
 

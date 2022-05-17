@@ -10,9 +10,7 @@ class SN_ForInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 200
     node_color = "INTERFACE"
     
-    @property
-    def layout_type(self):
-        return self.active_layout
+    passthrough_layout_type = True
     
     def on_create(self, context):
         self.add_interface_input()
@@ -39,14 +37,6 @@ class SN_ForInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 description="Reverse the order the loop runs through the items",
                                 default=False,
                                 update=SN_ScriptingBaseNode._evaluate)
-    
-        
-    def on_link_insert(self, from_socket, to_socket, is_output):
-        if to_socket == self.inputs[0]:
-            for out in self.outputs:
-                if out.bl_label == "Interface":
-                    for socket in out.to_sockets():
-                        socket.node._evaluate(bpy.context)
 
     def evaluate(self, context):
         if self.inputs[1].is_linked:

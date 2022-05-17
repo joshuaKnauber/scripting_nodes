@@ -11,9 +11,7 @@ class SN_EnumMapInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 200
     node_color = "INTERFACE"
     
-    @property
-    def layout_type(self):
-        return self.active_layout
+    passthrough_layout_type = True
     
     def on_create(self, context):
         self.add_interface_input()
