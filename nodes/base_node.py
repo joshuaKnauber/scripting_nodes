@@ -407,6 +407,7 @@ class SN_ScriptingBaseNode:
 
     def _remove_link_layout_update(self, from_socket, is_output):
         """ Updates the layout type of this node when a connected node with layout type gets removed """
+        return
         if not is_output and not from_socket.node:
             self.active_layout = "layout"
         elif from_socket.node and from_socket.node.layout_type:
@@ -692,11 +693,13 @@ class SN_ScriptingBaseNode:
             self["active_layout"] = value
             self._evaluate(bpy.context)
             
-            # trigger layout updates if passthrough
-            if self.passthrough_layout_type:
-                for out in self.outputs:
-                    if out.bl_label == "Interface":
-                        out.node.active_layout = value
+        # trigger layout updates if passthrough
+        if self.passthrough_layout_type:
+            for out in self.outputs:
+                if out.bl_label == "Interface":
+                    to_sockets = out.to_sockets()
+                    if to_sockets:
+                        to_sockets[0].node.active_layout = value
 
     active_layout: bpy.props.StringProperty(default="layout",
                             get=get_active_layout, set=set_active_layout)
