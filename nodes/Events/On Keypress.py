@@ -233,7 +233,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                     for inp in self.inputs:
                         if not inp.disabled:
                             for prop in op_rna.properties:
-                                if prop.name == inp.name:
+                                if inp.name.replace(" ", "_").lower() == prop.identifier:
                                     input_code += f"kmi.properties.{prop.identifier} = {inp.python_value}\n"
                 elif self.parent_type == "CUSTOM" and self.ref_ntree and self.ref_SN_OperatorNode in self.ref_ntree.nodes:
                     node = self.ref_ntree.nodes[self.ref_SN_OperatorNode]

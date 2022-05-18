@@ -658,7 +658,7 @@ class SN_ScriptingBaseNode:
                     prop_type = "Enum Set"
                 if len(prop.enum_items) == 0:
                     prop_type = "String"
-            inp = self._add_input(self.socket_names[prop_type], prop.name if prop.name else prop.identifier.replace("_", " ").title())
+            inp = self._add_input(self.socket_names[prop_type], prop.identifier.replace("_", " ").title())
             # get enum items
             if prop_type == "Enum":
                 inp.items = str(list(map(lambda item: item.identifier, prop.enum_items)))
