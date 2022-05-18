@@ -118,7 +118,8 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
             for inp in self.inputs:
                 if inp.can_be_disabled and not inp.disabled:
                     for prop in op_rna.properties:
-                        if prop.name == inp.name:
+                        if (self.version == 0 and (prop.name and prop.name == inp.name) or (not prop.name and prop.identifier.replace("_", " ").title() == inp.name)) \
+                            or (self.version == 1 and (inp.name.replace(" ", "_").lower() == prop.identifier)):
                             self.code += "\n" + f"op.{prop.identifier} = {inp.python_value}"
 
         else:

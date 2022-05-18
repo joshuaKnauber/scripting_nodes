@@ -54,6 +54,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 200
 
     def on_create(self, context):
+        self.version = 1
         self.add_execute_input()
         self.add_execute_output()
         
@@ -189,7 +190,8 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
             for inp in self.inputs[1:]:
                 if not inp.disabled:
                     for prop in op_rna.properties:
-                        if inp.name.replace(" ", "_").lower() == prop.identifier:
+                        if (self.version == 0 and (prop.name and prop.name == inp.name) or (not prop.name and prop.identifier.replace("_", " ").title() == inp.name)) \
+                            or (self.version == 1 and (inp.name.replace(" ", "_").lower() == prop.identifier)):
                             parameters += f"{prop.identifier}={inp.python_value}, "
 
             self.code = f"""

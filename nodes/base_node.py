@@ -41,6 +41,9 @@ class SN_ScriptingBaseNode:
 
     # set this to true for the node if it starts a program node tree (nodes like operator, panel, ...)
     is_trigger = False
+    
+    # node version, set in on_create if needed to behave differently for old versions
+    version: bpy.props.IntProperty(default=0, name="Version", description="Version of this node")
 
     # set this for any interface nodes that change the layout type (nodes like row, column, split, ...)
     @property
