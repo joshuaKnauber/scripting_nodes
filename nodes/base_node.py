@@ -662,6 +662,11 @@ class SN_ScriptingBaseNode:
             # get enum items
             if prop_type == "Enum":
                 inp.items = str(list(map(lambda item: item.identifier, prop.enum_items)))
+            elif prop_type == "String" and getattr(prop, "subtype", "NONE") != "NONE":
+                if prop.subtype == "FILEPATH":
+                    inp.subtype = "FILE_PATH"
+                elif prop.subtype == "DIRPATH":
+                    inp.subtype = "DIR_PATH"
             # get property default
             if not prop_type in ["Collection", "Pointer"]:
                 default = prop.default
