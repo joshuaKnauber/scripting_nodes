@@ -388,7 +388,7 @@ class SN_ScriptingBaseNode:
 
     def _insert_link_layout_update(self, from_socket, is_output):
         """ Updates the layout type of this node when a node with layout type gets connected """
-        if not is_output and from_socket.node.layout_type:
+        if not is_output and from_socket.bl_label == "Interface":
             self.active_layout = from_socket.node.layout_type
 
     def _insert_trigger_dynamic(self, from_socket, to_socket):
