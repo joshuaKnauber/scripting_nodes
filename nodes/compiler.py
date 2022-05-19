@@ -148,8 +148,13 @@ def format_single_file():
     code = f"{LICENSE}\n{imports}\n{imperative}\n{main}\n\ndef register():\n{indent_code(register, 1, 0)}\n\ndef unregister():\n{indent_code(unregister, 1, 0)}\n\n"
     t7 = time.time()
     
-    # code = format_linebreaks(code)
+    if (sn.remove_duplicate_code and sn.debug_code) or sn.is_exporting:
+        code = remove_duplicates(code)
     t8 = time.time()
+    
+    if (sn.format_code and sn.debug_code) or sn.is_exporting:
+        code = format_linebreaks(code)
+    t9 = time.time()
 
     if sn.debug_compile_time:
         print(f"--Variable register code generation took {round((t2-t1)*1000, 2)}ms")
@@ -157,25 +162,107 @@ def format_single_file():
         print(f"--Property unregister code generation took {round((t4-t3)*1000, 2)}ms")
         print(f"--Node code generation took {round((t5-t4)*1000, 2)}ms")
         print(f"--Property imperative code generation took {round((t6-t5)*1000, 2)}ms")
-        print(f"--Code formatting took {round((t7-t6)*1000, 2)}ms")
-        # print(f"--Formatting linebreaks took {round((t8-t7)*1000, 2)}ms")
+        print(f"--Joining code took {round((t7-t6)*1000, 2)}ms")
+        print(f"--Removing duplicate code took {round((t8-t7)*1000, 2)}ms")
+        print(f"--Formatting linebreaks took {round((t9-t8)*1000, 2)}ms")
     return code
 
+
+def remove_duplicates(code):
+    code = remove_duplicate_functions(code)
+    code = remove_duplicate_imports(code)
+    return code
+
+
+def remove_func(code, func):
+    lines = code.split("\n")
+    newLines = []
+    inFunc = False
+    for i, line in enumerate(lines):
+        if inFunc and len(line) - len(line.lstrip()) == 0:
+            inFunc = False
+            newLines += lines[i:]
+            break
+        elif not inFunc:
+            if len(line) > 3 and line[:3] == "def":
+                if line[:len(f"def {func}(")] == f"def {func}(":
+                    inFunc = True
+                    break
+            if not inFunc:
+                newLines.append(line)
+        elif inFunc:
+            print(line)
+    return "\n".join(newLines)
+
+
+def remove_duplicate_functions(code):
+    lines = code.split("\n")
+    functions = []
+    remove = []
+    for line in lines:
+        if len(line) > 3 and line[:3] == "def":
+            func = line.split("(")[0].split(" ")[-1]
+            if func in functions or code.count(func) == 1:
+                remove.append(func)
+            else:
+                functions.append(func)
+
+    newLines = []
+    inFunc = False
+    for line in lines:
+        if inFunc and len(line) - len(line.lstrip()) == 0:
+            inFunc = False
+        if not inFunc:
+            if len(line) > 3 and line[:3] == "def" and "(" in line:
+                for func in remove:
+                    if line.split("(")[0] == f"def {func}":
+                        remove.remove(func)
+                        inFunc = True
+                        break
+            if not inFunc:
+                newLines.append(line)
+    return "\n".join(newLines)
+
+
+def remove_duplicate_imports(code):
+    imports = []
+    newLines = []
+    for line in code.split("\n"):
+        if line[:6] == "import" or (line[:4] == "from" and "import" in line):
+            if not line.strip() in imports:
+                imports.append(line.strip())
+                newLines.append(line)
+        else:
+            newLines.append(line)
+    return "\n".join(newLines)
 
 
 def format_linebreaks(code):
     lines = code.split("\n")
-    lines = list(map(lambda line: line.replace('\n', '').replace('\r', ''), filter(lambda line: line.strip(), lines)))
-    start_keywords = ["def", "class", "import"]
-    end_keywords = ["return"]
-    for i in range(1, len(lines)-1):
-        for key in start_keywords:
-            if lines[i].strip().startswith(key):
-                lines[i] = f"\n{lines[i]}"
-        for key in end_keywords:
-            if lines[i].strip().startswith(key):
-                lines[i] = f"{lines[i]}\n"
-    return "\n".join(lines)
+    newLines = []
+    for i, line in enumerate(lines):
+        if line.strip():
+            # insert linebreaks for lines with no indent
+            if len(line) - len(line.lstrip()) == 0:
+                # linebreak for going from indents to no indents
+                if newLines and len(newLines[-1]) - len(newLines[-1].lstrip()) > 0:
+                    newLines.append("\n")
+                # linebreak for imperative functions
+                elif newLines and len(line) > 3 and len(newLines[-1].strip()) and line[:3] == "def" and not newLines[-1][0] == "@":
+                    newLines.append("\n")
+                # linebreak for imperative functions
+                elif newLines and "import" in line and not "import" in newLines[-1]:
+                    newLines.append("\n")
+            # insert linebreaks for lines with indent
+            elif newLines:
+                # linebreak for decorated functions in classes
+                if line and line.lstrip()[0] == "@":
+                    newLines.append("")
+                # linebreak for functions without decorator
+                elif len(line) > 3 and len(newLines[-1].strip()) and line.lstrip()[:3] == "def" and not newLines[-1].lstrip()[0] == "@":
+                    newLines.append("")
+            newLines.append(line)
+    return "\n".join(newLines) + "\n"
     
     
 def get_trigger_nodes():

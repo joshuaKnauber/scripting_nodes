@@ -34,12 +34,19 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         col.prop(sn, "compile_on_load")
 
         layout.separator()
+        col = layout.column(heading="Generated Code")
+        col.prop(sn, "debug_code", text="Keep Code File")
+        subcol = col.column()
+        subcol.enabled = sn.debug_code
+        subcol.prop(sn, "remove_duplicate_code")
+        subcol.prop(sn, "format_code")
+
+        layout.separator()
         col = layout.column(heading="Debug")
-        col.prop(sn, "debug_compile_time")
+        col.prop(sn, "debug_compile_time", text="Log Compile Time")
         col.prop(sn, "debug_python_nodes")
         col.prop(sn, "debug_python_sockets")
         col.prop(sn, "debug_python_properties")
-        col.prop(sn, "debug_code")
         
         
         

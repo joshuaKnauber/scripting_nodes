@@ -130,7 +130,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                 for inp in self.inputs:
                     if inp.can_be_disabled and not inp.disabled:
                         for prop in node.properties:
-                            if inp.name.replace(" ", "_").lower() == prop.identifier:
+                            if prop.name == inp.name:
                                 self.code += "\n" + f"op.{prop.python_name} = {inp.python_value}"
             else:
                 self.code = f"op = {self.active_layout}.operator('sn.dummy_button_operator', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"

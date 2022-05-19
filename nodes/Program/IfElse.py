@@ -21,7 +21,7 @@ class SN_IfElseExecuteNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.code = f"""
                     if {self.inputs['Condition'].python_value}:
                         {self.indent(self.outputs['True'].python_value, 6) if self.outputs['True'].python_value.strip() else 'pass'}
-                    else:
-                        {self.indent(self.outputs['False'].python_value, 6) if self.outputs['False'].python_value.strip() else 'pass'}
+                    {"else:" if self.outputs['False'].python_value.strip() else ""}
+                        {self.indent(self.outputs['False'].python_value, 6) if self.outputs['False'].python_value.strip() else ''}
                     {self.indent(self.outputs['Continue'].python_value, 5)}
                     """

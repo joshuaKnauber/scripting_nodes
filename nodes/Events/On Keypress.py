@@ -240,9 +240,11 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 elif self.parent_type == "CUSTOM" and self.ref_ntree and self.ref_SN_OperatorNode in self.ref_ntree.nodes:
                     node = self.ref_ntree.nodes[self.ref_SN_OperatorNode]
                     operator = f"sna.{node.operator_python_name}"
-                    for i, inp in enumerate(self.inputs):
+                    for inp in self.inputs:
                         if not inp.disabled:
-                            input_code += f"kmi.properties.{node.properties[i].python_name} = {inp.python_value}\n"
+                            for prop in node.properties:
+                                if prop.name == inp.name:
+                                    input_code += f"kmi.properties.{prop.python_name} = {inp.python_value}\n"
             if operator:
                 self.code_register = f"""
                     kc = bpy.context.window_manager.keyconfigs.addon

@@ -92,7 +92,6 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
             code = format_single_file()
             code = self.info() + code
             code = code.replace("from easybpy import", "from .easybpy import")
-            # TODO remove unused functions
             init_file.write(code)
         bpy.context.scene.sn.is_exporting = False
         for ntree in bpy.data.node_groups:
