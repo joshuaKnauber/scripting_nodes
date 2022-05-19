@@ -20,6 +20,7 @@ class SN_DisplayCollectionListNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_output("Item Row").prev_dynamic = True
         self.add_dynamic_interface_output("Item Row")
         self.add_property_output("Item")
+        self.add_integer_output("Item Index")
 
     def evaluate(self, context):
         if self.inputs["Index Property"].is_linked and self.inputs["Collection Property"].is_linked:
@@ -38,5 +39,10 @@ class SN_DisplayCollectionListNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     """
             self.code = f"{self.active_layout}.template_list('{ui_list_idname}', '{self.static_uid}', {self.inputs['Collection Property'].python_source}, '{self.inputs['Collection Property'].python_attr}', {self.inputs['Index Property'].python_source}, '{self.inputs['Index Property'].python_attr}', rows={self.inputs['Rows'].python_value})"
             self.outputs["Item"].python_value = f"{self.inputs['Collection Property'].python_value}[index_{self.static_uid}]"
+            if "Item Index" in self.outputs:
+                self.outputs["Item Index"].python_value = f"index_{self.static_uid}"
         else:
             self.code = f"{self.active_layout}.label(text='No Property connected!', icon='ERROR')"
+            self.outputs["Item"].reset_value()
+            if "Item Index" in self.outputs:
+                self.outputs["Item Index"].reset_value()
