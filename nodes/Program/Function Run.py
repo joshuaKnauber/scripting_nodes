@@ -23,6 +23,10 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             new = to_socket.custom_items.add()
             new.name = item.name
             
+    def update_vector_socket(self, from_socket, to_socket):
+        to_socket.size = from_socket.size
+        
+            
     def on_ref_update(self, node, data=None):
         if node.bl_idname == "SN_FunctionNode" and data:
             # inputs has been added
@@ -39,6 +43,8 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 # update enum items
                 if data["changed"].bl_label == "Enum" or data["changed"].bl_label == "Enum Set":
                     self.update_enum_socket(data["changed"], self.inputs[data["changed"].index])
+                elif "Vector" in data["changed"].bl_label:
+                    self.update_vector_socket(data["changed"], self.inputs[data["changed"].index])
             # input has updated
             elif "updated" in data:
                 self.inputs[data["updated"].index].name = data["updated"].name
@@ -79,6 +85,8 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 # update enum items
                 if out.bl_label == "Enum" or out.bl_label == "Enum Set":
                     self.update_enum_socket(out, inp)
+                elif "Vector" in out.bl_label:
+                    self.update_vector_socket(out, inp)
         # restore connections
         if len(links) == len(self.inputs)-1:
             for i, from_socket in enumerate(links):

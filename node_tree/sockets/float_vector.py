@@ -36,6 +36,7 @@ class SN_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
     def update_size(self, context):
         self.default_python_value = str(tuple([1]*self.size))
         self._set_value(self.default_value)
+        self.node.on_socket_type_change(self)
         
     def on_subtype_update(self):
         if self.subtype == "COLOR":
@@ -47,6 +48,10 @@ class SN_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
                                 name="Size",
                                 description="Size of this float vector",
                                 update=update_size)
+    
+    size_editable: bpy.props.BoolProperty(default=False,
+                                name="Size Editable",
+                                description="Let's you edit the vectors size on the socket")
 
     default_value: bpy.props.FloatVectorProperty(name="Value",
                                             size=32,
@@ -91,3 +96,6 @@ class SN_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
             col = layout.column(heading=text, align=True)
             for i in range(self.size):
                 col.prop(self, self.subtype_attr, index=i, text="", toggle=True)
+                
+        if self.size_editable:
+            layout.prop(self, "size", text="")

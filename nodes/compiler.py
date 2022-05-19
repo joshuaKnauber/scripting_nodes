@@ -174,27 +174,6 @@ def remove_duplicates(code):
     return code
 
 
-def remove_func(code, func):
-    lines = code.split("\n")
-    newLines = []
-    inFunc = False
-    for i, line in enumerate(lines):
-        if inFunc and len(line) - len(line.lstrip()) == 0:
-            inFunc = False
-            newLines += lines[i:]
-            break
-        elif not inFunc:
-            if len(line) > 3 and line[:3] == "def":
-                if line[:len(f"def {func}(")] == f"def {func}(":
-                    inFunc = True
-                    break
-            if not inFunc:
-                newLines.append(line)
-        elif inFunc:
-            print(line)
-    return "\n".join(newLines)
-
-
 def remove_duplicate_functions(code):
     lines = code.split("\n")
     functions = []
@@ -203,7 +182,8 @@ def remove_duplicate_functions(code):
         if len(line) > 3 and line[:3] == "def":
             func = line.split("(")[0].split(" ")[-1]
             if func in functions or code.count(func) == 1:
-                remove.append(func)
+                if not func in ["register", "unregister"]:
+                    remove.append(func)
             else:
                 functions.append(func)
 
