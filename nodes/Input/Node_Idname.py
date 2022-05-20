@@ -19,18 +19,15 @@ class SN_NodeIdnameNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_string_output("Idname")
-        
+       
         # load internal nodes
-        for cls in bpy.types.NodeInternal.__subclasses__():
-            item = self.nodes.add()
-            item.name = cls.bl_rna.name
-            item.name = f"{cls.bl_rna.name} (Internal)"
-            item.identifier = cls.bl_rna.identifier
-            for subcls in cls.__subclasses__():
+        for name in dir(bpy.types):
+            cls = getattr(bpy.types, name)
+            if hasattr(cls, "bl_rna") and cls.bl_rna.base and "Node" in cls.bl_rna.base.bl_rna.name:
                 item = self.nodes.add()
-                item.name = f"{subcls.bl_rna.name} ({cls.bl_rna.name})"
-                item.identifier = subcls.bl_rna.identifier
-
+                item.name = f"{cls.bl_rna.name} ({cls.bl_rna.base.bl_rna.name})"
+                item.identifier = cls.bl_rna.identifier
+                
         # load python nodes
         for cls in bpy.types.Node.__subclasses__():
             item = self.nodes.add()
