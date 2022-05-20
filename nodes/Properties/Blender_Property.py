@@ -37,8 +37,9 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         return path and "bpy." in path and not ".ops." in path
 
     def get_data(self):
-        if self._is_valid_data_path(self.pasted_data_path):
-            return bpy_to_indexed_sections(self.pasted_data_path)
+        if self.pasted_data_path:
+            if self._is_valid_data_path(self.pasted_data_path):
+                return bpy_to_indexed_sections(self.pasted_data_path)
         return None
     
     
@@ -62,8 +63,8 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         
         
     def get_pasted_prop_name(self):
-        if self.pasted_data_path:
-            data = self.get_data()
+        data = self.get_data()
+        if data:
             if data[-1][0] == "[":
                 return data[-1]
             return data[-1].replace("_", " ").title()
@@ -91,10 +92,10 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         
 
     def evaluate(self, context):
-        if not self.pasted_data_path:
+        data = self.get_data()
+        if not data:
             self.outputs[0].reset_value()
         else:
-            data = self.get_data()
             data_path = data_path_from_inputs(self.inputs, data)
             
             self.outputs[0].python_value = data_path
