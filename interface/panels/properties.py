@@ -37,7 +37,7 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
             subrow.prop(sn, "active_prop_category", text="")
             subrow.operator("sn.edit_property_categories", text="", icon="GREASEPENCIL")
 
-        col.template_list("SN_UL_PropertyList", "Properties", sn, "properties", sn, "property_index", rows=4)
+        col.template_list("SN_UL_PropertyList", "Properties", sn, "properties", sn, "property_index", rows=5)
         col.operator("sn.add_property_node_popup", text="Add Node", icon="ADD")
         col = row.column(align=True)
         col.operator("sn.add_property", text="", icon="ADD")
@@ -45,6 +45,11 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
         subrow = col.row(align=True)
         subrow.enabled = prop != None
         subrow.operator("sn.remove_property", text="", icon="REMOVE")
+        col.separator()
+
+        subrow = col.row(align=True)
+        subrow.enabled = prop != None
+        op = subrow.operator("sn.duplicate_property", text="", icon="DUPLICATE")
 
         col.separator()
         subrow = col.row(align=True)
@@ -55,7 +60,7 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
         subrow.enabled = after != None and prop != None
         op = subrow.operator("sn.move_property", text="", icon="TRIA_DOWN")
         op.move_up = False
-        layout.separator()
+        
         
         
         if prop:            

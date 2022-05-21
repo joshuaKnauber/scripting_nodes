@@ -262,3 +262,18 @@ class BasicProperty():
     
     category: bpy.props.StringProperty(name="Category", default="OTHER",
                                 description="The category this property is displayed in")
+    
+    def match_settings(self, new_prop):
+        new_prop.name = self.name
+        new_prop.description = self.description
+        new_prop.property_type = self.property_type
+        new_prop.allow_pointers = self.allow_pointers
+        new_prop.prop_options = self.prop_options
+        for attr in self.settings.copy_attributes:
+            setattr(new_prop.settings, attr, getattr(self.settings, attr))
+        self.settings.copy(new_prop.settings)
+    
+    def copy(self):
+        new_prop = self.prop_collection.add()
+        self.match_settings(new_prop)
+        return new_prop

@@ -9,6 +9,8 @@ class SN_PT_CollectionProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "They can also be turned into a vector which holds multiple of these.\n" \
                     + "\n" \
                     + "Integers are displayed as number inputs."
+                    
+    copy_attributes = ["prop_group"]
     
     
     def draw(self, context, layout):

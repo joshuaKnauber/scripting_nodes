@@ -9,6 +9,9 @@ class SN_PT_IntegerProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "They can also be turned into a vector which holds multiple of these.\n" \
                     + "\n" \
                     + "Integers are displayed as number inputs."
+                    
+    copy_attributes = ["is_vector", "default", "subtype", "unit", "use_min", "min", "use_max", "use_soft_min",
+                       "soft_min", "max", "use_soft_max", "soft_max", "step", "size", "vector_default"]
     
     def draw(self, context, layout):
         """ Draws the settings for this property type """

@@ -9,6 +9,8 @@ class SN_PT_StringProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "\n" \
                     + "String properties are displayed as text inputs in the UI. \n" \
                     + "There are subtypes to add a file selector to the string property."
+                    
+    copy_attributes = ["default", "subtype", "maxlen"]
 
     
     def draw(self, context, layout):

@@ -7,7 +7,7 @@ from .settings import PropertySettings
 _enum_prop_cache = {} # stores key, value of enum.as_pointer, prop
 
 class EnumItem(bpy.types.PropertyGroup):
-    
+                        
     @property
     def prop(self):
         if self.id_data.bl_rna.identifier == "ScriptingNodesTree":
@@ -59,6 +59,15 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "\n" \
                     + "Enum properties are displayed as dropdowns or a list of toggles.\n" \
                     + "Dynamic enums can be used to display custom icons such as a list of asset images."
+                    
+    copy_attributes = ["enum_flag", "is_dynamic"]
+    
+    def copy(self, new_settings):
+        for item in self.items:
+            new = new_settings.items.add()
+            new.name = item.name
+            new.description = item.description
+            new.icon = item.icon
                     
     
     def draw(self, context, layout):
