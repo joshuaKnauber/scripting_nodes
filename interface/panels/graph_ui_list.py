@@ -65,7 +65,6 @@ class SN_UL_GraphList(bpy.types.UIList):
         
         if sn.active_graph_category == "ALL":
             flt_flags = helper_funcs.filter_items_by_name("ScriptingNodesTree", self.bitflag_filter_item, node_trees, "bl_idname", reverse=False)
-            return flt_flags, flt_neworder
         
         elif sn.active_graph_category == "OTHER":
             flt_flags = []
@@ -77,7 +76,6 @@ class SN_UL_GraphList(bpy.types.UIList):
                     flt_flags.append(self.bitflag_filter_item)
                 else:
                     flt_flags.append(0)
-            return flt_flags, flt_neworder
         
         else:
             flt_flags = []
@@ -88,4 +86,9 @@ class SN_UL_GraphList(bpy.types.UIList):
                     flt_flags.append(self.bitflag_filter_item)
                 else:
                     flt_flags.append(0)
-            return flt_flags, flt_neworder
+
+        for i in range(len(node_trees)):
+            if self.filter_name and not self.filter_name.lower() in node_trees[i].name:
+                flt_flags[i] = 0
+
+        return flt_flags, flt_neworder
