@@ -35,6 +35,18 @@ blend_data_defaults = {
     "View Layer": {
         "value": "bpy.context.view_layer",
         "name": "Using Active"},
+    "Light": {
+        "value": "bpy.context.view_layer.objects.active",
+        "name": "Using Active"},
+    "Lights": {
+        "value": "bpy.context.view_layer.objects.active",
+        "name": "Using Active"},
+    "Camera": {
+        "value": "bpy.context.view_layer.objects.active",
+        "name": "Using Active"},
+    "Cameras": {
+        "value": "bpy.context.view_layer.objects.active",
+        "name": "Using Active"},
         
     "Preferences": {
         "value": lambda: f"bpy.context.preferences.addons['{bpy.context.scene.sn.module_name}'].preferences" if bpy.context.scene.sn.is_exporting else "bpy.context.scene.sna_addon_prefs_temp",
