@@ -10,7 +10,7 @@ from ..node_tree.graphs.graph_category_ops import SN_GraphCategory
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
 from .load_markets import SN_Addon, SN_Package, SN_Snippet
-from ..extensions.snippet_ops import SN_SnippetCategory
+from ..extensions.snippet_ops import SN_BoolCollection, SN_SnippetCategory
 from ..nodes.compiler import compile_addon
             
 
@@ -48,6 +48,16 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Pause Reregistering",
                                         description="Pauses reregistering the addon when changes are made",
                                         update=update_reregister)
+
+
+    snippet_vars_customizable: bpy.props.CollectionProperty(type=SN_BoolCollection,
+                                        name="Variables Customizable",
+                                        description="Saves customizable setting of snippet variables")
+
+
+    snippet_props_customizable: bpy.props.CollectionProperty(type=SN_BoolCollection,
+                                        name="Properties Customizable",
+                                        description="Saves customizable setting of snippet properties")
 
 
     is_exporting: bpy.props.BoolProperty(default=False,

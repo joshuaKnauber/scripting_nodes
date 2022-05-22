@@ -11,6 +11,10 @@ class SN_SnippetCategory(bpy.types.PropertyGroup):
     path: bpy.props.StringProperty()
 
 
+class SN_BoolCollection(bpy.types.PropertyGroup):
+    name: bpy.props.StringProperty()
+    enabled: bpy.props.BoolProperty(default=True)
+
 loaded_snippets = [] # temp var for the loaded snippets
 
 def load_snippets():
@@ -115,6 +119,78 @@ class SN_OT_AddSnippet(bpy.types.Operator):
         context.space_data.node_tree.nodes.active.path = self.path
         return {"FINISHED"}
 
+class SN_OT_ExportSnippetDraw(bpy.types.Operator):
+    bl_idname = "sn.draw_export_snippet"
+    bl_label = "Draw Export Snippet Popup"
+    bl_description = "Draw Export Snippet Popup"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    node: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    tree: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def get_connected_functions(self, function_node):
+        nodes = []
+        for node in function_node._get_linked_nodes(started_at_trigger=True):
+            if node.bl_idname == "SN_RunFunctionNode":
+                parent_tree = node.ref_ntree if node.ref_ntree else node.node_tree
+                if node.ref_SN_FunctionNode in parent_tree.nodes:
+                    new_node = parent_tree.nodes[node.ref_SN_FunctionNode]
+                    nodes.append(new_node)
+                    nodes += self.get_connected_functions(new_node)
+        return nodes
+
+
+    def invoke(self, context, event):
+        node = context.space_data.node_tree.nodes.active
+        function_node = node.node_tree.nodes[node.ref_SN_FunctionNode]
+        function_nodes = self.get_connected_functions(function_node)
+        vars = []
+        props = []
+        context.scene.sn.snippet_vars_customizable.clear()
+        context.scene.sn.snippet_props_customizable.clear()
+        for func_node in function_nodes + [function_node]:
+            for some_node in func_node._get_linked_nodes(started_at_trigger=True):
+                if hasattr(some_node, "var_name") and hasattr(some_node, "ref_ntree"):
+                    var = some_node.get_var()
+                    if var:
+                        if not var.name in vars:
+                            vars.append(var.name)
+                            item = context.scene.sn.snippet_vars_customizable.add()
+                            item.name = var.name
+
+                if hasattr(some_node, "prop_name"):
+                    prop_src = some_node.get_prop_source()
+                    if prop_src and some_node.prop_name in prop_src.properties:
+                        prop = prop_src.properties[some_node.prop_name]
+                        if not prop.name in props:
+                            props.append(prop.name)
+                            item = context.scene.sn.snippet_props_customizable.add()
+                            item.name = prop.name
+        wm = context.window_manager
+        return wm.invoke_popup(self, width=400)
+
+
+    def draw(self, context):
+        node = context.space_data.node_tree.nodes.active
+        layout = self.layout
+        layout.label(text="Choose which variables/properties you want the user to be able to edit:")
+        for var in context.scene.sn.snippet_vars_customizable:
+            row = layout.row()
+            row.prop(var, "enabled", text="")
+            row.separator()
+            row.label(text=var.name)
+        for prop in context.scene.sn.snippet_props_customizable:
+            row = layout.row()
+            row.prop(prop, "enabled", text="")
+            row.separator()
+            row.label(text=prop.name)
+
+        op = layout.operator("sn.export_snippet", text="Export Snippet", icon="EXPORT", depress=True)
+        op.node = node.name
+        op.tree = node.node_tree.name
+
+    def execute(self, context):
+        return {'FINISHED'}
 
 
 class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
@@ -138,6 +214,7 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                     nodes.append(new_node)
                     nodes += self.get_connected_functions(new_node)
         return nodes
+
     def get_connected_interface(self, function_node):
         nodes = []
         for node in function_node._get_linked_nodes(started_at_trigger=True):
@@ -190,6 +267,7 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                 data["unregister"] += ("\n" + func_node._get_code_unregister()) if func_node._get_code_unregister() else ""
 
             variables = {}
+            used_vars = []
             properties = {}
             data["variables"] = []
             data["properties"] = []
@@ -200,12 +278,16 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                         if var:
                             if not var.node_tree.python_name + "_SNIPPET_VARS" in variables:
                                 variables[var.node_tree.python_name + "_SNIPPET_VARS"] = {}
-                            data["variables"].append({"name": var.name,"python_name": var.python_name, "tree": var.node_tree.python_name, "type": var.variable_type})
-                            variables[var.node_tree.python_name + "_SNIPPET_VARS"][var.python_name] = str(var.var_default)
-                            data["function"] = data["function"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
-                            data["imperative"] = data["imperative"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
-                            data["register"] = data["register"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
-                            data["unregister"] = data["unregister"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+
+                            if not var.name in used_vars:
+                                used_vars.append(var.name)
+                                customizable = context.scene.sn.snippet_vars_customizable[var.name].enabled
+                                data["variables"].append({"name": var.name,"python_name": var.python_name, "tree": var.node_tree.python_name, "type": var.variable_type, "customizable": customizable})
+                                variables[var.node_tree.python_name + "_SNIPPET_VARS"][var.python_name] = str(var.var_default)
+                                data["function"] = data["function"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+                                data["imperative"] = data["imperative"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+                                data["register"] = data["register"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+                                data["unregister"] = data["unregister"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
 
                     if hasattr(node, "prop_name"):
                         prop_src = node.get_prop_source()
@@ -213,7 +295,8 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                             prop = prop_src.properties[node.prop_name]
                             if not prop.name in properties:
                                 properties[prop.name] = [prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"), prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS")]
-                                data["properties"].append({"name": prop.name, "python_name": prop.python_name, "type": prop.property_type, "attach_to": prop.attach_to})
+                                customizable = context.scene.sn.snippet_props_customizable[prop.name].enabled
+                                data["properties"].append({"name": prop.name, "python_name": prop.python_name, "type": prop.property_type, "attach_to": prop.attach_to, "customizable": customizable})
                                 data["function"] = data["function"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["imperative"] = data["imperative"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["register"] = data["register"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
@@ -253,6 +336,7 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                 data["unregister"] += ("\n" + func_node._get_code_unregister()) if func_node._get_code_unregister() else ""
 
             variables = {}
+            used_vars = []
             properties = {}
             data["variables"] = []
             data["properties"] = []
@@ -263,12 +347,16 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                         if var:
                             if not var.node_tree.python_name + "_SNIPPET_VARS" in variables:
                                 variables[var.node_tree.python_name + "_SNIPPET_VARS"] = {}
-                            data["variables"].append({"name": var.name,"python_name": var.python_name, "tree": var.node_tree.python_name, "type": var.variable_type})
-                            variables[var.node_tree.python_name + "_SNIPPET_VARS"][var.python_name] = str(var.var_default)
-                            data["function"] = data["function"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
-                            data["imperative"] = data["imperative"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
-                            data["register"] = data["register"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
-                            data["unregister"] = data["unregister"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+
+                            if not var.name in used_vars:
+                                used_vars.append(var.name)
+                                customizable = context.scene.sn.snippet_vars_customizable[var.name].enabled
+                                data["variables"].append({"name": var.name,"python_name": var.python_name, "tree": var.node_tree.python_name, "type": var.variable_type, "customizable": customizable})
+                                variables[var.node_tree.python_name + "_SNIPPET_VARS"][var.python_name] = str(var.var_default)
+                                data["function"] = data["function"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+                                data["imperative"] = data["imperative"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+                                data["register"] = data["register"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
+                                data["unregister"] = data["unregister"].replace(var.node_tree.python_name + "[", var.node_tree.python_name +"_SNIPPET_VARS[")
 
                     if hasattr(node, "prop_name"):
                         prop_src = node.get_prop_source()
@@ -276,7 +364,8 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                             prop = prop_src.properties[node.prop_name]
                             if not prop.name in properties:
                                 properties[prop.name] = [prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"), prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS")]
-                                data["properties"].append({"name": prop.name, "python_name": prop.python_name, "type": prop.property_type})
+                                customizable = context.scene.sn.snippet_props_customizable[prop.name].enabled
+                                data["properties"].append({"name": prop.name, "python_name": prop.python_name, "type": prop.property_type, "customizable": customizable})
                                 data["function"] = data["function"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["imperative"] = data["imperative"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
                                 data["register"] = data["register"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
