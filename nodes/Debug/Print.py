@@ -56,16 +56,16 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
                     print({", ".join(values)})
                     # This part is only added during development to display the messages on the node
                     if {self.print_on_node}:
-                        # try:
-                        if '{self.node_tree.name}' in bpy.data.node_groups and '{self.name}' in bpy.data.node_groups['{self.node_tree.name}'].nodes:
-                            node = bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}']
-                            msg = node.messages.add()
-                            msg.text = str([{", ".join(values)}])[1:-1]
-                            if {self.limit_prints} and len(node.messages) > {self.limit_prints}:
-                                node.messages.remove(0)
-                        for area in bpy.context.screen.areas: area.tag_redraw()
-                        # except:
-                            # print("Can't add print outputs to the node when the print is run in an interface!")
+                        try:
+                            if '{self.node_tree.name}' in bpy.data.node_groups and '{self.name}' in bpy.data.node_groups['{self.node_tree.name}'].nodes:
+                                node = bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}']
+                                msg = node.messages.add()
+                                msg.text = str([{", ".join(values)}])[1:-1]
+                                if {self.limit_prints} and len(node.messages) > {self.limit_prints}:
+                                    node.messages.remove(0)
+                            for area in bpy.context.screen.areas: area.tag_redraw()
+                        except:
+                            print("Can't add print outputs to the node when the print is run in an interface!")
                     {self.indent(self.outputs[0].python_value, 5)}
                     """
                     

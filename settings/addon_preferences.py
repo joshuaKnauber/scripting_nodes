@@ -1,5 +1,6 @@
 import bpy
 from ..keymaps.keymap import get_shortcut
+from .preset_data import PresetData
 
 
 
@@ -54,6 +55,10 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
     only_serpens_3: bpy.props.BoolProperty(name="Only Serpens 3",
                                         description="Hide all results from previous serpens versions")
+    
+    presets: bpy.props.CollectionProperty(name="Presets",
+                                        description="Preset nodes",
+                                        type=PresetData)
 
 
     def draw_serpens_prefs(self, context, layout):

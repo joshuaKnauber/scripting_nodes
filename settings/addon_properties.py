@@ -371,3 +371,12 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     variable_graph: bpy.props.EnumProperty(name="Variable Graph",
                                         description="Graph to display variables from",
                                         items=get_variable_graph_items)
+    
+    
+    remove_duplicate_code: bpy.props.BoolProperty(name="Remove Duplicate Code",
+                                        description="Removes duplicate code in the generated code (small performance impact for large addons)",
+                                        default=True)
+    
+    format_code: bpy.props.BoolProperty(name="Format Code",
+                                        description="Formats linebreaks in the generated code (small performance impact for large addons)",
+                                        default=True)

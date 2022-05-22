@@ -36,14 +36,27 @@ class SN_AddToMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
         func_name = f"sna_add_to_{self.menu_parent.lower()}_{uid}"
 
         self.code = f"""
-                    def {func_name}(self, context):
-                        if not ({self.inputs["Hide"].python_value}):
-                            layout = self.layout
-                            {self.indent([out.python_value for out in self.outputs[:-1]], 7)}
-                    """
+            def {func_name}(self, context):
+                if not ({self.inputs["Hide"].python_value}):
+                    layout = self.layout
+                    {self.indent([out.python_value for out in self.outputs[:-1]], 5)}
+        """
+        
+        if self.menu_parent == "WM_MT_button_context":
+            self.code_imperative = """
+                class WM_MT_button_context(bpy.types.Menu):
+                    bl_label = "Unused"
+                    def draw(self, context):
+                        pass
+            """
 
-        self.code_register = f"bpy.types.{self.menu_parent}.{self.append.lower()}({func_name})"
-        self.code_unregister = f"bpy.types.{self.menu_parent}.remove({func_name})"
+        self.code_register = f"""
+            {"if not hasattr(bpy.types, 'WM_MT_button_context'): bpy.utils.register_class(WM_MT_button_context)" if self.menu_parent == "WM_MT_button_context" else ""}
+            bpy.types.{self.menu_parent}.{self.append.lower()}({func_name})
+        """
+        self.code_unregister = f"""
+            bpy.types.{self.menu_parent}.remove({func_name})
+        """
 
 
     def draw_node(self, context, layout):

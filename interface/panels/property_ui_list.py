@@ -54,16 +54,21 @@ class SN_UL_PropertyList(bpy.types.UIList):
 
     def filter_items(self, context, data, propname):
         sn = context.scene.sn
+        helper_funcs = bpy.types.UI_UL_list
         
-        if sn.active_prop_category == "ALL" or data != context.scene.sn.properties:
-            return [], []
+        if sn.active_prop_category == "ALL" or data != context.scene.sn:
+            flt_flags = helper_funcs.filter_items_by_name(self.filter_name, self.bitflag_filter_item, sn.properties, "name", reverse=False)
+            return flt_flags, []
         
         elif sn.active_prop_category == "OTHER":
             flt_flags = []
             cat_list = list(map(lambda cat: cat.name, sn.property_categories))
             for prop in sn.properties:
                 if prop.category == "OTHER" or not prop.category or not prop.category in cat_list:
-                    flt_flags.append(self.bitflag_filter_item)
+                    if not self.filter_name or self.filter_name.lower() in prop.name.lower():
+                        flt_flags.append(self.bitflag_filter_item)
+                    else:
+                        flt_flags.append(0)
                 else:
                     flt_flags.append(0)
             return flt_flags, []
@@ -72,7 +77,10 @@ class SN_UL_PropertyList(bpy.types.UIList):
             flt_flags = []
             for prop in sn.properties:
                 if prop.category == sn.active_prop_category:
-                    flt_flags.append(self.bitflag_filter_item)
+                    if not self.filter_name or self.filter_name.lower() in prop.name.lower():
+                        flt_flags.append(self.bitflag_filter_item)
+                    else:
+                        flt_flags.append(0)
                 else:
                     flt_flags.append(0)
             return flt_flags, []

@@ -92,7 +92,6 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
             code = format_single_file()
             code = self.info() + code
             code = code.replace("from easybpy import", "from .easybpy import")
-            # TODO remove unused functions
             init_file.write(code)
         bpy.context.scene.sn.is_exporting = False
         for ntree in bpy.data.node_groups:
@@ -126,21 +125,18 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
     
     def execute(self, context):
         context.window_manager.progress_begin(0, 100)
-        try:
-            name, _ = os.path.splitext(self.filepath)
-            if os.path.exists(name):
-                self.report({"ERROR"}, message=f"Please delete the '{os.path.basename(name)}' folder before exporting.")
-            else:
-                baseDir = self.create_structure(name)
-                context.window_manager.progress_update(30)
-                self.create_files(baseDir)
-                context.window_manager.progress_update(90)
-                self.zip_addon(name)
-            context.window_manager.progress_end()
-            bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
-        except Exception as err:
-            print(err)
-            context.window_manager.progress_end()
+        name, _ = os.path.splitext(self.filepath)
+        if os.path.exists(name):
+            self.report({"ERROR"}, message=f"Please delete the '{os.path.basename(name)}' folder before exporting.")
+        else:
+            baseDir = self.create_structure(name)
+            context.window_manager.progress_update(30)
+            self.create_files(baseDir)
+            context.window_manager.progress_update(90)
+            self.zip_addon(name)
+        context.window_manager.progress_end()
+        bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
+        context.window_manager.progress_end()
         return {"FINISHED"}
 
     def invoke(self, context, event):

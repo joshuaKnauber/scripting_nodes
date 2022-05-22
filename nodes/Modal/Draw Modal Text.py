@@ -20,22 +20,13 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp.subtype = "COLOR_ALPHA"
         inp.default_value = tuple([1]*32)
         
-        self.add_integer_input("Size").default_value = 20
+        self.add_float_input("Size").default_value = 20
         self.add_integer_input("DPI").default_value = 72
 
         inp = self.add_integer_vector_input("Position")
         inp.size = 2
         inp.default_value = [100]*32
         self.add_integer_input("Z").default_value = 0
-                
-    def draw_node(self, context, layout):        
-        for node in self.root_nodes:
-            if node.bl_idname == "SN_ModalOperatorNode":
-                break
-        else:
-            row = layout.row()
-            row.alert = True
-            row.label(text="This node only works with modal operators!", icon="ERROR")
     
     def evaluate(self, context):
         self.code = f"""
@@ -52,4 +43,7 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
                 blf.draw(font_id, {self.inputs["Text"].python_value})
             {self.indent(self.outputs[0].python_value, 3)}
         """
-        self.code_import = "import os"
+        self.code_import = """
+            import blf
+            import os
+            """

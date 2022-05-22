@@ -39,7 +39,7 @@ class SN_DisplaySerpensShortcutNode(bpy.types.Node, SN_ScriptingBaseNode):
                                         found_item = False
                         if found_item:
                             return item
-                    print("Couldn't find keymap item, using addon keymap instead. This won't be saved across sessions!")
+                    print(f"Couldn't find keymap item for {key}, using addon keymap instead. This won't be saved across sessions!")
                     return kmi
             """
             node = self.ref_ntree.nodes[self.ref_SN_OnKeypressNode]

@@ -27,9 +27,10 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         return path and "bpy." in path and not ".ops." in path
 
     def get_data(self):
-        if self._is_valid_data_path(self.pasted_data_path):
-            # return bpy_to_indexed_sections(self.pasted_data_path)
-            return self._disect_data_path(self.pasted_data_path)
+        if self.pasted_data_path:
+            if self._is_valid_data_path(self.pasted_data_path):
+                # return bpy_to_indexed_sections(self.pasted_data_path)
+                return self._disect_data_path(self.pasted_data_path)
         return None
     
     
@@ -67,11 +68,11 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                         inp["default_value"] = int(segment.split("[")[-1].split("]")[0])
                         inp.index_type = "Integer"
                     inp.indexable = True
-        # create parameter inputs
-        params = self.pasted_data_path.split("(")[-1].split(")")[0].split(", ")
-        for param in params:
-            if param.strip():
-                self.add_socket_from_param(param, self._add_input)
+            # create parameter inputs
+            params = self.pasted_data_path.split("(")[-1].split(")")[0].split(", ")
+            for param in params:
+                if param.strip():
+                    self.add_socket_from_param(param, self._add_input)
                     
     def create_outputs_from_path(self):
         # remove existing outputs
@@ -84,14 +85,16 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.add_socket_from_param(param, self._add_output)
         
         
-    def get_pasted_prop_name(self):
+    def get_pasted_prop_name(self, offset=-1):
         if self.pasted_data_path:
-            return self.pasted_data_path.split(".")[-1].split("(")[0].replace("_", " ").title()
+            return self.pasted_data_path.split(".")[offset].split("(")[0].replace("_", " ").title()
         return "Property Function"
     
     def on_prop_change(self, context):
         self.disable_evaluation = True
-        self.label = self.get_pasted_prop_name()
+        name = self.get_pasted_prop_name()
+        source = self.get_pasted_prop_name(-2).split("[")[0]
+        self.label = f"{name} ({source})"
         self.create_inputs_from_path()
         self.create_outputs_from_path()
         self.disable_evaluation = False
@@ -118,9 +121,10 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, context):
-        if self.pasted_data_path:
+        data = self.get_data()
+        if data:
             inps = list(filter(lambda inp: inp.indexable, list(self.inputs)))
-            function = data_path_from_inputs(inps, self.get_data()) + "("
+            function = data_path_from_inputs(inps, data) + "("
 
             # add function parameters
             inp_params = list(filter(lambda inp: inp.strip(), self.pasted_data_path.split("(")[-1].split(")")[0].split(", ")))

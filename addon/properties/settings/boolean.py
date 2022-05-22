@@ -9,6 +9,8 @@ class SN_PT_BooleanProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "They can also be turned into a vector which holds multiple of these.\n" \
                     + "\n" \
                     + "Booleans are displayed as checkboxes or toggles in the UI."
+                    
+    copy_attributes = ["default", "is_vector", "size", "vector_default"]
     
     def draw(self, context, layout):
         """ Draws the settings for this property type """

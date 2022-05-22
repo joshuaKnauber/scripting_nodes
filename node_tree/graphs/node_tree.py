@@ -9,7 +9,7 @@ from ...utils import unique_collection_name, get_python_name
 class ScriptingNodesTree(bpy.types.NodeTree):
 
     bl_idname = 'ScriptingNodesTree'
-    bl_label = "Visual Scripting"
+    bl_label = "Visual Scripting Editor"
     bl_icon = 'FILE_SCRIPT'
     is_sn = True
     type: bpy.props.EnumProperty(items=[("SCRIPTING", "Scripting", "Scripting")], name="Type")

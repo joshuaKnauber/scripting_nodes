@@ -28,6 +28,9 @@ class SN_LayoutColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_enum_input("Alignment")["items"] = str(["Expand", "Left", "Center", "Right"])
         self.add_interface_output().prev_dynamic = True
         self.add_dynamic_interface_output()
+        
+    def draw_node(self, context, layout):
+        layout.label(text=self.layout_type)
 
     def evaluate(self, context):
         self.code = f"""

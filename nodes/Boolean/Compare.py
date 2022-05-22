@@ -30,4 +30,4 @@ class SN_CompareNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "operation", text='')
 
     def evaluate(self, context):
-        self.outputs["Boolean"].python_value = f"{self.inputs[0].python_value} {self.operation} {self.inputs[1].python_value}"
+        self.outputs["Boolean"].python_value = f"({self.inputs[0].python_value} {self.operation} {self.inputs[1].python_value})"

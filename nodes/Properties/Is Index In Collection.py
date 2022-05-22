@@ -27,12 +27,21 @@ class SN_IsIndexInCollectionPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 update=update_index_type)
         
     def evaluate(self, context):
+        self.code_imperative = f"""
+            def property_exists(prop_path, glob, loc):
+                try:
+                    eval(prop_path, glob, loc)
+                    return True
+                except:
+                    return False
+            """
+            
         if self.inputs[0].is_linked:
             if self.index_type == "Integer":
-                self.outputs["In Collection"].python_value = f"(len({self.inputs[0].python_value}) > {self.inputs[1].python_value})"
+                self.outputs["In Collection"].python_value = f"""(property_exists("{self.inputs[0].python_value}", globals(), locals()) and len({self.inputs[0].python_value}) > {self.inputs[1].python_value})"""
                 self.outputs["Index"].python_value = self.inputs[1].python_value
             else:
-                self.outputs["In Collection"].python_value = f"({self.inputs[1].python_value} in {self.inputs[0].python_value})"
+                self.outputs["In Collection"].python_value = f"""(property_exists("{self.inputs[0].python_value}", globals(), locals()) and {self.inputs[1].python_value} in {self.inputs[0].python_value})"""
                 self.outputs["Index"].python_value = f"{self.inputs[0].python_value}.find({self.inputs[1].python_value})"
         else:
             self.outputs[0].reset_value()

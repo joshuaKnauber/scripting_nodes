@@ -12,10 +12,10 @@ class SN_ForExecuteNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def on_create(self, context):
         self.add_execute_input()
-        self.add_list_input("List")
+        self.add_collection_property_input("Collection")
         self.add_execute_output("Repeat")
         self.add_execute_output("Continue")
-        self.add_data_output("Item").changeable = True
+        self.add_property_output("Item").changeable = True
         self.add_integer_output("Index")
         
         
@@ -29,6 +29,7 @@ class SN_ForExecuteNode(bpy.types.Node, SN_ScriptingBaseNode):
                                 description="Collection Type",
                                 items=[("List", "List", "List"),
                                        ("Collection", "Collection", "Collection")],
+                                default="Collection",
                                 update=update_type)
 
     reverse: bpy.props.BoolProperty(name="Reverse",

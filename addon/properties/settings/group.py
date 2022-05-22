@@ -47,6 +47,13 @@ class SN_PT_GroupProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "Use a property called 'Name' to find properties in a collection.\n" \
                     + "\n" \
                     + "A common use for group properties is to group your addons settings together."
+                    
+    copy_attributes = []
+
+    def copy(self, new_settings):
+        for prop in self.properties:
+            new_prop = new_settings.properties.add()
+            prop.match_settings(new_prop)
     
     
     def draw(self, context, layout):

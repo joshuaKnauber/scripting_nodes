@@ -172,7 +172,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_ref_update(self, node, data=None):
         if node.bl_idname in ["SN_PanelNode", "SN_MenuNode", "SN_PieMenuNode"]:
             self._evaluate(bpy.context)
-        elif node.bl_idname == "SN_OperatorNode":
+        elif node.bl_idname in ["SN_OperatorNode", "SN_ModalOperatorNode"]:
             on_operator_ref_update(self, node, data, self.ref_ntree, self.ref_SN_OperatorNode, 0)
             
     def update_custom_operator(self, context):
@@ -233,14 +233,18 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                     for inp in self.inputs:
                         if not inp.disabled:
                             for prop in op_rna.properties:
-                                if prop.name == inp.name:
+                                if (self.version == 0 and (prop.name and prop.name == inp.name) or (not prop.name and prop.identifier.replace("_", " ").title() == inp.name)) \
+                                    or (self.version == 1 and (inp.name.replace(" ", "_").lower() == prop.identifier)):
+                                    self.code += "\n" + f"op.{prop.identifier} = {inp.python_value}"
                                     input_code += f"kmi.properties.{prop.identifier} = {inp.python_value}\n"
                 elif self.parent_type == "CUSTOM" and self.ref_ntree and self.ref_SN_OperatorNode in self.ref_ntree.nodes:
                     node = self.ref_ntree.nodes[self.ref_SN_OperatorNode]
                     operator = f"sna.{node.operator_python_name}"
-                    for i, inp in enumerate(self.inputs):
+                    for inp in self.inputs:
                         if not inp.disabled:
-                            input_code += f"kmi.properties.{node.properties[i].python_name} = {inp.python_value}\n"
+                            for prop in node.properties:
+                                if prop.name == inp.name:
+                                    input_code += f"kmi.properties.{prop.python_name} = {inp.python_value}\n"
             if operator:
                 self.code_register = f"""
                     kc = bpy.context.window_manager.keyconfigs.addon

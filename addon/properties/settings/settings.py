@@ -76,6 +76,10 @@ class PropertySettings:
     
     dummy: bpy.props.StringProperty(name="DUMMY", description="Dummy prop for resolving path")
     
+    copy_attributes = []
+
+    def copy(self, new_settings): pass
+    
     @property
     def prop(self):
         """ Returns the property these settings belong to """

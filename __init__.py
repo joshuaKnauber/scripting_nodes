@@ -19,7 +19,7 @@ bl_info = {
     "description" : "Adds a node editor for building addons with nodes",
     "blender" : (3, 0, 0),
     "version" : (3, 0, 1),
-    "location" : "Editors -> Visual Scripting",
+    "location" : "Editors -> Visual Scripting Editor",
     "doc_url": "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233", 
     "tracker_url": "https://discord.com/invite/NK6kyae", 
     "category" : "Node" 
@@ -40,6 +40,7 @@ from .interface.header.header import header_prepend, header_append, node_info_ap
 from .interface.panels.warnings import append_warning
 from .interface.menus.rightclick import serpens_right_click
 from .interface.menus.snippets import snippet_menu
+from .interface.menus.presets import preset_menu
 from .msgbus import subscribe_to_name_change, unsubscribe_from_name_change
 
 from .settings.addon_properties import SN_AddonProperties
@@ -94,6 +95,7 @@ def register():
 
     # add to the node add menu
     bpy.types.NODE_MT_category_snippets.append(snippet_menu)
+    bpy.types.NODE_MT_add.append(preset_menu)
     
     # add name change update
     subscribe_to_name_change()
@@ -121,6 +123,7 @@ def unregister():
     
     # remove from the node add menu
     bpy.types.NODE_MT_category_snippets.remove(snippet_menu)
+    bpy.types.NODE_MT_add.remove(preset_menu)
 
     # addon properties
     del bpy.types.Scene.sn

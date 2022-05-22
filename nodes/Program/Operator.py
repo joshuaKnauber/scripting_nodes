@@ -109,6 +109,10 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     export_extension: bpy.props.StringProperty(default=".png", name="Export Extension",
                                         description="Extension that the file is exported with",
                                         update=SN_ScriptingBaseNode._evaluate)
+    
+
+    hide_properties: bpy.props.BoolProperty(default=False, name="Hide Properties",
+                                        description="Hide the properties section of this operator")
 
 
     @property
@@ -153,7 +157,11 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                 row.alert = True
                 row.label(text="This property needs to be type Enum or String!")
 
-        self.draw_list(layout)
+        if not self.hide_properties:
+            self.draw_list(layout)
+            
+    def draw_node_panel(self, context, layout):
+        layout.prop(self, "hide_properties")
 
 
     def evaluate(self, context):

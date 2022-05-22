@@ -32,11 +32,16 @@ class SN_BooleanVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
     def update_size(self, context):
         self.default_python_value = str(tuple([False]*self.size))
         self._set_value(self.default_value)
+        self.node.on_socket_type_change(self)
 
     size: bpy.props.IntProperty(default=3, min=2, max=32,
                                 name="Size",
                                 description="Size of this boolean vector",
                                 update=update_size)
+    
+    size_editable: bpy.props.BoolProperty(default=False,
+                                name="Size Editable",
+                                description="Let's you edit the vectors size on the socket")
 
     default_value: bpy.props.BoolVectorProperty(name="Value",
                                             size=32,
@@ -58,3 +63,6 @@ class SN_BooleanVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
             col = layout.column(heading=text, align=True)
             for i in range(self.size):
                 col.prop(self, self.subtype_attr, index=i, text=str(getattr(self, self.subtype_attr)[i]), toggle=True)
+                
+        if self.size_editable:
+            layout.prop(self, "size", text="")

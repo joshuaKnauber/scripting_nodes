@@ -12,6 +12,8 @@ class SN_PT_PointerProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "\n" \
                     + "When used with blend data, you can use pointers to let the user select the data\n" \
                     + "from a dropdown and get the blend data from the property."
+                    
+    copy_attributes = ["data_type", "use_prop_group", "prop_group"]
     
     
     def draw(self, context, layout):

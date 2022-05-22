@@ -13,13 +13,14 @@ class SN_ReturnModalNode(bpy.types.Node, SN_ScriptingBaseNode):
     return_type: bpy.props.EnumProperty(name="Return Type",
                             description="The way this modal should be finished",
                             items=[("FINISHED", "Finish", "End the modal"),
-                                   ("PASS_THROUGH", "Interactive", "Keep the modal running and let the events be used by other operators"),
-                                   ("RUNNING_MODAL", "Not Interactive", "Keep the modal running but block other uses of the event")],
+                                ("CANCELLED", "Cancel", "Cancel the modal"),
+                                ("PASS_THROUGH", "Interactive", "Keep the modal running and let the events be used by other operators"),
+                                ("RUNNING_MODAL", "Not Interactive", "Keep the modal running but block other uses of the event")],
                             default="FINISHED",
                             update=SN_ScriptingBaseNode._evaluate)
     
     enable_escape: bpy.props.BoolProperty(default=True,
-                            name="Default Escape Modal Options",
+                            name="Default Escape",
                             description="Finish the modal automatically when pressing escape or rightclicking. If this is turned off you need to add a way to finish a modal yourself",
                             update=SN_ScriptingBaseNode._evaluate)
 
@@ -30,14 +31,6 @@ class SN_ReturnModalNode(bpy.types.Node, SN_ScriptingBaseNode):
         col = layout.column()
         col.prop(self, "return_type", expand=True)
         layout.prop(self, "enable_escape")
-        
-        for node in self.root_nodes:
-            if node.bl_idname == "SN_ModalOperatorNode":
-                break
-        else:
-            row = layout.row()
-            row.alert = True
-            row.label(text="This node only works with modal operators!", icon="ERROR")
     
     def evaluate(self, context):
         escape = """

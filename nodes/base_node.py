@@ -41,9 +41,15 @@ class SN_ScriptingBaseNode:
 
     # set this to true for the node if it starts a program node tree (nodes like operator, panel, ...)
     is_trigger = False
+    
+    # node version, set in on_create if needed to behave differently for old versions
+    version: bpy.props.IntProperty(default=0, name="Version", description="Version of this node")
 
     # set this for any interface nodes that change the layout type (nodes like row, column, split, ...)
-    layout_type = None
+    @property
+    def layout_type(self):
+        return self.active_layout
+    passthrough_layout_type = False
     
     
     # disables evaluation, only use this when the node is being initialized
@@ -382,8 +388,8 @@ class SN_ScriptingBaseNode:
 
     def _insert_link_layout_update(self, from_socket, is_output):
         """ Updates the layout type of this node when a node with layout type gets connected """
-        if not is_output and from_socket.node.layout_type:
-            self._evaluate(bpy.context)
+        if not is_output and from_socket.bl_label == "Interface":
+            self.active_layout = from_socket.node.layout_type
 
     def _insert_trigger_dynamic(self, from_socket, to_socket):
         """ Triggers dynamic sockets to add new ones """
@@ -395,8 +401,6 @@ class SN_ScriptingBaseNode:
     def link_insert(self, from_socket, to_socket, is_output):
         if not is_output:
             self._insert_link_layout_update(from_socket, is_output)
-        else:
-            self._evaluate(bpy.context)
         self.on_link_insert(from_socket, to_socket, is_output)
         self._insert_trigger_dynamic(from_socket, to_socket)
 
@@ -406,8 +410,11 @@ class SN_ScriptingBaseNode:
 
     def _remove_link_layout_update(self, from_socket, is_output):
         """ Updates the layout type of this node when a connected node with layout type gets removed """
-        if not is_output and not from_socket.node or (from_socket.node and from_socket.node.layout_type):
-            self._evaluate(bpy.context)
+        return
+        if not is_output and not from_socket.node:
+            self.active_layout = "layout"
+        elif from_socket.node and from_socket.node.layout_type:
+            self.active_layout = from_socket.node.layout_type
 
     def link_remove(self, from_socket, to_socket, is_output):
         self._remove_link_layout_update(from_socket, is_output)
@@ -654,10 +661,15 @@ class SN_ScriptingBaseNode:
                     prop_type = "Enum Set"
                 if len(prop.enum_items) == 0:
                     prop_type = "String"
-            inp = self._add_input(self.socket_names[prop_type], prop.name if prop.name else prop.identifier.replace("_", " ").title())
+            inp = self._add_input(self.socket_names[prop_type], prop.identifier.replace("_", " ").title())
             # get enum items
             if prop_type == "Enum":
                 inp.items = str(list(map(lambda item: item.identifier, prop.enum_items)))
+            elif prop_type == "String" and getattr(prop, "subtype", "NONE") != "NONE":
+                if prop.subtype == "FILEPATH":
+                    inp.subtype = "FILE_PATH"
+                elif prop.subtype == "DIRPATH":
+                    inp.subtype = "DIR_PATH"
             # get property default
             if not prop_type in ["Collection", "Pointer"]:
                 default = prop.default
@@ -681,16 +693,24 @@ class SN_ScriptingBaseNode:
 
 
     ### INTERFACE UTIL
-    @property
-    def active_layout(self):
-        """ Returns the last connected layout type for this node """
-        for inp in self.inputs:
-            if inp.bl_label == "Interface":
-                from_out = inp.from_socket()
-                if from_out:
-                    assert from_out.node.layout_type != None, f"Layout type not set on {from_out.node.bl_label}"
-                    return from_out.node.layout_type
-        return "layout"
+    def get_active_layout(self):
+        return self.get("active_layout", "layout")
+
+    def set_active_layout(self, value):
+        if self.get_active_layout() != value:
+            self["active_layout"] = value
+            self._evaluate(bpy.context)
+            
+        # trigger layout updates if passthrough
+        if self.passthrough_layout_type:
+            for out in self.outputs:
+                if out.bl_label == "Interface":
+                    to_sockets = out.to_sockets()
+                    if to_sockets:
+                        to_sockets[0].node.active_layout = value
+
+    active_layout: bpy.props.StringProperty(default="layout",
+                            get=get_active_layout, set=set_active_layout)
 
 
 

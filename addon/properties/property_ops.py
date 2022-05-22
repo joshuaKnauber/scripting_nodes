@@ -1,6 +1,6 @@
 import bpy
 from ...nodes.compiler import compile_addon
-from ...interface.panels.property_ui_list import get_selected_property_offset
+from ...interface.panels.property_ui_list import get_selected_property, get_selected_property_offset
 
 
 
@@ -77,6 +77,23 @@ class SN_OT_MoveProperty(bpy.types.Operator):
             new_index = list(sn.properties).index(after)
             sn.properties.move(sn.property_index, new_index)
             sn.property_index = new_index
+        return {"FINISHED"}
+    
+    
+    
+class SN_OT_DuplicateProperty(bpy.types.Operator):
+    bl_idname = "sn.duplicate_property"
+    bl_label = "Duplicate Property"
+    bl_description = "Duplicates the selected property"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    def execute(self, context):
+        sn = context.scene.sn
+        prop = get_selected_property()
+        if prop:
+            prop.copy()
+            sn.properties.move(len(sn.properties)-1, sn.property_index+1)
+            sn.property_index += 1
         return {"FINISHED"}
 
 

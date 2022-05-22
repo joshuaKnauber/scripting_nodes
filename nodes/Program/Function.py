@@ -22,6 +22,8 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         socket["name"] = get_python_name(socket.name, "Input", lower=False)
         socket["name"] = unique_collection_name(socket.name, "Input", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
         socket.python_value = socket.name
+        if hasattr(socket, "size_editable"):
+            socket.size_editable = True
         self.trigger_ref_update({ "added": socket })
         self._evaluate(bpy.context)
 
@@ -34,6 +36,8 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_socket_type_change(self, socket):
         if socket.bl_label == "Enum" or socket.bl_label == "Enum Set":
             socket.subtype = "CUSTOM_ITEMS"
+        elif hasattr(socket, "size_editable"):
+            socket.size_editable = True
         self.trigger_ref_update({ "changed": socket })
         self._evaluate(bpy.context)
 
