@@ -166,26 +166,32 @@ class SN_OT_ExportSnippetDraw(bpy.types.Operator):
                             props.append(prop.name)
                             item = context.scene.sn.snippet_props_customizable.add()
                             item.name = prop.name
-        wm = context.window_manager
-        return wm.invoke_popup(self, width=400)
+        
+        if len(context.scene.sn.snippet_props_customizable) or len(context.scene.sn.snippet_vars_customizable):
+            wm = context.window_manager
+            return wm.invoke_popup(self, width=200)
 
+        node = context.space_data.node_tree.nodes.active
+        bpy.ops.sn.export_snippet("INVOKE_DEFAULT", node=node.name, tree=node.node_tree.name)
+        return self.execute(context)
 
     def draw(self, context):
         node = context.space_data.node_tree.nodes.active
         layout = self.layout
-        layout.label(text="Choose which variables/properties you want the user to be able to edit:")
-        for var in context.scene.sn.snippet_vars_customizable:
-            row = layout.row()
-            row.prop(var, "enabled", text="")
-            row.separator()
-            row.label(text=var.name)
-        for prop in context.scene.sn.snippet_props_customizable:
-            row = layout.row()
-            row.prop(prop, "enabled", text="")
-            row.separator()
-            row.label(text=prop.name)
+        if len(context.scene.sn.snippet_vars_customizable):
+            layout.label(text="Select editable variables:")
+            for var in context.scene.sn.snippet_vars_customizable:
+                layout.prop(var, "enabled", text=var.name, toggle=True)
+        if len(context.scene.sn.snippet_props_customizable):
+            layout.separator()
+            layout.label(text="Select editable properties:")
+            for prop in context.scene.sn.snippet_props_customizable:
+                layout.prop(prop, "enabled", text=prop.name, toggle=True)
 
-        op = layout.operator("sn.export_snippet", text="Export Snippet", icon="EXPORT", depress=True)
+        layout.separator()
+        row = layout.row()
+        row.scale_y = 1.5
+        op = row.operator("sn.export_snippet", text="Export Snippet", icon="EXPORT")
         op.node = node.name
         op.tree = node.node_tree.name
 
