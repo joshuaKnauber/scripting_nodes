@@ -85,14 +85,16 @@ class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
                 self.add_socket_from_param(param, self._add_output)
         
         
-    def get_pasted_prop_name(self):
+    def get_pasted_prop_name(self, offset=-1):
         if self.pasted_data_path:
-            return self.pasted_data_path.split(".")[-1].split("(")[0].replace("_", " ").title()
+            return self.pasted_data_path.split(".")[offset].split("(")[0].replace("_", " ").title()
         return "Property Function"
     
     def on_prop_change(self, context):
         self.disable_evaluation = True
-        self.label = self.get_pasted_prop_name()
+        name = self.get_pasted_prop_name()
+        source = self.get_pasted_prop_name(-2).split("[")[0]
+        self.label = f"{name} ({source})"
         self.create_inputs_from_path()
         self.create_outputs_from_path()
         self.disable_evaluation = False

@@ -62,17 +62,18 @@ class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
                     inp.indexable = True
         
         
-    def get_pasted_prop_name(self):
+    def get_pasted_prop_name(self, offset=-1):
         data = self.get_data()
         if data:
-            if data[-1][0] == "[":
-                return data[-1]
-            return data[-1].replace("_", " ").title()
+            if data[offset][0] == "[":
+                return data[offset]
+            return data[offset].replace("_", " ").title()
         return "Property"
     
     def on_prop_change(self, context):
         name = self.get_pasted_prop_name()
-        self.label = name
+        source = self.get_pasted_prop_name(-2).split("[")[0]
+        self.label = f"{name} ({source})"
         self.outputs[0].name = name 
         self.outputs[0].set_hide(self.pasted_data_path == "")
         self.outputs[1].set_hide(self.pasted_data_path == "")
