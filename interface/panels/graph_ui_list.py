@@ -88,7 +88,7 @@ class SN_UL_GraphList(bpy.types.UIList):
                     flt_flags.append(0)
 
         for i in range(len(node_trees)):
-            if self.filter_name and not self.filter_name.lower() in node_trees[i].name:
+            if self.filter_name and not self.filter_name.lower() in node_trees[i].name.lower():
                 flt_flags[i] = 0
 
         return flt_flags, flt_neworder

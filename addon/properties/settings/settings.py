@@ -116,11 +116,14 @@ class PropertySettings:
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.node_collection("SN_OnPropertyUpdateNode").nodes:
+                    print(node)
                     prop_src = node.get_prop_source()
                     if prop_src and node.prop_name in prop_src.properties:
                         prop = prop_src.properties[node.prop_name]
-                        if prop == self.prop:
+                        print(prop.name, self.prop.name)
+                        if prop.name == self.prop.name:
                             updates.append((node.update_func_name(prop), node.order))
+        # print(updates)
         return list(map(lambda item: item[0], sorted(updates, key=lambda i: i[1])))
         
     
