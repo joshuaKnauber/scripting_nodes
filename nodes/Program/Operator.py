@@ -250,7 +250,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                             return {invoke_return}
                     """
         
-        if not self.invoke_option in ["none", "IMPORT", "EXPORT"]:
+        if not self.invoke_option in ["IMPORT", "EXPORT"]:
             code += invoke
         self.code = code
 

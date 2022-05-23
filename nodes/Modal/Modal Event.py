@@ -11,7 +11,7 @@ class SN_ModalEventNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_string_output("Type")
-        self.add_boolean_output("Value")
+        self.add_string_output("Value")
         self.add_boolean_output("Alt")
         self.add_boolean_output("Shift")
         self.add_boolean_output("Ctrl")
