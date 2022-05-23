@@ -30,6 +30,8 @@ class SN_SnippetVarsPropertyGroup(bpy.types.PropertyGroup):
                                     poll=lambda _, ntree: ntree.bl_idname == "ScriptingNodesTree",
                                     update=var_prop_update)
 
+    customizable: bpy.props.BoolProperty(default=True)
+
 
 
 class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
@@ -60,12 +62,16 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             item.python_name = var["python_name"]
             item.tree_name = var["tree"]
             item.type = var["type"]
+            if "customizable" in var:
+                item.customizable = var["customizable"]
         for prop in data["properties"]:
             item = self.prop_collection.add()
             item.og_name = prop["name"]
             item.python_name = prop["python_name"]
             item.type = prop["type"]
             item.attach_to = prop["attach_to"]
+            if "customizable" in prop:
+                item.customizable = prop["customizable"]
 
 
     def load_snippet_file(self, path):
@@ -212,34 +218,36 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.prop(self, "path")
 
         for var in self.var_collection:
-            row = layout.row(align=True)
-            row.prop(var, "use_custom", text="")
-            row.label(text=var.og_name)
-            if var.use_custom:
+            if var.customizable:
                 row = layout.row(align=True)
-                row.prop_search(var, "ref_ntree", bpy.data, "node_groups", text="")
-                col = row.column(align=True)
-                col.enabled = bool(var.ref_ntree)
-                parent_tree = var.ref_ntree if var.ref_ntree else self.node_tree
-                col.prop_search(var, "var_name", parent_tree, "variables", text="")
-                row.operator("sn.tooltip", text="", icon="QUESTION").text = "Choose a '" + var.type + "' variable to assign this snippet variable to."
-                if var.ref_ntree and var.var_name in var.ref_ntree.variables:
-                    if var.type != var.ref_ntree.variables[var.var_name].variable_type:
-                        row = layout.row()
-                        row.alert = True
-                        row.label(text=f"Choose a variable of type '{var.type}'")
+                row.prop(var, "use_custom", text="")
+                row.label(text=var.og_name)
+                if var.use_custom:
+                    row = layout.row(align=True)
+                    row.prop_search(var, "ref_ntree", bpy.data, "node_groups", text="")
+                    col = row.column(align=True)
+                    col.enabled = bool(var.ref_ntree)
+                    parent_tree = var.ref_ntree if var.ref_ntree else self.node_tree
+                    col.prop_search(var, "var_name", parent_tree, "variables", text="")
+                    row.operator("sn.tooltip", text="", icon="QUESTION").text = "Choose a '" + var.type + "' variable to assign this snippet variable to."
+                    if var.ref_ntree and var.var_name in var.ref_ntree.variables:
+                        if var.type != var.ref_ntree.variables[var.var_name].variable_type:
+                            row = layout.row()
+                            row.alert = True
+                            row.label(text=f"Choose a variable of type '{var.type}'")
 
         for prop in self.prop_collection:
-            row = layout.row(align=True)
-            row.prop(prop, "use_custom", text="")
-            row.label(text=prop.og_name)
-            if prop.use_custom:
+            if prop.customizable:
                 row = layout.row(align=True)
-                row.prop_search(prop, "prop_name", context.scene.sn, "properties", text="")
-                row.operator("sn.tooltip", text="", icon="QUESTION").text = f"Choose a '{prop.type}' property thats attached to '{prop.attach_to}' to assign this snippet property to."
+                row.prop(prop, "use_custom", text="")
+                row.label(text=prop.og_name)
+                if prop.use_custom:
+                    row = layout.row(align=True)
+                    row.prop_search(prop, "prop_name", context.scene.sn, "properties", text="")
+                    row.operator("sn.tooltip", text="", icon="QUESTION").text = f"Choose a '{prop.type}' property thats attached to '{prop.attach_to}' to assign this snippet property to."
 
-                if prop.prop_name in context.scene.sn.properties:
-                    if prop.type != context.scene.sn.properties[prop.prop_name].property_type or prop.attach_to != context.scene.sn.properties[prop.prop_name].attach_to:
-                        row = layout.row()
-                        row.alert = True
-                        row.label(text=f"Choose a property of type '{prop.type}', that's attached to '{prop.attach_to}'!")
+                    if prop.prop_name in context.scene.sn.properties:
+                        if prop.type != context.scene.sn.properties[prop.prop_name].property_type or prop.attach_to != context.scene.sn.properties[prop.prop_name].attach_to:
+                            row = layout.row()
+                            row.alert = True
+                            row.label(text=f"Choose a property of type '{prop.type}', that's attached to '{prop.attach_to}'!")
