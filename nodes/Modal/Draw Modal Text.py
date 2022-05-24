@@ -23,6 +23,8 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_float_input("Size").default_value = 20
         self.add_integer_input("DPI").default_value = 72
 
+        self.add_integer_input("Wrap Width").default_value = 0
+
         inp = self.add_integer_vector_input("Position")
         inp.size = 2
         inp.default_value = [100]*32
@@ -40,7 +42,11 @@ class SN_DrawModalTextNode(bpy.types.Node, SN_ScriptingBaseNode):
                 blf.size(font_id, {self.inputs["Size"].python_value}, {self.inputs["DPI"].python_value})
                 clr = {self.inputs["Text Color"].python_value}
                 blf.color(font_id, clr[0], clr[1], clr[2], clr[3])
+                if {self.inputs["Wrap Width"].python_value if "Wrap Width" in self.inputs else "False"}:
+                    blf.enable(font_id, blf.WORD_WRAP)
+                    blf.word_wrap(font_id, {self.inputs["Wrap Width"].python_value if "Wrap Width" in self.inputs else "0"})
                 blf.draw(font_id, {self.inputs["Text"].python_value})
+                blf.disable(font_id, blf.WORD_WRAP)
             {self.indent(self.outputs[0].python_value, 3)}
         """
         self.code_import = """

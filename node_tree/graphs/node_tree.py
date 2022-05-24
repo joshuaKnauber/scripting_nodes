@@ -119,10 +119,17 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         """ Updates the reroute look of this node if it is a reroute. Not possible to do custom sockets """
         for link in from_out.links:
             if link.to_node.bl_idname == "NodeReroute":
-                link.to_node.inputs[0].type = "VALUE"
-                link.to_node.outputs[0].type = "VALUE"
-                link.to_node.inputs[0].display_shape = link.from_socket.display_shape
-                link.to_node.outputs[0].display_shape = link.from_socket.display_shape
+                # link.to_node.inputs[0].type = "VALUE"
+                # link.to_node.outputs[0].type = "VALUE"
+                # from_socket = link.from_socket
+                # to_socket = link.to_socket
+                # reroute = link.to_node
+                # if reroute.inputs[0].bl_idname != link.from_socket.bl_idname:
+                #     reroute.inputs.remove(reroute.inputs[0])
+                #     reroute.outputs.remove(reroute.outputs[0])
+                #     reroute.inputs.new(link.from_socket.bl_idname)
+                #     reroute.outputs.new(link.from_socket.bl_idname)
+                #     link = self.links.new(from_socket, to_socket)
                 self._update_reroute_type(link.to_node.outputs[0])
                 
                 
