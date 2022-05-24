@@ -113,25 +113,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         to_inp = link.to_socket
         from_out = link.to_socket.from_socket()
         return self.is_valid_connection(from_out, to_inp)
-
-
-    def _update_reroute_type(self, from_out):
-        """ Updates the reroute look of this node if it is a reroute. Not possible to do custom sockets """
-        for link in from_out.links:
-            if link.to_node.bl_idname == "NodeReroute":
-                # link.to_node.inputs[0].type = "VALUE"
-                # link.to_node.outputs[0].type = "VALUE"
-                # from_socket = link.from_socket
-                # to_socket = link.to_socket
-                # reroute = link.to_node
-                # if reroute.inputs[0].bl_idname != link.from_socket.bl_idname:
-                #     reroute.inputs.remove(reroute.inputs[0])
-                #     reroute.outputs.remove(reroute.outputs[0])
-                #     reroute.inputs.new(link.from_socket.bl_idname)
-                #     reroute.outputs.new(link.from_socket.bl_idname)
-                #     link = self.links.new(from_socket, to_socket)
-                self._update_reroute_type(link.to_node.outputs[0])
-                
+             
                 
     def _insert_define_data_nodes(self, links):
         """ Inserts define data nodes for all links invalid links """
@@ -176,7 +158,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             # update program sockets
             elif getattr(from_out, "is_sn", False) and from_out.is_program and from_out.node:
                 from_out.force_update()
-            self._update_reroute_type(from_out)
 
 
     def _call_link_inserts(self, added):
@@ -228,9 +209,29 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         bpy.app.timers.register(self._update_post, first_interval=0.001)
 
 
+    def _update_reroutes(self):
+        """ Updates all inputs and display shapes of the reroutes in this node tree """
+        for reroute in self.nodes:
+            if reroute.bl_idname == "NodeReroute":
+                connections_left = [x.from_socket for x in reroute.inputs[0].links]
+                connections_right = [x.to_socket for x in reroute.outputs[0].links]
+                if reroute.inputs[0].bl_idname != "SN_RerouteSocket":
+                    reroute.inputs.remove(reroute.inputs[0])
+                    reroute.outputs.remove(reroute.outputs[0])
+                    i = reroute.inputs.new("SN_RerouteSocket", "Input")
+                    o = reroute.outputs.new("SN_RerouteSocket", "Output")
+                    for c in connections_left:
+                        self.links.new(c, i)
+                    for c in connections_right:
+                        self.links.new(c, o)
+                reroute.inputs[0].display_shape = connections_left[0].display_shape if connections_left else "CIRCLE"
+                reroute.outputs[0].display_shape = connections_left[0].display_shape if connections_left else "CIRCLE"
+
+
     def update(self):
         # update tree links
         self._update_tree_links()
+        self._update_reroutes()
 
 
     def reevaluate(self):

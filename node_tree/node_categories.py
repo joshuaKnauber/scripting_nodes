@@ -17,7 +17,7 @@ def get_node_categories():
     node_categories = {}
 
     for cls in auto_load.ordered_classes:
-        if cls.bl_rna.base.identifier == "Node":
+        if cls.bl_rna.base and cls.bl_rna.base.identifier == "Node":
             category = os.path.basename(os.path.dirname(inspect.getfile(cls)))
             if not category in ["nodes"]:
                 if not category in node_categories: node_categories[category] = []
