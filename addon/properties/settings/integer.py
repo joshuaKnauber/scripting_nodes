@@ -10,7 +10,7 @@ class SN_PT_IntegerProperty(PropertySettings, bpy.types.PropertyGroup):
                     + "\n" \
                     + "Integers are displayed as number inputs."
                     
-    copy_attributes = ["is_vector", "default", "subtype", "unit", "use_min", "min", "use_max", "use_soft_min",
+    copy_attributes = ["is_vector", "default", "subtype", "use_min", "min", "use_max", "use_soft_min",
                        "soft_min", "max", "use_soft_max", "soft_max", "step", "size", "vector_default"]
     
     def draw(self, context, layout):
