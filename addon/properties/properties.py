@@ -105,3 +105,8 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
                                     description="The type of blend data to attach this property to",
                                     items=get_attach_to_items,
                                     update=FullBasicProperty.trigger_reference_update)
+    
+    def copy(self):
+        new_prop = super().copy()
+        new_prop.attach_to = self.attach_to
+        return new_prop
