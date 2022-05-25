@@ -246,7 +246,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="Your custom category")
     
     
-    data_items = {"app": {}, "context": {}, "data": {},}# "path": {}, "utils": {}}
+    data_items = {"app": {}, "context": {}, "data": {}}
+    
+    def overwrite_data_items(self, items):
+        self.data_items["data"] = items
         
     def reload_data_category(self, category):
         """ Reloads the basic data for a category """
@@ -261,8 +264,6 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         self.reload_data_category("app")
         self.reload_data_category("context")
         self.reload_data_category("data")
-        # self.reload_data_category("path")
-        # self.reload_data_category("utils")
 
     def update_hide_preferences(self, context):
         for cls in space_userpref.classes:

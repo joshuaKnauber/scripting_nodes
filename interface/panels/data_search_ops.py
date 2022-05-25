@@ -202,3 +202,35 @@ class SN_OT_CopyDataPath(bpy.types.Operator):
         context.scene.sn.last_copied_required = self.required
         self.report({"INFO"}, message="Copied!")
         return {"FINISHED"}
+    
+    
+
+class SN_OT_PreloadData(bpy.types.Operator):
+    bl_idname = "sn.preload_data"
+    bl_label = "Preload Data"
+    bl_description = "Preloads the blend data"
+    bl_options = {"REGISTER", "INTERNAL"}
+    
+    data = {"app": {}, "context": {}, "data": {}}
+    
+    def get_nested_data(self, value, step):
+        if step > 5: return
+        print(value)
+        for item in value["properties"].values():
+            item["expanded"] = True
+            item["properties"] = get_data_items(item["path"], item["data"])
+            for prop in item["properties"]:
+                self.get_nested_data(prop, step+1)
+
+    def execute(self, context):
+        self.data["data"] = get_data_items("bpy.data", bpy.data)
+        
+        for value in self.data["data"].values():
+            value["expanded"] = True
+            value["properties"] = get_data_items(value["path"], value["data"])
+            for prop in value["properties"]:
+                self.get_nested_data(prop, 1)
+            
+                
+        context.scene.sn.overwrite_data_items(self.data["data"])
+        return {"FINISHED"}
