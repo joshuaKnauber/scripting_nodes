@@ -2,7 +2,10 @@ import bpy
 import time
 from ...settings.data_properties import get_data_items
 
-
+# instead of going broad and then deep go deep in one and then broad
+# search one branch to the end, then do the next one fully, etc.
+# that way it only ever stores the data it needs and not everything and then remove
+# wont be faster but because it stores and moves less data hopefully more stable?
 
 class SN_OT_GlobalSearch(bpy.types.Operator):
     bl_idname = "sn.global_search"
