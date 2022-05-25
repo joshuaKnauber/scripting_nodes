@@ -32,11 +32,18 @@ def is_iterable(data):
     return False
 
 
+def add_additional_data(data_dict, path):
+    if ".outputs[" in path:
+        data_dict["links"] = list(eval(path+".links"))
+    return data_dict
+
+
 def get_data_items(path, data):
     data_items = {}
 
     # get attributes
     data_dict = validate_data_dict(data) if type(data) == dict else data_to_dict(data)
+    data_dict = add_additional_data(data_dict, path)
     for key in data_dict.keys():
         item = get_data_item(data, data_dict[key], path, key)
         if item: data_items[key] = item
