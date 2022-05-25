@@ -84,11 +84,11 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     invoke_option: bpy.props.EnumProperty(name="Popup",items=[("none","None","None"),
                                                             ("invoke_confirm","Confirm","Shows a confirmation option for this operator"),
                                                             ("invoke_props_dialog","Popup","Opens a customizable property dialog"),
-                                                            # ("invoke_popup", "Show Properties", "Shows a popup with the operators properties"),
                                                             ("invoke_props_popup", "Property Update", "Show a customizable dialog and execute the operator on property changes"),
                                                             ("invoke_search_popup", "Search Popup", "Opens a search menu from a selected enum property"),
                                                             ("IMPORT", "Import File Browser", "Opens a filebrowser to select items"),
-                                                            ("EXPORT", "Export File Browser", "Opens a filebrowser to a location")],update=update_popup)
+                                                            ("EXPORT", "Export File Browser", "Opens a filebrowser to a location"),
+                                                            ("invoke_popup", "Show Properties", "Shows a popup with the operators properties")],update=update_popup)
 
 
     select_property: bpy.props.StringProperty(name="Preselected Property",description="The property that is preselected when the popup is opened. This can only be a String or Enum Property!", update=SN_ScriptingBaseNode._evaluate)

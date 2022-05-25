@@ -248,8 +248,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     data_items = {"app": {}, "context": {}, "data": {}}
     
-    def overwrite_data_items(self, items):
-        self.data_items["data"] = items
+    def overwrite_data_items(self, data):
+        self.data_items["data"] = data["data"]
+        self.data_items["context"] = data["context"]
+        self.data_items["app"] = data["app"]
         
     def reload_data_category(self, category):
         """ Reloads the basic data for a category """

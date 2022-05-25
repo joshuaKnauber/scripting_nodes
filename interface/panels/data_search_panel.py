@@ -37,10 +37,10 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         row.scale_y = 1.4
         row.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH")
 
-        # col = layout.column(align=True)
-        # row = col.row()
-        # row.scale_y = 1.4
-        # row.operator("sn.preload_data", text="LOAD", icon="FILE_REFRESH")
+        col = layout.column(align=True)
+        row = col.row()
+        row.scale_y = 1
+        row.operator("sn.global_search", text="Global Search", icon="VIEWZOOM")
 
         layout.separator()
         col = layout.column()
