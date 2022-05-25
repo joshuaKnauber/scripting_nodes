@@ -19,7 +19,7 @@ class SN_RegionToViewNode(bpy.types.Node, SN_ScriptingBaseNode):
                 for region in area.regions:
                     if region.type == "WINDOW":
                         ui_scale = bpy.context.preferences.system.ui_scale
-                        return region.view2d.region_to_view(coords[0]*ui_scale, coords[1]*ui_scale, clip=False)
+                        return region.view2d.region_to_view(coords[0]*ui_scale, coords[1]*ui_scale)
                 return coords
             """
         self.outputs[0].python_value = f"coords_region_to_view({self.inputs[0].python_value}, tuple({self.inputs[1].python_value}))"
