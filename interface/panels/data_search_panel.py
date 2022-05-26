@@ -33,10 +33,10 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         col.prop(context.scene.sn, "data_category", expand=True)
         layout.separator()
 
-        col = layout.column(align=True)
-        row = col.row()
-        row.enabled = not sn.global_search_active
-        row.operator("sn.global_search", text="Global Search", icon="VIEWZOOM")
+        # col = layout.column(align=True)
+        # row = col.row()
+        # row.enabled = not sn.global_search_active
+        # row.operator("sn.global_search", text="Global Search", icon="VIEWZOOM")
 
         col = layout.column(align=True)
         row = col.row()

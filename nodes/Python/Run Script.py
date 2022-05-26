@@ -132,9 +132,9 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
                     text = script_file.read()
                     script = self.get_script_code(text)
 
-            self.code_register = f"""{script[1]}"""
-            self.code_unregister = f"""{script[2]}"""
-            self.code_import = f"""{script[3]}"""
+            self.code_register = script[1]
+            self.code_unregister = script[2]
+            self.code_import = script[3]
             self.code = f"""
                         {self.indent([f"{inp.name} = {inp.python_value}" for inp in self.inputs[2:-1]], 6)}
                         {self.indent([f"{out.name} = None" for out in self.outputs[1:-1]], 6)}
