@@ -28,6 +28,7 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         layout.use_property_decorate = False
 
         col = layout.column(heading="General")
+        col.prop(sn, "watch_script_changes")
         col.prop(sn, "show_graph_categories")
         col.prop(sn, "show_property_categories")
         col.prop(sn, "overwrite_variable_graph")

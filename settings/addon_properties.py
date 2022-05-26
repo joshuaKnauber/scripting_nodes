@@ -3,7 +3,9 @@ from bl_ui import space_userpref
 from uuid import uuid4
 
 
+
 from .data_properties import get_data_items, filter_items, filter_defaults
+from .handle_script_changes import unwatch_script_changes, watch_script_changes
 from ..addon.properties.properties import SN_GeneralProperties
 from ..addon.properties.property_category import SN_PropertyCategory
 from ..node_tree.graphs.graph_category_ops import SN_GraphCategory
@@ -387,3 +389,15 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     format_code: bpy.props.BoolProperty(name="Format Code",
                                         description="Formats linebreaks in the generated code (small performance impact for large addons)",
                                         default=True)
+    
+    
+    def update_watch_scripts(self, context):
+        if self.watch_script_changes:
+            watch_script_changes()
+        else:
+            unwatch_script_changes()
+    
+    watch_script_changes: bpy.props.BoolProperty(name="Watch Script Changes",
+                                        description="Will watch for changes in the scripts of your run script nodes and recompile the addon when you save the file",
+                                        default=False,
+                                        update=update_watch_scripts)

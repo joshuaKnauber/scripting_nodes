@@ -105,6 +105,7 @@ def register():
     bpy.app.handlers.load_post.append(handlers.load_handler)
     bpy.app.handlers.load_pre.append(handlers.unload_handler)
     bpy.app.handlers.undo_post.append(handlers.undo_post)
+    bpy.app.handlers.save_pre.append(handlers.save_pre)
     atexit.register(handlers.unload_handler)
     
     # add right click menu
@@ -142,6 +143,7 @@ def unregister():
     bpy.app.handlers.load_post.remove(handlers.load_handler)
     bpy.app.handlers.load_pre.remove(handlers.unload_handler)
     bpy.app.handlers.undo_post.remove(handlers.undo_post)
+    bpy.app.handlers.save_pre.remove(handlers.save_pre)
     atexit.unregister(handlers.unload_handler)
     
     # remove name change msgbus
