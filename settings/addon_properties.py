@@ -33,6 +33,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     preview_collections = {}
     
     
+    # stores functions that need to be called during developement
+    function_store = {}
+    
+    
     compile_time: bpy.props.FloatProperty(name="Compile Time",
                                         description="Time the addon took to compile")
 
