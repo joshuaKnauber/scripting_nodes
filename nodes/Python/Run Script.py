@@ -68,6 +68,18 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     script: bpy.props.PointerProperty(name="File", type=bpy.types.Text, update=SN_ScriptingBaseNode._evaluate)
 
+    def find_block_bounds(self, lines, name):
+        start = -1
+        end = -1
+        for i, line in enumerate(lines):
+            if start < 0 and name in line:
+                start = i
+            elif start >= 0 and len(line) - len(line.lstrip()) == 0 and line.strip():
+                end = i-1
+                break
+        if end == -1: end = len(lines)-1
+        return start, end
+
     def get_script_code(self, script):
         register = ""
         unregister = ""
@@ -83,26 +95,31 @@ class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
         if not "def register()" in script and not "def unregister()" in script:
             return (normalize_code(script), register, unregister, imports)
 
+        lines = script.split("\n")
+
         if "def register()" in script:
-            register = "def register()" + script.split("def register()")[1]
-            register_lines = register.split("\n")
-            for x, line in enumerate(register.split("\n")[1:]):
-                if not len(line) - len(line.lstrip()) and line.strip():
-                    register_lines = register_lines[:x]
-                    break
-            script = script.replace("\n".join(register_lines), "")
-            register = normalize_code("\n".join(register_lines[1:]))
+            start, end = self.find_block_bounds(lines, "def register():")
+            if start >= 0 and end >= 0:
+                lines_register = lines[start:end+1][1:]
+                register = normalize_code("\n".join(lines_register))
+                after = lines[end+1:]
+                lines = lines[:start] + after
 
         if "def unregister()" in script:
-            unregister = "def unregister()" + script.split("def unregister()")[1]
-            unregister_lines = unregister.split("\n")
-            for x, line in enumerate(unregister.split("\n")[1:]):
-                if not len(line) - len(line.lstrip()) and line.strip():
-                    unregister_lines = unregister_lines[:x]
-                    break
-            script = script.replace("\n".join(unregister_lines), "")
-            unregister = normalize_code("\n".join(unregister_lines[1:]))
+            start, end = self.find_block_bounds(lines, "def unregister():")
+            if start >= 0 and end >= 0:
+                lines_unregister = lines[start:end+1][1:]
+                unregister = normalize_code("\n".join(lines_unregister))
+                after = lines[end+1:]
+                lines = lines[:start] + after
 
+        if "if __name__ == '__main__'" in script.replace('"', "'"):
+            start, end = self.find_block_bounds(lines, "if __name__ == ")
+            if start >= 0 and end >= 0:
+                after = lines[end+1:]
+                lines = lines[:start] + after
+        
+        script = "\n".join(lines)
         return (normalize_code(script), register, unregister, imports)
 
 
