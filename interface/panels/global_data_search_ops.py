@@ -7,6 +7,8 @@ from ...settings.data_properties import get_data_items
 # that way it only ever stores the data it needs and not everything and then remove
 # wont be faster but because it stores and moves less data hopefully more stable?
 
+global_search_active = False
+
 class SN_OT_GlobalSearch(bpy.types.Operator):
     bl_idname = "sn.global_search"
     bl_label = "Global Search"
@@ -15,7 +17,7 @@ class SN_OT_GlobalSearch(bpy.types.Operator):
     
     data = {"app": {}, "context": {}, "data": {}}
     
-    search: bpy.props.StringProperty(name="Search Value",
+    search: bpy.props.StringProperty(name="Search",
                             description="The name of the property to search for",
                             default="")
 
@@ -29,9 +31,10 @@ class SN_OT_GlobalSearch(bpy.types.Operator):
             if item["has_properties"]:
                 try:
                     item["data"]
-                    item["expanded"] = True
+                    # item["expanded"] = True
                     item["properties"] = get_data_items(item["path"], item["data"])
-                    self.get_nested_data(item, step+1)
+                    if not ".spaces" in item["path"]:
+                        self.get_nested_data(item, step+1)
                 except:
                     item["expanded"] = False
                     item["has_properties"] = False
@@ -53,12 +56,18 @@ class SN_OT_GlobalSearch(bpy.types.Operator):
 
 
     def load_category(self, category):
-        self.data[category] = get_data_items(f"bpy.{category}", bpy.data)
+        bpy.context.window_manager.progress_begin(0, 100)
+        if category != "context":
+            self.data[category] = get_data_items(f"bpy.{category}", getattr(bpy, category))
+        else:
+            ctxt = bpy.context.scene.sn.copied_context[0] if bpy.context.scene.sn.copied_context else bpy.context.copy()
+            self.data[category] = get_data_items(f"bpy.context", ctxt)
         
-        for value in self.data[category].values():
+        for i, value in enumerate(self.data[category].values()):
+            bpy.context.window_manager.progress_update((i/len(self.data[category].values()))*100)
             try:
                 value["data"]                
-                value["expanded"] = True
+                # value["expanded"] = True
                 value["properties"] = get_data_items(value["path"], value["data"])
                 self.get_nested_data(value, 1)
             except:
@@ -66,16 +75,20 @@ class SN_OT_GlobalSearch(bpy.types.Operator):
                 value["has_properties"] = False
         
         self.filter_data(self.data[category])
+        bpy.context.window_manager.progress_end()
 
 
     def run_search(self):
         t1 = time.time()
-        self.load_category("data") # when doing context, load copied context
+        self.load_category("data")
+        self.load_category("app")
+        self.load_category("context")
         t2 = time.time()
         s = round(t2-t1, 2)
         print(f"Took {s}s")
 
     def execute(self, context):
+        context.scene.sn.global_search_active = True
         self.run_search()
         context.scene.sn.overwrite_data_items(self.data)
         context.area.tag_redraw()
@@ -87,4 +100,4 @@ class SN_OT_GlobalSearch(bpy.types.Operator):
         layout.prop(self, "depth")
     
     def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self, width=400)
+        return context.window_manager.invoke_props_dialog(self, width=300)

@@ -134,7 +134,6 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
             self.create_files(baseDir)
             context.window_manager.progress_update(90)
             self.zip_addon(name)
-        context.window_manager.progress_end()
         bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
         context.window_manager.progress_end()
         return {"FINISHED"}

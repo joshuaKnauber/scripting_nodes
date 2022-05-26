@@ -280,6 +280,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Hide Preferences",
                                         description="Hides all panels in the preferences window",
                                         update=update_hide_preferences)
+            
+    global_search_active: bpy.props.BoolProperty(default=False,
+                                        name="Global Search",
+                                        description="If the global search is active")
     
     def make_enum_item(self, _id, name, descr, preview_id, uid):
         lookup = str(_id)+"\\0"+str(name)+"\\0"+str(descr)+"\\0"+str(preview_id)+"\\0"+str(uid)

@@ -10,6 +10,7 @@ class SN_OT_ShowDataOverview(bpy.types.Operator):
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context):
+        context.scene.sn.global_search_active = False
         for area in context.screen.areas:
             if area.type == "PREFERENCES":
                 break
@@ -29,6 +30,7 @@ class SN_OT_ExitDataSearch(bpy.types.Operator):
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context):
+        context.scene.sn.global_search_active = False
         context.scene.sn.hide_preferences = False
         return {"FINISHED"}
 
@@ -137,6 +139,7 @@ class SN_OT_ReloadData(bpy.types.Operator):
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context):
+        context.scene.sn.global_search_active = False
         context.scene.sn.hide_preferences = True
         return {"FINISHED"}
     

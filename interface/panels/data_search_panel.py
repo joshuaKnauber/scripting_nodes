@@ -16,6 +16,7 @@ class SN_PT_navigation_bar(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+        sn = context.scene.sn
 
         row = layout.row()
         row.scale_y = 1.4
@@ -34,16 +35,17 @@ class SN_PT_navigation_bar(bpy.types.Panel):
 
         col = layout.column(align=True)
         row = col.row()
-        row.scale_y = 1.4
-        row.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH")
+        row.enabled = not sn.global_search_active
+        row.operator("sn.global_search", text="Global Search", icon="VIEWZOOM")
 
         col = layout.column(align=True)
         row = col.row()
-        row.scale_y = 1
-        row.operator("sn.global_search", text="Global Search", icon="VIEWZOOM")
+        row.scale_y = 1.4
+        row.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH", depress=sn.global_search_active)
 
         layout.separator()
         col = layout.column()
+        col.enabled = not sn.global_search_active
         row = col.row()
         row.label(text="Filter Overview:")
         row.operator("sn.reset_filters", text="", icon="LOOP_BACK", emboss=False)
