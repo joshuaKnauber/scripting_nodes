@@ -1,9 +1,10 @@
+import json
 import bpy
 import time
-from ..utils import indent_code
+from ..utils import indent_code, normalize_code
 from ..node_tree.sockets.conversions import CONVERT_UTILS
 from ..addon.properties.compiler_properties import property_imperative_code, property_register_code, property_unregister_code
-from ..addon.variables.compiler_variables import variable_register_code
+from ..addon.variables.compiler_variables import ntree_variable_register_code, variable_register_code
 
 
 
@@ -71,8 +72,7 @@ def compile_addon():
         sn.compile_time = time.time() - t1
 
 
-LICENSE = """
-# This program is free software; you can redistribute it and/or modify
+LICENSE = """# This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
@@ -145,7 +145,7 @@ def format_single_file():
     if not unregister.strip():
         unregister = "pass\n"
     
-    code = f"{LICENSE}\n{imports}\n{imperative}\n{main}\n\ndef register():\n{indent_code(register, 1, 0)}\n\ndef unregister():\n{indent_code(unregister, 1, 0)}\n\n"
+    code = f"{imports}\n{imperative}\n{main}\n\ndef register():\n{indent_code(register, 1, 0)}\n\ndef unregister():\n{indent_code(unregister, 1, 0)}\n\n"
     t7 = time.time()
     
     if (sn.remove_duplicate_code and sn.debug_code) or sn.is_exporting:
@@ -155,6 +155,10 @@ def format_single_file():
     if (sn.format_code and sn.debug_code) or sn.is_exporting:
         code = format_linebreaks(code)
     t9 = time.time()
+    
+    if sn.is_exporting:
+        code = f"{info()}\n{code}"
+    code = f"{LICENSE}\n{code}"
 
     if sn.debug_compile_time:
         print(f"--Variable register code generation took {round((t2-t1)*1000, 2)}ms")
@@ -170,6 +174,8 @@ def format_single_file():
 
 def remove_duplicates(code):
     code = remove_duplicate_functions(code)
+    if bpy.context.scene.sn.is_exporting:
+        code = remove_duplicate_functions(code)
     code = remove_duplicate_imports(code)
     return code
 
@@ -220,7 +226,7 @@ def remove_duplicate_imports(code):
 def format_linebreaks(code):
     lines = code.split("\n")
     newLines = []
-    for i, line in enumerate(lines):
+    for line in lines:
         if line.strip():
             # insert linebreaks for lines with no indent
             if len(line) - len(line.lstrip()) == 0:
@@ -242,6 +248,13 @@ def format_linebreaks(code):
                 elif len(line) > 3 and len(newLines[-1].strip()) and line.lstrip()[:3] == "def" and not newLines[-1].lstrip()[0] == "@":
                     newLines.append("")
             newLines.append(line)
+
+    # insert linebreaks after last import
+    for i in range(len(newLines)):
+        if "import" in newLines[i] and i < len(newLines)-1 and not "import" in newLines[i+1]:
+            newLines.insert(i+1, "\n")
+            break
+    
     return "\n".join(newLines) + "\n"
     
     
@@ -255,3 +268,104 @@ def get_trigger_nodes():
                     nodes.append(node)
     nodes = sorted(nodes, key=lambda node: node.order)
     return nodes
+
+
+def info():
+    """ Returns the bl_info for this addon """
+    sn = bpy.context.scene.sn
+    info = f"""
+    bl_info = {{
+        "name" : "{sn.addon_name}",
+        "author" : "{sn.author}", 
+        "description" : "{sn.description}",
+        "blender" : {tuple(sn.blender)},
+        "version" : {tuple(sn.version)},
+        "location" : "{sn.location}",
+        "waring" : "{sn.warning}",
+        "doc_url": "{sn.doc_url}", 
+        "tracker_url": "{sn.tracker_url}", 
+        "category" : "{sn.category if not sn.category == 'CUSTOM' else sn.custom_category}" 
+    }}
+    """
+    return normalize_code(info) + "\n" + "\n"
+
+
+def format_multifile():
+    """ Returns the code for the entire addon as a dictionary of multiple files """
+    files = {}
+    
+    register, unregister = "", ""
+    for ntree in bpy.data.node_groups:
+        if ntree.bl_idname == "ScriptingNodesTree":
+            code, ntree_register, ntree_unregister = format_node_tree(ntree)
+            files[ntree.python_name] = code
+            register += "\n" + ntree_register + "\n"
+            unregister += "\n" + ntree_unregister + "\n"
+            
+    files["__init__"] = format_multifile_init(register, unregister)
+    return files
+
+
+def format_node_tree(ntree):
+    imperative, main, register, unregister = (CONVERT_UTILS, "", "", "")
+    imports = "import bpy\nfrom . import addon_keymaps, _icons\n"
+    
+    import_ntrees = ""
+    for group in bpy.data.node_groups:
+        if group != ntree and group.bl_idname == "ScriptingNodesTree":
+            imports += f"from .{group.python_name} import *\n"
+            import_ntrees += f"{group.python_name}, "
+    if import_ntrees:
+        imports += f"from . import {import_ntrees[:-2]}\n"
+
+    imperative += ntree_variable_register_code(ntree) + "\n"
+    
+    nodes = []
+    for node in ntree.nodes:
+        if getattr(node, "is_trigger", False):
+            nodes.append(node)
+            
+    for node in nodes:
+        if node.code_import and not node.code_import in imports: imports += "\n" + node.code_import
+        if node.code_imperative and not node.code_imperative in imperative: imperative += "\n" + node.code_imperative
+        if node.code: main += "\n" + node.code
+        if node.code_register: register += "\n" + node.code_register
+        if node.code_unregister: unregister += "\n" + node.code_unregister
+            
+    code = imperative + "\n" + main
+    
+    for group in bpy.data.node_groups:
+        if group != ntree and group.bl_idname == "ScriptingNodesTree":
+            code = code.replace(group.python_name, f"{group.python_name}.{group.python_name}")
+
+    code = imports + "\n" + code
+
+    code = remove_duplicates(code)
+    code = format_linebreaks(code)
+
+    return code, register, unregister
+
+
+def format_multifile_init(node_register, node_unregister):
+    imports, imperative, main, register, unregister = (DEFAULT_IMPORTS, CONVERT_UTILS + GLOBAL_VARS, "", REGISTER, UNREGISTER)
+    
+    for ntree in bpy.data.node_groups:
+        if ntree.bl_idname == "ScriptingNodesTree":
+            imports += f"from .{ntree.python_name} import *\n"
+            
+    main += "\n" + property_imperative_code() + "\n"
+    
+    register += property_register_code() + "\n" + node_register + "\n"
+    unregister += property_unregister_code() + "\n" + node_unregister + "\n"
+    
+    register = "def register():\n" + indent_code(register, 1, 0)
+    unregister = "def unregister():\n" + indent_code(unregister, 1, 0)
+
+    code = imports + "\n" + imperative + "\n" + main + "\n" + register + "\n" + unregister
+    code = remove_duplicates(code)
+    code = format_linebreaks(code)
+    
+    code = f"{info()}\n{code}"
+    code = f"{LICENSE}\n{code}"
+
+    return code

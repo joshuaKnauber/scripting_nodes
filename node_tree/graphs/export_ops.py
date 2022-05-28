@@ -2,7 +2,7 @@ from bpy_extras.io_utils import ExportHelper
 import bpy
 import os
 import shutil
-from ...nodes.compiler import format_single_file
+from ...nodes.compiler import format_multifile, format_single_file
 from ...utils import normalize_code
 
 
@@ -63,36 +63,21 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
                             settings.color_mode = mode
                             settings.color_depth = depth
 
-    def info(self):
-        """ Returns the bl_info for this addon """
-        sn = bpy.context.scene.sn
-        info = f"""
-        bl_info = {{
-            "name" : "{sn.addon_name}",
-            "author" : "{sn.author}", 
-            "description" : "{sn.description}",
-            "blender" : {tuple(sn.blender)},
-            "version" : {tuple(sn.version)},
-            "location" : "{sn.location}",
-            "waring" : "{sn.warning}",
-            "doc_url": "{sn.doc_url}", 
-            "tracker_url": "{sn.tracker_url}", 
-            "category" : "{sn.category if not sn.category == 'CUSTOM' else sn.custom_category}" 
-        }}
-        """
-        return normalize_code(info) + "\n" + "\n"
-
     def add_code(self, path):
         """ Creates the index file """
         bpy.context.scene.sn.is_exporting = True
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 ntree.reevaluate()
-        with open(os.path.join(path, "__init__.py"), "a") as init_file:
-            code = format_single_file()
-            code = self.info() + code
-            code = code.replace("from easybpy import", "from .easybpy import")
-            init_file.write(code)
+        if bpy.context.scene.sn.multifile:
+            files = format_multifile()
+        else:
+            files = { "__init__" : format_single_file() }
+        for name in files.keys():
+            with open(os.path.join(path, f"{name}.py"), "a") as code_file:
+                code = files[name]
+                code = code.replace("from easybpy import", "from .easybpy import")
+                code_file.write(code)
         bpy.context.scene.sn.is_exporting = False
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
@@ -123,7 +108,7 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
         except OSError as e:
             self.report({"WARNING"}, message=f"Error: {e.filename} - {e.strerror}.")
     
-    def execute(self, context):
+    def execute(self, context):            
         context.window_manager.progress_begin(0, 100)
         name, _ = os.path.splitext(self.filepath)
         if os.path.exists(name):

@@ -405,3 +405,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="Will watch for changes in the scripts of your run script nodes and recompile the addon when you save the file",
                                         default=False,
                                         update=update_watch_scripts)
+    
+    multifile: bpy.props.BoolProperty(name="Multifile",
+                                        description="Export the separate node trees as separate python files",
+                                        default=False)
