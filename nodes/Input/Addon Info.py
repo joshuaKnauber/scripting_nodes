@@ -42,5 +42,5 @@ class SN_AddonInfoNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.outputs[5].python_value = bpy.context.scene.sn.doc_url
         self.outputs[6].python_value = bpy.context.scene.sn.tracker_url
         self.outputs[7].python_value = bpy.context.scene.sn.category
-        self.outputs[8].python_value = tuple(bpy.context.scene.sn.version)
-        self.outputs[9].python_value = tuple(bpy.context.scene.sn.blender)
+        self.outputs[8].python_value = str(tuple(bpy.context.scene.sn.version))
+        self.outputs[9].python_value = str(tuple(bpy.context.scene.sn.blender))
