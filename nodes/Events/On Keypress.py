@@ -56,7 +56,21 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                          ("RELEASE","On Release","The action is run when the key is released"),
                                          ("CLICK","On Click","The action is run when the mouse button is clicked once"),
                                          ("DOUBLE_CLICK","On Double Click","The action is run when the mouse button is clicked twice"),
+                                         ("CLICK_DRAG","On Click Drag","The action is run when you click and drag"),
                                          ("ANY","Any","The action will run with any of the above ways")],
+                                  update=SN_ScriptingBaseNode._evaluate)
+    
+    direction: bpy.props.EnumProperty(name="Direction",
+                                  description="Direction to drag the mouse in to run the action",
+                                  items=[("ANY","Any Direction","The action will run when you click and drag in any direction"),
+                                         ("NORTH","North","The action will run when you click and drag in this direction"),
+                                         ("NORTH_EAST","North East","The action will run when you click and drag in this direction"),
+                                         ("EAST","East","The action will run when you click and drag in this direction"),
+                                         ("SOUTH_EAST","South East","The action will run when you click and drag in this direction"),
+                                         ("SOUTH","South","The action will run when you click and drag in this direction"),
+                                         ("SOUT_WEST","South West","The action will run when you click and drag in this direction"),
+                                         ("WEST","West","The action will run when you click and drag in this direction"),
+                                         ("NORTH_WEST","North West","The action will run when you click and drag in this direction")],
                                   update=SN_ScriptingBaseNode._evaluate)
     
     repeat: bpy.props.BoolProperty(name="Repeat Key",
@@ -255,6 +269,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                     km = kc.keymaps.new(name='{space_names[self.space]}', space_type='{self.space}')
                     kmi = km.keymap_items.new('{operator}', '{self.key}', '{self.value}',
                         ctrl={self.ctrl}, alt={self.alt}, shift={self.shift}, repeat={self.repeat})
+                    {f'kmi.direction = "{self.direction}"' if self.value == "CLICK_DRAG" else ''}
                     {self.indent(input_code, 5)}
                     addon_keymaps['{self.static_uid}'] = (km, kmi)
                 """
@@ -263,6 +278,9 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         row = layout.row(align=True)
         row.prop(self, "space", text="")
         row.prop(self, "value", text="")
+        
+        if self.value == "CLICK_DRAG":
+            layout.prop(self, "direction", text="")
         
         layout.operator("sn.record_key", text=self.key, depress=self.recording).node = self.name
         row = layout.row(align=True)
