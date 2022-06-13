@@ -12,6 +12,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 200
 
     def on_create(self, context):
+        self.version = 1
         self.add_interface_input()
         self.add_string_input("Label").default_value = "My Button"
         self.add_boolean_input("Emboss").default_value = True
@@ -119,7 +120,7 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
                 if inp.can_be_disabled and not inp.disabled:
                     for prop in op_rna.properties:
                         if (self.version == 0 and (prop.name and prop.name == inp.name) or (not prop.name and prop.identifier.replace("_", " ").title() == inp.name)) \
-                            or (self.version == 1 and (inp.name.replace(" ", "_").lower() == prop.identifier)):
+                            or (self.version == 1 and inp.name.replace(" ", "_").lower() == prop.identifier):
                             self.code += "\n" + f"op.{prop.identifier} = {inp.python_value}"
 
         else:
