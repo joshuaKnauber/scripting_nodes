@@ -66,6 +66,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     def on_create(self, context):
         self.ref_ntree = self.node_tree
+        self.order = 3
     
     def reset_inputs(self, context=None):
         self.inputs.clear()

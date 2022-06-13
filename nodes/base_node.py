@@ -1,7 +1,7 @@
 import bpy
 from uuid import uuid4
 from ..utils import normalize_code, indent_code
-from .compiler import compile_addon
+from .compiler import compile_addon, format_linebreaks
     
 
 
@@ -170,7 +170,9 @@ class SN_ScriptingBaseNode:
 
     def _set_any_code(self, key, raw_code):
         """ Checks if the given code is different from the current code. If required it triggers a code update """
+        sn = bpy.context.scene.sn
         normalized = normalize_code(raw_code)
+        if (sn.format_code and sn.debug_code): normalized = format_linebreaks(normalized)
         if self.get(key) == None or normalized != self[key]:
             self[key] = normalized
 
@@ -449,7 +451,7 @@ class SN_ScriptingBaseNode:
         box = layout.box()
         box.label(text=f"Static UID: {self.static_uid}")
         for key in ["code", "code_import", "code_imperative", "code_register", "code_unregister"]:
-            if getattr(self, key):
+            if getattr(self, key).strip():
                 box = layout.box()
                 col = box.column(align=True)
                 row = col.row()
