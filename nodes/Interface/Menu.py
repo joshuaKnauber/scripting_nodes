@@ -47,6 +47,7 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                 def draw(self, context):
                     layout = self.layout.column_flow(columns={self.inputs["Columns"].python_value})
+                    layout.operator_context = "INVOKE_DEFAULT"
                     {self.indent([out.python_value for out in self.outputs], 5)}
             """
         
