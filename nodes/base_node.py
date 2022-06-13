@@ -308,13 +308,14 @@ class SN_ScriptingBaseNode:
 
     def _set_node_color(self):
         """ Sets the color of the node depending on the node_color """
-        self.use_custom_color = True
-        if str(self.node_color) in self._colors:
-            self.color = self._colors[self.node_color]
-        elif type(self.node_color) == tuple:
-            self.color = self.node_color
-        else:
-            self.color = self._colors["DEFAULT"]
+        if bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences.use_colors:
+            self.use_custom_color = True
+            if str(self.node_color) in self._colors:
+                self.color = self._colors[self.node_color]
+            elif type(self.node_color) == tuple:
+                self.color = self.node_color
+            else:
+                self.color = self._colors["DEFAULT"]
             
     def _create_node_collection_item(self):
         """ Creates an item in the nodes collection of this node tree for this node """

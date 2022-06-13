@@ -36,6 +36,10 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
     check_for_updates: bpy.props.BoolProperty(name="Check For Updates",
                                         description="Check for updates online when loading the addon",
                                         default=True)
+
+    use_colors: bpy.props.BoolProperty(name="Use Colored Nodes",
+                                        description="Color nodes to match their category. Does not apply to existing nodes",
+                                        default=True)
     
     keep_last_error_file: bpy.props.BoolProperty(name="Keep Error File",
                                         description="Keeps a copy of any compiled file that threw an error as 'serpens_error' in the text editor",
@@ -66,6 +70,7 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
         col = row.column(heading="General")
         col.prop(self, "check_for_updates")
+        col.prop(self, "use_colors")
         col.prop(get_shortcut("sn.force_compile"), "type", full_event=True, text="Force Compile")
         col.prop(get_shortcut("sn.open_node_docs"), "type", full_event=True, text="Node Docs")
         col.prop(get_shortcut("sn.add_copied_node"), "type", full_event=True, text="Add Node From Copied")
