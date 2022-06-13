@@ -23,6 +23,7 @@ def depsgraph_handler(dummy):
 
 @persistent
 def load_handler(dummy):
+    bpy.context.scene.sn.picker_active = False
     subscribe_to_name_change()
     check_easy_bpy_install()
     if bpy.context.scene.sn.compile_on_load:

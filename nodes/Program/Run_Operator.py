@@ -57,6 +57,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.version = 1
         self.add_execute_input()
         self.add_execute_output()
+        self.ref_ntree = self.node_tree
         
     def get_context_items(self,context):
         items = []
