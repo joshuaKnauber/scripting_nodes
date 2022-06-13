@@ -142,7 +142,15 @@ class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
         row.prop(self, "source_type", text="", icon_only=True)
         
         if self.source_type == "BLENDER":
-            op = row.operator("sn.paste_operator", text=self.pasted_name if self.pasted_operator else "Paste Operator", icon="PASTEDOWN")
+            name = "Paste Operator"
+            if self.pasted_operator:
+                if self.pasted_name:
+                    name = self.pasted_name
+                elif len(self.pasted_operator.split(".")) > 2:
+                    name = self.pasted_operator.split(".")[3].split("(")[0].replace("_", " ").title()
+                else:
+                    name = self.pasted_operator
+            op = row.operator("sn.paste_operator", text=name, icon="PASTEDOWN")
             op.node_tree = self.node_tree.name
             op.node = self.name
         
