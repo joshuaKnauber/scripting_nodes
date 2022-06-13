@@ -64,6 +64,9 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                    default=False,
                                    update=SN_ScriptingBaseNode._evaluate)
     
+    def on_create(self, context):
+        self.ref_ntree = self.node_tree
+    
     def reset_inputs(self, context=None):
         self.inputs.clear()
         self.pasted_operator = ""

@@ -52,20 +52,21 @@ class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         self.messages.clear()
         values = [inp.python_value for inp in self.inputs[1:-1]]
+        self.code_imperative = f"""
+        def sn_print(on_node, node, limit, *args):
+            print(*args)
+            if on_node:
+                try:
+                    msg = node.messages.add()
+                    msg.text = str(args)[1:-1]
+                    if limit and len(node.messages) > limit:
+                        node.messages.remove(0)
+                    for area in bpy.context.screen.areas: area.tag_redraw()
+                except:
+                    print("Can't add print outputs to the node when the print is run in an interface!")
+        """
         self.code = f"""
-                    print({", ".join(values)})
-                    # This part is only added during development to display the messages on the node
-                    if {self.print_on_node}:
-                        try:
-                            if '{self.node_tree.name}' in bpy.data.node_groups and '{self.name}' in bpy.data.node_groups['{self.node_tree.name}'].nodes:
-                                node = bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}']
-                                msg = node.messages.add()
-                                msg.text = str([{", ".join(values)}])[1:-1]
-                                if {self.limit_prints} and len(node.messages) > {self.limit_prints}:
-                                    node.messages.remove(0)
-                            for area in bpy.context.screen.areas: area.tag_redraw()
-                        except:
-                            print("Can't add print outputs to the node when the print is run in an interface!")
+                    sn_print({self.print_on_node}, bpy.data.node_groups['{self.node_tree.name}'].nodes['{self.name}'], {self.limit_prints}, {", ".join(values)})
                     {self.indent(self.outputs[0].python_value, 5)}
                     """
                     
