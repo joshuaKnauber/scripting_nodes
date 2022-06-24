@@ -16,7 +16,8 @@ class SN_IndexCollectionPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_property_output()
 
     def update_index_type(self, context):
-        self.convert_socket(self.inputs[1], self.socket_names[self.index_type])
+        inp = self.convert_socket(self.inputs[1], self.socket_names[self.index_type])
+        inp.name = "Index" if self.index_type == "Integer" else "Name"
         self._evaluate(context)
         
     index_type: bpy.props.EnumProperty(name="Index Type",
