@@ -56,8 +56,8 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                                          ("RELEASE","On Release","The action is run when the key is released"),
                                          ("CLICK","On Click","The action is run when the mouse button is clicked once"),
                                          ("DOUBLE_CLICK","On Double Click","The action is run when the mouse button is clicked twice"),
-                                         ("CLICK_DRAG","On Click Drag","The action is run when you click and drag"),
-                                         ("ANY","Any","The action will run with any of the above ways")],
+                                         ("ANY","Any","The action will run with any of the above ways"),
+                                         ("CLICK_DRAG","On Click Drag","The action is run when you click and drag")],
                                   update=SN_ScriptingBaseNode._evaluate)
     
     direction: bpy.props.EnumProperty(name="Direction",
