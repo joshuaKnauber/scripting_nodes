@@ -9,14 +9,13 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     bl_idname = "SN_PreferencesNode"
     bl_label = "Preferences"
     bl_width_default = 200
-    layout_type = "layout"
+    def layout_type(self, _): return "layout"
     is_trigger = True
     node_color = "INTERFACE"
     
     def on_create(self, context):
         self.add_boolean_input("Hide").default_value = False
-        self.add_interface_output("Preferences").prev_dynamic = True
-        self.add_dynamic_interface_output("Preferences")
+        self.add_interface_output("Preferences")
 
     def evaluate(self, context):
         props_imperative_list = self.props_imperative(context).split("\n")

@@ -7,7 +7,7 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_MenuNode"
     bl_label = "Menu"
-    layout_type = "layout"
+    def layout_type(self, _): return "layout"
     is_trigger = True
     node_color = "INTERFACE"
     bl_width_default = 200
@@ -15,8 +15,7 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_integer_input("Columns")["default_value"] = 1
         self.add_boolean_input("Hide")
-        self.add_interface_output("Menu").prev_dynamic = True
-        self.add_dynamic_interface_output("Menu")
+        self.add_interface_output("Menu")
 
     idname_override: bpy.props.StringProperty(default="",
                                 name="Idname Override",

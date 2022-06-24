@@ -7,15 +7,14 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_PieMenuNode"
     bl_label = "Pie Menu"
-    layout_type = "layout"
+    def layout_type(self, _): return "layout"
     is_trigger = True
     node_color = "INTERFACE"
     bl_width_default = 200
 
     def on_create(self, context):
         self.add_boolean_input("Hide")
-        self.add_interface_output("Menu").prev_dynamic = True
-        self.add_dynamic_interface_output("Menu")
+        self.add_interface_output("Menu")
 
     idname_override: bpy.props.StringProperty(default="",
                                 name="Idname Override",

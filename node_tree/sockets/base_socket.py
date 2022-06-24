@@ -421,6 +421,8 @@ class ScriptingSocket:
             socket.changeable = self.changeable
             socket.is_variable = self.is_variable
             socket.data_type = self.data_type
+            if hasattr(socket, "passthrough_layout_type"):
+                socket.passthrough_layout_type = self.passthrough_layout_type
 
             # set this socket
             self.dynamic = False

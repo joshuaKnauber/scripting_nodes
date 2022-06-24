@@ -3,17 +3,16 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_DisplaySerpensShortcutNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_DisplaySerpensShortcutNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_DisplaySerpensShortcutNodeNew"
-    bl_label = "Display Serpens Shortcut"
+    bl_idname = "SN_DisplaySerpensShortcutNode"
+    bl_label = "Display Serpens Shortcut (Legacy)"
     node_color = "INTERFACE"
     bl_width_default = 200
 
     def on_create(self, context):
         self.add_interface_input()
         self.add_string_input("Label")
-        self.add_interface_output().passthrough_layout_type = True
         
     ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
                                     name="Panel Node Tree",
@@ -45,10 +44,7 @@ class SN_DisplaySerpensShortcutNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
             """
             node = self.ref_ntree.nodes[self.ref_SN_OnKeypressNode]
             src = f"find_user_keyconfig('{node.static_uid}')"
-            self.code = f"""
-                {self.active_layout}.prop({src}, 'type', text={self.inputs['Label'].python_value}, full_event=True)
-                {self.indent(self.outputs[0].python_value, 4)}
-            """
+            self.code = f"{self.active_layout}.prop({src}, 'type', text={self.inputs['Label'].python_value}, full_event=True)"
 
     def draw_node(self, context, layout):
         row = layout.row(align=True)

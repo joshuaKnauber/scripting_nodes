@@ -1,7 +1,9 @@
 from nodeitems_utils import NodeCategory, NodeItem
+from ..utils import get_python_name
 from .. import auto_load
 import os
 import inspect
+import bpy
 
 
 
@@ -14,6 +16,7 @@ class SN_ScriptingNodesCategory(NodeCategory):
 
 
 def get_node_categories():
+    addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences
     node_categories = {}
 
     for cls in auto_load.ordered_classes:
@@ -32,6 +35,7 @@ def get_node_categories():
     for cat in node_categories:
         names = list(map(lambda node: node[1], sorted(node_categories[cat], key=lambda x: x[0])))
         nodes = list(map(lambda name: NodeItem(name), names))
-        categories.append(SN_ScriptingNodesCategory(cat.replace(" ", "_").lower(), cat.replace("_", " "), items=nodes))
+        if not cat == "Interface (Legacy)" or addon_prefs.show_legacy_interface:
+            categories.append(SN_ScriptingNodesCategory(get_python_name(cat, "category"), cat.replace("_", " "), items=nodes))
 
     return categories

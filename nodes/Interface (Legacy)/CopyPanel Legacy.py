@@ -3,16 +3,15 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_CopyPanelNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_CopyPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_CopyPanelNodeNew"
-    bl_label = "Copy Panel"
+    bl_idname = "SN_CopyPanelNode"
+    bl_label = "Copy Panel (Legacy)"
     bl_width_default = 200
     node_color = "INTERFACE"
 
     def on_create(self, context):
         self.add_interface_input()
-        self.add_interface_output().passthrough_layout_type = True
 
     panel_parent: bpy.props.StringProperty(default="EEVEE_MATERIAL_PT_surface",
                                     name="Parent",
@@ -28,7 +27,6 @@ class SN_CopyPanelNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                             {self.active_layout}.label(text="Can't display this panel here!", icon="ERROR")
                     else:
                         {self.active_layout}.label(text="Can't display this panel!", icon="ERROR")
-                    {self.indent(self.outputs[0].python_value, 5)}
                     """
                     
     def draw_node(self, context, layout):

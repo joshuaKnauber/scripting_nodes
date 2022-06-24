@@ -3,10 +3,10 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_AddToMenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_AddToMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_AddToMenuNodeNew"
-    bl_label = "Add To Menu"
+    bl_idname = "SN_AddToMenuNode"
+    bl_label = "Add To Menu (Legacy)"
     bl_width_default = 200
     def layout_type(self, _): return "layout"
     is_trigger = True
@@ -14,7 +14,8 @@ class SN_AddToMenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_boolean_input("Hide")
-        self.add_interface_output("Menu")
+        self.add_interface_output("Menu").prev_dynamic = True
+        self.add_dynamic_interface_output("Menu")
 
 
     append: bpy.props.EnumProperty(default="APPEND", items=[
@@ -38,7 +39,7 @@ class SN_AddToMenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
             def {func_name}(self, context):
                 if not ({self.inputs["Hide"].python_value}):
                     layout = self.layout
-                    {self.indent(self.outputs[0].python_value, 5)}
+                    {self.indent([out.python_value for out in self.outputs[:-1]], 5)}
         """
         
         if self.menu_parent == "WM_MT_button_context":

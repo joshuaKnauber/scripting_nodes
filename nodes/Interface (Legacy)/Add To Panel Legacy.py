@@ -3,10 +3,10 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_AddToPanelNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_AddToPanelNodeNew"
-    bl_label = "Add To Panel"
+    bl_idname = "SN_AddToPanelNode"
+    bl_label = "Add To Panel (Legacy)"
     bl_width_default = 200
     def layout_type(self, _): return "layout"
     is_trigger = True
@@ -14,7 +14,8 @@ class SN_AddToPanelNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_boolean_input("Hide")
-        self.add_interface_output("Panel")
+        self.add_interface_output("Panel").prev_dynamic = True
+        self.add_dynamic_interface_output("Panel")
 
 
     append: bpy.props.EnumProperty(default="APPEND", items=[
@@ -38,7 +39,7 @@ class SN_AddToPanelNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                     def {func_name}(self, context):
                         if not ({self.inputs["Hide"].python_value}):
                             layout = self.layout
-                            {self.indent(self.outputs[0].python_value, 7)}
+                            {self.indent([out.python_value for out in self.outputs[:-1]], 7)}
                     """
 
         self.code_register = f"bpy.types.{self.panel_parent}.{self.append.lower()}({func_name})"

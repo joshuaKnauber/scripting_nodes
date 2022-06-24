@@ -11,6 +11,10 @@ class SN_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
     is_program = True
     bl_label = "Interface"
     default_python_value = ""
+    
+    passthrough_layout_type: bpy.props.BoolProperty(default=False,
+                                                description="Pass through layout type of the node before",
+                                                name="Pass Through Layout Type")
 
     def get_color(self, context, node):
         return (0.9, 0.6, 0)

@@ -3,10 +3,10 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_PopoverNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_PopoverNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_PopoverNodeNew"
-    bl_label = "Popover"
+    bl_idname = "SN_PopoverNode"
+    bl_label = "Popover (Legacy)"
     bl_width_default = 200
     node_color = "INTERFACE"
 
@@ -14,7 +14,6 @@ class SN_PopoverNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_input()
         self.add_string_input("Label")
         self.add_icon_input()
-        self.add_interface_output().passthrough_layout_type = True
         
         
     parent_type: bpy.props.EnumProperty(name="Parent Type",
@@ -50,13 +49,11 @@ class SN_PopoverNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                 node = self.ref_ntree.nodes[self.ref_SN_PanelNode]
                 self.code = f"""
                     {self.active_layout}.popover('{node.last_idname}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})
-                    {self.indent(self.outputs[0].python_value, 5)}
                 """
         
         else:
             self.code = f"""
                 {self.active_layout}.popover('{self.panel_parent}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})
-                {self.indent(self.outputs[0].python_value, 4)}
             """
 
 

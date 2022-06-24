@@ -16,7 +16,7 @@ class SN_EnumMapInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_interface_input()
         self.add_string_input("Enum Value")
-        self.add_interface_output("Continue")
+        self.add_interface_output()
         self.add_interface_output("Other Option")
         out = self.add_dynamic_interface_output("Enum Option")
         out.is_variable = True
@@ -41,5 +41,5 @@ class SN_EnumMapInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
                     {self.indent(options, 5)}
                     {"else:" if options.strip() else "if True:"}
                         {other_opt_code if other_opt_code.strip() else "pass"}
-                    {self.indent(self.outputs['Continue'].python_value, 5)}
+                    {self.indent(self.outputs[0].python_value, 5)}
                     """

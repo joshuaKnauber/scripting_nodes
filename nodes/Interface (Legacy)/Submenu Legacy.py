@@ -3,10 +3,10 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_SubmenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_SubmenuNodeNew"
-    bl_label = "Submenu"
+    bl_idname = "SN_SubmenuNode"
+    bl_label = "Submenu (Legacy)"
     node_color = "INTERFACE"
     bl_width_default = 200
 
@@ -14,7 +14,6 @@ class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_input()
         self.add_string_input("Label")
         self.add_icon_input()
-        self.add_interface_output().passthrough_layout_type = True
 
     def on_ref_update(self, node, data=None):
         if node.bl_idname in ["SN_PanelNode", "SN_MenuNode", "SN_PieMenuNode"]:
@@ -45,15 +44,9 @@ class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         if self.parent_type == "CUSTOM":
             if self.ref_ntree and self.ref_SN_MenuNode in self.ref_ntree.nodes:
-                self.code = f"""
-                    {self.active_layout}.menu('{self.ref_ntree.nodes[self.ref_SN_MenuNode].idname}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})
-                    {self.indent(self.outputs[0].python_value, 5)}
-                """
+                self.code = f"{self.active_layout}.menu('{self.ref_ntree.nodes[self.ref_SN_MenuNode].idname}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})"
         else:
-            self.code = f"""
-                {self.active_layout}.menu('{self.menu_parent}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})
-                {self.indent(self.outputs[0].python_value, 4)}
-            """
+            self.code = f"{self.active_layout}.menu('{self.menu_parent}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})"
 
     def draw_node(self, context, layout):
         row = layout.row(align=True)

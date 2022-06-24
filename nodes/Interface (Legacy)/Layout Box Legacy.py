@@ -3,17 +3,16 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_LayoutBoxNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_LayoutBoxNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_LayoutBoxNodeNew"
-    bl_label = "Box"
+    bl_idname = "SN_LayoutBoxNode"
+    bl_label = "Box (Legacy)"
     bl_width_default = 200
     node_color = "INTERFACE"
     
-    def layout_type(self, socket):
-        if socket == self.outputs["Box"]:
-            return f"box_{self.static_uid}"
-        return self.active_layout
+    @property
+    def layout_type(self):
+        return f"box_{self.static_uid}"
 
     def on_create(self, context):
         self.add_interface_input()
@@ -25,8 +24,8 @@ class SN_LayoutBoxNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_float_input("Scale X")["default_value"] = 1
         self.add_float_input("Scale Y")["default_value"] = 1
         self.add_enum_input("Alignment")["items"] = str(["Expand", "Left", "Center", "Right"])
-        self.add_interface_output()
-        self.add_interface_output("Box")
+        self.add_interface_output().prev_dynamic = True
+        self.add_dynamic_interface_output()
 
     def evaluate(self, context):
         self.code = f"""
@@ -39,6 +38,5 @@ class SN_LayoutBoxNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                     box_{self.static_uid}.alignment = {self.inputs["Alignment"].python_value}.upper()
                     box_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
                     box_{self.static_uid}.scale_y = {self.inputs["Scale Y"].python_value}
-                    {self.indent(self.outputs[1].python_value, 5)}
-                    {self.indent(self.outputs[0].python_value, 5)}
+                    {self.indent([out.python_value for out in self.outputs[:-1]], 5)}
                     """

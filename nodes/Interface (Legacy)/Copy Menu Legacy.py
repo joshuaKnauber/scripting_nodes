@@ -3,16 +3,15 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_CopyMenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_CopyMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_CopyMenuNodeNew"
-    bl_label = "Copy Menu"
+    bl_idname = "SN_CopyMenuNode"
+    bl_label = "Copy Menu (Legacy)"
     node_color = "INTERFACE"
     bl_width_default = 200
 
     def on_create(self, context):
         self.add_interface_input()
-        self.add_interface_output().passthrough_layout_type = True
     
     menu_parent: bpy.props.StringProperty(name="Menu",
                                     default="VIEW3D_MT_add",
@@ -28,7 +27,6 @@ class SN_CopyMenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                             {self.active_layout}.label(text="Can't display this menu here!", icon="ERROR")
                     else:
                         {self.active_layout}.label(text="Can't display this menu!", icon="ERROR")
-                    {self.indent(self.outputs[0].python_value, 5)}
                     """
                     
     def draw_node(self, context, layout):

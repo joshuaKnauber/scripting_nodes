@@ -9,16 +9,15 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_PanelNode"
     bl_label = "Panel"
     bl_width_default = 200
-    layout_type = "layout"
+    def layout_type(self, _): return "layout"
     is_trigger = True
     node_color = "INTERFACE"
     
 
     def on_create(self, context):
         self.add_boolean_input("Hide")
-        self.add_interface_output("Panel").prev_dynamic = True
-        self.add_dynamic_interface_output("Panel")
-        self.add_dynamic_interface_output("Header")
+        self.add_interface_output("Panel")
+        self.add_interface_output("Header")
         self.ref_ntree = self.node_tree
         
         

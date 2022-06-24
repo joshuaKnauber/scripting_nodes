@@ -3,17 +3,15 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_LayoutColumnNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_LayoutColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_LayoutColumnNodeNew"
-    bl_label = "Colum"
+    bl_idname = "SN_LayoutColumnNode"
+    bl_label = "Column (Legacy)"
     bl_width_default = 200
     node_color = "INTERFACE"
     
-    def layout_type(self, socket):
-        if socket == self.outputs["Column"]:
-            return f"col_{self.static_uid}"
-        return self.active_layout
+    def layout_type(self, _):
+        return f"col_{self.static_uid}"
 
     def on_create(self, context):
         self.add_interface_input()
@@ -27,8 +25,8 @@ class SN_LayoutColumnNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_float_input("Scale X")["default_value"] = 1
         self.add_float_input("Scale Y")["default_value"] = 1
         self.add_enum_input("Alignment")["items"] = str(["Expand", "Left", "Center", "Right"])
-        self.add_interface_output()
-        self.add_interface_output("Column")
+        self.add_interface_output().prev_dynamic = True
+        self.add_dynamic_interface_output()
 
     def evaluate(self, context):
         self.code = f"""
@@ -41,6 +39,5 @@ class SN_LayoutColumnNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                     col_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
                     col_{self.static_uid}.scale_y = {self.inputs["Scale Y"].python_value}
                     col_{self.static_uid}.alignment = {self.inputs["Alignment"].python_value}.upper()
-                    {self.indent(self.outputs[1].python_value, 5)}
-                    {self.indent(self.outputs[0].python_value, 5)}
+                    {self.indent([out.python_value for out in self.outputs[:-1]], 5)}
                     """

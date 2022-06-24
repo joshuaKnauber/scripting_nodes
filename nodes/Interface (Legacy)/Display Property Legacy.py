@@ -3,10 +3,10 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_DisplayPropertyNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_DisplayPropertyNodeNew"
-    bl_label = "Display Property"
+    bl_idname = "SN_DisplayPropertyNode"
+    bl_label = "Display Property (Legacy)"
     node_color = "INTERFACE"
 
     def on_create(self, context):
@@ -38,7 +38,6 @@ class SN_DisplayPropertyNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         inp = self.add_integer_input("Index")
         inp.can_be_disabled = True
         inp.disabled = True
-        self.add_interface_output().passthrough_layout_type = True
 
 
     def evaluate(self, context):
@@ -49,10 +48,8 @@ class SN_DisplayPropertyNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                     attributes += f", {inp.name.lower().replace(' ', '_')}={inp.python_value}"
             self.code = f"""
                         {self.active_layout}.prop({self.inputs['Property'].python_source}, '{self.inputs['Property'].python_attr.replace("'",'"')}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}{attributes})
-                        {self.indent(self.outputs[0].python_value, 6)}
                         """
         else:
             self.code = f"""
                         {self.active_layout}.label(text='No Property connected!', icon='ERROR')
-                        {self.indent(self.outputs[0].python_value, 6)}
                         """

@@ -46,10 +46,9 @@ class SN_ScriptingBaseNode:
     version: bpy.props.IntProperty(default=0, name="Version", description="Version of this node")
 
     # set this for any interface nodes that change the layout type (nodes like row, column, split, ...)
-    @property
-    def layout_type(self):
+    def layout_type(self, socket=None):
         return self.active_layout
-    passthrough_layout_type = False
+    passthrough_layout_type = False # legacy, now set per interface socket
     
     
     # disables evaluation, only use this when the node is being initialized
@@ -389,10 +388,10 @@ class SN_ScriptingBaseNode:
     ### LINK UPDATE
     def on_link_insert(self, from_socket, to_socket, is_output): pass
 
-    def _insert_link_layout_update(self, from_socket, is_output):
+    def _insert_link_layout_update(self, from_socket):
         """ Updates the layout type of this node when a node with layout type gets connected """
-        if not is_output and from_socket.bl_label == "Interface":
-            self.active_layout = from_socket.node.layout_type
+        if from_socket.bl_label == "Interface":
+            self.active_layout = from_socket.node.layout_type(from_socket)
 
     def _insert_trigger_dynamic(self, from_socket, to_socket):
         """ Triggers dynamic sockets to add new ones """
@@ -403,7 +402,7 @@ class SN_ScriptingBaseNode:
 
     def link_insert(self, from_socket, to_socket, is_output):
         if not is_output:
-            self._insert_link_layout_update(from_socket, is_output)
+            self._insert_link_layout_update(from_socket)
         self.on_link_insert(from_socket, to_socket, is_output)
         self._insert_trigger_dynamic(from_socket, to_socket)
 
@@ -705,12 +704,11 @@ class SN_ScriptingBaseNode:
             self._evaluate(bpy.context)
             
         # trigger layout updates if passthrough
-        if self.passthrough_layout_type:
-            for out in self.outputs:
-                if out.bl_label == "Interface":
-                    to_sockets = out.to_sockets()
-                    if to_sockets:
-                        to_sockets[0].node.active_layout = value
+        for out in self.outputs:
+            if out.bl_label == "Interface" and (out.passthrough_layout_type or getattr(self, "passthrough_layout_type", False)):
+                to_sockets = out.to_sockets()
+                if to_sockets:
+                    to_sockets[0].node.active_layout = value
 
     active_layout: bpy.props.StringProperty(default="layout",
                             get=get_active_layout, set=set_active_layout)
@@ -729,10 +727,11 @@ class SN_YourNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_label = "Node Name"
     node_color = "DEFAULT"
 
-    # delete theseif you don't need them
+    # delete these if you don't need them
 		bl_width_default = 160
     is_trigger = False
-    layout_type = "layout"
+    
+    def layout_type(self, _): return "layout"
 
     # avoid having properties on your nodes, expose everything to sockets if possible
 		# make sure to call _evaluate when a property value changes, you can use self._evaluate(context) if you have a custom update function

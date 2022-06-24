@@ -3,17 +3,15 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_LayoutSplitNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_LayoutSplitNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_LayoutSplitNodeNew"
-    bl_label = "Split"
+    bl_idname = "SN_LayoutSplitNode"
+    bl_label = "Split (Legacy)"
     bl_width_default = 200
     node_color = "INTERFACE"
     
-    def layout_type(self, socket):
-        if socket == self.outputs["Split"]:
-            return f"split_{self.static_uid}"
-        return self.active_layout
+    def layout_type(self, _):
+        return f"split_{self.static_uid}"
 
     def on_create(self, context):
         self.add_interface_input()
@@ -30,8 +28,7 @@ class SN_LayoutSplitNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_float_input("Scale Y")["default_value"] = 1
         self.add_enum_input("Alignment")["items"] = str(["Expand", "Left", "Center", "Right"])
         self.add_interface_output()
-        self.add_interface_output("Split")
-        self.add_interface_output("Split")
+        self.add_interface_output()
 
     def evaluate(self, context):
         self.code = f"""
@@ -44,7 +41,6 @@ class SN_LayoutSplitNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                     split_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
                     split_{self.static_uid}.scale_y = {self.inputs["Scale Y"].python_value}
                     split_{self.static_uid}.alignment = {self.inputs["Alignment"].python_value}.upper()
-                    {self.indent(self.outputs[1].python_value, 5)}
-                    {self.indent(self.outputs[2].python_value, 5)}
                     {self.indent(self.outputs[0].python_value, 5)}
+                    {self.indent(self.outputs[1].python_value, 5)}
                     """

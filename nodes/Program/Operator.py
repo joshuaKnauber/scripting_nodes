@@ -9,7 +9,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
     bl_idname = "SN_OperatorNode"
     bl_label = "Operator"
-    layout_type = "layout"
+    def layout_type(self, _): return "layout"
     is_trigger = True
     bl_width_default = 200
     node_color = "PROGRAM"

@@ -4,10 +4,10 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_ButtonNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_ButtonNodeNew"
-    bl_label = "Button"
+    bl_idname = "SN_ButtonNode"
+    bl_label = "Button (Legacy)"
     node_color = "INTERFACE"
     bl_width_default = 200
 
@@ -18,7 +18,6 @@ class SN_ButtonNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_input("Emboss").default_value = True
         self.add_boolean_input("Depress")
         self.add_icon_input("Icon")
-        self.add_interface_output().passthrough_layout_type = True
         self.ref_ntree = self.node_tree
 
 
@@ -113,7 +112,7 @@ class SN_ButtonNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         if self.source_type == "BLENDER":
             op_name = self.pasted_operator[8:].split("(")[0]
-            code = f"op = {self.active_layout}.operator('{op_name}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"
+            self.code = f"op = {self.active_layout}.operator('{op_name}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"
 
             op = eval(self.pasted_operator.split("(")[0])
             op_rna = op.get_rna_type()
@@ -122,29 +121,20 @@ class SN_ButtonNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                     for prop in op_rna.properties:
                         if (self.version == 0 and (prop.name and prop.name == inp.name) or (not prop.name and prop.identifier.replace("_", " ").title() == inp.name)) \
                             or (self.version == 1 and inp.name.replace(" ", "_").lower() == prop.identifier):
-                            code += "\n" + f"op.{prop.identifier} = {inp.python_value}"
-            self.code = f"""
-                        {code}
-                        {self.indent(self.outputs[0].python_value, 6)}
-                        """
+                            self.code += "\n" + f"op.{prop.identifier} = {inp.python_value}"
 
         else:
             if self.ref_ntree and self.ref_SN_OperatorNode in self.ref_ntree.nodes:
                 node = self.ref_ntree.nodes[self.ref_SN_OperatorNode]
-                code = f"op = {self.active_layout}.operator('sna.{node.operator_python_name}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"
+                self.code = f"op = {self.active_layout}.operator('sna.{node.operator_python_name}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"
 
                 for inp in self.inputs:
                     if inp.can_be_disabled and not inp.disabled:
                         for prop in node.properties:
                             if prop.name == inp.name:
-                                code += "\n" + f"op.{prop.python_name} = {inp.python_value}"
+                                self.code += "\n" + f"op.{prop.python_name} = {inp.python_value}"
             else:
-                code = f"op = {self.active_layout}.operator('sn.dummy_button_operator', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"
-            
-            self.code = f"""
-                        {code}
-                        {self.indent(self.outputs[0].python_value, 6)}
-                        """
+                self.code = f"op = {self.active_layout}.operator('sn.dummy_button_operator', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"
 
 
     def draw_node(self, context, layout):
