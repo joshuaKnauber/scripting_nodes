@@ -114,6 +114,7 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     def draw_node(self, context, layout):
         row = layout.row(align=True)
         row.prop(self, "name")
+        row.operator("sn.find_referencing_nodes", text="", icon="VIEWZOOM").node = self.name
         python_name = get_python_name(self.name, replacement="my_generic_operator")
         row.operator("sn.copy_python_name", text="", icon="COPYDOWN").name = "sna." + python_name
 

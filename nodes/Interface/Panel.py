@@ -238,28 +238,32 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                 op = row.operator("sn.activate_panel_picker", text=f"{self.space.replace('_', ' ').title()} {self.region.replace('_', ' ').title()} {self.context.replace('_', ' ').title()}", icon="EYEDROPPER")
                 op.node_tree = self.node_tree.name
                 op.node = self.name
+                row.operator("sn.find_referencing_nodes", text="", icon="VIEWZOOM").node = self.name
             else:
                 row = layout.row(align=True)
                 if self.parent_type == "BLENDER":
                     op = row.operator("sn.activate_subpanel_picker", text=f"{self.panel_parent.replace('_PT_', ' ').replace('_', ' ').title()}", icon="EYEDROPPER")
                     op.node_tree = self.node_tree.name
                     op.node = self.name
-                else:
-                    subrow = row.row()
-                    subrow.enabled = self.ref_ntree != None and self.ref_SN_PanelNode in self.ref_ntree.nodes
-                    op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
-                    op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
-                    op.node = self.ref_SN_PanelNode
-                
+
+                    row.prop(self, "parent_type", text="", icon_only=True)
+                else:                
                     parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
                     row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
                     subrow = row.row(align=True)
                     subrow.enabled = self.ref_ntree != None
                     subrow.prop_search(self, "ref_SN_PanelNode", bpy.data.node_groups[parent_tree.name].node_collection(self.bl_idname), "refs", text="")
+                        
+                    row.prop(self, "parent_type", text="", icon_only=True)
+
+                    subrow = row.row()
+                    subrow.enabled = self.ref_ntree != None and self.ref_SN_PanelNode in self.ref_ntree.nodes
+                    op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+                    op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
+                    op.node = self.ref_SN_PanelNode
+
                     if self.ref_SN_PanelNode == self.name and self.ref_ntree == self.node_tree:
                         layout.label(text="Can't use self as panel parent!", icon="ERROR")
-
-                row.prop(self, "parent_type", text="", icon_only=True)
             
             layout.prop(self, "is_subpanel")
 

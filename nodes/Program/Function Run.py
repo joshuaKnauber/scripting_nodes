@@ -8,7 +8,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RunFunctionNode"
     bl_label = "Function Run (Execute)"
-    bl_width_default = 200
+    bl_width_default = 250
 
     def on_create(self, context):
         self.add_execute_input()
@@ -187,9 +187,21 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         subrow.enabled = self.ref_ntree != None
         subrow.prop_search(self, "ref_SN_FunctionNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_FunctionNode"), "refs", text="")
 
+        subrow = row.row()
+        subrow.enabled = self.ref_ntree != None and self.ref_SN_FunctionNode in self.ref_ntree.nodes
+        op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+        op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
+        op.node = self.ref_SN_FunctionNode
+
         row = layout.row()
         row.enabled = self.ref_ntree != None
         row.prop_search(self, "ref_SN_FunctionReturnNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_FunctionReturnNode"), "refs", text="Return")
+
+        subrow = row.row()
+        subrow.enabled = self.ref_ntree != None and self.ref_SN_FunctionReturnNode in self.ref_ntree.nodes
+        op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+        op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
+        op.node = self.ref_SN_FunctionReturnNode
 
         layout.prop(self, "require_execute")
         

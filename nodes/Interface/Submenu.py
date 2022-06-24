@@ -8,7 +8,7 @@ class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_SubmenuNodeNew"
     bl_label = "Submenu"
     node_color = "INTERFACE"
-    bl_width_default = 200
+    bl_width_default = 250
 
     def on_create(self, context):
         self.add_interface_input()
@@ -64,13 +64,22 @@ class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
             subrow = row.row(align=True)
             subrow.enabled = self.ref_ntree != None
             subrow.prop_search(self, "ref_SN_MenuNode", parent_tree.node_collection("SN_MenuNode"), "refs", text="")
+            
+            row.prop(self, "parent_type", text="", icon_only=True)
+            
+            subrow = row.row()
+            subrow.enabled = self.ref_ntree != None and self.ref_SN_MenuNode in self.ref_ntree.nodes
+            op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+            op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
+            op.node = self.ref_SN_MenuNode
         else:
             name = f"{self.menu_parent.replace('_MT_', ' ').replace('_', ' ').title()}"
             op = row.operator("sn.activate_menu_picker", icon="EYEDROPPER", text=name)
             op.node_tree = self.node_tree.name
             op.node = self.name
 
-        row.prop(self, "parent_type", text="", icon_only=True)
+            row.prop(self, "parent_type", text="", icon_only=True)
+
         
     def draw_node_panel(self, context, layout):
         layout.prop(self, "menu_parent")

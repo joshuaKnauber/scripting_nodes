@@ -129,6 +129,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
         row = layout.row(align=True)
         row.prop(self, "name")
         python_name = get_python_name(self.name, replacement="my_generic_operator")
+        row.operator("sn.find_referencing_nodes", text="", icon="VIEWZOOM").node = self.name
         row.operator("sn.copy_python_name", text="", icon="COPYDOWN").name = "sna." + python_name
 
         layout.label(text="Description: ")

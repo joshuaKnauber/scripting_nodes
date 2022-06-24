@@ -278,6 +278,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         row = layout.row(align=True)
         row.prop(self, "space", text="")
         row.prop(self, "value", text="")
+        row.operator("sn.find_referencing_nodes", text="", icon="VIEWZOOM").node = self.name
         
         if self.value == "CLICK_DRAG":
             layout.prop(self, "direction", text="")
@@ -308,6 +309,13 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 subrow = row.row(align=True)
                 subrow.enabled = self.ref_ntree != None
                 subrow.prop_search(self, "ref_SN_PanelNode", parent_tree.node_collection("SN_PanelNode"), "refs", text="", icon="VIEWZOOM")
+
+                subrow = row.row()
+                subrow.enabled = self.ref_ntree != None and self.ref_SN_PanelNode in self.ref_ntree.nodes
+                op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+                op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
+                op.node = self.ref_SN_PanelNode
+
             layout.prop(self, "keep_open")
 
         elif self.action == "MENU":
@@ -323,6 +331,12 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 subrow.enabled = self.ref_ntree != None
                 subrow.prop_search(self, "ref_SN_MenuNode", parent_tree.node_collection("SN_MenuNode"), "refs", text="", icon="VIEWZOOM")
 
+                subrow = row.row()
+                subrow.enabled = self.ref_ntree != None and self.ref_SN_MenuNode in self.ref_ntree.nodes
+                op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+                op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
+                op.node = self.ref_SN_MenuNode
+
         elif self.action == "PIE_MENU":
             if self.parent_type == "BLENDER":
                 name = self.pie.replace("_"," ").title() if self.pie else "Select Pie Menu"
@@ -335,6 +349,12 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 subrow = row.row(align=True)
                 subrow.enabled = self.ref_ntree != None
                 subrow.prop_search(self, "ref_SN_PieMenuNode", parent_tree.node_collection("SN_PieMenuNode"), "refs", text="", icon="VIEWZOOM")
+
+                subrow = row.row()
+                subrow.enabled = self.ref_ntree != None and self.ref_SN_PieMenuNode in self.ref_ntree.nodes
+                op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+                op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
+                op.node = self.ref_SN_PieMenuNode
                 
         elif self.action == "OPERATOR":
             if self.parent_type == "BLENDER":
@@ -348,3 +368,9 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
                 subrow = row.row(align=True)
                 subrow.enabled = self.ref_ntree != None
                 subrow.prop_search(self, "ref_SN_OperatorNode", parent_tree.node_collection("SN_OperatorNode"), "refs", text="", icon="VIEWZOOM")
+
+                subrow = row.row()
+                subrow.enabled = self.ref_ntree != None and self.ref_SN_OperatorNode in self.ref_ntree.nodes
+                op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+                op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
+                op.node = self.ref_SN_OperatorNode

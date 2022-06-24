@@ -58,5 +58,11 @@ class SN_DisplaySerpensShortcutNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         subrow = row.row(align=True)
         subrow.enabled = self.ref_ntree != None
         subrow.prop_search(self, "ref_SN_OnKeypressNode", parent_tree.node_collection("SN_OnKeypressNode"), "refs", text="")
+        
+        subrow = row.row()
+        subrow.enabled = self.ref_ntree != None and self.ref_SN_OnKeypressNode in self.ref_ntree.nodes
+        op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+        op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
+        op.node = self.ref_SN_OnKeypressNode
 
         layout.label(text="Copy blender shortcuts from the blend data browser in display property", icon="INFO")

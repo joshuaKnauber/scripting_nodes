@@ -7,7 +7,7 @@ class SN_PopoverNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_PopoverNodeNew"
     bl_label = "Popover"
-    bl_width_default = 200
+    bl_width_default = 250
     node_color = "INTERFACE"
 
     def on_create(self, context):
@@ -68,13 +68,21 @@ class SN_PopoverNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
             subrow.enabled = self.ref_ntree != None
             parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
             subrow.prop_search(self, "ref_SN_PanelNode", parent_tree.node_collection("SN_PanelNode"), "refs", text="", icon="VIEWZOOM")
+        
+            row.prop(self, "parent_type", text="", icon_only=True)
+            
+            subrow = row.row()
+            subrow.enabled = self.ref_ntree != None and self.ref_SN_PanelNode in self.ref_ntree.nodes
+            op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+            op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
+            op.node = self.ref_SN_PanelNode
         else:
             op = row.operator("sn.activate_subpanel_picker", text=f"{self.panel_parent.replace('_PT_', ' ').replace('_', ' ').title()}", icon="EYEDROPPER")
             op.node_tree = self.node_tree.name
             op.node = self.name
             op.allow_subpanels = True
             
-        row.prop(self, "parent_type", text="", icon_only=True)
+            row.prop(self, "parent_type", text="", icon_only=True)
         
 
     def draw_node_panel(self, context, layout):

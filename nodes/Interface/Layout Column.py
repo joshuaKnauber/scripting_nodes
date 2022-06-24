@@ -6,7 +6,7 @@ from ..base_node import SN_ScriptingBaseNode
 class SN_LayoutColumnNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_LayoutColumnNodeNew"
-    bl_label = "Colum"
+    bl_label = "Column"
     bl_width_default = 200
     node_color = "INTERFACE"
     

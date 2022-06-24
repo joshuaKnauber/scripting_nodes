@@ -59,7 +59,9 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
             """
 
     def draw_node(self, context, layout):
-        layout.prop(self, "name")
+        row = layout.row(align=True)
+        row.prop(self, "name")
+        row.operator("sn.find_referencing_nodes", text="", icon="VIEWZOOM").node = self.name
         layout.prop(self, "title")
     
     def draw_node_panel(self, context, layout):
