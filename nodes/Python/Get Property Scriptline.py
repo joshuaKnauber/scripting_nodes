@@ -18,10 +18,13 @@ class SN_GetPropertyScriptlineNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     update=SN_ScriptingBaseNode._evaluate)
         
     def evaluate(self, context):
-        if self.property_name[0] == "[":
-            self.outputs[0].python_value = f"{self.inputs[0].python_value}{self.property_name}"
+        if self.property_name:
+            if self.property_name[0] == "[":
+                self.outputs[0].python_value = f"{self.inputs[0].python_value}{self.property_name}"
+            else:
+                self.outputs[0].python_value = f"{self.inputs[0].python_value}.{self.property_name}"
         else:
-            self.outputs[0].python_value = f"{self.inputs[0].python_value}.{self.property_name}"
+            self.outputs[0].reset_value()
         
     def draw_node(self, context, layout):
         layout.prop(self, "property_name")
