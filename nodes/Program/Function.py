@@ -82,9 +82,10 @@ class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     
     
     def draw_node(self, context, layout):
-        row = layout.row()
+        row = layout.row(align=True)
         row.prop(self, "name")
-        row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False).name = self.func_name
+        row.operator("sn.find_referencing_nodes", text="", icon="VIEWZOOM").node = self.name
+        row.operator("sn.copy_python_name", text="", icon="COPYDOWN").name = self.func_name
         
     def draw_node_panel(self, context, layout):
         layout.prop(self, "fixed_func_name")

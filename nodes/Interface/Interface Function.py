@@ -86,3 +86,4 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         row = layout.row(align=True)
         row.prop(self, "name")
         row.operator("sn.find_referencing_nodes", text="", icon="VIEWZOOM").node = self.name
+        row.operator("sn.copy_python_name", text="", icon="COPYDOWN").name = self.func_name
