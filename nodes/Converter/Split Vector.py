@@ -52,8 +52,12 @@ class SN_SplitVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
 
 
     def evaluate(self, context):
-        for i in range(len(self.outputs)):
-            self.outputs[i].python_value = f"{self.inputs[0].python_value}[{i}]"
+        if self.vector_type == "Integer Vector":
+            for i in range(len(self.outputs)):
+                self.outputs[i].python_value = f"int({self.inputs[0].python_value}[{i}])"
+        else:
+            for i in range(len(self.outputs)):
+                self.outputs[i].python_value = f"{self.inputs[0].python_value}[{i}]"
 
     def draw_node(self, context, layout):
         layout.prop(self, "vector_type")
