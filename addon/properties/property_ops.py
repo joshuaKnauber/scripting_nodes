@@ -209,6 +209,8 @@ class SN_OT_AddPropertyNodePopup(bpy.types.Operator):
     bl_label = "Add Property Node Popup"
     bl_description = "Opens a popup to let you choose a property node"
     bl_options = {"REGISTER", "INTERNAL"}
+    
+    node: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
         return {"FINISHED"}
@@ -219,12 +221,16 @@ class SN_OT_AddPropertyNodePopup(bpy.types.Operator):
         col.scale_y = 1.5
         op = col.operator("sn.add_property_node", text="Property", icon="ADD")
         op.type = "SN_SerpensPropertyNode"
+        op.node = self.node
         op = col.operator("sn.add_property_node", text="Display Property", icon="ADD")
-        op.type = "SN_DisplayPropertyNode"
+        op.type = "SN_DisplayPropertyNodeNew"
+        op.node = self.node
         op = col.operator("sn.add_property_node", text="Set Property", icon="ADD")
         op.type = "SN_SetPropertyNode"
+        op.node = self.node
         op = col.operator("sn.add_property_node", text="On Property Update", icon="ADD")
         op.type = "SN_OnPropertyUpdateNode"
+        op.node = self.node
         
     def invoke(self, context, event):
         return context.window_manager.invoke_popup(self)
@@ -238,17 +244,25 @@ class SN_OT_AddPropertyNode(bpy.types.Operator):
     bl_options = {"REGISTER", "INTERNAL"}
 
     type: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+    node: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
         bpy.ops.node.add_node("INVOKE_DEFAULT", type=self.type, use_transform=True)
         node = context.space_data.node_tree.nodes.active
 
-        if context.scene.sn.property_index < len(context.scene.sn.properties):
+        prop = None
+        if self.node:
+            prop_node = context.space_data.node_tree.nodes[self.node]
+            if prop_node.property_index < len(prop_node.properties):
+                prop = prop_node.properties[prop_node.property_index]
+        elif context.scene.sn.property_index < len(context.scene.sn.properties):
             prop = context.scene.sn.properties[context.scene.sn.property_index]
 
-            if self.type == "SN_SerpensPropertyNode":
-                node.prop_name = prop.name
-            elif self.type == "SN_OnPropertyUpdateNode":
+        if prop:            
+            if self.type in ["SN_SerpensPropertyNode", "SN_OnPropertyUpdateNode"]:
+                if self.node:
+                    node.prop_source = "NODE"
+                    node.from_node = self.node
                 node.prop_name = prop.name
         return {"FINISHED"}
     

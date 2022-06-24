@@ -101,6 +101,7 @@ class PropertyNode():
         row.template_list("SN_UL_PropertyList", "", self, "properties", self, "property_index")
 
         col = row.column(align=True)
+        col.operator("sn.add_property_node_popup", icon="FORWARD", text="").node = self.name
         op = col.operator("sn.edit_node_property", text="", icon="GREASEPENCIL")
         op.node_tree = self.node_tree.name
         op.node = self.name

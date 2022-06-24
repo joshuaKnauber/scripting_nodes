@@ -17,6 +17,7 @@ class SN_SerpensPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefer
         self.add_property_output("Property")
         self.add_data_output("Value")
         self.add_property_input("Data")
+        self.ref_ntree = self.node_tree
 
 
     def evaluate(self, context):

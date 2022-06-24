@@ -18,6 +18,7 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
         self.add_execute_output()
         self.add_data_output("Value")
         self.add_property_output("Attached To Item")
+        self.ref_ntree = self.node_tree
         
         
     def update_func_name(self, prop):
