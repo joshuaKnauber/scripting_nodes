@@ -72,10 +72,13 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
             out_values.append(get_python_name(out.name, f"parameter_{i}"))
         out_names = ", ".join(out_values)
 
+        if index > 1:
+            code = self.indent([out.python_value for out in self.outputs[:index-1]], 6)
+        else:
+            code = self.indent(self.outputs[0].python_value, 6)
         self.code = f"""
                     def {self.func_name}(layout_function, {out_names}):
-                        pass
-                        {self.indent([out.python_value for out in self.outputs[:index-1]], 6)}
+                        {code if code.strip() else "pass"}
                     """
 
         for i, out in enumerate(self.outputs[index:-1]):

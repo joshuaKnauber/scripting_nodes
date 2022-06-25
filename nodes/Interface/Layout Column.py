@@ -27,7 +27,7 @@ class SN_LayoutColumnNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_float_input("Scale X")["default_value"] = 1
         self.add_float_input("Scale Y")["default_value"] = 1
         self.add_enum_input("Alignment")["items"] = str(["Expand", "Left", "Center", "Right"])
-        self.add_interface_output()
+        self.add_interface_output().passthrough_layout_type = True
         self.add_interface_output("Column")
 
     def evaluate(self, context):
