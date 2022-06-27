@@ -39,7 +39,7 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
             col.prop(sn, "custom_category", text=" ")
         layout.prop(sn, "version")
         layout.prop(sn, "blender")
-        layout.prop(sn, "multifile")
+        # layout.prop(sn, "multifile")
 
         row = layout.row()
         row.scale_y = 1.5
