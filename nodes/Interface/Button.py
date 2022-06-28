@@ -124,7 +124,7 @@ class SN_ButtonNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                             or (self.version == 1 and inp.name.replace(" ", "_").lower() == prop.identifier):
                             code += "\n" + f"op.{prop.identifier} = {inp.python_value}"
             self.code = f"""
-                        {code}
+                        {self.indent(code, 6)}
                         {self.indent(self.outputs[0].python_value, 6)}
                         """
 
@@ -142,7 +142,7 @@ class SN_ButtonNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                 code = f"op = {self.active_layout}.operator('sn.dummy_button_operator', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}, depress={self.inputs['Depress'].python_value})"
             
             self.code = f"""
-                        {code}
+                        {self.indent(code, 6)}
                         {self.indent(self.outputs[0].python_value, 6)}
                         """
 
