@@ -241,8 +241,8 @@ class ScriptingSocket:
         """ Draws the color of this node based on the get_color function and the status of this socket """
         c = self.get_color(context, node)
         alpha = 1
-        if self.dynamic:
-            alpha = 0
+        # if self.dynamic:
+            # alpha = 0
         return (c[0], c[1], c[2], alpha)
 
 

@@ -23,7 +23,7 @@ class SN_DisplayEnumItemNode(bpy.types.Node, SN_ScriptingBaseNode):
                         {self.active_layout}.prop_enum({self.inputs['Property'].python_source}, '{self.inputs['Property'].python_attr.replace("'",'"')}', text={self.inputs['Label'].python_value}, value={self.inputs['Item'].python_value})
                         {self.indent(self.outputs[0].python_value, 6)}
                         """
-        elif self.inputs["Property"].is_linked:
+        elif not self.inputs["Property"].is_linked:
             self.code = f"""
                         {self.active_layout}.label(text='No Property connected!', icon='ERROR')
                         {self.indent(self.outputs[0].python_value, 6)}

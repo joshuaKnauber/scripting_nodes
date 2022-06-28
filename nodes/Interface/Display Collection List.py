@@ -17,8 +17,8 @@ class SN_DisplayCollectionListNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_collection_property_input()
         self.add_property_input("Index Property")
         self.add_integer_input("Rows")
-        self.add_interface_output().passthrough_layout_type = True
-        self.add_interface_output("Item Row")
+        self.add_dynamic_interface_output("Item Row")
+        self.add_dynamic_interface_output("Interface").passthrough_layout_type = True
         self.add_property_output("Item")
         self.add_integer_output("Item Index")
 
@@ -29,7 +29,7 @@ class SN_DisplayCollectionListNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                                     class {ui_list_idname}(bpy.types.UIList):
                                         def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index_{self.static_uid}):
                                             row = layout
-                                            {self.indent(self.outputs["Item Row"].python_value, 11)}
+                                            {self.indent([out.python_value if out.name == 'Item Row' else '' for out in self.outputs], 11)}
                                     """
             self.code_register = f"""
                                     bpy.utils.register_class({ui_list_idname})
@@ -39,7 +39,7 @@ class SN_DisplayCollectionListNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                                     """
             self.code = f"""
                 {self.active_layout}.template_list('{ui_list_idname}', '{self.static_uid}', {self.inputs['Collection Property'].python_source}, '{self.inputs['Collection Property'].python_attr}', {self.inputs['Index Property'].python_source}, '{self.inputs['Index Property'].python_attr}', rows={self.inputs['Rows'].python_value})
-                {self.indent(self.outputs["Interface"].python_value, 4)}
+                {self.indent([out.python_value if out.name == 'Interface' else '' for out in self.outputs], 4)}
                 """
             self.outputs["Item"].python_value = f"{self.inputs['Collection Property'].python_value}[index_{self.static_uid}]"
             if "Item Index" in self.outputs:

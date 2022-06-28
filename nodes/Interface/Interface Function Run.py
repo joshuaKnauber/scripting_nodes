@@ -13,7 +13,8 @@ class SN_RunInterfaceFunctionNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_interface_input()
-        self.add_interface_output()
+        self.add_dynamic_interface_output().passthrough_layout_type = True
+        self.ref_ntree = self.node_tree
 
 
     def on_ref_update(self, node, data=None):
@@ -87,11 +88,11 @@ class SN_RunInterfaceFunctionNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
             self.code = f"""
                         layout_function = {self.active_layout}
                         {parent_tree.nodes[self.ref_SN_InterfaceFunctionNode].func_name}(layout_function, {inp_values})
-                        {self.indent(self.outputs[0].python_value, 6)}
+                        {self.indent([out.python_value if out.name == 'Interface' else '' for out in self.outputs], 6)}
                         """
         else:
             self.code = f"""
-                {self.indent(self.outputs[0].python_value, 4)}
+                {self.indent([out.python_value if out.name == 'Interface' else '' for out in self.outputs], 4)}
             """
 
 

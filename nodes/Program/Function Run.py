@@ -13,6 +13,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_execute_input()
         self.add_execute_output()
+        self.ref_ntree = self.node_tree
 
 
     def update_enum_socket(self, from_socket, to_socket):

@@ -14,7 +14,7 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "INTERFACE"
 
     def on_create(self, context):
-        self.add_interface_output()
+        self.add_dynamic_interface_output()
         out = self.add_dynamic_data_output("Input")
         out.is_variable = True
         out.changeable = True
@@ -75,7 +75,7 @@ class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
         if index > 1:
             code = self.indent([out.python_value for out in self.outputs[:index-1]], 6)
         else:
-            code = self.indent(self.outputs[0].python_value, 6)
+            code = self.indent([out.python_value if out.name == 'Interface' else '' for out in self.outputs], 0)
         self.code = f"""
                     def {self.func_name}(layout_function, {out_names}):
                         {code if code.strip() else "pass"}

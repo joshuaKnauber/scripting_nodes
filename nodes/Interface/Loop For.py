@@ -13,8 +13,8 @@ class SN_ForInterfaceNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_interface_input()
         self.add_collection_property_input("Collection")
-        self.add_interface_output().passthrough_layout_type = True
         self.add_interface_output("Repeat").passthrough_layout_type = True
+        self.add_dynamic_interface_output().passthrough_layout_type = True
         self.add_property_output("Item").changeable = True
         self.add_integer_output("Index")
         
@@ -44,12 +44,12 @@ class SN_ForInterfaceNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
             self.code = f"""
                         for i_{self.static_uid} in range({f"len({self.inputs[1].python_value})" if not self.reverse else f"len({self.inputs[1].python_value})-1,-1,-1"}):
                             {self.indent(self.outputs['Repeat'].python_value, 7) if self.outputs['Repeat'].python_value.strip() else 'pass'}
-                        {self.indent(self.outputs[9].python_value, 6)}
+                        {self.indent([out.python_value if out.name == 'Interface' else '' for out in self.outputs], 6)}
                         """
         else:
             self.code = f"""
                         {self.active_layout}.label(text='No Collection connected!', icon='ERROR')
-                        {self.indent(self.outputs[0].python_value, 6)}
+                        {self.indent([out.python_value if out.name == 'Interface' else '' for out in self.outputs], 6)}
                         """
             self.outputs["Index"].reset_value()
             self.outputs["Item"].reset_value()

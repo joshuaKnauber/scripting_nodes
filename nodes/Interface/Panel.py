@@ -16,8 +16,8 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_boolean_input("Hide")
-        self.add_interface_output("Panel")
-        self.add_interface_output("Header")
+        self.add_dynamic_interface_output("Panel")
+        self.add_dynamic_interface_output("Header")
         self.ref_ntree = self.node_tree
         
         
@@ -205,11 +205,11 @@ class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
                         
                         def draw_header(self, context):
                             layout = self.layout
-                            {self.indent([out.python_value for out in filter(lambda out: out.name=='Header' and not out.dynamic, self.outputs)], 7)}
+                            {self.indent([out.python_value if out.name == 'Header' else '' for out in self.outputs], 7)}
 
                         def draw(self, context):
                             layout = self.layout
-                            {self.indent([out.python_value for out in filter(lambda out: out.name=='Panel' and not out.dynamic, self.outputs)], 7)}
+                            {self.indent([out.python_value if out.name == 'Panel' else '' for out in self.outputs], 7)}
                     """
 
         if self.is_subpanel and parent and not context.scene.sn.is_exporting and self.parent_type == "CUSTOM":

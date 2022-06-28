@@ -16,7 +16,7 @@ class SN_EnumMapInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_interface_input()
         self.add_string_input("Enum Value")
-        self.add_interface_output()
+        self.add_interface_output("Interface")
         self.add_interface_output("Other Option")
         out = self.add_dynamic_interface_output("Enum Option")
         out.is_variable = True

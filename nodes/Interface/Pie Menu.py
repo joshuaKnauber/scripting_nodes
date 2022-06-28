@@ -14,7 +14,7 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_boolean_input("Hide")
-        self.add_interface_output("Menu")
+        self.add_dynamic_interface_output("Menu")
 
     idname_override: bpy.props.StringProperty(default="",
                                 name="Idname Override",
@@ -45,7 +45,7 @@ class SN_PieMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
                 def draw(self, context):
                     layout = self.layout.menu_pie()
-                    {self.indent([out.python_value for out in self.outputs], 5)}
+                    {self.indent([out.python_value if out.name == 'Menu' else '' for out in self.outputs], 5)}
             """
         
         self.code_register = f"""

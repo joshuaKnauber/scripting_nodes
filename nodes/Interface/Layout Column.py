@@ -11,7 +11,7 @@ class SN_LayoutColumnNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "INTERFACE"
     
     def layout_type(self, socket):
-        if socket == self.outputs["Column"]:
+        if socket.name == "Column":
             return f"col_{self.static_uid}"
         return self.active_layout
 
@@ -27,8 +27,7 @@ class SN_LayoutColumnNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_float_input("Scale X")["default_value"] = 1
         self.add_float_input("Scale Y")["default_value"] = 1
         self.add_enum_input("Alignment")["items"] = str(["Expand", "Left", "Center", "Right"])
-        self.add_interface_output().passthrough_layout_type = True
-        self.add_interface_output("Column")
+        self.add_dynamic_interface_output("Column")
 
     def evaluate(self, context):
         self.code = f"""
@@ -41,6 +40,5 @@ class SN_LayoutColumnNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                     col_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
                     col_{self.static_uid}.scale_y = {self.inputs["Scale Y"].python_value}
                     col_{self.static_uid}.alignment = {self.inputs["Alignment"].python_value}.upper()
-                    {self.indent(self.outputs[1].python_value, 5)}
-                    {self.indent(self.outputs[0].python_value, 5)}
+                    {self.indent([out.python_value if out.name == 'Column' else '' for out in self.outputs], 5)}
                     """

@@ -13,8 +13,8 @@ class SN_RepeatInterfaceNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_interface_input()
         self.add_integer_input("Repetitions").default_value = 2
-        self.add_interface_output().passthrough_layout_type = True
         self.add_interface_output("Repeat").passthrough_layout_type = True
+        self.add_interface_output().passthrough_layout_type = True
         self.add_integer_output("Step")
 
     def evaluate(self, context):
@@ -22,5 +22,5 @@ class SN_RepeatInterfaceNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.code = f"""
                     for i_{self.static_uid} in range({self.inputs['Repetitions'].python_value}):
                         {self.indent(self.outputs['Repeat'].python_value, 6) if self.outputs['Repeat'].python_value.strip() else 'pass'}
-                    {self.indent(self.outputs[0].python_value, 5)}
+                    {self.indent([out.python_value if out.name == 'Interface' else '' for out in self.outputs], 5)}
                     """

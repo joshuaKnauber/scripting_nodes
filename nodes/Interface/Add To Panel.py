@@ -14,7 +14,7 @@ class SN_AddToPanelNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_boolean_input("Hide")
-        self.add_interface_output("Panel")
+        self.add_dynamic_interface_output("Panel")
 
 
     append: bpy.props.EnumProperty(default="APPEND", items=[
@@ -38,7 +38,7 @@ class SN_AddToPanelNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                     def {func_name}(self, context):
                         if not ({self.inputs["Hide"].python_value}):
                             layout = self.layout
-                            {self.indent(self.outputs[0].python_value, 7)}
+                            {self.indent([out.python_value if out.name == 'Panel' else '' for out in self.outputs], 7)}
                     """
 
         self.code_register = f"bpy.types.{self.panel_parent}.{self.append.lower()}({func_name})"

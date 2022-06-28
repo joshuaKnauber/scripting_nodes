@@ -15,7 +15,7 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_integer_input("Columns")["default_value"] = 1
         self.add_boolean_input("Hide")
-        self.add_interface_output("Menu")
+        self.add_dynamic_interface_output("Menu")
 
     idname_override: bpy.props.StringProperty(default="",
                                 name="Idname Override",
@@ -47,7 +47,7 @@ class SN_MenuNode(bpy.types.Node, SN_ScriptingBaseNode):
                 def draw(self, context):
                     layout = self.layout.column_flow(columns={self.inputs["Columns"].python_value})
                     layout.operator_context = "INVOKE_DEFAULT"
-                    {self.indent([out.python_value for out in self.outputs], 5)}
+                    {self.indent([out.python_value if out.name == 'Menu' else '' for out in self.outputs], 5)}
             """
         
         self.code_register = f"""

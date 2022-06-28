@@ -15,7 +15,7 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     
     def on_create(self, context):
         self.add_boolean_input("Hide").default_value = False
-        self.add_interface_output("Preferences")
+        self.add_dynamic_interface_output("Preferences")
 
     def evaluate(self, context):
         props_imperative_list = self.props_imperative(context).split("\n")
@@ -74,7 +74,7 @@ class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                         def draw(self, context):
                             if not ({self.inputs["Hide"].python_value}):
                                 layout = self.layout 
-                                {self.indent([out.python_value for out in self.outputs[:-1]], 8)}
+                                {self.indent([out.python_value if out.name == 'Preferences' else '' for out in self.outputs], 8)}
                     """
 
         self.code_register = f"""
