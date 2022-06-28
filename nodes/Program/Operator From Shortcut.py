@@ -23,7 +23,7 @@ class SN_OT_ShortcutToNode(bpy.types.Operator):
 
     def execute(self, context):
         if self.button:
-            bpy.ops.node.add_node("INVOKE_DEFAULT", type="SN_ButtonNode", use_transform=True)
+            bpy.ops.node.add_node("INVOKE_DEFAULT", type="SN_ButtonNodeNew", use_transform=True)
         else:
             bpy.ops.node.add_node("INVOKE_DEFAULT", type="SN_RunOperatorNode", use_transform=True)
         node = context.space_data.node_tree.nodes.active

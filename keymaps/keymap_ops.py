@@ -52,7 +52,7 @@ class SN_OT_AddCopiedOperatorNode(bpy.types.Operator):
     def execute(self, context):
         if "bpy." in context.window_manager.clipboard and ".ops." in context.window_manager.clipboard:
             if self.is_button:
-                bpy.ops.node.add_node("INVOKE_DEFAULT", type="SN_ButtonNode", use_transform=True)
+                bpy.ops.node.add_node("INVOKE_DEFAULT", type="SN_ButtonNodeNew", use_transform=True)
             else:
                 bpy.ops.node.add_node("INVOKE_DEFAULT", type="SN_RunOperatorNode", use_transform=True)
             node = context.space_data.node_tree.nodes.active
