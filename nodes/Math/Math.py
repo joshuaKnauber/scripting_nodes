@@ -1,4 +1,4 @@
-from cmath import exp
+import re
 import bpy
 import string
 from ..base_node import SN_ScriptingBaseNode
@@ -47,19 +47,10 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.prop(self, "operation", text="")
         if self.operation == "EXPRESSION":
             layout.prop(self,"expression",text="")
-
-    def replace_in_expression(self,expression, varname, value):
-        parts = expression.split(varname)
-
-        for char in string.ascii_lowercase:
-            if not char == varname:
-                expression = expression.replace(f"{varname}{char}", f"#{char}")
-                expression = expression.replace(f"{char}{varname}", f"{char}#")
-
-        expression = expression.replace(varname,value)
-        expression = expression.replace("#",varname)
-
-        return expression
+            
+    def multiple_replace(self, string, rep_dict):
+        pattern = re.compile("|".join([re.escape(k) for k in sorted(rep_dict,key=len,reverse=True)]), flags=re.DOTALL)
+        return pattern.sub(lambda x: rep_dict[x.group(0)], string)
 
     def evaluate(self, context):
         if not self.operation == "EXPRESSION":
@@ -70,7 +61,13 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
         else:
             self.code_import = "import math"
             expression = self.expression
+            
+            to_replace = {}
             for inp in self.inputs:
-                expression = self.replace_in_expression(expression, inp.name, inp.python_value)
+                if not inp.dynamic:
+                    to_replace[inp.name] = inp.python_value
+
+            expression = self.multiple_replace(expression, to_replace)
+
             self.outputs[0].python_value = f"eval(\"{expression}\")"
             self.outputs[1].python_value = f"int(eval(\"{expression}\"))"
