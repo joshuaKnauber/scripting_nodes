@@ -281,7 +281,7 @@ def info():
         "blender" : {tuple(sn.blender)},
         "version" : {tuple(sn.version)},
         "location" : "{sn.location}",
-        "waring" : "{sn.warning}",
+        "warning" : "{sn.warning}",
         "doc_url": "{sn.doc_url}", 
         "tracker_url": "{sn.tracker_url}", 
         "category" : "{sn.category if not sn.category == 'CUSTOM' else sn.custom_category}" 
