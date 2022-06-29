@@ -16,6 +16,7 @@ class SN_PopoverNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_icon_input()
         self.add_interface_output().passthrough_layout_type = True
         self.ref_ntree = self.node_tree
+        self.order = 1
         
         
     parent_type: bpy.props.EnumProperty(name="Parent Type",
