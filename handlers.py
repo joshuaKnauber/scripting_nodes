@@ -1,5 +1,6 @@
 import bpy
 from bpy.app.handlers import persistent
+from .interface.menus.rightclick import serpens_right_click
 from . import bl_info
 from .nodes.compiler import compile_addon, unregister_addon
 from .settings.updates import check_serpens_updates

@@ -2,9 +2,9 @@ import bpy
 
 
 
-# TODO: find better solution for registering something in a rightclick menu
 class WM_MT_button_context(bpy.types.Menu):
-    bl_label = "Unused"
+    bl_label = ""
+
     def draw(self, context):
         pass
 

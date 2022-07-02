@@ -27,8 +27,10 @@ def init():
 
 def register():
     for cls in ordered_classes:
-        try: bpy.utils.register_class(cls)
-        except: pass
+        isContextMenu = getattr(cls, "__name__", None) == "WM_MT_button_context"
+        if not isContextMenu or (isContextMenu and getattr(bpy.types, "WM_MT_button_context", None) == None):
+            try: bpy.utils.register_class(cls)
+            except: pass
 
     for module in modules:
         if module.__name__ == __name__:
@@ -38,8 +40,10 @@ def register():
 
 def unregister():
     for cls in reversed(ordered_classes):
-        try: bpy.utils.unregister_class(cls)
-        except: pass
+        isContextMenu = getattr(cls, "__name__", None) == "WM_MT_button_context"
+        if not isContextMenu:
+            try: bpy.utils.unregister_class(cls)
+            except: pass
 
     for module in modules:
         if module.__name__ == __name__:
