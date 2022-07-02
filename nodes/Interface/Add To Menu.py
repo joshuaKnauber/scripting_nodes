@@ -44,13 +44,14 @@ class SN_AddToMenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         if self.menu_parent == "WM_MT_button_context":
             self.code_imperative = """
                 class WM_MT_button_context(bpy.types.Menu):
-                    bl_label = "Unused"
+                    bl_label = ""
+                    
                     def draw(self, context):
                         pass
             """
 
         self.code_register = f"""
-            {"if not hasattr(bpy.types, 'WM_MT_button_context'): bpy.utils.register_class(WM_MT_button_context)" if self.menu_parent == "WM_MT_button_context" else ""}
+            {"if getattr(bpy.types, 'WM_MT_button_context', None) == None: bpy.utils.register_class(WM_MT_button_context)" if self.menu_parent == "WM_MT_button_context" else ""}
             bpy.types.{self.menu_parent}.{self.append.lower()}({func_name})
         """
         self.code_unregister = f"""
