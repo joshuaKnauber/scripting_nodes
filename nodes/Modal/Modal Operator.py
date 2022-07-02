@@ -186,6 +186,8 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                     
                 def save_event(self, event):
                     event_options = ["type", "value", "alt", "shift", "ctrl", "oskey", "mouse_region_x", "mouse_region_y", "mouse_x", "mouse_y", "pressure", "tilt"]
+                    if bpy.app.version >= (3, 2, 1):
+                        event_options += ["type_prev", "value_prev"]
                     for option in event_options: self._event[option] = getattr(event, option)
                     
                 def draw_callback_px(self, context):

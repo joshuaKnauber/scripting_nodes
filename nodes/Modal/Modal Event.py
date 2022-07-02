@@ -11,7 +11,9 @@ class SN_ModalEventNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def on_create(self, context):
         self.add_string_output("Type")
+        self.add_string_output("Type Previous")
         self.add_string_output("Value")
+        self.add_string_output("Value Previous")
         self.add_boolean_output("Alt")
         self.add_boolean_output("Shift")
         self.add_boolean_output("Ctrl")
@@ -25,7 +27,9 @@ class SN_ModalEventNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     def evaluate(self, context):
         self.outputs["Type"].python_value = f"event.type"
+        if "Type Previous" in self.outputs: self.outputs["Type Previous"].python_value = f"event.type_prev"
         self.outputs["Value"].python_value = f"event.value"
+        if "Value Previous" in self.outputs: self.outputs["Value Previous"].python_value = f"event.value_prev"
         self.outputs["Alt"].python_value = f"event.alt"
         self.outputs["Shift"].python_value = f"event.shift"
         self.outputs["Ctrl"].python_value = f"event.ctrl"
