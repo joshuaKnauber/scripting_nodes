@@ -26,6 +26,13 @@ class SN_DisplayCollectionListNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         if self.inputs["Index Property"].is_linked and self.inputs["Collection Property"].is_linked:
             ui_list_idname = f"SNA_UL_{get_python_name(self.name, 'List')}_{self.static_uid}"
             self.code_imperative = f"""
+                                    def display_collection_id(uid, vars):
+                                        id = f"coll_{{uid}}"
+                                        for var in vars.keys():
+                                            if var.startswith("i_"):
+                                                id += f"_{{var}}_{{vars[var]}}"
+                                        return id
+                                    
                                     class {ui_list_idname}(bpy.types.UIList):
                                         def draw_item(self, context, layout, data, item_{self.static_uid}, icon, active_data, active_propname, index_{self.static_uid}):
                                             row = layout
@@ -38,7 +45,8 @@ class SN_DisplayCollectionListNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                                     bpy.utils.unregister_class({ui_list_idname})
                                     """
             self.code = f"""
-                {self.active_layout}.template_list('{ui_list_idname}', '{self.static_uid}', {self.inputs['Collection Property'].python_source}, '{self.inputs['Collection Property'].python_attr}', {self.inputs['Index Property'].python_source}, '{self.inputs['Index Property'].python_attr}', rows={self.inputs['Rows'].python_value})
+                coll_id = display_collection_id('{self.static_uid}', locals())
+                {self.active_layout}.template_list('{ui_list_idname}', coll_id, {self.inputs['Collection Property'].python_source}, '{self.inputs['Collection Property'].python_attr}', {self.inputs['Index Property'].python_source}, '{self.inputs['Index Property'].python_attr}', rows={self.inputs['Rows'].python_value})
                 {self.indent([out.python_value if out.name == 'Interface' else '' for out in self.outputs], 4)}
                 """
             self.outputs["Item"].python_value = f"item_{self.static_uid}"
