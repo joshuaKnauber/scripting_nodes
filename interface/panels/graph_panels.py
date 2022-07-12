@@ -55,7 +55,6 @@ class SN_PT_GraphPanel(bpy.types.Panel):
         col = row.column(align=True)
         col.operator("sn.add_graph", text="", icon="ADD")
         col.operator("sn.append_graph", text="", icon="APPEND_BLEND")
-        col.separator()
         subrow = col.row(align=True)
         subrow.enabled = tree != None
         subrow.operator("sn.remove_graph", text="", icon="REMOVE")

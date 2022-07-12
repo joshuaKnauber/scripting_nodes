@@ -119,7 +119,8 @@ class SN_OT_SelectIcon(bpy.types.Operator):
 
         grid = layout.grid_flow(align=True,even_columns=True, even_rows=True)
         for icon in icons:
-            if self.icon_search.lower() in icon.name.lower() or not self.icon_search:
+            # NOTE filtering out icon 806 because it throws an error for some reason
+            if icon.value != 806 and (self.icon_search.lower() in icon.name.lower() or not self.icon_search):
                 op = grid.operator("sn.set_icon",text="", icon_value=icon.value, emboss=prop==icon.value)
                 op.icon_data_path = self.icon_data_path
                 op.prop_name = self.prop_name

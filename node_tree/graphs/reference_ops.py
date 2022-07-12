@@ -17,6 +17,7 @@ class SN_OT_FindReferencingNodes(bpy.types.Operator):
         
     def draw(self, context):
         layout = self.layout
+        if not self.node in context.space_data.node_tree.nodes: return
         ref_node = context.space_data.node_tree.nodes[self.node]
         
         for key in self.references:

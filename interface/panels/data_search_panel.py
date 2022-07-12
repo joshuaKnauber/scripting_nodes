@@ -22,26 +22,30 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         row.scale_y = 1.4
         row.alert = True
         row.operator("sn.exit_search", text="Exit", icon="PANEL_CLOSE")
-        layout.separator()
 
+        layout.separator()
         layout.operator("wm.url_open", text="How to", icon="QUESTION").url = "https://joshuaknauber.notion.site/Blend-Data-33e9f2ea40f44c2498cb26838662b621"
+
+        layout.separator(factor=2)
+        col = layout.column(align=True)
+        row = col.row()
+        row.scale_y = 1.4
+        row.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH", depress=sn.global_search_active)
 
         layout.separator()
         layout.label(text="Source:")
-        col = layout.column()
+        col = layout.column(align=True)
         col.scale_y = 1.4
-        col.prop(context.scene.sn, "data_category", expand=True)
-        layout.separator()
+        col.prop_enum(context.scene.sn, "data_category", value="app")
+        col.prop_enum(context.scene.sn, "data_category", value="context")
+        col.prop_enum(context.scene.sn, "data_category", value="data")
+        col.separator()
+        col.prop_enum(context.scene.sn, "data_category", value="ops")
 
         # col = layout.column(align=True)
         # row = col.row()
         # row.enabled = not sn.global_search_active
         # row.operator("sn.global_search", text="Global Search", icon="VIEWZOOM")
-
-        col = layout.column(align=True)
-        row = col.row()
-        row.scale_y = 1.4
-        row.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH", depress=sn.global_search_active)
 
         layout.separator()
         col = layout.column()
@@ -52,7 +56,9 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         row = col.row()
         row.scale_y = 1.2
         row.prop(context.scene.sn, "data_search", text="", icon="VIEWZOOM")
-        col.prop(context.scene.sn, "data_filter", expand=True)
+        subcol = col.column()
+        subcol.enabled = context.scene.sn.data_category != "ops"
+        subcol.prop(context.scene.sn, "data_filter", expand=True)
         
         layout.separator()
         layout.prop(context.scene.sn, "show_path")
@@ -162,17 +168,64 @@ class SN_PT_data_search(bpy.types.Panel):
             if is_empty:
                 col.label(text="No Items for these filters!", icon="INFO")
 
+    def draw_operator_category(self, layout, category):
+        sn = bpy.context.scene.sn
+
+        box = layout.box()
+        row = box.row()
+        op = row.operator("sn.expand_data", text="", icon="TRIA_DOWN" if sn.ops_items["operators"][category]["expanded"] else "TRIA_RIGHT", emboss=False)
+        op.path = f"bpy.ops.{category}"
+        if category == "sn":
+            row.label(text="Serpens")
+        elif category == "sna":
+            row.label(text="Serpens Addon")
+        else:
+            row.label(text=category.replace("_", " ").title())
+
+        if sn.ops_items["operators"][category]["expanded"]:
+            row = box.row()
+            split = row.split(factor=0.015)
+            split.label(text="")
+            col = split.column(align=True)
+
+            for operator in sn.ops_items["operators"][category]["items"]:
+                if operator["operator"] in sn.ops_items["filtered"][category]:
+                    path = f"bpy.ops.{category}.{operator['operator']}()"
+                    box = col.box()
+                    box.scale_y = 0.75
+                    row = box.row()
+                    row.label(text=operator["name"])
+
+                    if bpy.context.scene.sn.show_path:
+                        subrow = row.row()
+                        subrow.enabled = False
+                        subrow.label(text=path)
+
+                    op = row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False)
+                    op.name = path
+
     def draw(self, context):
         layout = self.layout
         sn = context.scene.sn
-        
+
         col = layout.column(align=True)
+
         is_empty = True
-        for key in sn.data_items[sn.data_category].keys():
-            item = sn.data_items[sn.data_category][key]
-            if self.should_draw(item, sn.data_search, sn.data_filter):
-                self.draw_item(col, item)
-                is_empty = False
-                
+        if sn.data_category == "ops":
+            row = col.row()
+            row.label(text="Use property functions instead of operators when possible!", icon="INFO")
+            row.operator("sn.expand_operators", text="", icon="FULLSCREEN_ENTER", emboss=False)
+            col.separator()
+            for cat in sn.ops_items["operators"].keys():
+                if cat in sn.ops_items["filtered"].keys():
+                    self.draw_operator_category(col, cat)
+                    is_empty = False
+        else:
+            for key in sn.data_items[sn.data_category].keys():
+                item = sn.data_items[sn.data_category][key]
+                if self.should_draw(item, sn.data_search, sn.data_filter):
+                    self.draw_item(col, item)
+                    is_empty = False
+                    
         if is_empty:
             layout.label(text="No Items for these filters!", icon="INFO")

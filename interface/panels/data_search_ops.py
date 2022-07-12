@@ -46,16 +46,39 @@ class SN_OT_ExpandData(bpy.types.Operator):
 
     def execute(self, context): 
         sn = context.scene.sn
-        item = item_from_path(sn.data_items, self.path)
-        item["expanded"] = not item["expanded"]
-        if not item["properties"]:
-            try:
-                item["data"]
-                item["properties"] = get_data_items(self.path, item["data"])
-            except:
-                item["has_properties"] = False
-                item["expanded"] = False
-                self.report({"ERROR"}, message="This data doesn't exist anymore!")
+
+        if "bpy.ops" in self.path:
+            item = sn.ops_items["operators"][self.path.split(".")[-1]]
+            item["expanded"] = not item["expanded"]
+
+        else:
+            item = item_from_path(sn.data_items, self.path)
+            item["expanded"] = not item["expanded"]
+            if not item["properties"]:
+                try:
+                    item["data"]
+                    item["properties"] = get_data_items(self.path, item["data"])
+                except:
+                    item["has_properties"] = False
+                    item["expanded"] = False
+                    self.report({"ERROR"}, message="This data doesn't exist anymore!")
+        return {"FINISHED"}
+
+
+
+class SN_OT_ExpandAllOperators(bpy.types.Operator):
+    bl_idname = "sn.expand_operators"
+    bl_label = "Expand Operators"
+    bl_description = "Expands all operators"
+    bl_options = {"REGISTER", "INTERNAL"}
+    
+    def execute(self, context): 
+        sn = context.scene.sn
+        if sn.ops_items["operators"]:
+            expand = not list(sn.ops_items["operators"].values())[0]["expanded"]
+
+            for item in sn.ops_items["operators"].values():
+                item["expanded"] = expand
         return {"FINISHED"}
 
 

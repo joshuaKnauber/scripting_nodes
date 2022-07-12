@@ -252,7 +252,8 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="Your custom category")
     
     
-    data_items = {"app": {}, "context": {}, "data": {}}
+    data_items = { "app": {}, "context": {}, "data": {} }
+    ops_items = { "operators": {}, "filtered": {} }
     
     def overwrite_data_items(self, data):
         self.data_items["data"] = data["data"]
@@ -267,11 +268,53 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
             ctxt = self.copied_context[0] if self.copied_context else bpy.context.copy()
             self.data_items[category] = get_data_items(f"bpy.context", ctxt)
 
+    def refresh_filtered_ops(self):
+        """ Sets the filtered operators """
+        filtered = {}
+        for cat in self.ops_items["operators"]:
+            cat_ops = []
+            for op in self.ops_items["operators"][cat]["items"]:
+                if self.data_search.lower() in op["name"].lower() or self.data_search.lower() in op["operator"].lower():
+                    cat_ops.append(op["operator"])
+            if cat_ops:
+                filtered[cat] = cat_ops
+        self.ops_items["filtered"] = filtered
+
+    def get_category_ops(self, category, cat_name):
+        """ Gets the operators for a category """
+        ops = []
+        for op_name in dir(category):
+            if op_name[0].isalpha():
+                try: op = eval(f"bpy.ops.{cat_name}.{op_name}")
+                except: op = None
+                if op:
+                    rna = op.get_rna_type()
+                    ops.append({
+                        "name": getattr(rna, "name", op_name),
+                        "operator": op_name,
+                    })
+        return ops
+
+    def load_operators(self):
+        """ Reloads the list of operators """
+        self.ops_items["operators"] = {}
+        for cat_name in dir(bpy.ops):
+            if cat_name[0].isalpha() and not cat_name == "class":
+                try: cat = eval(f"bpy.ops.{cat_name}")
+                except: cat = None
+                if cat:
+                    self.ops_items["operators"][cat_name] = {
+                        "expanded": False,
+                        "items": self.get_category_ops(cat, cat_name)
+                    }
+        self.refresh_filtered_ops()
+
     def load_categories(self):
         """ Loads the data for the bpy categories """
         self.reload_data_category("app")
         self.reload_data_category("context")
         self.reload_data_category("data")
+        self.load_operators()
 
     def update_hide_preferences(self, context):
         for cls in space_userpref.classes:
@@ -298,13 +341,17 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         return _item_map[lookup]
 
     def get_categories(self, context):
-        ctxt = "Nothing Copied"
+        ctxt = "Preferences"
         if context.scene.sn.copied_context:
             ctxt = f"{self.copied_context[0]['area'].type.replace('_', ' ').title()} {self.copied_context[0]['region'].type.replace('_', ' ').title()}"
         items = [self.make_enum_item("app", "App", "bpy.app", 0, 0),
                 self.make_enum_item("context", f"Context ({ctxt})", "bpy.context", 0, 1),
-                self.make_enum_item("data", "Data", "bpy.data", 0, 2)]
+                self.make_enum_item("data", "Data", "bpy.data", 0, 2),
+                self.make_enum_item("ops", "Operators", "bpy.ops", 0, 3)]
         return items
+
+    def update_data_search(self, context):
+        self.refresh_filtered_ops()
     
     data_category: bpy.props.EnumProperty(name="Category",
                                         items=get_categories,
@@ -318,7 +365,8 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     data_search: bpy.props.StringProperty(name="Search",
                                         description="Search data",
-                                        options={"TEXTEDIT_UPDATE"})
+                                        options={"TEXTEDIT_UPDATE"},
+                                        update=update_data_search)
     
     show_path: bpy.props.BoolProperty(name="Show Path",
                                         description="Show python path of properties",

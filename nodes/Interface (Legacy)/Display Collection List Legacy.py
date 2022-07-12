@@ -27,7 +27,7 @@ class SN_DisplayCollectionListNode(bpy.types.Node, SN_ScriptingBaseNode):
             ui_list_idname = f"SNA_UL_{get_python_name(self.name, 'List')}_{self.static_uid}"
             self.code_imperative = f"""
                                     class {ui_list_idname}(bpy.types.UIList):
-                                        def draw_item(self, context, layout, data, item, icon, active_data, active_propname, index_{self.static_uid}):
+                                        def draw_item(self, context, layout, data, item_{self.static_uid}, icon, active_data, active_propname, index_{self.static_uid}):
                                             row = layout
                                             {self.indent([out.python_value for out in self.outputs[:-2]], 11)}
                                     """
@@ -38,7 +38,7 @@ class SN_DisplayCollectionListNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     bpy.utils.unregister_class({ui_list_idname})
                                     """
             self.code = f"{self.active_layout}.template_list('{ui_list_idname}', '{self.static_uid}', {self.inputs['Collection Property'].python_source}, '{self.inputs['Collection Property'].python_attr}', {self.inputs['Index Property'].python_source}, '{self.inputs['Index Property'].python_attr}', rows={self.inputs['Rows'].python_value})"
-            self.outputs["Item"].python_value = f"{self.inputs['Collection Property'].python_value}[index_{self.static_uid}]"
+            self.outputs["Item"].python_value = f"item_{self.static_uid}"
             if "Item Index" in self.outputs:
                 self.outputs["Item Index"].python_value = f"index_{self.static_uid}"
         else:
