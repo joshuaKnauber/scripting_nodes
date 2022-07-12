@@ -130,7 +130,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             # change data output
             elif link.from_socket.bl_label == "Data":
                 to_sockets = link.from_socket.to_sockets(False)
-                if len(to_sockets) == 1:
+                if not link.from_socket.dynamic and len(to_sockets) == 1:
                     to_socket = to_sockets[0]
                     if to_socket.bl_idname in list(map(lambda item: item[0], link.from_socket.get_data_type_items(bpy.context))):
                         link.from_socket.data_type = to_socket.bl_idname
@@ -162,10 +162,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def _call_link_inserts(self, added):
         """ Calls link_insert for all new links """
-        for _, to_inp, from_real, _ in added:
+        for from_inp, to_inp, from_real, _ in added:
             if from_real:
                 from_real.node.link_insert(from_real, to_inp, is_output=True)
                 to_inp.node.link_insert(from_real, to_inp, is_output=False)
+            elif from_inp and getattr(from_inp.node, "is_sn", False):
+                from_inp.node.link_insert(from_inp, to_inp, is_output=True)
 
 
     def _call_link_removes(self, removed):
