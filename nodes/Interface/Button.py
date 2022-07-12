@@ -9,7 +9,7 @@ class SN_ButtonNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_ButtonNodeNew"
     bl_label = "Button"
     node_color = "INTERFACE"
-    bl_width_default = 250
+    bl_width_default = 240
 
     def on_create(self, context):
         self.version = 1

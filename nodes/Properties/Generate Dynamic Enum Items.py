@@ -9,7 +9,7 @@ class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRef
     bl_idname = "SN_GenerateEnumItemsNode"
     bl_label = "Generate Dynamic Enum Items"
     node_color = "PROGRAM"
-    bl_width_default = 250
+    bl_width_default = 240
     is_trigger = True
         
 

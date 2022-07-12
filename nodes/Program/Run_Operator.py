@@ -51,7 +51,7 @@ class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_RunOperatorNode"
     bl_label = "Run Operator"
     node_color = "PROGRAM"
-    bl_width_default = 250
+    bl_width_default = 240
 
     def on_create(self, context):
         self.version = 1

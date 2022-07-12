@@ -45,7 +45,7 @@ class SN_FindShortcutOperator(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_FindShortcutOperator"
     bl_label = "Find Operator From Shortcut"
-    bl_width_default = 250
+    bl_width_default = 240
 
     options: bpy.props.CollectionProperty(type=SN_ShortcutOperatorOption)
     selected: bpy.props.StringProperty()

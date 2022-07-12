@@ -8,7 +8,7 @@ class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_SubmenuNodeNew"
     bl_label = "Submenu"
     node_color = "INTERFACE"
-    bl_width_default = 250
+    bl_width_default = 240
 
     def on_create(self, context):
         self.add_interface_input()

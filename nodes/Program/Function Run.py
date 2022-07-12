@@ -8,7 +8,7 @@ class SN_RunFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_RunFunctionNode"
     bl_label = "Function Run (Execute)"
-    bl_width_default = 250
+    bl_width_default = 240
 
     def on_create(self, context):
         self.add_execute_input()

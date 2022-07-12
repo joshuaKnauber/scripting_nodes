@@ -7,7 +7,7 @@ class SN_PopoverNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_PopoverNodeNew"
     bl_label = "Popover"
-    bl_width_default = 250
+    bl_width_default = 240
     node_color = "INTERFACE"
 
     def on_create(self, context):

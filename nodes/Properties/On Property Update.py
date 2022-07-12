@@ -10,7 +10,7 @@ class SN_OnPropertyUpdateNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyRefe
     bl_idname = "SN_OnPropertyUpdateNode"
     bl_label = "On Property Update"
     node_color = "PROGRAM"
-    bl_width_default = 250
+    bl_width_default = 240
     is_trigger = True
     
 
