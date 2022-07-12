@@ -290,7 +290,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                 if op:
                     rna = op.get_rna_type()
                     ops.append({
-                        "name": getattr(rna, "name", op_name),
+                        "name": getattr(rna, "name", op_name) if getattr(rna, "name", op_name) else op_name.replace("_", " ").title(),
                         "operator": op_name,
                     })
         return ops
