@@ -26,6 +26,7 @@ class SN_LayoutSplitNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_boolean_input("Active")["default_value"] = True
         self.add_boolean_input("Split Layout")
         self.add_boolean_input("Decorate Layout")
+        self.add_boolean_input("Use Invoke")["default_value"] = True
         self.add_float_input("Scale X")["default_value"] = 1
         self.add_float_input("Scale Y")["default_value"] = 1
         self.add_enum_input("Alignment")["items"] = str(["Expand", "Left", "Center", "Right"])
@@ -43,6 +44,7 @@ class SN_LayoutSplitNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                     split_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
                     split_{self.static_uid}.scale_y = {self.inputs["Scale Y"].python_value}
                     split_{self.static_uid}.alignment = {self.inputs["Alignment"].python_value}.upper()
+                    split_{self.static_uid}.operator_context = "INVOKE_DEFAULT" if {self.inputs["Use Invoke"].python_value} else "EXEC_DEFAULT"
                     {self.indent(self.outputs[0].python_value, 5)}
                     {self.indent(self.outputs[1].python_value, 5)}
                     """
