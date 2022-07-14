@@ -86,6 +86,8 @@ class BasicProperty():
         
         else:
             path = "[".join(repr(self.path_resolve("name", False)).split("[")[:-1])
+            if path.endswith("scenes"):
+                path = "bpy.context.scene.sn.properties"
             coll = eval(path)
             return coll
     
@@ -134,9 +136,12 @@ class BasicProperty():
     def get_name(self):
         return self.get("name", "Prop Default")
 
-    def set_name(self, value):
+    def get_unique_name(self, value):
         names = list(map(lambda item: item.name, list(filter(lambda item: item!=self, self.prop_collection))))
-        value = unique_collection_name(value, "New Property", names, " ")
+        return unique_collection_name(value, "New Property", names, " ")
+
+    def set_name(self, value):
+        value = self.get_unique_name(value)
 
         # get nodes to update references
         to_update_nodes = []
@@ -264,13 +269,14 @@ class BasicProperty():
                                 description="The category this property is displayed in")
     
     def match_settings(self, new_prop):
-        new_prop.name = self.name
-        new_prop.description = self.description
-        new_prop.property_type = self.property_type
-        new_prop.allow_pointers = self.allow_pointers
-        new_prop.prop_options = self.prop_options
+        new_prop["name"] = self.get_unique_name(self.get("name"))
+        new_prop["property_type"] = self.get("property_type")
+        new_prop["description"] = self.get("description")
+        new_prop["allow_pointers"] = self.get("allow_pointers")
+        new_prop["prop_options"] = self.get("prop_options")
+        new_prop["category"] = self.get("category")
         for attr in self.settings.copy_attributes:
-            setattr(new_prop.settings, attr, getattr(self.settings, attr))
+            new_prop.settings[attr] = self.settings.get(attr)
         self.settings.copy(new_prop.settings)
     
     def copy(self):
