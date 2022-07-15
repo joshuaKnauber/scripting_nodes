@@ -42,6 +42,6 @@ class SN_LayoutGridNode(bpy.types.Node, SN_ScriptingBaseNode):
                     grid_{self.static_uid}.alignment = {self.inputs["Alignment"].python_value}.upper()
                     grid_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
                     grid_{self.static_uid}.scale_y = {self.inputs["Scale Y"].python_value}
-                    grid_{self.static_uid}.operator_context = "INVOKE_DEFAULT" if {self.inputs["Use Invoke"].python_value} else "EXEC_DEFAULT"
+                    grid_{self.static_uid}.operator_context = "INVOKE_DEFAULT" if {"False" if not "Use Invoke" in self.inputs else self.inputs["Use Invoke"].python_value} else "EXEC_DEFAULT"
                     {self.indent([out.python_value if out.name == 'Grid' else '' for out in self.outputs], 5)}
                     """
