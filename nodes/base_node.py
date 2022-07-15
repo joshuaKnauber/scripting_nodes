@@ -473,7 +473,7 @@ class SN_ScriptingBaseNode:
     def draw_buttons_ext(self,context,layout):
         layout.use_property_split = True
         layout.use_property_decorate = False
-        layout.label(text="For compile after changing the order", icon="INFO")
+        layout.label(text="Force compile after changing the order", icon="INFO")
         layout.prop(self, "order")
         if self.is_trigger:
             layout.prop(self, "skip_export")

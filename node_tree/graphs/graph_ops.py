@@ -172,12 +172,19 @@ class SN_OT_ForceCompile(bpy.types.Operator):
     bl_description = "Forces all node trees to compile"
     bl_options = {"REGISTER", "INTERNAL"}
 
+    def fix_compile_order(self, refs):
+        for node in refs.nodes:
+            if node.order == 0:
+                node.order = 3
+
     def execute(self, context):
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for refs in ntree.node_refs:
                     refs.clear_unused_refs()
                     refs.fix_ref_names()
+                    if refs.name == "SN_OnKeypressNode":
+                        self.fix_compile_order(refs)
                 ntree.reevaluate()
         self.report({"INFO"}, message="Compiled successfully!")
         return {"FINISHED"}

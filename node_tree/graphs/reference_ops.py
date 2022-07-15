@@ -65,6 +65,5 @@ class SN_OT_AddReferencingNode(bpy.types.Operator):
     def execute(self, context):
         bpy.ops.node.add_node("INVOKE_DEFAULT", type=self.idname, use_transform=True)
         node = context.space_data.node_tree.nodes.active
-        print(node, self.ref_attr)
         setattr(node, self.ref_attr, self.node)
         return {"FINISHED"}
