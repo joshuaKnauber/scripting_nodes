@@ -48,7 +48,6 @@ def compile_addon():
             log = bpy.data.texts["serpens_code_log"]
             log.clear()
             log.write(code)
-            
 
         # run text file
         t2 = time.time()
@@ -57,6 +56,10 @@ def compile_addon():
         try:
             # exec(txt.as_string())
             bpy.ops.text.run_script(ctx)
+            print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+            print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+            print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+            print("Compiled successfully!")
         except Exception:
             print("^ ERROR WHEN REGISTERING SERPENS ADDON ^\n")
             if bpy.context.preferences.addons[__name__.partition('.')[0]].preferences.keep_last_error_file:
