@@ -186,6 +186,7 @@ class SN_OT_ForceCompile(bpy.types.Operator):
                     if refs.name == "SN_OnKeypressNode":
                         self.fix_compile_order(refs)
                 ntree.reevaluate()
+        compile_addon()
         self.report({"INFO"}, message="Compiled successfully!")
         return {"FINISHED"}
 
