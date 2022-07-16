@@ -166,7 +166,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             if from_real:
                 from_real.node.link_insert(from_real, to_inp, is_output=True)
                 to_inp.node.link_insert(from_real, to_inp, is_output=False)
-            elif from_inp and getattr(from_inp.node, "is_sn", False):
+            elif from_inp and getattr(from_inp.node, "is_sn", False) \
+                and to_inp and getattr(to_inp.node, "is_sn", False):
                 from_inp.node.link_insert(from_inp, to_inp, is_output=True)
 
 
