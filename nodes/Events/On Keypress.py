@@ -291,7 +291,7 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         layout.separator()
 
         row = layout.row(align=True)
-        row.prop(self, "name", text="")
+        row.prop(self, "name")
         row.operator("sn.find_referencing_nodes", text="", icon="VIEWZOOM").node = self.name
         layout.separator()
 
