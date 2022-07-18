@@ -47,12 +47,14 @@ class SN_DisplayPropertyNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
             for inp in self.inputs:
                 if inp.can_be_disabled and not inp.disabled:
                     attributes += f", {inp.name.lower().replace(' ', '_')}={inp.python_value}"
+            attribute = f"attr_{self.static_uid} = '[\"' + str({self.inputs['Property'].python_attr[1:-1]} + '\"]') " if self.inputs["Property"].python_is_attribute else ""
             self.code = f"""
-                        {self.active_layout}.prop({self.inputs['Property'].python_source}, '{self.inputs['Property'].python_attr.replace("'",'"')}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}{attributes})
-                        {self.indent(self.outputs[0].python_value, 6)}
+                            {attribute}
+                            {self.active_layout}.prop({self.inputs['Property'].python_source}, {f"attr_{self.static_uid}" if self.inputs["Property"].python_is_attribute else "'" + self.inputs['Property'].python_attr.replace("'", '"') + "'"}, text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value}, emboss={self.inputs['Emboss'].python_value}{attributes})
+                            {self.indent(self.outputs[0].python_value, 7)}
                         """
         else:
             self.code = f"""
-                        {self.active_layout}.label(text='No Property connected!', icon='ERROR')
-                        {self.indent(self.outputs[0].python_value, 6)}
+                            {self.active_layout}.label(text='No Property connected!', icon='ERROR')
+                            {self.indent(self.outputs[0].python_value, 7)}
                         """

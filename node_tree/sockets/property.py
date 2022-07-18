@@ -96,6 +96,15 @@ class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
         return self.python_value if self.python_value else "None"
     
     @property
+    def python_is_attribute(self):
+        sections = bpy_to_path_sections(self.python_value)
+        if sections:
+            last_section = sections[-1].replace("'",'"')
+            if last_section[0] == "[" and last_section[-1] == "]":
+                return True
+        return False
+    
+    @property
     def python_source(self):
         sections = bpy_to_path_sections(self.python_value)
         if sections:
