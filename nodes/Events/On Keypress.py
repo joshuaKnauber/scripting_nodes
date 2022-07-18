@@ -278,7 +278,6 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         row = layout.row(align=True)
         row.prop(self, "space", text="")
         row.prop(self, "value", text="")
-        row.operator("sn.find_referencing_nodes", text="", icon="VIEWZOOM").node = self.name
         
         if self.value == "CLICK_DRAG":
             layout.prop(self, "direction", text="")
@@ -289,6 +288,11 @@ class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
         row.prop(self,"shift", toggle=True)
         row.prop(self,"alt", toggle=True)
         layout.prop(self, "repeat")
+        layout.separator()
+
+        row = layout.row(align=True)
+        row.prop(self, "name", text="")
+        row.operator("sn.find_referencing_nodes", text="", icon="VIEWZOOM").node = self.name
         layout.separator()
 
         row = layout.row(align=True)
