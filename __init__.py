@@ -23,7 +23,7 @@ bl_info = {
     "doc_url": "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233", 
     "tracker_url": "https://discord.com/invite/NK6kyae", 
     "category" : "Node" 
-}
+} 
 
 
 
