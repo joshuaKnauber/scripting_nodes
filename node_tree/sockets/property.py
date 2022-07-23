@@ -35,6 +35,12 @@ blend_data_defaults = {
     "Area": {
         "value": "bpy.context.area",
         "name": "Using Active"},
+    "Screens": {
+        "value": "bpy.context.screen",
+        "name": "Using Active"},
+    "Screen": {
+        "value": "bpy.context.screen",
+        "name": "Using Active"},
     "View Layers": {
         "value": "bpy.context.view_layer",
         "name": "Using Active"},

@@ -10,6 +10,7 @@ class SN_AreaByTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
     node_color = "PROPERTY"
     
     def on_create(self, context):
+        self.add_property_input("Screen")
         self.add_property_output("First Area")
         self.add_property_output("Last Area")
         self.add_property_output("Biggest Area")
@@ -36,22 +37,21 @@ class SN_AreaByTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
         
     def evaluate(self, context):
         self.code_imperative = f"""
-            def find_areas_of_type(area_type):
+            def find_areas_of_type(screen, area_type):
                 areas = []
-                for screen in bpy.data.screens:
-                    for area in screen.areas:
-                        if area.type == area_type:
-                            areas.append(area)
+                for area in screen.areas:
+                    if area.type == area_type:
+                        areas.append(area)
                 return areas
 
-            def find_area_by_type(area_type, index):
-                areas = find_areas_of_type(area_type)
+            def find_area_by_type(screen, area_type, index):
+                areas = find_areas_of_type(screen, area_type)
                 if areas:
                     return areas[index]
                 return None
 
-            def find_biggest_area_by_type(area_type):
-                areas = find_areas_of_type(area_type)
+            def find_biggest_area_by_type(screen, area_type):
+                areas = find_areas_of_type(screen, area_type)
                 if not areas: return []
                 max_area = (areas[0], areas[0].width * areas[0].height)
                 for area in areas:
@@ -59,13 +59,14 @@ class SN_AreaByTypeNode(bpy.types.Node, SN_ScriptingBaseNode):
                         max_area = (area, area.width * area.height)
                 return max_area[0]
             """
-            
-        self.outputs["First Area"].python_value = f"find_area_by_type('{self.area_type}', 0)"
-        self.outputs["Last Area"].python_value = f"find_area_by_type('{self.area_type}', -1)"
-        self.outputs["Biggest Area"].python_value = f"find_biggest_area_by_type('{self.area_type}')"
-        self.outputs["All Areas"].python_value = f"find_areas_of_type('{self.area_type}')"
-        self.outputs["Area Exists"].python_value = f"bool(find_areas_of_type('{self.area_type}'))"
-        self.outputs["Area Amount"].python_value = f"len(find_areas_of_type('{self.area_type}'))"
+        
+        screen = "bpy.context.screen" if not "Screen" in self.inputs else self.inputs["Screen"].python_value
+        self.outputs["First Area"].python_value = f"find_area_by_type({screen}, '{self.area_type}', 0)"
+        self.outputs["Last Area"].python_value = f"find_area_by_type({screen}, '{self.area_type}', -1)"
+        self.outputs["Biggest Area"].python_value = f"find_biggest_area_by_type({screen}, '{self.area_type}')"
+        self.outputs["All Areas"].python_value = f"find_areas_of_type({screen}, '{self.area_type}')"
+        self.outputs["Area Exists"].python_value = f"bool(find_areas_of_type({screen}, '{self.area_type}'))"
+        self.outputs["Area Amount"].python_value = f"len(find_areas_of_type({screen}, '{self.area_type}'))"
 
 
     def draw_node(self, context, layout):
