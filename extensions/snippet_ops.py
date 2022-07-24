@@ -300,7 +300,7 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                         if prop_src and node.prop_name in prop_src.properties:
                             prop = prop_src.properties[node.prop_name]
                             if not prop.name in properties:
-                                properties[prop.name] = [prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"), prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS")]
+                                properties[prop.python_name] = [prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"), prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS")]
                                 customizable = context.scene.sn.snippet_props_customizable[prop.name].enabled
                                 data["properties"].append({"name": prop.name, "python_name": prop.python_name, "type": prop.property_type, "attach_to": prop.attach_to, "customizable": customizable})
                                 data["function"] = data["function"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")
@@ -369,7 +369,7 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
                         if prop_src and node.prop_name in prop_src.properties:
                             prop = prop_src.properties[node.prop_name]
                             if not prop.name in properties:
-                                properties[prop.name] = [prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"), prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS")]
+                                properties[prop.python_name] = [prop.register_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS"), prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS")]
                                 customizable = context.scene.sn.snippet_props_customizable[prop.name].enabled
                                 data["properties"].append({"name": prop.name, "python_name": prop.python_name, "type": prop.property_type, "customizable": customizable})
                                 data["function"] = data["function"].replace(prop.python_name, prop.python_name +"_SNIPPET_VARS")

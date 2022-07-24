@@ -19,9 +19,13 @@ class SN_SnippetVarsPropertyGroup(bpy.types.PropertyGroup):
                 if item == self:
                     node._evaluate(context)
                     return
+            for item in node.prop_collection:
+                if item == self:
+                    node._evaluate(context)
+                    return
 
     attach_to: bpy.props.StringProperty()
-    use_custom: bpy.props.BoolProperty(name="Use Custom", description="Use custom variable instead of the standalone snippet variable", default=False)
+    use_custom: bpy.props.BoolProperty(update=var_prop_update, name="Use Custom", description="Use custom variable instead of the standalone snippet variable", default=False)
     var_name: bpy.props.StringProperty(name="Name", update=var_prop_update)
     prop_name: bpy.props.StringProperty(name="Name", update=var_prop_update)
     ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
