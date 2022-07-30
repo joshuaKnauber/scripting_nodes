@@ -12,6 +12,9 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
     def on_create(self, context):
         self.add_float_input("Minimum")
         self.add_float_input("Maximum")
+        inp = self.add_integer_input("Seed")
+        inp.can_be_disabled = True
+        inp.disabled = True
         self.add_integer_output("Random Number")
 
     def update_num_type(self, context):
@@ -25,12 +28,26 @@ class SN_RandomNumberNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     update=update_num_type)
 
     def evaluate(self, context):
-        if self.number_type == "Integer":
-            self.code_import = "from random import randint"
-            self.outputs[0].python_value = f"randint(int({self.inputs['Minimum'].python_value}), int({self.inputs['Maximum'].python_value}))"
+        self.code_import = "import random"
+        if "Seed" in self.inputs and not self.inputs["Seed"].disabled:
+            self.code_imperative = """
+            def random_integer(min, max, seed):
+                random.seed(seed)
+                return random.randint(int(min), int(max))
+
+            def random_float(min, max, seed):
+                random.seed(seed)
+                return random.uniform(min, max)
+            """
+            if self.number_type == "Integer":
+                self.outputs[0].python_value = f"random_integer({self.inputs['Minimum'].python_value}, {self.inputs['Maximum'].python_value}, {self.inputs['Seed'].python_value})"
+            else:
+                self.outputs[0].python_value = f"random_float({self.inputs['Minimum'].python_value}, {self.inputs['Maximum'].python_value}, {self.inputs['Seed'].python_value})"
         else:
-            self.code_import = "from random import uniform"
-            self.outputs[0].python_value = f"uniform({self.inputs['Minimum'].python_value}, {self.inputs['Maximum'].python_value})"
+            if self.number_type == "Integer":
+                self.outputs[0].python_value = f"random.randint(int({self.inputs['Minimum'].python_value}), int({self.inputs['Maximum'].python_value}))"
+            else:
+                self.outputs[0].python_value = f"random.uniform({self.inputs['Minimum'].python_value}, {self.inputs['Maximum'].python_value})"
 
     def draw_node(self, context, layout):
         layout.prop(self, "number_type")

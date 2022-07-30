@@ -7,6 +7,7 @@ class SN_TextSizeNode(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_TextSizeNode"
     bl_label = "Modal Text Size"
+    bl_width_default = 200
 
     def on_create(self, context):
         self.add_string_input("Text").default_value = "My Modal Text"
