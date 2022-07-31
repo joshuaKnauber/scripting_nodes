@@ -36,12 +36,6 @@ class SN_DrawPointNode(bpy.types.Node, SN_ScriptingBaseNode):
         inp.default_value[1] = 0
         inp.default_value[2] = 0
 
-        inp = self.add_dynamic_float_vector_input("Location")
-        inp.size = 2
-        inp.default_value[0] = 0
-        inp.default_value[1] = 0
-        inp.default_value[2] = 0
-
         self.add_execute_output()
         self.ref_ntree = self.node_tree
 

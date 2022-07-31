@@ -21,8 +21,8 @@ class SN_StartDrawingNode(bpy.types.Node, SN_ScriptingBaseNode):
                                             update=SN_ScriptingBaseNode._evaluate)
 
     ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
-                                    name="Panel Node Tree",
-                                    description="The node tree to select the panel from",
+                                    name="Function Node Tree",
+                                    description="The node tree to select the function from",
                                     poll=SN_ScriptingBaseNode.ntree_poll,
                                     update=SN_ScriptingBaseNode._evaluate)
 
@@ -32,6 +32,8 @@ class SN_StartDrawingNode(bpy.types.Node, SN_ScriptingBaseNode):
         self.ref_ntree = self.node_tree
 
     def draw_node(self, context, layout):
+        layout.prop(self, "name")
+
         row = layout.row(align=True)
         parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
         row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
@@ -39,7 +41,7 @@ class SN_StartDrawingNode(bpy.types.Node, SN_ScriptingBaseNode):
         subrow.enabled = self.ref_ntree != None
         subrow.prop_search(self, "ref_SN_FunctionNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_FunctionNode"), "refs", text="")
 
-        layout.prop(self, "draw_type", text="")
+        layout.prop(self, "draw_type", expand=True)
         
     def evaluate(self, context):
         func = None
@@ -56,5 +58,7 @@ class SN_StartDrawingNode(bpy.types.Node, SN_ScriptingBaseNode):
             """
 
             self.code_unregister = f"""
-                if handler_{self.static_uid}: bpy.types.SpaceView3D.draw_handler_remove(handler_{self.static_uid}[0], 'WINDOW')
+                if handler_{self.static_uid}:
+                    bpy.types.SpaceView3D.draw_handler_remove(handler_{self.static_uid}[0], 'WINDOW')
+                    handler_{self.static_uid}.pop(0)
             """
