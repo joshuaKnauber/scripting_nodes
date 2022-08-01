@@ -8,6 +8,7 @@ class SN_EndDrawingNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_idname = "SN_EndDrawingNode"
     bl_label = "End Drawing"
     node_color = "PROGRAM"
+    bl_width_default = 200
 
     ref_SN_StartDrawingNode: bpy.props.StringProperty(name="Handler",
                                             description="The handler to stop",
@@ -18,6 +19,9 @@ class SN_EndDrawingNode(bpy.types.Node, SN_ScriptingBaseNode):
                                     description="The node tree to select the handler from",
                                     poll=SN_ScriptingBaseNode.ntree_poll,
                                     update=SN_ScriptingBaseNode._evaluate)
+
+    def on_ref_update(self, node, data=None):
+        self._evaluate(bpy.context)
 
     def on_create(self, context):
         self.add_execute_input()
@@ -39,7 +43,7 @@ class SN_EndDrawingNode(bpy.types.Node, SN_ScriptingBaseNode):
 
             self.code = f"""
                 if handler_{handler.static_uid}:
-                    bpy.types.SpaceView3D.draw_handler_remove(handler_{handler.static_uid}[0], 'WINDOW')
+                    bpy.types.{handler.draw_space}.draw_handler_remove(handler_{handler.static_uid}[0], 'WINDOW')
                     handler_{handler.static_uid}.pop(0)
                 {self.indent(self.outputs[0].python_value, 4)}
             """
