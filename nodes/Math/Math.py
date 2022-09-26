@@ -49,8 +49,9 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
             layout.prop(self,"expression",text="")
             
     def multiple_replace(self, string, rep_dict):
-        pattern = re.compile("|".join([re.escape(k) for k in sorted(rep_dict,key=len,reverse=True)]), flags=re.DOTALL)
-        return pattern.sub(lambda x: rep_dict[x.group(0)], string)
+        for key, value in rep_dict.items():
+            string = re.sub(rf'\b{key}\b', value, string)
+        return string
 
     def evaluate(self, context):
         if not self.operation == "EXPRESSION":
