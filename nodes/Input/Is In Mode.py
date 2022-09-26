@@ -14,7 +14,7 @@ class SN_InModeNode(bpy.types.Node, SN_ScriptingBaseNode):
         modes = ["EDIT_MESH", "EDIT_CURVE", "EDIT_SURFACE", "EDIT_TEXT", "EDIT_ARMATURE",
                 "EDIT_METABALL", "EDIT_LATTICE", "POSE", "SCULPT", "PAINT_WEIGHT", "PAINT_VERTEX",
                 "PAINT_TEXTURE", "PARTICLE", "OBJECT", "PAINT_GPENCIL", "EDIT_GPENCIL",
-                "SCULPT_GPENCIL", "WEIGHT_GPENCIL", "VERTEX_GPENCIL"]
+                "SCULPT_GPENCIL" "WEIGHT_GPENCIL", "VERTEX_GPENCIL", "SCULPT_CURVES"]
         for mode in modes:
             items.append((mode,mode.replace("_"," ").title(),mode))
         return items
