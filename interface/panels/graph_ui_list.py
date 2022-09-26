@@ -17,12 +17,16 @@ def get_selected_graph():
                 return ntree
     return None
 
+filtered_cache = {}
 def get_filtered_graphs():
-    filtered = []
     sn = bpy.context.scene.sn
+    key = "|".join(list(map(lambda ntree: ntree.category, bpy.data.node_groups))) + "|" + bpy.context.scene.sn.active_graph_category
+    if key in filtered_cache:
+        return filtered_cache[key]
+    filtered = []
+    cat_list = list(map(lambda cat: cat.name, sn.graph_categories))
     for ntree in bpy.data.node_groups:
         if ntree.bl_idname == "ScriptingNodesTree":
-            cat_list = list(map(lambda cat: cat.name, sn.graph_categories))
             if sn.active_graph_category == "ALL":
                 filtered.append(ntree)
             elif sn.active_graph_category == "OTHER":
@@ -32,6 +36,7 @@ def get_filtered_graphs():
                 filtered.append(ntree)
                 
     filtered = list(sorted(filtered, key=lambda n: n.index))
+    filtered_cache[key] = filtered
     return filtered
 
 def get_selected_graph_offset(offset):
