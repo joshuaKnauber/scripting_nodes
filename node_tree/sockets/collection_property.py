@@ -30,7 +30,7 @@ class SN_CollectionPropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     def python_source(self):
         sections = bpy_to_path_sections(self.python_value)
         if sections:
-            if "bpy." in self.python_value: sections.insert(0, "bpy")
+            if self.python_value.startswith("bpy."): sections.insert(0, "bpy")
             return join_sections(sections[:-1])
         return self.python_value
     
@@ -38,7 +38,7 @@ class SN_CollectionPropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     def python_sections(self):
         sections = bpy_to_path_sections(self.python_value)
         if sections:
-            if "bpy." in self.python_value: sections.insert(0, "bpy")
+            if self.python_value.startswith("bpy."): sections.insert(0, "bpy")
             return sections
         return []
 
