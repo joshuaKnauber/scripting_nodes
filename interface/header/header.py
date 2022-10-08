@@ -65,3 +65,11 @@ def node_info_append(self, context):
     node = context.space_data.node_tree.nodes.active
     if getattr(node, "is_sn", False):
         layout.operator("wm.url_open", text="Node Documentation", icon="QUESTION").url = "https://joshuaknauber.notion.site/555efb921f50426ea4d5812f1aa3e462?v=d781b590cc8f47449cb20812deab0cc6"
+
+
+
+def footer_status(self, context):
+    layout = self.layout
+    sn = context.scene.sn
+    if sn.global_data_loading:
+        layout.prop(sn, "global_data_progress", text="", slider=True)

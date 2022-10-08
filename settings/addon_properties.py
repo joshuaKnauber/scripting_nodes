@@ -375,6 +375,16 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     show_path: bpy.props.BoolProperty(name="Show Path",
                                         description="Show python path of properties",
                                         default=False)
+
+
+    global_data_loading: bpy.props.BoolProperty(name="Loading Global Data",
+                                        description="If the global data is loading",
+                                        default=False)
+
+    global_data_progress: bpy.props.IntProperty(name="Global Data Progress",
+                                        description="Progress of the global data loading",
+                                        default=0,
+                                        min=0, max=100)
     
     
     addons: bpy.props.CollectionProperty(type=SN_Addon)
