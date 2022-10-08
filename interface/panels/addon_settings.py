@@ -47,6 +47,9 @@ class SN_PT_AddonSettingsPanel(bpy.types.Panel):
         col.prop(sn, "debug_compile_time", text="Log Compile Time")
         col.prop(sn, "debug_python_nodes")
         col.prop(sn, "debug_python_sockets")
+        subrow = col.row()
+        subrow.active = sn.debug_python_nodes or sn.debug_python_sockets
+        subrow.prop(sn, "debug_selected_only")
         col.prop(sn, "debug_python_properties")
         
         

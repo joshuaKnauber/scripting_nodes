@@ -178,10 +178,12 @@ class ScriptingSocket:
 
     def draw(self, context, layout, node, text):
         """ Draws this socket """
+        sn = context.scene.sn
         text = self.name
         # draw debug text for sockets
-        if context.scene.sn.debug_python_sockets and self.python_value:
-            text = self.python_value.replace("\n", " || ")
+        if sn.debug_python_sockets and self.python_value:
+            if not sn.debug_selected_only or (sn.debug_selected_only and self.node.select):
+                text = self.python_value.replace("\n", " || ")
         # draw dynamic sockets
         if self.dynamic:
             self._draw_dynamic_socket(layout, node, text)

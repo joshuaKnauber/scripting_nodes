@@ -462,8 +462,10 @@ class SN_ScriptingBaseNode:
                     col.label(text=line)
 
     def draw_buttons(self, context, layout):
-        if context.scene.sn.debug_python_nodes:
-            self._draw_debug_code(context, layout)
+        sn = context.scene.sn
+        if sn.debug_python_nodes:
+            if not sn.debug_selected_only or (sn.debug_selected_only and self.select):
+                self._draw_debug_code(context, layout)
         self.draw_node(context, layout)
 
 

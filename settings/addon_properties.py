@@ -113,6 +113,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         name="Debug Sockets",
                                         description="Debug internal socket code")
 
+    debug_selected_only: bpy.props.BoolProperty(default=False,
+                                        name="Debug Selected Only",
+                                        description="Debug only selected nodes")
+
     debug_code: bpy.props.BoolProperty(default=False,
                                         name="Keep Code",
                                         description="Keeps a python file in the text editor when the code changes")
