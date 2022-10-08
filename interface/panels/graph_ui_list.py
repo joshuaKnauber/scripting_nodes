@@ -23,8 +23,7 @@ filtered_cache = {}
 
 def get_filtered_graphs():
     sn = bpy.context.scene.sn
-    key = "|".join(list(map(lambda ntree: getattr(ntree, "category", "SHADER"),
-                   bpy.data.node_groups))) + "|" + bpy.context.scene.sn.active_graph_category
+    key = "|".join(list(map(lambda ntree: getattr(ntree, "category", "SHADER") + "," + str(getattr(ntree, "index", 0)), bpy.data.node_groups))) + "|" + bpy.context.scene.sn.active_graph_category
     if key in filtered_cache:
         return filtered_cache[key]
     filtered = []
@@ -45,6 +44,7 @@ def get_filtered_graphs():
 
 
 def get_selected_graph_offset(offset):
+    global filtered_cache
     selected = get_selected_graph()
     filtered = get_filtered_graphs()
     if selected:
