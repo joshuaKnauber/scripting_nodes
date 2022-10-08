@@ -58,7 +58,6 @@ def compile_addon():
             bpy.ops.text.run_script(ctx)
             print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
             print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-            print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
             print("Compiled successfully!")
         except Exception:
             print("^ ERROR WHEN REGISTERING SERPENS ADDON ^\n")

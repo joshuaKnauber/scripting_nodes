@@ -71,5 +71,3 @@ def node_info_append(self, context):
 def footer_status(self, context):
     layout = self.layout
     sn = context.scene.sn
-    if sn.global_data_loading:
-        layout.prop(sn, "global_data_progress", text="", slider=True)

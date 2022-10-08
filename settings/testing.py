@@ -1,9 +1,10 @@
 import bpy
-from time import time
+from time import time, sleep
 import threading
 
 thread = None
-data_flat_glob = {}
+data_flat = {}
+visited_ids = {}
 
 def is_iterable(data):
     if hasattr(data, "keys") and hasattr(data, "values"):
@@ -13,39 +14,55 @@ def is_iterable(data):
 def is_valid_key(key):
     if key.startswith("_"):
         return False
-    if key in ["rna_type", "bl_rna", "spaces"]:
+    if key in ["rna_type", "bl_rna", "depsgraph", "original"]:
         return False
     return True
 
-def get_data(data, path, depth):
-    global data_flat_glob
-    global count
-    if depth > 5:
+def is_valid_path(path, screen):
+    # NOTE blender bug where it crashes when you access data from another screen
+    if ".screens[" in path and not screen.name in path:
+        return False
+    return True
+
+
+def get_data(data, path, screen, depth):
+    global data_flat
+    global visited_ids
+
+    if depth > 10:
         return
 
-    for key in dir(data):
-        if is_valid_key(key):
-            # print(path, key)
+    if id(data) in visited_ids and visited_ids[id(data)]["depth"] >= depth:
+        return
+    visited_ids[id(data)] = {
+        "path": path,
+        "depth": depth
+    }
+
+    keys = dir(data)
+    if hasattr(data, "keyframe_insert"):
+        keys += dir(bpy.types.Struct)
+
+    for key in keys:
+        if is_valid_key(key) and is_valid_path(f"{path}.{key}", screen):
             try:
                 child_data = getattr(data, key)
-                data_flat_glob[path] = { "name": key, }
-                get_data(child_data, f"{path}.{key}", depth=depth+1)
-            except: pass
+                data_flat[f"{path}.{key}"] = { "name": key, }
+                if hasattr(child_data, "bl_rna"):
+                    get_data(child_data, f"{path}.{key}", screen, depth+1)
 
-            max_items = 4
-            if is_iterable(child_data):
-                child_path = f"{path}.{key}"
-                # keyed data
-                if len(child_data.keys()) == len(child_data.values()):
                     max_items = 20
-                    for i, key in enumerate(list(child_data.keys())):
-                        if i < max_items:
-                            get_data(child_data[key], f"{child_path}['{key}']", depth=depth+2)
-                # indexed data
-                else:
-                    max_items = 20
-                    for i in range(min(len(child_data.values()), max_items)):
-                        get_data(child_data[i], f"{child_path}[{i}]", depth=depth+2)
+                    if is_iterable(child_data):
+                        # keyed data
+                        if len(child_data.keys()) == len(child_data.values()):
+                            for i, child_key in enumerate(list(child_data.keys())):
+                                # if i < max_items:
+                                get_data(child_data[child_key], f"{path}.{key}['{child_key}']", screen, depth+1)
+                        # indexed data
+                        else:
+                            for i in range(min(len(child_data.values()), max_items)):
+                                get_data(child_data[i], f"{path}.{key}[{i}]", screen, depth+1)
+            except: pass
 
 
 def is_match(path, search):
@@ -58,12 +75,17 @@ def is_match(path, search):
 
 def timer():
     global thread
-    global data_flat_glob
+    global data_flat
     if not thread.is_alive():
-        print(f"Found {len(data_flat_glob)} items")
-        bpy.context.scene.sn.global_data_loading = False
+        keys = list(data_flat.keys())
+        keys.sort(key=len)
+        new_data = {}
+        for key in keys:
+            new_data[key] = data_flat[key]
+        data_flat = new_data
+        print(f"Found {len(data_flat)} items")
         return None
-    return .1
+    return 0.1
 
 class SN_OT_TestGlobalSearch(bpy.types.Operator):
     bl_idname = "sn.test_global_search"
@@ -73,7 +95,7 @@ class SN_OT_TestGlobalSearch(bpy.types.Operator):
 
     def update_search(self, context):
         new_count = 0
-        for key in data_flat_glob.keys():
+        for key in data_flat.keys():
             if is_match(key, self.search):
                 new_count += 1
         self.count = new_count
@@ -81,24 +103,32 @@ class SN_OT_TestGlobalSearch(bpy.types.Operator):
     count: bpy.props.IntProperty(name="Count")
     search: bpy.props.StringProperty(name="Search", default="", update=update_search)
 
+    max_draw: bpy.props.IntProperty(name="Max Draw", default=100)
+
     def execute(self, context):
         return {"FINISHED"}
 
     def draw(self, context):
         layout = self.layout
         layout.prop(self, "search")
-        layout.label(text=f"Found Items Count: {self.count}")
-        if self.count <= 1000:
-            for key in data_flat_glob.keys():
-                if is_match(key, self.search):
-                    layout.label(text=key)
+        layout.prop(self, "max_draw")
+        layout.label(text=f"Total Count: {len(data_flat)}")
+        layout.label(text=f"Filtered Count: {self.count}")
+        count = 0
+        for key in data_flat.keys():
+            if is_match(key, self.search) and count < self.max_draw:
+                count += 1
+                layout.label(text=key)
 
     def invoke(self, context, event):
         global thread
-        thread = threading.Thread(target=get_data, args=(bpy.data, "bpy.data", 1))
+        global data_flat
+        global visited_ids
+        data_flat = {}
+        visited_ids = {}
+        thread = threading.Thread(target=get_data, args=(bpy.data, "bpy.data", context.screen, 1))
         thread.start()
 
-        context.scene.sn.global_data_loading = True
         bpy.app.timers.register(timer, first_interval=0.1)
 
-        return context.window_manager.invoke_popup(self, width=500)
+        return context.window_manager.invoke_popup(self, width=800)
