@@ -235,10 +235,14 @@ class SN_PT_data_search(bpy.types.Panel):
             subrow = row.row(align=True)
             subrow.alignment = "LEFT"
             for section in path.split("."):
-                subrow.operator("sn.add_to_search", text=section, emboss=not is_section_in_search(section)).section = section
+                if not section == "bpy":
+                    display = section.replace("_", " ").title()
+                    if "[" in display and "]" in display:
+                        display = display.split("[")[0] + ": " + display.split("[")[1].replace("]", "")
+                    subrow.operator("sn.add_to_search", text=display, emboss=not is_section_in_search(section)).section = section
 
             row.label(text="")
-            
+
             if bpy.context.scene.sn.show_path:
                 subcol = row.column()
                 subcol.enabled = False

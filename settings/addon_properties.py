@@ -396,7 +396,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     discover_full_only: bpy.props.BoolProperty(name="Full Matches Only",
                                         description="Only show items that match the full search",
-                                        default=False, update=update_discover)
+                                        default=True, update=update_discover)
     
     data_category: bpy.props.EnumProperty(name="Category",
                                         items=get_categories,
