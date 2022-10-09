@@ -1,6 +1,7 @@
 import bpy
 from ...addon.properties.settings.settings import property_icons
 from ...settings.data_properties import filter_defaults
+from ...settings import global_search
         
         
         
@@ -28,40 +29,50 @@ class SN_PT_navigation_bar(bpy.types.Panel):
 
         layout.separator(factor=2)
         col = layout.column(align=True)
-        row = col.row()
-        row.scale_y = 1.4
-        row.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH", depress=sn.global_search_active)
+        col.scale_y = 1.4
+        col.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH")
+        col.separator()
+        col.prop_enum(sn, "data_category", value="discover", icon="WORLD")
 
         layout.separator()
         layout.label(text="Source:")
         col = layout.column(align=True)
         col.scale_y = 1.4
-        col.prop_enum(context.scene.sn, "data_category", value="app")
-        col.prop_enum(context.scene.sn, "data_category", value="context")
-        col.prop_enum(context.scene.sn, "data_category", value="data")
+        col.prop_enum(sn, "data_category", value="app")
+        col.prop_enum(sn, "data_category", value="context")
+        col.prop_enum(sn, "data_category", value="data")
         col.separator()
-        col.prop_enum(context.scene.sn, "data_category", value="ops")
-
-        # col = layout.column(align=True)
-        # row = col.row()
-        # row.enabled = not sn.global_search_active
-        # row.operator("sn.global_search", text="Global Search", icon="VIEWZOOM")
+        col.prop_enum(sn, "data_category", value="ops")
 
         layout.separator()
         col = layout.column()
-        col.enabled = not sn.global_search_active
         row = col.row()
         row.label(text="Filter Overview:")
         row.operator("sn.reset_filters", text="", icon="LOOP_BACK", emboss=False)
+
+        if sn.data_category == "discover":
+            row = col.row()
+            row.enabled = False
+            row.label(text=f"Total: {len(global_search.data_flat)} items")
+            row = col.row()
+            row.enabled = False
+            row.label(text=f"Full Matches: {sn.discover_data['full_matches']} items")
+            
         row = col.row()
         row.scale_y = 1.2
-        row.prop(context.scene.sn, "data_search", text="", icon="VIEWZOOM")
+        if sn.data_category == "discover":
+            row.prop(sn, "discover_search", text="", icon="VIEWZOOM")
+        else:
+            row.prop(sn, "data_search", text="", icon="VIEWZOOM")
         subcol = col.column()
-        subcol.enabled = context.scene.sn.data_category != "ops"
-        subcol.prop(context.scene.sn, "data_filter", expand=True)
+        subcol.enabled = sn.data_category != "ops"
+        subcol.prop(sn, "data_filter", expand=True)
         
         layout.separator()
-        layout.prop(context.scene.sn, "show_path")
+        layout.prop(sn, "show_path")
+        if sn.data_category == "discover":
+            layout.prop(sn, "discover_full_only")
+            layout.prop(sn, "discover_show_amount")
         
         
         
@@ -204,28 +215,66 @@ class SN_PT_data_search(bpy.types.Panel):
                     op = row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False)
                     op.name = path
 
+    def draw_global_search(self, layout):
+        sn = bpy.context.scene.sn
+
+        def is_section_in_search(section):
+            if sn.discover_search.startswith(section) or \
+                sn.discover_search.endswith(section) or \
+                f",{section}," in sn.discover_search:
+                return True
+            return False
+
+        col = layout.column(align=True)
+        for path in bpy.context.scene.sn.discover_data["items"]:
+            item = global_search.data_flat[path]
+
+            box = col.box()
+            row = box.row()
+
+            subrow = row.row(align=True)
+            subrow.alignment = "LEFT"
+            for section in path.split("."):
+                subrow.operator("sn.add_to_search", text=section, emboss=not is_section_in_search(section)).section = section
+
+            row.label(text="")
+            
+            if bpy.context.scene.sn.show_path:
+                subcol = row.column()
+                subcol.enabled = False
+                subcol.label(text=path)
+                
+            row.label(text="")
+
+            op = row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False)
+            op.name = path
+
     def draw(self, context):
         layout = self.layout
         sn = context.scene.sn
 
         col = layout.column(align=True)
 
-        is_empty = True
-        if sn.data_category == "ops":
-            row = col.row()
-            row.label(text="Use property functions instead of operators when possible!", icon="INFO")
-            row.operator("sn.expand_operators", text="", icon="FULLSCREEN_ENTER", emboss=False)
-            col.separator()
-            for cat in sn.ops_items["operators"].keys():
-                if cat in sn.ops_items["filtered"].keys():
-                    self.draw_operator_category(col, cat)
-                    is_empty = False
+        if sn.data_category == "discover":
+            self.draw_global_search(col)
+
         else:
-            for key in sn.data_items[sn.data_category].keys():
-                item = sn.data_items[sn.data_category][key]
-                if self.should_draw(item, sn.data_search, sn.data_filter):
-                    self.draw_item(col, item)
-                    is_empty = False
-                    
-        if is_empty:
-            layout.label(text="No Items for these filters!", icon="INFO")
+            is_empty = True
+            if sn.data_category == "ops":
+                row = col.row()
+                row.label(text="Use property functions instead of operators when possible!", icon="INFO")
+                row.operator("sn.expand_operators", text="", icon="FULLSCREEN_ENTER", emboss=False)
+                col.separator()
+                for cat in sn.ops_items["operators"].keys():
+                    if cat in sn.ops_items["filtered"].keys():
+                        self.draw_operator_category(col, cat)
+                        is_empty = False
+            else:
+                for key in sn.data_items[sn.data_category].keys():
+                    item = sn.data_items[sn.data_category][key]
+                    if self.should_draw(item, sn.data_search, sn.data_filter):
+                        self.draw_item(col, item)
+                        is_empty = False
+                        
+            if is_empty:
+                layout.label(text="No Items for these filters!", icon="INFO")

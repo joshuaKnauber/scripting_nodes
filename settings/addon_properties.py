@@ -14,6 +14,7 @@ from ..utils import get_python_name
 from .load_markets import SN_Addon, SN_Package, SN_Snippet
 from ..extensions.snippet_ops import SN_BoolCollection, SN_SnippetCategory
 from ..nodes.compiler import compile_addon
+from . import global_search
             
 
 
@@ -351,14 +352,55 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         items = [self.make_enum_item("app", "App", "bpy.app", 0, 0),
                 self.make_enum_item("context", f"Context ({ctxt})", "bpy.context", 0, 1),
                 self.make_enum_item("data", "Data", "bpy.data", 0, 2),
-                self.make_enum_item("ops", "Operators", "bpy.ops", 0, 3)]
+                self.make_enum_item("ops", "Operators", "bpy.ops", 0, 3),
+                self.make_enum_item("discover", "Discover", "Discover items in the global search", 0, 4)]
         return items
 
     def update_data_search(self, context):
         self.refresh_filtered_ops()
+
+    def update_categories(self, context):
+        global_search.start_get_data(context)
+
+    discover_data = { "items": [], "full_matches": 0 }
+
+    def update_discover(self, context):
+        counted_paths = []
+        full_matches = 0
+        queries = self.discover_search.lower().split(",")
+
+        for path in global_search.data_flat.keys():
+            matches = 0
+            for query in queries:
+                if query in path.lower():
+                    matches += 1
+            if matches == len(queries):
+                full_matches += 1
+                counted_paths.append((path, matches))
+            elif not self.discover_full_only:
+                counted_paths.append((path, matches))
+
+        ordered_paths = list(map(lambda x: x[0], sorted(counted_paths, key=lambda x: x[1], reverse=True)))
+        ordered_paths = ordered_paths[:self.discover_show_amount]
+
+        self.discover_data["items"] = ordered_paths
+        self.discover_data["full_matches"] = full_matches
+
+    discover_search: bpy.props.StringProperty(name="Search",
+                                        description="Searches for items in the global search (Separate multiple queries with commas)",
+                                        default="", update=update_discover)
+
+    discover_show_amount: bpy.props.IntProperty(name="Show Amount",
+                                        description="The amount of items to show in the discover tab",
+                                        default=100, min=1, update=update_discover)
+
+    discover_full_only: bpy.props.BoolProperty(name="Full Matches Only",
+                                        description="Only show items that match the full search",
+                                        default=False, update=update_discover)
     
     data_category: bpy.props.EnumProperty(name="Category",
                                         items=get_categories,
+                                        update=update_categories,
                                         description="Category of blend data")
     
     data_filter: bpy.props.EnumProperty(name="Type",

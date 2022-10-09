@@ -10,7 +10,6 @@ class SN_OT_ShowDataOverview(bpy.types.Operator):
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context):
-        context.scene.sn.global_search_active = False
         for area in context.screen.areas:
             if area.type == "PREFERENCES":
                 break
@@ -30,7 +29,6 @@ class SN_OT_ExitDataSearch(bpy.types.Operator):
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context):
-        context.scene.sn.global_search_active = False
         context.scene.sn.hide_preferences = False
         return {"FINISHED"}
 
@@ -162,7 +160,6 @@ class SN_OT_ReloadData(bpy.types.Operator):
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context):
-        context.scene.sn.global_search_active = False
         context.scene.sn.hide_preferences = True
         return {"FINISHED"}
     
@@ -227,4 +224,29 @@ class SN_OT_CopyDataPath(bpy.types.Operator):
         context.scene.sn.last_copied_datatype = self.type
         context.scene.sn.last_copied_required = self.required
         self.report({"INFO"}, message="Copied!")
+        return {"FINISHED"}
+
+
+
+class SN_OT_AddToSearch(bpy.types.Operator):
+    bl_idname = "sn.add_to_search"
+    bl_label = "Add To Search"
+    bl_description = "Adds this section to the search"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    section: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
+
+    def execute(self, context):
+        sn = context.scene.sn
+        if sn.discover_search.startswith(self.section):
+            sn.discover_search = sn.discover_search[len(self.section)+1:]
+        elif sn.discover_search.endswith(self.section):
+            sn.discover_search = sn.discover_search[:-len(self.section)-1]
+        elif f",{self.section}," in sn.discover_search:
+            sn.discover_search = sn.discover_search.replace(f",{self.section},", ",")
+        else:
+            if sn.discover_search:
+                sn.discover_search += f",{self.section}"
+            else:
+                sn.discover_search = self.section
         return {"FINISHED"}
