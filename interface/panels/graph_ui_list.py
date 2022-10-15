@@ -48,6 +48,9 @@ def get_selected_graph_offset(offset):
     selected = get_selected_graph()
     filtered = get_filtered_graphs()
     if selected:
+        if not selected in filtered:
+            filtered_cache = {}
+            filtered = get_filtered_graphs()
         i = filtered.index(selected)
         i += offset
         if i >= 0 and i < len(filtered):
