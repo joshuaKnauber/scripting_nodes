@@ -134,6 +134,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                     to_socket = to_sockets[0]
                     if to_socket.bl_idname in list(map(lambda item: item[0], link.from_socket.get_data_type_items(bpy.context))):
                         link.from_socket.data_type = to_socket.bl_idname
+                        link.from_socket.subtype = to_socket.subtype
                 
 
 

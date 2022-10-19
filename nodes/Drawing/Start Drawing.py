@@ -17,7 +17,89 @@ class SN_StartDrawingNode(bpy.types.Node, SN_ScriptingBaseNode):
         default="POST_PIXEL",
         update=SN_ScriptingBaseNode._evaluate)
 
+
+    def update_enum_socket(self, from_socket, to_socket):
+        to_socket.subtype = "CUSTOM_ITEMS"
+        to_socket.custom_items_editable = False
+        to_socket.custom_items.clear()
+        for item in from_socket.custom_items:
+            new = to_socket.custom_items.add()
+            new.name = item.name
+            
+    def update_vector_socket(self, from_socket, to_socket):
+        to_socket.size = from_socket.size
+        to_socket.subtype = from_socket.subtype
+
+
+    def on_ref_update(self, node, data=None):
+        if node.bl_idname == "SN_FunctionNode" and data:
+            # inputs has been added
+            if "added" in data:
+                socket_index = list(data["added"].node.outputs).index(data["added"])
+                self.add_input_from_socket(data["added"])
+                self.inputs.move(len(self.inputs)-1, socket_index)
+            # input has been removed
+            elif "removed" in data:
+                self.inputs.remove(self.inputs[data["removed"]])
+            # input has changed
+            elif "changed" in data:
+                self.convert_socket(self.inputs[data["changed"].index], data["changed"].bl_idname)
+                # update enum items
+                if data["changed"].bl_label == "Enum" or data["changed"].bl_label == "Enum Set":
+                    self.update_enum_socket(data["changed"], self.inputs[data["changed"].index])
+                elif "Vector" in data["changed"].bl_label:
+                    self.update_vector_socket(data["changed"], self.inputs[data["changed"].index])
+            # input has updated
+            elif "updated" in data:
+                self.inputs[data["updated"].index].name = data["updated"].name
+            self._evaluate(bpy.context)
+        elif node.bl_idname == "SN_FunctionReturnNode" and data:
+            # output has been added
+            if "added" in data:
+                socket_index = list(data["added"].node.inputs).index(data["added"])
+                self.add_output_from_socket(data["added"])
+                self.outputs.move(len(self.outputs)-1, socket_index)
+            # output has been removed
+            elif "removed" in data:
+                self.outputs.remove(self.outputs[data["removed"]])
+            # output has changed
+            elif "changed" in data:
+                self.convert_socket(self.outputs[data["changed"].index], data["changed"].bl_idname)
+            # output has updated
+            elif "updated" in data:
+                self.outputs[data["updated"].index].name = data["updated"].name
+            self._evaluate(bpy.context)
+
+
+    def update_function_reference(self, context):
+        parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
+        # remember connections
+        links = []
+        for inp in self.inputs[1:]:
+            links.append(None)
+            if inp.is_linked:
+                links[-1] = inp.from_socket()
+        # remove current data inputs
+        for i in range(len(self.inputs)-1, 0, -1):
+            self.inputs.remove(self.inputs[i])
+        # add new data inputs
+        if self.ref_SN_FunctionNode in parent_tree.nodes:
+            for out in parent_tree.nodes[self.ref_SN_FunctionNode].outputs[1:-1]:
+                inp = self.add_input_from_socket(out)
+                # update enum items
+                if out.bl_label == "Enum" or out.bl_label == "Enum Set":
+                    self.update_enum_socket(out, inp)
+                elif "Vector" in out.bl_label:
+                    self.update_vector_socket(out, inp)
+        # restore connections
+        if len(links) == len(self.inputs)-1:
+            for i, from_socket in enumerate(links):
+                if from_socket:
+                    self.node_tree.links.new(from_socket, self.inputs[i+1])
+        self._evaluate(context)
+
     def update_references(self, context):
+        self.update_function_reference(context)
         self.trigger_ref_update(self)
         self._evaluate(context)
 
@@ -68,12 +150,20 @@ class SN_StartDrawingNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.ref_ntree and self.ref_SN_FunctionNode in self.ref_ntree.nodes:
             func = self.ref_ntree.nodes[self.ref_SN_FunctionNode]
 
+            # get input values
+            inp_values = []
+            for inp in self.inputs[1:]:
+                inp_values.append(inp.python_value)
+            inp_values = ", ".join(inp_values)
+            if inp_values:
+                inp_values += ", "
+
             self.code_imperative = f"""
                 handler_{self.static_uid} = []
             """
 
             self.code = f"""
-                handler_{self.static_uid}.append(bpy.types.{self.draw_space}.draw_handler_add({func.func_name}, (), 'WINDOW', '{self.draw_type}'))
+                handler_{self.static_uid}.append(bpy.types.{self.draw_space}.draw_handler_add({func.func_name}, ({inp_values}), 'WINDOW', '{self.draw_type}'))
                 {self.indent(self.outputs[0].python_value, 4)}
             """
 
