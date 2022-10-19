@@ -11,8 +11,7 @@ class SN_CombineStringsNode(bpy.types.Node, SN_ScriptingBaseNode):
     bl_width_default = 200
 
     def on_create(self, context):
-        self.add_string_input("String")
-        self.add_string_input("String")
+        self.add_string_input("String").prev_dynamic = True
         self.add_dynamic_string_input("String")
         self.add_string_output("Combined String")
 
