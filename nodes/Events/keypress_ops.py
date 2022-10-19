@@ -28,7 +28,7 @@ class SN_OT_RecordKey(bpy.types.Operator):
         invalid = ["MOUSEMOVE","INBETWEEN_MOUSEMOVE","TRACKPADPAN","TRACKPADZOOM","MOUSEROTATE","MOUSESMARTZOOM",
                    "TEXTINPUT","WINDOW_DEACTIVATE","ACTIONZONE_AREA","ACTIONZONE_REGION","ACTIONZONE_FULLSCREEN"]
         
-        if not event.type in invalid and not "TIMER" in event.type and not "NDOF" in event.type:
+        if not event.type in invalid and not "TIMER" in event.type:
             self.assign_key(context,event.type)
             return {"FINISHED"}
         return {"RUNNING_MODAL"}
