@@ -22,9 +22,36 @@ class SN_DisplayCollectionListNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_property_output("Item")
         self.add_integer_output("Item Index")
 
+    def update_function_node(self, context):
+        self._evaluate(context)
+
+    ref_SN_FunctionNode: bpy.props.StringProperty(name="Function",
+                                    description="Filter function which should have a single property input and return a boolean (True keeps the item, False removes it)",
+                                    update=update_function_node)
+
+    ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
+                                    name="Function Node Tree",
+                                    description="The node tree to select the function from",
+                                    poll=SN_ScriptingBaseNode.ntree_poll,
+                                    update=SN_ScriptingBaseNode._evaluate)
+
+    def draw_node(self, context, layout):
+        row = layout.row(align=True)
+        row.label(text="Filter:")
+        parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
+        row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
+        subrow = row.row(align=True)
+        subrow.enabled = self.ref_ntree != None
+        subrow.prop_search(self, "ref_SN_FunctionNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_FunctionNode"), "refs", text="")
+
     def evaluate(self, context):
         if self.inputs["Index Property"].is_linked and self.inputs["Collection Property"].is_linked:
             ui_list_idname = f"SNA_UL_{get_python_name(self.name, 'List')}_{self.static_uid}"
+
+            func = None
+            if self.ref_ntree and self.ref_SN_FunctionNode in self.ref_ntree.nodes:
+                func = self.ref_ntree.nodes[self.ref_SN_FunctionNode]
+            
             self.code_imperative = f"""
                                     def display_collection_id(uid, vars):
                                         id = f"coll_{{uid}}"
@@ -37,6 +64,20 @@ class SN_DisplayCollectionListNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                                         def draw_item(self, context, layout, data, item_{self.static_uid}, icon, active_data, active_propname, index_{self.static_uid}):
                                             row = layout
                                             {self.indent([out.python_value if out.name == 'Item Row' else '' for out in self.outputs], 11)}
+
+                                        def filter_items(self, context, data, propname):
+                                            flt_flags = []
+                                            for item in getattr(data, propname):
+                                                if not self.filter_name or self.filter_name.lower() in item.name.lower():
+                                                    print({func.func_name}(item), item.name)
+                                                    if {f'{func.func_name}(item)' if func else 'True'}:
+                                                        flt_flags.append(self.bitflag_filter_item)
+                                                    else:
+                                                        flt_flags.append(0)
+                                                else:
+                                                    flt_flags.append(0)
+                                            print(flt_flags)
+                                            return flt_flags, []
                                     """
             self.code_register = f"""
                                     bpy.utils.register_class({ui_list_idname})
