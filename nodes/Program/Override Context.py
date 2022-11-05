@@ -108,7 +108,6 @@ class SN_OverrideContextNode(bpy.types.Node, SN_ScriptingBaseNode):
             identifier = inp.name.lower().replace(' ', '_')
             var_name = f"{identifier}_{self.static_uid}"
             override_vars.append(f"{var_name} = {inp.python_value}")
-            override_vars.append(f"print({var_name}, {var_name}.type)")
             overrides += f"{identifier}={var_name}, "
         self.code = f"""
                     {self.indent(override_vars, 5)}
