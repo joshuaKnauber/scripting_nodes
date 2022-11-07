@@ -2,7 +2,6 @@ import bpy
 from ..base_node import SN_ScriptingBaseNode
 
 
-
 class SN_DisplaySerpensShortcutNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
 
     bl_idname = "SN_DisplaySerpensShortcutNodeNew"
@@ -14,16 +13,16 @@ class SN_DisplaySerpensShortcutNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         self.add_interface_input()
         self.add_string_input("Label")
         self.add_interface_output().passthrough_layout_type = True
-        
+
     ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
-                                    name="Panel Node Tree",
-                                    description="The node tree to select the panel from",
-                                    poll=SN_ScriptingBaseNode.ntree_poll,
-                                    update=SN_ScriptingBaseNode._evaluate)
-        
+                                         name="Panel Node Tree",
+                                         description="The node tree to select the panel from",
+                                         poll=SN_ScriptingBaseNode.ntree_poll,
+                                         update=SN_ScriptingBaseNode._evaluate)
+
     ref_SN_OnKeypressNode: bpy.props.StringProperty(name="Shortcut",
-                                                description="The shortcut to display",
-                                                update=SN_ScriptingBaseNode._evaluate)
+                                                    description="The shortcut to display",
+                                                    update=SN_ScriptingBaseNode._evaluate)
 
     def evaluate(self, context):
         if self.ref_ntree and self.ref_SN_OnKeypressNode in self.ref_ntree.nodes:
@@ -36,7 +35,7 @@ class SN_DisplaySerpensShortcutNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                             found_item = True
                             for name in dir(kmi.properties):
                                 if not name in ["bl_rna", "rna_type"] and not name[0] == "_":
-                                    if not kmi.properties[name] == item.properties[name]:
+                                    if name in kmi.properties and name in item.properties and not kmi.properties[name] == item.properties[name]:
                                         found_item = False
                         if found_item:
                             return item
@@ -57,12 +56,15 @@ class SN_DisplaySerpensShortcutNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
         subrow = row.row(align=True)
         subrow.enabled = self.ref_ntree != None
-        subrow.prop_search(self, "ref_SN_OnKeypressNode", parent_tree.node_collection("SN_OnKeypressNode"), "refs", text="")
-        
+        subrow.prop_search(self, "ref_SN_OnKeypressNode", parent_tree.node_collection(
+            "SN_OnKeypressNode"), "refs", text="")
+
         subrow = row.row()
         subrow.enabled = self.ref_ntree != None and self.ref_SN_OnKeypressNode in self.ref_ntree.nodes
-        op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
+        op = subrow.operator("sn.find_node", text="",
+                             icon="RESTRICT_SELECT_OFF", emboss=False)
         op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
         op.node = self.ref_SN_OnKeypressNode
 
-        layout.label(text="Copy blender shortcuts from the blend data browser in display property", icon="INFO")
+        layout.label(
+            text="Copy blender shortcuts from the blend data browser in display property", icon="INFO")
