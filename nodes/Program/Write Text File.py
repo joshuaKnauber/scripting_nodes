@@ -37,7 +37,7 @@ class SN_WriteTextFileNode(bpy.types.Node, SN_ScriptingBaseNode):
                             {f"file_{self.static_uid}.seek(0)" if self.write_type == "OVERWRITE" else ""}
                             file_{self.static_uid}.write({self.inputs["Text"].python_value})
                             {f"file_{self.static_uid}.truncate()" if self.write_type == "OVERWRITE" else ""}
-                        {self.indent(self.outputs[0].python_value, 5)}
+                        {self.indent(self.outputs[0].python_value, 6)}
                         """
         else:
             self.code = f"""
@@ -45,5 +45,5 @@ class SN_WriteTextFileNode(bpy.types.Node, SN_ScriptingBaseNode):
                             file_{self.static_uid}.seek(0)
                             file_{self.static_uid}.write({self.inputs["Text"].python_value})
                             file_{self.static_uid}.truncate()
-                        {self.indent(self.outputs[0].python_value, 5)}
+                        {self.indent(self.outputs[0].python_value, 6)}
                         """

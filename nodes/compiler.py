@@ -5,6 +5,7 @@ from ..utils import indent_code, normalize_code
 from ..node_tree.sockets.conversions import CONVERT_UTILS
 from ..addon.properties.compiler_properties import property_imperative_code, property_register_code, property_unregister_code
 from ..addon.variables.compiler_variables import ntree_variable_register_code, variable_register_code
+from ..node_tree.serializer.deserialize import deserialize_addon
 
 
 
@@ -72,6 +73,8 @@ def compile_addon():
         # remove text file
         bpy.data.texts.remove(txt)
         sn.compile_time = time.time() - t1
+
+        # deserialize_addon()
 
 
 LICENSE = """# This program is free software; you can redistribute it and/or modify
