@@ -69,7 +69,6 @@ class SN_DisplayCollectionListNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                                             flt_flags = []
                                             for item in getattr(data, propname):
                                                 if not self.filter_name or self.filter_name.lower() in item.name.lower():
-                                                    print({func.func_name}(item), item.name)
                                                     if {f'{func.func_name}(item)' if func else 'True'}:
                                                         flt_flags.append(self.bitflag_filter_item)
                                                     else:
