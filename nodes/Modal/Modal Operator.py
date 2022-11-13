@@ -45,6 +45,7 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
     def on_create(self, context):
         self.add_boolean_input("Disable")
+        self.add_string_input("Disabled Warning")
         self.add_execute_output("Before Modal")
         self.add_execute_output("Modal")
         self.add_execute_output("Draw Text").set_hide(True)
@@ -180,6 +181,8 @@ class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
 
                 @classmethod
                 def poll(cls, context):
+                    if bpy.app.version >= (3, 0, 0) and {'Disabled Warning' in self.inputs}:
+                        cls.poll_message_set({self.inputs['Disabled Warning'].python_value if 'Disabled Warning' in self.inputs else ""})
                     if not {self.draw_text} or context.area.spaces[0].bl_rna.identifier == '{self.draw_space}':
                         return not {self.inputs[0].python_value}
                     return False
