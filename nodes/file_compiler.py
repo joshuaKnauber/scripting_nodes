@@ -10,9 +10,24 @@ from ..utils import indent_code
 """
 
 [] Figure out how to separate node trees into separate files
+    - Could separate all trigger nodes into separate files? (at least panels, operators, ...)
+    - Node trees are for editing, saved files are structured to best support importing without circular import errors
+
 [] Figure out benefits of separate files
+    - Forced to optimize generated code (better understandability)
+
 [] Figure out potential inclusion of full custom files (IDE support)
+    - Option to choose location to save addon -> Can be an existing folder
+        - If it is not an existing folder create basic init file
+        - Else load the data from the init file and add serpens hooks into register/unregister
+    - Create serpens folder (generated/serpens/visual_scripting)
+
 [] Figure out collaboration support
+    - Introspection files for each generated file or one overall file for the entire addon or for each node tree
+    - Goal is to make a change in the code files or in the serpens nodes
+    - What is the end game here?
+        - Do all people editing the addon have serpens / need to have serpens?
+        - 
 
 """
 

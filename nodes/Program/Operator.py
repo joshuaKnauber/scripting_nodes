@@ -238,7 +238,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
                         @classmethod
                         def poll(cls, context):
                             if bpy.app.version >= (3, 0, 0) and {'Disabled Warning' in self.inputs}:
-                                cls.poll_message_set({self.inputs['Disabled Warning'].python_value})
+                                cls.poll_message_set({self.inputs['Disabled Warning'].python_value if 'Disabled Warning' in self.inputs else ""})
                             return not {self.inputs[0].python_value}
 
                         def execute(self, context):

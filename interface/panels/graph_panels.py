@@ -31,7 +31,7 @@ class SN_PT_GraphPanel(bpy.types.Panel):
     
     def draw_header(self, context):
         layout = self.layout
-        layout.label(text="Node Trees")
+        layout.label(text="Files")
         layout.operator("wm.url_open", text="", icon="QUESTION", emboss=False).url = "https://joshuaknauber.notion.site/Workflow-Introduction-d235d03178124dc9b752088d75a25192"
 
     def draw(self, context):

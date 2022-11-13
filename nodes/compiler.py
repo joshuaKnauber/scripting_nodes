@@ -12,7 +12,7 @@ from . import file_compiler
 
 def unregister_addon():
     """ Unregisters this addon """
-    return
+    # return
     sn = bpy.context.scene.sn
     t1 = time.time()
     if sn.addon_unregister:
@@ -27,8 +27,8 @@ def unregister_addon():
 
 def compile_addon():
     """ Reregisters the current addon code and stores results """
-    file_compiler.compile_addon()
-    return
+    # file_compiler.compile_addon()
+    # return
     if not bpy.context.scene.sn.pause_reregister:
         t1 = time.time()
         sn = bpy.context.scene.sn
