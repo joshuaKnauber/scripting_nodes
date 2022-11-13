@@ -50,7 +50,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
     def update_popup(self, context):
         # width input
         if self.invoke_option in ["invoke_props_dialog", "invoke_popup"]:
-            if len(self.inputs) == 1: self.add_integer_input("Width").default_value = 300
+            if not "Width" in self.inputs: self.add_integer_input("Width").default_value = 300
         else:
             if "Width" in self.inputs: self.inputs.remove(self.inputs["Width"])
 
@@ -184,7 +184,7 @@ class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
             invoke_return = "context.window_manager." + self.invoke_option + "(self, event)"
 
         elif self.invoke_option in ["invoke_props_dialog","invoke_popup"]:
-            invoke_return = "context.window_manager." + self.invoke_option + f"(self, width={self.inputs[1].python_value})"
+            invoke_return = "context.window_manager." + self.invoke_option + f"(self, width={self.inputs['Width'].python_value})"
 
         elif self.invoke_option == "invoke_search_popup":
             if self.select_property in self.properties and self.properties[self.select_property].property_type == "Enum":
