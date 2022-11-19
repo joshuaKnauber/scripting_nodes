@@ -6,13 +6,11 @@ from ..node_tree.sockets.conversions import CONVERT_UTILS
 from ..addon.properties.compiler_properties import property_imperative_code, property_register_code, property_unregister_code
 from ..addon.variables.compiler_variables import ntree_variable_register_code, variable_register_code
 from ..node_tree.serializer.deserialize import deserialize_addon
-from . import file_compiler
 
 
 
 def unregister_addon():
     """ Unregisters this addon """
-    # return
     sn = bpy.context.scene.sn
     t1 = time.time()
     if sn.addon_unregister:
@@ -27,8 +25,6 @@ def unregister_addon():
 
 def compile_addon():
     """ Reregisters the current addon code and stores results """
-    # file_compiler.compile_addon()
-    # return
     if not bpy.context.scene.sn.pause_reregister:
         t1 = time.time()
         sn = bpy.context.scene.sn

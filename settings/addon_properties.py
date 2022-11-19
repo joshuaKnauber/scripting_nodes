@@ -360,7 +360,8 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         self.refresh_filtered_ops()
 
     def update_categories(self, context):
-        global_search.start_get_data(context)
+        if self.data_category == "discover":
+            global_search.start_get_data(context)
 
     discover_data = { "items": [], "full_matches": 0 }
 
