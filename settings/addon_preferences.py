@@ -45,10 +45,6 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
                                         description="Keeps a copy of any compiled file that threw an error as 'serpens_error' in the text editor",
                                         default=False)
     
-    show_legacy_interface: bpy.props.BoolProperty(name="Legacy Interface Nodes",
-                                        description="Shows the Interface Legacy nodes in the add menu (Requires a restart!)",
-                                        default=False)
-    
     search_addons: bpy.props.StringProperty(name="Search",
                                         description="Search through the loaded addons",
                                         options={"TEXTEDIT_UPDATE"})
@@ -75,7 +71,6 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
         col = row.column(heading="General")
         col.prop(self, "check_for_updates")
         col.prop(self, "use_colors")
-        col.prop(self, "show_legacy_interface")
         col.prop(get_shortcut("sn.force_compile"), "type", full_event=True, text="Force Compile")
         col.prop(get_shortcut("sn.open_node_docs"), "type", full_event=True, text="Node Docs")
         col.prop(get_shortcut("sn.add_copied_node"), "type", full_event=True, text="Add Node From Copied")

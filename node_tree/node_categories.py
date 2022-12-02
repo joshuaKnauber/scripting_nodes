@@ -1,41 +1,136 @@
-from nodeitems_utils import NodeCategory, NodeItem
-from ..utils import get_python_name
 from .. import auto_load
 import os
 import inspect
 import bpy
 
 
+class SN_MT_LayoutMenu(bpy.types.Menu):
+    bl_idname = "SN_MT_LayoutMenu"
+    bl_label = "Layout"
 
-class SN_ScriptingNodesCategory(NodeCategory):
-    
-    @classmethod
-    def poll(cls, context):
-        return context.space_data.tree_type == 'ScriptingNodesTree'
+    def draw(self, context):
+        layout = self.layout
+        op = layout.operator("node.add_node", text="Frame")
+        op.type = "FrameNode"
+        op.use_transform = True
+
+        op = layout.operator("node.add_node", text="Portal")
+        op.type = "SN_PortalNode"
+        op.use_transform = True
+
+        op = layout.operator("node.add_node", text="Reroute")
+        op.type = "NodeReroute"
+        op.use_transform = True
 
 
-
+_node_categories = {}
 def get_node_categories():
-    addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences
-    node_categories = {}
+    global _node_categories
+    if _node_categories:
+        return _node_categories
+    else:
+        node_categories = {}
 
-    for cls in auto_load.ordered_classes:
-        if cls.bl_rna.base and cls.bl_rna.base.identifier == "Node":
-            category = os.path.basename(os.path.dirname(inspect.getfile(cls)))
-            if not category in ["nodes"]:
-                if not category in node_categories: node_categories[category] = []
-                node_categories[category].append((cls.bl_label, cls.bl_idname))
+        for cls in auto_load.ordered_classes:
+            if cls.bl_rna.base and cls.bl_rna.base.identifier == "Node":
+                path = os.path.dirname(inspect.getfile(cls))
+                dirs = path.split(os.sep)
 
-    layout_items = [("Frame", "NodeFrame"), ("Reroute", "NodeReroute")]
-    node_categories["Layout"] = layout_items
+                if "nodes" in dirs:
+                    node_path = dirs[dirs.index("nodes")+1:]
+                    parent = node_categories
+                    for dir in node_path:
+                        if not dir in parent:
+                            parent[dir] = {}
+                        parent = parent[dir]
+                    if not "nodes" in parent:
+                        parent["nodes"] = []
+                    parent["nodes"].append(cls)
 
-    node_categories = dict(sorted(node_categories.items()))
+        _node_categories = node_categories
+        return node_categories
 
-    categories = []
-    for cat in node_categories:
-        names = list(map(lambda node: node[1], sorted(node_categories[cat], key=lambda x: x[0])))
-        nodes = list(map(lambda name: NodeItem(name), names))
-        if not cat == "Interface (Legacy)" or addon_prefs.show_legacy_interface:
-            categories.append(SN_ScriptingNodesCategory(get_python_name(cat, "category"), cat.replace("_", " "), items=nodes))
 
-    return categories
+
+blocklist = ["nodes", "Snippets", "Layout", "Legacy"]
+_registered_menus = []
+
+
+def register_node_menus():
+    categories = get_node_categories()
+    for cat in sorted(categories.keys()):
+        if not cat in blocklist:
+            register_menu(cat, cat)
+            register_category_menus(categories[cat], cat)
+
+
+def register_category_menus(category, path):
+    for cat in sorted(category.keys()):
+        if not cat in blocklist:
+            register_menu(cat, f"{path}.{cat}")
+            register_category_menus(category[cat], f"{path}.{cat}")
+
+
+@classmethod
+def poll(cls, context):
+    return context.space_data.tree_type == 'ScriptingNodesTree'
+
+
+def register_menu(name, path):
+    menu_type = type("SN_MT_category_" + name, (bpy.types.Menu,), {
+        "bl_space_type": 'NODE_EDITOR',
+        "bl_label": name.replace("_", " ").title(),
+        "path": path,
+        "poll": poll,
+        "draw": draw_submenu,
+        })
+    bpy.utils.register_class(menu_type)
+    _registered_menus.append(menu_type)
+
+
+def unregister_node_menus():
+    for menu in _registered_menus:
+        bpy.utils.unregister_class(menu)
+    _registered_menus.clear()
+
+
+def draw_submenu(self, context):
+    layout = self.layout
+
+    category = get_node_categories()
+    for path in self.path.split("."):
+        category = category[path]
+    
+    for cat in sorted(category.keys()):
+        if not cat in blocklist:
+            layout.menu("SN_MT_category_" + cat, text=cat.replace("_", " ").title())
+
+    if "nodes" in category and len(category["nodes"]) and len(category.keys()) > 1:
+        layout.separator()
+
+    if "nodes" in category:
+        for node in sorted(category["nodes"], key=lambda n: n.bl_label):
+            op = layout.operator("node.add_node", text=node.bl_label)
+            op.type = node.bl_idname
+            op.use_transform = True
+
+
+def draw_node_menu(self, context):
+    if context.space_data.tree_type != 'ScriptingNodesTree': return
+    categories = get_node_categories()
+    layout = self.layout
+
+    row = layout.row()
+    row.operator_context = 'INVOKE_DEFAULT'
+    row.operator("node.add_search", text="Search", icon="VIEWZOOM").use_transform = True
+
+    layout.separator()
+    for cat in sorted(categories.keys()):
+        if not cat in blocklist:
+            layout.menu("SN_MT_category_" + cat, text=cat.replace("_", " ").title())
+    
+    layout.menu("SN_MT_LayoutMenu", text="Layout")
+
+    layout.separator()
+    layout.menu("SN_MT_PresetMenu", text="Presets")
+    layout.menu("SN_MT_SnippetsMenu", text="Snippets")

@@ -1,4 +1,3 @@
-from re import A
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.PropertyReferenceNode import PropertyReferenceNode

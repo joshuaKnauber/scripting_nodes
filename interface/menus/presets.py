@@ -1,7 +1,6 @@
 import bpy
 
 
-
 class SN_MT_PresetMenu(bpy.types.Menu):
     bl_idname = "SN_MT_PresetMenu"
     bl_label = "Presets"
@@ -27,10 +26,3 @@ class SN_MT_PresetMenu(bpy.types.Menu):
         row = layout.row()
         row.enabled = len(prefs.presets) > 0
         row.operator("sn.remove_presets", text="Remove Preset", icon="REMOVE")
-            
-
-
-def preset_menu(self, context):
-    if context.space_data.node_tree and context.space_data.node_tree.bl_idname == "ScriptingNodesTree":
-        layout = self.layout
-        layout.menu("SN_MT_PresetMenu", text="Presets")
