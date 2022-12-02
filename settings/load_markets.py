@@ -97,7 +97,7 @@ class SN_OT_LoadPackages(bpy.types.Operator):
                 item.price = package["price"]
                 item.url = package["url"]
                 item.author = package["author"]
-                item.serpens_version = 2 if not "serpens_version" in package else 3
+                item.serpens_version = 2 if not "version" in package else 3
 
         except:
             print("Couldn't load packages!")
