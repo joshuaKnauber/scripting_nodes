@@ -56,7 +56,7 @@ class SN_MathNode(bpy.types.Node, SN_ScriptingBaseNode):
     def evaluate(self, context):
         if not self.operation == "EXPRESSION":
             values = [inp.python_value for inp in self.inputs[:-1]]
-            self.outputs[0].python_value = f"{self.operation.join(values)}"
+            self.outputs[0].python_value = f"float({self.operation.join(values)})"
             self.outputs[1].python_value = f"int({self.operation.join(values)})"
 
         else:
