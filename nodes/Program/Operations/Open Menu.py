@@ -3,18 +3,16 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_OpenMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_SubmenuNodeNew"
-    bl_label = "Submenu"
-    node_color = "INTERFACE"
+    bl_idname = "SN_OpenMenuNode"
+    bl_label = "Open Menu"
+    node_color = "PROGRAM"
     bl_width_default = 240
 
     def on_create(self, context):
-        self.add_interface_input()
-        self.add_string_input("Label")
-        self.add_icon_input()
-        self.add_interface_output().passthrough_layout_type = True
+        self.add_execute_input()
+        self.add_execute_output()
         self.ref_ntree = self.node_tree
 
     def on_ref_update(self, node, data=None):
@@ -29,7 +27,7 @@ class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                                     update=SN_ScriptingBaseNode._evaluate)
     
     ref_SN_MenuNode: bpy.props.StringProperty(name="Custom Parent",
-                                    description="The menu used for this submenu",
+                                    description="The menu that should be shown",
                                     update=SN_ScriptingBaseNode._evaluate)
     
     ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
@@ -47,12 +45,12 @@ class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
         if self.parent_type == "CUSTOM":
             if self.ref_ntree and self.ref_SN_MenuNode in self.ref_ntree.nodes:
                 self.code = f"""
-                    {self.active_layout}.menu('{self.ref_ntree.nodes[self.ref_SN_MenuNode].idname}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})
+                    bpy.ops.wm.call_menu(name="{self.ref_ntree.nodes[self.ref_SN_MenuNode].idname}")
                     {self.indent(self.outputs[0].python_value, 5)}
                 """
         else:
             self.code = f"""
-                {self.active_layout}.menu('{self.menu_parent}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})
+                bpy.ops.wm.call_menu(name="{self.menu_parent}")
                 {self.indent(self.outputs[0].python_value, 4)}
             """
 

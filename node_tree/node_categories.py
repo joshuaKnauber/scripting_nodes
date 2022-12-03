@@ -77,7 +77,7 @@ def poll(cls, context):
 
 
 def register_menu(name, path):
-    menu_type = type("SN_MT_category_" + name.replace("_", " ").title(), (bpy.types.Menu,), {
+    menu_type = type("SN_MT_category_" + name.replace(" ", "_"), (bpy.types.Menu,), {
         "bl_space_type": 'NODE_EDITOR',
         "bl_label": name.replace("_", " ").title(),
         "path": path,
@@ -90,7 +90,8 @@ def register_menu(name, path):
 
 def unregister_node_menus():
     for menu in _registered_menus:
-        bpy.utils.unregister_class(menu)
+        try: bpy.utils.unregister_class(menu)
+        except: pass
     _registered_menus.clear()
 
 
@@ -103,7 +104,7 @@ def draw_submenu(self, context):
     
     for cat in sorted(category.keys()):
         if not cat in blocklist:
-            layout.menu("SN_MT_category_" + cat.replace("_", " ").title(), text=cat.replace("_", " ").title())
+            layout.menu("SN_MT_category_" + cat.replace(" ", "_"), text=cat.replace("_", " ").title())
 
     if "nodes" in category and len(category["nodes"]) and len(category.keys()) > 1:
         layout.separator()
@@ -127,7 +128,7 @@ def draw_node_menu(self, context):
     layout.separator()
     for cat in sorted(categories.keys()):
         if not cat in blocklist:
-            layout.menu("SN_MT_category_" + cat.replace("_", " ").title(), text=cat.replace("_", " ").title())
+            layout.menu("SN_MT_category_" + cat.replace(" ", "_"), text=cat.replace("_", " ").title())
     
     layout.menu("SN_MT_LayoutMenu", text="Layout")
 

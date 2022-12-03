@@ -24,25 +24,27 @@ def depsgraph_handler(dummy):
 
 @persistent
 def load_handler(dummy):
-    bpy.context.scene.sn.picker_active = False
-    subscribe_to_name_change()
-    check_easy_bpy_install()
-    if bpy.context.scene.sn.compile_on_load:
-        compile_addon()
-    check_serpens_updates(bl_info["version"])
-    bpy.ops.sn.reload_packages()
-    load_snippets()
-    bpy.context.scene.sn.hide_preferences = False
-    unwatch_script_changes()
-    if bpy.context.scene.sn.watch_script_changes:
-        watch_script_changes()
+    if hasattr(bpy.context.scene, "sn"):
+        bpy.context.scene.sn.picker_active = False
+        subscribe_to_name_change()
+        check_easy_bpy_install()
+        if bpy.context.scene.sn.compile_on_load:
+            compile_addon()
+        check_serpens_updates(bl_info["version"])
+        bpy.ops.sn.reload_packages()
+        load_snippets()
+        bpy.context.scene.sn.hide_preferences = False
+        unwatch_script_changes()
+        if bpy.context.scene.sn.watch_script_changes:
+            watch_script_changes()
 
 
 
 @persistent
 def unload_handler(dummy=None):
-    unwatch_script_changes()
-    unregister_addon()
+    if hasattr(bpy.context.scene, "sn"):
+        unwatch_script_changes()
+        unregister_addon()
 
 
 

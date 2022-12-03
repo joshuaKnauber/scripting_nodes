@@ -3,18 +3,17 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_OpenPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
 
-    bl_idname = "SN_SubmenuNodeNew"
-    bl_label = "Submenu"
-    node_color = "INTERFACE"
+    bl_idname = "SN_OpenPanelNode"
+    bl_label = "Open Panel"
+    node_color = "PROGRAM"
     bl_width_default = 240
 
     def on_create(self, context):
-        self.add_interface_input()
-        self.add_string_input("Label")
-        self.add_icon_input()
-        self.add_interface_output().passthrough_layout_type = True
+        self.add_execute_input()
+        self.add_boolean_input("Keep Open After Click")
+        self.add_execute_output()
         self.ref_ntree = self.node_tree
 
     def on_ref_update(self, node, data=None):
@@ -28,31 +27,31 @@ class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
                                            ("CUSTOM", "Custom", "Custom", "FILE_SCRIPT", 1)],
                                     update=SN_ScriptingBaseNode._evaluate)
     
-    ref_SN_MenuNode: bpy.props.StringProperty(name="Custom Parent",
-                                    description="The menu used for this submenu",
+    ref_SN_PanelNode: bpy.props.StringProperty(name="Custom Parent",
+                                    description="The panel that should be shown",
                                     update=SN_ScriptingBaseNode._evaluate)
     
     ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
-                                    name="Menu Node Tree",
-                                    description="The node tree to select the menu from",
+                                    name="Panel Node Tree",
+                                    description="The node tree to select the panel from",
                                     poll=SN_ScriptingBaseNode.ntree_poll,
                                     update=SN_ScriptingBaseNode._evaluate)
     
-    menu_parent: bpy.props.StringProperty(name="Menu",
-                                    default="VIEW3D_MT_add",
-                                    description="The menu that should be displayed",
+    panel_parent: bpy.props.StringProperty(name="Panel",
+                                    default="RENDER_PT_context",
+                                    description="The panel that should be displayed",
                                     update=SN_ScriptingBaseNode._evaluate)
 
     def evaluate(self, context):
         if self.parent_type == "CUSTOM":
-            if self.ref_ntree and self.ref_SN_MenuNode in self.ref_ntree.nodes:
+            if self.ref_ntree and self.ref_SN_PanelNode in self.ref_ntree.nodes:
                 self.code = f"""
-                    {self.active_layout}.menu('{self.ref_ntree.nodes[self.ref_SN_MenuNode].idname}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})
+                    bpy.ops.wm.call_panel(name="{self.ref_ntree.nodes[self.ref_SN_PanelNode].last_idname}", keep_open={self.inputs[1].python_value})
                     {self.indent(self.outputs[0].python_value, 5)}
                 """
         else:
             self.code = f"""
-                {self.active_layout}.menu('{self.menu_parent}', text={self.inputs['Label'].python_value}, icon_value={self.inputs['Icon'].python_value})
+                bpy.ops.wm.call_panel(name="{self.panel_parent}", keep_open={self.inputs[1].python_value})
                 {self.indent(self.outputs[0].python_value, 4)}
             """
 
@@ -64,18 +63,18 @@ class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
             row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
             subrow = row.row(align=True)
             subrow.enabled = self.ref_ntree != None
-            subrow.prop_search(self, "ref_SN_MenuNode", parent_tree.node_collection("SN_MenuNode"), "refs", text="")
+            subrow.prop_search(self, "ref_SN_PanelNode", parent_tree.node_collection("SN_PanelNode"), "refs", text="")
             
             row.prop(self, "parent_type", text="", icon_only=True)
             
             subrow = row.row()
-            subrow.enabled = self.ref_ntree != None and self.ref_SN_MenuNode in self.ref_ntree.nodes
+            subrow.enabled = self.ref_ntree != None and self.ref_SN_PanelNode in self.ref_ntree.nodes
             op = subrow.operator("sn.find_node", text="", icon="RESTRICT_SELECT_OFF", emboss=False)
             op.node_tree = self.ref_ntree.name if self.ref_ntree else ""
-            op.node = self.ref_SN_MenuNode
+            op.node = self.ref_SN_PanelNode
         else:
-            name = f"{self.menu_parent.replace('_MT_', ' ').replace('_', ' ').title()}"
-            op = row.operator("sn.activate_menu_picker", icon="EYEDROPPER", text=name)
+            name = f"{self.panel_parent.replace('_PT_', ' ').replace('_', ' ').title()}"
+            op = row.operator("sn.activate_subpanel_picker", icon="EYEDROPPER", text=name)
             op.node_tree = self.node_tree.name
             op.node = self.name
 
@@ -83,4 +82,4 @@ class SN_SubmenuNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
 
         
     def draw_node_panel(self, context, layout):
-        layout.prop(self, "menu_parent")
+        layout.prop(self, "panel_parent")
