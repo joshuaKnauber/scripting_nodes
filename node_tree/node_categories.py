@@ -81,7 +81,7 @@ class SN_MT_LayoutMenu(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         op = layout.operator("node.add_node", text="Frame")
-        op.type = "FrameNode"
+        op.type = "NodeFrame"
         op.use_transform = True
 
         op = layout.operator("node.add_node", text="Portal")
