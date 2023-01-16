@@ -16,13 +16,15 @@ class SN_VectorMathNode(bpy.types.Node, SN_ScriptingBaseNode):
         if self.operation == "LENGTH":
             if len(self.inputs) == 2:
                 self.inputs.remove(self.inputs[1])
+            self.convert_socket(self.outputs[0], self.socket_names["Float"])
         else:
             if len(self.inputs) == 1:
                 self.add_float_vector_input("B").size = self.size
+            self.convert_socket(self.outputs[0], self.socket_names["Float Vector"])
 
-        if self.operation in ["DIVIDE", "LENGTH"]:
+        if self.operation in ["DIVIDE"]:
             self.convert_socket(self.inputs[1], self.socket_names["Float"])
-        else:
+        elif len(self.inputs) > 1:
             self.convert_socket(self.inputs[1], self.socket_names["Float Vector"])
 
         self._evaluate(context)
