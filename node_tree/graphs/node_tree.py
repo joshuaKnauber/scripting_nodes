@@ -217,19 +217,22 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         """ Updates all inputs and display shapes of the reroutes in this node tree """
         for reroute in self.nodes:
             if reroute.bl_idname == "NodeReroute":
-                connections_left = [x.from_socket for x in reroute.inputs[0].links]
-                connections_right = [x.to_socket for x in reroute.outputs[0].links]
-                if reroute.inputs[0].bl_idname != "SN_RerouteSocket":
-                    reroute.inputs.remove(reroute.inputs[0])
-                    reroute.outputs.remove(reroute.outputs[0])
-                    i = reroute.inputs.new("SN_RerouteSocket", "Input")
-                    o = reroute.outputs.new("SN_RerouteSocket", "Output")
-                    for c in connections_left:
-                        self.links.new(c, i)
-                    for c in connections_right:
-                        self.links.new(c, o)
-                reroute.inputs[0].display_shape = connections_left[0].display_shape if connections_left else "CIRCLE"
-                reroute.outputs[0].display_shape = connections_left[0].display_shape if connections_left else "CIRCLE"
+                try:
+                    connections_left = [x.from_socket for x in reroute.inputs[0].links]
+                    connections_right = [x.to_socket for x in reroute.outputs[0].links]
+                    if reroute.inputs[0].bl_idname != "SN_RerouteSocket":
+                        reroute.inputs.remove(reroute.inputs[0])
+                        reroute.outputs.remove(reroute.outputs[0])
+                        i = reroute.inputs.new("SN_RerouteSocket", "Input")
+                        o = reroute.outputs.new("SN_RerouteSocket", "Output")
+                        for c in connections_left:
+                            self.links.new(c, i)
+                        for c in connections_right:
+                            self.links.new(c, o)
+                    reroute.inputs[0].display_shape = connections_left[0].display_shape if connections_left else "CIRCLE"
+                    reroute.outputs[0].display_shape = connections_left[0].display_shape if connections_left else "CIRCLE"
+                except:
+                    pass
 
 
     def update(self):
