@@ -250,7 +250,7 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
             data["outputs"] = []
             for inp in node.inputs:
                 if not inp.hide:
-                    if inp.bl_idname == "SN_EnumSocket":
+                    if inp.bl_idname in ["SN_EnumSocket", "SN_EnumSetSocket"]:
                         items = [item[0] for item in inp.get_items(None)]
                         data["inputs"].append({"idname": inp.bl_idname,"name": inp.name,"subtype": inp.subtype, "enum_items": str(items)})
                     elif "Vector" in inp.bl_idname:
