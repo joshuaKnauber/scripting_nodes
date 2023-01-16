@@ -42,26 +42,12 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
                 for node in ntree.nodes:
                     if node.bl_idname == "SN_IconNode":
                         if node.icon_source == "CUSTOM" and node.icon_file:
-                            node.icon_file.reload()
-                            filepath = os.path.join(icon_path, node.icon_file.name)
-
-                            # Store current render settings
-                            settings = bpy.context.scene.render.image_settings
-                            format = settings.file_format
-                            mode = settings.color_mode
-                            depth = settings.color_depth
-
-                            # Change render settings to our target format
-                            settings.file_format = 'PNG'
-                            settings.color_mode = 'RGBA'
-                            settings.color_depth = '8'
-
-                            node.icon_file.save_render(filepath)
-
-                            # Restore previous render settings
-                            settings.file_format = format
-                            settings.color_mode = mode
-                            settings.color_depth = depth
+                            img_path = bpy.path.abspath(node.icon_file.filepath)
+                            if os.path.exists(img_path):
+                                filepath = os.path.join(icon_path, os.path.basename(img_path))
+                                shutil.copy(img_path, filepath)
+                            else:
+                                raise FileNotFoundError(f"Could not find the icon file at {icon_path}")
 
     def add_code(self, path):
         """ Creates the index file """
@@ -110,16 +96,19 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
     
     def execute(self, context):            
         context.window_manager.progress_begin(0, 100)
-        name, _ = os.path.splitext(self.filepath)
-        if os.path.exists(name):
-            self.report({"ERROR"}, message=f"Please delete the '{os.path.basename(name)}' folder before exporting.")
-        else:
-            baseDir = self.create_structure(name)
-            context.window_manager.progress_update(30)
-            self.create_files(baseDir)
-            context.window_manager.progress_update(90)
-            self.zip_addon(name)
-        bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
+        try:
+            name, _ = os.path.splitext(self.filepath)
+            if os.path.exists(name):
+                self.report({"ERROR"}, message=f"Please delete the '{os.path.basename(name)}' folder before exporting.")
+            else:
+                baseDir = self.create_structure(name)
+                context.window_manager.progress_update(30)
+                self.create_files(baseDir)
+                context.window_manager.progress_update(90)
+                self.zip_addon(name)
+            bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
+        except Exception as e:
+            self.report({"ERROR"}, message=f"Error: {e}")
         context.window_manager.progress_end()
         return {"FINISHED"}
 
