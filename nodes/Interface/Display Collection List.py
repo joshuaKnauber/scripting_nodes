@@ -18,7 +18,8 @@ class SN_DisplayCollectionListNodeNew(SN_ScriptingBaseNode, bpy.types.Node):
         self.add_property_input("Index Property")
         self.add_integer_input("Rows")
         self.add_dynamic_interface_output("Item Row")
-        self.add_dynamic_interface_output("Interface").passthrough_layout_type = True
+        self.add_dynamic_interface_output(
+            "Interface").passthrough_layout_type = True
         self.add_property_output("Item")
         self.add_integer_output("Item Index")
 
@@ -26,14 +27,14 @@ class SN_DisplayCollectionListNodeNew(SN_ScriptingBaseNode, bpy.types.Node):
         self._evaluate(context)
 
     ref_SN_FunctionNode: bpy.props.StringProperty(name="Function",
-                                    description="Filter function which should have a single property input and return a boolean (True keeps the item, False removes it)",
-                                    update=update_function_node)
+                                                  description="Filter function which should have a single property input and return a boolean (True keeps the item, False removes it)",
+                                                  update=update_function_node)
 
     ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
-                                    name="Function Node Tree",
-                                    description="The node tree to select the function from",
-                                    poll=SN_ScriptingBaseNode.ntree_poll,
-                                    update=SN_ScriptingBaseNode._evaluate)
+                                         name="Function Node Tree",
+                                         description="The node tree to select the function from",
+                                         poll=SN_ScriptingBaseNode.ntree_poll,
+                                         update=SN_ScriptingBaseNode._evaluate)
 
     def draw_node(self, context, layout):
         row = layout.row(align=True)
@@ -42,7 +43,8 @@ class SN_DisplayCollectionListNodeNew(SN_ScriptingBaseNode, bpy.types.Node):
         row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
         subrow = row.row(align=True)
         subrow.enabled = self.ref_ntree != None
-        subrow.prop_search(self, "ref_SN_FunctionNode", bpy.data.node_groups[parent_tree.name].node_collection("SN_FunctionNode"), "refs", text="")
+        subrow.prop_search(self, "ref_SN_FunctionNode", bpy.data.node_groups[parent_tree.name].node_collection(
+            "SN_FunctionNode"), "refs", text="")
 
     def evaluate(self, context):
         if self.inputs["Index Property"].is_linked and self.inputs["Collection Property"].is_linked:
@@ -51,7 +53,7 @@ class SN_DisplayCollectionListNodeNew(SN_ScriptingBaseNode, bpy.types.Node):
             func = None
             if self.ref_ntree and self.ref_SN_FunctionNode in self.ref_ntree.nodes:
                 func = self.ref_ntree.nodes[self.ref_SN_FunctionNode]
-            
+
             self.code_imperative = f"""
                                     def display_collection_id(uid, vars):
                                         id = f"coll_{{uid}}"
@@ -75,7 +77,6 @@ class SN_DisplayCollectionListNodeNew(SN_ScriptingBaseNode, bpy.types.Node):
                                                         flt_flags.append(0)
                                                 else:
                                                     flt_flags.append(0)
-                                            print(flt_flags)
                                             return flt_flags, []
                                     """
             self.code_register = f"""
