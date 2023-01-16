@@ -55,6 +55,8 @@ class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
                 socket.subtype = "NONE"
                 socket.custom_items_editable = False
                 socket.items = inp["enum_items"]
+            if "size" in inp:
+                socket.size = inp["size"]
         for out in data["outputs"]:
             socket = self._add_output(out["idname"], out["name"])
             if out["subtype"] != "NONE":
