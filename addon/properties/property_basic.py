@@ -21,7 +21,14 @@ class BasicProperty():
         row.prop(self, "property_type")
         row.operator("sn.tooltip", text="", emboss=False, icon="QUESTION").text = self.settings.type_description
         layout.prop(self, "description")
-        layout.prop(self, "prop_options")
+        
+        col = layout.column(align=True)
+        col.prop_enum(self, "prop_options", "HIDDEN", text="Hidden")
+        col.prop_enum(self, "prop_options", "SKIP_SAVE", text="Skip Save")
+        if self.property_type in {"Float", "Integer", "Boolean"}:
+            col.prop_enum(self, "prop_options", "ANIMATABLE", text="Animatable")
+        if self.property_type == "String":
+            col.prop_enum(self, "prop_options", "TEXTEDIT_UPDATE", text="Textedit Update")
 
     
     # cache python names so they only have to be generated once

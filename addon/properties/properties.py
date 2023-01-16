@@ -50,7 +50,10 @@ class SN_GeneralProperties(FullBasicProperty, bpy.types.PropertyGroup):
         if not self.property_type == "Group":
             layout.prop(self, "attach_to")
             layout.prop(self, "description")
-            layout.prop(self, "prop_options")
+            if self.property_type in {"Float", "Integer", "Boolean"}:
+                layout.prop_enum(self, "prop_options", "ANIMATABLE", text="Animatable")
+            elif self.property_type == "String":
+                layout.prop_enum(self, "prop_options", "TEXTEDIT_UPDATE", text="Textedit Update")
             
     
     @property
