@@ -98,7 +98,7 @@ class PropertyNode():
 
     def draw_list(self, layout):
         row = layout.row()
-        row.template_list("SN_UL_PropertyList", "", self, "properties", self, "property_index")
+        row.template_list("SN_UL_PropertyList", self.static_uid, self, "properties", self, "property_index")
 
         col = row.column(align=True)
         col.operator("sn.add_property_node_popup", icon="FORWARD", text="").node = self.name
