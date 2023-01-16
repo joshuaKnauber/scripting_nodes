@@ -4,7 +4,7 @@ from ..base_node import SN_ScriptingBaseNode
 from ...utils import unique_collection_name, get_python_name
 
 
-class SN_InterfaceScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_InterfaceScriptNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_InterfaceScriptNode"
     bl_label = "Interface Script"

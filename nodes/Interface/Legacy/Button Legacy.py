@@ -4,7 +4,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_ButtonNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_ButtonNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_ButtonNode"
     bl_label = "Button (Legacy)"

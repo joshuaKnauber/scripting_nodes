@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_DrawQuadNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_DrawQuadNode"
     bl_label = "Draw Quad"

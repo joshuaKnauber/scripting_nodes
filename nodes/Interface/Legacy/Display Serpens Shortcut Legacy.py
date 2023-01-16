@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_DisplaySerpensShortcutNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_DisplaySerpensShortcutNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_DisplaySerpensShortcutNode"
     bl_label = "Display Serpens Shortcut (Legacy)"

@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_LayoutColumnNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_LayoutColumnNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_LayoutColumnNode"
     bl_label = "Column (Legacy)"

@@ -89,7 +89,7 @@ class SN_OT_AddOverride(bpy.types.Operator):
 
 
 
-class SN_OverrideContextNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_OverrideContextNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_OverrideContextNode"
     bl_label = "Override Context"

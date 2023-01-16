@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_RefreshViewNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_RefreshViewNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_RefreshViewNode"
     bl_label = "Refresh View"

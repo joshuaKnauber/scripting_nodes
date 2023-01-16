@@ -131,7 +131,7 @@ def draw():
 
 
 
-class SN_TutorialNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_TutorialNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_TutorialNode"
     bl_label = "Tutorial"

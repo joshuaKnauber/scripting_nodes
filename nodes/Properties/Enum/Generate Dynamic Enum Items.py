@@ -4,7 +4,7 @@ from ...templates.PropertyReferenceNode import PropertyReferenceNode
 
 
 
-class SN_GenerateEnumItemsNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferenceNode):
+class SN_GenerateEnumItemsNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyReferenceNode):
 
     bl_idname = "SN_GenerateEnumItemsNode"
     bl_label = "Generate Dynamic Enum Items"

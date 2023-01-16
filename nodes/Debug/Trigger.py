@@ -21,7 +21,7 @@ class SN_OT_TriggerTriggerNode(bpy.types.Operator):
 
 
 
-class SN_TriggerNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_TriggerNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_TriggerNode"
     bl_label = "Trigger"

@@ -27,7 +27,7 @@ def data_path_from_inputs(inputs, data):
             inp_index += 1
     return data_path
 
-class SN_BlenderPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_BlenderPropertyNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_BlenderPropertyNode"
     bl_label = "Blender Property"

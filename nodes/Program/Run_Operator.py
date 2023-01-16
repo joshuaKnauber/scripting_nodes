@@ -46,7 +46,7 @@ def on_operator_ref_update(self, node, data, ntree, node_ref_name, input_offset=
 
 
 
-class SN_RunOperatorNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_RunOperatorNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_RunOperatorNode"
     bl_label = "Run Operator"

@@ -4,7 +4,7 @@ from ....utils import get_python_name, unique_collection_name
 
 
 
-class SN_InterfaceFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_InterfaceFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_InterfaceFunctionNode"
     bl_label = "Function (Interface)"

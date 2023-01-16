@@ -4,7 +4,7 @@ from .Blender_Property import segment_is_indexable, data_path_from_inputs
 from ...settings.data_properties import bpy_to_indexed_sections, bpy_to_path_sections
 
 
-class SN_RunPropertyFunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_RunPropertyFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_RunPropertyFunctionNode"
     bl_label = "Run Property Function"

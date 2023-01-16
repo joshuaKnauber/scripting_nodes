@@ -4,7 +4,7 @@ from ..templates.PropertyReferenceNode import PropertyReferenceNode
 
 
 
-class SN_SerpensPropertyNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyReferenceNode):
+class SN_SerpensPropertyNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyReferenceNode):
 
     bl_idname = "SN_SerpensPropertyNode"
     bl_label = "Serpens Property"

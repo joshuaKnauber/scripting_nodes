@@ -25,7 +25,7 @@ class SN_OT_ClearPrints(bpy.types.Operator):
 
 
 
-class SN_PrintNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_PrintNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_PrintNode"
     bl_label = "Print"

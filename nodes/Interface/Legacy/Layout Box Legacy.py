@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_LayoutBoxNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_LayoutBoxNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_LayoutBoxNode"
     bl_label = "Box (Legacy)"

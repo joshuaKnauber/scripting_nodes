@@ -5,7 +5,7 @@ from ...templates.VariableReferenceNode import VariableReferenceNode
 
 
 
-class SN_RemoveFromListNode(bpy.types.Node, SN_ScriptingBaseNode, VariableReferenceNode):
+class SN_RemoveFromListNode(SN_ScriptingBaseNode, bpy.types.Node, VariableReferenceNode):
 
     bl_idname = "SN_RemoveFromListNode"
     bl_label = "Remove From List"

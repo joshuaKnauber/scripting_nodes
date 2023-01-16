@@ -4,7 +4,7 @@ from ...templates.PropertyNode import PropertyNode
 
 
 
-class SN_PreferencesNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
+class SN_PreferencesNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
 
     bl_idname = "SN_PreferencesNode"
     bl_label = "Preferences"

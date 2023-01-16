@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_FloatNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_FloatNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_FloatNode"
     bl_label = "Float"

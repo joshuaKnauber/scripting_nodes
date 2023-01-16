@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_AddToMenuNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_AddToMenuNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_AddToMenuNode"
     bl_label = "Add To Menu (Legacy)"

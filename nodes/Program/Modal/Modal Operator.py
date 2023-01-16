@@ -5,7 +5,7 @@ from ....utils import get_python_name, normalize_code, unique_collection_name
 
 
 
-class SN_ModalOperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
+class SN_ModalOperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
 
     bl_idname = "SN_ModalOperatorNode"
     bl_label = "Modal Operator"

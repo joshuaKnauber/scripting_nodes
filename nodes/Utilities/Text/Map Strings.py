@@ -17,7 +17,7 @@ class StringMap(bpy.types.PropertyGroup):
 
 
 
-class SN_MapStringsNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_MapStringsNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_MapStringsNode"
     bl_label = "Map Strings"

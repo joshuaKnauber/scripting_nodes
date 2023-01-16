@@ -4,7 +4,7 @@ from ..templates.VariableReferenceNode import VariableReferenceNode
 
 
 
-class SN_ChangeVariableByNode(bpy.types.Node, SN_ScriptingBaseNode, VariableReferenceNode):
+class SN_ChangeVariableByNode(SN_ScriptingBaseNode, bpy.types.Node, VariableReferenceNode):
 
     bl_idname = "SN_ChangeVariableByNode"
     bl_label = "Change Variable By"

@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_IconGalleryNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_IconGalleryNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_IconGalleryNode"
     bl_label = "Icon Gallery (Legacy)"

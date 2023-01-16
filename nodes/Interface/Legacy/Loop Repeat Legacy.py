@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_RepeatInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_RepeatInterfaceNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_RepeatInterfaceNode"
     bl_label = "Loop Repeat (Interface) (Legacy)"

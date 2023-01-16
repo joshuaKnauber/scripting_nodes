@@ -4,7 +4,7 @@ from ...utils import normalize_code
 
 
 
-class SN_EnumMapInterfaceNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_EnumMapInterfaceNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_EnumMapInterfaceNode"
     bl_label = "Enum Map (Interface)"

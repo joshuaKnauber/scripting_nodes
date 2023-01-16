@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_DisplayPropertyNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_DisplayPropertyNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_DisplayPropertyNode"
     bl_label = "Display Property (Legacy)"

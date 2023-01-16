@@ -4,7 +4,7 @@ from ....utils import normalize_code
 
 
 
-class SN_EnumMapNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_EnumMapNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_EnumMapNode"
     bl_label = "Enum Map (Execute)"

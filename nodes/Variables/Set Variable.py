@@ -4,7 +4,7 @@ from ..templates.VariableReferenceNode import VariableReferenceNode
 
 
 
-class SN_SetVariableNode(bpy.types.Node, SN_ScriptingBaseNode, VariableReferenceNode):
+class SN_SetVariableNode(SN_ScriptingBaseNode, bpy.types.Node, VariableReferenceNode):
 
     bl_idname = "SN_SetVariableNode"
     bl_label = "Set Variable"

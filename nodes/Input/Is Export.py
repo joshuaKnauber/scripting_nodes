@@ -3,7 +3,7 @@ from ..base_node import SN_ScriptingBaseNode
 
 
 
-class SN_IsExportNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_IsExportNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_IsExportNode"
     bl_label = "Is Export"

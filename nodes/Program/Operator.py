@@ -5,7 +5,7 @@ from ...utils import get_python_name, unique_collection_name
 
 
 
-class SN_OperatorNode(bpy.types.Node, SN_ScriptingBaseNode, PropertyNode):
+class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
 
     bl_idname = "SN_OperatorNode"
     bl_label = "Operator"

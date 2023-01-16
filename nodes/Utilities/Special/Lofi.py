@@ -18,7 +18,7 @@ class SN_OT_RandomIndex(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class SN_LofiNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_LofiNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_LofiNode"
     bl_label = "LoFi"

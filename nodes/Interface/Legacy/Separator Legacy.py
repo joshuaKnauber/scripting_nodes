@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_SeparatorNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_SeparatorNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_SeparatorNode"
     bl_label = "Separator (Legacy)"

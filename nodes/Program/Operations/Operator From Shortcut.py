@@ -41,7 +41,7 @@ class SN_OT_ShortcutToNode(bpy.types.Operator):
 
 
 
-class SN_FindShortcutOperator(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_FindShortcutOperator(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_FindShortcutOperator"
     bl_label = "Find Operator From Shortcut"

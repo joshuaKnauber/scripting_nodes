@@ -24,7 +24,7 @@ space_names = {
 
 
 
-class SN_OnKeypressNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_OnKeypressNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_OnKeypressNode"
     bl_label = "On Keypress"

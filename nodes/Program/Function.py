@@ -4,7 +4,7 @@ from ...utils import get_python_name, unique_collection_name
 
 
 
-class SN_FunctionNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_FunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_FunctionNode"
     bl_label = "Function (Execute)"

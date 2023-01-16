@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_AddToPanelNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_AddToPanelNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_AddToPanelNode"
     bl_label = "Add To Panel (Legacy)"

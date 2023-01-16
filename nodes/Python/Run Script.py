@@ -19,7 +19,7 @@ class SN_OT_ReloadScript(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class SN_RunScriptNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_RunScriptNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_RunScriptNode"
     bl_label = "Run Script"

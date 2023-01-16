@@ -4,7 +4,7 @@ from ...utils import get_python_name
 
 
 
-class SN_DisplayCollectionListNodeNew(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_DisplayCollectionListNodeNew(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_DisplayCollectionListNodeNew"
     bl_label = "Display Collection List"

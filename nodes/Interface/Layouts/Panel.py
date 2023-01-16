@@ -4,7 +4,7 @@ from ....utils import get_python_name
 
 
 
-class SN_PanelNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_PanelNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_PanelNode"
     bl_label = "Panel"

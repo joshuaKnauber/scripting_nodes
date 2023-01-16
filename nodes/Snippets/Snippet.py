@@ -38,7 +38,7 @@ class SN_SnippetVarsPropertyGroup(bpy.types.PropertyGroup):
 
 
 
-class SN_SnippetNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_SnippetNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_SnippetNode"
     bl_label = "Snippet"

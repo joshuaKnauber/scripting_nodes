@@ -3,7 +3,7 @@ from ...base_node import SN_ScriptingBaseNode
 
 
 
-class SN_FloatVectorNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_FloatVectorNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_FloatVectorNode"
     bl_label = "Float Vector"

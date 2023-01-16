@@ -11,7 +11,7 @@ class NodeType(bpy.types.PropertyGroup):
 
 
 
-class SN_NodeIdnameNode(bpy.types.Node, SN_ScriptingBaseNode):
+class SN_NodeIdnameNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_NodeIdnameNode"
     bl_label = "Node Idname"
