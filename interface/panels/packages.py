@@ -54,8 +54,8 @@ class SN_PT_SnippetsPanel(bpy.types.Panel):
         node = context.space_data.node_tree.nodes.active
         row = layout.row()
         row.scale_y = 1.1
-        if node and node.select and node.bl_idname in ["SN_RunFunctionNode", "SN_RunInterfaceFunctionNode"]:
-            if getattr(node, "ref_SN_FunctionNode", None) or getattr(node, "ref_SN_InterfaceFunctionNode", None):
+        if node and node.select and node.bl_idname in ["SN_RunFunctionNode", "SN_RunInterfaceFunctionNodeNew"]:
+            if getattr(node, "ref_SN_FunctionNode", None) or getattr(node, "ref_SN_RunInterfaceFunctionNodeNew", None):
                 op = row.operator("sn.draw_export_snippet", text="Export Snippet", icon="EXPORT", depress=True)
                 op.node = node.name
                 op.tree = node.node_tree.name
