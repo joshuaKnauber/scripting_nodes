@@ -14,14 +14,14 @@ def {func_name}(self, context):
     layout = self.layout
     row = layout.row()
     row.alert = True
-    if "SNA_PT_" in "{panel.bl_rna.identifier}":
-        row.label(text="Select this custom panel on the subpanel node", icon="ERROR")
-    else:
-        row.scale_y = 1.5
-        op = row.operator("sn.pick_subpanel_location", text="Select {label}")
-        op.node_tree = "{ntree}"
-        op.node = "{node}"
-        op.panel = "{panel.bl_rna.identifier}"
+    # if "SNA_PT_" in "{panel.bl_rna.identifier}":
+    #     row.label(text="Select this custom panel on the subpanel node", icon="ERROR")
+    # else:
+    row.scale_y = 1.5
+    op = row.operator("sn.pick_subpanel_location", text="Select {label}")
+    op.node_tree = "{ntree}"
+    op.node = "{node}"
+    op.panel = "{panel.bl_rna.identifier}"
     
 bpy.types.{panel.bl_rna.identifier}.append({func_name})
 registered_subpanels.append([bpy.types.{panel.bl_rna.identifier}, {func_name}])
