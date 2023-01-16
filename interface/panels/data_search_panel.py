@@ -32,7 +32,7 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         col.scale_y = 1.4
         col.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH")
         col.separator()
-        col.prop_enum(sn, "data_category", value="discover", icon="WORLD")
+        col.prop_enum(sn, "data_category", value="discover", text="Discover (BETA)", icon="WORLD")
 
         layout.separator()
         layout.label(text="Source:")
@@ -72,7 +72,7 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         layout.prop(sn, "show_path")
         if sn.data_category == "discover":
             layout.prop(sn, "discover_full_only")
-            layout.prop(sn, "discover_show_amount")
+            layout.prop(sn, "discover_show_amount", text="Max Amount")
         
         
         

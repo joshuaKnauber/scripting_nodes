@@ -368,7 +368,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     def update_discover(self, context):
         counted_paths = []
         full_matches = 0
-        queries = self.discover_search.lower().split(",")
+        queries = self.discover_search.lower().replace(", ", ",").split(",")
 
         for path in global_search.data_flat.keys():
             matches = 0

@@ -54,7 +54,17 @@ def get_data(data, path, screen, depth):
         child_path = f"{path}.{key}"
         if is_valid_key(key) and is_valid_path(child_path, screen):
             try:
-                child_data = getattr(data, key)
+                try:
+                    # print(data.bl_rna.properties[key].type)
+                    if data.bl_rna.properties[key].type == "ENUM":
+                        if data.bl_rna.properties[key].is_enum_flag:
+                            child_data = set()
+                        else:
+                            child_data = ""
+                    else:
+                        child_data = getattr(data, key)
+                except Exception as e:
+                    child_data = getattr(data, key)
                 data_flat[child_path] = get_data_info(child_data, key)
                 if hasattr(child_data, "bl_rna"):
                     get_data(child_data, child_path, screen, depth+1)
