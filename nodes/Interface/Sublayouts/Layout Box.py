@@ -39,6 +39,6 @@ class SN_LayoutBoxNodeNew(SN_ScriptingBaseNode, bpy.types.Node):
                     box_{self.static_uid}.alignment = {self.inputs["Alignment"].python_value}.upper()
                     box_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
                     box_{self.static_uid}.scale_y = {self.inputs["Scale Y"].python_value}
-                    box_{self.static_uid}.operator_context = "INVOKE_DEFAULT" if {"False" if not "Use Invoke" in self.inputs else self.inputs["Use Invoke"].python_value} else "EXEC_DEFAULT"
+                    if not {self.inputs['Use Invoke'].python_value}: box_{self.static_uid}.operator_context = "EXEC_DEFAULT"
                     {self.indent([out.python_value if out.name == 'Box' else '' for out in self.outputs], 5)}
                     """
