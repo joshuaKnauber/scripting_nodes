@@ -39,7 +39,7 @@ class SN_DrawLineNode(SN_ScriptingBaseNode, bpy.types.Node):
         inp = self.add_float_vector_input("Point 2")
         inp.size = 2
         inp.default_value[0] = 0
-        inp.default_value[1] = 0
+        inp.default_value[1] = 1
         inp.default_value[2] = 1
 
         self.add_execute_output()
@@ -79,6 +79,7 @@ class SN_DrawLineNode(SN_ScriptingBaseNode, bpy.types.Node):
             gpu.state.depth_test_set({self.inputs["On Top"].python_value})
             gpu.state.depth_mask_set(True)
 
+            gpu.state.blend_set('ALPHA')
             batch.draw(shader)
             {self.indent(self.outputs[0].python_value, 3)}
         """

@@ -44,7 +44,7 @@ class SN_LayoutSplitNodeNew(SN_ScriptingBaseNode, bpy.types.Node):
                     split_{self.static_uid}.scale_x = {self.inputs["Scale X"].python_value}
                     split_{self.static_uid}.scale_y = {self.inputs["Scale Y"].python_value}
                     split_{self.static_uid}.alignment = {self.inputs["Alignment"].python_value}.upper()
-                    if not {self.inputs['Use Invoke'].python_value}: split_{self.static_uid}.operator_context = "EXEC_DEFAULT"
+                    if not {self.inputs['Use Invoke'].python_value if 'Use Invoke' in self.inputs else 'False'}: split_{self.static_uid}.operator_context = "EXEC_DEFAULT"
                     {self.indent(self.outputs[0].python_value, 5)}
                     {self.indent(self.outputs[1].python_value, 5)}
                     """

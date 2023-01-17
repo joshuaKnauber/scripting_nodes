@@ -20,6 +20,18 @@ class SN_DrawPointNode(SN_ScriptingBaseNode, bpy.types.Node):
                                 default=False,
                                 update=update_use3d)
 
+    def update_use_loc_list(self, context):
+        if self.use_loc_list:
+            self.convert_socket(self.inputs["Location"], self.socket_names["List"])
+        else:
+            self.convert_socket(self.inputs["Location"], self.socket_names["Float Vector"])
+
+
+    use_loc_list: bpy.props.BoolProperty(name="Draw Multiple",
+                                description="Whether to draw multiple points (this is more efficient than separate nodes)",
+                                default=False,
+                                update=update_use_loc_list)
+
     def on_create(self, context):
         self.add_execute_input()
 
@@ -41,6 +53,7 @@ class SN_DrawPointNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     def draw_node(self, context, layout):
         layout.prop(self, "use_3d", text="Use 3D")
+        layout.prop(self, "use_loc_list", text="Draw Multiple")
         
     def evaluate(self, context):
         self.code_import = f"""
@@ -48,11 +61,12 @@ class SN_DrawPointNode(SN_ScriptingBaseNode, bpy.types.Node):
             from gpu_extras.batch import batch_for_shader
         """
 
-        coords = f"coords = ("
-        for inp in self.inputs:
-            if inp.name == "Location" and not inp.dynamic:
-                coords += f"{inp.python_value}, "
-        coords += ")"
+        coords = f"coords = ()"
+        loc_inp = self.inputs["Location"]
+        if loc_inp.bl_label == "Float Vector":
+            coords = f"coords = ({loc_inp.python_value}, )"
+        else:
+            coords = f"coords = tuple({loc_inp.python_value})"
 
         self.code = f"""
             {coords}
@@ -68,6 +82,7 @@ class SN_DrawPointNode(SN_ScriptingBaseNode, bpy.types.Node):
             gpu.state.depth_test_set({self.inputs["On Top"].python_value})
             gpu.state.depth_mask_set(True)
 
+            gpu.state.blend_set('ALPHA')
             batch.draw(shader)
             {self.indent(self.outputs[0].python_value, 3)}
         """

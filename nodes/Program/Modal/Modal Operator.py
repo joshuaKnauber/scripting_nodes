@@ -48,7 +48,7 @@ class SN_ModalOperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
         self.add_string_input("Disabled Warning")
         self.add_execute_output("Before Modal")
         self.add_execute_output("Modal")
-        self.add_execute_output("Draw Text").set_hide(True)
+        self.add_execute_output("Draw").set_hide(True)
         self.add_execute_output("After Modal")
     
     def update_description(self, context):
@@ -82,12 +82,15 @@ class SN_ModalOperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
                             update=SN_ScriptingBaseNode._evaluate)
 
     def update_draw_text(self, context):
-        self.outputs["Draw Text"].set_hide(not self.draw_text)
+        if "Draw" in self.outputs:
+            self.outputs["Draw"].set_hide(not self.draw_text)
+        else:
+            self.outputs["Draw Text"].set_hide(not self.draw_text)
         self._evaluate(context)
     
     draw_text: bpy.props.BoolProperty(default=False,
-                            name="Draw Text",
-                            description="Lets you draw text to the interface while the modal is running",
+                            name="Draw",
+                            description="Lets you draw to the interface while the modal is running",
                             update=update_draw_text)
 
     def draw_space_items(self, context):
@@ -100,7 +103,7 @@ class SN_ModalOperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
         return items
     
     draw_space: bpy.props.EnumProperty(name="Draw Space",
-                            description="The space this operator can run in and the text is drawn in",
+                            description="The space this operator can run in and elements are drawn in",
                             update=SN_ScriptingBaseNode._evaluate,
                             items=draw_space_items)
     
@@ -161,7 +164,10 @@ class SN_ModalOperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
             """
         
         modal_code = self.outputs['Modal'].python_value
-        draw_code = self.outputs["Draw Text"].python_value
+        if "Draw" in self.outputs:
+            draw_code = self.outputs["Draw"].python_value
+        else:
+            draw_code = self.outputs["Draw Text"].python_value
         
         self.code = f"""
             {self.indent(props_imperative_list, 3)}

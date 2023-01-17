@@ -45,5 +45,6 @@ class SN_EndDrawingNode(SN_ScriptingBaseNode, bpy.types.Node):
                 if handler_{handler.static_uid}:
                     bpy.types.{handler.draw_space}.draw_handler_remove(handler_{handler.static_uid}[0], 'WINDOW')
                     handler_{handler.static_uid}.pop(0)
+                    for a in bpy.context.screen.areas: a.tag_redraw()
                 {self.indent(self.outputs[0].python_value, 4)}
             """

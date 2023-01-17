@@ -26,6 +26,10 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
         inp = self.add_float_vector_input("Color")
         inp.subtype = "COLOR_ALPHA"
 
+        self.add_enum_input("On Top")["items"] = str(["NONE", "ALWAYS", "LESS", "LESS_EQUAL", "EQUAL", "GREATER", "GREATER_EQUAL"])
+
+        self.add_boolean_input("Backface Culling").default_value = True
+
         inp = self.add_float_vector_input("Bottom Left")
         inp.size = 2
         inp.default_value[0] = 0
@@ -34,21 +38,21 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
 
         inp = self.add_float_vector_input("Bottom Right")
         inp.size = 2
-        inp.default_value[0] = 100
+        inp.default_value[0] = 1
         inp.default_value[1] = 0
         inp.default_value[2] = 0
 
         inp = self.add_float_vector_input("Top Left")
         inp.size = 2
         inp.default_value[0] = 0
-        inp.default_value[1] = 100
-        inp.default_value[2] = 100
+        inp.default_value[1] = 1
+        inp.default_value[2] = 1
 
         inp = self.add_float_vector_input("Top Right")
         inp.size = 2
-        inp.default_value[0] = 100
-        inp.default_value[1] = 100
-        inp.default_value[2] = 100
+        inp.default_value[0] = 1
+        inp.default_value[1] = 1
+        inp.default_value[2] = 1
 
         self.add_execute_output()
         self.ref_ntree = self.node_tree
@@ -89,6 +93,13 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
 
             shader.bind()
             shader.uniform_float("color", {self.inputs["Color"].python_value})
+
+            gpu.state.depth_test_set({self.inputs["On Top"].python_value})
+            gpu.state.depth_mask_set(True)
+
+            gpu.state.face_culling_set("BACK" if {self.inputs["Backface Culling"].python_value} else "NONE")
+
+            gpu.state.blend_set('ALPHA')
             batch.draw(shader)
             {self.indent(self.outputs[0].python_value, 3)}
         """

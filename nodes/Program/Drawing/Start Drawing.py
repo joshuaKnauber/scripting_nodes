@@ -164,6 +164,7 @@ class SN_StartDrawingNode(SN_ScriptingBaseNode, bpy.types.Node):
 
             self.code = f"""
                 handler_{self.static_uid}.append(bpy.types.{self.draw_space}.draw_handler_add({func.func_name}, ({inp_values}), 'WINDOW', '{self.draw_type}'))
+                for a in bpy.context.screen.areas: a.tag_redraw()
                 {self.indent(self.outputs[0].python_value, 4)}
             """
 
