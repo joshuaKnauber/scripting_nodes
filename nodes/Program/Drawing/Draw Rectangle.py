@@ -13,6 +13,8 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
         for input in self.inputs:
             if input.bl_label == "Float Vector" and input.subtype == "NONE":
                 input.size = 3 if self.use_3d else 2
+        self.inputs["On Top"].set_hide(True)
+        self.inputs["Backface Culling"].set_hide(True)
         self._evaluate(context)
 
     use_3d: bpy.props.BoolProperty(name="Use 3D",
@@ -94,10 +96,10 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
             shader.bind()
             shader.uniform_float("color", {self.inputs["Color"].python_value})
 
-            gpu.state.depth_test_set({self.inputs["On Top"].python_value})
-            gpu.state.depth_mask_set(True)
+            {f"gpu.state.depth_test_set({self.inputs['On Top'].python_value})" if self.use_3d else ""}
+            {"gpu.state.depth_mask_set(True)" if self.use_3d else ""}
 
-            gpu.state.face_culling_set("BACK" if {self.inputs["Backface Culling"].python_value} else "NONE")
+            {f"gpu.state.face_culling_set('BACK' if {self.inputs['Backface Culling'].python_value} else 'NONE')" if self.use_3d else ""}
 
             gpu.state.blend_set('ALPHA')
             batch.draw(shader)

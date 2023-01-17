@@ -10,7 +10,10 @@ class SN_DrawModalTextNode(SN_ScriptingBaseNode, bpy.types.Node):
     node_color = "PROGRAM"
 
     def update_use3d(self, context):
-        self.inputs["Position"].size = 3 if self.use_3d else 2
+        if self.use_3d:
+            self.inputs["Position"].size = 3
+        else:
+            self.inputs["Position"].size = 2
         self._evaluate(context)
 
     use_3d: bpy.props.BoolProperty(name="Use 3D", default=False, description="Use 3D coordinates", update=update_use3d)
@@ -27,13 +30,12 @@ class SN_DrawModalTextNode(SN_ScriptingBaseNode, bpy.types.Node):
         inp.default_value = tuple([1]*32)
         
         self.add_float_input("Size").default_value = 20
-        self.add_integer_input("DPI").default_value = 72
 
         self.add_integer_input("Wrap Width").default_value = 0
 
-        inp = self.add_integer_vector_input("Position")
+        inp = self.add_float_vector_input("Position")
         inp.size = 2
-        inp.default_value = [100]*32
+        inp.default_value = [1]*32
 
         self.add_float_input("Rotation")
 
@@ -41,6 +43,11 @@ class SN_DrawModalTextNode(SN_ScriptingBaseNode, bpy.types.Node):
         layout.prop(self, "use_3d")
     
     def evaluate(self, context):
+
+        position_code = f"x_{self.static_uid}, y_{self.static_uid} = {self.inputs['Position'].python_value}"
+        if self.use_3d:
+            position_code = f"x_{self.static_uid}, y_{self.static_uid} = location_3d_to_region_2d(bpy.context.region, bpy.context.space_data.region_3d, tuple({self.inputs['Position'].python_value}))"
+
         self.code = f"""
             font_id = 0
             if {self.inputs["Font"].python_value} and os.path.exists({self.inputs["Font"].python_value}):
@@ -48,8 +55,9 @@ class SN_DrawModalTextNode(SN_ScriptingBaseNode, bpy.types.Node):
             if font_id == -1:
                 print("Couldn't load font!")
             else:
-                blf.position(font_id, {self.inputs["Position"].python_value}[0], {self.inputs["Position"].python_value}[1], {f'{self.inputs["Position"].python_value}[2]' if self.use_3d else '0'})
-                blf.size(font_id, {self.inputs["Size"].python_value}, {self.inputs["DPI"].python_value})
+                {self.indent(position_code, 4)}
+                blf.position(font_id, x_{self.static_uid}, y_{self.static_uid}, 0)
+                blf.size(font_id, {self.inputs["Size"].python_value})
                 clr = {self.inputs["Text Color"].python_value}
                 blf.color(font_id, clr[0], clr[1], clr[2], clr[3])
                 if {self.inputs["Wrap Width"].python_value if "Wrap Width" in self.inputs else "False"}:
@@ -64,7 +72,8 @@ class SN_DrawModalTextNode(SN_ScriptingBaseNode, bpy.types.Node):
                 blf.disable(font_id, blf.WORD_WRAP)
             {self.indent(self.outputs[0].python_value, 3)}
         """
-        self.code_import = """
+        self.code_import = f"""
             import blf
             import os
+            {"from bpy_extras.view3d_utils import location_3d_to_region_2d" if self.use_3d else ""}
             """

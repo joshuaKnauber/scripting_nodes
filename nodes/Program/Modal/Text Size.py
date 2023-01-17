@@ -6,11 +6,11 @@ from ...base_node import SN_ScriptingBaseNode
 class SN_TextSizeNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_TextSizeNode"
-    bl_label = "Modal Text Size"
+    bl_label = "Text Size"
     bl_width_default = 200
 
     def on_create(self, context):
-        self.add_string_input("Text").default_value = "My Modal Text"
+        self.add_string_input("Text").default_value = "My Text"
         self.add_string_input("Font").subtype = "FILE_PATH"
                 
         self.add_float_input("Size").default_value = 20

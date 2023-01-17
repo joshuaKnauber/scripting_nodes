@@ -25,6 +25,7 @@ class SN_DrawPointNode(SN_ScriptingBaseNode, bpy.types.Node):
             self.convert_socket(self.inputs["Location"], self.socket_names["List"])
         else:
             self.convert_socket(self.inputs["Location"], self.socket_names["Float Vector"])
+        self._evaluate(context)
 
 
     use_loc_list: bpy.props.BoolProperty(name="Draw Multiple",
