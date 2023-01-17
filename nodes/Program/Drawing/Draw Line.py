@@ -20,6 +20,19 @@ class SN_DrawLineNode(SN_ScriptingBaseNode, bpy.types.Node):
                                 default=False,
                                 update=update_use3d)
 
+    def update_use_loc_list(self, context):
+        self.inputs["Line Locations"].set_hide(not self.use_loc_list)
+        for inp in self.inputs:
+            if inp.bl_label == "Float Vector" and inp.subtype == "NONE":
+                inp.set_hide(self.use_loc_list)
+        self._evaluate(context)
+
+
+    use_loc_list: bpy.props.BoolProperty(name="Draw Multiple",
+                                description="Whether to draw multiple points (this is more efficient than separate nodes)",
+                                default=False,
+                                update=update_use_loc_list)
+
     def on_create(self, context):
         self.add_execute_input()
 
@@ -42,11 +55,15 @@ class SN_DrawLineNode(SN_ScriptingBaseNode, bpy.types.Node):
         inp.default_value[1] = 1
         inp.default_value[2] = 1
 
+        inp = self.add_list_input("Line Locations")
+        inp.set_hide(True)
+
         self.add_execute_output()
         self.ref_ntree = self.node_tree
 
     def draw_node(self, context, layout):
         layout.prop(self, "use_3d", text="Use 3D")
+        layout.prop(self, "use_loc_list", text="Draw Multiple")
         
     def evaluate(self, context):
         self.code_import = f"""
@@ -57,27 +74,35 @@ class SN_DrawLineNode(SN_ScriptingBaseNode, bpy.types.Node):
         p1 = self.inputs["Point 1"].python_value
         p2 = self.inputs["Point 2"].python_value
 
-        coords = f"""
-            coords = (({p1}[0], {p1}[1]), ({p2}[0], {p2}[1]))
+        lines = f"""
+            lines = [({p1}, {p2})]
         """
-        if self.use_3d:
-            coords = f"""
-            coords = (({p1}[0], {p1}[1], {p1}[2]), ({p2}[0], {p2}[1], {p2}[2]))
-            """
+
+        if self.use_loc_list:
+            lines = f"lines = {self.inputs['Line Locations'].python_value}"
+
+        coords = f"""
+            {lines}
+            coords = []
+            indices = []
+            for i, line in enumerate(lines):
+                coords.extend(line)
+                indices.append((i*2, i*2+1))
+        """
 
         self.code = f"""
             {coords}
 
             shader = gpu.shader.from_builtin('{"3" if self.use_3d else "2"}D_UNIFORM_COLOR')
-            batch = batch_for_shader(shader, 'LINES', {{"pos": coords}})
+            batch = batch_for_shader(shader, 'LINES', {{"pos": coords}}, indices=tuple(indices))
 
             shader.bind()
             shader.uniform_float("color", {self.inputs["Color"].python_value})
 
             gpu.state.line_width_set({self.inputs["Width"].python_value})
 
-            gpu.state.depth_test_set({self.inputs["On Top"].python_value})
-            gpu.state.depth_mask_set(True)
+            {f"gpu.state.depth_test_set({self.inputs['On Top'].python_value})" if self.use_3d else ""}
+            {"gpu.state.depth_mask_set(True)" if self.use_3d else ""}
 
             gpu.state.blend_set('ALPHA')
             batch.draw(shader)

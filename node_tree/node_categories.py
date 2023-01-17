@@ -47,6 +47,8 @@ class SN_OT_SearchNodes(bpy.types.Operator):
         for snippet in flat_snippets:
             name = os.path.basename(snippet).split(".")[0]
             items.append((snippet, name + " (Snippet)", name))
+        items.append(("NodeFrame", "Frame", "Frame"))
+        items.append(("NodeReroute", "Reroute", "Reroute"))
         items = sorted(items, key=lambda x: x[1])
         return items
 

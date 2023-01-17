@@ -13,14 +13,27 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
         for input in self.inputs:
             if input.bl_label == "Float Vector" and input.subtype == "NONE":
                 input.size = 3 if self.use_3d else 2
-        self.inputs["On Top"].set_hide(True)
-        self.inputs["Backface Culling"].set_hide(True)
+        self.inputs["On Top"].set_hide(not self.use_3d)
+        self.inputs["Backface Culling"].set_hide(not self.use_3d)
         self._evaluate(context)
 
     use_3d: bpy.props.BoolProperty(name="Use 3D",
                                 description="Whether to use 3D or 2D coordinates",
                                 default=False,
                                 update=update_use3d)
+
+    def update_use_loc_list(self, context):
+        self.inputs["Quad Locations"].set_hide(not self.use_loc_list)
+        for inp in self.inputs:
+            if inp.bl_label == "Float Vector" and inp.subtype == "NONE":
+                inp.set_hide(self.use_loc_list)
+        self._evaluate(context)
+
+
+    use_loc_list: bpy.props.BoolProperty(name="Draw Multiple",
+                                description="Whether to draw multiple points (this is more efficient than separate nodes)",
+                                default=False,
+                                update=update_use_loc_list)
 
     def on_create(self, context):
         self.add_execute_input()
@@ -56,11 +69,15 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
         inp.default_value[1] = 1
         inp.default_value[2] = 1
 
+        inp = self.add_list_input("Quad Locations")
+        inp.set_hide(True)
+
         self.add_execute_output()
         self.ref_ntree = self.node_tree
 
     def draw_node(self, context, layout):
         layout.prop(self, "use_3d", text="Use 3D")
+        layout.prop(self, "use_loc_list", text="Draw Multiple")
         
     def evaluate(self, context):
         self.code_import = f"""
@@ -73,25 +90,25 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
         tl = self.inputs["Top Left"].python_value
         tr = self.inputs["Top Right"].python_value
 
+        quad_locations = f"quads = [[tuple({bl}), tuple({br}), tuple({tl}), tuple({tr})]]"
+
+        if self.use_loc_list:
+            quad_locations = f"quads = {self.inputs['Quad Locations'].python_value}"
+
         verts = f"""
-            vertices = (
-                ({bl}[0], {bl}[1]), ({br}[0], {br}[1]),
-                ({tl}[0], {tl}[1]), ({tr}[0], {tr}[1]))
+            {quad_locations}
+            vertices = []
+            indices = []
+            for i_{self.static_uid}, quad in enumerate(quads):
+                vertices.extend(quad)
+                indices.extend([(i_{self.static_uid} * 4, i_{self.static_uid} * 4 + 1, i_{self.static_uid} * 4 + 2), (i_{self.static_uid} * 4 + 2, i_{self.static_uid} * 4 + 1, i_{self.static_uid} * 4 + 3)])
         """
-        if self.use_3d:
-            verts = f"""
-            vertices = (
-                ({bl}[0], {bl}[1], {bl}[2]), ({br}[0], {br}[1], {br}[2]),
-                ({tl}[0], {tl}[1], {tl}[2]), ({tr}[0], {tr}[1], {tr}[2]))
-            """
 
         self.code = f"""
             {verts}
 
-            indices = ((0, 1, 2), (2, 1, 3))
-
             shader = gpu.shader.from_builtin('{"3" if self.use_3d else "2"}D_UNIFORM_COLOR')
-            batch = batch_for_shader(shader, 'TRIS', {{"pos": vertices}}, indices=indices)
+            batch = batch_for_shader(shader, 'TRIS', {{"pos": tuple(vertices)}}, indices=tuple(indices))
 
             shader.bind()
             shader.uniform_float("color", {self.inputs["Color"].python_value})
