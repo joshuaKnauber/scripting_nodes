@@ -203,6 +203,12 @@ class SN_OnKeypressNode(SN_ScriptingBaseNode, bpy.types.Node):
                     socket = self._add_input(self.socket_names[prop.property_type + " Vector"], prop.name)
                     socket.size = prop.settings.size
                     socket.can_be_disabled = True
+                elif prop.property_type == "Enum":
+                    if prop.stngs_enum.enum_flag:
+                        socket = self._add_input(self.socket_names["Enum Set"], prop.name)
+                    else:
+                        socket = self._add_input(self.socket_names[prop.property_type], prop.name)
+                    socket.items = str(list(map(lambda item: item.name, prop.stngs_enum.items)))
                 else:
                     self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
                 

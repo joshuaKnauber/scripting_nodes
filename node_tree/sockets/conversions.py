@@ -134,7 +134,7 @@ CONVERSIONS = { # convert KEY to OPTIONS
         "Data": lambda from_out, to_inp: from_out.python_value,
         "Boolean": lambda from_out, to_inp: from_out.python_value,
         "Property": lambda from_out, to_inp: f"{from_out.python_value}[0]",
-        "String": lambda from_out, to_inp: f"str({from_out.python_value}.keys())",
-        "List": lambda from_out, to_inp: f"{from_out.python_value}.values()",
+        "String": lambda from_out, to_inp: f"str({from_out.python_value})",
+        "List": lambda from_out, to_inp: f"list({from_out.python_value})",
     },
 }

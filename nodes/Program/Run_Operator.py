@@ -16,7 +16,10 @@ def on_operator_ref_update(self, node, data, ntree, node_ref_name, input_offset=
                             socket = self.convert_socket(inp, self.socket_names[prop.property_type + " Vector"])
                             socket.size = prop.settings.size
                         else:
-                            socket = self.convert_socket(inp, self.socket_names[prop.property_type])
+                            prop_type = prop.property_type
+                            if prop_type == "Enum" and prop.stngs_enum.enum_flag:
+                                prop_type = "Enum Set"
+                            socket = self.convert_socket(inp, self.socket_names[prop_type])
                     
                         if hasattr(prop.settings, "subtype"):
                             if prop.settings.subtype in socket.subtypes:
@@ -27,6 +30,7 @@ def on_operator_ref_update(self, node, data, ntree, node_ref_name, input_offset=
                         if prop.property_type == "Enum":
                             socket.subtype = "CUSTOM_ITEMS"
                             socket.custom_items.clear()
+                            socket.custom_items_editable = False
                             for item in prop.settings.items:
                                 socket.custom_items.add().name = item.name
 
@@ -106,6 +110,12 @@ class SN_RunOperatorNode(SN_ScriptingBaseNode, bpy.types.Node):
                     socket = self._add_input(self.socket_names[prop.property_type + " Vector"], prop.name)
                     socket.size = prop.settings.size
                     socket.can_be_disabled = True
+                elif prop.property_type == "Enum":
+                    if prop.stngs_enum.enum_flag:
+                        socket = self._add_input(self.socket_names["Enum Set"], prop.name)
+                    else:
+                        socket = self._add_input(self.socket_names[prop.property_type], prop.name)
+                    socket.items = str(list(map(lambda item: item.name, prop.stngs_enum.items)))
                 else:
                     self._add_input(self.socket_names[prop.property_type], prop.name).can_be_disabled = True
 
