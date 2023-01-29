@@ -55,7 +55,6 @@ def get_data(data, path, screen, depth):
         if is_valid_key(key) and is_valid_path(child_path, screen):
             try:
                 try:
-                    # print(data.bl_rna.properties[key].type)
                     if data.bl_rna.properties[key].type == "ENUM":
                         if data.bl_rna.properties[key].is_enum_flag:
                             child_data = set()

@@ -67,7 +67,6 @@ class SN_DrawTriangleNode(SN_ScriptingBaseNode, bpy.types.Node):
         inp.set_hide(True)
 
         self.add_execute_output()
-        self.ref_ntree = self.node_tree
 
     def draw_node(self, context, layout):
         layout.prop(self, "use_3d", text="Use 3D")
@@ -76,7 +75,7 @@ class SN_DrawTriangleNode(SN_ScriptingBaseNode, bpy.types.Node):
     def evaluate(self, context):
         self.code_import = f"""
             import gpu
-            from gpu_extras.batch import batch_for_shader
+            import gpu_extras
         """
 
         c1 = self.inputs["Corner 1"].python_value
@@ -101,7 +100,7 @@ class SN_DrawTriangleNode(SN_ScriptingBaseNode, bpy.types.Node):
             {verts}
 
             shader = gpu.shader.from_builtin('{"3" if self.use_3d else "2"}D_UNIFORM_COLOR')
-            batch = batch_for_shader(shader, 'TRIS', {{"pos": tuple(vertices)}}, indices=tuple(indices))
+            batch = gpu_extras.batch.batch_for_shader(shader, 'TRIS', {{"pos": tuple(vertices)}}, indices=tuple(indices))
 
             shader.bind()
             shader.uniform_float("color", {self.inputs["Color"].python_value})

@@ -36,7 +36,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     # stores functions that need to be called during developement
     function_store = {}
-    
+
     
     compile_time: bpy.props.FloatProperty(name="Compile Time",
                                         description="Time the addon took to compile")
@@ -105,6 +105,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                                         description="If Serpens has an available update or not. This is set on file load.",
                                         default=False)
 
+    
+    def update_recompile(self, context):
+        bpy.ops.sn.force_compile()
+
 
     debug_python_nodes: bpy.props.BoolProperty(default=False,
                                         name="Debug Nodes",
@@ -120,6 +124,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     debug_code: bpy.props.BoolProperty(default=False,
                                         name="Keep Code",
+                                        update=update_recompile,
                                         description="Keeps a python file in the text editor when the code changes")
 
     debug_python_properties: bpy.props.BoolProperty(default=False,
@@ -483,11 +488,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     remove_duplicate_code: bpy.props.BoolProperty(name="Remove Duplicate Code",
                                         description="Removes duplicate code in the generated code (small performance impact for large addons)",
-                                        default=True)
+                                        default=True, update=update_recompile)
     
     format_code: bpy.props.BoolProperty(name="Format Code",
                                         description="Formats linebreaks in the generated code (small performance impact for large addons)",
-                                        default=True)
+                                        default=True, update=update_recompile)
     
     
     def update_watch_scripts(self, context):
