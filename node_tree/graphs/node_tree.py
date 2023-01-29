@@ -154,11 +154,14 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         """ Forces the affected nodes to update depending on if it's a program or data socket """
         for from_out, to_inp, _, _ in links:
             # update data sockets
-            if getattr(to_inp, "is_sn", False) and not to_inp.is_program and to_inp.node:
-                to_inp.force_update()
-            # update program sockets
-            elif getattr(from_out, "is_sn", False) and from_out.is_program and from_out.node:
-                from_out.force_update()
+            try:
+                if getattr(to_inp, "is_sn", False) and not to_inp.is_program and to_inp.node:
+                    to_inp.force_update()
+                # update program sockets
+                elif getattr(from_out, "is_sn", False) and from_out.is_program and from_out.node:
+                    from_out.force_update()
+            except:
+                pass
 
 
     def _call_link_inserts(self, added):

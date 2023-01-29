@@ -667,7 +667,7 @@ class SN_ScriptingBaseNode:
                     prop_type = "String"
             inp = self._add_input(self.socket_names[prop_type], prop.identifier.replace("_", " ").title())
             # get enum items
-            if prop_type == "Enum":
+            if prop_type == "Enum" or prop_type == "Enum Set":
                 inp.items = str(list(map(lambda item: item.identifier, prop.enum_items)))
             elif prop_type == "String" and getattr(prop, "subtype", "NONE") != "NONE":
                 if prop.subtype == "FILEPATH":

@@ -27,6 +27,7 @@ class SN_ObjectToBMeshNode(SN_ScriptingBaseNode, bpy.types.Node):
                     bm_{self.static_uid}.from_mesh({self.inputs["Object"].python_value}.data)
             bm_{self.static_uid}.verts.ensure_lookup_table()
             bm_{self.static_uid}.faces.ensure_lookup_table()
+            bm_{self.static_uid}.edges.ensure_lookup_table()
             {self.indent(self.outputs[0].python_value, 3)}
         """
 
