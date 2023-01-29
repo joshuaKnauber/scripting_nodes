@@ -27,6 +27,7 @@ class SN_BMeshFaceDataNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.add_boolean_output("Hidden")
         self.add_boolean_output("Smooth")
         self.add_integer_output("Index")
+        self.add_integer_output("Material Index")
 
     def draw_node(self, context, layout):
         layout.prop(self, "with_transforms")
@@ -46,8 +47,8 @@ class SN_BMeshFaceDataNode(SN_ScriptingBaseNode, bpy.types.Node):
             self.outputs["Hidden"].python_value = f"{self.inputs['BMesh Face'].python_value}.hide"
             self.outputs["Smooth"].python_value = f"{self.inputs['BMesh Face'].python_value}.smooth"
             self.outputs["Index"].python_value = f"{self.inputs['BMesh Face'].python_value}.index"
+            self.outputs["Material Index"].python_value = f"{self.inputs['BMesh Face'].python_value}.material_index"
         else:
-            self.outputs["Location"].reset_value()
             self.outputs["Normal"].reset_value()
             self.outputs["Index"].reset_value()
             self.outputs["Selected"].reset_value()
@@ -57,3 +58,4 @@ class SN_BMeshFaceDataNode(SN_ScriptingBaseNode, bpy.types.Node):
             self.outputs["Smooth"].reset_value()
             self.outputs["Edges"].reset_value()
             self.outputs["Vertices"].reset_value()
+            self.outputs["Material Index"].reset_value()
