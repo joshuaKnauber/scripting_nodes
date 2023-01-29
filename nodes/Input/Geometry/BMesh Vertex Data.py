@@ -13,8 +13,6 @@ class SN_BMeshVertexDataNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.inputs["Object"].set_hide(not self.with_transforms)
         self._evaluate(context)
 
-    with_transforms: bpy.props.BoolProperty(name="With Transforms", default=False, description="Apply the transforms of the input object", update=update_with_transforms)
-
     def on_create(self, context):
         self.add_property_input("BMesh Vertex")
         self.add_property_input("Object").set_hide(True)
@@ -23,20 +21,20 @@ class SN_BMeshVertexDataNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.add_boolean_output("Selected")
         self.add_boolean_output("Hidden")
         self.add_integer_output("Index")
-
-    def draw_node(self, context, layout):
-        layout.prop(self, "with_transforms")
+        self.add_boolean_output("Is Boundary")
+        self.add_boolean_output("Is Manifold")
+        self.add_boolean_output("Is Wire")
         
     def evaluate(self, context):
         if self.inputs["BMesh Vertex"].is_linked:
-            if self.with_transforms:
-                self.outputs["Location"].python_value = f"({self.inputs['Object'].python_value}.matrix_world @ {self.inputs['BMesh Vertex'].python_value}.co).to_tuple()"
-            else:
-                self.outputs["Location"].python_value = f"{self.inputs['BMesh Vertex'].python_value}.co"
+            self.outputs["Location"].python_value = f"{self.inputs['BMesh Vertex'].python_value}.co"
             self.outputs["Normal"].python_value = f"{self.inputs['BMesh Vertex'].python_value}.normal"
             self.outputs["Selected"].python_value = f"{self.inputs['BMesh Vertex'].python_value}.select"
             self.outputs["Hidden"].python_value = f"{self.inputs['BMesh Vertex'].python_value}.hide"
             self.outputs["Index"].python_value = f"{self.inputs['BMesh Vertex'].python_value}.index"
+            self.outputs["Is Boundary"].python_value = f"{self.inputs['BMesh Vertex'].python_value}.is_boundary"
+            self.outputs["Is Manifold"].python_value = f"{self.inputs['BMesh Vertex'].python_value}.is_manifold"
+            self.outputs["Is Wire"].python_value = f"{self.inputs['BMesh Vertex'].python_value}.is_wire"
         else:
             self.outputs["Location"].reset_value()
             self.outputs["Normal"].reset_value()
@@ -44,3 +42,6 @@ class SN_BMeshVertexDataNode(SN_ScriptingBaseNode, bpy.types.Node):
             self.outputs["Selected"].reset_value()
             self.outputs["Hidden"].reset_value()
             self.outputs["Index"].reset_value()
+            self.outputs["Is Boundary"].reset_value()
+            self.outputs["Is Manifold"].reset_value()
+            self.outputs["Is Wire"].reset_value()
