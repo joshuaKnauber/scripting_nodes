@@ -28,7 +28,8 @@ class SN_AddToListNode(SN_ScriptingBaseNode, bpy.types.Node, VariableReferenceNo
                             description="Method to add the item to the list",
                             items=[("Append", "Append", "Append"),
                                    ("Prepend", "Prepend", "Prepend"),
-                                   ("Insert", "Insert", "Insert")],
+                                   ("Insert", "Insert", "Insert"),
+                                   ("Extend", "Extend", "Extend")],
                             update=update_method)
 
 
@@ -48,6 +49,11 @@ class SN_AddToListNode(SN_ScriptingBaseNode, bpy.types.Node, VariableReferenceNo
             elif self.method == "Insert":
                 self.code = f"""
                             {var.data_path}.insert({self.inputs['Index'].python_value}, {self.inputs[1].python_value})
+                            {self.indent(self.outputs[0].python_value, 7)}
+                            """
+            elif self.method == "Extend":
+                self.code = f"""
+                            {var.data_path}.extend({self.inputs[1].python_value})
                             {self.indent(self.outputs[0].python_value, 7)}
                             """
         else:
