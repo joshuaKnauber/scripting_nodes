@@ -6,7 +6,7 @@ from ...base_node import SN_ScriptingBaseNode
 class SN_BMeshDataNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_BMeshDataNode"
-    bl_label = "BMesh Data"
+    bl_label = "BMesh Object Data"
     node_color = "PROPERTY"
 
     def on_create(self, context):
