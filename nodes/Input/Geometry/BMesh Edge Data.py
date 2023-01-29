@@ -13,26 +13,22 @@ class SN_BMeshEdgeDataNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.inputs["Object"].set_hide(not self.with_transforms)
         self._evaluate(context)
 
-    with_transforms: bpy.props.BoolProperty(name="With Transforms", default=False, description="Apply the transforms of the input object", update=update_with_transforms)
-
     def on_create(self, context):
         self.add_property_input("BMesh Edge")
         self.add_property_input("Object").set_hide(True)
         self.add_collection_property_output("Vertices")
         self.add_collection_property_output("Faces")
-        self.add_float_vector_output("Is Boundary")
-        self.add_float_vector_output("Is Contiguous")
-        self.add_float_vector_output("Is Convex")
-        self.add_float_vector_output("Is Wire")
-        self.add_float_vector_output("Is Seam")
         self.add_boolean_output("Selected")
         self.add_boolean_output("Hidden")
         self.add_boolean_output("Smooth")
         self.add_integer_output("Index")
+        self.add_boolean_output("Is Manifold")
+        self.add_boolean_output("Is Boundary")
+        self.add_boolean_output("Is Contiguous")
+        self.add_boolean_output("Is Convex")
+        self.add_boolean_output("Is Wire")
+        self.add_boolean_output("Is Seam")
 
-    def draw_node(self, context, layout):
-        layout.prop(self, "with_transforms")
-        
     def evaluate(self, context):
         if self.inputs["BMesh Edge"].is_linked:
             self.outputs["Faces"].python_value = f"{self.inputs['BMesh Edge'].python_value}.link_faces"
@@ -46,6 +42,7 @@ class SN_BMeshEdgeDataNode(SN_ScriptingBaseNode, bpy.types.Node):
             self.outputs["Hidden"].python_value = f"{self.inputs['BMesh Edge'].python_value}.hide"
             self.outputs["Smooth"].python_value = f"{self.inputs['BMesh Edge'].python_value}.smooth"
             self.outputs["Index"].python_value = f"{self.inputs['BMesh Edge'].python_value}.index"
+            self.outputs["Is Manifold"].python_value = f"{self.inputs['BMesh Edge'].python_value}.is_manifold"
         else:
             self.outputs["Index"].reset_value()
             self.outputs["Selected"].reset_value()
@@ -58,3 +55,4 @@ class SN_BMeshEdgeDataNode(SN_ScriptingBaseNode, bpy.types.Node):
             self.outputs["Is Seam"].reset_value()
             self.outputs["Vertices"].reset_value()
             self.outputs["Faces"].reset_value()
+            self.outputs["Is Manifold"].reset_value()
