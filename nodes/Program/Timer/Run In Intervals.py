@@ -28,7 +28,7 @@ class SN_RunInIntervalsNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.add_execute_output("Instant")
 
     def draw_node(self, context, layout):
-        layout.prop(self, "emergency_stop", text="Manual Stop", toggle=True)
+        layout.prop(self, "emergency_stop", text="Manual Stop", toggle=True, invert_checkbox=self.static_uid in bpy.context.scene.sn.function_store)
 
     def evaluate(self, context):
         self.code = f"""
