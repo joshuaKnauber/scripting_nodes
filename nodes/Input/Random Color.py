@@ -30,4 +30,4 @@ class SN_RandomColorNode(SN_ScriptingBaseNode, bpy.types.Node):
             else:
                 return (random.uniform(0, 1), random.uniform(0, 1), random.uniform(0, 1))
         """
-        self.outputs[0].python_value = f"random_color({self.inputs['Use Alpha'].python_value}, {'None' if not self.inputs['Fixed Alpha'].disabled else self.inputs['Fixed Alpha'].python_value}, {'None' if self.inputs['Seed'].disabled else self.inputs['Seed'].python_value})"
+        self.outputs[0].python_value = f"random_color({self.inputs['Use Alpha'].python_value}, {'None' if self.inputs['Fixed Alpha'].disabled else self.inputs['Fixed Alpha'].python_value}, {'None' if self.inputs['Seed'].disabled else self.inputs['Seed'].python_value})"
