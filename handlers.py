@@ -6,6 +6,7 @@ from .nodes.compiler import compile_addon, unregister_addon
 from .settings.updates import check_serpens_updates
 from .settings.easybpy import check_easy_bpy_install
 from .settings.handle_script_changes import unwatch_script_changes, watch_script_changes, update_script_nodes
+from .settings.live_variable_debug import start_live_variable_debug, stop_live_variable_debug
 from .extensions.snippet_ops import load_snippets
 from .msgbus import subscribe_to_name_change
 
@@ -37,6 +38,8 @@ def load_handler(dummy):
         unwatch_script_changes()
         if bpy.context.scene.sn.watch_script_changes:
             watch_script_changes()
+        if bpy.context.scene.sn.live_variable_debug:
+            start_live_variable_debug()
 
 
 
@@ -45,6 +48,7 @@ def unload_handler(dummy=None):
     if hasattr(bpy.context.scene, "sn"):
         unwatch_script_changes()
         unregister_addon()
+        stop_live_variable_debug()
 
 
 

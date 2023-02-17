@@ -36,6 +36,9 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                                         name="Node References",
                                         description="A collection of groups that hold references to nodes of a specific idname")
 
+    show_debug: bpy.props.BoolProperty(name="Show Debug", default=True,
+                                        description="Show node tree data in the debug panel")
+
 
     # cache python names so they only have to be generated once
     cached_python_names = {}

@@ -12,6 +12,7 @@ from ..node_tree.graphs.graph_category_ops import SN_GraphCategory
 from ..addon.assets.assets import SN_AssetProperties
 from ..utils import get_python_name
 from .load_markets import SN_Addon, SN_Package, SN_Snippet
+from .live_variable_debug import start_live_variable_debug, stop_live_variable_debug
 from ..extensions.snippet_ops import SN_BoolCollection, SN_SnippetCategory
 from ..nodes.compiler import compile_addon
 from . import global_search
@@ -36,6 +37,10 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     # stores functions that need to be called during developement
     function_store = {}
+
+
+    # stores the module store for the current addon
+    module_store = []
 
     
     compile_time: bpy.props.FloatProperty(name="Compile Time",
@@ -509,3 +514,15 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     multifile: bpy.props.BoolProperty(name="Multifile",
                                         description="Export the separate node trees as separate python files",
                                         default=False)
+
+
+    def update_live_variable_debug(self, context):
+        if self.live_variable_debug:
+            start_live_variable_debug()
+        else:
+            stop_live_variable_debug()
+
+    live_variable_debug: bpy.props.BoolProperty(name="Live Variable Debug",
+                                        description="Live debug variables in the debug panel",
+                                        default=False,
+                                        update=update_live_variable_debug)

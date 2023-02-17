@@ -140,6 +140,11 @@ def format_single_file():
     main += "\n" + property_imperative_code() + "\n"
     t6 = time.time()
 
+    # add module store code
+    if not sn.is_exporting:
+        register += "\n\nimport sys\nbpy.context.scene.sn.module_store.append([globals()])\n"
+        unregister += "\n\nbpy.context.scene.sn.module_store.clear()\n"
+
     # format register functions
     if not register.strip():
         register = "pass\n"
