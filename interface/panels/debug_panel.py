@@ -53,7 +53,9 @@ class SN_PT_DebugPanel(bpy.types.Panel):
                         subcol = box.column(align=True)
                         subcol.label(text=f"{ntree.name}:")
                         for var in sn.module_store[0][0][ntree.python_name]:
+                            var_data = list(filter(lambda v: v.python_name == var, ntree.variables))
+                            name = var if not var_data else var_data[0].name
                             row = subcol.row()
                             row.active = False
-                            row.label(text=f"{var}:")
+                            row.label(text=f"{name}:")
                             subcol.label(text=str(sn.module_store[0][0][ntree.python_name][var]))
