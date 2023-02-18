@@ -5,7 +5,7 @@ class SN_PT_NodeTreeDebugPopover(bpy.types.Panel):
     bl_idname = "SN_PT_NodeTreeDebugPopover"
     bl_label = "Node Trees"
     bl_space_type = "NODE_EDITOR"
-    bl_region_type = "UI"
+    bl_region_type = "HEADER"
 
     def draw(self, context):
         layout = self.layout
