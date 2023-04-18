@@ -1,15 +1,12 @@
 import bpy
 from ...base_node import SN_ScriptingBaseNode
-from ....settings.data_properties import get_item_type
-
+from ....properties.data_properties import get_item_type
 
 
 class SN_OverrideItem(bpy.types.PropertyGroup):
-
     name: bpy.props.StringProperty(name="Name", default="")
     identifier: bpy.props.StringProperty(name="Identifier", default="")
     type: bpy.props.StringProperty(name="Type", default="")
-
 
 
 class SN_OT_AddOverrideInput(bpy.types.Operator):
@@ -33,9 +30,10 @@ class SN_OT_AddOverrideInput(bpy.types.Operator):
             print(f"Value of {self.name}:")
             print(context.scene.sn.copied_context[0][self.identifier])
             print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - ")
-            self.report({"INFO"}, f"Printed the current value of {self.name} in the console")
+            self.report(
+                {"INFO"}, f"Printed the current value of {self.name} in the console"
+            )
         return {"FINISHED"}
-
 
 
 class SN_OT_AddOverride(bpy.types.Operator):
@@ -64,7 +62,11 @@ class SN_OT_AddOverride(bpy.types.Operator):
             layout.label(text=ctxt)
             layout.prop_search(self, "override", self, "overrides", text="")
             row = layout.row()
-            item = None if not self.override in self.overrides.keys() else self.overrides[self.override]
+            item = (
+                None
+                if not self.override in self.overrides.keys()
+                else self.overrides[self.override]
+            )
             row.enabled = item != None
             op = row.operator("sn.add_override_input", text="Add", icon="ADD")
             op.node = self.node
@@ -88,9 +90,7 @@ class SN_OT_AddOverride(bpy.types.Operator):
         return context.window_manager.invoke_popup(self, width=300)
 
 
-
 class SN_OverrideContextNode(SN_ScriptingBaseNode, bpy.types.Node):
-
     bl_idname = "SN_OverrideContextNode"
     bl_label = "Override Context"
     node_color = "PROGRAM"
@@ -105,7 +105,7 @@ class SN_OverrideContextNode(SN_ScriptingBaseNode, bpy.types.Node):
         overrides = ""
         override_vars = []
         for inp in self.inputs[1:]:
-            identifier = inp.name.lower().replace(' ', '_')
+            identifier = inp.name.lower().replace(" ", "_")
             var_name = f"{identifier}_{self.static_uid}"
             override_vars.append(f"{var_name} = {inp.python_value}")
             overrides += f"{identifier}={var_name}, "
@@ -115,8 +115,10 @@ class SN_OverrideContextNode(SN_ScriptingBaseNode, bpy.types.Node):
                         {self.indent(self.outputs[0].python_value, 6) if self.indent(self.outputs[0].python_value, 6).strip() else "pass"}
                     {self.indent(self.outputs[1].python_value, 5)}
                     """
-                    
+
     def draw_node(self, context, layout):
         row = layout.row()
         row.scale_y = 1.25
-        row.operator("sn.add_override", text="Add Override", icon="ADD").node = self.name
+        row.operator(
+            "sn.add_override", text="Add Override", icon="ADD"
+        ).node = self.name

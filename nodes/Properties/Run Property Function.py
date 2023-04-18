@@ -1,11 +1,10 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from .Blender_Property import segment_is_indexable, data_path_from_inputs
-from ...settings.data_properties import bpy_to_indexed_sections, bpy_to_path_sections
+from ...properties.data_properties import bpy_to_indexed_sections, bpy_to_path_sections
 
 
 class SN_RunPropertyFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
-
     bl_idname = "SN_RunPropertyFunctionNode"
     bl_label = "Run Property Function"
     node_color = "PROPERTY"
@@ -31,7 +30,7 @@ class SN_RunPropertyFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
         return None
 
     def add_socket_from_param(self, param, callback):
-        """ Adds a socket from the given parameter with the given add callback """
+        """Adds a socket from the given parameter with the given add callback"""
         sn = bpy.context.scene.sn
         socket_type = param.split(": ")[-1].split("[")[0]
         param_name = param.split(": ")[0]
@@ -41,15 +40,18 @@ class SN_RunPropertyFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
         socket = callback(self.socket_names[socket_type], socket_name)
         socket.can_be_disabled = True
         socket.disabled = True
-        if sn.last_copied_datapath == self.pasted_data_path and param_name in sn.last_copied_required.split(";"):
+        if (
+            sn.last_copied_datapath == self.pasted_data_path
+            and param_name in sn.last_copied_required.split(";")
+        ):
             socket.disabled = False
         if socket_type == "Enum" or socket_type == "Enum Set":
             socket.items = f"[{param.split(': ')[-1].split('[')[-1]}"
 
     def create_inputs_from_path(self):
-        """ Creates the inputs for the given data path """
+        """Creates the inputs for the given data path"""
         # remove existing inputs
-        for _ in range(len(self.inputs)-1):
+        for _ in range(len(self.inputs) - 1):
             self.inputs.remove(self.inputs[1])
         # create blend data path inputs
         data = self.get_data()
@@ -59,25 +61,24 @@ class SN_RunPropertyFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
                     name = segment.split("[")[0].replace("_", " ").title()
                     if '"' in segment or "'" in segment:
                         inp = self.add_string_input(name)
-                        inp["default_value"] = segment.split(
-                            "[")[-1].split("]")[0][1:-1]
+                        inp["default_value"] = segment.split("[")[-1].split("]")[0][
+                            1:-1
+                        ]
                         inp.index_type = "String"
                     else:
                         inp = self.add_integer_input(name)
-                        inp["default_value"] = int(
-                            segment.split("[")[-1].split("]")[0])
+                        inp["default_value"] = int(segment.split("[")[-1].split("]")[0])
                         inp.index_type = "Integer"
                     inp.indexable = True
             # create parameter inputs
-            params = self.pasted_data_path.split(
-                "(")[-1].split(")")[0].split(", ")
+            params = self.pasted_data_path.split("(")[-1].split(")")[0].split(", ")
             for param in params:
                 if param.strip():
                     self.add_socket_from_param(param, self._add_input)
 
     def create_outputs_from_path(self):
         # remove existing outputs
-        for _ in range(len(self.outputs)-1):
+        for _ in range(len(self.outputs) - 1):
             self.outputs.remove(self.outputs[1])
         # add new outputs
         if " = " in self.pasted_data_path:
@@ -87,7 +88,12 @@ class SN_RunPropertyFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     def get_pasted_prop_name(self, offset=-1):
         if self.pasted_data_path:
-            return self.pasted_data_path.split(".")[offset].split("(")[0].replace("_", " ").title()
+            return (
+                self.pasted_data_path.split(".")[offset]
+                .split("(")[0]
+                .replace("_", " ")
+                .title()
+            )
         return "Property Function"
 
     def on_prop_change(self, context):
@@ -100,9 +106,11 @@ class SN_RunPropertyFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.disable_evaluation = False
         self._evaluate(context)
 
-    pasted_data_path: bpy.props.StringProperty(name="Pasted Path",
-                                               description="The full data path to the property",
-                                               update=on_prop_change)
+    pasted_data_path: bpy.props.StringProperty(
+        name="Pasted Path",
+        description="The full data path to the property",
+        update=on_prop_change,
+    )
 
     def on_create(self, context):
         self.add_execute_input()
@@ -113,9 +121,12 @@ class SN_RunPropertyFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.outputs[0].set_hide(not self.require_execute)
         self._evaluate(context)
 
-    require_execute: bpy.props.BoolProperty(name="Require Execute", default=True,
-                                            description="Removes the execute inputs and only gives you the return value",
-                                            update=update_require_execute)
+    require_execute: bpy.props.BoolProperty(
+        name="Require Execute",
+        default=True,
+        description="Removes the execute inputs and only gives you the return value",
+        update=update_require_execute,
+    )
 
     def evaluate(self, context):
         data = self.get_data()
@@ -124,11 +135,15 @@ class SN_RunPropertyFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
             function = data_path_from_inputs(inps, data) + "("
 
             # add function parameters
-            inp_params = list(filter(lambda inp: inp.strip(), self.pasted_data_path.split(
-                "(")[-1].split(")")[0].split(", ")))
+            inp_params = list(
+                filter(
+                    lambda inp: inp.strip(),
+                    self.pasted_data_path.split("(")[-1].split(")")[0].split(", "),
+                )
+            )
             for i, param in enumerate(inp_params):
                 param = param.split(": ")[0]
-                param_inp = self.inputs[len(self.inputs) - len(inp_params)+i]
+                param_inp = self.inputs[len(self.inputs) - len(inp_params) + i]
                 if not param_inp.disabled:
                     if param[-1] == "*":
                         function += f"{param_inp.python_value}, "
@@ -137,15 +152,19 @@ class SN_RunPropertyFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
             function += ")"
 
             # add output parameters
-            out_params = list(filter(lambda inp: inp.strip(
-            ), self.pasted_data_path.split(" = ")[-1].split(", ")))
+            out_params = list(
+                filter(
+                    lambda inp: inp.strip(),
+                    self.pasted_data_path.split(" = ")[-1].split(", "),
+                )
+            )
             if self.require_execute:
                 results = ""
                 if " = " in self.pasted_data_path:
                     for i, param in enumerate(out_params):
                         name = param.split(": ")[0] + f"_{self.static_uid}"
                         results += f"{name}, "
-                        self.outputs[i+1].python_value = name
+                        self.outputs[i + 1].python_value = name
                 if results:
                     results = results[:-2] + " = "
                 # code
@@ -165,8 +184,13 @@ class SN_RunPropertyFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
     def draw_node(self, context, layout):
         row = layout.row(align=True)
         row.scale_y = 1.2
-        op = row.operator("sn.paste_data_path", text=self.get_pasted_prop_name(
-        ) if self.pasted_data_path else "Paste Function", icon="PASTEDOWN")
+        op = row.operator(
+            "sn.paste_data_path",
+            text=self.get_pasted_prop_name()
+            if self.pasted_data_path
+            else "Paste Function",
+            icon="PASTEDOWN",
+        )
         op.node = self.name
         op.node_tree = self.node_tree.name
         if self.pasted_data_path:

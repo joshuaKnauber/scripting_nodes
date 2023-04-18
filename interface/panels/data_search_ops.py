@@ -1,6 +1,10 @@
 import bpy
-from ...settings.data_properties import get_data_items, item_from_path, filter_items, filter_defaults
-
+from ...properties.data_properties import (
+    get_data_items,
+    item_from_path,
+    filter_items,
+    filter_defaults,
+)
 
 
 class SN_OT_ShowDataOverview(bpy.types.Operator):
@@ -20,8 +24,6 @@ class SN_OT_ShowDataOverview(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
-
 class SN_OT_ExitDataSearch(bpy.types.Operator):
     bl_idname = "sn.exit_search"
     bl_label = "Exit Data Search"
@@ -33,16 +35,15 @@ class SN_OT_ExitDataSearch(bpy.types.Operator):
         return {"FINISHED"}
 
 
-    
 class SN_OT_ExpandData(bpy.types.Operator):
     bl_idname = "sn.expand_data"
     bl_label = "Expand Data"
     bl_description = "Loads the items for the given item"
     bl_options = {"REGISTER", "INTERNAL"}
-    
+
     path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
-    def execute(self, context): 
+    def execute(self, context):
         sn = context.scene.sn
 
         if "bpy.ops" in self.path:
@@ -63,14 +64,13 @@ class SN_OT_ExpandData(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_ExpandAllOperators(bpy.types.Operator):
     bl_idname = "sn.expand_operators"
     bl_label = "Expand Operators"
     bl_description = "Expands all operators"
     bl_options = {"REGISTER", "INTERNAL"}
-    
-    def execute(self, context): 
+
+    def execute(self, context):
         sn = context.scene.sn
         if sn.ops_items["operators"]:
             expand = not list(sn.ops_items["operators"].values())[0]["expanded"]
@@ -80,13 +80,12 @@ class SN_OT_ExpandAllOperators(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_FilterData(bpy.types.Operator):
     bl_idname = "sn.filter_data"
     bl_label = "Filter Data"
     bl_description = "Filters this items data"
     bl_options = {"REGISTER", "INTERNAL"}
-    
+
     path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def update_filters(self, context):
@@ -94,30 +93,34 @@ class SN_OT_FilterData(bpy.types.Operator):
         item["data_search"] = self.data_search
         item["data_filter"] = self.data_filter
 
-    data_search: bpy.props.StringProperty(default="",
-                                    options={"SKIP_SAVE", "HIDDEN", "TEXTEDIT_UPDATE"},
-                                    update=update_filters)
-    
-    data_filter: bpy.props.EnumProperty(name="Type",
-                                        options={"ENUM_FLAG"},
-                                        description="Filter by data type",
-                                        items=filter_items,
-                                        default=filter_defaults,
-                                        update=update_filters)
+    data_search: bpy.props.StringProperty(
+        default="",
+        options={"SKIP_SAVE", "HIDDEN", "TEXTEDIT_UPDATE"},
+        update=update_filters,
+    )
+
+    data_filter: bpy.props.EnumProperty(
+        name="Type",
+        options={"ENUM_FLAG"},
+        description="Filter by data type",
+        items=filter_items,
+        default=filter_defaults,
+        update=update_filters,
+    )
 
     def update_reset(self, context):
         if not self.reset:
             self["reset"] = True
             self.data_search = ""
             self.data_filter = filter_defaults
-    
-    reset: bpy.props.BoolProperty(name="Reset", default=True,
-                                description="Reset the filters",
-                                update=update_reset)
+
+    reset: bpy.props.BoolProperty(
+        name="Reset", default=True, description="Reset the filters", update=update_reset
+    )
 
     def execute(self, context):
         return {"FINISHED"}
-    
+
     def draw(self, context):
         layout = self.layout
         layout.label(text="Search:")
@@ -127,7 +130,7 @@ class SN_OT_FilterData(bpy.types.Operator):
         layout.separator()
         col = layout.column()
         col.prop(self, "data_filter", expand=True)
-    
+
     def invoke(self, context, event):
         item = item_from_path(context.scene.sn.data_items, self.path)
         last_filter = item["data_filter"]
@@ -135,8 +138,7 @@ class SN_OT_FilterData(bpy.types.Operator):
         self.data_filter = last_filter
         self.data_search = last_search
         return context.window_manager.invoke_popup(self, width=300)
-    
-    
+
 
 class SN_OT_ResetFilters(bpy.types.Operator):
     bl_idname = "sn.reset_filters"
@@ -152,7 +154,6 @@ class SN_OT_ResetFilters(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_ReloadData(bpy.types.Operator):
     bl_idname = "sn.reload_data"
     bl_label = "Reload Data"
@@ -162,9 +163,8 @@ class SN_OT_ReloadData(bpy.types.Operator):
     def execute(self, context):
         context.scene.sn.hide_preferences = True
         return {"FINISHED"}
-    
-    
-    
+
+
 class SN_OT_ResetItemFilters(bpy.types.Operator):
     bl_idname = "sn.reset_item_filters"
     bl_label = "Reset Item Filters"
@@ -184,7 +184,6 @@ class SN_OT_ResetItemFilters(bpy.types.Operator):
             item["expanded"] = False
             self.report({"ERROR"}, message="This data doesn't exist anymore!")
         return {"FINISHED"}
-
 
 
 class SN_OT_ReloadItemData(bpy.types.Operator):
@@ -207,7 +206,6 @@ class SN_OT_ReloadItemData(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_CopyDataPath(bpy.types.Operator):
     bl_idname = "sn.copy_data_path"
     bl_label = "Copy Data Path"
@@ -227,7 +225,6 @@ class SN_OT_CopyDataPath(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_AddToSearch(bpy.types.Operator):
     bl_idname = "sn.add_to_search"
     bl_label = "Add To Search"
@@ -239,9 +236,9 @@ class SN_OT_AddToSearch(bpy.types.Operator):
     def execute(self, context):
         sn = context.scene.sn
         if sn.discover_search.startswith(self.section):
-            sn.discover_search = sn.discover_search[len(self.section)+1:]
+            sn.discover_search = sn.discover_search[len(self.section) + 1 :]
         elif sn.discover_search.endswith(self.section):
-            sn.discover_search = sn.discover_search[:-len(self.section)-1]
+            sn.discover_search = sn.discover_search[: -len(self.section) - 1]
         elif f",{self.section}," in sn.discover_search:
             sn.discover_search = sn.discover_search.replace(f",{self.section},", ",")
         else:

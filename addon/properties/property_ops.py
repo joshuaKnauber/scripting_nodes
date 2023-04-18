@@ -1,7 +1,5 @@
 import bpy
 from ...nodes.compiler import compile_addon
-from ...interface.panels.property_ui_list import get_selected_property, get_selected_property_offset
-
 
 
 class SN_OT_AddProperty(bpy.types.Operator):
@@ -14,12 +12,12 @@ class SN_OT_AddProperty(bpy.types.Operator):
         sn = context.scene.sn
         new_prop = sn.properties.add()
         new_prop.name = "New Property"
-        if sn.active_prop_category: new_prop.category = sn.active_prop_category
+        if sn.active_prop_category:
+            new_prop.category = sn.active_prop_category
         for index, property in enumerate(sn.properties):
             if property == new_prop:
                 sn.property_index = index
         return {"FINISHED"}
-
 
 
 class SN_OT_RemoveProperty(bpy.types.Operator):
@@ -40,7 +38,6 @@ class SN_OT_RemoveProperty(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_RemoveGroupProperty(bpy.types.Operator):
     bl_idname = "sn.remove_group_property"
     bl_label = "Remove Property"
@@ -56,7 +53,6 @@ class SN_OT_RemoveGroupProperty(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_MoveProperty(bpy.types.Operator):
     bl_idname = "sn.move_property"
     bl_label = "Move Property"
@@ -66,21 +62,20 @@ class SN_OT_MoveProperty(bpy.types.Operator):
     move_up: bpy.props.BoolProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
-        sn = context.scene.sn
-        if self.move_up:
-            before = get_selected_property_offset(-1)
-            new_index = list(sn.properties).index(before)
-            sn.properties.move(sn.property_index, new_index)
-            sn.property_index = new_index
-        else:
-            after = get_selected_property_offset(1)
-            new_index = list(sn.properties).index(after)
-            sn.properties.move(sn.property_index, new_index)
-            sn.property_index = new_index
+        # sn = context.scene.sn
+        # if self.move_up:
+        #     before = get_selected_property_offset(-1)
+        #     new_index = list(sn.properties).index(before)
+        #     sn.properties.move(sn.property_index, new_index)
+        #     sn.property_index = new_index
+        # else:
+        #     after = get_selected_property_offset(1)
+        #     new_index = list(sn.properties).index(after)
+        #     sn.properties.move(sn.property_index, new_index)
+        #     sn.property_index = new_index
         return {"FINISHED"}
-    
-    
-    
+
+
 class SN_OT_DuplicateProperty(bpy.types.Operator):
     bl_idname = "sn.duplicate_property"
     bl_label = "Duplicate Property"
@@ -88,14 +83,13 @@ class SN_OT_DuplicateProperty(bpy.types.Operator):
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
     def execute(self, context):
-        sn = context.scene.sn
-        prop = get_selected_property()
-        if prop:
-            prop.copy()
-            sn.properties.move(len(sn.properties)-1, sn.property_index+1)
-            sn.property_index += 1
+        # sn = context.scene.sn
+        # prop = get_selected_property()
+        # if prop:
+        #     prop.copy()
+        #     sn.properties.move(len(sn.properties)-1, sn.property_index+1)
+        #     sn.property_index += 1
         return {"FINISHED"}
-
 
 
 class SN_OT_MoveGroupProperty(bpy.types.Operator):
@@ -117,7 +111,6 @@ class SN_OT_MoveGroupProperty(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_CopyPythonName(bpy.types.Operator):
     bl_idname = "sn.copy_python_name"
     bl_label = "Copy Python Name"
@@ -130,7 +123,6 @@ class SN_OT_CopyPythonName(bpy.types.Operator):
         context.window_manager.clipboard = self.name
         self.report({"INFO"}, message="Copied!")
         return {"FINISHED"}
-
 
 
 class SN_OT_AddEnumItem(bpy.types.Operator):
@@ -146,7 +138,6 @@ class SN_OT_AddEnumItem(bpy.types.Operator):
         item = items.add()
         item.update(context)
         return {"FINISHED"}
-
 
 
 class SN_OT_RemoveEnumItem(bpy.types.Operator):
@@ -165,7 +156,6 @@ class SN_OT_RemoveEnumItem(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_MoveEnumItem(bpy.types.Operator):
     bl_idname = "sn.move_enum_item"
     bl_label = "Move Enum Item"
@@ -174,18 +164,17 @@ class SN_OT_MoveEnumItem(bpy.types.Operator):
 
     settings_data_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
     item_index: bpy.props.IntProperty(options={"SKIP_SAVE", "HIDDEN"})
-    
+
     move_up: bpy.props.BoolProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
         settings = eval(self.settings_data_path)
         if self.move_up:
-            settings.items.move(self.item_index, self.item_index-1)
+            settings.items.move(self.item_index, self.item_index - 1)
         else:
-            settings.items.move(self.item_index, self.item_index+1)
+            settings.items.move(self.item_index, self.item_index + 1)
         settings.compile(context)
         return {"FINISHED"}
-
 
 
 class SN_OT_AddPropertyItem(bpy.types.Operator):
@@ -203,18 +192,17 @@ class SN_OT_AddPropertyItem(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_AddPropertyNodePopup(bpy.types.Operator):
     bl_idname = "sn.add_property_node_popup"
     bl_label = "Add Property Node Popup"
     bl_description = "Opens a popup to let you choose a property node"
     bl_options = {"REGISTER", "INTERNAL"}
-    
+
     node: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
 
     def execute(self, context):
         return {"FINISHED"}
-    
+
     def draw(self, context):
         layout = self.layout
         col = layout.column(align=True)
@@ -231,11 +219,10 @@ class SN_OT_AddPropertyNodePopup(bpy.types.Operator):
         op = col.operator("sn.add_property_node", text="On Property Update", icon="ADD")
         op.type = "SN_OnPropertyUpdateNode"
         op.node = self.node
-        
+
     def invoke(self, context, event):
         return context.window_manager.invoke_popup(self)
-    
-    
+
 
 class SN_OT_AddPropertyNode(bpy.types.Operator):
     bl_idname = "sn.add_property_node"
@@ -258,16 +245,15 @@ class SN_OT_AddPropertyNode(bpy.types.Operator):
         elif context.scene.sn.property_index < len(context.scene.sn.properties):
             prop = context.scene.sn.properties[context.scene.sn.property_index]
 
-        if prop:            
+        if prop:
             if self.type in ["SN_SerpensPropertyNode", "SN_OnPropertyUpdateNode"]:
                 if self.node:
                     node.prop_source = "NODE"
                     node.from_node = self.node
                 node.prop_name = prop.name
         return {"FINISHED"}
-    
-    
-    
+
+
 class SN_OT_FindProperty(bpy.types.Operator):
     bl_idname = "sn.find_property"
     bl_label = "Find Property"
@@ -276,10 +262,10 @@ class SN_OT_FindProperty(bpy.types.Operator):
 
     def execute(self, context):
         return {"FINISHED"}
-    
+
     def draw(self, context):
         layout = self.layout
-        
+
         # init property nodes
         empty_nodes = []
         property_nodes = []
@@ -299,35 +285,39 @@ class SN_OT_FindProperty(bpy.types.Operator):
                                 property_nodes.append(node)
                         elif not prop_src or not node.prop_name:
                             empty_nodes.append(node)
-                        
-        # draw nodes for selected property    
+
+        # draw nodes for selected property
         if context.scene.sn.property_index < len(context.scene.sn.properties):
             col = layout.column()
             row = col.row()
             row.enabled = False
             row.label(text=f"Property: {property.name}")
-            
+
             for node in property_nodes:
-                op = col.operator("sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF")
+                op = col.operator(
+                    "sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF"
+                )
                 op.node_tree = node.node_tree.name
                 op.node = node.name
-            
+
             if not property_nodes:
                 col.label(text="No nodes found for this property", icon="INFO")
-        
+
         # draw nodes with empty property
         col = layout.column()
         row = col.row()
         row.label(text="Empty Propert Nodes")
         row.enabled = False
-        
+
         for node in empty_nodes:
-            op = col.operator("sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF")
+            op = col.operator(
+                "sn.find_node", text=node.name, icon="RESTRICT_SELECT_OFF"
+            )
             op.node_tree = node.node_tree.name
             op.node = node.name
 
         if not empty_nodes:
             col.label(text="No empty property nodes found", icon="INFO")
-    
+
     def invoke(self, context, event):
         return context.window_manager.invoke_popup(self, width=250)

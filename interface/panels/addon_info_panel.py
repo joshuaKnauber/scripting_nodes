@@ -1,29 +1,33 @@
 import bpy
 
 
-
 class SN_PT_AddonInfoPanel(bpy.types.Panel):
     bl_idname = "SN_PT_AddonInfoPanel"
-    bl_label = ""
-    bl_space_type = 'NODE_EDITOR'
-    bl_region_type = 'UI'
+    bl_label = "Addon Info"
+    bl_space_type = "NODE_EDITOR"
+    bl_region_type = "UI"
     bl_category = "Serpens"
-    bl_options = {"DEFAULT_CLOSED", "HEADER_LAYOUT_EXPAND"}
-    bl_order = 4
+    bl_options = {"DEFAULT_CLOSED"}
+    bl_order = 0
 
     @classmethod
     def poll(cls, context):
-        return context.space_data.tree_type == "ScriptingNodesTree" and context.space_data.node_tree
-    
+        return (
+            context.space_data.tree_type == "ScriptingNodesTree"
+            and context.space_data.node_tree
+        )
+
     def draw_header(self, context):
         layout = self.layout
-        layout.label(text="Addon")
-        layout.operator("wm.url_open", text="", icon="QUESTION", emboss=False).url = "https://joshuaknauber.notion.site/Export-496335f1abe44262885bde330efe59c0"
+        sn = context.scene.sn
+        layout.prop(sn, "use_addon", text="")
+        layout.separator(factor=0.25)
 
     def draw(self, context):
         layout = self.layout
+        layout.enabled = context.scene.sn.use_addon
         sn = context.scene.sn
-        
+
         layout.use_property_split = True
         layout.use_property_decorate = False
         layout.prop(sn, "addon_name")
@@ -39,12 +43,8 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
             col.prop(sn, "custom_category", text=" ")
         layout.prop(sn, "version")
         layout.prop(sn, "blender")
-        # layout.prop(sn, "multifile")
 
         row = layout.row()
         row.scale_y = 1.5
         col = row.column(align=True)
         col.operator("sn.export_addon", text="Save Addon", icon="EXPORT")
-        row = col.row()
-        row.scale_y = 0.7
-        row.operator("sn.export_to_marketplace",text="Add to Marketplace",icon_value=bpy.context.scene.sn_icons[ "discord" ].icon_id)
