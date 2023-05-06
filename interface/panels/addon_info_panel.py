@@ -48,3 +48,8 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
         row.scale_y = 1.5
         col = row.column(align=True)
         col.operator("sn.export_addon", text="Save Addon", icon="EXPORT")
+
+        col.separator()
+        row = layout.row()
+        row.alert = True
+        row.label(text="Restart to see changes", icon="INFO")

@@ -15,7 +15,6 @@ class SN_PT_FilesPanel(bpy.types.Panel):
         return (
             context.space_data.tree_type == "ScriptingNodesTree"
             and context.space_data.node_tree
-            and context.scene.sn.use_addon
         )
 
     def draw_header(self, context):

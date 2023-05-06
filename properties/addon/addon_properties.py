@@ -36,7 +36,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     use_external: bpy.props.BoolProperty(
         default=False,
-        name="Use External",
+        name="Extend External Addon",
         description="Lets you select an external addon to edit and add files to",
     )
 

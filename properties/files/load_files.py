@@ -8,7 +8,7 @@ LOAD_EXTENSIONS = ["py", "txt", "json", "blend", "jpg", "png"]
 def load_files(path: str):
     """Loads all the files for the given path into the file_list property"""
     sn = bpy.context.scene.sn
-    if not sn.use_addon or not sn.use_files:
+    if not sn.use_files:
         return
 
     active_path = sn.active_file.path if sn.active_file else ""

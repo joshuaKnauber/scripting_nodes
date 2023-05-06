@@ -24,7 +24,7 @@ class SN_PT_FileSettingsPanel(bpy.types.Panel):
         row.scale_y = 1.2
         row.operator(
             "sn.select_location",
-            text=shortened_path if shortened_path else "Select Addon",
+            text=shortened_path if shortened_path else "Select Addon Folder",
             icon="FILE_FOLDER",
         )
         # col.separator(factor=2)
