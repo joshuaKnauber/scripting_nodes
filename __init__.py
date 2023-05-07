@@ -27,12 +27,11 @@ bl_info = {
 
 import bpy
 from bpy.utils import previews
-import atexit
 
 import os
 
 from .keymaps.keymap import register_keymaps, unregister_keymaps
-from .node_tree.node_categories import (
+from .core.node_tree.node_categories import (
     draw_node_menu,
     register_node_menus,
     unregister_node_menus,
@@ -43,9 +42,8 @@ from .interface.header.header import (
 )
 from .interface.panels.warnings import append_warning
 from .interface.menus.rightclick import serpens_right_click
-from .msgbus import subscribe_to_name_change, unsubscribe_from_name_change
 
-from .properties.addon.addon_properties import SN_AddonProperties
+from .addon.addon_properties import SN_AddonProperties
 
 from . import handlers
 
@@ -97,9 +95,6 @@ def register():
     bpy.types.NODE_PT_node_tree_interface_inputs.append(append_warning)
     bpy.types.NODE_PT_node_tree_interface_outputs.append(append_warning)
 
-    # add name change update
-    subscribe_to_name_change()
-
     # app handlers
     handlers.register()
 
@@ -131,9 +126,6 @@ def unregister():
 
     # remove handlers
     handlers.unregister()
-
-    # remove name change msgbus
-    unsubscribe_from_name_change()
 
     # remove right click menu
     if hasattr(bpy.types, "WM_MT_button_context"):

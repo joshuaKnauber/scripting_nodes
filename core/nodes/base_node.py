@@ -1,0 +1,245 @@
+import bpy
+from uuid import uuid4
+
+
+class SN_ScriptingBaseNode:
+    is_sn = True
+    bl_width_default = 160
+    bl_width_min = 40
+    bl_width_max = 5000
+
+    bl_icon = "NONE"
+    bl_label = "Node"
+
+    @classmethod
+    def poll(cls, ntree):
+        return ntree.bl_idname == "ScriptingNodesTree"
+
+    # poll function for node tree pointer prop searches
+    def ntree_poll(self, group):
+        return group.bl_idname == "ScriptingNodesTree"
+
+    @property
+    def is_root(self):
+        has_input_program = any(inp.is_program for inp in self.inputs)
+        has_output_program = any(out.is_program for out in self.outputs)
+        return (has_input_program or has_output_program) and not (
+            has_input_program and has_output_program
+        )
+
+    @property
+    def node_tree(self):
+        """Returns the node tree this node lives in"""
+        return self.id_data
+
+    @property
+    def random_uuid(self):
+        """Returns a random uuid. Note that this is not stable and will change over time!"""
+        return uuid4().hex[:5].upper()
+
+    def on_create(self, context):
+        pass
+
+    def init(self, context):
+        self.on_create(context)
+
+    def copy(self, old):
+        pass
+
+    def free(self):
+        pass
+
+    ### NODE UPDATE
+    def update(self):
+        pass
+
+    ### DRAW NODE
+    def draw_node(self, context, layout):
+        layout.label(text=str(self.is_root))
+
+    def draw_buttons(self, context, layout):
+        self.draw_node(context, layout)
+
+    ### DRAW NODE PANEL
+    def draw_node_panel(self, context, layout):
+        pass
+
+    def draw_buttons_ext(self, context, layout):
+        self.draw_node_panel(context, layout)
+
+    ### CREATE SOCKETS
+    def _add_input(self, idname, label, dynamic=False):
+        socket = self.inputs.new(idname, label)
+        return socket
+
+    def _add_output(self, idname, label, dynamic=False):
+        socket = self.outputs.new(idname, label)
+        return socket
+
+    def add_execute_input(self, label="Execute"):
+        return self._add_input("SN_ExecuteSocket", label)
+
+    def add_execute_output(self, label="Execute"):
+        return self._add_output("SN_ExecuteSocket", label)
+
+    def add_dynamic_execute_input(self, label="Execute"):
+        return self._add_input("SN_ExecuteSocket", label, True)
+
+    def add_dynamic_execute_output(self, label="Execute"):
+        return self._add_output("SN_ExecuteSocket", label, True)
+
+    def add_interface_input(self, label="Interface"):
+        return self._add_input("SN_InterfaceSocket", label)
+
+    def add_interface_output(self, label="Interface"):
+        return self._add_output("SN_InterfaceSocket", label)
+
+    def add_dynamic_interface_input(self, label="Interface"):
+        return self._add_input("SN_InterfaceSocket", label, True)
+
+    def add_dynamic_interface_output(self, label="Interface"):
+        return self._add_output("SN_InterfaceSocket", label, True)
+
+    def add_data_input(self, label="Data"):
+        return self._add_input("SN_DataSocket", label)
+
+    def add_data_output(self, label="Data"):
+        return self._add_output("SN_DataSocket", label)
+
+    def add_dynamic_data_input(self, label="Data"):
+        return self._add_input("SN_DataSocket", label, True)
+
+    def add_dynamic_data_output(self, label="Data"):
+        return self._add_output("SN_DataSocket", label, True)
+
+    def add_string_input(self, label="String"):
+        return self._add_input("SN_StringSocket", label)
+
+    def add_string_output(self, label="String"):
+        return self._add_output("SN_StringSocket", label)
+
+    def add_dynamic_string_input(self, label="String"):
+        return self._add_input("SN_StringSocket", label, True)
+
+    def add_dynamic_string_output(self, label="String"):
+        return self._add_output("SN_StringSocket", label, True)
+
+    def add_enum_input(self, label="Enum"):
+        return self._add_input("SN_EnumSocket", label)
+
+    def add_enum_output(self, label="Enum"):
+        return self._add_output("SN_EnumSocket", label)
+
+    def add_dynamic_enum_input(self, label="Enum"):
+        return self._add_input("SN_EnumSocket", label, True)
+
+    def add_dynamic_enum_output(self, label="Enum"):
+        return self._add_output("SN_EnumSocket", label, True)
+
+    def add_enum_set_input(self, label="Enum Set"):
+        return self._add_input("SN_EnumSetSocket", label)
+
+    def add_enum_set_output(self, label="Enum Set"):
+        return self._add_output("SN_EnumSetSocket", label)
+
+    def add_dynamic_enum_set_input(self, label="Enum Set"):
+        return self._add_input("SN_EnumSetSocket", label, True)
+
+    def add_dynamic_enum_set_output(self, label="Enum Set"):
+        return self._add_output("SN_EnumSetSocket", label, True)
+
+    def add_boolean_input(self, label="Boolean"):
+        return self._add_input("SN_BooleanSocket", label)
+
+    def add_boolean_output(self, label="Boolean"):
+        return self._add_output("SN_BooleanSocket", label)
+
+    def add_dynamic_boolean_input(self, label="Boolean"):
+        return self._add_input("SN_BooleanSocket", label, True)
+
+    def add_dynamic_boolean_output(self, label="Boolean"):
+        return self._add_output("SN_BooleanSocket", label, True)
+
+    def add_boolean_vector_input(self, label="Boolean Vector"):
+        return self._add_input("SN_BooleanVectorSocket", label)
+
+    def add_boolean_vector_output(self, label="Boolean Vector"):
+        return self._add_output("SN_BooleanVectorSocket", label)
+
+    def add_dynamic_boolean_vector_input(self, label="Boolean Vector"):
+        return self._add_input("SN_BooleanVectorSocket", label, True)
+
+    def add_dynamic_boolean_vector_output(self, label="Boolean Vector"):
+        return self._add_output("SN_BooleanVectorSocket", label, True)
+
+    def add_integer_input(self, label="Integer"):
+        return self._add_input("SN_IntegerSocket", label)
+
+    def add_integer_output(self, label="Integer"):
+        return self._add_output("SN_IntegerSocket", label)
+
+    def add_dynamic_integer_input(self, label="Integer"):
+        return self._add_input("SN_IntegerSocket", label, True)
+
+    def add_dynamic_integer_output(self, label="Integer"):
+        return self._add_output("SN_IntegerSocket", label, True)
+
+    def add_integer_vector_input(self, label="Integer Vector"):
+        return self._add_input("SN_IntegerVectorSocket", label)
+
+    def add_integer_vector_output(self, label="Integer Vector"):
+        return self._add_output("SN_IntegerVectorSocket", label)
+
+    def add_dynamic_integer_vector_input(self, label="Integer Vector"):
+        return self._add_input("SN_IntegerVectorSocket", label, True)
+
+    def add_dynamic_integer_vector_output(self, label="Integer Vector"):
+        return self._add_output("SN_IntegerVectorSocket", label, True)
+
+    def add_float_input(self, label="Float"):
+        return self._add_input("SN_FloatSocket", label)
+
+    def add_float_output(self, label="Float"):
+        return self._add_output("SN_FloatSocket", label)
+
+    def add_dynamic_float_input(self, label="Float"):
+        return self._add_input("SN_FloatSocket", label, True)
+
+    def add_dynamic_float_output(self, label="Float"):
+        return self._add_output("SN_FloatSocket", label, True)
+
+    def add_float_vector_input(self, label="Float Vector"):
+        return self._add_input("SN_FloatVectorSocket", label)
+
+    def add_float_vector_output(self, label="Float Vector"):
+        return self._add_output("SN_FloatVectorSocket", label)
+
+    def add_dynamic_float_vector_input(self, label="Float Vector"):
+        return self._add_input("SN_FloatVectorSocket", label, True)
+
+    def add_dynamic_float_vector_output(self, label="Float Vector"):
+        return self._add_output("SN_FloatVectorSocket", label, True)
+
+    def add_icon_input(self, label="Icon"):
+        return self._add_input("SN_IconSocket", label)
+
+    def add_icon_output(self, label="Icon"):
+        return self._add_output("SN_IconSocket", label)
+
+    def add_list_input(self, label="List"):
+        return self._add_input("SN_ListSocket", label)
+
+    def add_list_output(self, label="List"):
+        return self._add_output("SN_ListSocket", label)
+
+    def add_collection_property_input(self, label="Collection Property"):
+        return self._add_input("SN_CollectionPropertySocket", label)
+
+    def add_collection_property_output(self, label="Collection Property"):
+        return self._add_output("SN_CollectionPropertySocket", label)
+
+    def add_property_input(self, label="Property"):
+        return self._add_input("SN_PropertySocket", label)
+
+    def add_property_output(self, label="Property"):
+        return self._add_output("SN_PropertySocket", label)

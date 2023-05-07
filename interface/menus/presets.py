@@ -7,22 +7,3 @@ class SN_MT_PresetMenu(bpy.types.Menu):
 
     def draw(self, context):
         layout = self.layout
-        prefs = bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences
-        
-        for i, preset in enumerate(prefs.presets):
-            layout.operator("sn.load_preset", text=preset.name).index = i
-
-        if not len(prefs.presets):
-            layout.label(text="No presets", icon="INFO")
-        
-        layout.separator()
-
-        node = context.space_data.node_tree.nodes.active
-        if node:
-            layout.operator("sn.add_preset", icon="ADD", text=f"Add '{node.label if node.label else node.name}'")
-        else:
-            layout.operator("sn.add_preset", icon="ADD")
-
-        row = layout.row()
-        row.enabled = len(prefs.presets) > 0
-        row.operator("sn.remove_presets", text="Remove Preset", icon="REMOVE")

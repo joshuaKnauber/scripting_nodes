@@ -1,6 +1,5 @@
 import bpy
 from bpy.app.handlers import persistent
-from .properties.files.load_files import load_files
 
 
 def register():
