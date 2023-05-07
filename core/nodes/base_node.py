@@ -1,6 +1,7 @@
 import bpy
 from uuid import uuid4
 from ...utils.logging import log
+from ...utils.code_generation import cleanup_code
 
 
 class SN_BaseNode:
@@ -14,6 +15,22 @@ class SN_BaseNode:
 
     last_generate_time: bpy.props.FloatProperty(default=0)
 
+    def get_code(self):
+        """ Returns the code for this node. """
+        return self["code"] if "code" in self else ""
+
+    def set_code(self, value):
+        """ Formats and sets the code for this socket. Updates connected nodes if necessary. """
+        value = cleanup_code(value)
+        is_dirty = self.get_code() != value
+        self["code"] = value
+        print(value)
+        if is_dirty:  # add dependent nodes to queue
+            pass
+            log(2, "Node code changed", self.name)
+
+    code: bpy.props.StringProperty(default="", get=get_code, set=set_code)
+
     @classmethod
     def poll(cls, ntree):
         return ntree.bl_idname == "ScriptingNodesTree"
@@ -26,6 +43,7 @@ class SN_BaseNode:
     def is_root(self):
         has_input_program = any(inp.is_program for inp in self.inputs)
         has_output_program = any(out.is_program for out in self.outputs)
+        print(has_input_program, has_output_program)
         return (has_input_program or has_output_program) and not (
             has_input_program and has_output_program
         )
@@ -39,6 +57,10 @@ class SN_BaseNode:
     def random_uuid(self):
         """Returns a random uuid. Note that this is not stable and will change over time!"""
         return uuid4().hex[:5].upper()
+
+    def generate(self, context):
+        """Generates the code for this node"""
+        raise NotImplementedError
 
     def _update(self, context=None):
         self.node_tree.add_to_queue(self)
@@ -62,7 +84,7 @@ class SN_BaseNode:
 
     def insert_link(self, link):
         # program nodes regenerate from right to left
-        if link.to_socket.is_program:
+        if link.to_socket.is_program:  # TODO
             if link.from_node == self:
                 log(0, f"Adding {self.name} to queue after it was linked to {link.to_node.name}")
                 self.node_tree.add_to_queue(self)
@@ -108,6 +130,12 @@ class SN_BaseNode:
     def _add_output(self, idname, label, dynamic=False):
         socket = self.outputs.new(idname, label)
         return socket
+
+    def add_program_input(self, label="Program"):
+        return self._add_input("SN_ProgramSocket", label)
+
+    def add_program_output(self, label="Program"):
+        return self._add_output("SN_ProgramSocket", label)
 
     def add_execute_input(self, label="Execute"):
         return self._add_input("SN_ExecuteSocket", label)

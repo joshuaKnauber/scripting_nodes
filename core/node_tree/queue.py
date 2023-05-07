@@ -32,7 +32,7 @@ def _is_watching_queue():
     return bpy.app.timers.is_registered(_process_queue)
 
 
-def process_queue():
+def watch_queue():
     """ Start processing the queue and watch for new items until the queue is empty. """
     global _last_start_time
     if _is_watching_queue():
@@ -47,5 +47,4 @@ def add_to_queue(node):
     global _queue
     if len(_queue) == 0 or _queue[-1] != node:
         _queue.append(node)
-        # watch_queue()
-        process_queue()
+        watch_queue()

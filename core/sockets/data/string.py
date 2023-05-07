@@ -1,6 +1,6 @@
 import bpy
 from ..base_socket import ScriptingSocket
-from ....utils.codify import codify_string_value
+from ....utils.code_generation import codify_string_value
 
 
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):

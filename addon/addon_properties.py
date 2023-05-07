@@ -2,6 +2,7 @@ import bpy
 from bl_ui import space_userpref
 from uuid import uuid4
 from ..core.file_browser.properties.files_properties import FilesProperties
+from .addon_info import SN_AddonInfoProperties
 
 
 class SN_AddonProperties(bpy.types.PropertyGroup):
@@ -46,3 +47,5 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         description="Location of the addon files",
         subtype="DIR_PATH",
     )
+
+    info: bpy.props.PointerProperty(type=SN_AddonInfoProperties)

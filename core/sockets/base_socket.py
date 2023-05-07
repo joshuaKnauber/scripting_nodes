@@ -1,5 +1,6 @@
 import bpy
 from ...utils.logging import log
+from ...utils.code_generation import cleanup_code
 
 
 class ScriptingSocket:
@@ -72,20 +73,6 @@ class ScriptingSocket:
 
     # CODE
 
-    def _format_code_value(self, value):
-        """ Formats multiline code values to be indented correctly. """
-        if "\n" in value:
-            lines = value.split("\n")
-            # remove empty lines
-            lines = [*filter(lambda line: line.strip() != "", lines)]
-            lines = [*map(lambda line: line.rstrip(), lines)]
-            # remove indent
-            min_indent = min([len(line) - len(line.lstrip())
-                             for line in lines])
-            lines = [line[min_indent:] for line in lines]
-            value = "\n".join(lines)
-        return value
-
     def get_code(self):
         """ Returns the code for this socket. """
         # return code from connected node for program outputs
@@ -96,11 +83,11 @@ class ScriptingSocket:
         elif not self.is_program and not self.is_output:
             next = self.next
             return next[0].code if next else self.value_code
-        return self["code"] if "code" in self else ""
+        return self["code"].strip() if "code" in self else ""
 
     def set_code(self, value):
         """ Formats and sets the code for this socket. Updates connected nodes if necessary. """
-        value = self._format_code_value(value)
+        value = cleanup_code(value)
         is_dirty = self.get_code() != value
         self["code"] = value
         if is_dirty and self.is_linked:  # add connected node to queue
@@ -116,6 +103,8 @@ class ScriptingSocket:
         if not self.is_program:
             raise NotImplementedError
 
-    def code_block(self, indents=0):
+    def code_block(self, indents=0, default=""):
         """ Returns the code block for this socket. Indents multiline code values by the given amount. """
-        return "\n".join([" "*4 * indents * min(i, 1) + line for i, line in enumerate(self.code.split("\n"))])
+        code = "\n".join([" "*4 * indents * min(i, 1) + line for i,
+                         line in enumerate(self.code.split("\n"))]).strip()
+        return code if code != "" else default
