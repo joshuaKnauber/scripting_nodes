@@ -1,8 +1,9 @@
 import bpy
 from uuid import uuid4
+from ...utils.logging import log
 
 
-class SN_ScriptingBaseNode:
+class SN_BaseNode:
     is_sn = True
     bl_width_default = 160
     bl_width_min = 40
@@ -10,6 +11,8 @@ class SN_ScriptingBaseNode:
 
     bl_icon = "NONE"
     bl_label = "Node"
+
+    last_generate_time: bpy.props.FloatProperty(default=0)
 
     @classmethod
     def poll(cls, ntree):
@@ -37,37 +40,67 @@ class SN_ScriptingBaseNode:
         """Returns a random uuid. Note that this is not stable and will change over time!"""
         return uuid4().hex[:5].upper()
 
+    def _update(self, context=None):
+        self.node_tree.add_to_queue(self)
+
     def on_create(self, context):
         pass
 
     def init(self, context):
         self.on_create(context)
+        self.node_tree.add_to_queue(self)
 
     def copy(self, old):
-        pass
+        self.node_tree.add_to_queue(self)
 
     def free(self):
         pass
 
-    ### NODE UPDATE
+    # NODE UPDATE
     def update(self):
         pass
 
-    ### DRAW NODE
+    def insert_link(self, link):
+        # program nodes regenerate from right to left
+        if link.to_socket.is_program:
+            if link.from_node == self:
+                log(0, f"Adding {self.name} to queue after it was linked to {link.to_node.name}")
+                self.node_tree.add_to_queue(self)
+        # data nodes regenerate from left to right
+        else:
+            if link.to_node == self:
+                log(0, f"Adding {self.name} to queue after it was linked to {link.from_node.name}")
+                self.node_tree.add_to_queue(self)
+
+    def remove_link(self, from_socket, to_socket):
+        if from_socket and from_socket.node == self:
+            # program nodes regenerate from right to left
+            if from_socket.is_program:
+                log(0, f"Adding {self.name} to queue after output {from_socket.index} was unlinked")
+                self.node_tree.add_to_queue(self)
+        elif to_socket and to_socket.node == self:
+            # data nodes regenerate from left to right
+            if not to_socket.is_program:
+                log(0, f"Adding {self.name} to queue after input {to_socket.index} was unlinked")
+                self.node_tree.add_to_queue(self)
+
+    # DRAW NODE
     def draw_node(self, context, layout):
-        layout.label(text=str(self.is_root))
+        pass
 
     def draw_buttons(self, context, layout):
+        # layout.label(text=str(self.is_root))
+        # layout.label(text=str(round(self.last_generate_time*1000, 5))+"ms")
         self.draw_node(context, layout)
 
-    ### DRAW NODE PANEL
+    # DRAW NODE PANEL
     def draw_node_panel(self, context, layout):
         pass
 
     def draw_buttons_ext(self, context, layout):
         self.draw_node_panel(context, layout)
 
-    ### CREATE SOCKETS
+    # CREATE SOCKETS
     def _add_input(self, idname, label, dynamic=False):
         socket = self.inputs.new(idname, label)
         return socket

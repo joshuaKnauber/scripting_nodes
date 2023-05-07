@@ -24,14 +24,15 @@ class SN_PT_SettingsPanel(bpy.types.Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
 
-        col = layout.column(heading="General")
-        col.prop(sn, "compile_on_load")
+        # col = layout.column(heading="General")
+        # col.prop(sn, "compile_on_load")
 
         layout.separator()
         col = layout.column(heading="Debug")
-        col.prop(sn, "debug_compile_time", text="Log Compile Time")
-        col.prop(sn, "debug_python_nodes")
-        col.prop(sn, "debug_python_sockets")
-        subrow = col.row()
-        subrow.active = sn.debug_python_nodes or sn.debug_python_sockets
-        subrow.prop(sn, "debug_selected_only")
+        col.prop(sn, "dev_logs")
+        # col.prop(sn, "debug_compile_time", text="Log Compile Time")
+        # col.prop(sn, "debug_python_nodes")
+        # col.prop(sn, "debug_python_sockets")
+        # subrow = col.row()
+        # subrow.active = sn.debug_python_nodes or sn.debug_python_sockets
+        # subrow.prop(sn, "debug_selected_only")

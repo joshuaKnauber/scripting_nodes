@@ -4,7 +4,7 @@ import gpu
 import bgl
 from gpu_extras.batch import batch_for_shader
 import os
-from .base_node import SN_ScriptingBaseNode
+from .base_node import SN_BaseNode
 
 
 class SN_OT_StartTutorial(bpy.types.Operator):
@@ -133,7 +133,7 @@ def draw():
         bpy.types.SpaceNodeEditor.draw_handler_remove(handler, "WINDOW")
 
 
-class SN_TutorialNode(SN_ScriptingBaseNode, bpy.types.Node):
+class SN_TutorialNode(SN_BaseNode, bpy.types.Node):
     bl_idname = "SN_TutorialNode"
     bl_label = "Tutorial"
     bl_icon = "HELP"
@@ -240,12 +240,14 @@ class SN_TutorialNode(SN_ScriptingBaseNode, bpy.types.Node):
             op.index = 1
             col = row.column(align=True)
             col.enabled = self.index > 0
-            op = col.operator("sn.move_tutorial", icon="TRIA_LEFT", text="Previous")
+            op = col.operator("sn.move_tutorial",
+                              icon="TRIA_LEFT", text="Previous")
             op.node = self.name
             op.forward = False
             col = row.column(align=True)
             col.enabled = self.index < len(images) - 1
-            op = col.operator("sn.move_tutorial", icon="TRIA_RIGHT", text="Next")
+            op = col.operator("sn.move_tutorial",
+                              icon="TRIA_RIGHT", text="Next")
             op.node = self.name
             op.forward = True
             row.operator(

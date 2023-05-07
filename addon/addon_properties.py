@@ -5,6 +5,11 @@ from ..core.file_browser.properties.files_properties import FilesProperties
 
 
 class SN_AddonProperties(bpy.types.PropertyGroup):
+    dev_logs: bpy.props.BoolProperty(
+        default=False, name="Developer Logs", description="Show developer logs in the console")
+
+    last_generate_time: bpy.props.FloatProperty(default=0)
+
     # split this up in sub property groups that all live in here
     use_addon: bpy.props.BoolProperty(
         default=False,
