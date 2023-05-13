@@ -13,6 +13,11 @@ class SN_BaseNode:
     bl_icon = "NONE"
     bl_label = "Node"
 
+    id: bpy.props.StringProperty(default="")
+
+    def set_id(self):
+        self.id = uuid4().hex[:5].upper()
+
     last_generate_time: bpy.props.FloatProperty(default=0)
 
     def get_code(self):
@@ -24,9 +29,9 @@ class SN_BaseNode:
         value = cleanup_code(value)
         is_dirty = self.get_code() != value
         self["code"] = value
-        print(value)
         if is_dirty:  # add dependent nodes to queue
-            pass
+            pass  # TODO: add dependent nodes to queue
+            pass  # TODO: run code
             log(2, "Node code changed", self.name)
 
     code: bpy.props.StringProperty(default="", get=get_code, set=set_code)
@@ -69,14 +74,18 @@ class SN_BaseNode:
         pass
 
     def init(self, context):
+        self.set_id()
+        bpy.context.scene.sn.add_node(self)
         self.on_create(context)
         self.node_tree.add_to_queue(self)
 
     def copy(self, old):
+        self.set_id()
+        bpy.context.scene.sn.add_node(self)
         self.node_tree.add_to_queue(self)
 
     def free(self):
-        pass
+        bpy.context.scene.sn.remove_node(self.id)
 
     # NODE UPDATE
     def update(self):
@@ -111,6 +120,7 @@ class SN_BaseNode:
         pass
 
     def draw_buttons(self, context, layout):
+        layout.label(text=self.id)
         # layout.label(text=str(self.is_root))
         # layout.label(text=str(round(self.last_generate_time*1000, 5))+"ms")
         self.draw_node(context, layout)

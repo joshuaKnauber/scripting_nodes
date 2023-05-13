@@ -1,8 +1,9 @@
 import bpy
 from bl_ui import space_userpref
-from uuid import uuid4
 from ..core.file_browser.properties.files_properties import FilesProperties
 from .addon_info import SN_AddonInfoProperties
+from .node_references import SN_NodeReference
+from .group_properties import SN_GroupProperties
 
 
 class SN_AddonProperties(bpy.types.PropertyGroup):
@@ -49,3 +50,18 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     )
 
     info: bpy.props.PointerProperty(type=SN_AddonInfoProperties)
+
+    groups: bpy.props.CollectionProperty(type=SN_GroupProperties)
+
+    nodes: bpy.props.CollectionProperty(type=SN_NodeReference)
+
+    def add_node(self, node):
+        item = self.nodes.add()
+        item.name = node.name
+        item.id = node.id
+
+    def remove_node(self, id):
+        for i, node in enumerate(self.nodes):
+            if node.id == id:
+                self.nodes.remove(i)
+                return

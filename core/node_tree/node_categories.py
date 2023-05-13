@@ -55,14 +55,49 @@ class SN_MT_LayoutMenu(bpy.types.Menu):
         op.use_transform = True
 
 
+class SN_MT_GroupSubMenu(bpy.types.Menu):
+    bl_idname = "SN_MT_GroupSubMenu"
+    bl_label = "Groups"
+
+    def draw(self, context):
+        layout = self.layout
+        category = getattr(context, "group", "Other")
+        categories = [group.name for group in context.scene.sn.groups]
+        if category != "Other" and category.name != "Other":
+            found_trees = False
+            for ntree in bpy.data.node_groups:
+                if ntree.bl_idname == "ScriptingNodesTree" and ntree.category == category.name:
+                    row = layout.row(align=True)
+                    row.operator("sn.move_group_category",
+                                 icon="GREASEPENCIL", text="").ntree = ntree.name
+                    found_trees = True
+                    op = row.operator("sn.add_group_node", text=ntree.name)
+                    op.ntree = ntree.name
+            if not found_trees:
+                layout.label(text="No groups")
+        else:
+            found_trees = False
+            for ntree in bpy.data.node_groups:
+                if ntree.bl_idname == "ScriptingNodesTree" and ntree.category not in categories or ntree.category == "Other":
+                    found_trees = True
+                    row = layout.row(align=True)
+                    row.operator("sn.move_group_category",
+                                 icon="GREASEPENCIL", text="").ntree = ntree.name
+                    op = row.operator("sn.add_group_node", text=ntree.name)
+                    op.ntree = ntree.name
+            if not found_trees:
+                layout.label(text="No groups")
+
+
 class SN_MT_GroupMenu(bpy.types.Menu):
     bl_idname = "SN_MT_GroupMenu"
     bl_label = "Group"
 
     def draw(self, context):
         layout = self.layout
+        sn = context.scene.sn
         layout.operator("sn.make_serpens_group", text="Make Group")
-        layout.operator("sn.toggle_edit_serpens_group", text="Edit Group")
+        layout.operator("sn.edit_serpens_node_group", text="Edit Group")
 
         layout.separator()
 
@@ -73,6 +108,16 @@ class SN_MT_GroupMenu(bpy.types.Menu):
         op = layout.operator("node.add_node", text="Group Output")
         op.type = "SN_NodeGroupOutputNode"
         op.use_transform = True
+
+        layout.separator()
+
+        for group in sn.groups:
+            row = layout.row()
+            row.context_pointer_set("group", group)
+            row.menu("SN_MT_GroupSubMenu", text=group.name)
+        row = layout.row()
+        row.menu("SN_MT_GroupSubMenu", text="Other")
+        layout.operator("sn.add_group_category", icon="ADD")
 
 
 _node_categories = {}
@@ -91,7 +136,7 @@ def get_node_categories():
                 dirs = path.split(os.sep)
 
                 if "nodes" in dirs:
-                    node_path = dirs[dirs.index("nodes") + 1 :]
+                    node_path = dirs[dirs.index("nodes") + 1:]
                     parent = node_categories
                     for dir in node_path:
                         if not dir in parent:

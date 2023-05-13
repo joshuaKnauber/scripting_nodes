@@ -13,5 +13,9 @@ class SN_NodeGroupNode(SN_BaseNode, bpy.types.Node):
     group_tree: bpy.props.PointerProperty(
         type=bpy.types.NodeTree, poll=poll_tree)
 
+    def on_create(self, context):
+        self.add_execute_input()
+        self.add_execute_output()
+
     def draw_node(self, context, layout):
         layout.template_ID(self, "group_tree", new="node.new_node_tree")

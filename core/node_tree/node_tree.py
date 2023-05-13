@@ -1,6 +1,5 @@
 import bpy
 from .queue import add_to_queue
-import functools
 
 
 class ScriptingNodesTree(bpy.types.NodeTree):
@@ -11,6 +10,15 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     type: bpy.props.EnumProperty(
         items=[("SCRIPTING", "Scripting", "Scripting")], name="Type"
     )
+
+    @property
+    def is_node_group(self):
+        for node in self.nodes:
+            if node.bl_idname in ["SN_NodeGroupInputNode", "SN_NodeGroupOutputNode"]:
+                return True
+        return False
+
+    category: bpy.props.StringProperty(default="Other")
 
     def add_to_queue(self, node):
         """ Adds the given node to the queue for processing. """
