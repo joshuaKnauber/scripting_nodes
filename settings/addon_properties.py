@@ -25,6 +25,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     
     # stores the unregister function for the addon when its compiled
     addon_unregister = []
+    addon_modules = []
 
 
     # stores the preferences draw function while compiling the addon to draw in the serpens preferences
