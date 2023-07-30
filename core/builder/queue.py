@@ -2,6 +2,7 @@ import bpy
 import time
 from ...utils.logging import log
 from ...utils.redraw import redraw
+from .builder import build_addon
 
 
 _queue = []
@@ -15,6 +16,7 @@ def _process_queue():
         log(1, "Stop watching queue")
         redraw(all=True)
         bpy.context.scene.sn.last_generate_time = time.time() - _last_start_time
+        build_addon()
         return None
 
     log(0, "Processing queue", [node.name for node in _queue])
@@ -43,7 +45,7 @@ def watch_queue():
 
 
 def add_to_queue(node):
-    """ Adds the given node to the queue for processing. """
+    """ Adds the given node to the queue for processing. Should be called whenever a node is changed in any way. """
     global _queue
     if len(_queue) == 0 or _queue[-1] != node:
         _queue.append(node)

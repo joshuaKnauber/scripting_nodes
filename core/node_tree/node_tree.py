@@ -1,5 +1,5 @@
 import bpy
-from .queue import add_to_queue
+from ..builder.queue import add_to_queue
 
 
 class ScriptingNodesTree(bpy.types.NodeTree):
@@ -21,7 +21,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     category: bpy.props.StringProperty(default="Other")
 
     def add_to_queue(self, node):
-        """ Adds the given node to the queue for processing. """
+        """ Adds the given node to the queue for processing. Utility to avoid long imports """
         add_to_queue(node)
 
     _previous_links = set()

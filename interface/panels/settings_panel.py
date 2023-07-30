@@ -30,6 +30,7 @@ class SN_PT_SettingsPanel(bpy.types.Panel):
         layout.separator()
         col = layout.column(heading="Debug")
         col.prop(sn, "dev_logs")
+        col.prop(sn, "debug_code")
         # col.prop(sn, "debug_compile_time", text="Log Compile Time")
         # col.prop(sn, "debug_python_nodes")
         # col.prop(sn, "debug_python_sockets")

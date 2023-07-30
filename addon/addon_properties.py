@@ -65,3 +65,9 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
             if node.id == id:
                 self.nodes.remove(i)
                 return
+
+    debug_code: bpy.props.BoolProperty(
+        default=False,
+        name="Debug Code",
+        description="Show the generated code on the nodes",
+    )

@@ -44,14 +44,17 @@ class SN_BaseNode:
     def ntree_poll(self, group):
         return group.bl_idname == "ScriptingNodesTree"
 
+    _is_root = None
+
     @property
     def is_root(self):
-        has_input_program = any(inp.is_program for inp in self.inputs)
-        has_output_program = any(out.is_program for out in self.outputs)
-        print(has_input_program, has_output_program)
-        return (has_input_program or has_output_program) and not (
-            has_input_program and has_output_program
-        )
+        if self._is_root is None:
+            has_input_program = any(inp.is_program for inp in self.inputs)
+            has_output_program = any(out.is_program for out in self.outputs)
+            self._is_root = (has_input_program or has_output_program) and not (
+                has_input_program and has_output_program
+            )
+        return self._is_root
 
     @property
     def node_tree(self):
@@ -119,10 +122,16 @@ class SN_BaseNode:
     def draw_node(self, context, layout):
         pass
 
+    def debug_code(self, layout):
+        box = layout.box()
+        for line in self.code.split("\n"):
+            box.label(text=line)
+
     def draw_buttons(self, context, layout):
-        layout.label(text=self.id)
-        # layout.label(text=str(self.is_root))
+        sn = context.scene.sn
         # layout.label(text=str(round(self.last_generate_time*1000, 5))+"ms")
+        if sn.debug_code:
+            self.debug_code(layout)
         self.draw_node(context, layout)
 
     # DRAW NODE PANEL
