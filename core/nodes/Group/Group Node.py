@@ -1,4 +1,6 @@
 import bpy
+
+from ....core.node_tree.node_tree import ScriptingNodesTree
 from ..base_node import SN_BaseNode
 
 
@@ -8,7 +10,7 @@ class SN_NodeGroupNode(SN_BaseNode, bpy.types.Node):
     bl_width_min = 200
 
     def poll_tree(self, tree):
-        return tree.bl_idname == "ScriptingNodesTree"
+        return tree.bl_idname == ScriptingNodesTree.bl_idname
 
     group_tree: bpy.props.PointerProperty(
         type=bpy.types.NodeTree, poll=poll_tree)

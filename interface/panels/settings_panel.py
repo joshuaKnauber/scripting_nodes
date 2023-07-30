@@ -1,4 +1,5 @@
 import bpy
+from ...utils.is_serpens import in_sn_tree
 
 
 class SN_PT_SettingsPanel(bpy.types.Panel):
@@ -11,29 +12,14 @@ class SN_PT_SettingsPanel(bpy.types.Panel):
     bl_order = 4
 
     @classmethod
-    def poll(cls, context):
-        return (
-            context.space_data.tree_type == "ScriptingNodesTree"
-            and context.space_data.node_tree
-        )
+    def poll(cls, context: bpy.types.Context): return in_sn_tree(context)
 
-    def draw(self, context):
+    def draw(self, context: bpy.types.Context):
         layout = self.layout
         sn = context.scene.sn
 
         layout.use_property_split = True
         layout.use_property_decorate = False
 
-        # col = layout.column(heading="General")
-        # col.prop(sn, "compile_on_load")
-
         layout.separator()
         col = layout.column(heading="Debug")
-        col.prop(sn, "dev_logs")
-        col.prop(sn, "debug_code")
-        # col.prop(sn, "debug_compile_time", text="Log Compile Time")
-        # col.prop(sn, "debug_python_nodes")
-        # col.prop(sn, "debug_python_sockets")
-        # subrow = col.row()
-        # subrow.active = sn.debug_python_nodes or sn.debug_python_sockets
-        # subrow.prop(sn, "debug_selected_only")

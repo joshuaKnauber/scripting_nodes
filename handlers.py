@@ -13,6 +13,3 @@ def unregister():
 @persistent
 def load_handler(dummy):
     sn = bpy.context.scene.sn
-    if not sn:
-        return
-    # load_files(sn.addon_location)

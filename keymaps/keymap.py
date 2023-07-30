@@ -1,19 +1,13 @@
 import bpy
+from ..core.nodes.Group.operators.edit_operators import SN_OT_EditSerpensGroup, SN_OT_MakeSerpensGroup, SN_OT_QuitEditSerpensGroup
 
 
-# keymaps
+# keymap store
 addon_keymaps = {}
 
 
-def get_shortcut(idname):
-    """Returns the shortcut struct for the given idname"""
-    return bpy.context.window_manager.keyconfigs.user.keymaps[
-        "Node Editor"
-    ].keymap_items[idname]
-
-
 def register_keymaps():
-    # registers the visual scripting keymaps
+    """ Registers the visual scripting keymaps """
 
     # create keymap
     global addon_keymaps
@@ -23,20 +17,11 @@ def register_keymaps():
 
     km = kc.keymaps.new(name="Node Editor", space_type="NODE_EDITOR")
 
-    # shortcut for compiling
-    kmi = km.keymap_items.new(
-        idname="sn.force_compile",
-        type="R",
-        value="PRESS",
-        shift=True,
-        ctrl=False,
-        alt=False,
-    )
-    addon_keymaps["compile"] = (km, kmi)
+    ### GROUP EDITING ###
 
     # shortcut for making a node group
     kmi = km.keymap_items.new(
-        idname="sn.make_serpens_group",
+        idname=SN_OT_MakeSerpensGroup.bl_idname,
         type="G",
         value="PRESS",
         shift=False,
@@ -47,7 +32,7 @@ def register_keymaps():
 
     # shortcut for editing a node group
     kmi = km.keymap_items.new(
-        idname="sn.edit_serpens_node_group",
+        idname=SN_OT_EditSerpensGroup.bl_idname,
         type="TAB",
         value="PRESS",
         shift=False,
@@ -58,7 +43,7 @@ def register_keymaps():
 
     # shortcut for stopping to edit a node group
     kmi = km.keymap_items.new(
-        idname="sn.quit_edit_serpens_node_group",
+        idname=SN_OT_QuitEditSerpensGroup.bl_idname,
         type="TAB",
         value="PRESS",
         shift=False,
@@ -66,17 +51,6 @@ def register_keymaps():
         alt=False,
     )
     addon_keymaps["group_edit_stop"] = (km, kmi)
-
-    # shortcut for adding a node from copied path
-    kmi = km.keymap_items.new(
-        idname="sn.add_copied_node",
-        type="V",
-        value="PRESS",
-        shift=True,
-        ctrl=False,
-        alt=False,
-    )
-    addon_keymaps["copied"] = (km, kmi)
 
 
 def unregister_keymaps():
@@ -88,3 +62,10 @@ def unregister_keymaps():
         km.keymap_items.remove(kmi)
 
     addon_keymaps.clear()
+
+
+def get_shortcut(idname: str):
+    """Returns the shortcut struct for the given idname"""
+    # return bpy.context.window_manager.keyconfigs.user.keymaps[
+    #     "Node Editor"
+    # ].keymap_items[idname]

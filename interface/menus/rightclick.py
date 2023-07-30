@@ -8,7 +8,7 @@ class WM_MT_button_context(bpy.types.Menu):
         pass
 
 
-def serpens_right_click(self, context):
+def serpens_right_click(self, context: bpy.types.Context):
     layout = self.layout
 
     property_pointer = getattr(context, "button_pointer", None)

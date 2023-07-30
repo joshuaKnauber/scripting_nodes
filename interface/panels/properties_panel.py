@@ -1,4 +1,5 @@
 import bpy
+from ...utils.is_serpens import in_sn_tree
 
 
 class SN_PT_PropertyPanel(bpy.types.Panel):
@@ -11,12 +12,8 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
     bl_order = 3
 
     @classmethod
-    def poll(cls, context):
-        return (
-            context.space_data.tree_type == "ScriptingNodesTree"
-            and context.space_data.node_tree
-        )
+    def poll(cls, context: bpy.types.Context): return in_sn_tree(context)
 
-    def draw(self, context):
+    def draw(self, context: bpy.types.Context):
         layout = self.layout
         sn = context.scene.sn

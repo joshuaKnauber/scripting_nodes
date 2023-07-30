@@ -9,3 +9,4 @@ class SN_AddonPreferences(bpy.types.AddonPreferences):
 
 
 # addon_prefs = bpy.context.preferences.addons[__name__.partition('.')[ 0]].preferences
+# TODO move to constants

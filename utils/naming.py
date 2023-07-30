@@ -1,8 +1,7 @@
-import bpy
 import re
 
 
-def get_python_name(name, replacement="", separator="_", lower=True):
+def pythonify_name(name: str, replacement: str = "", separator: str = "_", lower: bool = True) -> str:
     """Returns the given name as a valid python represention to use as variable names in scripts"""
     # format string
     name = name.replace(" ", separator)
@@ -21,7 +20,7 @@ def get_python_name(name, replacement="", separator="_", lower=True):
     return name
 
 
-def unique_collection_name(name, default, name_list, separator="", includes_name=False):
+def unique_name(name: str, default: str, name_list: list[str], separator: str = "", includes_name: bool = False) -> str:
     """Returns a unique name based for the given list of names"""
     if not name:
         name = default

@@ -1,5 +1,7 @@
 import bpy
 
+from .....core.node_tree.node_tree import ScriptingNodesTree
+
 
 class SN_OT_MakeSerpensGroup(bpy.types.Operator):
     bl_idname = "sn.make_serpens_group"
@@ -24,7 +26,7 @@ class SN_OT_MakeSerpensGroup(bpy.types.Operator):
         for node in selected_nodes:
             context.space_data.edit_tree.nodes.remove(node)
 
-        group = bpy.data.node_groups.new("Node Group", "ScriptingNodesTree")
+        group = bpy.data.node_groups.new("Node Group", ScriptingNodesTree.bl_idname)
         group.use_fake_user = True
 
         input_node = group.nodes.new("SN_NodeGroupInputNode")
@@ -52,7 +54,7 @@ class SN_OT_EditSerpensGroup(
 
     @classmethod
     def poll(cls, context):
-        return getattr(context.space_data, "tree_type", None) == "ScriptingNodesTree"
+        return getattr(context.space_data, "tree_type", None) == ScriptingNodesTree.bl_idname
 
     def execute(self, context):
         path = context.space_data.path
@@ -72,7 +74,7 @@ class SN_OT_QuitEditSerpensGroup(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return getattr(context.space_data, "tree_type", None) == "ScriptingNodesTree"
+        return getattr(context.space_data, "tree_type", None) == ScriptingNodesTree.bl_idname
 
     def execute(self, context):
         path = context.space_data.path

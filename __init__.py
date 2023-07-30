@@ -12,42 +12,35 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
+from . import auto_load
+from . import handlers
+from .addon.addon_properties import SN_AddonProperties
+from .interface.menus.rightclick import serpens_right_click
+from .interface.header.header import (
+    header_prepend,
+    header_append,
+)
+from .interface.menus.add_menu.node_categories import (
+    draw_node_menu,
+    register_node_menus,
+    unregister_node_menus,
+)
+from .keymaps.keymap import register_keymaps, unregister_keymaps
+import os
+from bpy.utils import previews
+import bpy
 bl_info = {
     "name": "Serpens",
     "author": "Joshua Knauber, Finn Knauber",
     "description": "Adds a node editor for building addons with nodes",
     "blender": (3, 0, 0),
-    "version": (3, 2, 0),
+    "version": (4, 0, 0),
     "location": "Editors -> Visual Scripting Editor",
     "doc_url": "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233",
     "tracker_url": "https://discord.com/invite/NK6kyae",
     "category": "Node",
 }
 
-
-import bpy
-from bpy.utils import previews
-
-import os
-
-from .keymaps.keymap import register_keymaps, unregister_keymaps
-from .core.node_tree.node_categories import (
-    draw_node_menu,
-    register_node_menus,
-    unregister_node_menus,
-)
-from .interface.header.header import (
-    header_prepend,
-    header_append,
-)
-from .interface.panels.warnings import append_warning
-from .interface.menus.rightclick import serpens_right_click
-
-from .addon.addon_properties import SN_AddonProperties
-
-from . import handlers
-
-from . import auto_load
 
 auto_load.init()
 
@@ -91,10 +84,6 @@ def register():
     bpy.types.NODE_HT_header.append(header_append)
     bpy.types.NODE_MT_editor_menus.append(header_prepend)
 
-    # add no edit warnings
-    bpy.types.NODE_PT_node_tree_interface_inputs.append(append_warning)
-    bpy.types.NODE_PT_node_tree_interface_outputs.append(append_warning)
-
     # app handlers
     handlers.register()
 
@@ -106,10 +95,6 @@ def unregister():
     # remove the node tree header
     bpy.types.NODE_MT_editor_menus.remove(header_prepend)
     bpy.types.NODE_HT_header.remove(header_append)
-
-    # remove no edit warnings
-    bpy.types.NODE_PT_node_tree_interface_inputs.remove(append_warning)
-    bpy.types.NODE_PT_node_tree_interface_outputs.remove(append_warning)
 
     # addon properties
     del bpy.types.Scene.sn
