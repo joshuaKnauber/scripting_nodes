@@ -11,8 +11,7 @@ def add_socket(node: bpy.types.Node, idname: str, name: str, is_output: bool) ->
     try:
         if not name:
             name = sockets.SOCKET_NAMES[idname]
-        if idname == sockets.INTERFACE:
-            socket = collection.new(idname, name)
+        socket = collection.new(idname, name)
     except KeyError:
         logger.log(4, f"Invalid socket type: {idname}")
     return socket

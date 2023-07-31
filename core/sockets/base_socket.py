@@ -6,6 +6,9 @@ class ScriptingSocket:
 
     initialized: bpy.props.BoolProperty(default=False)
 
+    draw_output_value: bpy.props.BoolProperty(default=False, name="Draw Output Value", description="Draw the value of the socket event if it is an output")
+    draw_linked_value: bpy.props.BoolProperty(default=False, name="Draw Linked Value", description="Draw the value of the socket even if it is linked")
+
     def __init__(self):
         if not self.initialized:
             self.init()
@@ -14,11 +17,15 @@ class ScriptingSocket:
     def init(self):
         self.on_create(bpy.context)
 
-    def on_create(self, context):  # callback for when the socket is created
-        raise NotImplementedError
+    # callback for when the socket is created
+    def on_create(self, context): return
 
     def draw(self, context, layout, node, text):
-        layout.label(text=text)
+        self.draw_socket(context, layout, node, text, self.draw_linked_value, self.draw_output_value)
+
+    # callback for drawing the socket
+    def draw_socket(self, context, layout, node, text, draw_linked_value, draw_output_value):
+        raise NotImplementedError
 
     def draw_color(self, context: bpy.types.Context, node: bpy.types.Node):
         return self.get_color(context, node)
@@ -26,9 +33,17 @@ class ScriptingSocket:
     def get_color(self, context, node):
         raise NotImplementedError
 
+    def value_code(self):
+        raise NotImplementedError
+
     def code(self, indent: int = 0, fallback: str = ""):
-        if not self.is_output or len(self.links) == 0:
-            return fallback
-        ntree = self.node.node_tree
-        to_socket = self.links[0].to_socket
-        return f"bpy.data.node_groups['{ntree.name}'].nodes['{to_socket.node.name}']._execute(locals(), globals())"
+        if self.is_output:
+            if len(self.links) == 0:
+                return fallback
+            ntree = self.node.node_tree
+            to_socket = self.links[0].to_socket
+            return f"bpy.data.node_groups['{ntree.name}'].nodes['{to_socket.node.name}']._execute(locals(), globals())"
+        else:
+            if self.is_linked:
+                return self.links[0].from_socket.value_code()
+            return self.value_code()

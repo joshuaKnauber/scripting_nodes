@@ -84,7 +84,6 @@ class SN_BaseNode(bpy.types.Node):
 
     def generate(self, context: bpy.types.Context):
         """ Generates the code for the node """
-        raise NotImplementedError
 
     def compile(self):
         """ Called when the node changes. Forwards the update to the node tree """
@@ -100,7 +99,6 @@ class SN_BaseNode(bpy.types.Node):
 
     def draw_buttons(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         """ Draws the buttons on the node """
-        layout.label(text=self.id)
         self.draw_node(context, layout)
 
     # Callback for when the node is drawn
