@@ -1,5 +1,6 @@
+from typing import Any, Literal
+
 import bpy
-from typing import Literal, Any
 
 
 class bcolors:
@@ -13,14 +14,14 @@ class bcolors:
 
 def log(level: Literal[1, 2, 3, 4], *args: Any):
     """ Logs the given message to the console with the given level. """
-    if bpy.context.scene.sn.dev_logs:  # TODO
-        color = bcolors.OKBLUE
-        if level == 1:
-            color = bcolors.OKCYAN
-        elif level == 2:
-            color = bcolors.OKGREEN
-        elif level == 3:
-            color = bcolors.WARNING
-        elif level == 4:
-            color = bcolors.FAIL
-        print(f"{color}SN LOG: {bcolors.ENDC}", *args)
+    # if bpy.context.scene.sn.dev_logs:  # TODO
+    color = bcolors.OKBLUE
+    if level == 1:
+        color = bcolors.OKCYAN
+    elif level == 2:
+        color = bcolors.OKGREEN
+    elif level == 3:
+        color = bcolors.WARNING
+    elif level == 4:
+        color = bcolors.FAIL
+    print(f"{color}SN LOG: {bcolors.ENDC}", *args)
