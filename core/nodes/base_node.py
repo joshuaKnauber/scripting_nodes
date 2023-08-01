@@ -7,6 +7,7 @@ from ...core.node_tree.node_tree import ScriptingNodesTree
 from ...core.utils.links import handle_link_insert, handle_link_remove
 from ...core.utils.sockets import add_socket
 from ...interface.overlays.errors.error_drawing import display_error
+from ...interface.overlays.nodes.node_drawing import set_node_error, set_node_time
 from ...utils import logger
 from ...utils.code import normalize_indents
 
@@ -95,13 +96,16 @@ class SN_BaseNode(bpy.types.Node):
             self.node_tree.compile(self)
 
     def _execute(self, local_vars: dict, global_vars: dict):
-        """ Executes the code for the node """
-        t1 = time.time()  # TODO
+        """ Executes the code for the node. Note that this code runs within the context of the running addon """
+        t1 = time.time()
         try:
             exec(normalize_indents(self.code), local_vars, global_vars)
+            set_node_error(self.id, "")
         except Exception as e:
             logger.log(4, f"Error in node '{self.name}'")  # TODO
             display_error(f"Node '{self.name}': {str(e)}")
+            set_node_error(self.id, str(e))
+        set_node_time(self.id, (time.time() - t1)*1000)
 
     def draw_buttons(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         """ Draws the buttons on the node """
