@@ -18,6 +18,7 @@ class SN_LabelNode(SN_BaseNode, bpy.types.Node):
         self.code = f"""
             {layout}.label(text={self.inputs['Label'].code()})
             {self.outputs["Interface"].code(3)}
+            None.object
         """
 
         self.outputs["Interface"].set_meta("layout", layout)

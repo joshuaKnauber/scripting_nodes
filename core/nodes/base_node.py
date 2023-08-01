@@ -6,6 +6,7 @@ import bpy
 from ...core.node_tree.node_tree import ScriptingNodesTree
 from ...core.utils.links import handle_link_insert, handle_link_remove
 from ...core.utils.sockets import add_socket
+from ...interface.overlays.errors.error_drawing import display_error
 from ...utils import logger
 from ...utils.code import normalize_indents
 
@@ -100,7 +101,7 @@ class SN_BaseNode(bpy.types.Node):
             exec(normalize_indents(self.code), local_vars, global_vars)
         except Exception as e:
             logger.log(4, f"Error in node '{self.name}'")  # TODO
-            print(e)
+            display_error(f"Node '{self.name}': {str(e)}")
 
     def draw_buttons(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         """ Draws the buttons on the node """
