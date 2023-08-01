@@ -1,12 +1,11 @@
-import os
 import inspect
+import os
+
 import bpy
 
-from ....core.node_tree.node_tree import ScriptingNodesTree
-
-from ....utils.is_serpens import in_sn_tree
 from .... import auto_load
-
+from ....core.node_tree.node_tree import ScriptingNodesTree
+from ....utils.is_serpens import in_sn_tree
 
 _node_categories = {}
 
@@ -38,7 +37,7 @@ def get_node_categories():
         return node_categories
 
 
-blocklist = ["nodes", "Layout"]  # folder names to ignore
+blocklist = ["nodes"]  # folder names to ignore
 _registered_menus = []
 
 

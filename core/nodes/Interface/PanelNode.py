@@ -35,3 +35,6 @@ class SNA_PT_Panel_{self.id}(bpy.types.Panel):
         self.code_unregister = f"""
             bpy.utils.unregister_class(SNA_PT_Panel_{self.id})
         """
+
+        self.outputs["Header"].set_meta("layout", "self.layout")
+        self.outputs["Interface"].set_meta("layout", "self.layout")

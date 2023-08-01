@@ -1,3 +1,4 @@
+import time
 from uuid import uuid4
 
 import bpy
@@ -6,6 +7,7 @@ from ...core.node_tree.node_tree import ScriptingNodesTree
 from ...core.utils.links import handle_link_insert, handle_link_remove
 from ...core.utils.sockets import add_socket
 from ...utils import logger
+from ...utils.code import normalize_indents
 
 
 class SN_BaseNode(bpy.types.Node):
@@ -87,18 +89,25 @@ class SN_BaseNode(bpy.types.Node):
 
     def compile(self):
         """ Called when the node changes. Forwards the update to the node tree """
-        self.node_tree.compile(self)
+        self.generate(bpy.context)
+        if self.code_register:  # TODO
+            self.node_tree.compile(self)
 
     def _execute(self, local_vars: dict, global_vars: dict):
         """ Executes the code for the node """
+        t1 = time.time()  # TODO
         try:
-            exec(self.code.strip(), local_vars, global_vars)
+            exec(normalize_indents(self.code), local_vars, global_vars)
         except Exception as e:
-            line = self.code.splitlines()[e.lineno - 1]
-            logger.log(4, f"Error in node '{self.name}' at line {e.lineno}:\n{line}\n{e}")
+            logger.log(4, f"Error in node '{self.name}'")  # TODO
+            print(e)
 
     def draw_buttons(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         """ Draws the buttons on the node """
+        box = layout.box()
+        col = box.column(align=True)
+        for line in self.code.split("\n"):
+            col.label(text=line)
         self.draw_node(context, layout)
 
     # Callback for when the node is drawn

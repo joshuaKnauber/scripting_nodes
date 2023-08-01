@@ -11,8 +11,13 @@ class SN_LabelNode(SN_BaseNode, bpy.types.Node):
     def on_create(self):
         self.add_input(sockets.INTERFACE)
         self.add_input(sockets.STRING, "Label")
+        self.add_output(sockets.INTERFACE)
 
     def generate(self, context):
+        layout = self.inputs["Interface"].get_meta("layout", "self.layout")
         self.code = f"""
-            self.layout.label(text={self.inputs['Label'].code()})
+            {layout}.label(text={self.inputs['Label'].code()})
+            {self.outputs["Interface"].code(3)}
         """
+
+        self.outputs["Interface"].set_meta("layout", layout)

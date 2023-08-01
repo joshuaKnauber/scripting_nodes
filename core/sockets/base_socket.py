@@ -1,3 +1,5 @@
+import json
+
 import bpy
 
 
@@ -42,8 +44,25 @@ class ScriptingSocket:
                 return fallback
             ntree = self.node.node_tree
             to_socket = self.links[0].to_socket
-            return f"bpy.data.node_groups['{ntree.name}'].nodes['{to_socket.node.name}']._execute(locals(), globals())"
+            return f"bpy.data.node_groups['{ntree.name}'].nodes['{to_socket.node.name}']._execute(locals(), globals())\n"
         else:
             if self.is_linked:
                 return self.links[0].from_socket.value_code()
             return self.value_code()
+
+    meta: bpy.props.StringProperty(default="{}", name="Metadata", description="Stringified JSON metadata passed along by this socket")
+
+    def set_meta(self, key: str, value):
+        meta = json.loads(self.meta)
+        meta[key] = value
+        self.meta = json.dumps(meta)
+
+    def get_meta(self, key: str, fallback):
+        if not self.is_output:
+            if self.is_linked:
+                return self.links[0].from_socket.get_meta(key, fallback)
+            return fallback
+        meta = json.loads(self.meta)
+        if key in meta:
+            return meta[key]
+        return fallback

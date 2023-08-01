@@ -16,6 +16,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         """ Called when the node tree is updating. """
 
     def temp_build(self):
+        print("register")
         global _unregister
         # TEMP
         code = "import bpy\n"
@@ -45,5 +46,4 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         _unregister = module.unregister
 
     def compile(self, node: bpy.types.Node):
-        node.generate(bpy.context)
         self.temp_build()
