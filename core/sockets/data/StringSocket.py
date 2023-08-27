@@ -6,7 +6,7 @@ from ..base_socket import ScriptingSocket
 class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SN_StringSocket"
 
-    value: bpy.props.StringProperty(default="", update=lambda self, _: self.node.compile())
+    value: bpy.props.StringProperty(default="", update=lambda self, _: self.node.mark_dirty())
 
     def value_code(self):
         value = self.value.replace('\'', '\\\'')

@@ -25,3 +25,23 @@ def log(level: Literal[1, 2, 3, 4], *args: Any):
     elif level == 4:
         color = bcolors.FAIL
     print(f"{color}SN LOG: {bcolors.ENDC}", *args)
+
+
+def error(*args: Any):
+    """ Logs the given message to the console as an error. """
+    log(4, *args)
+
+
+def warning(*args: Any):
+    """ Logs the given message to the console as a warning. """
+    log(3, *args)
+
+
+def success(*args: Any):
+    """ Logs the given message to the console as success. """
+    log(2, *args)
+
+
+def info(*args: Any):
+    """ Logs the given message to the console as info. """
+    log(1, *args)

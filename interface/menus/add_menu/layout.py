@@ -1,5 +1,4 @@
 import bpy
-from ....core.nodes.Layout.Portal import SN_PortalNode
 
 
 class SN_MT_LayoutMenu(bpy.types.Menu):
@@ -13,7 +12,7 @@ class SN_MT_LayoutMenu(bpy.types.Menu):
         op.use_transform = True
 
         op = layout.operator("node.add_node", text="Portal")
-        op.type = SN_PortalNode.bl_idname
+        # op.type = SN_PortalNode.bl_idname
         op.use_transform = True
 
         op = layout.operator("node.add_node", text="Reroute")

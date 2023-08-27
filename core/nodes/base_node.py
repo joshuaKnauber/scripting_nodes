@@ -6,10 +6,10 @@ import bpy
 from ...core.node_tree.node_tree import ScriptingNodesTree
 from ...core.utils.links import handle_link_insert, handle_link_remove
 from ...core.utils.sockets import add_socket
-from ...interface.overlays.errors.error_drawing import display_error
-from ...interface.overlays.nodes.node_drawing import set_node_error, set_node_time
+from ...interface.overlays.nodes.node_overlays import set_node_error, set_node_time
 from ...utils import logger
 from ...utils.code import normalize_indents
+from .utils.draw_code import draw_code
 
 
 class SN_BaseNode(bpy.types.Node):
@@ -39,7 +39,7 @@ class SN_BaseNode(bpy.types.Node):
         """ Called when the node is created """
         self._set_id()
         self.on_create()
-        self.compile()
+        self.mark_dirty()
 
     # Callback for when the node is created
     def on_create(self): return
@@ -48,7 +48,7 @@ class SN_BaseNode(bpy.types.Node):
         """ Called when the node is copied """
         self._set_id()
         self.on_copy(node)
-        self.compile()
+        self.mark_dirty()
 
     # Callback for when the node is copied
     def on_copy(self, node: bpy.types.Node): return
@@ -56,7 +56,7 @@ class SN_BaseNode(bpy.types.Node):
     def free(self):
         """ Called when the node is deleted """
         self.on_delete()
-        self.compile()  # TODO: check if this is necessary
+        self.mark_dirty()  # TODO: check if this is necessary
 
     # Callback for when the node is deleted
     def on_delete(self): return
@@ -80,20 +80,20 @@ class SN_BaseNode(bpy.types.Node):
     def update(self):
         """ Called when the node topology changes """
         # handle_link_updates(self) # TODO
-        self.compile()  # TEMP
+        self.mark_dirty()  # TEMP
 
     code: bpy.props.StringProperty(default="", name="Code", description="Generated code for the node")
     code_register: bpy.props.StringProperty(default="", name="Code Register", description="Generated register code for the node")
     code_unregister: bpy.props.StringProperty(default="", name="Code Unregister", description="Generated unregister code for the node")
 
     def generate(self, context: bpy.types.Context):
-        """ Generates the code for the node """
+        """ Generates the code for the node. Overwrite this in nodes by setting the self.code... properties """
 
-    def compile(self):
+    def mark_dirty(self):
         """ Called when the node changes. Forwards the update to the node tree """
         self.generate(bpy.context)
         if self.code_register:  # TODO
-            self.node_tree.compile(self)
+            self.node_tree.mark_dirty(self)
 
     def _execute(self, local_vars: dict, global_vars: dict):
         """ Executes the code for the node. Note that this code runs within the context of the running addon """
@@ -102,17 +102,13 @@ class SN_BaseNode(bpy.types.Node):
             exec(normalize_indents(self.code), local_vars, global_vars)
             set_node_error(self.id, "")
         except Exception as e:
-            logger.log(4, f"Error in node '{self.name}'")  # TODO
-            display_error(f"Node '{self.name}': {str(e)}")
+            logger.error(f"Error in node '{self.name}'")  # TODO
             set_node_error(self.id, str(e))
         set_node_time(self.id, (time.time() - t1)*1000)
 
     def draw_buttons(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         """ Draws the buttons on the node """
-        box = layout.box()
-        col = box.column(align=True)
-        for line in self.code.split("\n"):
-            col.label(text=line)
+        draw_code(layout, self)
         self.draw_node(context, layout)
 
     # Callback for when the node is drawn

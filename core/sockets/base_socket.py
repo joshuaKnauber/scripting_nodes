@@ -2,6 +2,8 @@ import json
 
 import bpy
 
+from ..utils import sockets
+
 
 class ScriptingSocket:
     is_sn = True
@@ -35,19 +37,26 @@ class ScriptingSocket:
     def get_color(self, context, node):
         raise NotImplementedError
 
+    def has_next(self) -> bool:
+        """ Returns a boolean saying if the node is connected to other valid sockets """
+        return len(sockets.get_next_sockets(self)) > 0
+
+    def get_next(self) -> list[bpy.types.NodeSocket]:
+        """ Returns a list of all valid connected sockets """
+        return sockets.get_next_sockets(self)
+
     def value_code(self):
         raise NotImplementedError
 
     def code(self, indent: int = 0, fallback: str = ""):
         if self.is_output:
-            if len(self.links) == 0:
+            if not self.has_next():
                 return fallback
             ntree = self.node.node_tree
-            to_socket = self.links[0].to_socket
-            return f"bpy.data.node_groups['{ntree.name}'].nodes['{to_socket.node.name}']._execute(locals(), globals())\n"
+            return f"bpy.data.node_groups['{ntree.name}']._execute_node('{self.get_next()[0].node.id}', locals(), globals())\n"
         else:
-            if self.is_linked:
-                return self.links[0].from_socket.value_code()
+            if self.has_next():
+                return self.get_next()[0].value_code()
             return self.value_code()
 
     meta: bpy.props.StringProperty(default="{}", name="Metadata", description="Stringified JSON metadata passed along by this socket")
@@ -59,8 +68,8 @@ class ScriptingSocket:
 
     def get_meta(self, key: str, fallback):
         if not self.is_output:
-            if self.is_linked:
-                return self.links[0].from_socket.get_meta(key, fallback)
+            if self.has_next():
+                return self.get_next()[0].get_meta(key, fallback)
             return fallback
         meta = json.loads(self.meta)
         if key in meta:

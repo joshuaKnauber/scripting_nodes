@@ -23,7 +23,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         register = ""
         unregister = ""
         for node in self.nodes:
-            if node.code_register:
+            if node.get("code_register", None):
                 code += node.code.strip() + "\n"
                 register += " "*4 + node.code_register.strip() + "\n"
                 unregister += " "*4 + node.code_unregister.strip() + "\n"
@@ -45,5 +45,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         module.register()
         _unregister = module.unregister
 
-    def compile(self, node: bpy.types.Node):
+    def mark_dirty(self, node: bpy.types.Node):
         self.temp_build()
+
+    def _execute_node(self, id: str, local_vars: dict, global_vars: dict):
+        """ Runs the generated code on this node """
+        for node in self.nodes:
+            if node.get("id", None) == id:
+                node._execute(local_vars, global_vars)
+                break

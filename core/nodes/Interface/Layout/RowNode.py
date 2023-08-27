@@ -13,8 +13,9 @@ class SN_RowNode(SN_BaseNode, bpy.types.Node):
         self.add_output(sockets.INTERFACE)
 
     def generate(self, context):
+        layout = self.inputs["Interface"].get_meta("layout", "self.layout")
         self.code = f"""
-            row_{self.id} = self.layout.row()
+            row_{self.id} = {layout}.row()
             {self.outputs["Interface"].code(3)}
         """
 
