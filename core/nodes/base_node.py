@@ -63,6 +63,7 @@ class SN_BaseNode(bpy.types.Node):
         sn = bpy.context.scene.sn
         self.on_delete()
         sn.references.remove_reference(self)
+        self.node_tree.mark_dirty(self)
 
     # Callback for when the node is deleted
     def on_delete(self): return
@@ -93,11 +94,21 @@ class SN_BaseNode(bpy.types.Node):
     code_register: bpy.props.StringProperty(default="", name="Code Register", description="Generated register code for the node")
     code_unregister: bpy.props.StringProperty(default="", name="Code Unregister", description="Generated unregister code for the node")
 
+    def _reset_code(self):
+        self.code = ""
+        self.code_register = ""
+        self.code_unregister = ""
+        for inp in self.inputs:
+            inp.reset_meta()
+        for out in self.outputs:
+            out.reset_meta()
+
     def generate(self, context: bpy.types.Context):
         """ Generates the code for the node. Overwrite this in nodes by setting the self.code... properties """
 
     def mark_dirty(self):
         """ Called when the node changes. Forwards the update to the node tree """
+        self._reset_code()
         self.generate(bpy.context)
         if self.code_register:  # TODO reregister if this node needs to be registered/unregistered
             self.node_tree.mark_dirty(self)

@@ -61,6 +61,9 @@ class ScriptingSocket:
 
     meta: bpy.props.StringProperty(default="{}", name="Metadata", description="Stringified JSON metadata passed along by this socket")
 
+    def reset_meta(self):
+        self.meta = "{}"
+
     def set_meta(self, key: str, value):
         meta = json.loads(self.meta)
         meta[key] = value

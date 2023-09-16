@@ -3,6 +3,16 @@ import bpy
 
 class NodePointer(bpy.types.PropertyGroup):
 
+    @property
+    def node(self):
+        """ Get the referenced node """
+        for ntree in bpy.data.node_groups:
+            if getattr(ntree, "is_sn", False):
+                for node in ntree.nodes:
+                    if getattr(node, "id", None) == self.id:
+                        return node
+        return None
+
     def update_name(self, context):
         """ Update the referenced node """
         sn = context.scene.sn
@@ -12,6 +22,11 @@ class NodePointer(bpy.types.PropertyGroup):
         else:
             self.id = ""
         # TODO mark node as dirty
+        for ntree in bpy.data.node_groups:
+            if getattr(ntree, "is_sn", False):
+                for node in ntree.nodes:
+                    if getattr(node, "is_sn", False):
+                        node.mark_dirty()
 
     name: bpy.props.StringProperty(name="Name", default="", description="Name of the referenced node", update=update_name)
     id: bpy.props.StringProperty(name="ID", default="", description="ID of the referenced node")

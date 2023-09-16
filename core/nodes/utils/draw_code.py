@@ -12,7 +12,7 @@ def draw_code(layout: bpy.types.UILayout, node: bpy.types.Node):
     while lines and (not lines[0].strip() or not lines[-1].strip()):
         if not lines[0].strip():
             lines.pop(0)
-        if not lines[-1].strip():
+        if lines and not lines[-1].strip():
             lines.pop(-1)
 
     for line in lines:

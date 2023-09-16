@@ -19,11 +19,14 @@ class SN_SubpanelNode(SN_BaseNode, bpy.types.Node):
         self.add_output("SN_InterfaceSocket", "Interface")
 
     def generate(self, context):
+        if not self.panel.node:
+            return
+
         self.code = f"""
 class SNA_PT_Panel_{self.id}(bpy.types.Panel):
     bl_idname = "SNA_PT_Panel_{self.id}"
     bl_label = "My Panel"
-    bl_parent_id = ""
+    bl_parent_id = "SNA_PT_Panel_{self.panel.node.id}"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
     bl_category = "Serpens"
