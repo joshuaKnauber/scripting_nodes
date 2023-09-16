@@ -4,7 +4,7 @@ from uuid import uuid4
 import bpy
 
 from ...core.node_tree.node_tree import ScriptingNodesTree
-from ...core.utils.links import handle_link_insert, handle_link_remove
+from ...core.utils.links import handle_link_insert, handle_link_remove, is_link_valid
 from ...core.utils.sockets import add_socket
 from ...interface.overlays.nodes.node_overlays import set_node_error, set_node_time
 from ...utils import logger
@@ -12,14 +12,15 @@ from ...utils.code import normalize_indents
 from .utils.draw_code import draw_code
 
 
+def get_id():
+    return uuid4().hex[:5].upper()
+
+
 class SN_BaseNode(bpy.types.Node):
     is_sn = True
     bl_label = "Base Node"
 
     id: bpy.props.StringProperty(default="", name="ID", description="Unique ID of the node")
-
-    def _set_id(self):
-        self.id = uuid4().hex[:5].upper()
 
     @classmethod
     def poll(cls, ntree):
@@ -37,7 +38,9 @@ class SN_BaseNode(bpy.types.Node):
 
     def init(self, context: bpy.types.Context):
         """ Called when the node is created """
-        self._set_id()
+        sn = bpy.context.scene.sn
+        self.id = get_id()
+        sn.references.add_reference(self)
         self.on_create()
         self.mark_dirty()
 
@@ -46,7 +49,9 @@ class SN_BaseNode(bpy.types.Node):
 
     def copy(self, node: bpy.types.Node):
         """ Called when the node is copied """
-        self._set_id()
+        sn = bpy.context.scene.sn
+        self.id = get_id()
+        sn.references.add_reference(self)
         self.on_copy(node)
         self.mark_dirty()
 
@@ -55,8 +60,9 @@ class SN_BaseNode(bpy.types.Node):
 
     def free(self):
         """ Called when the node is deleted """
+        sn = bpy.context.scene.sn
         self.on_delete()
-        self.mark_dirty()  # TODO: check if this is necessary
+        sn.references.remove_reference(self)
 
     # Callback for when the node is deleted
     def on_delete(self): return
@@ -75,10 +81,11 @@ class SN_BaseNode(bpy.types.Node):
 
     def remove_link(self, link: bpy.types.NodeLink):
         """ Called when a link is removed """
-        handle_link_remove(self, link)
+        print("link removed", self)
+        # handle_link_remove(self, link)
 
     def update(self):
-        """ Called when the node topology changes """
+        """ Called by blender when the node topology changes """
         # handle_link_updates(self) # TODO
         self.mark_dirty()  # TEMP
 
@@ -92,7 +99,7 @@ class SN_BaseNode(bpy.types.Node):
     def mark_dirty(self):
         """ Called when the node changes. Forwards the update to the node tree """
         self.generate(bpy.context)
-        if self.code_register:  # TODO
+        if self.code_register:  # TODO reregister if this node needs to be registered/unregistered
             self.node_tree.mark_dirty(self)
 
     def _execute(self, local_vars: dict, global_vars: dict):
@@ -108,7 +115,9 @@ class SN_BaseNode(bpy.types.Node):
 
     def draw_buttons(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         """ Draws the buttons on the node """
-        draw_code(layout, self)
+        sn = context.scene.sn
+        if self.select and sn.show_node_code:
+            draw_code(layout, self)
         self.draw_node(context, layout)
 
     # Callback for when the node is drawn

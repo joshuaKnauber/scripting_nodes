@@ -20,7 +20,7 @@ def draw_errors():
     left = 40
     i = 0
     for node in bpy.context.space_data.node_tree.nodes:
-        if node.get("is_sn", False):
+        if getattr(node, "is_sn", False):
             error = get_node_error_msg(node)
             if error:
                 blf.color(font_id, 1, 1, 1, 1 - i*0.2)

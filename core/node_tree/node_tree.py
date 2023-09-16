@@ -23,7 +23,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         register = ""
         unregister = ""
         for node in self.nodes:
-            if node.get("code_register", None):
+            if getattr(node, "code_register", None):
                 code += node.code.strip() + "\n"
                 register += " "*4 + node.code_register.strip() + "\n"
                 unregister += " "*4 + node.code_unregister.strip() + "\n"
@@ -51,6 +51,6 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     def _execute_node(self, id: str, local_vars: dict, global_vars: dict):
         """ Runs the generated code on this node """
         for node in self.nodes:
-            if node.get("id", None) == id:
+            if getattr(node, "id", None) == id:
                 node._execute(local_vars, global_vars)
                 break

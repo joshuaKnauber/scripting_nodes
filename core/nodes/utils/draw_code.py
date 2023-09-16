@@ -25,7 +25,7 @@ def _draw_line(layout: bpy.types.UILayout, line: str, node: bpy.types.Node):
         indents = len(line) - len(line.lstrip())
         id = line.split("._execute_node('")[1].split("',")[0]
         for n in node.node_tree.nodes:
-            if n.get("id", None) == id:
+            if getattr(n, "id", None) == id:
                 layout.label(text=" "*indents + f"{{Node '{n.name}'}}")
                 break
         else:

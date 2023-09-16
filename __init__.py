@@ -12,23 +12,23 @@
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 
-from . import auto_load
-from . import handlers
+import os
+
+import bpy
+from bpy.utils import previews
+
+from . import auto_load, handlers
 from .addon.addon_properties import SN_AddonProperties
-from .interface.menus.rightclick import serpens_right_click
-from .interface.header.header import (
-    header_prepend,
-    header_append,
-)
+from .interface.header.header import header_append, header_prepend
 from .interface.menus.add_menu.node_categories import (
     draw_node_menu,
     register_node_menus,
     unregister_node_menus,
 )
+from .interface.menus.rightclick import serpens_right_click
 from .keymaps.keymap import register_keymaps, unregister_keymaps
-import os
-from bpy.utils import previews
-import bpy
+from .msgbus import subscribe_to_name_change, unsubscribe_from_name_change
+
 bl_info = {
     "name": "Serpens",
     "author": "Joshua Knauber, Finn Knauber",
@@ -70,6 +70,9 @@ def register():
         type=SN_AddonProperties, name="Serpens Properties"
     )
 
+    # msgbus
+    subscribe_to_name_change()
+
     # register the keymaps
     register_keymaps()
 
@@ -90,6 +93,8 @@ def register():
     # add right click menu
     bpy.types.WM_MT_button_context.append(serpens_right_click)
 
+    # msgbus
+
 
 def unregister():
     # remove the node tree header
@@ -98,6 +103,9 @@ def unregister():
 
     # addon properties
     del bpy.types.Scene.sn
+
+    # msgbus
+    unsubscribe_from_name_change()
 
     # unregister the keymaps
     unregister_keymaps()
