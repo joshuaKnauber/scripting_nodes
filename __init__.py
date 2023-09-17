@@ -30,10 +30,10 @@ from .keymaps.keymap import register_keymaps, unregister_keymaps
 from .msgbus import subscribe_to_name_change, unsubscribe_from_name_change
 
 bl_info = {
-    "name": "Serpens",
+    "name": "Serpens - Scripting Nodes",
     "author": "Joshua Knauber, Finn Knauber",
     "description": "Adds a node editor for building addons with nodes",
-    "blender": (3, 0, 0),
+    "blender": (4, 0, 0),
     "version": (4, 0, 0),
     "location": "Editors -> Scripting Node Editor",
     "doc_url": "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233",

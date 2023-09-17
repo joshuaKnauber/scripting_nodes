@@ -10,6 +10,7 @@ class SN_PT_AddonPanel(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "Serpens"
     bl_order = 0
+    bl_options = {"DEFAULT_CLOSED"}
 
     @classmethod
     def poll(cls, context: bpy.types.Context): return in_sn_tree(context)

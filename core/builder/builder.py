@@ -77,9 +77,26 @@ def _add_base_files():
 def _ntree_to_code(ntree: bpy.types.NodeTree):
     """ Converts the given node tree to code """
     code = "import bpy\n\n"
+    register = ""
+    unregister = ""
+
     for node in ntree.nodes:
-        if getattr(node, "is_sn", False) and node.code and node.require_register:  # TODO
+        if getattr(node, "is_sn", False) and node.require_register:  # TODO
             code += node.code + "\n"
+            print(node, node.code_register)
+            if node.code_register:
+                register += "    " + node.code_register + "\n"
+            if node.code_unregister:
+                unregister += "    " + node.code_unregister + "\n"
+
+    code += "\n"
+    if register:
+        code += "def register():\n"
+        code += register + "\n"
+    if unregister:
+        code += "def unregister():\n"
+        code += unregister + "\n"
+
     return code
 
 

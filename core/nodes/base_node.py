@@ -100,6 +100,7 @@ class SN_BaseNode(bpy.types.Node):
         self.code = ""
         self.code_register = ""
         self.code_unregister = ""
+        self.require_register = False
         for inp in self.inputs:
             inp.reset_meta()
         for out in self.outputs:

@@ -1,5 +1,6 @@
 import bpy
 
+from ....constants import sockets
 from ..base_node import SN_BaseNode
 
 
@@ -8,8 +9,8 @@ class SN_PanelNode(SN_BaseNode, bpy.types.Node):
     bl_label = "Panel"
 
     def on_create(self):
-        self.add_output("SN_InterfaceSocket", "Header")
-        self.add_output("SN_InterfaceSocket", "Interface")
+        self.add_output(sockets.INTERFACE, "Header")
+        self.add_output(sockets.INTERFACE, "Interface")
 
     def generate(self, context):
         self.require_register = True

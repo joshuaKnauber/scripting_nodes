@@ -21,7 +21,18 @@ def is_link_valid(link: bpy.types.NodeLink):
     """ Checks if a link is valid """
     def is_valid_connection(link: bpy.types.NodeLink):
         """ Checks if the connection is valid """
-        return getattr(link.from_socket, "is_program", False) == getattr(link.to_socket, "is_program", False)
+        connected = getattr(link.from_socket, "is_program", False) == getattr(link.to_socket, "is_program", False)
+        program_type_a = ""
+        for socket in [*link.from_node.inputs, *link.from_node.outputs]:
+            if getattr(socket, "is_program", False):
+                program_type_a = socket.bl_idname
+                break
+        program_type_b = ""
+        for socket in [*link.to_node.inputs, *link.to_node.outputs]:
+            if getattr(socket, "is_program", False):
+                program_type_b = socket.bl_idname
+                break
+        return connected or ((not program_type_a or not program_type_a) or program_type_a == program_type_b)
 
     def is_valid_connection_amount(link: bpy.types.NodeLink):
         """ Checks if the connection amount is valid """
