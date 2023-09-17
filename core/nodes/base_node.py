@@ -94,6 +94,8 @@ class SN_BaseNode(bpy.types.Node):
     code_register: bpy.props.StringProperty(default="", name="Code Register", description="Generated register code for the node")
     code_unregister: bpy.props.StringProperty(default="", name="Code Unregister", description="Generated unregister code for the node")
 
+    require_register: bpy.props.BoolProperty(default=False, name="Require Register", description="If an update to this node needs to trigger a reregister")
+
     def _reset_code(self):
         self.code = ""
         self.code_register = ""
@@ -110,7 +112,7 @@ class SN_BaseNode(bpy.types.Node):
         """ Called when the node changes. Forwards the update to the node tree """
         self._reset_code()
         self.generate(bpy.context)
-        if self.code_register:  # TODO reregister if this node needs to be registered/unregistered
+        if self.require_register:
             self.node_tree.mark_dirty(self)
 
     def _execute(self, local_vars: dict, global_vars: dict):

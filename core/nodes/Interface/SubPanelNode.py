@@ -19,6 +19,7 @@ class SN_SubpanelNode(SN_BaseNode, bpy.types.Node):
         self.add_output("SN_InterfaceSocket", "Interface")
 
     def generate(self, context):
+        self.require_register = True
         if not self.panel.node:
             return
 

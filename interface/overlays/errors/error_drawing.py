@@ -23,7 +23,7 @@ def draw_errors():
         if getattr(node, "is_sn", False):
             error = get_node_error_msg(node)
             if error:
-                blf.color(font_id, 1, 1, 1, 1 - i*0.2)
+                blf.color(font_id, 1, 0.4, 0.6, 1 - i*0.2)
                 blf.position(font_id, left, bpy.context.region.height - top, 0)
                 blf.draw(font_id, error)
                 _, height = blf.dimensions(font_id, error)

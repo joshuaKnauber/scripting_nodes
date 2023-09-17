@@ -22,7 +22,6 @@ class SN_PT_SettingsPanel(bpy.types.Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
 
-        layout.separator()
         col = layout.column(heading="Debug")
         col.prop(sn, "show_node_code")
 
@@ -39,11 +38,9 @@ class SN_PT_DeveloperSettingsPanel(bpy.types.Panel):
     @classmethod
     def poll(cls, context: bpy.types.Context): return in_sn_tree(context)
 
-    def draw_header(self, context: bpy.types.Context):
-        self.layout.label(text="", icon="MEMORY")
-
     def draw_node_refs(self, context: bpy.types.Context):
         sn = context.scene.sn
+        self.layout.separator()
         layout = self.layout.column(align=True)
         for coll in sn.references.collections:
             box = layout.box()
@@ -55,7 +52,8 @@ class SN_PT_DeveloperSettingsPanel(bpy.types.Panel):
             if len(coll.nodes) == 0:
                 col.label(text="No nodes")
         if len(sn.references.collections) == 0:
-            layout.label(text="No collections")
+            box = layout.box()
+            box.label(text="No collections")
 
     def draw(self, context: bpy.types.Context):
         layout = self.layout

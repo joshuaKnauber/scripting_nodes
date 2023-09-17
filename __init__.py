@@ -35,7 +35,7 @@ bl_info = {
     "description": "Adds a node editor for building addons with nodes",
     "blender": (3, 0, 0),
     "version": (4, 0, 0),
-    "location": "Editors -> Visual Scripting Editor",
+    "location": "Editors -> Scripting Node Editor",
     "doc_url": "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233",
     "tracker_url": "https://discord.com/invite/NK6kyae",
     "category": "Node",
@@ -92,8 +92,6 @@ def register():
 
     # add right click menu
     bpy.types.WM_MT_button_context.append(serpens_right_click)
-
-    # msgbus
 
 
 def unregister():

@@ -1,56 +1,27 @@
 import bpy
 
-_unregister = None
-
 
 class ScriptingNodesTree(bpy.types.NodeTree):
     bl_idname = "ScriptingNodeTree"
-    bl_label = "Visual Scripting Editor"
+    bl_label = "Scripting Node Editor"
     bl_icon = "FILE_SCRIPT"
     is_sn = True
     type: bpy.props.EnumProperty(
         items=[("SCRIPTING", "Scripting", "Scripting")], name="Type"
     )
 
+    is_dirty: bpy.props.BoolProperty(default=False, name="Is Dirty")
+
     def update(self):
         """ Called when the node tree is updating. """
-
-    def temp_build(self):
-        print("register")
-        global _unregister
-        # TEMP
-        code = "import bpy\n"
-        register = ""
-        unregister = ""
-        for node in self.nodes:
-            if getattr(node, "code_register", None):
-                code += node.code.strip() + "\n"
-                register += " "*4 + node.code_register.strip() + "\n"
-                unregister += " "*4 + node.code_unregister.strip() + "\n"
-
-        code += "\n"
-        code += "def register():\n"
-        code += register
-        code += "\n"
-        code += "def unregister():\n"
-        code += unregister
-        code += "\n"
-
-        if _unregister:
-            _unregister()
-
-        script = bpy.data.texts.new("script.py")
-        script.write(code)
-        module = script.as_module()
-        module.register()
-        _unregister = module.unregister
+        # TODO maybe remove it not needed
 
     def mark_dirty(self, node: bpy.types.Node):
-        self.temp_build()
+        self.is_dirty = True
 
-    def _execute_node(self, id: str, local_vars: dict, global_vars: dict):
-        """ Runs the generated code on this node """
+    def _execute_node(self, node_id: str, local_vars: dict, global_vars: dict):
+        """ Runs the generated code on the given node. Called by nodes during development. """
         for node in self.nodes:
-            if getattr(node, "id", None) == id:
+            if getattr(node, "id", None) == node_id:
                 node._execute(local_vars, global_vars)
                 break

@@ -1,0 +1,41 @@
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTIBILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+
+import bpy
+from . import auto_load
+
+bl_info = {
+    "name": "$NAME",
+    "author": "Joshua Knauber, Finn Knauber",
+    "description": "Adds a node editor for building addons with nodes",
+    "blender": (3, 0, 0),
+    "version": (4, 0, 0),
+    "location": "Editors -> Scripting Node Editor",
+    "doc_url": "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233",
+    "tracker_url": "https://discord.com/invite/NK6kyae",
+    "category": "Node",
+}
+
+
+auto_load.init()
+
+
+def register():
+    # register the classes of the addon
+    auto_load.register()
+
+
+def unregister():
+    # unregister the addon classes
+    auto_load.unregister()
