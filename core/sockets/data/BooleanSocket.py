@@ -8,14 +8,16 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     value: bpy.props.BoolProperty(default=False, update=lambda self, _: self.node.mark_dirty())
 
-    def value_code(self):
+    def python_value(self):
+        if self.is_output:
+            return self.code if self.code else "False"
         return str(self.value)
 
     def get_color(self, context: bpy.types.Context, node: bpy.types.Node):
         return (0.95, 0.73, 1, 1)
 
-    def draw_socket(self, context, layout, node, text, draw_linked_value, draw_output_value):
-        if (not self.is_output or draw_output_value) and (not self.is_linked or draw_linked_value):
+    def draw_socket(self, context, layout, node, text):
+        if not self.is_output:
             layout.prop(self, "value", text="" if self.is_output else text)
         else:
             layout.label(text=text)

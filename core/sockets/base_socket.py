@@ -10,9 +10,6 @@ class ScriptingSocket:
 
     initialized: bpy.props.BoolProperty(default=False)
 
-    draw_output_value: bpy.props.BoolProperty(default=False, name="Draw Output Value", description="Draw the value of the socket event if it is an output")
-    draw_linked_value: bpy.props.BoolProperty(default=False, name="Draw Linked Value", description="Draw the value of the socket even if it is linked")
-
     def __init__(self):
         if not self.initialized:
             self.init()
@@ -25,10 +22,10 @@ class ScriptingSocket:
     def on_create(self, context): return
 
     def draw(self, context, layout, node, text):
-        self.draw_socket(context, layout, node, text, self.draw_linked_value, self.draw_output_value)
+        self.draw_socket(context, layout, node, text)
 
     # callback for drawing the socket
-    def draw_socket(self, context, layout, node, text, draw_linked_value, draw_output_value):
+    def draw_socket(self, context, layout, node, text):
         raise NotImplementedError
 
     def draw_color(self, context: bpy.types.Context, node: bpy.types.Node):
@@ -45,19 +42,25 @@ class ScriptingSocket:
         """ Returns a list of all valid connected sockets """
         return sockets.get_next_sockets(self)
 
-    def value_code(self):
+    def python_value(self):
         raise NotImplementedError
 
-    def code(self, indent: int = 0, fallback: str = ""):
+    code: bpy.props.StringProperty(default="", name="Code", description="The code returned by this socket")
+
+    def get_code(self, indent: int = 0, fallback: str = ""):
         if self.is_output:
-            if not self.has_next():
-                return fallback
-            ntree = self.node.node_tree
-            return f"bpy.data.node_groups['{ntree.name}']._execute_node('{self.get_next()[0].node.id}', locals(), globals())\n"
-        else:
+            if getattr(self, "is_program", False):
+                if not self.has_next():
+                    return fallback
+                ntree = self.node.node_tree
+                return f"bpy.context.scene.sn._execute_node('{ntree.id}', '{self.get_next()[0].node.id}', locals(), globals())\n"
+            else:
+                return self.python_value()
+        elif not getattr(self, "is_program", False):
             if self.has_next():
-                return self.get_next()[0].value_code()
-            return self.value_code()
+                return self.get_next()[0].python_value()
+            return self.python_value()
+        return fallback
 
     meta: bpy.props.StringProperty(default="{}", name="Metadata", description="Stringified JSON metadata passed along by this socket")
 

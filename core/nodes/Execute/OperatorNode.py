@@ -19,6 +19,6 @@ class SNA_OT_Operator_{self.id}(bpy.types.Operator):
     bl_label = "My Operator"
 
     def execute(self, context):
-        {self.outputs["Execute"].code(2)}
+        {self.outputs["Execute"].get_code(2)}
         return {{'FINISHED'}}
 """

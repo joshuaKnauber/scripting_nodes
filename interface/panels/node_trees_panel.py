@@ -19,5 +19,8 @@ class SN_PT_NodeTreesPanel(bpy.types.Panel):
         layout = self.layout
         sn = context.scene.sn
 
-        row = layout.row()
+        row = layout.row(align=True)
         row.template_list(SN_UL_NodeTreesList.bl_idname, "sn_node_trees", bpy.data, "node_groups", sn, "active_nodetree_index")
+
+        col = row.column(align=True)
+        col.operator("sn.add_nodetree", icon="ADD", text="")

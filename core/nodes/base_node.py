@@ -1,5 +1,4 @@
 import time
-from uuid import uuid4
 
 import bpy
 
@@ -9,11 +8,8 @@ from ...core.utils.sockets import add_socket
 from ...interface.overlays.nodes.node_overlays import set_node_error, set_node_time
 from ...utils import logger
 from ...utils.code import normalize_indents
+from ..utils.id import get_id
 from .utils.draw_code import draw_code
-
-
-def get_id():
-    return uuid4().hex[:5].upper()
 
 
 class SN_BaseNode(bpy.types.Node):
@@ -106,15 +102,34 @@ class SN_BaseNode(bpy.types.Node):
         for out in self.outputs:
             out.reset_meta()
 
+    def _get_code_summary(self):
+        """ Returns a summary of all the code stored in the node to check for changes """
+        code = self.code + self.code_register + self.code_unregister
+        for socket in [*self.inputs, *self.outputs]:
+            code += socket.meta
+            code += socket.get_code()
+        return code
+
     def generate(self, context: bpy.types.Context):
         """ Generates the code for the node. Overwrite this in nodes by setting the self.code... properties """
 
     def mark_dirty(self):
         """ Called when the node changes. Forwards the update to the node tree """
+        summary = self._get_code_summary()
         self._reset_code()
         self.generate(bpy.context)
+        if summary == self._get_code_summary():
+            return
+        self._propagate_changes()
         if self.require_register:
             self.node_tree.mark_dirty(self)
+
+    def _propagate_changes(self):
+        """ Propagates the changes to the surrounding nodes """
+        for socket in [*self.inputs, *self.outputs]:
+            if socket.has_next():
+                for next in socket.get_next():
+                    next.node.mark_dirty()
 
     def _execute(self, local_vars: dict, global_vars: dict):
         """ Executes the code for the node. Note that this code runs within the context of the running addon """

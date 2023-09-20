@@ -16,8 +16,8 @@ class SN_LabelNode(SN_BaseNode, bpy.types.Node):
     def generate(self, context):
         layout = self.inputs["Interface"].get_meta("layout", "self.layout")
         self.code = f"""
-            {layout}.label(text={self.inputs['Label'].code()})
-            {self.outputs["Interface"].code(3)}
+            {layout}.label(text={self.inputs['Label'].get_code()})
+            {self.outputs["Interface"].get_code(3)}
         """
 
         self.outputs["Interface"].set_meta("layout", layout)

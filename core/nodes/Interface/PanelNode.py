@@ -23,10 +23,10 @@ class SNA_PT_Panel_{self.id}(bpy.types.Panel):
     bl_category = "Serpens"
 
     def draw_header(self, context):
-        {self.outputs['Header'].code(5, "pass")}
+        {self.outputs['Header'].get_code(5, "pass")}
         
     def draw(self, context):
-        {self.outputs['Interface'].code(5, "pass")}
+        {self.outputs['Interface'].get_code(5, "pass")}
         """
 
         self.outputs["Header"].set_meta("layout", "self.layout")

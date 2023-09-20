@@ -21,13 +21,13 @@ class SN_DrawCheckboxNode(SN_BaseNode, bpy.types.Node):
 
         # if self.bool_prop.node:
         #     self.code = f"""
-        #         {layout}.prop(bpy.context.scene, "prop_{self.bool_prop.id}", text={self.inputs['Label'].code()})
-        #         {self.outputs["Interface"].code(4)}
+        #         {layout}.prop(bpy.context.scene, "prop_{self.bool_prop.id}", text={self.inputs['Label'].get_code()})
+        #         {self.outputs["Interface"].get_code(4)}
         #     """
         # else:
         #     self.code = f"""
         #         {layout}.label(text="No valid property selected!")
-        #         {self.outputs["Interface"].code(4)}
+        #         {self.outputs["Interface"].get_code(4)}
         #     """
 
         self.outputs["Interface"].set_meta("layout", layout)

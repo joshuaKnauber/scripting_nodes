@@ -1,5 +1,7 @@
 import bpy
 
+from ..utils.id import get_id
+
 
 class ScriptingNodesTree(bpy.types.NodeTree):
     bl_idname = "ScriptingNodeTree"
@@ -12,9 +14,16 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     is_dirty: bpy.props.BoolProperty(default=False, name="Is Dirty")
 
+    id: bpy.props.StringProperty(default="", name="ID", description="Unique ID of the node tree")
+
+    def _init(self):
+        """ Called when the node tree is created by the depsgraph handler. """
+        if not self.id:
+            self.id = get_id()
+            self.name = "NodeTree"
+
     def update(self):
         """ Called when the node tree is updating. """
-        # TODO maybe remove it not needed
 
     def mark_dirty(self, node: bpy.types.Node):
         self.is_dirty = True
