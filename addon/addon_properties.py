@@ -44,3 +44,5 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         pass
 
     active_property_index: bpy.props.IntProperty(default=0, name="Active Property Index", description="The index of the active property", min=0, update=update_active_property_index)
+
+    node_search: bpy.props.StringProperty(default="", name="Node Search", description="Search for a node by name or type", options={"TEXTEDIT_UPDATE"})

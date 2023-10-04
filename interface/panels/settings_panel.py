@@ -10,7 +10,7 @@ class SN_PT_SettingsPanel(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "Scripting Nodes"
     bl_options = {"DEFAULT_CLOSED"}
-    bl_order = 4
+    bl_order = 3
 
     @classmethod
     def poll(cls, context: bpy.types.Context): return in_sn_tree(context)
