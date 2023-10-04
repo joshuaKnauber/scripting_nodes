@@ -74,7 +74,8 @@ class SN_BaseNode(bpy.types.Node):
 
     def insert_link(self, link: bpy.types.NodeLink):
         """ Called when a link is inserted """
-        handle_link_insert(self, link)
+        # handle_link_insert(self, link)
+        pass  # TODO are these necessary
 
     def remove_link(self, link: bpy.types.NodeLink):
         """ Called when a link is removed """

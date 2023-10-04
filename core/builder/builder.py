@@ -66,7 +66,18 @@ def _add_base_files():
         with open(os.path.join(os.path.dirname(__file__), "templates", "init.txt"), "r") as read_file:
             text = read_file.read()
             text = text.replace("$NAME", sn.info.name)
+            text = text.replace("$AUTHOR", sn.info.author)
             text = text.replace("$DESCRIPTION", sn.info.description)
+            version = f"({sn.info.version[0]}, {sn.info.version[1]}, {sn.info.version[2]})"
+            text = text.replace("$VERSION", version)
+            blender = f"({sn.info.blender[0]}, {sn.info.blender[1]}, {sn.info.blender[2]})"
+            text = text.replace("$BLENDER", blender)
+            text = text.replace("$LOCATION", sn.info.location)
+            category = sn.info.custom_category if sn.info.category == "CUSTOM" else sn.info.category
+            text = text.replace("$CATEGORY", category)
+            text = text.replace("$WARNING", sn.info.warning)
+            text = text.replace("$DOC_URL", sn.info.doc_url)
+            text = text.replace("$TRACKER_URL", sn.info.tracker_url)
             write_file.write(text)
     # add auto load file
     with open(os.path.join(basedir, "auto_load.py"), "w") as write_file:

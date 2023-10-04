@@ -28,6 +28,10 @@ class ScriptingSocket:
     def draw_socket(self, context, layout, node, text):
         raise NotImplementedError
 
+    @classmethod
+    def draw_color_simple(self):
+        return self.get_color(None, None, None)
+
     def draw_color(self, context: bpy.types.Context, node: bpy.types.Node):
         return self.get_color(context, node)
 

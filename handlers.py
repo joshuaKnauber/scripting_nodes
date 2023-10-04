@@ -1,6 +1,7 @@
 import bpy
 from bpy.app.handlers import persistent
 
+from .addon.info.info_properties import reset_addon_info_has_changes
 from .core.builder import builder, watcher
 from .interface.overlays.errors.error_drawing import draw_errors
 from .interface.overlays.nodes.node_overlays import draw_node_overlays
@@ -22,6 +23,7 @@ def unregister():
 @persistent
 def load_handler(dummy):
     subscribe_to_name_change()
+    reset_addon_info_has_changes()
     builder.build_addon()
     # TODO do properly
     bpy.types.SpaceNodeEditor.draw_handler_add(draw_errors, (), 'WINDOW', 'BACKDROP')
