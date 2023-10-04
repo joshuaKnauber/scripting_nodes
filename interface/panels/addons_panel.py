@@ -8,7 +8,7 @@ class SN_PT_AddonPanel(bpy.types.Panel):
     bl_label = "Addon"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
-    bl_category = "Serpens"
+    bl_category = "Scripting Nodes"
     bl_order = 0
     bl_options = {"DEFAULT_CLOSED"}
 
@@ -53,7 +53,7 @@ class SN_PT_AddonInfoPanel(bpy.types.Panel):
     bl_label = "Addon Info"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
-    bl_category = "Serpens"
+    bl_category = "Scripting Nodes"
     bl_options = {"DEFAULT_CLOSED"}
     bl_order = 0
 
@@ -85,7 +85,7 @@ class SN_PT_AddonDetailsPanel(bpy.types.Panel):
     bl_label = "Addon Details"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
-    bl_category = "Serpens"
+    bl_category = "Scripting Nodes"
     bl_options = {"DEFAULT_CLOSED"}
     bl_order = 1
 

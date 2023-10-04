@@ -8,7 +8,7 @@ class SN_PT_SettingsPanel(bpy.types.Panel):
     bl_label = "Settings"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
-    bl_category = "Serpens"
+    bl_category = "Scripting Nodes"
     bl_options = {"DEFAULT_CLOSED"}
     bl_order = 4
 
@@ -32,7 +32,7 @@ class SN_PT_DeveloperSettingsPanel(bpy.types.Panel):
     bl_label = "Developer Settings"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
-    bl_category = "Serpens"
+    bl_category = "Scripting Nodes"
     bl_options = {"DEFAULT_CLOSED"}
 
     @classmethod

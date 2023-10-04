@@ -9,7 +9,7 @@ class SN_PT_NodeTreesPanel(bpy.types.Panel):
     bl_label = "Node Trees"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
-    bl_category = "Serpens"
+    bl_category = "Scripting Nodes"
     bl_order = 1
 
     @classmethod
@@ -19,8 +19,11 @@ class SN_PT_NodeTreesPanel(bpy.types.Panel):
         layout = self.layout
         sn = context.scene.sn
 
-        row = layout.row(align=True)
+        row = layout.row()
         row.template_list(SN_UL_NodeTreesList.bl_idname, "sn_node_trees", bpy.data, "node_groups", sn, "active_nodetree_index")
 
         col = row.column(align=True)
         col.operator("sn.add_nodetree", icon="ADD", text="")
+        subrow = col.row(align=True)
+        subrow.enabled = sn.active_nodetree_index <= len(bpy.data.node_groups)-1
+        subrow.operator("sn.remove_nodetree", icon="REMOVE", text="")

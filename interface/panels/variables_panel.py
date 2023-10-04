@@ -1,4 +1,5 @@
 import bpy
+
 from ...utils.is_serpens import in_sn_tree
 
 
@@ -7,7 +8,7 @@ class SN_PT_VariablePanel(bpy.types.Panel):
     bl_label = "Variables"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
-    bl_category = "Serpens"
+    bl_category = "Scripting Nodes"
     bl_options = {"DEFAULT_CLOSED"}
     bl_order = 2
 

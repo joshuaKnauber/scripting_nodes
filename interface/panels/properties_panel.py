@@ -9,7 +9,7 @@ class SN_PT_PropertyPanel(bpy.types.Panel):
     bl_label = "Properties"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
-    bl_category = "Serpens"
+    bl_category = "Scripting Nodes"
     bl_options = {"DEFAULT_CLOSED"}
     bl_order = 3
 
