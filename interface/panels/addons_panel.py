@@ -22,6 +22,16 @@ class SN_PT_AddonPanel(bpy.types.Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
 
+        if sn.info.has_changes:
+            box = layout.box()
+            box.alert = True
+            col = box.column(align=True)
+            col.label(text="Addon Info Changes", icon="INFO")
+            row = col.row()
+            row.enabled = False
+            row.label(text="Restart required to update preferences.")
+            layout.separator()
+
         col = layout.column(heading="Info")
 
         col.prop(sn.info, "name")
@@ -34,17 +44,7 @@ class SN_PT_AddonPanel(bpy.types.Panel):
 
         row = layout.row()
         row.scale_y = 1.5
-        row.operator("sn.export_addon", icon="EXPORT")
-
-        if sn.info.has_changes:
-            layout.separator()
-            box = layout.box()
-            box.alert = True
-            col = box.column(align=True)
-            col.label(text="Addon Info Changes", icon="INFO")
-            row = col.row()
-            row.enabled = False
-            row.label(text="Restart required to update preferences.")
+        row.operator("sn.export_addon", icon="EXPORT", text=f"Export Addon {'.'.join(map(str, list(sn.info.version)))}")
 
 
 class SN_PT_AddonInfoPanel(bpy.types.Panel):

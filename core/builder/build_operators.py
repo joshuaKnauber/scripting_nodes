@@ -1,11 +1,40 @@
+import os
+import shutil
+
 import bpy
+from bpy_extras.io_utils import ExportHelper
+
+from . import builder
 
 
-class SN_OT_ExportAddon(bpy.types.Operator):
+class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
     """Export the current addon as a zip file"""
     bl_idname = "sn.export_addon"
     bl_label = "Export Addon"
     bl_options = {"REGISTER", "INTERNAL"}
 
+    filename_ext = ".zip"
+
+    filter_glob: bpy.props.StringProperty(
+        default="*.zip",
+        options={'HIDDEN'},
+        maxlen=255,
+    )
+
     def execute(self, context: bpy.types.Context):
+        print(self.filepath)
+        base_dir = os.path.dirname(self.filepath)
+        if os.path.exists(base_dir):
+            addon_dir = builder.get_addon_dir(base_dir)
+            # if os.path.exists(addon_dir):
+            #     shutil.rmtree(addon_dir)
+            builder.build_addon(base_dir)
+            shutil.make_archive(self.filepath[:-4], "zip", addon_dir)
         return {"FINISHED"}
+
+    def invoke(self, context, event):
+        sn = context.scene.sn
+        version = ".".join([str(i) for i in sn.info.version])
+        self.filepath = f"{'test_addon'}_{version}.blend"
+        context.window_manager.fileselect_add(self)
+        return {'RUNNING_MODAL'}

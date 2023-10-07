@@ -11,11 +11,14 @@ import bpy
 from ...utils import logger
 
 
-def build_addon():
+def build_addon(base_dir: str = None) -> str:
+    if not base_dir:
+        base_dir = _get_addons_dir()
     if not _has_addon():
         return
-    _prepare_addon_dir()
+    _prepare_addon_dir(base_dir)
     _reload_addon()
+    return get_addon_dir(base_dir)
 
 
 def _reload_addon():
@@ -36,18 +39,18 @@ def _has_addon():
     return False
 
 
-def _prepare_addon_dir():
-    _reset_addon_dir()
-    _add_dir_structure()
-    _add_base_files()
+def _prepare_addon_dir(base_dir: str):
+    _reset_addon_dir(base_dir)
+    _add_dir_structure(base_dir)
+    _add_base_files(base_dir)
     for ntree in bpy.data.node_groups:
         if getattr(ntree, "is_sn", False):
-            _add_node_tree(ntree)
+            _add_node_tree(base_dir, ntree)
 
 
-def _add_node_tree(ntree: bpy.types.NodeTree):
+def _add_node_tree(base_dir: str, ntree: bpy.types.NodeTree):
     """ Adds the given node tree to the given directory """
-    with open(os.path.join(_get_ntree_dir(), _get_ntree_filename(ntree)), "w") as write_file:
+    with open(os.path.join(_get_ntree_dir(base_dir), _get_ntree_filename(ntree)), "w") as write_file:
         write_file.write(_ntree_to_code(ntree))
 
 
@@ -57,10 +60,10 @@ def _get_ntree_filename(ntree: bpy.types.NodeTree):
     return f"{pythonic}.py"
 
 
-def _add_base_files():
+def _add_base_files(base_dir: str):
     """ Adds the base files to the addon directory """
     sn = bpy.context.scene.sn
-    basedir = _get_addon_dir()
+    basedir = get_addon_dir(base_dir)
     # add init file
     with open(os.path.join(basedir, "__init__.py"), "w") as write_file:
         with open(os.path.join(os.path.dirname(__file__), "templates", "init.txt"), "r") as read_file:
@@ -111,36 +114,36 @@ def _ntree_to_code(ntree: bpy.types.NodeTree):
     return code
 
 
-def _add_dir_structure():
+def _add_dir_structure(base_dir: str):
     """ Adds the directory structure to the addon directory """
     # add addon directory
-    os.mkdir(_get_ntree_dir())
-    with open(os.path.join(_get_ntree_dir(), "__init__.py"), "w") as write_file:
+    os.mkdir(_get_ntree_dir(base_dir))
+    with open(os.path.join(_get_ntree_dir(base_dir), "__init__.py"), "w") as write_file:
         write_file.write("")
     # add assets directory
-    os.mkdir(_get_assets_dir())
+    os.mkdir(_get_assets_dir(base_dir))
     # add icons directory
-    os.mkdir(_get_icon_dir())
+    os.mkdir(_get_icon_dir(base_dir))
 
 
-def _get_ntree_dir():
+def _get_ntree_dir(base_dir: str):
     """ Returns the directory for the given node tree """
-    return os.path.join(_get_addon_dir(), "addon")
+    return os.path.join(get_addon_dir(base_dir), "addon")
 
 
-def _get_assets_dir():
+def _get_assets_dir(base_dir: str):
     """ Returns the directory for the given node tree """
-    return os.path.join(_get_addon_dir(), "assets")
+    return os.path.join(get_addon_dir(base_dir), "assets")
 
 
-def _get_icon_dir():
+def _get_icon_dir(base_dir: str):
     """ Returns the directory for the given node tree """
-    return os.path.join(_get_addon_dir(), "icons")
+    return os.path.join(get_addon_dir(base_dir), "icons")
 
 
-def _reset_addon_dir():
+def _reset_addon_dir(base_dir: str):
     """ Removes the current files and adds the addon directory """
-    addon_dir = _get_addon_dir()
+    addon_dir = get_addon_dir(base_dir)
     if os.path.exists(addon_dir):
         for filename in os.listdir(addon_dir):
             if os.path.isfile(os.path.join(addon_dir, filename)):
@@ -151,9 +154,9 @@ def _reset_addon_dir():
         os.mkdir(addon_dir)
 
 
-def _get_addon_dir():
+def get_addon_dir(base_dir: str):
     """ Returns the addon directory """
-    return os.path.join(_get_addons_dir(), "test_addon")
+    return os.path.join(base_dir, "test_addon")
 
 
 def _get_addons_dir():
