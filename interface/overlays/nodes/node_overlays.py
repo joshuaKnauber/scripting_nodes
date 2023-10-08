@@ -141,6 +141,7 @@ def draw_error_marker(node: bpy.types.Node):
 
 def draw_node_overlays():
     """ Draws node details to the interface """
+    return
     if not in_sn_tree(bpy.context):
         return
     zoom = get_zoom_level()

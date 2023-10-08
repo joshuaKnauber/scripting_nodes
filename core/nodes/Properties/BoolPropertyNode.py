@@ -20,16 +20,17 @@ class SN_BoolPropertyNode(SN_BaseNode, bpy.types.Node):
         row.prop(self, "name", text="")
         row.operator("sn.node_settings", text="", icon="PREFERENCES", emboss=False).node = self.name
 
+    def identifier(self):
+        return f"prop_{self.id}"
+
     def generate(self, context):
         self.require_register = True
 
-        prop_identifier = f"prop_{self.id}"
-
-        self.outputs["Boolean Property"].code = f"bpy.context.scene.{prop_identifier}"
+        self.outputs["Boolean Property"].code = f"bpy.context.scene.{self.identifier()}"
         self.outputs["Boolean Property"].set_meta("data", "bpy.context.scene")
-        self.outputs["Boolean Property"].set_meta("identifier", prop_identifier)
+        self.outputs["Boolean Property"].set_meta("identifier", self.identifier())
 
-        self.outputs["Boolean Value"].code = f"bpy.context.scene.{prop_identifier}"
+        self.outputs["Boolean Value"].code = f"bpy.context.scene.{self.identifier()}"
 
-        self.code_register = f"bpy.types.Scene.{prop_identifier} = bpy.props.BoolProperty(name='{self.name}')"
-        self.code_unregister = f"del bpy.types.Scene.{prop_identifier}"
+        self.code_register = f"bpy.types.Scene.{self.identifier()} = bpy.props.BoolProperty(name='{self.name}')"
+        self.code_unregister = f"del bpy.types.Scene.{self.identifier()}"

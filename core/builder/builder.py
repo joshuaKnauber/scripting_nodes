@@ -2,13 +2,13 @@ import os
 import re
 import shutil
 import sys
-import threading
 import time
 
 import addon_utils
 import bpy
 
 from ...utils import logger
+from ...utils.code import normalize_indents
 
 
 def build_addon(base_dir: str = None) -> str:
@@ -96,8 +96,7 @@ def _ntree_to_code(ntree: bpy.types.NodeTree):
 
     for node in ntree.nodes:
         if getattr(node, "is_sn", False) and node.require_register:  # TODO
-            code += node.code + "\n"
-            print(node, node.code_register)
+            code += normalize_indents(node.code) + "\n"
             if node.code_register:
                 register += "    " + node.code_register + "\n"
             if node.code_unregister:
