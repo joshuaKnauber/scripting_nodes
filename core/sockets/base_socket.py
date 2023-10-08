@@ -3,6 +3,7 @@ import json
 import bpy
 
 from ..utils import sockets
+from .data.convert import convert_types
 
 
 class ScriptingSocket:
@@ -65,7 +66,8 @@ class ScriptingSocket:
                 return self._python_value()
         elif not getattr(self, "is_program", False):
             if self.has_next():
-                return self.get_next()[0]._python_value()
+                from_socket = self.get_next()[0]
+                return convert_types(from_socket._python_value(), from_socket, self)
             return self._python_value()
         return fallback
 
