@@ -26,4 +26,6 @@ class SN_IfElseNode(SN_BaseNode, bpy.types.Node):
             {self.outputs["After"].get_code(3)}
         """
 
-        self.outputs["Interface"].set_meta("layout", layout)
+        self.outputs["True"].set_meta("layout", layout)
+        self.outputs["False"].set_meta("layout", layout)
+        self.outputs["After"].set_meta("layout", layout)

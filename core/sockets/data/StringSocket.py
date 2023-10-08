@@ -8,7 +8,7 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     value: bpy.props.StringProperty(default="", update=lambda self, _: self.node.mark_dirty(), options={"TEXTEDIT_UPDATE"})
 
-    def python_value(self):
+    def _python_value(self):
         if self.is_output:
             return self.code if self.code else "''"
         value = self.value.replace('\'', '\\\'')
@@ -19,6 +19,11 @@ class SN_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     def draw_socket(self, context, layout, node, text):
         if not self.is_output:
-            layout.prop(self, "value", text="" if self.is_output else text)
+            if self.show_enable:
+                layout.prop(self, "enabled", text="", icon="HIDE_OFF" if self.enabled else "HIDE_ON", emboss=False)
+            if self.enabled:
+                layout.prop(self, "value", text=text)
+            else:
+                layout.label(text=text)
         else:
             layout.label(text=text)

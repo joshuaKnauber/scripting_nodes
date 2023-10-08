@@ -10,6 +10,9 @@ class ScriptingSocket:
 
     initialized: bpy.props.BoolProperty(default=False)
 
+    enabled: bpy.props.BoolProperty(default=True, name="Enabled", description="Enable or disable this socket", update=lambda self, _: self.node.mark_dirty())
+    show_enable: bpy.props.BoolProperty(default=False, name="Show Enabled", description="Show the enable icon")
+
     def __init__(self):
         if not self.initialized:
             self.init()
@@ -46,7 +49,7 @@ class ScriptingSocket:
         """ Returns a list of all valid connected sockets """
         return sockets.get_next_sockets(self)
 
-    def python_value(self):
+    def _python_value(self):
         raise NotImplementedError
 
     code: bpy.props.StringProperty(default="", name="Code", description="The code returned by this socket")
@@ -59,11 +62,11 @@ class ScriptingSocket:
                 ntree = self.node.node_tree
                 return f"bpy.context.scene.sn._execute_node('{ntree.id}', '{self.get_next()[0].node.id}', locals(), globals())\n"
             else:
-                return self.python_value()
+                return self._python_value()
         elif not getattr(self, "is_program", False):
             if self.has_next():
-                return self.get_next()[0].python_value()
-            return self.python_value()
+                return self.get_next()[0]._python_value()
+            return self._python_value()
         return fallback
 
     meta: bpy.props.StringProperty(default="{}", name="Metadata", description="Stringified JSON metadata passed along by this socket")

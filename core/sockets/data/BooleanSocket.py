@@ -8,7 +8,7 @@ class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     value: bpy.props.BoolProperty(default=False, update=lambda self, _: self.node.mark_dirty())
 
-    def python_value(self):
+    def _python_value(self):
         if self.is_output:
             return self.code if self.code else "False"
         return str(self.value)

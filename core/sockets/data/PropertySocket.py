@@ -1,3 +1,5 @@
+from operator import is_
+
 import bpy
 
 from ..base_socket import ScriptingSocket
@@ -6,7 +8,9 @@ from ..base_socket import ScriptingSocket
 class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SN_PropertySocket"
 
-    def python_value(self):
+    def _python_value(self):
+        if self.is_output:
+            return self.code if self.code else "None"
         return "None"
 
     def get_color(self, context: bpy.types.Context, node: bpy.types.Node):
