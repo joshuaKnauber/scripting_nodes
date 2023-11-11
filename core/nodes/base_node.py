@@ -3,6 +3,7 @@ import time
 import bpy
 
 from ...core.node_tree.node_tree import ScriptingNodesTree
+from ...core.nodes.utils.references import NodePointer, get_references_to_node
 from ...core.utils.links import handle_link_insert, handle_link_remove, is_link_valid
 from ...core.utils.sockets import add_socket
 from ...interface.overlays.nodes.node_overlays import set_node_error, set_node_time
@@ -114,6 +115,9 @@ class SN_BaseNode(bpy.types.Node):
     def generate(self, context: bpy.types.Context):
         """ Generates the code for the node. Overwrite this in nodes by setting the self.code... properties """
 
+    def on_reference_update(self, node: bpy.types.Node):
+        """ Called when a node is referenced by this node """
+
     def mark_dirty(self):
         """ Called when the node changes. Forwards the update to the node tree """
         summary = self._get_code_summary()
@@ -126,11 +130,20 @@ class SN_BaseNode(bpy.types.Node):
             self.node_tree.mark_dirty(self)
 
     def _propagate_changes(self):
-        """ Propagates the changes to the surrounding nodes """
-        for socket in [*self.inputs, *self.outputs]:
-            if socket.has_next():
-                for next in socket.get_next():
-                    next.node.mark_dirty()
+        """ Propagates the changes to the surrounding and referencing nodes """
+
+        def propagate_change_to_sockets(self):
+            for socket in [*self.inputs, *self.outputs]:
+                if socket.has_next():
+                    for next in socket.get_next():
+                        next.node.mark_dirty()
+
+        def propagate_change_to_references(self):
+            for ref in get_references_to_node(self):
+                ref.on_reference_update(self)
+
+        propagate_change_to_sockets(self)
+        propagate_change_to_references(self)
 
     def _execute(self, local_vars: dict, global_vars: dict):
         """ Executes the code for the node. Note that this code runs within the context of the running addon """

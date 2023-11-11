@@ -33,11 +33,13 @@ class NodePointer(bpy.types.PropertyGroup):
 
 
 def collection(idname: str):
+    """ Returns the collection for the given idname """
     sn = bpy.context.scene.sn
     return sn.references.get_collection(idname)
 
 
 def node_search(layout: bpy.types.UILayout, prop: NodePointer, idname: str):
+    """ Draws a node search field """
     coll = collection(idname)
     if coll:
         layout.prop_search(prop, "name", coll, "nodes", text="")
@@ -45,3 +47,16 @@ def node_search(layout: bpy.types.UILayout, prop: NodePointer, idname: str):
         subrow = layout.row()
         subrow.enabled = False
         subrow.prop_search(prop, "name", bpy.data.node_groups[0], "nodes", text="")
+
+
+def get_references_to_node(node: bpy.types.Node):
+    """ Returns a list of references to the given node """
+    refs = []
+    for ntree in bpy.data.node_groups:
+        if getattr(ntree, "is_sn", False):
+            for ref_node in ntree.nodes:
+                for prop in ref_node.bl_rna.properties:
+                    if getattr(prop, "fixed_type", None) and prop.fixed_type.identifier == NodePointer.__name__:
+                        if getattr(ref_node, prop.identifier).id == node.id:
+                            refs.append(ref_node)
+    return refs

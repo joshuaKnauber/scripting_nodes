@@ -20,6 +20,11 @@ class SN_GetPropertyNode(SN_BaseNode, bpy.types.Node):
         self.add_output(sockets.PROPERTY, "Property")
         self.add_output(sockets.BOOLEAN, "Value")
 
+    def on_reference_update(self, property_node: bpy.types.Node):
+        self.inputs[0].name = property_node.source_type
+        self.inputs[0].set_meta("type", property_node.source_type)
+        self.mark_dirty()
+
     def draw_label(self):
         if self.selected_property.node:
             return self.selected_property.name
@@ -35,7 +40,7 @@ class SN_GetPropertyNode(SN_BaseNode, bpy.types.Node):
             return
 
         identifier = self.selected_property.node.identifier()
-        self.outputs["Property"].code = f"bpy.context.scene.{identifier}"
+        self.outputs["Property"].code = f"{self.inputs[0].get_code()}.{identifier}"
         self.outputs["Property"].set_meta("data", "bpy.context.scene")
         self.outputs["Property"].set_meta("identifier", identifier)
 

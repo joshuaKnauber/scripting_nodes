@@ -33,10 +33,11 @@ class ScriptingSocket:
         raise NotImplementedError
 
     @classmethod
-    def draw_color_simple(self):
-        return self.get_color(None, None, None)
+    def draw_color_simple(cls):
+        return cls.get_color(None, None, None)
 
     def draw_color(self, context: bpy.types.Context, node: bpy.types.Node):
+        # TODO I guess this doesn't exist anymore?
         return self.get_color(context, node)
 
     def get_color(self, context, node):
