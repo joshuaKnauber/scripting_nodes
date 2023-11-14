@@ -80,6 +80,7 @@ class ScriptingSocket:
     def update_subtype(self, _):
         self.force_update()
         self.on_subtype_update()
+        self.node.location = self.node.location
 
     subtype: bpy.props.EnumProperty(
         name="Subtype",
@@ -132,6 +133,7 @@ class ScriptingSocket:
     def update_data_type(self, context):
         if self.changeable and self.data_type != self.bl_idname:
             self.node.convert_socket(self, self.data_type)
+            self.node.location = self.node.location
 
     def get_data_type_items(self, context):
         items = []
