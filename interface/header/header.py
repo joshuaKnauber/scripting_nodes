@@ -34,7 +34,7 @@ def header_prepend(self, context):
         row.operator("sn.show_data_overview", text="Blend Data", icon="RNA")
 
         subrow = row.row(align=True)
-        if platform.system() != "Darwin":
+        if platform.system() == "Windows":
             subrow.operator("sn.clear_console", text="", icon="TRASH")
             subrow.operator("wm.console_toggle", text="Console", icon="CONSOLE")
 
