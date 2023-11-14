@@ -1,7 +1,6 @@
 import bpy
 
 
-
 class SN_OT_AddDynamic(bpy.types.Operator):
     bl_idname = "sn.add_dynamic"
     bl_label = "Add Dynamic Socket"
@@ -28,14 +27,14 @@ class SN_OT_AddDynamic(bpy.types.Operator):
                 socket = node.outputs[self.index]
             else:
                 socket = node.inputs[self.index]
-                
+
             # trigger adding dynamic socket
             socket.trigger_dynamic(self.insert_above)
 
             # trigger reevaluation
             node._evaluate(context)
+            context.space_data.node_tree.interface_update(context=context)
         return {"FINISHED"}
-
 
 
 class SN_OT_RemoveSocket(bpy.types.Operator):
@@ -70,12 +69,11 @@ class SN_OT_RemoveSocket(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_SetIcon(bpy.types.Operator):
     bl_idname = "sn.set_icon"
     bl_label = "Set Icon"
     bl_description = "Sets this icon"
-    bl_options = {"REGISTER","UNDO","INTERNAL"}
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
     icon_data_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
     prop_name: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"}, default="icon")
@@ -88,40 +86,48 @@ class SN_OT_SetIcon(bpy.types.Operator):
         return {"FINISHED"}
 
 
-
 class SN_OT_SelectIcon(bpy.types.Operator):
     bl_idname = "sn.select_icon"
     bl_label = "Select Icon"
     bl_description = "Shows you a selection of all blender icons"
-    bl_options = {"REGISTER","UNDO","INTERNAL"}
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
     bl_property = "icon_search"
-    
+
     icon_data_path: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"})
     prop_name: bpy.props.StringProperty(options={"SKIP_SAVE", "HIDDEN"}, default="icon")
-    
+
     icon_search: bpy.props.StringProperty(name="Search", options={"SKIP_SAVE"})
 
     def execute(self, context):
         return {"FINISHED"}
 
-    def invoke(self,context,event):
+    def invoke(self, context, event):
         return context.window_manager.invoke_popup(self, width=800)
 
-    def draw(self,context):
+    def draw(self, context):
         layout = self.layout
-        icons = bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items
-        
+        icons = (
+            bpy.types.UILayout.bl_rna.functions["prop"].parameters["icon"].enum_items
+        )
+
         data = eval(self.icon_data_path)
         prop = getattr(data, self.prop_name)
 
         row = layout.row()
-        row.prop(self,"icon_search",text="",icon="VIEWZOOM")
+        row.prop(self, "icon_search", text="", icon="VIEWZOOM")
 
-        grid = layout.grid_flow(align=True,even_columns=True, even_rows=True)
+        grid = layout.grid_flow(align=True, even_columns=True, even_rows=True)
         for icon in icons:
             # NOTE filtering out icon 806 because it throws an error for some reason
-            if icon.value != 806 and (self.icon_search.lower() in icon.name.lower() or not self.icon_search):
-                op = grid.operator("sn.set_icon",text="", icon_value=icon.value, emboss=prop==icon.value)
+            if icon.value != 806 and (
+                self.icon_search.lower() in icon.name.lower() or not self.icon_search
+            ):
+                op = grid.operator(
+                    "sn.set_icon",
+                    text="",
+                    icon_value=icon.value,
+                    emboss=prop == icon.value,
+                )
                 op.icon_data_path = self.icon_data_path
                 op.prop_name = self.prop_name
                 op.icon = icon.value

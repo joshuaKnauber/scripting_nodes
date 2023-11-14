@@ -178,17 +178,32 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     def _update_changed_links(self, links):
         """Forces the affected nodes to update depending on if it's a program or data socket"""
         for from_out, to_inp, _, _ in links:
+            from_out_in_links = list(
+                filter(
+                    lambda link: link.to_socket == from_out
+                    or link.from_socket == from_out,
+                    self.links,
+                )
+            )
+            to_inp_in_links = list(
+                filter(
+                    lambda link: link.to_socket == to_inp or link.from_socket == to_inp,
+                    self.links,
+                )
+            )
             # update data sockets
             try:
                 if (
                     getattr(to_inp, "is_sn", False)
+                    and to_inp_in_links
                     and not to_inp.is_program
                     and to_inp.node
                 ):
                     to_inp.force_update()
                 # update program sockets
                 elif (
-                    getattr(from_out, "is_sn", False)
+                    from_out_in_links
+                    and getattr(from_out, "is_sn", False)
                     and from_out.is_program
                     and from_out.node
                 ):
@@ -215,12 +230,20 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         for _, to_inp, from_real, _ in removed:
             if from_real:
                 from_in_links = list(
-                    filter(lambda link: link.to_socket == from_real, self.links)
+                    filter(
+                        lambda link: link.to_socket == from_real
+                        or link.from_socket == from_real,
+                        self.links,
+                    )
                 )
                 if from_in_links and from_real.node:
                     from_real.node.link_remove(from_real, to_inp, is_output=True)
                 to_in_links = list(
-                    filter(lambda link: link.from_socket == to_inp, self.links)
+                    filter(
+                        lambda link: link.to_socket == to_inp
+                        or link.from_socket == to_inp,
+                        self.links,
+                    )
                 )
                 if to_in_links and to_inp.node:
                     to_inp.node.link_remove(from_real, to_inp, is_output=False)
