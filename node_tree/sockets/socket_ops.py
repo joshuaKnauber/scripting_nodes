@@ -33,7 +33,6 @@ class SN_OT_AddDynamic(bpy.types.Operator):
 
             # trigger reevaluation
             node._evaluate(context)
-            context.space_data.node_tree.interface_update(context=context)
         return {"FINISHED"}
 
 
