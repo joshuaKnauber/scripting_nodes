@@ -214,10 +214,16 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         """Calls link_remove for all removed links"""
         for _, to_inp, from_real, _ in removed:
             if from_real:
-                if from_real.node:
+                from_in_links = list(
+                    filter(lambda link: link.to_socket == from_real, self.links)
+                )
+                if from_in_links and from_real.node:
                     from_real.node.link_remove(from_real, to_inp, is_output=True)
-                # if to_inp.node:
-                #     to_inp.node.link_remove(from_real, to_inp, is_output=False)
+                to_in_links = list(
+                    filter(lambda link: link.to_socket == to_inp, self.links)
+                )
+                if to_in_links and to_inp.node:
+                    to_inp.node.link_remove(from_real, to_inp, is_output=False)
 
     def _update_added_links(self, added):
         """Triggers an update on the given links data outputs and program inputs to update the affected program"""
