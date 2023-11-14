@@ -23,6 +23,7 @@ class SN_PT_SettingsPanel(bpy.types.Panel):
         layout.use_property_decorate = False
 
         col = layout.column(heading="Debug")
+        col.prop(sn, "draw_errors")
         col.prop(sn, "show_node_code")
 
 

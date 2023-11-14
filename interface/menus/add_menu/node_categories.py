@@ -114,12 +114,6 @@ def draw_node_menu(self, context: bpy.types.Context):
     categories = get_node_categories()
     layout = self.layout
     layout.enabled = in_sn_tree(context)
-
-    row = layout.row()
-    row.operator_context = "INVOKE_DEFAULT"
-    row.operator("sn.search_nodes", text="Search", icon="VIEWZOOM")
-
-    layout.separator()
     for cat in sorted(categories.keys()):
         if not cat in blocklist and not cat == "Group":
             layout.menu(
@@ -129,5 +123,5 @@ def draw_node_menu(self, context: bpy.types.Context):
 
     layout.menu("SN_MT_LayoutMenu", text="Layout")
 
-    layout.separator()
-    layout.menu("SN_MT_GroupMenu", text="Group")
+    # layout.separator()
+    # layout.menu("SN_MT_GroupMenu", text="Group")

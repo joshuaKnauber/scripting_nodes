@@ -29,6 +29,8 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
 
     show_node_refs: bpy.props.BoolProperty(default=False, name="Show Node References", description="Display the node reference structure")
 
+    draw_errors: bpy.props.BoolProperty(default=True, name="Draw Errors", description="Draw errors in the node editor")
+
     def property_type_items(self, context):
         items = property_node_items(self, context)
         for i, item in enumerate(items):

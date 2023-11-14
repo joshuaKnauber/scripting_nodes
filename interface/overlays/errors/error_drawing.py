@@ -10,7 +10,7 @@ from ..nodes.node_overlays import get_monospace_font, get_node_error_msg
 def draw_errors():
     """ Draws the errors to the interface """
     global _errors
-    if not in_sn_tree(bpy.context):
+    if not in_sn_tree(bpy.context) or not bpy.context.scene.sn.draw_errors:
         return
     font_id = get_monospace_font()
     blf.size(font_id, 20)
