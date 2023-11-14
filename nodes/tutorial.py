@@ -114,20 +114,14 @@ def load_shader(img, x, y, size):
 
 
 def draw():
-    pass
-    # global shader
-    # global batch
-    # global image
+    global shader
+    global batch
+    global image
 
-    # bgl.glActiveTexture(bgl.GL_TEXTURE0)
-    # try:
-    #     # bgl.glBindTexture(bgl.GL_TEXTURE_2D, image.bindcode)
-    #     # shader.bind()
-    #     shader.uniform_int("image", 0)
-    #     batch.draw(shader)
+    shader.bind()
+    shader.uniform_sampler("image", gpu.texture.from_image(image))
 
-    # except:
-    #     bpy.types.SpaceNodeEditor.draw_handler_remove(handler, "WINDOW")
+    batch.draw(shader)
 
 
 class SN_TutorialNode(SN_ScriptingBaseNode, bpy.types.Node):
