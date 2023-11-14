@@ -3,11 +3,14 @@ import bpy
 owner = object()
 
 
-
 def name_change_callback(cls):
     for ntree in bpy.data.node_groups:
         if ntree.bl_idname == "ScriptingNodesTree":
-            key = cls.collection_key_overwrite if cls.collection_key_overwrite else cls.bl_idname
+            key = (
+                cls.collection_key_overwrite
+                if cls.collection_key_overwrite
+                else cls.bl_idname
+            )
             for ref in ntree.node_collection(key).refs:
                 node = ref.node
                 if node and node.name != ref.name:
@@ -15,7 +18,6 @@ def name_change_callback(cls):
                     node.on_node_name_change()
                     node._evaluate(bpy.context)
                     return
-
 
 
 def subscribe_to_name_change():
@@ -29,7 +31,6 @@ def subscribe_to_name_change():
                 args=(cls,),
                 notify=name_change_callback,
             )
-
 
 
 def unsubscribe_from_name_change():
