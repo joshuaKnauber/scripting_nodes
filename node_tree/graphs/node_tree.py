@@ -220,7 +220,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                 if from_in_links and from_real.node:
                     from_real.node.link_remove(from_real, to_inp, is_output=True)
                 to_in_links = list(
-                    filter(lambda link: link.to_socket == to_inp, self.links)
+                    filter(lambda link: link.from_socket == to_inp, self.links)
                 )
                 if to_in_links and to_inp.node:
                     to_inp.node.link_remove(from_real, to_inp, is_output=False)
