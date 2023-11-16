@@ -8,14 +8,20 @@ from ..base_node import SN_BaseNode
 class SN_PanelNode(SN_BaseNode, bpy.types.Node):
     bl_idname = "SN_PanelNode"
     bl_label = "Panel"
+    bl_width_default = 200
 
-    default_closed: bpy.props.BoolProperty(default=True, name="Default Closed", description="Close the panel by default", update=lambda self, _: self.mark_dirty())
-    hide_header: bpy.props.BoolProperty(default=False, name="Hide Header", description="Hide the header of the panel", update=lambda self, _: self.mark_dirty())
-    expand_header: bpy.props.BoolProperty(default=False, name="Expand Header", description="Allow elements in the header to stretch across the whole layout", update=lambda self, _: self.mark_dirty())
+    default_closed: bpy.props.BoolProperty(
+        default=True, name="Default Closed", description="Close the panel by default", update=lambda self, _: self.mark_dirty())
+    hide_header: bpy.props.BoolProperty(
+        default=False, name="Hide Header", description="Hide the header of the panel", update=lambda self, _: self.mark_dirty())
+    expand_header: bpy.props.BoolProperty(
+        default=False, name="Expand Header", description="Allow elements in the header to stretch across the whole layout", update=lambda self, _: self.mark_dirty())
 
-    label: bpy.props.StringProperty(default="Panel", name="Label", description="The label of the panel", update=lambda self, _: self.mark_dirty())
+    label: bpy.props.StringProperty(
+        default="Panel", name="Label", description="The label of the panel", update=lambda self, _: self.mark_dirty())
 
-    order: bpy.props.IntProperty(default=0, name="Order", description="The order index of the panel copared to your other panels", update=lambda self, _: self.mark_dirty())
+    order: bpy.props.IntProperty(
+        default=0, name="Order", description="The order index of the panel copared to your other panels", update=lambda self, _: self.mark_dirty())
 
     def on_create(self):
         self.add_input(sockets.BOOLEAN, "Hide")
@@ -25,7 +31,13 @@ class SN_PanelNode(SN_BaseNode, bpy.types.Node):
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         row = layout.row()
         row.prop(self, "name", text="")
-        row.operator("sn.node_settings", text="", icon="PREFERENCES", emboss=False).node = self.name
+        row.operator("sn.node_settings", text="",
+                     icon="PREFERENCES", emboss=False).node = self.name
+        row = layout.row()
+        row.scale_y = 1.5
+        op = row.operator(
+            "sn.picker", text="Select Location", icon="EYEDROPPER")
+        op.locations = "PANELS"
 
     def generate(self, context):
         self.require_register = True
@@ -59,7 +71,7 @@ class SN_PanelNode(SN_BaseNode, bpy.types.Node):
 
                 def draw_header(self, context):
                     {self.outputs['Header'].get_code(5, "pass")}
-                    
+
                 def draw(self, context):
                     {self.outputs['Interface'].get_code(5, "pass")}
         """
