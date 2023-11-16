@@ -175,37 +175,31 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                     data_links.append(link)
         self._insert_define_data_nodes(data_links)
 
+    def _find_node_from_socket(self, socket):
+        for node in self.nodes:
+            for s in [*node.inputs, *node.outputs]:
+                if s == socket:
+                    return node
+        return None
+
     def _update_changed_links(self, links):
         """Forces the affected nodes to update depending on if it's a program or data socket"""
         for from_out, to_inp, _, _ in links:
-            from_out_in_links = list(
-                filter(
-                    lambda link: link.to_socket == from_out
-                    or link.from_socket == from_out,
-                    self.links,
-                )
-            )
-            to_inp_in_links = list(
-                filter(
-                    lambda link: link.to_socket == to_inp or link.from_socket == to_inp,
-                    self.links,
-                )
-            )
+            to_inp_node = self._find_node_from_socket(to_inp)
+            from_out_node = self._find_node_from_socket(from_out)
             # update data sockets
             try:
                 if (
                     getattr(to_inp, "is_sn", False)
-                    and to_inp_in_links
+                    and to_inp_node
                     and not to_inp.is_program
-                    and to_inp.node
                 ):
                     to_inp.force_update()
                 # update program sockets
                 elif (
-                    from_out_in_links
+                    from_out_node
                     and getattr(from_out, "is_sn", False)
                     and from_out.is_program
-                    and from_out.node
                 ):
                     from_out.force_update()
             except:
@@ -229,24 +223,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         """Calls link_remove for all removed links"""
         for _, to_inp, from_real, _ in removed:
             if from_real:
-                from_in_links = list(
-                    filter(
-                        lambda link: link.to_socket == from_real
-                        or link.from_socket == from_real,
-                        self.links,
-                    )
-                )
-                if from_in_links and from_real.node:
-                    from_real.node.link_remove(from_real, to_inp, is_output=True)
-                to_in_links = list(
-                    filter(
-                        lambda link: link.to_socket == to_inp
-                        or link.from_socket == to_inp,
-                        self.links,
-                    )
-                )
-                if to_in_links and to_inp.node:
-                    to_inp.node.link_remove(from_real, to_inp, is_output=False)
+                node = self._find_node_from_socket(from_real)
+                if node:
+                    node.link_remove(from_real, to_inp, is_output=True)
+                node = self._find_node_from_socket(to_inp)
+                if node:
+                    node.link_remove(from_real, to_inp, is_output=False)
 
     def _update_added_links(self, added):
         """Triggers an update on the given links data outputs and program inputs to update the affected program"""
