@@ -2,9 +2,7 @@ import bpy
 from ...base_node import SN_ScriptingBaseNode
 
 
-
 class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
-
     bl_idname = "SN_DrawQuadNode"
     bl_label = "Draw Quad"
     node_color = "PROGRAM"
@@ -17,10 +15,12 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.inputs["Backface Culling"].set_hide(not self.use_3d)
         self._evaluate(context)
 
-    use_3d: bpy.props.BoolProperty(name="Use 3D",
-                                description="Whether to use 3D or 2D coordinates",
-                                default=False,
-                                update=update_use3d)
+    use_3d: bpy.props.BoolProperty(
+        name="Use 3D",
+        description="Whether to use 3D or 2D coordinates",
+        default=False,
+        update=update_use3d,
+    )
 
     def update_use_loc_list(self, context):
         self.inputs["Quad Locations"].set_hide(not self.use_loc_list)
@@ -29,11 +29,12 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
                 inp.set_hide(self.use_loc_list)
         self._evaluate(context)
 
-
-    use_loc_list: bpy.props.BoolProperty(name="Draw Multiple",
-                                description="Whether to draw multiple points (this is more efficient than separate nodes)",
-                                default=False,
-                                update=update_use_loc_list)
+    use_loc_list: bpy.props.BoolProperty(
+        name="Draw Multiple",
+        description="Whether to draw multiple points (this is more efficient than separate nodes)",
+        default=False,
+        update=update_use_loc_list,
+    )
 
     def on_create(self, context):
         self.add_execute_input()
@@ -41,7 +42,17 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
         inp = self.add_float_vector_input("Color")
         inp.subtype = "COLOR_ALPHA"
 
-        self.add_enum_input("On Top")["items"] = str(["NONE", "ALWAYS", "LESS", "LESS_EQUAL", "EQUAL", "GREATER", "GREATER_EQUAL"])
+        self.add_enum_input("On Top")["items"] = str(
+            [
+                "NONE",
+                "ALWAYS",
+                "LESS",
+                "LESS_EQUAL",
+                "EQUAL",
+                "GREATER",
+                "GREATER_EQUAL",
+            ]
+        )
 
         self.add_boolean_input("Backface Culling").default_value = True
 
@@ -77,7 +88,7 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
     def draw_node(self, context, layout):
         layout.prop(self, "use_3d", text="Use 3D")
         layout.prop(self, "use_loc_list", text="Draw Multiple")
-        
+
     def evaluate(self, context):
         self.code_import = f"""
             import gpu
@@ -89,7 +100,9 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
         tl = self.inputs["Top Left"].python_value
         tr = self.inputs["Top Right"].python_value
 
-        quad_locations = f"quads = [[tuple({bl}), tuple({br}), tuple({tl}), tuple({tr})]]"
+        quad_locations = (
+            f"quads = [[tuple({bl}), tuple({br}), tuple({tl}), tuple({tr})]]"
+        )
 
         if self.use_loc_list:
             quad_locations = f"quads = {self.inputs['Quad Locations'].python_value}"
@@ -106,7 +119,7 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.code = f"""
             {verts}
 
-            shader = gpu.shader.from_builtin('{"3" if self.use_3d else "2"}D_UNIFORM_COLOR')
+            shader = gpu.shader.from_builtin('UNIFORM_COLOR')
             batch = gpu_extras.batch.batch_for_shader(shader, 'TRIS', {{"pos": tuple(vertices)}}, indices=tuple(indices))
 
             shader.bind()

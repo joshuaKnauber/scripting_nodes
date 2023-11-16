@@ -2,9 +2,7 @@ import bpy
 from ...base_node import SN_ScriptingBaseNode
 
 
-
 class SN_DrawLineNode(SN_ScriptingBaseNode, bpy.types.Node):
-
     bl_idname = "SN_DrawLineNode"
     bl_label = "Draw Line"
     node_color = "PROGRAM"
@@ -15,10 +13,12 @@ class SN_DrawLineNode(SN_ScriptingBaseNode, bpy.types.Node):
                 input.size = 3 if self.use_3d else 2
         self._evaluate(context)
 
-    use_3d: bpy.props.BoolProperty(name="Use 3D",
-                                description="Whether to use 3D or 2D coordinates",
-                                default=False,
-                                update=update_use3d)
+    use_3d: bpy.props.BoolProperty(
+        name="Use 3D",
+        description="Whether to use 3D or 2D coordinates",
+        default=False,
+        update=update_use3d,
+    )
 
     def update_use_loc_list(self, context):
         self.inputs["Line Locations"].set_hide(not self.use_loc_list)
@@ -27,11 +27,12 @@ class SN_DrawLineNode(SN_ScriptingBaseNode, bpy.types.Node):
                 inp.set_hide(self.use_loc_list)
         self._evaluate(context)
 
-
-    use_loc_list: bpy.props.BoolProperty(name="Draw Multiple",
-                                description="Whether to draw multiple points (this is more efficient than separate nodes)",
-                                default=False,
-                                update=update_use_loc_list)
+    use_loc_list: bpy.props.BoolProperty(
+        name="Draw Multiple",
+        description="Whether to draw multiple points (this is more efficient than separate nodes)",
+        default=False,
+        update=update_use_loc_list,
+    )
 
     def on_create(self, context):
         self.add_execute_input()
@@ -41,7 +42,17 @@ class SN_DrawLineNode(SN_ScriptingBaseNode, bpy.types.Node):
 
         self.add_float_input("Width").default_value = 1
 
-        self.add_enum_input("On Top")["items"] = str(["NONE", "ALWAYS", "LESS", "LESS_EQUAL", "EQUAL", "GREATER", "GREATER_EQUAL"])
+        self.add_enum_input("On Top")["items"] = str(
+            [
+                "NONE",
+                "ALWAYS",
+                "LESS",
+                "LESS_EQUAL",
+                "EQUAL",
+                "GREATER",
+                "GREATER_EQUAL",
+            ]
+        )
 
         inp = self.add_float_vector_input("Point 1")
         inp.size = 2
@@ -63,7 +74,7 @@ class SN_DrawLineNode(SN_ScriptingBaseNode, bpy.types.Node):
     def draw_node(self, context, layout):
         layout.prop(self, "use_3d", text="Use 3D")
         layout.prop(self, "use_loc_list", text="Draw Multiple")
-        
+
     def evaluate(self, context):
         self.code_import = f"""
             import gpu
@@ -92,7 +103,7 @@ class SN_DrawLineNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.code = f"""
             {coords}
 
-            shader = gpu.shader.from_builtin('{"3" if self.use_3d else "2"}D_UNIFORM_COLOR')
+            shader = gpu.shader.from_builtin('UNIFORM_COLOR')
             batch = gpu_extras.batch.batch_for_shader(shader, 'LINES', {{"pos": coords}}, indices=tuple(indices))
 
             shader.bind()
