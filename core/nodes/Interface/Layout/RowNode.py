@@ -4,8 +4,8 @@ from .....constants import sockets
 from ...base_node import SN_BaseNode
 
 
-class SN_RowNode(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_RowNode"
+class SN_NodeRow(SN_BaseNode, bpy.types.Node):
+    bl_idname = "SN_NodeRow"
     bl_label = "Row"
 
     def on_create(self):

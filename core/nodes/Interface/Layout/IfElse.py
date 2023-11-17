@@ -4,8 +4,8 @@ from .....constants import sockets
 from ...base_node import SN_BaseNode
 
 
-class SN_IfElseNode(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_IfElseNode"
+class SN_NodeIfElse(SN_BaseNode, bpy.types.Node):
+    bl_idname = "SN_NodeIfElse"
     bl_label = "If/Else"
 
     def on_create(self):

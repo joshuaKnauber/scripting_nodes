@@ -5,11 +5,12 @@ from ..utils.references import NodePointer, node_search
 from .PanelNode import SN_PanelNode
 
 
-class SN_SubpanelNode(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_SubpanelNode"
+class SN_NodeSubpanel(SN_BaseNode, bpy.types.Node):
+    bl_idname = "SN_NodeSubpanel"
     bl_label = "Subpanel"
 
-    panel: bpy.props.PointerProperty(type=NodePointer, name="Panel", description="Panel to be displayed")
+    panel: bpy.props.PointerProperty(
+        type=NodePointer, name="Panel", description="Panel to be displayed")
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         node_search(layout, self.panel, SN_PanelNode.bl_idname)
@@ -34,7 +35,7 @@ class SNA_PT_Panel_{self.id}(bpy.types.Panel):
 
     def draw_header(self, context):
         {self.outputs['Header'].get_code(5, "pass")}
-        
+
     def draw(self, context):
         {self.outputs['Interface'].get_code(5, "pass")}
         """

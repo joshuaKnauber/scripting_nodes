@@ -4,8 +4,8 @@ from ....constants.properties import id_type_items, id_type_names
 from ..base_node import SN_BaseNode
 
 
-class SN_BoolPropertyNode(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_BoolPropertyNode"
+class SN_NodeBoolProperty(SN_BaseNode, bpy.types.Node):
+    bl_idname = "SN_NodeBoolProperty"
     bl_label = "Boolean Property"
 
     source_type: bpy.props.EnumProperty(
@@ -22,7 +22,8 @@ class SN_BoolPropertyNode(SN_BaseNode, bpy.types.Node):
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         row = layout.row()
         row.prop(self, "name", text="")
-        row.operator("sn.node_settings", text="", icon="PREFERENCES", emboss=False).node = self.name
+        row.operator("sn.node_settings", text="",
+                     icon="PREFERENCES", emboss=False).node = self.name
         layout.prop(self, "source_type", text="")
 
     def identifier(self):
@@ -31,5 +32,7 @@ class SN_BoolPropertyNode(SN_BaseNode, bpy.types.Node):
     def generate(self, context):
         self.require_register = True
 
-        self.code_register = f"bpy.types.{self.source_type}.{self.identifier()} = bpy.props.BoolProperty(name='{self.name}')"
-        self.code_unregister = f"del bpy.types.{self.source_type}.{self.identifier()}"
+        self.code_register = f"bpy.types.{self.source_type}.{
+            self.identifier()} = bpy.props.BoolProperty(name='{self.name}')"
+        self.code_unregister = f"del bpy.types.{
+            self.source_type}.{self.identifier()}"

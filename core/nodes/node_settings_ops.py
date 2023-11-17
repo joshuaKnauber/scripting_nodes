@@ -26,16 +26,23 @@ class SN_OT_NodeSettings(bpy.types.Operator):
             panel_settings(layout, node)
 
     def invoke(self, context, event):
-        return context.window_manager.invoke_popup(self, width=250)
+        return context.window_manager.invoke_popup(self, width=300)
 
 
 def panel_settings(layout: bpy.types.UILayout, node: bpy.types.Node):
-    layout.prop(node, "label")
+    layout.prop(node, "title")
     layout.separator()
     row = layout.row()
     row.prop(node, "default_closed")
     row.prop(node, "hide_header")
     row = layout.row()
     row.prop(node, "expand_header")
+    row.prop(node, "order")
     layout.separator()
-    layout.prop(node, "order")
+    layout.label(text="Picked Settings")
+    row = layout.row()
+    row.prop(node, "space")
+    row.prop(node, "region")
+    row = layout.row()
+    row.prop(node, "category")
+    row.prop(node, "context")

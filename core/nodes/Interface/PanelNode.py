@@ -5,8 +5,8 @@ from ...utils.id import get_id
 from ..base_node import SN_BaseNode
 
 
-class SN_PanelNode(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_PanelNode"
+class SN_NodePanel(SN_BaseNode, bpy.types.Node):
+    bl_idname = "SN_NodePanel"
     bl_label = "Panel"
     bl_width_default = 200
 
@@ -17,11 +17,23 @@ class SN_PanelNode(SN_BaseNode, bpy.types.Node):
     expand_header: bpy.props.BoolProperty(
         default=False, name="Expand Header", description="Allow elements in the header to stretch across the whole layout", update=lambda self, _: self.mark_dirty())
 
-    label: bpy.props.StringProperty(
-        default="Panel", name="Label", description="The label of the panel", update=lambda self, _: self.mark_dirty())
+    def update_title(self, context):
+        self.name = self.title
+        self.mark_dirty()
+
+    title: bpy.props.StringProperty(
+        default="Panel", name="Label", description="The label of the panel", update=update_title)
 
     order: bpy.props.IntProperty(
         default=0, name="Order", description="The order index of the panel copared to your other panels", update=lambda self, _: self.mark_dirty())
+    space: bpy.props.StringProperty(
+        default="VIEW_3D", name="Space", description="The space type of the panel", update=lambda self, _: self.mark_dirty())
+    region: bpy.props.StringProperty(
+        default="UI", name="Region", description="The region type of the panel", update=lambda self, _: self.mark_dirty())
+    category: bpy.props.StringProperty(
+        default="Scripting Nodes", name="Category", description="The category of the panel", update=lambda self, _: self.mark_dirty())
+    context: bpy.props.StringProperty(
+        default="*", name="Context", description="The context of the panel", update=lambda self, _: self.mark_dirty())
 
     def on_create(self):
         self.add_input(sockets.BOOLEAN, "Hide")
@@ -30,14 +42,14 @@ class SN_PanelNode(SN_BaseNode, bpy.types.Node):
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         row = layout.row()
-        row.prop(self, "name", text="")
+        row.scale_y = 1.25
+        label = f"'{self.title}' ({self.space.replace('_', ' ').title()})"
+        op = row.operator(
+            "sn.picker", text=label, icon="RESTRICT_SELECT_OFF")
+        op.locations = "PANELS"
+        op.node = self.id
         row.operator("sn.node_settings", text="",
                      icon="PREFERENCES", emboss=False).node = self.name
-        row = layout.row()
-        row.scale_y = 1.5
-        op = row.operator(
-            "sn.picker", text="Select Location", icon="EYEDROPPER")
-        op.locations = "PANELS"
 
     def generate(self, context):
         self.require_register = True
@@ -58,10 +70,11 @@ class SN_PanelNode(SN_BaseNode, bpy.types.Node):
         self.code = f"""
             class {panel_classname}(bpy.types.Panel):
                 bl_idname = "{panel_classname}"
-                bl_label = "{self.label}"
-                bl_space_type = "NODE_EDITOR"
-                bl_region_type = "UI"
-                bl_category = "Scripting Nodes"
+                bl_label = "{self.title}"
+                bl_space_type = "{self.space}"
+                bl_region_type = "{self.region}"
+                {f'bl_category = "{self.category}"' if self.category else ""}
+                {f'bl_context = "{self.context}"' if self.context else ""}
                 bl_order = {self.order}
                 {options}
 

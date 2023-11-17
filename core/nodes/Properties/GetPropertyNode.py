@@ -8,12 +8,14 @@ from ..utils.references import NodePointer, node_search
 from .BoolPropertyNode import SN_BoolPropertyNode
 
 
-class SN_GetPropertyNode(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_GetPropertyNode"
+class SN_NodeGetProperty(SN_BaseNode, bpy.types.Node):
+    bl_idname = "SN_NodeGetProperty"
     bl_label = "Get Property"
 
-    property_type: bpy.props.EnumProperty(items=properties.property_type_items, update=lambda self, _: self.mark_dirty())
-    selected_property: bpy.props.PointerProperty(type=NodePointer, name="Panel", description="Panel to be displayed", update=lambda self, _: self.mark_dirty())
+    property_type: bpy.props.EnumProperty(
+        items=properties.property_type_items, update=lambda self, _: self.mark_dirty())
+    selected_property: bpy.props.PointerProperty(
+        type=NodePointer, name="Panel", description="Panel to be displayed", update=lambda self, _: self.mark_dirty())
 
     def on_create(self):
         self.add_input(sockets.PROPERTY, "Source")
@@ -40,7 +42,8 @@ class SN_GetPropertyNode(SN_BaseNode, bpy.types.Node):
             return
 
         identifier = self.selected_property.node.identifier()
-        self.outputs["Property"].code = f"{self.inputs[0].get_code()}.{identifier}"
+        self.outputs["Property"].code = f"{self.inputs[0].get_code()}.{
+            identifier}"
         self.outputs["Property"].set_meta("data", "bpy.context.scene")
         self.outputs["Property"].set_meta("identifier", identifier)
 

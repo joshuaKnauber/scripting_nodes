@@ -4,8 +4,8 @@ from ....constants import sockets
 from ..base_node import SN_BaseNode
 
 
-class SN_DrawCheckboxNode(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_DrawCheckboxNode"
+class SN_NodeDrawCheckbox(SN_BaseNode, bpy.types.Node):
+    bl_idname = "SN_NodeDrawCheckbox"
     bl_label = "Draw Checkbox"
 
     def on_create(self):
@@ -21,7 +21,8 @@ class SN_DrawCheckboxNode(SN_BaseNode, bpy.types.Node):
 
         if self.inputs["Boolean Property"].is_linked:
             prop = self.inputs["Boolean Property"]
-            text = f", text={self.inputs['Label'].get_code()}" if self.inputs['Label'].enabled else ""
+            text = f", text={self.inputs['Label'].get_code(
+            )}" if self.inputs['Label'].enabled else ""
             self.code = f"""
                 {layout}.prop({prop.get_meta('data', 'bpy.context.scene')}, "{prop.get_meta('identifier', 'not_a_property')}"{text})
                 {self.outputs["Interface"].get_code(4)}
