@@ -1,8 +1,8 @@
 import bpy
-from ..base_node import SN_BaseNode
+from ..base_node import SNA_BaseNode
 
 
-class SN_NodeGroupInputNode(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_NodeGroupInputNode"
+class SNA_NodeGroupInputNode(SNA_BaseNode, bpy.types.Node):
+    bl_idname = "SNA_NodeGroupInputNode"
     bl_label = "Group Input"
     bl_width_min = 200

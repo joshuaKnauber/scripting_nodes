@@ -1,12 +1,12 @@
 import bpy
 
-from ..base_node import SN_BaseNode
+from ..base_node import SNA_BaseNode
 from ..utils.references import NodePointer, node_search
-from .PanelNode import SN_NodePanel
+from .PanelNode import SNA_NodePanel
 
 
-class SN_NodeSubpanel(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_NodeSubpanel"
+class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
+    bl_idname = "SNA_NodeSubpanel"
     bl_label = "Subpanel"
 
     panel: bpy.props.PointerProperty(
@@ -14,11 +14,11 @@ class SN_NodeSubpanel(SN_BaseNode, bpy.types.Node):
     )
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
-        node_search(layout, self.panel, SN_NodePanel.bl_idname)
+        node_search(layout, self.panel, SNA_NodePanel.bl_idname)
 
     def on_create(self):
-        self.add_output("SN_InterfaceSocket", "Header")
-        self.add_output("SN_InterfaceSocket", "Interface")
+        self.add_output("SNA_InterfaceSocket", "Header")
+        self.add_output("SNA_InterfaceSocket", "Interface")
 
     def generate(self, context):
         self.require_register = True

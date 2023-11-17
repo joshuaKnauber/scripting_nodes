@@ -3,8 +3,8 @@ import bpy
 from ..base_socket import ScriptingSocket
 
 
-class SN_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_idname = "SN_ExecuteSocket"
+class SNA_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
+    bl_idname = "SNA_ExecuteSocket"
     is_program = True
 
     def on_create(self, context: bpy.types.Context):

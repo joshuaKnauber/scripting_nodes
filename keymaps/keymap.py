@@ -1,5 +1,9 @@
 import bpy
-from ..core.nodes.Group.operators.edit_operators import SN_OT_EditSerpensGroup, SN_OT_MakeSerpensGroup, SN_OT_QuitEditSerpensGroup
+from ..core.nodes.Group.operators.edit_operators import (
+    SNA_OT_EditSerpensGroup,
+    SNA_OT_MakeSerpensGroup,
+    SNA_OT_QuitEditSerpensGroup,
+)
 
 
 # keymap store
@@ -7,7 +11,7 @@ addon_keymaps = {}
 
 
 def register_keymaps():
-    """ Registers the visual scripting keymaps """
+    """Registers the visual scripting keymaps"""
 
     # create keymap
     global addon_keymaps
@@ -21,7 +25,7 @@ def register_keymaps():
 
     # shortcut for making a node group
     kmi = km.keymap_items.new(
-        idname=SN_OT_MakeSerpensGroup.bl_idname,
+        idname=SNA_OT_MakeSerpensGroup.bl_idname,
         type="G",
         value="PRESS",
         shift=False,
@@ -32,7 +36,7 @@ def register_keymaps():
 
     # shortcut for editing a node group
     kmi = km.keymap_items.new(
-        idname=SN_OT_EditSerpensGroup.bl_idname,
+        idname=SNA_OT_EditSerpensGroup.bl_idname,
         type="TAB",
         value="PRESS",
         shift=False,
@@ -43,7 +47,7 @@ def register_keymaps():
 
     # shortcut for stopping to edit a node group
     kmi = km.keymap_items.new(
-        idname=SN_OT_QuitEditSerpensGroup.bl_idname,
+        idname=SNA_OT_QuitEditSerpensGroup.bl_idname,
         type="TAB",
         value="PRESS",
         shift=False,

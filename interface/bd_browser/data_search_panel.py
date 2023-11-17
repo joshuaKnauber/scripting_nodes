@@ -1,7 +1,7 @@
 import bpy
 
 
-class SN_PT_navigation_bar(bpy.types.Panel):
+class SNA_PT_navigation_bar(bpy.types.Panel):
     bl_label = "Preferences Navigation"
     bl_space_type = "PREFERENCES"
     bl_region_type = "NAVIGATION_BAR"
@@ -9,11 +9,11 @@ class SN_PT_navigation_bar(bpy.types.Panel):
 
     def draw(self, context: bpy.types.Context):
         layout = self.layout
-        sn = context.scene.sn
+        sna = context.scene.sna
 
 
-class SN_PT_FilterDataSettings(bpy.types.Panel):
-    bl_idname = "SN_PT_FilterDataSettings"
+class SNA_PT_FilterDataSettings(bpy.types.Panel):
+    bl_idname = "SNA_PT_FilterDataSettings"
     bl_label = "Filter"
     bl_space_type = "PREFERENCES"
     bl_region_type = "WINDOW"
@@ -23,7 +23,7 @@ class SN_PT_FilterDataSettings(bpy.types.Panel):
         layout = self.layout
 
 
-class SN_PT_data_search(bpy.types.Panel):
+class SNA_PT_data_search(bpy.types.Panel):
     bl_space_type = "PREFERENCES"
     bl_region_type = "WINDOW"
     bl_label = "Display"
@@ -31,4 +31,4 @@ class SN_PT_data_search(bpy.types.Panel):
 
     def draw(self, context: bpy.types.Context):
         layout = self.layout
-        sn = context.scene.sn
+        sna = context.scene.sna

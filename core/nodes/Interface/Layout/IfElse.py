@@ -1,11 +1,11 @@
 import bpy
 
 from .....constants import sockets
-from ...base_node import SN_BaseNode
+from ...base_node import SNA_BaseNode
 
 
-class SN_NodeIfElse(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_NodeIfElse"
+class SNA_NodeIfElse(SNA_BaseNode, bpy.types.Node):
+    bl_idname = "SNA_NodeIfElse"
     bl_label = "If/Else"
 
     def on_create(self):

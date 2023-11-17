@@ -1,15 +1,18 @@
 import bpy
 
 from ....constants import sockets
-from ..base_node import SN_BaseNode
+from ..base_node import SNA_BaseNode
 
 
-class SN_NodePropertyGroup(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_NodePropertyGroup"
+class SNA_NodePropertyGroup(SNA_BaseNode, bpy.types.Node):
+    bl_idname = "SNA_NodePropertyGroup"
     bl_label = "Property Group"
 
     name: bpy.props.StringProperty(
-        name="Name", default="New Property Group", update=lambda self, context: self.mark_dirty())
+        name="Name",
+        default="New Property Group",
+        update=lambda self, context: self.mark_dirty(),
+    )
 
     def on_create(self):
         self.add_output(sockets.PROPERTY, "Property Group")

@@ -4,7 +4,7 @@ import os
 import bpy
 
 from .... import auto_load
-from ....core.node_tree.node_tree import ScriptingNodesTree
+from ....core.node_tree.node_tree import ScriptingNodeTree
 from ....utils.is_serpens import in_sn_tree
 
 _node_categories = {}
@@ -23,7 +23,7 @@ def get_node_categories():
                 dirs = path.split(os.sep)
 
                 if "nodes" in dirs:
-                    node_path = dirs[dirs.index("nodes") + 1:]
+                    node_path = dirs[dirs.index("nodes") + 1 :]
                     parent = node_categories
                     for dir in node_path:
                         if not dir in parent:
@@ -58,12 +58,12 @@ def register_category_menus(category, path):
 
 @classmethod
 def poll(cls, context: bpy.types.Context):
-    return context.space_data.tree_type == ScriptingNodesTree.bl_idname
+    return context.space_data.tree_type == ScriptingNodeTree.bl_idname
 
 
 def register_menu(name: str, path: str):
     menu_type = type(
-        "SN_MT_category_" + name.replace(" ", "_"),
+        "SNA_MT_category_" + name.replace(" ", "_"),
         (bpy.types.Menu,),
         {
             "bl_space_type": "NODE_EDITOR",
@@ -96,7 +96,7 @@ def draw_submenu(self, context: bpy.types.Context):
     for cat in sorted(category.keys()):
         if not cat in blocklist:
             layout.menu(
-                "SN_MT_category_" + cat.replace(" ", "_"),
+                "SNA_MT_category_" + cat.replace(" ", "_"),
                 text=cat.replace("_", " ").title(),
             )
 
@@ -117,11 +117,11 @@ def draw_node_menu(self, context: bpy.types.Context):
     for cat in sorted(categories.keys()):
         if not cat in blocklist and not cat == "Group":
             layout.menu(
-                "SN_MT_category_" + cat.replace(" ", "_"),
+                "SNA_MT_category_" + cat.replace(" ", "_"),
                 text=cat.replace("_", " ").title(),
             )
 
-    layout.menu("SN_MT_LayoutMenu", text="Layout")
+    layout.menu("SNA_MT_LayoutMenu", text="Layout")
 
     # layout.separator()
-    # layout.menu("SN_MT_GroupMenu", text="Group")
+    # layout.menu("SNA_MT_GroupMenu", text="Group")

@@ -32,9 +32,9 @@ def _reload_addon():
 
 
 def _has_addon():
-    """ Returns if the file contains a scripting nodes addon """
+    """Returns if the file contains a scripting nodes addon"""
     for ntree in bpy.data.node_groups:
-        if getattr(ntree, "is_sn", False):
+        if getattr(ntree, "is_sn_ntree", False):
             return True
     return False
 
@@ -44,58 +44,72 @@ def _prepare_addon_dir(base_dir: str):
     _add_dir_structure(base_dir)
     _add_base_files(base_dir)
     for ntree in bpy.data.node_groups:
-        if getattr(ntree, "is_sn", False):
+        if getattr(ntree, "is_sn_ntree", False):
             _add_node_tree(base_dir, ntree)
 
 
 def _add_node_tree(base_dir: str, ntree: bpy.types.NodeTree):
-    """ Adds the given node tree to the given directory """
-    with open(os.path.join(_get_ntree_dir(base_dir), _get_ntree_filename(ntree)), "w") as write_file:
+    """Adds the given node tree to the given directory"""
+    with open(
+        os.path.join(_get_ntree_dir(base_dir), _get_ntree_filename(ntree)), "w"
+    ) as write_file:
         write_file.write(_ntree_to_code(ntree))
 
 
 def _get_ntree_filename(ntree: bpy.types.NodeTree):
-    """ Returns the filename for the given node tree """
-    pythonic = re.sub('\W|^(?=\d)', '_', ntree.name.lower())
+    """Returns the filename for the given node tree"""
+    pythonic = re.sub("\W|^(?=\d)", "_", ntree.name.lower())
     return f"{pythonic}.py"
 
 
 def _add_base_files(base_dir: str):
-    """ Adds the base files to the addon directory """
-    sn = bpy.context.scene.sn
+    """Adds the base files to the addon directory"""
+    sna = bpy.context.scene.sna
     basedir = get_addon_dir(base_dir)
     # add init file
     with open(os.path.join(basedir, "__init__.py"), "w") as write_file:
-        with open(os.path.join(os.path.dirname(__file__), "templates", "init.txt"), "r") as read_file:
+        with open(
+            os.path.join(os.path.dirname(__file__), "templates", "init.txt"), "r"
+        ) as read_file:
             text = read_file.read()
-            text = text.replace("$NAME", sn.info.name)
-            text = text.replace("$AUTHOR", sn.info.author)
-            text = text.replace("$DESCRIPTION", sn.info.description)
-            version = f"({sn.info.version[0]}, {sn.info.version[1]}, {sn.info.version[2]})"
+            text = text.replace("$NAME", sna.info.name)
+            text = text.replace("$AUTHOR", sna.info.author)
+            text = text.replace("$DESCRIPTION", sna.info.description)
+            version = (
+                f"({sna.info.version[0]}, {sna.info.version[1]}, {sna.info.version[2]})"
+            )
             text = text.replace("$VERSION", version)
-            blender = f"({sn.info.blender[0]}, {sn.info.blender[1]}, {sn.info.blender[2]})"
+            blender = (
+                f"({sna.info.blender[0]}, {sna.info.blender[1]}, {sna.info.blender[2]})"
+            )
             text = text.replace("$BLENDER", blender)
-            text = text.replace("$LOCATION", sn.info.location)
-            category = sn.info.custom_category if sn.info.category == "CUSTOM" else sn.info.category
+            text = text.replace("$LOCATION", sna.info.location)
+            category = (
+                sna.info.custom_category
+                if sna.info.category == "CUSTOM"
+                else sna.info.category
+            )
             text = text.replace("$CATEGORY", category)
-            text = text.replace("$WARNING", sn.info.warning)
-            text = text.replace("$DOC_URL", sn.info.doc_url)
-            text = text.replace("$TRACKER_URL", sn.info.tracker_url)
+            text = text.replace("$WARNING", sna.info.warning)
+            text = text.replace("$DOC_URL", sna.info.doc_url)
+            text = text.replace("$TRACKER_URL", sna.info.tracker_url)
             write_file.write(text)
     # add auto load file
     with open(os.path.join(basedir, "auto_load.py"), "w") as write_file:
-        with open(os.path.join(os.path.dirname(__file__), "templates", "auto_load.txt"), "r") as read_file:
+        with open(
+            os.path.join(os.path.dirname(__file__), "templates", "auto_load.txt"), "r"
+        ) as read_file:
             write_file.write(read_file.read())
 
 
 def _ntree_to_code(ntree: bpy.types.NodeTree):
-    """ Converts the given node tree to code """
+    """Converts the given node tree to code"""
     code = "import bpy\n\n"
     register = ""
     unregister = ""
 
     for node in ntree.nodes:
-        if getattr(node, "is_sn", False) and node.require_register:  # TODO
+        if getattr(node, "is_sn_node", False) and node.require_register:  # TODO
             code += normalize_indents(node.code) + "\n"
             if node.code_register:
                 register += "    " + node.code_register + "\n"
@@ -114,7 +128,7 @@ def _ntree_to_code(ntree: bpy.types.NodeTree):
 
 
 def _add_dir_structure(base_dir: str):
-    """ Adds the directory structure to the addon directory """
+    """Adds the directory structure to the addon directory"""
     # add addon directory
     os.mkdir(_get_ntree_dir(base_dir))
     with open(os.path.join(_get_ntree_dir(base_dir), "__init__.py"), "w") as write_file:
@@ -126,22 +140,22 @@ def _add_dir_structure(base_dir: str):
 
 
 def _get_ntree_dir(base_dir: str):
-    """ Returns the directory for the given node tree """
+    """Returns the directory for the given node tree"""
     return os.path.join(get_addon_dir(base_dir), "addon")
 
 
 def _get_assets_dir(base_dir: str):
-    """ Returns the directory for the given node tree """
+    """Returns the directory for the given node tree"""
     return os.path.join(get_addon_dir(base_dir), "assets")
 
 
 def _get_icon_dir(base_dir: str):
-    """ Returns the directory for the given node tree """
+    """Returns the directory for the given node tree"""
     return os.path.join(get_addon_dir(base_dir), "icons")
 
 
 def _reset_addon_dir(base_dir: str):
-    """ Removes the current files and adds the addon directory """
+    """Removes the current files and adds the addon directory"""
     addon_dir = get_addon_dir(base_dir)
     if os.path.exists(addon_dir):
         for filename in os.listdir(addon_dir):
@@ -154,10 +168,10 @@ def _reset_addon_dir(base_dir: str):
 
 
 def get_addon_dir(base_dir: str):
-    """ Returns the addon directory """
+    """Returns the addon directory"""
     return os.path.join(base_dir, "test_addon")
 
 
 def _get_addons_dir():
-    """ Returns the addons directory """
+    """Returns the addons directory"""
     return os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))

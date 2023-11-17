@@ -1,11 +1,11 @@
 import bpy
 
 from .....constants import sockets
-from ...base_node import SN_BaseNode
+from ...base_node import SNA_BaseNode
 
 
-class SN_NodeRow(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_NodeRow"
+class SNA_NodeRow(SNA_BaseNode, bpy.types.Node):
+    bl_idname = "SNA_NodeRow"
     bl_label = "Row"
 
     def on_create(self):

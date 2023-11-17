@@ -6,8 +6,8 @@ from ....utils.nodes import get_node_by_id
 _REGISTERED = {}  # {node_id: [panel_idname, ...]}
 
 
-class SN_OT_Picker(bpy.types.Operator):
-    bl_idname = "sn.picker"
+class SNA_OT_Picker(bpy.types.Operator):
+    bl_idname = "sna.picker"
     bl_label = "Location Picker"
     bl_description = "Pick a location in the interface"
     bl_options = {"REGISTER", "UNDO"}
@@ -16,7 +16,7 @@ class SN_OT_Picker(bpy.types.Operator):
         items=[
             ("PANEL_LOCATIONS", "Panel Locations", "Panel Locations"),
             ("PANELS", "Panels", "Panels"),
-            ("MENUS", "Menus", "Menus")
+            ("MENUS", "Menus", "Menus"),
         ]
     )
 
@@ -28,8 +28,8 @@ class SN_OT_Picker(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class SN_OT_Pick(bpy.types.Operator):
-    bl_idname = "sn.pick"
+class SNA_OT_Pick(bpy.types.Operator):
+    bl_idname = "sna.pick"
     bl_label = "Picker"
     bl_description = "Pick this location in the interface"
     bl_options = {"REGISTER", "UNDO"}
@@ -71,7 +71,7 @@ def register_panels(node: str):
             if not "Scripting Nodes" in cats:
                 cats.append("Scripting Nodes")
             for i, category in enumerate(cats):
-                idname = f"SN_PT_{space}_{region}_{i}"
+                idname = f"SNA_PT_{space}_{region}_{i}"
                 try:
                     exec(PANEL_TEMPLATE(node, idname, space, region, category))
                     if not node in _REGISTERED:
@@ -82,11 +82,11 @@ def register_panels(node: str):
 
 
 def get_space_types():
-    return bpy.types.Panel.bl_rna.properties['bl_space_type'].enum_items.keys()
+    return bpy.types.Panel.bl_rna.properties["bl_space_type"].enum_items.keys()
 
 
 def get_region_types():
-    return bpy.types.Panel.bl_rna.properties['bl_region_type'].enum_items.keys()
+    return bpy.types.Panel.bl_rna.properties["bl_region_type"].enum_items.keys()
 
 
 def get_panel_categories():
@@ -97,8 +97,7 @@ def get_panel_categories():
                 categories[cls.bl_space_type] = {}
             if cls.bl_region_type not in categories[cls.bl_space_type]:
                 categories[cls.bl_space_type][cls.bl_region_type] = set()
-            categories[cls.bl_space_type][cls.bl_region_type].add(
-                cls.bl_category)
+            categories[cls.bl_space_type][cls.bl_region_type].add(cls.bl_category)
     return categories
 
 
@@ -119,7 +118,7 @@ class {idname}(bpy.types.Panel):
         row = col.row(align=True)
         row.scale_y = 2
         op = row.operator(
-            "sn.pick", text="Select {region.replace("_", " ").title()} region in {space.replace("_", " ").title()}", icon="RESTRICT_SELECT_OFF")
+            "sna.pick", text="Select {region.replace("_", " ").title()} region in {space.replace("_", " ").title()}", icon="RESTRICT_SELECT_OFF")
         op.node = "{node}"
         op.space = "{space}"
         op.region = "{region}"
@@ -128,7 +127,7 @@ class {idname}(bpy.types.Panel):
         if hasattr(context.space_data, "context"):
             row = col.row(align=True)
             row.scale_y = 1.25
-            op = row.operator("sn.pick", text=f"Select with context '{{context.space_data.context.title()}}'",
+            op = row.operator("sna.pick", text=f"Select with context '{{context.space_data.context.title()}}'",
                          icon="RESTRICT_SELECT_OFF")
             op.node = "{node}"
             op.space = "{space}"

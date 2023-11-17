@@ -14,5 +14,5 @@ def watch_addon():
 
 def _unmark_dirty():
     for ntree in bpy.data.node_groups:
-        if getattr(ntree, "is_sn", False):
+        if getattr(ntree, "is_sn_ntree", False):
             ntree.is_dirty = False

@@ -7,9 +7,10 @@ from bpy_extras.io_utils import ExportHelper
 from . import builder
 
 
-class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
+class SNA_OT_ExportAddon(bpy.types.Operator, ExportHelper):
     """Export the current addon as a zip file"""
-    bl_idname = "sn.export_addon"
+
+    bl_idname = "sna.export_addon"
     bl_label = "Export Addon"
     bl_options = {"REGISTER", "INTERNAL"}
 
@@ -17,7 +18,7 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
 
     filter_glob: bpy.props.StringProperty(
         default="*.zip",
-        options={'HIDDEN'},
+        options={"HIDDEN"},
         maxlen=255,
     )
 
@@ -33,8 +34,8 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
         return {"FINISHED"}
 
     def invoke(self, context, event):
-        sn = context.scene.sn
-        version = ".".join([str(i) for i in sn.info.version])
+        sna = context.scene.sna
+        version = ".".join([str(i) for i in sna.info.version])
         self.filepath = f"{'test_addon'}_{version}.blend"
         context.window_manager.fileselect_add(self)
-        return {'RUNNING_MODAL'}
+        return {"RUNNING_MODAL"}

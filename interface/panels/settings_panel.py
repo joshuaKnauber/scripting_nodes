@@ -3,8 +3,8 @@ import bpy
 from ...utils.is_serpens import in_sn_tree
 
 
-class SN_PT_SettingsPanel(bpy.types.Panel):
-    bl_idname = "SN_PT_SettingsPanel"
+class SNA_PT_SettingsPanel(bpy.types.Panel):
+    bl_idname = "SNA_PT_SettingsPanel"
     bl_label = "Settings"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
@@ -13,23 +13,24 @@ class SN_PT_SettingsPanel(bpy.types.Panel):
     bl_order = 3
 
     @classmethod
-    def poll(cls, context: bpy.types.Context): return in_sn_tree(context)
+    def poll(cls, context: bpy.types.Context):
+        return in_sn_tree(context)
 
     def draw(self, context: bpy.types.Context):
         layout = self.layout
-        sn = context.scene.sn
+        sna = context.scene.sna
 
         layout.use_property_split = True
         layout.use_property_decorate = False
 
         col = layout.column(heading="Debug")
-        col.prop(sn, "draw_errors")
-        col.prop(sn, "show_node_code")
+        col.prop(sna, "draw_errors")
+        col.prop(sna, "show_node_code")
 
 
-class SN_PT_DeveloperSettingsPanel(bpy.types.Panel):
-    bl_idname = "SN_PT_DeveloperSettingsPanel"
-    bl_parent_id = "SN_PT_SettingsPanel"
+class SNA_PT_DeveloperSettingsPanel(bpy.types.Panel):
+    bl_idname = "SNA_PT_DeveloperSettingsPanel"
+    bl_parent_id = "SNA_PT_SettingsPanel"
     bl_label = "Developer Settings"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
@@ -37,13 +38,14 @@ class SN_PT_DeveloperSettingsPanel(bpy.types.Panel):
     bl_options = {"DEFAULT_CLOSED"}
 
     @classmethod
-    def poll(cls, context: bpy.types.Context): return in_sn_tree(context)
+    def poll(cls, context: bpy.types.Context):
+        return in_sn_tree(context)
 
     def draw_node_refs(self, context: bpy.types.Context):
-        sn = context.scene.sn
+        sna = context.scene.sna
         self.layout.separator()
         layout = self.layout.column(align=True)
-        for coll in sn.references.collections:
+        for coll in sna.references.collections:
             box = layout.box()
             box.label(text=coll.name)
             col = box.column(align=True)
@@ -52,17 +54,17 @@ class SN_PT_DeveloperSettingsPanel(bpy.types.Panel):
                 col.label(text="- " + node.name + " (" + node.id + ")")
             if len(coll.nodes) == 0:
                 col.label(text="No nodes")
-        if len(sn.references.collections) == 0:
+        if len(sna.references.collections) == 0:
             box = layout.box()
             box.label(text="No collections")
 
     def draw(self, context: bpy.types.Context):
         layout = self.layout
-        sn = context.scene.sn
+        sna = context.scene.sna
 
         layout.use_property_split = True
         layout.use_property_decorate = False
 
-        layout.prop(sn, "show_node_refs")
-        if sn.show_node_refs:
+        layout.prop(sna, "show_node_refs")
+        if sna.show_node_refs:
             self.draw_node_refs(context)

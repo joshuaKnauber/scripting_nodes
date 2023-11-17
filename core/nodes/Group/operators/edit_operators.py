@@ -1,10 +1,10 @@
 import bpy
 
-from .....core.node_tree.node_tree import ScriptingNodesTree
+from .....core.node_tree.node_tree import ScriptingNodeTree
 
 
-class SN_OT_MakeSerpensGroup(bpy.types.Operator):
-    bl_idname = "sn.make_serpens_group"
+class SNA_OT_MakeSerpensGroup(bpy.types.Operator):
+    bl_idname = "sna.make_serpens_group"
     bl_label = "Make Group"
     bl_description = "Make a Serpens node group"
     bl_options = {"REGISTER", "UNDO"}
@@ -26,35 +26,38 @@ class SN_OT_MakeSerpensGroup(bpy.types.Operator):
         for node in selected_nodes:
             context.space_data.edit_tree.nodes.remove(node)
 
-        group = bpy.data.node_groups.new("Node Group", ScriptingNodesTree.bl_idname)
+        group = bpy.data.node_groups.new("Node Group", ScriptingNodeTree.bl_idname)
         group.use_fake_user = True
 
-        input_node = group.nodes.new("SN_NodeGroupInputNode")
+        input_node = group.nodes.new("SNA_NodeGroupInputNode")
         input_node.location = (-200, 0)
 
-        output_node = group.nodes.new("SN_NodeGroupOutputNode")
+        output_node = group.nodes.new("SNA_NodeGroupOutputNode")
         output_node.location = (200, 0)
 
         group.links.new(input_node.outputs[0], output_node.inputs[0])
 
-        node = context.space_data.edit_tree.nodes.new("SN_NodeGroupNode")
+        node = context.space_data.edit_tree.nodes.new("SNA_NodeGroupNode")
         node.group_tree = group
         node.location = center
         context.space_data.edit_tree.nodes.active = node
         return {"FINISHED"}
 
 
-class SN_OT_EditSerpensGroup(
+class SNA_OT_EditSerpensGroup(
     bpy.types.Operator
 ):  # TODO, these ops are blocking other editors
-    bl_idname = "sn.edit_serpens_node_group"
+    bl_idname = "sna.edit_serpens_node_group"
     bl_label = "Edit Serpens Group"
     bl_description = "Edit a Serpens node group"
     bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
     def poll(cls, context):
-        return getattr(context.space_data, "tree_type", None) == ScriptingNodesTree.bl_idname
+        return (
+            getattr(context.space_data, "tree_type", None)
+            == ScriptingNodeTree.bl_idname
+        )
 
     def execute(self, context):
         path = context.space_data.path
@@ -66,15 +69,18 @@ class SN_OT_EditSerpensGroup(
         return {"FINISHED"}
 
 
-class SN_OT_QuitEditSerpensGroup(bpy.types.Operator):
-    bl_idname = "sn.quit_edit_serpens_node_group"
+class SNA_OT_QuitEditSerpensGroup(bpy.types.Operator):
+    bl_idname = "sna.quit_edit_serpens_node_group"
     bl_label = "Quit Editing Serpens Group"
     bl_description = "Quit editing a Serpens node group"
     bl_options = {"REGISTER", "UNDO"}
 
     @classmethod
     def poll(cls, context):
-        return getattr(context.space_data, "tree_type", None) == ScriptingNodesTree.bl_idname
+        return (
+            getattr(context.space_data, "tree_type", None)
+            == ScriptingNodeTree.bl_idname
+        )
 
     def execute(self, context):
         path = context.space_data.path

@@ -3,13 +3,13 @@ import typing
 import bpy
 
 from ....constants import properties, sockets
-from ..base_node import SN_BaseNode
+from ..base_node import SNA_BaseNode
 from ..utils.references import NodePointer, node_search
-from .BoolPropertyNode import SN_NodeBoolProperty
+from .BoolPropertyNode import SNA_NodeBoolProperty
 
 
-class SN_NodeGetProperty(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_NodeGetProperty"
+class SNA_NodeGetProperty(SNA_BaseNode, bpy.types.Node):
+    bl_idname = "SNA_NodeGetProperty"
     bl_label = "Get Property"
 
     property_type: bpy.props.EnumProperty(
@@ -40,7 +40,7 @@ class SN_NodeGetProperty(SN_BaseNode, bpy.types.Node):
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         row = layout.row(align=True)
         row.prop(self, "property_type", text="", icon_only=True)
-        node_search(row, self.selected_property, SN_NodeBoolProperty.bl_idname)
+        node_search(row, self.selected_property, SNA_NodeBoolProperty.bl_idname)
 
     def generate(self, context):
         if not self.selected_property.node:

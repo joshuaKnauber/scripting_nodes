@@ -5,19 +5,13 @@ import bpy
 from ..base_socket import ScriptingSocket
 
 DATA_DEFAULTS = {
-    "Scene": {
-        "data": "bpy.context.scene",
-        "label": "Active"
-    },
-    "Object": {
-        "data": "bpy.context.object",
-        "label": "Active"
-    },
+    "Scene": {"data": "bpy.context.scene", "label": "Active"},
+    "Object": {"data": "bpy.context.object", "label": "Active"},
 }
 
 
-class SN_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_idname = "SN_PropertySocket"
+class SNA_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
+    bl_idname = "SNA_PropertySocket"
 
     # Can have meta of type -> Type of data, identifier -> property identifier, data -> property parent data
 

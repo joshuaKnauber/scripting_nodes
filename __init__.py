@@ -18,7 +18,7 @@ import bpy
 from bpy.utils import previews
 
 from . import auto_load, handlers
-from .addon.addon_properties import SN_AddonProperties
+from .addon.addon_properties import SNA_AddonProperties
 from .interface.header.header import header_append, header_prepend
 from .interface.menus.add_menu.node_categories import (
     draw_node_menu,
@@ -46,19 +46,19 @@ auto_load.init()
 
 
 def register_icons():
-    bpy.types.Scene.sn_icons = bpy.utils.previews.new()
+    bpy.types.Scene.sna_icons = bpy.utils.previews.new()
     icons_dir = os.path.join(os.path.dirname(__file__), "assets", "icons")
 
     icons = ["discord", "serpens"]
 
     for icon in icons:
-        bpy.types.Scene.sn_icons.load(
+        bpy.types.Scene.sna_icons.load(
             icon, os.path.join(icons_dir, icon + ".png"), "IMAGE"
         )
 
 
 def unregister_icons():
-    bpy.utils.previews.remove(bpy.types.Scene.sn_icons)
+    bpy.utils.previews.remove(bpy.types.Scene.sna_icons)
 
 
 def register():
@@ -66,8 +66,8 @@ def register():
     auto_load.register()
 
     # addon properties
-    bpy.types.Scene.sn = bpy.props.PointerProperty(
-        type=SN_AddonProperties, name="Serpens Properties"
+    bpy.types.Scene.sna = bpy.props.PointerProperty(
+        type=SNA_AddonProperties, name="Serpens Properties"
     )
 
     # msgbus
@@ -100,7 +100,7 @@ def unregister():
     bpy.types.NODE_HT_header.remove(header_append)
 
     # addon properties
-    del bpy.types.Scene.sn
+    del bpy.types.Scene.sna
 
     # msgbus
     unsubscribe_from_name_change()

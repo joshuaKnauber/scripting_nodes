@@ -1,7 +1,7 @@
 import bpy
 
 
-class SN_AddonPreferences(bpy.types.AddonPreferences):
+class SNA_AddonPreferences(bpy.types.AddonPreferences):
     bl_idname = __name__.partition(".")[0]
 
     def draw(self, context):

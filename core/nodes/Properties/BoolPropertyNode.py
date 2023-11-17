@@ -1,11 +1,11 @@
 import bpy
 
 from ....constants.properties import id_type_items, id_type_names
-from ..base_node import SN_BaseNode
+from ..base_node import SNA_BaseNode
 
 
-class SN_NodeBoolProperty(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_NodeBoolProperty"
+class SNA_NodeBoolProperty(SNA_BaseNode, bpy.types.Node):
+    bl_idname = "SNA_NodeBoolProperty"
     bl_label = "Boolean Property"
 
     source_type: bpy.props.EnumProperty(
@@ -23,7 +23,7 @@ class SN_NodeBoolProperty(SN_BaseNode, bpy.types.Node):
         row = layout.row()
         row.prop(self, "name", text="")
         row.operator(
-            "sn.node_settings", text="", icon="PREFERENCES", emboss=False
+            "sna.node_settings", text="", icon="PREFERENCES", emboss=False
         ).node = self.name
         layout.prop(self, "source_type", text="")
 

@@ -8,9 +8,9 @@ from ..nodes.node_overlays import get_monospace_font, get_node_error_msg
 
 
 def draw_errors():
-    """ Draws the errors to the interface """
+    """Draws the errors to the interface"""
     global _errors
-    if not in_sn_tree(bpy.context) or not bpy.context.scene.sn.draw_errors:
+    if not in_sn_tree(bpy.context) or not bpy.context.scene.sna.draw_errors:
         return
     font_id = get_monospace_font()
     blf.size(font_id, 20)
@@ -20,10 +20,10 @@ def draw_errors():
     left = 40
     i = 0
     for node in bpy.context.space_data.node_tree.nodes:
-        if getattr(node, "is_sn", False):
+        if getattr(node, "is_sn_node", False):
             error = get_node_error_msg(node)
             if error:
-                blf.color(font_id, 1, 0.4, 0.6, 1 - i*0.2)
+                blf.color(font_id, 1, 0.4, 0.6, 1 - i * 0.2)
                 blf.position(font_id, left, bpy.context.region.height - top, 0)
                 blf.draw(font_id, error)
                 _, height = blf.dimensions(font_id, error)

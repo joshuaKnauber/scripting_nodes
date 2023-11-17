@@ -3,10 +3,12 @@ import bpy
 from ..base_socket import ScriptingSocket
 
 
-class SN_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_idname = "SN_BooleanSocket"
+class SNA_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
+    bl_idname = "SNA_BooleanSocket"
 
-    value: bpy.props.BoolProperty(default=False, update=lambda self, _: self.node.mark_dirty())
+    value: bpy.props.BoolProperty(
+        default=False, update=lambda self, _: self.node.mark_dirty()
+    )
 
     def _python_value(self):
         if self.is_output:

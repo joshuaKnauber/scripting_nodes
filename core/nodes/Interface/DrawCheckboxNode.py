@@ -1,11 +1,11 @@
 import bpy
 
 from ....constants import sockets
-from ..base_node import SN_BaseNode
+from ..base_node import SNA_BaseNode
 
 
-class SN_NodeDrawCheckbox(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_NodeDrawCheckbox"
+class SNA_NodeDrawCheckbox(SNA_BaseNode, bpy.types.Node):
+    bl_idname = "SNA_NodeDrawCheckbox"
     bl_label = "Draw Checkbox"
 
     def on_create(self):

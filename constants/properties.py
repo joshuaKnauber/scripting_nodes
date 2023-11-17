@@ -14,7 +14,7 @@ def property_type_items(self, context):
 
 def property_node_items(self, context):
     return [
-        ("SN_BoolPropertyNode", "Boolean", "Boolean", "FORCE_CHARGE", 0),
+        ("SNA_BoolPropertyNode", "Boolean", "Boolean", "FORCE_CHARGE", 0),
         ("STRING", "String", "String", "SYNTAX_OFF", 1),
         ("INT", "Integer", "Integer", "DRIVER_TRANSFORM", 2),
         ("FLOAT", "Float", "Float", "SEQUENCE_COLOR_01", 3),

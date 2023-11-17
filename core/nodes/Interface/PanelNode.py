@@ -2,38 +2,74 @@ import bpy
 
 from ....constants import sockets
 from ...utils.id import get_id
-from ..base_node import SN_BaseNode
+from ..base_node import SNA_BaseNode
 
 
-class SN_NodePanel(SN_BaseNode, bpy.types.Node):
-    bl_idname = "SN_NodePanel"
+class SNA_NodePanel(SNA_BaseNode, bpy.types.Node):
+    bl_idname = "SNA_NodePanel"
     bl_label = "Panel"
     bl_width_default = 200
 
     default_closed: bpy.props.BoolProperty(
-        default=True, name="Default Closed", description="Close the panel by default", update=lambda self, _: self.mark_dirty())
+        default=False,
+        name="Default Closed",
+        description="Close the panel by default",
+        update=lambda self, _: self.mark_dirty(),
+    )
     hide_header: bpy.props.BoolProperty(
-        default=False, name="Hide Header", description="Hide the header of the panel", update=lambda self, _: self.mark_dirty())
+        default=False,
+        name="Hide Header",
+        description="Hide the header of the panel",
+        update=lambda self, _: self.mark_dirty(),
+    )
     expand_header: bpy.props.BoolProperty(
-        default=False, name="Expand Header", description="Allow elements in the header to stretch across the whole layout", update=lambda self, _: self.mark_dirty())
+        default=False,
+        name="Expand Header",
+        description="Allow elements in the header to stretch across the whole layout",
+        update=lambda self, _: self.mark_dirty(),
+    )
 
     def update_title(self, context):
         self.name = self.title
         self.mark_dirty()
 
     title: bpy.props.StringProperty(
-        default="Panel", name="Label", description="The label of the panel", update=update_title)
+        default="Panel",
+        name="Label",
+        description="The label of the panel",
+        update=update_title,
+    )
 
     order: bpy.props.IntProperty(
-        default=0, name="Order", description="The order index of the panel copared to your other panels", update=lambda self, _: self.mark_dirty())
+        default=0,
+        name="Order",
+        description="The order index of the panel copared to your other panels",
+        update=lambda self, _: self.mark_dirty(),
+    )
     space: bpy.props.StringProperty(
-        default="VIEW_3D", name="Space", description="The space type of the panel", update=lambda self, _: self.mark_dirty())
+        default="VIEW_3D",
+        name="Space",
+        description="The space type of the panel",
+        update=lambda self, _: self.mark_dirty(),
+    )
     region: bpy.props.StringProperty(
-        default="UI", name="Region", description="The region type of the panel", update=lambda self, _: self.mark_dirty())
+        default="UI",
+        name="Region",
+        description="The region type of the panel",
+        update=lambda self, _: self.mark_dirty(),
+    )
     category: bpy.props.StringProperty(
-        default="Scripting Nodes", name="Category", description="The category of the panel", update=lambda self, _: self.mark_dirty())
+        default="Scripting Nodes",
+        name="Category",
+        description="The category of the panel",
+        update=lambda self, _: self.mark_dirty(),
+    )
     context: bpy.props.StringProperty(
-        default="*", name="Context", description="The context of the panel", update=lambda self, _: self.mark_dirty())
+        default="*",
+        name="Context",
+        description="The context of the panel",
+        update=lambda self, _: self.mark_dirty(),
+    )
 
     def on_create(self):
         self.add_input(sockets.BOOLEAN, "Hide")
@@ -44,12 +80,12 @@ class SN_NodePanel(SN_BaseNode, bpy.types.Node):
         row = layout.row()
         row.scale_y = 1.25
         label = f"'{self.title}' ({self.space.replace('_', ' ').title()})"
-        op = row.operator(
-            "sn.picker", text=label, icon="RESTRICT_SELECT_OFF")
+        op = row.operator("sna.picker", text=label, icon="RESTRICT_SELECT_OFF")
         op.locations = "PANELS"
         op.node = self.id
-        row.operator("sn.node_settings", text="",
-                     icon="PREFERENCES", emboss=False).node = self.name
+        row.operator(
+            "sna.node_settings", text="", icon="PREFERENCES", emboss=False
+        ).node = self.name
 
     def generate(self, context):
         self.require_register = True
