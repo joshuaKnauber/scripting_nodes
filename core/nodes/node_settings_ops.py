@@ -1,10 +1,11 @@
 import bpy
 
-from .Interface.PanelNode import SN_PanelNode
+from .Interface.PanelNode import SN_NodePanel
 
 
 class SN_OT_NodeSettings(bpy.types.Operator):
     """Open the Node Settings panel"""
+
     bl_idname = "sn.node_settings"
     bl_label = "Node Settings"
     bl_options = {"REGISTER", "INTERNAL"}
@@ -22,7 +23,7 @@ class SN_OT_NodeSettings(bpy.types.Operator):
         row.label(text=f"Settings '{node.name}'")
         layout.separator()
 
-        if node.bl_idname == SN_PanelNode.bl_idname:
+        if node.bl_idname == SN_NodePanel.bl_idname:
             panel_settings(layout, node)
 
     def invoke(self, context, event):

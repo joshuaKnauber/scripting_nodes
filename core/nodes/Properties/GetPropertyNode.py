@@ -5,7 +5,7 @@ import bpy
 from ....constants import properties, sockets
 from ..base_node import SN_BaseNode
 from ..utils.references import NodePointer, node_search
-from .BoolPropertyNode import SN_BoolPropertyNode
+from .BoolPropertyNode import SN_NodeBoolProperty
 
 
 class SN_NodeGetProperty(SN_BaseNode, bpy.types.Node):
@@ -13,9 +13,14 @@ class SN_NodeGetProperty(SN_BaseNode, bpy.types.Node):
     bl_label = "Get Property"
 
     property_type: bpy.props.EnumProperty(
-        items=properties.property_type_items, update=lambda self, _: self.mark_dirty())
+        items=properties.property_type_items, update=lambda self, _: self.mark_dirty()
+    )
     selected_property: bpy.props.PointerProperty(
-        type=NodePointer, name="Panel", description="Panel to be displayed", update=lambda self, _: self.mark_dirty())
+        type=NodePointer,
+        name="Panel",
+        description="Panel to be displayed",
+        update=lambda self, _: self.mark_dirty(),
+    )
 
     def on_create(self):
         self.add_input(sockets.PROPERTY, "Source")
@@ -35,15 +40,14 @@ class SN_NodeGetProperty(SN_BaseNode, bpy.types.Node):
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         row = layout.row(align=True)
         row.prop(self, "property_type", text="", icon_only=True)
-        node_search(row, self.selected_property, SN_BoolPropertyNode.bl_idname)
+        node_search(row, self.selected_property, SN_NodeBoolProperty.bl_idname)
 
     def generate(self, context):
         if not self.selected_property.node:
             return
 
         identifier = self.selected_property.node.identifier()
-        self.outputs["Property"].code = f"{self.inputs[0].get_code()}.{
-            identifier}"
+        self.outputs["Property"].code = f"{self.inputs[0].get_code()}.{identifier}"
         self.outputs["Property"].set_meta("data", "bpy.context.scene")
         self.outputs["Property"].set_meta("identifier", identifier)
 
