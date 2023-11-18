@@ -1,7 +1,7 @@
 import bpy
 
 
-_PREV_LINKS = {}  # {node: {socket: [links]}}
+_PREV_LINKS = {}  # {node: {socket: [next, ...]}}
 _INITIALIZED = {}  # {node: bool}
 
 
@@ -15,8 +15,8 @@ def has_link_updates(node: bpy.types.Node):
     for socket in [*node.inputs, *node.outputs]:
         if socket not in _PREV_LINKS[node.id]:
             _PREV_LINKS[node.id][socket] = []
-        if socket.links != _PREV_LINKS[node.id][socket]:
-            _PREV_LINKS[node.id][socket] = socket.links
+        if socket.get_next() != _PREV_LINKS[node.id][socket]:
+            _PREV_LINKS[node.id][socket] = socket.get_next()
             has_updates = True
     has_updates = has_updates and _INITIALIZED.get(node.id, False)
     _INITIALIZED[node.id] = True
