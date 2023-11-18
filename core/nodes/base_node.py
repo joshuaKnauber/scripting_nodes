@@ -172,8 +172,8 @@ class SNA_BaseNode(bpy.types.Node):
             for socket in [*self.inputs, *self.outputs]:
                 if socket.has_next():
                     for next in socket.get_next():
-                        if not getattr(next, "is_program", False):
-                            next.node.mark_dirty()
+                        # if not getattr(next, "is_program", False):
+                        next.node.mark_dirty()
 
         def propagate_change_to_references(self):
             for ref in get_references_to_node(self):
