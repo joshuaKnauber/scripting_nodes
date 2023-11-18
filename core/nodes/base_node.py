@@ -35,6 +35,10 @@ class SNA_BaseNode(bpy.types.Node):
         self.was_registered = False
         redraw.redraw(True)
 
+    expand_internals: bpy.props.BoolProperty(
+        default=False, name="Expand Internals", description="Expand internal properties"
+    )
+
     @classmethod
     def poll(cls, ntree):
         """Checks if the node is valid"""

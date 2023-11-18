@@ -44,13 +44,21 @@ def panel_settings(layout: bpy.types.UILayout, node: bpy.types.Node):
     row.prop(node, "expand_header")
     row.prop(node, "order")
     layout.separator()
-    layout.label(text="Picked Settings")
-    row = layout.row()
-    row.prop(node, "space")
-    row.prop(node, "region")
-    row = layout.row()
-    row.prop(node, "category")
-    row.prop(node, "context")
+    box = layout.box()
+    box.prop(
+        node,
+        "expand_internals",
+        text="Internal Settings",
+        icon="TRIA_DOWN" if node.expand_internals else "TRIA_RIGHT",
+        emboss=False,
+    )
+    if node.expand_internals:
+        row = box.row()
+        row.prop(node, "space")
+        row.prop(node, "region")
+        row = box.row()
+        row.prop(node, "category")
+        row.prop(node, "context")
 
 
 def subpanel_settings(layout: bpy.types.UILayout, node: bpy.types.Node):
@@ -66,11 +74,19 @@ def subpanel_settings(layout: bpy.types.UILayout, node: bpy.types.Node):
     layout.prop(node, "origin")
     if node.origin == "BLENDER":
         layout.separator()
-        layout.label(text="Picked Settings")
-        layout.prop(node, "blender_panel")
-        row = layout.row()
-        row.prop(node, "blender_space")
-        row.prop(node, "blender_region")
-        row = layout.row()
-        row.prop(node, "blender_category")
-        row.prop(node, "blender_context")
+        box = layout.box()
+        box.prop(
+            node,
+            "expand_internals",
+            text="Internal Settings",
+            icon="TRIA_DOWN" if node.expand_internals else "TRIA_RIGHT",
+            emboss=False,
+        )
+        if node.expand_internals:
+            box.prop(node, "blender_panel")
+            row = box.row()
+            row.prop(node, "blender_space")
+            row.prop(node, "blender_region")
+            row = box.row()
+            row.prop(node, "blender_category")
+            row.prop(node, "blender_context")

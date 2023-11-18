@@ -4,7 +4,8 @@ from .....utils.redraw import redraw
 from ....utils.nodes import get_node_by_id
 
 
-_REGISTERED = {}  # {node_id: [panel_idname, ...]}
+_PICKER_ACTIVE = False
+_REGISTERED = []
 
 
 class SNA_OT_Picker(bpy.types.Operator):
@@ -23,7 +24,14 @@ class SNA_OT_Picker(bpy.types.Operator):
 
     node: bpy.props.StringProperty()
 
+    @classmethod
+    def poll(cls, context):
+        global _PICKER_ACTIVE
+        return not _PICKER_ACTIVE
+
     def execute(self, context):
+        global _PICKER_ACTIVE
+        _PICKER_ACTIVE = True
         if self.locations == "PANELS":
             register_panels(self.node)
         elif self.locations == "SUBPANELS":
@@ -49,13 +57,12 @@ class SNA_OT_Pick(bpy.types.Operator):
     def populate_panel(self):
         # unregister the old panels
         global _REGISTERED
-        if self.node in _REGISTERED:
-            for panel in _REGISTERED[self.node]:
-                try:
-                    exec(f"bpy.utils.unregister_class(bpy.types.{panel})")
-                except Exception as e:
-                    pass
-            del _REGISTERED[self.node]
+        for panel in _REGISTERED:
+            try:
+                bpy.utils.unregister_class(panel)
+            except Exception as e:
+                pass
+        _REGISTERED = []
         # set the values
         node = get_node_by_id(self.node)
         node.space = self.space
@@ -64,6 +71,14 @@ class SNA_OT_Pick(bpy.types.Operator):
         node.context = self.context
 
     def populate_subpanel(self):
+        # unregister the old panels
+        global _REGISTERED
+        for panel in _REGISTERED:
+            try:
+                panel[1].remove(panel[0])
+            except Exception as e:
+                pass
+        _REGISTERED = []
         # set the values
         node = get_node_by_id(self.node)
         node.blender_panel = self.idname
@@ -73,6 +88,8 @@ class SNA_OT_Pick(bpy.types.Operator):
         node.blender_context = self.context
 
     def execute(self, context):
+        global _PICKER_ACTIVE
+        _PICKER_ACTIVE = False
         if self.idname:
             self.populate_subpanel()
         else:
@@ -93,10 +110,9 @@ def register_panels(node: str):
             for i, category in enumerate(cats):
                 idname = f"SNA_PT_{space}_{region}_{i}"
                 try:
-                    exec(PANEL_TEMPLATE(node, idname, space, region, category))
-                    if not node in _REGISTERED:
-                        _REGISTERED[node] = []
-                    _REGISTERED[node].append(idname)
+                    exec(
+                        PANEL_TEMPLATE(node, idname, space, region, category), globals()
+                    )
                 except Exception as e:
                     pass
     redraw(True)
@@ -107,7 +123,9 @@ def add_to_panels(node: str):
     panels = get_panels()
     for panel in panels:
         try:
-            exec(ADD_TO_PANEL_TEMPLATE(node, f"draw_{panel.__name__}", panel))
+            exec(
+                ADD_TO_PANEL_TEMPLATE(node, f"draw_{panel.__name__}", panel), globals()
+            )
         except Exception as e:
             pass
     redraw(True)
@@ -174,6 +192,7 @@ class {idname}(bpy.types.Panel):
             op.idname = ""
 
 bpy.utils.register_class({idname})
+_REGISTERED.append({idname})
 """
 
 
@@ -193,4 +212,5 @@ def {name}(self, context):
     op.context = "{getattr(panel, "bl_context", "")}"
 
 bpy.types.{panel.__name__}.append({name})
+_REGISTERED.append(({name}, bpy.types.{panel.__name__}))
 """

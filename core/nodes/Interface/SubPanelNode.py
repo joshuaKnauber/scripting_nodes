@@ -17,11 +17,26 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
     panel: bpy.props.PointerProperty(
         type=NodePointer, name="Panel", description="Panel to be displayed"
     )
-    blender_panel: bpy.props.StringProperty(name="Panel")
-    blender_space: bpy.props.StringProperty(name="Space")
-    blender_region: bpy.props.StringProperty(name="Region")
-    blender_category: bpy.props.StringProperty(name="Category")
-    blender_context: bpy.props.StringProperty(name="Context")
+    blender_panel: bpy.props.StringProperty(
+        name="Panel",
+        update=lambda self, _: self.mark_dirty(),
+    )
+    blender_space: bpy.props.StringProperty(
+        name="Space",
+        update=lambda self, _: self.mark_dirty(),
+    )
+    blender_region: bpy.props.StringProperty(
+        name="Region",
+        update=lambda self, _: self.mark_dirty(),
+    )
+    blender_category: bpy.props.StringProperty(
+        name="Category",
+        update=lambda self, _: self.mark_dirty(),
+    )
+    blender_context: bpy.props.StringProperty(
+        name="Context",
+        update=lambda self, _: self.mark_dirty(),
+    )
 
     origin: bpy.props.EnumProperty(
         name="Location",
@@ -129,7 +144,7 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
     def generate(self, context):
         self.require_register = True
         panel_node = self.panel.node
-        if not panel_node or panel_node == self:
+        if (not panel_node or panel_node == self) and not self.origin == "BLENDER":
             return
 
         options = []
@@ -146,11 +161,17 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
         panel_classname = f"SNA_PT_Subpanel_{panel_id}"
         self.last_classname = panel_classname
 
+        parent = (
+            panel_node.last_classname
+            if self.origin != "BLENDER"
+            else self.blender_panel
+        )
+
         self.code = f"""
             class {panel_classname}(bpy.types.Panel):
                 bl_idname = "{panel_classname}"
                 bl_label = "{self.title}"
-                bl_parent_id = "{panel_node.last_classname}"
+                bl_parent_id = "{parent}"
                 bl_space_type = "{self.space}"
                 bl_region_type = "{self.region}"
                 {f'bl_category = "{self.category}"' if self.category else ""}
