@@ -121,13 +121,18 @@ def register_panels(node: str):
 def add_to_panels(node: str):
     global _REGISTERED
     panels = get_panels()
+    names = set()
     for panel in panels:
-        try:
-            exec(
-                ADD_TO_PANEL_TEMPLATE(node, f"draw_{panel.__name__}", panel), globals()
-            )
-        except Exception as e:
-            pass
+        if not hasattr(panel, "bl_parent_id") and panel.__name__ not in names:
+            try:
+                exec(
+                    ADD_TO_PANEL_TEMPLATE(node, f"draw_{panel.__name__}", panel),
+                    globals(),
+                )
+                _REGISTERED[-1][1] = panel
+                names.add(panel.__name__)
+            except Exception as e:
+                pass
     redraw(True)
 
 
@@ -212,5 +217,5 @@ def {name}(self, context):
     op.context = "{getattr(panel, "bl_context", "")}"
 
 bpy.types.{panel.__name__}.append({name})
-_REGISTERED.append(({name}, bpy.types.{panel.__name__}))
+_REGISTERED.append([{name}, None])
 """
