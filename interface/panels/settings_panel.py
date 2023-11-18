@@ -25,7 +25,6 @@ class SNA_PT_SettingsPanel(bpy.types.Panel):
 
         col = layout.column(heading="Debug")
         col.prop(sna, "draw_errors")
-        col.prop(sna, "show_node_code")
 
 
 class SNA_PT_DeveloperSettingsPanel(bpy.types.Panel):
@@ -65,6 +64,12 @@ class SNA_PT_DeveloperSettingsPanel(bpy.types.Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
 
-        layout.prop(sna, "show_node_refs")
+        col = layout.column(heading="Nodes")
+        col.prop(sna, "show_node_code", text="Show Code")
+        col.prop(sna, "show_register_updates", text="Show Updates")
+
+        col.separator()
+        col.prop(sna, "show_node_refs", text="Show References")
+
         if sna.show_node_refs:
             self.draw_node_refs(context)

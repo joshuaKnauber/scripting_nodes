@@ -3,12 +3,13 @@ import time
 import bpy
 
 from ...core.node_tree.node_tree import ScriptingNodeTree
-from ...core.nodes.utils.references import NodePointer, get_references_to_node
-from ...core.utils.links import handle_link_insert, handle_link_remove, is_link_valid
+from ...core.nodes.utils.references import get_references_to_node
+from ...core.utils.links import has_link_updates, revalidate_links
 from ...core.utils.sockets import add_socket
 from ...interface.overlays.nodes.node_overlays import set_node_error, set_node_time
 from ...utils import logger
 from ...utils.code import normalize_indents
+from ...utils import redraw
 from ..utils.id import get_id
 from .utils.draw_code import draw_code
 
@@ -20,6 +21,19 @@ class SNA_BaseNode(bpy.types.Node):
     id: bpy.props.StringProperty(
         default="", name="ID", description="Unique ID of the node"
     )
+
+    was_registered: bpy.props.BoolProperty(
+        default=False
+    )  # temporarily active after this node was registered
+
+    def _start_was_registered(self):
+        self.was_registered = True
+        redraw.redraw(True)
+        bpy.app.timers.register(self._finish_was_registered, first_interval=1)
+
+    def _finish_was_registered(self):
+        self.was_registered = False
+        redraw.redraw(True)
 
     @classmethod
     def poll(cls, ntree):
@@ -78,20 +92,17 @@ class SNA_BaseNode(bpy.types.Node):
         """Adds an output socket to the node"""
         return add_socket(self, idname, name, True)
 
-    def insert_link(self, link: bpy.types.NodeLink):
-        """Called when a link is inserted"""
-        # handle_link_insert(self, link)
-        pass  # TODO are these necessary
-
-    def remove_link(self, link: bpy.types.NodeLink):
-        """Called when a link is removed"""
-        print("link removed", self)
-        # handle_link_remove(self, link)
-
     def update(self):
         """Called by blender when the node topology changes"""
-        # handle_link_updates(self) # TODO
+        if has_link_updates(self):
+            self.update_links()
+
+    def update_links(self):
+        """Called on link updates"""
         self.mark_dirty()
+        bpy.app.timers.register(
+            lambda: revalidate_links(self.node_tree), first_interval=0.025
+        )
 
     code: bpy.props.StringProperty(
         default="", name="Code", description="Generated code for the node"
@@ -135,15 +146,16 @@ class SNA_BaseNode(bpy.types.Node):
         """Generates the code for the node. Overwrite this in nodes by setting the self.code... properties"""
 
     def on_reference_update(self, node: bpy.types.Node):
-        """Called when a node is referenced by this node"""
+        """Called on updates when a node is referenced by this node"""
 
     def mark_dirty(self):
-        """Called when the node changes. Forwards the update to the node tree"""
+        """Called when the node changes. Forwards the update to the node tree if something has changed"""
         summary = self._get_code_summary()
         self._reset_code()
         self.generate(bpy.context)
         if summary == self._get_code_summary():
             return
+        self._start_was_registered()
         self._propagate_changes()
         if self.require_register:
             self.node_tree.mark_dirty(self)
@@ -155,7 +167,8 @@ class SNA_BaseNode(bpy.types.Node):
             for socket in [*self.inputs, *self.outputs]:
                 if socket.has_next():
                     for next in socket.get_next():
-                        next.node.mark_dirty()
+                        if not getattr(next, "is_program", False):
+                            next.node.mark_dirty()
 
         def propagate_change_to_references(self):
             for ref in get_references_to_node(self):
@@ -177,6 +190,11 @@ class SNA_BaseNode(bpy.types.Node):
 
     def draw_buttons(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         """Draws the buttons on the node"""
+        if self.was_registered and context.scene.sna.show_register_updates:
+            layout.progress(
+                text="Updating...",
+                factor=0.5,
+            )
         sna = context.scene.sna
         if self.select and sna.show_node_code:
             draw_code(layout, self)

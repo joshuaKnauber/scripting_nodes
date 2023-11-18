@@ -40,6 +40,12 @@ class SNA_AddonProperties(bpy.types.PropertyGroup):
         description="Display the code of the selected node",
     )
 
+    show_register_updates: bpy.props.BoolProperty(
+        default=False,
+        name="Show Node Updates",
+        description="Display the register updates on the nodes",
+    )
+
     show_node_refs: bpy.props.BoolProperty(
         default=False,
         name="Show Node References",

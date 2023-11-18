@@ -1,45 +1,64 @@
 import bpy
 
 
-def handle_link_insert(node: bpy.types.Node, link: bpy.types.NodeLink):
-    """ Called when a link is inserted """
-    bpy.app.timers.register(lambda: _link_update(node, link), first_interval=0.1)
+_PREV_LINKS = {}  # {node: {socket: [links]}}
+_INITIALIZED = {}  # {node: bool}
 
 
-def handle_link_remove(node: bpy.types.Node, link: bpy.types.NodeLink):
-    """ Called when a link is removed """
-    bpy.app.timers.register(lambda: _link_update(node, link), first_interval=0.1)
+def has_link_updates(node: bpy.types.Node):
+    """CHecks if the node has link updates from the last stored links"""
+    global _PREV_LINKS
+    global _INITIALIZED
+    has_updates = False
+    if node.id not in _PREV_LINKS:
+        _PREV_LINKS[node.id] = {}
+    for socket in [*node.inputs, *node.outputs]:
+        if socket not in _PREV_LINKS[node.id]:
+            _PREV_LINKS[node.id][socket] = []
+        if socket.links != _PREV_LINKS[node.id][socket]:
+            _PREV_LINKS[node.id][socket] = socket.links
+            has_updates = True
+    has_updates = has_updates and _INITIALIZED.get(node.id, False)
+    _INITIALIZED[node.id] = True
+    return has_updates
 
 
-def _link_update(node: bpy.types.Node, link: bpy.types.NodeLink):
-    """ Updates the node and link """
-    link.is_valid = is_link_valid(link)
-    node.mark_dirty()
+def revalidate_links(ntree: bpy.types.NodeTree):
+    """Validates the links of a node tree"""
+    for link in ntree.links:
+        link.is_valid = is_link_valid(link)
 
 
-def is_link_valid(link: bpy.types.NodeLink):
-    """ Checks if a link is valid """
-    def is_valid_connection(link: bpy.types.NodeLink):
-        """ Checks if the connection is valid """
-        connected = getattr(link.from_socket, "is_program", False) == getattr(link.to_socket, "is_program", False)
-        program_type_a = ""
-        for socket in [*link.from_node.inputs, *link.from_node.outputs]:
-            if getattr(socket, "is_program", False):
-                program_type_a = socket.bl_idname
-                break
-        program_type_b = ""
-        for socket in [*link.to_node.inputs, *link.to_node.outputs]:
-            if getattr(socket, "is_program", False):
-                program_type_b = socket.bl_idname
-                break
-        return connected or ((not program_type_a or not program_type_a) or program_type_a == program_type_b)
+def is_link_valid(link: bpy.types.NodeLink):  # TODO
+    """Checks if a link is valid"""
+    return True
 
-    def is_valid_connection_amount(link: bpy.types.NodeLink):
-        """ Checks if the connection amount is valid """
-        if getattr(link.from_socket, "is_program", False):
-            return len(link.from_socket.links) <= 1
-        elif getattr(link.to_socket, "is_program", False):
-            return len(link.to_socket.links) <= 1
-        return True
+    # def is_valid_connection(link: bpy.types.NodeLink):
+    #     """Checks if the connection is valid"""
+    #     connected = getattr(link.from_socket, "is_program", False) == getattr(
+    #         link.to_socket, "is_program", False
+    #     )
+    #     program_type_a = ""
+    #     for socket in [*link.from_node.inputs, *link.from_node.outputs]:
+    #         if getattr(socket, "is_program", False):
+    #             program_type_a = socket.bl_idname
+    #             break
+    #     program_type_b = ""
+    #     for socket in [*link.to_node.inputs, *link.to_node.outputs]:
+    #         if getattr(socket, "is_program", False):
+    #             program_type_b = socket.bl_idname
+    #             break
+    #     return connected or (
+    #         (not program_type_a or not program_type_a)
+    #         or program_type_a == program_type_b
+    #     )
 
-    return is_valid_connection(link)
+    # def is_valid_connection_amount(link: bpy.types.NodeLink):
+    #     """Checks if the connection amount is valid"""
+    #     if getattr(link.from_socket, "is_program", False):
+    #         return len(link.from_socket.links) <= 1
+    #     elif getattr(link.to_socket, "is_program", False):
+    #         return len(link.to_socket.links) <= 1
+    #     return True
+
+    # return is_valid_connection(link)
