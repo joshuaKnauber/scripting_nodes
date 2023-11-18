@@ -85,7 +85,7 @@ class SNA_NodePanel(SNA_BaseNode, bpy.types.Node):
         op.node = self.id
         row.operator(
             "sna.node_settings", text="", icon="PREFERENCES", emboss=False
-        ).node = self.name
+        ).node = self.id
 
     last_classname: bpy.props.StringProperty(default="")
 

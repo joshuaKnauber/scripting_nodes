@@ -93,7 +93,7 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
             op.node = self.id
         row.operator(
             "sna.node_settings", text="", icon="PREFERENCES", emboss=False
-        ).node = self.name
+        ).node = self.id
 
     def on_create(self):
         self.add_input(sockets.BOOLEAN, "Hide")

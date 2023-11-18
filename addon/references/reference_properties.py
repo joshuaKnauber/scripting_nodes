@@ -52,7 +52,7 @@ class SNA_NodeReference(bpy.types.PropertyGroup):
         for ntree in bpy.data.node_groups:
             if getattr(ntree, "is_sn_ntree", False):
                 for node in ntree.nodes:
-                    if getattr(node, "is_sn_node") and node.id == self.id:
+                    if getattr(node, "is_sn_node", False) and node.id == self.id:
                         return node
         return None
 

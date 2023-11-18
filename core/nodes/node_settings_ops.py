@@ -1,7 +1,7 @@
 import bpy
 
+from ..utils.nodes import get_node_by_id
 from .Interface.SubPanelNode import SNA_NodeSubpanel
-
 from .Interface.PanelNode import SNA_NodePanel
 
 
@@ -19,7 +19,7 @@ class SNA_OT_NodeSettings(bpy.types.Operator):
 
     def draw(self, context: bpy.types.Context):
         layout = self.layout
-        node = bpy.context.space_data.edit_tree.nodes[self.node]
+        node = get_node_by_id(self.node)
 
         row = layout.row()
         row.label(text=f"Settings '{node.name}'")

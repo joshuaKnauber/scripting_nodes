@@ -24,7 +24,7 @@ class SNA_NodeBoolProperty(SNA_BaseNode, bpy.types.Node):
         row.prop(self, "name", text="")
         row.operator(
             "sna.node_settings", text="", icon="PREFERENCES", emboss=False
-        ).node = self.name
+        ).node = self.id
         layout.prop(self, "source_type", text="")
 
     def identifier(self):
