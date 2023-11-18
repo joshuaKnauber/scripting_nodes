@@ -1,5 +1,7 @@
 import bpy
 
+from .Interface.SubPanelNode import SNA_NodeSubpanel
+
 from .Interface.PanelNode import SNA_NodePanel
 
 
@@ -25,6 +27,8 @@ class SNA_OT_NodeSettings(bpy.types.Operator):
 
         if node.bl_idname == SNA_NodePanel.bl_idname:
             panel_settings(layout, node)
+        elif node.bl_idname == SNA_NodeSubpanel.bl_idname:
+            subpanel_settings(layout, node)
 
     def invoke(self, context, event):
         return context.window_manager.invoke_popup(self, width=300)
@@ -47,3 +51,16 @@ def panel_settings(layout: bpy.types.UILayout, node: bpy.types.Node):
     row = layout.row()
     row.prop(node, "category")
     row.prop(node, "context")
+
+
+def subpanel_settings(layout: bpy.types.UILayout, node: bpy.types.Node):
+    layout.prop(node, "title")
+    layout.separator()
+    row = layout.row()
+    row.prop(node, "default_closed")
+    row.prop(node, "hide_header")
+    row = layout.row()
+    row.prop(node, "expand_header")
+    row.prop(node, "order")
+    layout.separator()
+    layout.prop(node, "nested")

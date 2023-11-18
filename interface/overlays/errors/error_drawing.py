@@ -17,7 +17,7 @@ def draw_errors():
     blf.enable(font_id, blf.WORD_WRAP)
     blf.word_wrap(font_id, 800)
     top = 40
-    left = 40
+    left = 40 + bpy.context.area.regions[2].width
     i = 0
     for node in bpy.context.space_data.node_tree.nodes:
         if getattr(node, "is_sn_node", False):

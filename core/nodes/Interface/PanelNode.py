@@ -87,6 +87,8 @@ class SNA_NodePanel(SNA_BaseNode, bpy.types.Node):
             "sna.node_settings", text="", icon="PREFERENCES", emboss=False
         ).node = self.name
 
+    last_classname: bpy.props.StringProperty(default="")
+
     def generate(self, context):
         self.require_register = True
 
@@ -102,6 +104,7 @@ class SNA_NodePanel(SNA_BaseNode, bpy.types.Node):
 
         panel_id = get_id()
         panel_classname = f"SNA_PT_Panel_{panel_id}"
+        self.last_classname = panel_classname
 
         self.code = f"""
             class {panel_classname}(bpy.types.Panel):

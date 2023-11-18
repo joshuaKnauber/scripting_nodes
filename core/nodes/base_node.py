@@ -146,7 +146,8 @@ class SNA_BaseNode(bpy.types.Node):
         """Generates the code for the node. Overwrite this in nodes by setting the self.code... properties"""
 
     def on_reference_update(self, node: bpy.types.Node):
-        """Called on updates when a node is referenced by this node"""
+        """Called on updates when a node is referenced by this node. Overrite this in nodes to handle updates"""
+        self.mark_dirty()
 
     def mark_dirty(self):
         """Called when the node changes. Forwards the update to the node tree if something has changed"""
