@@ -78,7 +78,7 @@ class SNA_NodePanel(SNA_BaseNode, bpy.types.Node):
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         row = layout.row()
-        row.scale_y = 1.25
+        row.scale_y = 1.5
         label = f"'{self.title}' ({self.space.replace('_', ' ').title()})"
         op = row.operator("sna.picker", text=label, icon="RESTRICT_SELECT_OFF")
         op.locations = "PANELS"
