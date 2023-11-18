@@ -65,7 +65,7 @@ class SNA_NodePanel(SNA_BaseNode, bpy.types.Node):
         update=lambda self, _: self.mark_dirty(),
     )
     context: bpy.props.StringProperty(
-        default="*",
+        default="",
         name="Context",
         description="The context of the panel",
         update=lambda self, _: self.mark_dirty(),

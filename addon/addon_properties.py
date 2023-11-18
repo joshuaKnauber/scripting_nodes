@@ -11,7 +11,10 @@ class SNA_AddonProperties(bpy.types.PropertyGroup):
     ):
         """Executes the code for the given node in the given node tree during development"""
         for ntree in bpy.data.node_groups:
-            if getattr(ntree, "id", "") == node_tree_id:
+            if (
+                getattr(ntree, "is_sn_ntree", False)
+                and getattr(ntree, "id", "") == node_tree_id
+            ):
                 ntree._execute_node(node_id, locals, globals)
 
     def update_active_nodetree_index(self, context: bpy.types.Context):

@@ -20,7 +20,7 @@ class NodePointer(bpy.types.PropertyGroup):
             self.id = ref.id
         else:
             self.id = ""
-        # TODO mark node as dirty
+        # mark all nodes dirty to trigger referencing node
         for ntree in bpy.data.node_groups:
             if getattr(ntree, "is_sn_ntree", False):
                 for node in ntree.nodes:

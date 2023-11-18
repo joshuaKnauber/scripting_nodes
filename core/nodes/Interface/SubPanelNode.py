@@ -12,15 +12,34 @@ from .PanelNode import SNA_NodePanel
 class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
     bl_idname = "SNA_NodeSubpanel"
     bl_label = "Subpanel"
+    bl_width_default = 200
 
     panel: bpy.props.PointerProperty(
         type=NodePointer, name="Panel", description="Panel to be displayed"
     )
+    blender_panel: bpy.props.StringProperty(name="Panel")
+    blender_space: bpy.props.StringProperty(name="Space")
+    blender_region: bpy.props.StringProperty(name="Region")
+    blender_category: bpy.props.StringProperty(name="Category")
+    blender_context: bpy.props.StringProperty(name="Context")
 
-    nested: bpy.props.BoolProperty(
-        default=False,
-        name="Nested Subpanel",
-        description="Lets you select a subpanel to display this subpanel in",
+    origin: bpy.props.EnumProperty(
+        name="Location",
+        items=[
+            ("PANEL", "Panel", "Add the subpanel to one of your panels"),
+            (
+                "SUBPANEL",
+                "Subpanel",
+                "Select one of your subpanels to create nested subpanels",
+            ),
+            (
+                "BLENDER",
+                "Blender Panel",
+                "Add the subpanel to an existing panel within the blender interface",
+            ),
+        ],
+        default="PANEL",
+        description="Where to display the panel",
         update=lambda self, _: self.mark_dirty(),
     )
 
@@ -63,10 +82,15 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         row = layout.row()
-        if not self.nested:
+        if self.origin == "PANEL":
             node_search(row, self.panel, SNA_NodePanel.bl_idname)
-        else:
+        elif self.origin == "SUBPANEL":
             node_search(row, self.panel, self.bl_idname)
+        else:
+            label = f"'{self.title}' ({self.blender_panel.replace('_', ' ').title()})"
+            op = row.operator("sna.picker", text=label, icon="RESTRICT_SELECT_OFF")
+            op.locations = "SUBPANELS"
+            op.node = self.id
         row.operator(
             "sna.node_settings", text="", icon="PREFERENCES", emboss=False
         ).node = self.name
@@ -80,18 +104,26 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
 
     @property
     def space(self):
+        if self.origin == "BLENDER":
+            return self.blender_space
         return self.panel.node.space if self.panel.node else ""
 
     @property
     def region(self):
+        if self.origin == "BLENDER":
+            return self.blender_region
         return self.panel.node.region if self.panel.node else ""
 
     @property
     def category(self):
+        if self.origin == "BLENDER":
+            return self.blender_category
         return self.panel.node.category if self.panel.node else ""
 
     @property
     def context(self):
+        if self.origin == "BLENDER":
+            return self.blender_context
         return self.panel.node.context if self.panel.node else ""
 
     def generate(self, context):
@@ -119,10 +151,10 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
                 bl_idname = "{panel_classname}"
                 bl_label = "{self.title}"
                 bl_parent_id = "{panel_node.last_classname}"
-                bl_space_type = "{panel_node.space}"
-                bl_region_type = "{panel_node.region}"
-                {f'bl_category = "{panel_node.category}"' if panel_node.category else ""}
-                {f'bl_context = "{panel_node.context}"' if panel_node.context else ""}
+                bl_space_type = "{self.space}"
+                bl_region_type = "{self.region}"
+                {f'bl_category = "{self.category}"' if self.category else ""}
+                {f'bl_context = "{self.context}"' if self.context else ""}
                 bl_order = {self.order}
                 {options}
 
