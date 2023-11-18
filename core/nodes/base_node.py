@@ -1,3 +1,4 @@
+import functools
 import time
 
 import bpy
@@ -14,6 +15,9 @@ from ..utils.id import get_id
 from .utils.draw_code import draw_code
 
 
+_LAST_UPDATED = set()  # set of node ids that have recently been updated
+
+
 class SNA_BaseNode(bpy.types.Node):
     is_sn_node = True
     bl_label = "Base Node"
@@ -22,17 +26,18 @@ class SNA_BaseNode(bpy.types.Node):
         default="", name="ID", description="Unique ID of the node"
     )
 
-    was_registered: bpy.props.BoolProperty(
-        default=False
-    )  # temporarily active after this node was registered
-
     def _start_was_registered(self):
-        self.was_registered = True
+        global _LAST_UPDATED
+        _LAST_UPDATED.add(self.id)
         redraw.redraw(True)
-        bpy.app.timers.register(self._finish_was_registered, first_interval=1)
+        bpy.app.timers.register(
+            functools.partial(self._finish_was_registered, self.id), first_interval=1
+        )
 
-    def _finish_was_registered(self):
-        self.was_registered = False
+    def _finish_was_registered(self, id):
+        global _LAST_UPDATED
+        if id in _LAST_UPDATED:
+            _LAST_UPDATED.remove(id)
         redraw.redraw(True)
 
     expand_internals: bpy.props.BoolProperty(
@@ -195,7 +200,8 @@ class SNA_BaseNode(bpy.types.Node):
 
     def draw_buttons(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         """Draws the buttons on the node"""
-        if self.was_registered and context.scene.sna.show_register_updates:
+        global _LAST_UPDATED
+        if self.id in _LAST_UPDATED and context.scene.sna.show_register_updates:
             layout.progress(
                 text="Updating...",
                 factor=0.5,
