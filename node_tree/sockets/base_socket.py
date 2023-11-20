@@ -2,7 +2,6 @@ import bpy
 from .conversions import CONVERSIONS
 from ...addon.properties.settings.settings import property_icons
 
-
 import time
 
 
@@ -16,9 +15,9 @@ class ScriptingSocket:
     def update_socket_name(self, context):
         self.node.on_socket_name_change(self)
 
-    name: bpy.props.StringProperty(
-        name="Socket Name", description="Name of this socket", update=update_socket_name
-    )
+    name: bpy.props.StringProperty(name="Socket Name",
+                                   description="Name of this socket",
+                                   update=update_socket_name)
 
     ### SOCKET OPTIONS
     # OVERWRITE
@@ -31,7 +30,8 @@ class ScriptingSocket:
     prev_dynamic: bpy.props.BoolProperty(
         default=False,
         name="Previously Dynamic",
-        description="True if this socket was previously dynamic and can now be removed",
+        description=
+        "True if this socket was previously dynamic and can now be removed",
     )
 
     def update_conversion(self, context):
@@ -60,7 +60,8 @@ class ScriptingSocket:
     can_be_disabled: bpy.props.BoolProperty(
         default=False,
         name="Can Be Hidden",
-        description="Lets the user disable this socket which can be used for evaluation",
+        description=
+        "Lets the user disable this socket which can be used for evaluation",
     )
 
     # OVERWRITE
@@ -102,7 +103,8 @@ class ScriptingSocket:
         self.hide = value
 
     def update_index_type(self, context):
-        if self.indexable and self.bl_idname != self.node.socket_names[self.index_type]:
+        if self.indexable and self.bl_idname != self.node.socket_names[
+                self.index_type]:
             # hide all index sockets before blend data input
             hide = self.index_type == "Property"
             for inp in self.node.inputs:
@@ -111,12 +113,14 @@ class ScriptingSocket:
                 if inp.indexable:
                     inp.set_hide(hide)
             # convert socket
-            self.node.convert_socket(self, self.node.socket_names[self.index_type])
+            self.node.convert_socket(self,
+                                     self.node.socket_names[self.index_type])
 
     indexable: bpy.props.BoolProperty(
         default=False,
         name="Indexable",
-        description="If this socket is indexable. Switches between String, Integer and Blend Data",
+        description=
+        "If this socket is indexable. Switches between String, Integer and Blend Data",
     )
 
     index_type: bpy.props.EnumProperty(
@@ -133,22 +137,20 @@ class ScriptingSocket:
     def update_data_type(self, context):
         if self.changeable and self.data_type != self.bl_idname:
             self.node.convert_socket(self, self.data_type)
-            self.node.location = self.node.location
+            # self.node.location = self.node.location
 
     def get_data_type_items(self, context):
         items = []
         used_idnames = []
         for name in list(self.node.socket_names.keys())[2:]:
             if not self.node.socket_names[name] in used_idnames:
-                items.append(
-                    (
-                        self.node.socket_names[name],
-                        name,
-                        name,
-                        property_icons[name],
-                        len(items),
-                    )
-                )
+                items.append((
+                    self.node.socket_names[name],
+                    name,
+                    name,
+                    property_icons[name],
+                    len(items),
+                ))
                 used_idnames.append(self.node.socket_names[name])
         return items
 
@@ -178,7 +180,10 @@ class ScriptingSocket:
 
     def _draw_removable_socket(self, layout, node):
         """Draws the operators for removable sockets"""
-        op = layout.operator("sn.remove_socket", text="", emboss=False, icon="REMOVE")
+        op = layout.operator("sn.remove_socket",
+                             text="",
+                             emboss=False,
+                             icon="REMOVE")
         op.node = node.name
         op.is_output = self.is_output
         op.index = self.index
@@ -190,7 +195,10 @@ class ScriptingSocket:
             layout.label(text=text)
 
         # draw add operator
-        op = layout.operator("sn.add_dynamic", text="", emboss=False, icon="ADD")
+        op = layout.operator("sn.add_dynamic",
+                             text="",
+                             emboss=False,
+                             icon="ADD")
         op.node = node.name
         op.is_output = self.is_output
         op.insert_above = False
@@ -207,9 +215,10 @@ class ScriptingSocket:
 
         # draw add above operator
         if context.scene.sn.insert_sockets:
-            op = layout.operator(
-                "sn.add_dynamic", text="", emboss=False, icon="TRIA_UP"
-            )
+            op = layout.operator("sn.add_dynamic",
+                                 text="",
+                                 emboss=False,
+                                 icon="TRIA_UP")
             op.node = node.name
             op.is_output = self.is_output
             op.insert_above = True
@@ -221,9 +230,8 @@ class ScriptingSocket:
         text = self.name
         # draw debug text for sockets
         if sn.debug_python_sockets and self.python_value:
-            if not sn.debug_selected_only or (
-                sn.debug_selected_only and self.node.select
-            ):
+            if not sn.debug_selected_only or (sn.debug_selected_only
+                                              and self.node.select):
                 text = self.python_value.replace("\n", " || ")
         # draw dynamic sockets
         if self.dynamic:
@@ -330,19 +338,17 @@ class ScriptingSocket:
                     if self.convert_data:
                         # convert different socket types
                         if from_out.bl_label != self.bl_label:
-                            value = CONVERSIONS[from_out.bl_label][self.bl_label](
-                                from_out, self
-                            )
+                            value = CONVERSIONS[from_out.bl_label][
+                                self.bl_label](from_out, self)
                         # convert convertable subtypes of the same socket
                         elif from_out.subtype != self.subtype:
-                            if from_out.subtype in CONVERSIONS[from_out.bl_label]:
-                                if (
-                                    self.subtype
-                                    in CONVERSIONS[from_out.bl_label][from_out.subtype]
-                                ):
+                            if from_out.subtype in CONVERSIONS[
+                                    from_out.bl_label]:
+                                if (self.subtype in CONVERSIONS[
+                                        from_out.bl_label][from_out.subtype]):
                                     value = CONVERSIONS[from_out.bl_label][
-                                        from_out.subtype
-                                    ][self.subtype](from_out, self)
+                                        from_out.subtype][self.subtype](
+                                            from_out, self)
                     return value
                 return self.get_python_repr()
 
@@ -393,9 +399,10 @@ class ScriptingSocket:
         self.force_update()
 
     # OVERWRITE
-    default_value: bpy.props.StringProperty(
-        name="Value", description="Value of this socket", get=_get_value, set=_set_value
-    )
+    default_value: bpy.props.StringProperty(name="Value",
+                                            description="Value of this socket",
+                                            get=_get_value,
+                                            set=_set_value)
 
     def force_update(self):
         """Triggers an update to the connected sockets, for both data and program sockets. Used to pretend the data of this node changed"""
@@ -408,12 +415,12 @@ class ScriptingSocket:
         # recursively find all sockets when splitting at reroutes
         if socket.node.bl_idname == "NodeReroute":
             for link in socket.node.outputs[0].links:
-                to_sockets += self._get_to_sockets(link.to_socket, check_validity)
+                to_sockets += self._get_to_sockets(link.to_socket,
+                                                   check_validity)
         else:
             # check validity of connection
             if not check_validity or self.node.node_tree.is_valid_connection(
-                self, socket
-            ):
+                    self, socket):
                 to_sockets.append(socket)
         return to_sockets
 
@@ -436,8 +443,7 @@ class ScriptingSocket:
                     return None
             # check connection validity
             if not check_validity or self.node.node_tree.is_valid_connection(
-                from_out, self
-            ):
+                    from_out, self):
                 return from_out
         return None
 
@@ -446,8 +452,7 @@ class ScriptingSocket:
     def index(self):
         """Returns the index of this socket on the node or -1 if it can't be found"""
         for index, socket in enumerate(
-            self.node.outputs if self.is_output else self.node.inputs
-        ):
+                self.node.outputs if self.is_output else self.node.inputs):
             if socket == self:
                 return index
         return -1
