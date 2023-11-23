@@ -11,19 +11,18 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-
 bl_info = {
     "name": "Serpens",
     "author": "Joshua Knauber, Finn Knauber",
     "description": "Adds a node editor for building addons with nodes",
     "blender": (4, 0, 0),
-    "version": (3, 3, 1),
+    "version": (3, 3, 2),
     "location": "Editors -> Visual Scripting Editor",
-    "doc_url": "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233",
+    "doc_url":
+    "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233",
     "tracker_url": "https://discord.com/invite/NK6kyae",
     "category": "Node",
 }
-
 
 import bpy
 from bpy.utils import previews
@@ -63,9 +62,9 @@ def register_icons():
     icons = ["discord", "serpens"]
 
     for icon in icons:
-        bpy.types.Scene.sn_icons.load(
-            icon, os.path.join(icons_dir, icon + ".png"), "IMAGE"
-        )
+        bpy.types.Scene.sn_icons.load(icon,
+                                      os.path.join(icons_dir, icon + ".png"),
+                                      "IMAGE")
 
 
 def unregister_icons():
@@ -77,9 +76,8 @@ def register():
     auto_load.register()
 
     # addon properties
-    bpy.types.Scene.sn = bpy.props.PointerProperty(
-        type=SN_AddonProperties, name="Serpens Properties"
-    )
+    bpy.types.Scene.sn = bpy.props.PointerProperty(type=SN_AddonProperties,
+                                                   name="Serpens Properties")
 
     # register the keymaps
     register_keymaps()
