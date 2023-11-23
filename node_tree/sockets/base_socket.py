@@ -137,7 +137,6 @@ class ScriptingSocket:
     def update_data_type(self, context):
         if self.changeable and self.data_type != self.bl_idname:
             self.node.convert_socket(self, self.data_type)
-            # self.node.location = self.node.location
 
     def get_data_type_items(self, context):
         items = []
