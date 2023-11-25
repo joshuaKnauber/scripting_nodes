@@ -37,7 +37,7 @@ class SNA_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
                     icon="HIDE_OFF" if self.editable else "HIDE_ON",
                     emboss=False,
                 )
-            if self.editable:
+            if self.editable and not self.is_linked:
                 col = layout.column(align=True, heading=text)
                 labels = self.labels.split(",")
                 for i in range(self.size):

@@ -64,6 +64,8 @@ class SNA_NodeRow(SNA_BaseNode, bpy.types.Node):
             {self.inputs["Enabled"].editable and f"row_{self.id}.enabled = {self.inputs['Enabled'].get_code()}" or ""}
             {self.inputs["Alert"].editable and f"row_{self.id}.alert = {self.inputs['Alert'].get_code()}" or ""}
             {self.inputs["Scale"].editable and f"row_{self.id}.scale_x, row_{self.id}.scale_y = {self.inputs['Scale'].get_code()}" or ""}
+            {self.inputs["Alignment"].editable and f"row_{self.id}.alignment = {self.inputs['Alignment'].get_code()}" or ""}
+            {self.inputs["Context"].editable and f"row_{self.id}.operator_context = {self.inputs['Context'].get_code()}" or ""}
             {self.outputs["Interface"].get_code(3)}
         """
 
