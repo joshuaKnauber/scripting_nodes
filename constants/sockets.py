@@ -6,9 +6,11 @@ from ..core.sockets.data.StringSocket import SNA_StringSocket
 from ..core.sockets.data.EnumSocket import SNA_EnumSocket
 from ..core.sockets.program.ExecuteSocket import SNA_ExecuteSocket
 from ..core.sockets.program.InterfaceSocket import SNA_InterfaceSocket
+from ..core.sockets.program.ProgramSocket import SNA_ProgramSocket
 
 EXECUTE = SNA_ExecuteSocket.bl_idname
 INTERFACE = SNA_InterfaceSocket.bl_idname
+PROGRAM = SNA_ProgramSocket.bl_idname
 STRING = SNA_StringSocket.bl_idname
 ENUM = SNA_EnumSocket.bl_idname
 BOOLEAN = SNA_BooleanSocket.bl_idname
@@ -20,6 +22,7 @@ PROPERTY = SNA_PropertySocket.bl_idname
 SOCKET_NAMES = {
     EXECUTE: "Execute",
     INTERFACE: "Interface",
+    PROGRAM: "Program",
     STRING: "String",
     ENUM: "Enum",
     BOOLEAN: "Boolean",

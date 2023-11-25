@@ -112,7 +112,7 @@ class SNA_BaseNode(bpy.types.Node):
         self.mark_dirty()
 
     def get_code(self):
-        return self["code"]
+        return self.get("code", "")
 
     def set_code(self, value):
         clean = "\n".join([*filter(lambda l: l.strip() != "", value.split("\n"))])
@@ -149,8 +149,10 @@ class SNA_BaseNode(bpy.types.Node):
         self.require_register = False
         for inp in self.inputs:
             inp.reset_meta()
+            inp.code = ""
         for out in self.outputs:
             out.reset_meta()
+            out.code = ""
 
     def _get_code_summary(self):
         """Returns a summary of all the code stored in the node to check for changes"""
