@@ -12,9 +12,6 @@ class SNA_NodeGlobalVariable(SNA_BaseNode, bpy.types.Node):
         self.convert_socket(
             self.inputs["Default"], sockets.VARIABLE_SOCKETS[self.variable_type]
         )
-        self.convert_socket(
-            self.outputs["Value"], sockets.VARIABLE_SOCKETS[self.variable_type]
-        )
         self.mark_dirty()
 
     variable_type: bpy.props.EnumProperty(
@@ -33,7 +30,11 @@ class SNA_NodeGlobalVariable(SNA_BaseNode, bpy.types.Node):
         row.prop(self, "name", text="")
 
     def var_name(self):
-        return f"var_{self.id}"
+        return f"var_{self.id}"  # TODO better name?
 
     def generate(self, context, trigger):
-        self.outputs["Value"].code = self.var_name()
+        self.require_register = True
+
+        self.code = f"""
+            {self.var_name()} = {self.inputs["Default"].get_code()}
+        """

@@ -36,7 +36,7 @@ class SNA_NodeLocalVariable(SNA_BaseNode, bpy.types.Node):
         row.prop(self, "name", text="")
 
     def var_name(self):
-        return f"var_{self.id}"
+        return f"var_{self.id}"  # TODO better name?
 
     def generate(self, context, trigger):
         self.code = f"""

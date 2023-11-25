@@ -200,7 +200,10 @@ class SNA_BaseNode(bpy.types.Node):
         summary = self._get_code_summary()
         self._reset_code()
         # generate new code
-        self.generate(bpy.context, trigger if trigger else self)
+        try:
+            self.generate(bpy.context, trigger if trigger else self)
+        except Exception as e:
+            logger.error(f"Error in node '{self.name}'", e)
         # check if code has changed
         if summary == self._get_code_summary():
             self._propagate_change_to_references()

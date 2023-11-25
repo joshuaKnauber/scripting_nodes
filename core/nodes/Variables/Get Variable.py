@@ -22,6 +22,7 @@ class SNA_NodeGetVariable(SNA_BaseNode, bpy.types.Node):
         ],
         name="Scope",
         description="Scope of the variable",
+        update=lambda self, context: self.mark_dirty(),
     )
 
     def on_create(self):
