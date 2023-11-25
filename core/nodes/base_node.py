@@ -114,9 +114,6 @@ class SNA_BaseNode(bpy.types.Node):
     def update_links(self):
         """Called on link updates"""
         self.mark_dirty()
-        bpy.app.timers.register(
-            lambda: revalidate_links(self.node_tree), first_interval=0.025
-        )
 
     def get_code(self):
         return self["code"]
@@ -185,13 +182,21 @@ class SNA_BaseNode(bpy.types.Node):
         """Called when the node changes. Forwards the update to the node tree if something has changed"""
         if not self._sockets_initialized():
             return
+        # revalidate links
+        bpy.app.timers.register(
+            lambda: revalidate_links(self.node_tree), first_interval=0.025
+        )
+        # reset code
         summary = self._get_code_summary()
         self._reset_code()
+        # generate new code
         context = {**bpy.context.copy()}
         context["trigger"] = trigger if trigger != None else self
         self.generate(context)
+        # check if code has changed
         if summary == self._get_code_summary():
             return
+        # propagate changes and build addon if necessary
         self._start_was_registered()
         self._propagate_changes()
         if self.require_register:

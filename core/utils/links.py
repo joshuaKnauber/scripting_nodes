@@ -31,6 +31,15 @@ def revalidate_links(ntree: bpy.types.NodeTree):
 
 def is_link_valid(link: bpy.types.NodeLink):  # TODO
     """Checks if a link is valid"""
+    from_socket = link.from_socket
+    to_socket = link.to_socket
+
+    # Invalid if connected to a disabled socket
+    if getattr(to_socket, "show_editable", False) and not getattr(
+        to_socket, "editable", True
+    ):
+        return False
+
     return True
 
     # def is_valid_connection(link: bpy.types.NodeLink):
