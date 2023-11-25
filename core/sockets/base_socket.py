@@ -44,7 +44,10 @@ class ScriptingSocket:
     def draw(self, context, layout, node, text):
         row = layout.row(align=False)
         row.alignment = "EXPAND" if not self.is_output else "RIGHT"
-        self.draw_socket(context, row, node, text)
+        if context.scene.sna.show_socket_code and self.node.select:
+            row.label(text=self.get_code())
+        else:
+            self.draw_socket(context, row, node, text)
 
     # callback for drawing the socket
     def draw_socket(self, context, layout, node, text):

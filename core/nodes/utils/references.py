@@ -13,14 +13,14 @@ class NodePointer(bpy.types.PropertyGroup):
         return None
 
     def update_name(self, context):
-        """Update the referenced node"""
+        """Update the referenced node when the name is changed"""
         sna = context.scene.sna
         ref = sna.references.get_ref_by_node_name(self.name)
         if ref is not None:
             self.id = ref.id
         else:
             self.id = ""
-        # mark all nodes dirty to trigger referencing node
+        # trigger initial update on all references
         for ntree in bpy.data.node_groups:
             if getattr(ntree, "is_sn_ntree", False):
                 for node in ntree.nodes:
@@ -55,6 +55,19 @@ def node_search(layout: bpy.types.UILayout, prop: NodePointer, idname: str):
         subrow.prop_search(prop, "name", bpy.data.node_groups[0], "nodes", text="")
 
 
+def _prop_matches_node(
+    ref_node: bpy.types.Node, prop: bpy.types.Property, node: bpy.types.Node
+):
+    """Checks if the given Node Pointer property matches the given node id"""
+    if (
+        getattr(prop, "fixed_type", None)
+        and prop.fixed_type.identifier == NodePointer.__name__
+    ):
+        if getattr(ref_node, prop.identifier).id == node.id:
+            return True
+    return False
+
+
 def get_references_to_node(node: bpy.types.Node):
     """Returns a list of references to the given node"""
     refs = []
@@ -62,10 +75,14 @@ def get_references_to_node(node: bpy.types.Node):
         if getattr(ntree, "is_sn_ntree", False):
             for ref_node in ntree.nodes:
                 for prop in ref_node.bl_rna.properties:
-                    if (
-                        getattr(prop, "fixed_type", None)
-                        and prop.fixed_type.identifier == NodePointer.__name__
-                    ):
-                        if getattr(ref_node, prop.identifier).id == node.id:
-                            refs.append(ref_node)
+                    if _prop_matches_node(ref_node, prop, node):
+                        refs.append(ref_node)
     return refs
+
+
+def update_reference_name(node: bpy.types.Node, new_name: str):
+    """Updates the name of the given node in all references"""
+    for ref_node in get_references_to_node(node):
+        for prop in ref_node.bl_rna.properties:
+            if _prop_matches_node(ref_node, prop, node):
+                getattr(ref_node, prop.identifier).name = new_name

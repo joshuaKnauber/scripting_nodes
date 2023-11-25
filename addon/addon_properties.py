@@ -43,6 +43,12 @@ class SNA_AddonProperties(bpy.types.PropertyGroup):
         description="Display the code of the selected node",
     )
 
+    show_socket_code: bpy.props.BoolProperty(
+        default=False,
+        name="Show Socket Code",
+        description="Display the code of the selected socket",
+    )
+
     show_register_updates: bpy.props.BoolProperty(
         default=False,
         name="Show Node Updates",

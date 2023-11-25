@@ -7,7 +7,7 @@ from ..sockets.base_socket import ScriptingSocket
 from ...core.node_tree.node_tree import ScriptingNodeTree
 from ...core.nodes.utils.references import get_references_to_node
 from ...core.utils.links import has_link_updates, revalidate_links
-from ...core.utils.sockets import add_socket
+from ...core.utils.sockets import add_socket, convert_socket_type
 from ...interface.overlays.nodes.node_overlays import set_node_error, set_node_time
 from ...utils import logger
 from ...utils.code import normalize_indents
@@ -44,6 +44,8 @@ class SNA_BaseNode(bpy.types.Node):
     expand_internals: bpy.props.BoolProperty(
         default=False, name="Expand Internals", description="Expand internal properties"
     )
+
+    pause_updates: bpy.props.BoolProperty(default=False, name="Pause Updates")
 
     @classmethod
     def poll(cls, ntree):
@@ -101,6 +103,13 @@ class SNA_BaseNode(bpy.types.Node):
     def add_output(self, idname: str, name: str = "") -> ScriptingSocket:
         """Adds an output socket to the node"""
         return add_socket(self, idname, name, True)
+
+    def convert_socket(self, socket: ScriptingSocket, idname: str):
+        """Converts a socket to another idname. Does not mark the node as dirty on its own"""
+        self.pause_updates = True
+        socket = convert_socket_type(socket, idname)
+        self.pause_updates = False
+        return socket
 
     def update(self):
         """Called by blender when the node topology changes"""
@@ -178,7 +187,7 @@ class SNA_BaseNode(bpy.types.Node):
 
     def mark_dirty(self, trigger: bpy.types.Node = None):
         """Called when the node changes. Forwards the update to the node tree if something has changed"""
-        if not self._sockets_initialized():
+        if not self._sockets_initialized() or self.pause_updates:
             return
         # revalidate links
         bpy.app.timers.register(
@@ -191,6 +200,7 @@ class SNA_BaseNode(bpy.types.Node):
         self.generate(bpy.context, trigger if trigger else self)
         # check if code has changed
         if summary == self._get_code_summary():
+            self._propagate_change_to_references()
             return
         # propagate changes and build addon if necessary
         self._start_was_registered()
@@ -198,21 +208,26 @@ class SNA_BaseNode(bpy.types.Node):
         if self.require_register:
             self.node_tree.mark_dirty(self)
 
+    def mark_dirty_delayed(self, trigger: bpy.types.Node = None):
+        """Call mark_dirty with a slight delay"""
+        bpy.app.timers.register(lambda: self.mark_dirty(trigger), first_interval=0.025)
+
+    def _propagate_change_to_sockets(self):
+        """Propagates the changes to the surrounding sockets"""
+        for socket in [*self.inputs, *self.outputs]:
+            if socket.has_next():
+                for next in socket.get_next():
+                    next.node.mark_dirty(self)
+
+    def _propagate_change_to_references(self):
+        """Propagates the changes to the surrounding and referencing nodes"""
+        for ref in get_references_to_node(self):
+            ref.on_reference_update(self)
+
     def _propagate_changes(self):
         """Propagates the changes to the surrounding and referencing nodes"""
-
-        def propagate_change_to_sockets(self):
-            for socket in [*self.inputs, *self.outputs]:
-                if socket.has_next():
-                    for next in socket.get_next():
-                        next.node.mark_dirty(self)
-
-        def propagate_change_to_references(self):
-            for ref in get_references_to_node(self):
-                ref.on_reference_update(self)
-
-        propagate_change_to_sockets(self)
-        propagate_change_to_references(self)
+        self._propagate_change_to_sockets()
+        self._propagate_change_to_references()
 
     def _execute(self, local_vars: dict, global_vars: dict):
         """Executes the code for the node. Note that this code runs within the context of the running addon"""

@@ -66,6 +66,7 @@ class SNA_PT_DeveloperSettingsPanel(bpy.types.Panel):
 
         col = layout.column(heading="Nodes")
         col.prop(sna, "show_node_code", text="Show Code")
+        col.prop(sna, "show_socket_code", text="Show Socket Code")
         col.prop(sna, "show_register_updates", text="Show Updates")
 
         col.separator()

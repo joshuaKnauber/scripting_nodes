@@ -1,5 +1,7 @@
 import bpy
 
+from ...core.nodes.utils.references import update_reference_name
+
 
 def _make_node_name(node: bpy.types.Node):
     """Returns an understandable name for the given node"""
@@ -103,6 +105,7 @@ class SNA_Nodes(bpy.types.PropertyGroup):
         ref = collection.nodes.add()
         ref.id = node.id
         ref.name = _make_node_name(node)
+        # TODO clean up orphan references, also maybe on node tree delete and others
 
     def remove_reference(self, node: bpy.types.Node):
         """Removes a reference"""
@@ -123,6 +126,7 @@ class SNA_Nodes(bpy.types.PropertyGroup):
             node = ref.get_node()
             if node is not None:
                 ref.name = _make_node_name(node)
+                update_reference_name(node, ref.name)
 
     def update_ref_names_by_ntree(self):
         """Updates the node tree names for all nodes"""
@@ -131,3 +135,4 @@ class SNA_Nodes(bpy.types.PropertyGroup):
                 node = ref.get_node()
                 if node is not None:
                     ref.name = _make_node_name(node)
+                    update_reference_name(node, ref.name)

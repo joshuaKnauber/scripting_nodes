@@ -23,6 +23,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
         if not self.id:
             self.id = get_id()
             self.name = "NodeTree"
+            self.use_fake_user = True
 
     def update(self):
         """Called when the node tree is updating."""

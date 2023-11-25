@@ -38,6 +38,6 @@ def load_handler(dummy):
 @persistent
 def depsgraph_handler(dummy):
     for ntree in bpy.data.node_groups:
-        if getattr(ntree, "is_sn_tree", False):
+        if getattr(ntree, "is_sn_ntree", False):
             if not ntree.id:
                 ntree._init()

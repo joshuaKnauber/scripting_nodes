@@ -1,10 +1,9 @@
 import bpy
+
 from .LocalVariable import SNA_NodeLocalVariable
-
-
 from ..utils.references import NodePointer, node_search
 from ..base_node import SNA_BaseNode
-from ....constants import sockets
+from ....constants import sockets, variables
 
 
 class SNA_NodeGetLocalVariable(SNA_BaseNode, bpy.types.Node):
@@ -19,6 +18,12 @@ class SNA_NodeGetLocalVariable(SNA_BaseNode, bpy.types.Node):
         self.add_input(sockets.PROGRAM)
         self.add_output(sockets.PROGRAM)
         self.add_output(sockets.FLOAT, "Value")
+
+    def on_reference_update(self, node: SNA_NodeLocalVariable):
+        self.convert_socket(
+            self.outputs["Value"], variables.VARIABLE_SOCKETS[node.variable_type]
+        )
+        self.mark_dirty_delayed()
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         node_search(layout, self.variable, SNA_NodeLocalVariable.bl_idname)
