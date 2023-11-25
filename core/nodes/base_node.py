@@ -192,7 +192,6 @@ class SNA_BaseNode(bpy.types.Node):
             if not retried:
                 self.mark_dirty_delayed(trigger)
             return
-        print("ready")
         # revalidate links
         bpy.app.timers.register(
             lambda: revalidate_links(self.node_tree), first_interval=0.025

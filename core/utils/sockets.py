@@ -27,6 +27,7 @@ def convert_socket_type(socket: bpy.types.NodeSocket, idname: str):
     connected_sockets = socket.get_next()
     name = socket.name
     is_output = socket.is_output
+    node = socket.node
     socket_index = 0
     for i, s in enumerate(socket.node.outputs if is_output else socket.node.inputs):
         if s == socket:
@@ -37,7 +38,7 @@ def convert_socket_type(socket: bpy.types.NodeSocket, idname: str):
         socket
     )
     # add new socket
-    new_socket = add_socket(socket.node, idname, name, is_output)
+    new_socket = add_socket(node, idname, name, is_output)
     # move socket
     if is_output:
         new_socket.node.outputs.move(len(new_socket.node.outputs) - 1, socket_index)

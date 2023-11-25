@@ -1,5 +1,6 @@
 import bpy
 
+from .GlobalVariable import SNA_NodeGlobalVariable
 from .LocalVariable import SNA_NodeLocalVariable
 from ..utils.references import NodePointer, node_search
 from ..base_node import SNA_BaseNode
@@ -14,6 +15,15 @@ class SNA_NodeGetVariable(SNA_BaseNode, bpy.types.Node):
         type=NodePointer, name="Variable", description="Variable to reference"
     )
 
+    scope: bpy.props.EnumProperty(
+        items=[
+            ("LOCAL", "Local", "Local variable", "HOME", 0),
+            ("GLOBAL", "Global", "Global variable", "WORLD", 1),
+        ],
+        name="Scope",
+        description="Scope of the variable",
+    )
+
     def on_create(self):
         self.add_input(sockets.PROGRAM)
         self.add_output(sockets.PROGRAM)
@@ -26,7 +36,18 @@ class SNA_NodeGetVariable(SNA_BaseNode, bpy.types.Node):
         self.mark_dirty()
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
-        node_search(layout, self.variable, SNA_NodeLocalVariable.bl_idname)
+        row = layout.row(align=True)
+        row.prop(self, "scope", text="", icon_only=True)
+        idname = (
+            SNA_NodeLocalVariable.bl_idname
+            if self.scope == "LOCAL"
+            else SNA_NodeGlobalVariable.bl_idname
+        )
+        node_search(
+            row,
+            self.variable,
+            idname,
+        )
 
     def generate(self, context, trigger):
         self.code = f"""
