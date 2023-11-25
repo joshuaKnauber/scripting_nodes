@@ -1,3 +1,4 @@
+from ..core.sockets.data.DataSocket import SNA_DataSocket
 from ..core.sockets.data.BooleanSocket import SNA_BooleanSocket
 from ..core.sockets.data.FloatSocket import SNA_FloatSocket
 from ..core.sockets.data.FloatVectorSocket import SNA_FloatVectorSocket
@@ -11,6 +12,7 @@ from ..core.sockets.program.ProgramSocket import SNA_ProgramSocket
 EXECUTE = SNA_ExecuteSocket.bl_idname
 INTERFACE = SNA_InterfaceSocket.bl_idname
 PROGRAM = SNA_ProgramSocket.bl_idname
+DATA = SNA_DataSocket.bl_idname
 STRING = SNA_StringSocket.bl_idname
 ENUM = SNA_EnumSocket.bl_idname
 BOOLEAN = SNA_BooleanSocket.bl_idname
@@ -23,10 +25,24 @@ SOCKET_NAMES = {
     EXECUTE: "Execute",
     INTERFACE: "Interface",
     PROGRAM: "Program",
+    DATA: "Data",
     STRING: "String",
     ENUM: "Enum",
     BOOLEAN: "Boolean",
     FLOAT: "Float",
     FLOAT_VECTOR: "Float Vector",
     PROPERTY: "Property",
+}
+
+
+VARIABLE_SOCKETS = {
+    "DATA": DATA,
+    "BOOLEAN": BOOLEAN,
+    "STRING": STRING,
+    "INT": FLOAT,  #
+    "FLOAT": FLOAT,
+    "LIST": FLOAT,  #
+    "DICT": FLOAT,  #
+    "POINTER": PROPERTY,
+    "COLLECTION": PROPERTY,  #
 }

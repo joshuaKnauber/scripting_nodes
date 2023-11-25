@@ -10,10 +10,10 @@ class SNA_NodeLocalVariable(SNA_BaseNode, bpy.types.Node):
 
     def update_type(self, context):
         self.convert_socket(
-            self.inputs["Default"], variables.VARIABLE_SOCKETS[self.variable_type]
+            self.inputs["Default"], sockets.VARIABLE_SOCKETS[self.variable_type]
         )
         self.convert_socket(
-            self.outputs["Value"], variables.VARIABLE_SOCKETS[self.variable_type]
+            self.outputs["Value"], sockets.VARIABLE_SOCKETS[self.variable_type]
         )
         self.mark_dirty()
 

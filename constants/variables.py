@@ -13,16 +13,3 @@ def variable_type_items(self, context):
         ("POINTER", "Pointer", "Pointer", "MONKEY", 7),
         ("COLLECTION", "Collection", "Collection", "SCENE_DATA", 8),
     ]
-
-
-VARIABLE_SOCKETS = {
-    "DATA": sockets.STRING,  #
-    "BOOLEAN": sockets.BOOLEAN,
-    "STRING": sockets.STRING,
-    "INT": sockets.FLOAT,  #
-    "FLOAT": sockets.FLOAT,
-    "LIST": sockets.FLOAT,  #
-    "DICT": sockets.FLOAT,  #
-    "POINTER": sockets.PROPERTY,
-    "COLLECTION": sockets.PROPERTY,  #
-}

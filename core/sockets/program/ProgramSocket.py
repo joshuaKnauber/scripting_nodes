@@ -16,7 +16,7 @@ class SNA_ProgramSocket(bpy.types.NodeSocket, ScriptingSocket):
                 next = inp.get_next()
                 if next:
                     return next[0].get_color(context, next[0].node)
-        return (0.15, 0.15, 0.15, 1)
+        return (0.2, 0.2, 0.2, 1)
 
     def draw_socket(self, context, layout, node, text):
         layout.label(text=text)

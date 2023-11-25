@@ -185,10 +185,14 @@ class SNA_BaseNode(bpy.types.Node):
         """Called on updates when a node is referenced by this node. Overrite this in nodes to handle updates"""
         self.mark_dirty()
 
-    def mark_dirty(self, trigger: bpy.types.Node = None):
-        """Called when the node changes. Forwards the update to the node tree if something has changed"""
+    def mark_dirty(self, trigger: bpy.types.Node = None, retried: bool = False):
+        """Called when the node changes. Forwards the update to the node tree if something has changed. Retries when the node is not ready"""
         if not self._sockets_initialized() or self.pause_updates:
+            # retry when node not ready
+            if not retried:
+                self.mark_dirty_delayed(trigger)
             return
+        print("ready")
         # revalidate links
         bpy.app.timers.register(
             lambda: revalidate_links(self.node_tree), first_interval=0.025
@@ -207,6 +211,12 @@ class SNA_BaseNode(bpy.types.Node):
         self._propagate_changes()
         if self.require_register:
             self.node_tree.mark_dirty(self)
+
+    def mark_dirty_delayed(self, trigger: bpy.types.Node = None):
+        """Trigger mark dirty with a short delay"""
+        bpy.app.timers.register(
+            functools.partial(self.mark_dirty, trigger, True), first_interval=0.025
+        )
 
     def _propagate_change_to_sockets(self):
         """Propagates the changes to the surrounding sockets"""
