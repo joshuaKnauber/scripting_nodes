@@ -28,7 +28,7 @@ def load_handler(dummy):
     # TODO do properly
     bpy.types.SpaceNodeEditor.draw_handler_add(draw_errors, (), "WINDOW", "POST_PIXEL")
     bpy.types.SpaceNodeEditor.draw_handler_add(
-        draw_node_overlays, (), "WINDOW", "BACKDROP"
+        draw_node_overlays, (), "WINDOW", "POST_PIXEL"
     )
 
     if not bpy.app.timers.is_registered(watcher.watch_addon):  # TODO unregister?

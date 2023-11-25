@@ -158,7 +158,11 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
         options = f"bl_options={{{options}}}" if options else ""
 
         panel_id = get_id()
-        panel_classname = f"SNA_PT_Subpanel_{panel_id}"
+        panel_classname = (
+            f"SNA_PT_Subpanel_{panel_id}"
+            if context["trigger"] == self
+            else self.last_classname
+        )
         self.last_classname = panel_classname
 
         parent = (

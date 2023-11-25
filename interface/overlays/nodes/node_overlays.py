@@ -130,16 +130,19 @@ def draw_error_marker(node: bpy.types.Node):
     offset = 30
     x, y = get_node_top_left(node)
     header = 0
+    npanel = 0
     for region in bpy.context.area.regions:
         if region.type == "HEADER" and bpy.context.area.spaces[0].show_region_header:
             header = region.height
-    x = max(min(x + offset, bpy.context.area.width - offset), offset)
+        if region.type == "UI":
+            npanel = region.width
+    x = max(min(x + offset, bpy.context.area.width - offset - npanel), offset)
     y = max(min(y + offset, bpy.context.area.height - offset - header), offset)
     # border
     shader.uniform_float("color", (0.35, 0, 0.05, 1))
     draw_filled_circle((x, y), size / 2, 16, shader)
     # circle
-    shader.uniform_float("color", (0.7, 0, 0.15, 1))
+    shader.uniform_float("color", (1, 0.4, 0.6, 1))
     draw_filled_circle((x, y - 2), size / 2 - 2, 16, shader)
     # exclamation mark
     shader.uniform_float("color", (0.35, 0, 0.05, 1))
@@ -149,7 +152,6 @@ def draw_error_marker(node: bpy.types.Node):
 
 def draw_node_overlays():
     """Draws node details to the interface"""
-    return False
     if not in_sn_tree(bpy.context):
         return
     zoom = get_zoom_level()
@@ -160,32 +162,32 @@ def draw_node_overlays():
         x, y = get_node_top_left(node)
 
         # if node.was_registered:
-        offset = 10 * zoom
-        shader.uniform_float("color", (0, 0.7, 0.25, 0.15))
-        draw_rect(
-            x,
-            y,
-            x + (node.dimensions[0] * zoom),
-            y - 200,
-            shader,
-        )
+        # offset = 10 * zoom
+        # shader.uniform_float("color", (0, 0.7, 0.25, 0.15))
+        # draw_rect(
+        #     x,
+        #     y,
+        #     x + (node.dimensions[0] * zoom),
+        #     y - 200,
+        #     shader,
+        # )
 
         if hasattr(node, "id") and node.id in _node_times:
             padding_x = 5 * zoom
             padding_y = 4 * zoom
             margin_x = 8 * zoom
 
-            # error = get_node_error_msg(node)
-            # if error:
-            # draw error marker
-            # draw_error_marker(node)
+            error = get_node_error_msg(node)
+            if error:
+                # draw error marker
+                draw_error_marker(node)
 
             # draw red overlay (and error text?)
             # offset = 10*zoom
             # shader.uniform_float("color", (.7, 0, .15, 0.15))
             # draw_rect(x-offset, y+offset, x+node.width, y-node.height, shader)
 
-            # draw timings
+            # # draw timings
             # x_offset = x + margin_x
             # text = f"{round(_node_times[node.id], 1)} ms"
             # width, height = blf.dimensions(font_id, text)

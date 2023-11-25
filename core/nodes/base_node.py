@@ -16,6 +16,10 @@ from ..utils.id import get_id
 from .utils.draw_code import draw_code
 
 
+class GenerateContext(bpy.types.Context):
+    trigger: bpy.types.Node
+
+
 _LAST_UPDATED = set()  # set of node ids that have recently been updated
 
 
@@ -170,20 +174,22 @@ class SNA_BaseNode(bpy.types.Node):
                 return False
         return True
 
-    def generate(self, context: bpy.types.Context):
+    def generate(self, context: GenerateContext):
         """Generates the code for the node. Overwrite this in nodes by setting the self.code... properties"""
 
     def on_reference_update(self, node: bpy.types.Node):
         """Called on updates when a node is referenced by this node. Overrite this in nodes to handle updates"""
         self.mark_dirty()
 
-    def mark_dirty(self):
+    def mark_dirty(self, trigger: bpy.types.Node = None):
         """Called when the node changes. Forwards the update to the node tree if something has changed"""
         if not self._sockets_initialized():
             return
         summary = self._get_code_summary()
         self._reset_code()
-        self.generate(bpy.context)
+        context = {**bpy.context.copy()}
+        context["trigger"] = trigger if trigger != None else self
+        self.generate(context)
         if summary == self._get_code_summary():
             return
         self._start_was_registered()
@@ -198,8 +204,7 @@ class SNA_BaseNode(bpy.types.Node):
             for socket in [*self.inputs, *self.outputs]:
                 if socket.has_next():
                     for next in socket.get_next():
-                        # if not getattr(next, "is_program", False):
-                        next.node.mark_dirty()
+                        next.node.mark_dirty(self)
 
         def propagate_change_to_references(self):
             for ref in get_references_to_node(self):
