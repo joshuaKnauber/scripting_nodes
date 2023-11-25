@@ -43,7 +43,7 @@ class ScriptingSocket:
 
     def draw(self, context, layout, node, text):
         row = layout.row(align=False)
-        row.alignment = "LEFT" if not self.is_output else "RIGHT"
+        row.alignment = "EXPAND" if not self.is_output else "RIGHT"
         self.draw_socket(context, row, node, text)
 
     # callback for drawing the socket

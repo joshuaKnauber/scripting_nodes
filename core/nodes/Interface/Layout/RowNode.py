@@ -30,10 +30,16 @@ class SNA_NodeRow(SNA_BaseNode, bpy.types.Node):
         inp.size = 2
         inp.labels = "X,Y"
         inp.value = [1, 1] + [0] * 30
-        inp = self.add_input(sockets.STRING, "Alignment")  # ENUM
+        inp = self.add_input(sockets.ENUM, "Alignment")
         inp.make_disabled()
-        inp = self.add_input(sockets.STRING, "Context")  # ENUM
+        inp.add_item("EXPAND", "Expand")
+        inp.add_item("LEFT", "Left")
+        inp.add_item("CENTER", "Center")
+        inp.add_item("RIGHT", "Right")
+        inp = self.add_input(sockets.ENUM, "Context")
         inp.make_disabled()
+        inp.add_item("INVOKE_DEFAULT", "Invoke")
+        inp.add_item("EXEC_DEFAULT", "Execute")
 
         self.add_output(sockets.INTERFACE)
 
