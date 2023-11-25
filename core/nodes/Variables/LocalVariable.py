@@ -15,7 +15,7 @@ class SNA_NodeLocalVariable(SNA_BaseNode, bpy.types.Node):
         self.convert_socket(
             self.outputs["Value"], variables.VARIABLE_SOCKETS[self.variable_type]
         )
-        self.mark_dirty_delayed()
+        self.mark_dirty()
 
     variable_type: bpy.props.EnumProperty(
         items=variables.variable_type_items,

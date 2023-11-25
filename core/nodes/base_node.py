@@ -208,10 +208,6 @@ class SNA_BaseNode(bpy.types.Node):
         if self.require_register:
             self.node_tree.mark_dirty(self)
 
-    def mark_dirty_delayed(self, trigger: bpy.types.Node = None):
-        """Call mark_dirty with a slight delay"""
-        bpy.app.timers.register(lambda: self.mark_dirty(trigger), first_interval=0.025)
-
     def _propagate_change_to_sockets(self):
         """Propagates the changes to the surrounding sockets"""
         for socket in [*self.inputs, *self.outputs]:
