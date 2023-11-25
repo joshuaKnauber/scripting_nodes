@@ -43,7 +43,7 @@ class SNA_NodeRow(SNA_BaseNode, bpy.types.Node):
 
         self.add_output(sockets.INTERFACE)
 
-    def generate(self, context):
+    def generate(self, context, trigger):
         layout = self.inputs["Interface"].get_meta("layout", "self.layout")
 
         heading = (

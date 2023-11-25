@@ -16,10 +16,6 @@ from ..utils.id import get_id
 from .utils.draw_code import draw_code
 
 
-class GenerateContext(bpy.types.Context):
-    trigger: bpy.types.Node
-
-
 _LAST_UPDATED = set()  # set of node ids that have recently been updated
 
 
@@ -171,7 +167,7 @@ class SNA_BaseNode(bpy.types.Node):
                 return False
         return True
 
-    def generate(self, context: GenerateContext):
+    def generate(self, context: bpy.types.Context, trigger: bpy.types.Node):
         """Generates the code for the node. Overwrite this in nodes by setting the self.code... properties"""
 
     def on_reference_update(self, node: bpy.types.Node):
@@ -190,9 +186,7 @@ class SNA_BaseNode(bpy.types.Node):
         summary = self._get_code_summary()
         self._reset_code()
         # generate new code
-        context = {**bpy.context.copy()}
-        context["trigger"] = trigger if trigger != None else self
-        self.generate(context)
+        self.generate(bpy.context, trigger if trigger else self)
         # check if code has changed
         if summary == self._get_code_summary():
             return

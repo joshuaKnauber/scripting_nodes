@@ -11,7 +11,7 @@ class SNA_NodeOperator(SNA_BaseNode, bpy.types.Node):
     def on_create(self):
         self.add_output(sockets.EXECUTE)
 
-    def generate(self, context):
+    def generate(self, context, trigger):
         self.require_register = True
         self.code = f"""
 class SNA_OT_Operator_{self.id}(bpy.types.Operator):

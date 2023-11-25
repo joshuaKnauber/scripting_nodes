@@ -16,7 +16,7 @@ class SNA_NodeDrawCheckbox(SNA_BaseNode, bpy.types.Node):
         label.editable = False
         self.add_output(sockets.INTERFACE)
 
-    def generate(self, context):
+    def generate(self, context, trigger):
         layout = self.inputs["Interface"].get_meta("layout", "self.layout")
 
         if self.inputs["Boolean Property"].is_linked:

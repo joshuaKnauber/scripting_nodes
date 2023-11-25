@@ -20,7 +20,7 @@ class SNA_NodePropertyGroup(SNA_BaseNode, bpy.types.Node):
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         layout.prop(self, "name", text="")
 
-    def generate(self, context):
+    def generate(self, context, trigger):
         self.require_register = True
 
         # self.outputs["Value"].

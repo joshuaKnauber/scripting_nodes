@@ -141,7 +141,7 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
             return self.blender_context
         return self.panel.node.context if self.panel.node else ""
 
-    def generate(self, context):
+    def generate(self, context, trigger):
         self.require_register = True
         panel_node = self.panel.node
         if (not panel_node or panel_node == self) and not self.origin == "BLENDER":
@@ -159,9 +159,7 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
 
         panel_id = get_id()
         panel_classname = (
-            f"SNA_PT_Subpanel_{panel_id}"
-            if context["trigger"] == self
-            else self.last_classname
+            f"SNA_PT_Subpanel_{panel_id}" if trigger == self else self.last_classname
         )
         self.last_classname = panel_classname
 

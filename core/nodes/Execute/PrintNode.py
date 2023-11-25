@@ -13,7 +13,7 @@ class SNA_NodePrint(SNA_BaseNode, bpy.types.Node):
         self.add_input(sockets.STRING, "Text")
         self.add_output(sockets.EXECUTE)
 
-    def generate(self, context):
+    def generate(self, context, trigger):
         self.require_register = True
         self.code = f"""
 print({self.inputs["Text"].get_code()})

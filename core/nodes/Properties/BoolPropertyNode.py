@@ -30,7 +30,7 @@ class SNA_NodeBoolProperty(SNA_BaseNode, bpy.types.Node):
     def identifier(self):
         return f"prop_{self.id}"
 
-    def generate(self, context):
+    def generate(self, context, trigger):
         self.require_register = True
 
         self.code_register = f"bpy.types.{self.source_type}.{self.identifier()} = bpy.props.BoolProperty(name='{self.name}')"

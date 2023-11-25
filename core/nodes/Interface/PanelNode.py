@@ -89,7 +89,7 @@ class SNA_NodePanel(SNA_BaseNode, bpy.types.Node):
 
     last_classname: bpy.props.StringProperty(default="")
 
-    def generate(self, context):
+    def generate(self, context, trigger):
         self.require_register = True
 
         options = []
@@ -104,9 +104,7 @@ class SNA_NodePanel(SNA_BaseNode, bpy.types.Node):
 
         panel_id = get_id()
         panel_classname = (
-            f"SNA_PT_Panel_{panel_id}"
-            if context["trigger"] == self
-            else self.last_classname
+            f"SNA_PT_Panel_{panel_id}" if trigger == self else self.last_classname
         )
         self.last_classname = panel_classname
 

@@ -42,7 +42,7 @@ class SNA_NodeGetProperty(SNA_BaseNode, bpy.types.Node):
         row.prop(self, "property_type", text="", icon_only=True)
         node_search(row, self.selected_property, SNA_NodeBoolProperty.bl_idname)
 
-    def generate(self, context):
+    def generate(self, context, trigger):
         if not self.selected_property.node:
             return
 

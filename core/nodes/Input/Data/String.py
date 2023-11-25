@@ -22,5 +22,5 @@ class SNA_NodeString(SNA_BaseNode, bpy.types.Node):
     def on_create(self):
         self.add_output(sockets.STRING)
 
-    def generate(self, context: bpy.types.Context):
+    def generate(self, context, trigger):
         self.outputs[0].code = f'"{self.value}"'  # TODO validate
