@@ -11,15 +11,23 @@ class ScriptingSocket:
 
     initialized: bpy.props.BoolProperty(default=False)
 
-    enabled: bpy.props.BoolProperty(
+    editable: bpy.props.BoolProperty(
         default=True,
         name="Enabled",
         description="Enable or disable this socket",
         update=lambda self, _: self.node.mark_dirty(),
     )
-    show_enable: bpy.props.BoolProperty(
+    show_editable: bpy.props.BoolProperty(
         default=False, name="Show Enabled", description="Show the enable icon"
     )
+
+    def make_disabled(self):
+        self.show_editable = True
+        self.editable = False
+
+    def make_enabled(self):
+        self.show_editable = True
+        self.editable = True
 
     def __init__(self):
         if not self.initialized:
@@ -34,7 +42,9 @@ class ScriptingSocket:
         return
 
     def draw(self, context, layout, node, text):
-        self.draw_socket(context, layout, node, text)
+        row = layout.row(align=False)
+        row.alignment = "LEFT" if not self.is_output else "RIGHT"
+        self.draw_socket(context, row, node, text)
 
     # callback for drawing the socket
     def draw_socket(self, context, layout, node, text):
@@ -45,7 +55,10 @@ class ScriptingSocket:
         return cls.get_color(None, None, None)
 
     def draw_color(self, context: bpy.types.Context, node: bpy.types.Node):
-        return self.get_color(context, node)
+        col = self.get_color(context, node)
+        enabled = self.editable or not self.show_editable
+        color = [col[0], col[1], col[2], 1.0 if enabled else 0.5]
+        return color
 
     def get_color(self, context, node):
         raise NotImplementedError

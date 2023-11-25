@@ -9,6 +9,7 @@ import bpy
 
 from ...utils import logger
 from ...utils.code import normalize_indents
+from ...utils import autopep8
 
 
 def build_addon(base_dir: str = None) -> str:
@@ -124,7 +125,7 @@ def _ntree_to_code(ntree: bpy.types.NodeTree):
         code += "def unregister():\n"
         code += unregister + "\n"
 
-    return code
+    return autopep8.fix_code(code)
 
 
 def _add_dir_structure(base_dir: str):

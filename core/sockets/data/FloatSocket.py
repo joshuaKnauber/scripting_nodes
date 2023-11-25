@@ -3,23 +3,20 @@ import bpy
 from ..base_socket import ScriptingSocket
 
 
-class SNA_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
-    bl_idname = "SNA_StringSocket"
+class SNA_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
+    bl_idname = "SNA_FloatSocket"
 
-    value: bpy.props.StringProperty(
-        default="",
-        update=lambda self, _: self.node.mark_dirty(),
-        options={"TEXTEDIT_UPDATE"},
+    value: bpy.props.FloatProperty(
+        default=0.0, update=lambda self, _: self.node.mark_dirty()
     )
 
     def _python_value(self):
         if self.is_output:
-            return self.code if self.code else "''"
-        value = self.value.replace("'", "\\'")
-        return f"'{value}'"
+            return self.code if self.code else "0.0"
+        return str(self.value)
 
     def get_color(self, context: bpy.types.Context, node: bpy.types.Node):
-        return (0.44, 0.7, 1, 1)
+        return (0.5, 0.5, 0.5, 1)
 
     def draw_socket(self, context, layout, node, text):
         if not self.is_output:

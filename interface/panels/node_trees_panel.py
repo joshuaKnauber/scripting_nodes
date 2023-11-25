@@ -32,6 +32,7 @@ class SNA_PT_NodeTreesPanel(bpy.types.Panel):
 
         col = row.column(align=True)
         col.operator("sna.add_nodetree", icon="ADD", text="")
+        col.operator("wm.append", icon="APPEND_BLEND", text="")
         subrow = col.row(align=True)
         subrow.enabled = sna.active_nodetree_index <= len(bpy.data.node_groups) - 1
         subrow.operator("sna.remove_nodetree", icon="REMOVE", text="")

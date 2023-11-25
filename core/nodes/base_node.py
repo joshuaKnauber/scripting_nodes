@@ -3,6 +3,7 @@ import time
 
 import bpy
 
+from ..sockets.base_socket import ScriptingSocket
 from ...core.node_tree.node_tree import ScriptingNodeTree
 from ...core.nodes.utils.references import get_references_to_node
 from ...core.utils.links import has_link_updates, revalidate_links
@@ -93,11 +94,11 @@ class SNA_BaseNode(bpy.types.Node):
     def on_delete(self):
         return
 
-    def add_input(self, idname: str, name: str = ""):
+    def add_input(self, idname: str, name: str = "") -> ScriptingSocket:
         """Adds an input socket to the node"""
         return add_socket(self, idname, name, False)
 
-    def add_output(self, idname: str, name: str = ""):
+    def add_output(self, idname: str, name: str = "") -> ScriptingSocket:
         """Adds an output socket to the node"""
         return add_socket(self, idname, name, True)
 
@@ -113,8 +114,19 @@ class SNA_BaseNode(bpy.types.Node):
             lambda: revalidate_links(self.node_tree), first_interval=0.025
         )
 
+    def get_code(self):
+        return self["code"]
+
+    def set_code(self, value):
+        clean = "\n".join([*filter(lambda l: l.strip() != "", value.split("\n"))])
+        self["code"] = clean
+
     code: bpy.props.StringProperty(
-        default="", name="Code", description="Generated code for the node"
+        default="",
+        name="Code",
+        description="Generated code for the node",
+        set=set_code,
+        get=get_code,
     )
     code_register: bpy.props.StringProperty(
         default="",
@@ -151,6 +163,13 @@ class SNA_BaseNode(bpy.types.Node):
             code += socket.get_code()
         return code
 
+    def _sockets_initialized(self):
+        """Returns a boolean saying if all sockets are initialized"""
+        for socket in [*self.inputs, *self.outputs]:
+            if not socket.initialized:
+                return False
+        return True
+
     def generate(self, context: bpy.types.Context):
         """Generates the code for the node. Overwrite this in nodes by setting the self.code... properties"""
 
@@ -160,6 +179,8 @@ class SNA_BaseNode(bpy.types.Node):
 
     def mark_dirty(self):
         """Called when the node changes. Forwards the update to the node tree if something has changed"""
+        if not self._sockets_initialized():
+            return
         summary = self._get_code_summary()
         self._reset_code()
         self.generate(bpy.context)

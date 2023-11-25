@@ -23,16 +23,6 @@ class SNA_PT_AddonPanel(bpy.types.Panel):
         layout.use_property_split = True
         layout.use_property_decorate = False
 
-        if sna.info.has_changes:
-            box = layout.box()
-            box.alert = True
-            col = box.column(align=True)
-            col.label(text="Addon Info Changes", icon="INFO")
-            row = col.row()
-            row.enabled = False
-            row.label(text="Restart required to update preferences.")
-            layout.separator()
-
         col = layout.column(heading="Info")
 
         col.prop(sna.info, "name")
@@ -42,6 +32,16 @@ class SNA_PT_AddonPanel(bpy.types.Panel):
         layout.separator()
         layout.prop(sna.info, "persist_sessions")
         layout.separator()
+
+        if sna.info.has_changes:
+            box = layout.box()
+            box.alert = True
+            col = box.column(align=True)
+            col.label(text="Addon Info Changes", icon="INFO")
+            row = col.row()
+            row.enabled = False
+            row.label(text="Restart required to update preferences.")
+            layout.separator()
 
         row = layout.row()
         row.scale_y = 1.5

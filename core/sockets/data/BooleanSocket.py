@@ -20,6 +20,17 @@ class SNA_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     def draw_socket(self, context, layout, node, text):
         if not self.is_output:
-            layout.prop(self, "value", text="" if self.is_output else text)
+            if self.show_editable:
+                layout.prop(
+                    self,
+                    "editable",
+                    text="",
+                    icon="HIDE_OFF" if self.editable else "HIDE_ON",
+                    emboss=False,
+                )
+            if self.editable:
+                layout.prop(self, "value", text=text)
+            else:
+                layout.label(text=text)
         else:
             layout.label(text=text)

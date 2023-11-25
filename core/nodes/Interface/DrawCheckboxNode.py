@@ -12,8 +12,8 @@ class SNA_NodeDrawCheckbox(SNA_BaseNode, bpy.types.Node):
         self.add_input(sockets.INTERFACE)
         self.add_input(sockets.PROPERTY, "Boolean Property")
         label = self.add_input(sockets.STRING, "Label")
-        label.show_enable = True
-        label.enabled = False
+        label.show_editable = True
+        label.editable = False
         self.add_output(sockets.INTERFACE)
 
     def generate(self, context):
@@ -23,7 +23,7 @@ class SNA_NodeDrawCheckbox(SNA_BaseNode, bpy.types.Node):
             prop = self.inputs["Boolean Property"]
             text = (
                 f", text={self.inputs['Label'].get_code()}"
-                if self.inputs["Label"].enabled
+                if self.inputs["Label"].editable
                 else ""
             )
             self.code = f"""
