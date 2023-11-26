@@ -1,5 +1,7 @@
 import bpy
 
+from .templates.VariableReferenceTemplate import VariableReferenceTemplate
+
 from .GlobalVariable import SNA_NodeGlobalVariable
 from .LocalVariable import SNA_NodeLocalVariable
 from ..utils.references import NodePointer, node_search
@@ -7,23 +9,9 @@ from ..base_node import SNA_BaseNode
 from ....constants import sockets
 
 
-class SNA_SetVariable(SNA_BaseNode, bpy.types.Node):
+class SNA_SetVariable(SNA_BaseNode, VariableReferenceTemplate, bpy.types.Node):
     bl_idname = "SNA_SetVariable"
     bl_label = "Set Variable"
-
-    variable: bpy.props.PointerProperty(
-        type=NodePointer, name="Variable", description="Variable to reference"
-    )
-
-    scope: bpy.props.EnumProperty(
-        items=[
-            ("LOCAL", "Local", "Local variable", "HOME", 0),
-            ("GLOBAL", "Global", "Global variable", "WORLD", 1),
-        ],
-        name="Scope",
-        description="Scope of the variable",
-        update=lambda self, context: self.mark_dirty(),
-    )
 
     def on_create(self):
         self.add_input(sockets.PROGRAM)
@@ -31,24 +19,11 @@ class SNA_SetVariable(SNA_BaseNode, bpy.types.Node):
         self.add_input(sockets.DATA, "Value")
 
     def on_reference_update(self, node: SNA_NodeLocalVariable):
-        self.convert_socket(
-            self.inputs["Value"], sockets.VARIABLE_SOCKETS[node.variable_type]
-        )
+        self.on_variable_update_input(node)
         self.mark_dirty()
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
-        row = layout.row(align=True)
-        row.prop(self, "scope", text="", icon_only=True)
-        idname = (
-            SNA_NodeLocalVariable.bl_idname
-            if self.scope == "LOCAL"
-            else SNA_NodeGlobalVariable.bl_idname
-        )
-        node_search(
-            row,
-            self.variable,
-            idname,
-        )
+        self.draw_variable_selection(context, layout)
 
     def generate(self, context, trigger):
         if self.variable.node:
