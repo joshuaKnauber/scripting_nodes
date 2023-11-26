@@ -7,6 +7,7 @@ from ..utils.sockets import add_socket
 class SNA_OT_AddDynamicSocket(bpy.types.Operator):
     bl_idname = "sna.add_dynamic_socket"
     bl_label = "Add Dynamic Socket"
+    bl_description = "Add a dynamic socket to this node"
 
     node: bpy.props.StringProperty()
     is_output: bpy.props.BoolProperty()
@@ -35,6 +36,7 @@ class SNA_OT_AddDynamicSocket(bpy.types.Operator):
 class SNA_OT_AddDynamicSocketRun(bpy.types.Operator):
     bl_idname = "sna.add_dynamic_socket_run"
     bl_label = "Add Dynamic Socket"
+    bl_description = "Add a dynamic socket to this node"
 
     node: bpy.props.StringProperty()
     is_output: bpy.props.BoolProperty()
