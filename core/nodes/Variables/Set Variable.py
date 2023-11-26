@@ -2,15 +2,13 @@ import bpy
 
 from .templates.VariableReferenceTemplate import VariableReferenceTemplate
 
-from .GlobalVariable import SNA_NodeGlobalVariable
 from .LocalVariable import SNA_NodeLocalVariable
-from ..utils.references import NodePointer, node_search
 from ..base_node import SNA_BaseNode
 from ....constants import sockets
 
 
-class SNA_SetVariable(SNA_BaseNode, VariableReferenceTemplate, bpy.types.Node):
-    bl_idname = "SNA_SetVariable"
+class SNA_NodeSetVariable(SNA_BaseNode, VariableReferenceTemplate, bpy.types.Node):
+    bl_idname = "SNA_NodeSetVariable"
     bl_label = "Set Variable"
 
     def on_create(self):
