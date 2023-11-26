@@ -149,11 +149,9 @@ class ScriptingSocket:
         else:
             self.meta = json.dumps(meta)
 
-    def get_meta(self, key: str, fallback):
-        if not self.is_output:
-            if self.has_next():
-                return self.get_next()[0].get_meta(key, fallback)
-            return fallback
+    def get_meta(self, key: str, fallback, only_current: bool = False):
+        if not only_current and not self.is_output and self.has_next():
+            return self.get_next()[0].get_meta(key, fallback)
         meta = json.loads(self.meta)
         if key in meta:
             return meta[key]

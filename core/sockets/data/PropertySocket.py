@@ -1,25 +1,26 @@
-from operator import is_
-
 import bpy
 
 from ..base_socket import ScriptingSocket
 
 DATA_DEFAULTS = {
-    "Scene": {"data": "bpy.context.scene", "label": "Active"},
-    "Object": {"data": "bpy.context.object", "label": "Active"},
+    "Scene": {"data": "bpy.context.scene", "label": "Using Active"},
+    "Object": {"data": "bpy.context.object", "label": "Using Active"},
 }
 
 
 class SNA_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_PropertySocket"
 
-    # Can have meta of type -> Type of data, identifier -> property identifier, data -> property parent data
+    # Can have optional meta of
+    # - parent: path to the parent data of the property
+    # - identifier: identifier of the property
+    # - type: type of the property
 
     def _python_value(self):
         if self.is_output:
             return self.code if self.code else "None"
         # return default value for data type if set
-        data_type = self.get_meta("type")
+        data_type = self.get_meta("type", "")
         if data_type in DATA_DEFAULTS:
             return DATA_DEFAULTS[data_type]["data"]
         return "None"
@@ -28,4 +29,10 @@ class SNA_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
         return (0, 0.87, 0.7, 1)
 
     def draw_socket(self, context, layout, node, text):
+        if not self.is_output and not self.is_linked:
+            data_type = self.get_meta("type", "")
+            if data_type in DATA_DEFAULTS:
+                text = f"{text} ({DATA_DEFAULTS[data_type]['label']})"
+            elif data_type:
+                text = f"{text} (No Default)"
         layout.label(text=text)

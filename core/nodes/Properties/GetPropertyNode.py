@@ -29,7 +29,6 @@ class SNA_NodeGetProperty(SNA_BaseNode, bpy.types.Node):
 
     def on_reference_update(self, property_node: bpy.types.Node):
         self.inputs[0].name = property_node.source_type
-        self.inputs[0].set_meta("type", property_node.source_type)
         self.mark_dirty()
 
     def draw_label(self):
@@ -47,8 +46,10 @@ class SNA_NodeGetProperty(SNA_BaseNode, bpy.types.Node):
             return
 
         identifier = self.selected_property.node.identifier()
-        self.outputs["Property"].code = f"{self.inputs[0].get_code()}.{identifier}"
-        self.outputs["Property"].set_meta("data", "bpy.context.scene")
+
+        self.inputs[0].set_meta("type", self.selected_property.node.source_type)
+        self.outputs["Property"].set_meta("parent", self.inputs[0].get_code())
         self.outputs["Property"].set_meta("identifier", identifier)
 
-        self.outputs["Value"].code = f"bpy.context.scene.{identifier}"
+        self.outputs["Property"].code = f"{self.inputs[0].get_code()}.{identifier}"
+        self.outputs["Value"].code = f"{self.inputs[0].get_code()}.{identifier}"

@@ -1,5 +1,5 @@
 import bpy
-
+from ...constants import sockets
 
 _PREV_LINKS = {}  # {node: {socket: [next, ...]}}
 _INITIALIZED = {}  # {node: bool}
@@ -39,6 +39,16 @@ def is_link_valid(link: bpy.types.NodeLink):  # TODO
         to_socket, "editable", True
     ):
         return False
+
+    # Invalidate if two different property socket types are connected
+    if (
+        from_socket.bl_idname == sockets.PROPERTY
+        and to_socket.bl_idname == sockets.PROPERTY
+    ):
+        from_type = from_socket.get_meta("type", "", True)
+        to_type = to_socket.get_meta("type", "", True)
+        if (from_type and to_type) and from_type != to_type:
+            return False
 
     return True
 

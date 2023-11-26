@@ -1,6 +1,3 @@
-from . import sockets
-
-
 def variable_type_items(self, context):
     return [
         ("DATA", "Data", "Data", "MOD_DATA_TRANSFER", 0),

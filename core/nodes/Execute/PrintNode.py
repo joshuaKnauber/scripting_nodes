@@ -14,8 +14,7 @@ class SNA_NodePrint(SNA_BaseNode, bpy.types.Node):
         self.add_output(sockets.EXECUTE)
 
     def generate(self, context, trigger):
-        self.require_register = True
         self.code = f"""
-print({self.inputs["Text"].get_code()})
-{self.outputs["Execute"].get_code(2)}
-"""
+            print({self.inputs["Text"].get_code(3)})
+            {self.outputs["Execute"].get_code(3)}
+        """

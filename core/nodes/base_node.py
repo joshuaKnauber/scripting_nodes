@@ -113,8 +113,13 @@ class SNA_BaseNode(bpy.types.Node):
 
     def update(self):
         """Called by blender when the node topology changes"""
+        # call link update functions
         if has_link_updates(self):
             self.update_links()
+        # revalidate links
+        bpy.app.timers.register(
+            lambda: revalidate_links(self.node_tree), first_interval=0.025
+        )
 
     def update_links(self):
         """Called on link updates"""
@@ -192,10 +197,6 @@ class SNA_BaseNode(bpy.types.Node):
             if not retried:
                 self.mark_dirty_delayed(trigger)
             return
-        # revalidate links
-        bpy.app.timers.register(
-            lambda: revalidate_links(self.node_tree), first_interval=0.025
-        )
         # reset code
         summary = self._get_code_summary()
         self._reset_code()

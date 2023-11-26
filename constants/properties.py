@@ -6,9 +6,10 @@ def property_type_items(self, context):
         ("BOOLEAN", "Boolean", "Boolean", "FORCE_CHARGE", 0),
         ("STRING", "String", "String", "SYNTAX_OFF", 1),
         ("INT", "Integer", "Integer", "DRIVER_TRANSFORM", 2),
-        ("FLOAT", "Float", "Float", "SEQUENCE_COLOR_01", 3),
-        ("ENUM", "Enum", "Enum", "SEQUENCE_COLOR_01", 4),
-        ("COLLECTION", "Collection", "Collection", "SEQUENCE_COLOR_01", 5),
+        ("FLOAT", "Float", "Float", "CON_TRANSLIKE", 3),
+        ("ENUM", "Enum", "Enum", "PRESET", 4),
+        ("POINTER", "Pointer", "Pointer", "MONKEY", 5),
+        ("COLLECTION", "Collection", "Collection", "SCENE_DATA", 6),
     ]
 
 
@@ -17,9 +18,10 @@ def property_node_items(self, context):
         ("SNA_BoolPropertyNode", "Boolean", "Boolean", "FORCE_CHARGE", 0),
         ("STRING", "String", "String", "SYNTAX_OFF", 1),
         ("INT", "Integer", "Integer", "DRIVER_TRANSFORM", 2),
-        ("FLOAT", "Float", "Float", "SEQUENCE_COLOR_01", 3),
-        ("ENUM", "Enum", "Enum", "SEQUENCE_COLOR_01", 4),
-        ("COLLECTION", "Collection", "Collection", "SEQUENCE_COLOR_01", 5),
+        ("FLOAT", "Float", "Float", "CON_TRANSLIKE", 3),
+        ("ENUM", "Enum", "Enum", "PRESET", 4),
+        ("POINTER", "Pointer", "Pointer", "MONKEY", 5),
+        ("COLLECTION", "Collection", "Collection", "SCENE_DATA", 6),
     ]
 
 
