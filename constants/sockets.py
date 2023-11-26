@@ -39,7 +39,7 @@ SOCKET_NAMES = {
     INT: "Int",
     FLOAT_VECTOR: "Float Vector",
     LIST: "List",
-    DICT: "Dict",
+    DICT: "Dictionary",
     PROPERTY: "Property",
 }
 
