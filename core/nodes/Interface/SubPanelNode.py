@@ -112,8 +112,10 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
 
     def on_create(self):
         self.add_input(sockets.BOOLEAN, "Hide")
-        self.add_output(sockets.INTERFACE, "Header")
-        self.add_output(sockets.INTERFACE, "Interface")
+        out = self.add_output(sockets.INTERFACE, "Header")
+        out.dynamic = True
+        out = self.add_output(sockets.INTERFACE, "Interface")
+        out.dynamic = True
 
     last_classname: bpy.props.StringProperty(default="")
 

@@ -41,7 +41,8 @@ class SNA_NodeRow(SNA_BaseNode, bpy.types.Node):
         inp.add_item("INVOKE_DEFAULT", "Invoke")
         inp.add_item("EXEC_DEFAULT", "Execute")
 
-        self.add_output(sockets.INTERFACE)
+        out = self.add_output(sockets.INTERFACE)
+        out.dynamic = True
 
     def generate(self, context, trigger):
         layout = self.inputs["Interface"].get_meta("layout", "self.layout")

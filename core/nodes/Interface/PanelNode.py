@@ -73,8 +73,10 @@ class SNA_NodePanel(SNA_BaseNode, bpy.types.Node):
 
     def on_create(self):
         self.add_input(sockets.BOOLEAN, "Hide")
-        self.add_output(sockets.INTERFACE, "Header")
-        self.add_output(sockets.INTERFACE, "Interface")
+        out = self.add_output(sockets.INTERFACE, "Header")
+        out.dynamic = True
+        out = self.add_output(sockets.INTERFACE, "Interface")
+        out.dynamic = True
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         row = layout.row()
@@ -127,8 +129,8 @@ class SNA_NodePanel(SNA_BaseNode, bpy.types.Node):
                     {self.outputs['Header'].get_code(5, "pass")}
 
                 def draw(self, context):
-                    {self.outputs['Interface'].get_code(5, "pass")}
+                    {self.outputs["Interface"].get_code(5, "pass")}
         """
 
-        self.outputs["Header"].set_meta("layout", "self.layout")
         self.outputs["Interface"].set_meta("layout", "self.layout")
+        self.outputs["Header"].set_meta("layout", "self.layout")

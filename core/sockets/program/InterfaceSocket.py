@@ -1,6 +1,7 @@
 import bpy
 
 from ..base_socket import ScriptingSocket
+from ...utils.sockets import is_only_with_name
 
 
 class SNA_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
@@ -15,3 +16,18 @@ class SNA_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     def draw_socket(self, context, layout, node, text):
         layout.label(text=text)
+        if self.dynamic:
+            row = layout.row(align=True)
+            op = row.operator(
+                "sna.add_dynamic_socket", text="", emboss=False, icon="ADD"
+            )  # TODO generalize
+            op.node = node.id
+            op.is_output = self.is_output
+            op.index = self.index
+            if not is_only_with_name(self.node, self):
+                op = row.operator(
+                    "sna.remove_socket", text="", emboss=False, icon="REMOVE"
+                )
+                op.node = node.id
+                op.is_output = self.is_output
+                op.index = self.index

@@ -1,4 +1,5 @@
 import json
+from math import e
 
 import bpy
 
@@ -19,6 +20,12 @@ class ScriptingSocket:
     )
     show_editable: bpy.props.BoolProperty(
         default=False, name="Show Enabled", description="Show the enable icon"
+    )
+
+    dynamic: bpy.props.BoolProperty(
+        default=False,
+        name="Dynamic",
+        description="Enable or disable this socket",
     )
 
     def make_disabled(self):
@@ -81,13 +88,37 @@ class ScriptingSocket:
         default="", name="Code", description="The code returned by this socket"
     )
 
+    def _get_program_code(
+        self, indent: int = 0, fallback: str = "", only_current: bool = False
+    ):
+        """Returns the code for a program output including potential dynamic outputs with the same name"""
+        # get dynamic socket code
+        if self.dynamic and not only_current:
+            code = []
+            # get individual socket code
+            for out in self.node.outputs:
+                if out.dynamic and out.name == self.name:
+                    out_code = out._get_program_code(indent, "", True)
+                    if out_code:
+                        code.append(out_code)
+            # indent code
+            if len(code) > 1:
+                for i in range(1, len(code)):
+                    code[i] = f"{' ' * 4 * indent}{code[i]}"
+            elif len(code) == 0:
+                return fallback
+            return "\n".join(code)
+        # get this sockets code
+        else:
+            if not self.has_next():
+                return fallback
+            ntree = self.node.node_tree
+            return f"bpy.context.scene.sna._execute_node('{ntree.id}', '{self.get_next()[0].node.id}', locals(), globals())\n"
+
     def get_code(self, indent: int = 0, fallback: str = ""):
         if self.is_output:
             if getattr(self, "is_program", False):
-                if not self.has_next():
-                    return fallback
-                ntree = self.node.node_tree
-                return f"bpy.context.scene.sna._execute_node('{ntree.id}', '{self.get_next()[0].node.id}', locals(), globals())\n"
+                return self._get_program_code(indent, fallback)
             else:
                 return self._python_value()
         elif not getattr(self, "is_program", False):
@@ -109,7 +140,14 @@ class ScriptingSocket:
     def set_meta(self, key: str, value):
         meta = json.loads(self.meta)
         meta[key] = value
-        self.meta = json.dumps(meta)
+        # set meta on all dynamic outputs with the same name
+        if self.dynamic:
+            for out in self.node.outputs:
+                if out.dynamic and out.name == self.name:
+                    out.meta = json.dumps(meta)
+        # set meta on this socket
+        else:
+            self.meta = json.dumps(meta)
 
     def get_meta(self, key: str, fallback):
         if not self.is_output:
@@ -120,3 +158,12 @@ class ScriptingSocket:
         if key in meta:
             return meta[key]
         return fallback
+
+    @property
+    def index(self):
+        for i, sock in enumerate(
+            self.node.outputs if self.is_output else self.node.inputs
+        ):
+            if sock == self:
+                return i
+        return -1
