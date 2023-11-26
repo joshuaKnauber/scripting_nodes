@@ -16,7 +16,7 @@ class SNA_NodeIfElse(SNA_BaseNode, bpy.types.Node):
         self.add_output(sockets.PROGRAM, "After")
 
     def generate(self, context, trigger):
-        layout = self.inputs["Interface"].get_meta("layout", "self.layout")
+        layout = self.inputs["Program"].get_meta("layout", "self.layout")
 
         self.code = f"""
             if {self.inputs["Condition"].get_code()}:
