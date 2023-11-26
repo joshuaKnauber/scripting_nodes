@@ -33,8 +33,28 @@ class SNA_NodeDrawCheckbox(SNA_BaseNode, bpy.types.Node):
             identifier = self.inputs["Boolean Property"].get_meta(
                 "identifier", "not_a_property"
             )
+            label = (
+                self.inputs["Label"].editable
+                and f", text={self.inputs['Label'].get_code()}"
+                or ""
+            )
+            toggle = (
+                self.inputs["Toggle Button"].editable
+                and f", toggle={self.inputs['Toggle Button'].get_code()}"
+                or ""
+            )
+            emboss = (
+                self.inputs["Emboss"].editable
+                and f", emboss={self.inputs['Emboss'].get_code()}"
+                or ""
+            )
+            invert = (
+                self.inputs["Invert"].editable
+                and f", invert_checkbox={self.inputs['Invert'].get_code()}"
+                or ""
+            )
             self.code = f"""
-                {layout}.prop({parent}, "{identifier}")
+                {layout}.prop({parent}, "{identifier}"{label}{toggle}{emboss}{invert})
                 {self.outputs["Interface"].get_code(4)}
             """
         else:
