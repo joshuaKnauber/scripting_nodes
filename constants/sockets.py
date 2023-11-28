@@ -2,6 +2,7 @@ from ..core.sockets.data.DataSocket import SNA_DataSocket
 from ..core.sockets.data.BooleanSocket import SNA_BooleanSocket
 from ..core.sockets.data.FloatSocket import SNA_FloatSocket
 from ..core.sockets.data.IntSocket import SNA_IntSocket
+from ..core.sockets.data.IconSocket import SNA_IconSocket
 from ..core.sockets.data.FloatVectorSocket import SNA_FloatVectorSocket
 from ..core.sockets.data.PropertySocket import SNA_PropertySocket
 from ..core.sockets.data.StringSocket import SNA_StringSocket
@@ -21,6 +22,7 @@ ENUM = SNA_EnumSocket.bl_idname
 BOOLEAN = SNA_BooleanSocket.bl_idname
 FLOAT = SNA_FloatSocket.bl_idname
 INT = SNA_IntSocket.bl_idname
+ICON = SNA_IconSocket.bl_idname
 FLOAT_VECTOR = SNA_FloatVectorSocket.bl_idname
 LIST = SNA_ListSocket.bl_idname
 DICT = SNA_DictSocket.bl_idname
@@ -36,7 +38,8 @@ SOCKET_NAMES = {
     ENUM: "Enum",
     BOOLEAN: "Boolean",
     FLOAT: "Float",
-    INT: "Int",
+    INT: "Integer",
+    ICON: "Icon",
     FLOAT_VECTOR: "Float Vector",
     LIST: "List",
     DICT: "Dictionary",

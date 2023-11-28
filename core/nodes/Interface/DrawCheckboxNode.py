@@ -13,7 +13,7 @@ class SNA_NodeDrawCheckbox(SNA_BaseNode, bpy.types.Node):
         self.add_input(sockets.PROPERTY, "Boolean Property")
         inp = self.add_input(sockets.STRING, "Label")
         inp.make_disabled()
-        inp = self.add_input(sockets.INT, "Icon")
+        inp = self.add_input(sockets.ICON)
         inp.make_disabled()
         inp = self.add_input(sockets.BOOLEAN, "Toggle Button")
         inp.make_disabled()
@@ -53,8 +53,13 @@ class SNA_NodeDrawCheckbox(SNA_BaseNode, bpy.types.Node):
                 and f", invert_checkbox={self.inputs['Invert'].get_code()}"
                 or ""
             )
+            icon = (
+                self.inputs["Icon"].editable
+                and f", {self.inputs['Icon'].get_code()}"
+                or ""
+            )
             self.code = f"""
-                {layout}.prop({parent}, "{identifier}"{label}{toggle}{emboss}{invert})
+                {layout}.prop({parent}, "{identifier}"{label}{toggle}{emboss}{invert}{icon})
                 {self.outputs["Interface"].get_code(4)}
             """
         else:
