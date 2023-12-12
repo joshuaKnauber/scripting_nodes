@@ -33,6 +33,19 @@ class SNA_OT_AddDynamicSocket(bpy.types.Operator):
         return context.window_manager.invoke_popup(self, width=150)
 
 
+def insert_dynamic_socket(socket, above):
+    # TODO fix
+    new_socket = add_socket(
+        socket.node, socket.bl_idname, socket.name, socket.is_output
+    )
+    new_socket.dynamic = True
+    new_index = socket.index if above else socket.index + 1
+    if socket.is_output:
+        socket.node.outputs.move(len(socket.node.outputs) - 1, new_index)
+    else:
+        socket.node.inputs.move(len(socket.node.inputs) - 1, new_index)
+
+
 class SNA_OT_AddDynamicSocketRun(bpy.types.Operator):
     bl_idname = "sna.add_dynamic_socket_run"
     bl_label = "Add Dynamic Socket"
@@ -51,13 +64,7 @@ class SNA_OT_AddDynamicSocketRun(bpy.types.Operator):
                 if not self.is_output
                 else node.outputs[self.index]
             )
-            new_socket = add_socket(node, socket.bl_idname, socket.name, self.is_output)
-            new_socket.dynamic = True
-            new_index = self.index if self.above else self.index + 1
-            if self.is_output:
-                node.outputs.move(len(node.outputs) - 1, new_index)
-            else:
-                node.inputs.move(len(node.inputs) - 1, new_index)
+            insert_dynamic_socket(socket, self.above)
             node.mark_dirty()
         return {"FINISHED"}
 

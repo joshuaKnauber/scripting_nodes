@@ -13,7 +13,9 @@ class SNA_NodeGetProperty(SNA_BaseNode, bpy.types.Node):
     bl_label = "Get Property"
 
     property_type: bpy.props.EnumProperty(
-        items=properties.property_type_items, update=lambda self, _: self.mark_dirty()
+        name="Property Type",
+        items=properties.property_type_items,
+        update=lambda self, _: self.mark_dirty(),
     )
     selected_property: bpy.props.PointerProperty(
         type=NodePointer,

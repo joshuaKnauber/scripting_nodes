@@ -70,3 +70,9 @@ def is_only_with_name(node: bpy.types.Node, socket: bpy.types.NodeSocket) -> boo
     """Returns True if the socket is the only one with its name"""
     sockets = node.outputs if socket.is_output else node.inputs
     return len([s for s in sockets if s.name == socket.name]) == 1
+
+
+def is_last_with_name(node: bpy.types.Node, socket: bpy.types.NodeSocket) -> bool:
+    """Returns True if the socket is the last one with its name"""
+    sockets = node.outputs if socket.is_output else node.inputs
+    return len([s for s in sockets if s.name == socket.name]) == socket.index + 1

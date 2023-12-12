@@ -8,7 +8,7 @@ from ..base_node import SNA_BaseNode
 class SNA_NodeBoolProperty(SNA_BaseNode, bpy.types.Node):
     bl_idname = "SNA_NodeBoolProperty"
     bl_label = "Boolean Property"
-    bl_width_default = 150
+    bl_width_default = 200
 
     source_type: bpy.props.EnumProperty(
         name="Source",
@@ -21,11 +21,23 @@ class SNA_NodeBoolProperty(SNA_BaseNode, bpy.types.Node):
     def on_create(self):
         self.name = "New Boolean"
 
-        self.add_output(sockets.EXECUTE, "On Update")
-        self.add_output(sockets.PROPERTY, "Updated Property")
-        self.add_output(sockets.BOOLEAN, "Updated Value")
+        inp = self.add_input(sockets.EXECUTE, "Property Group")
+        inp.make_disabled()
+        # self.add_output(sockets.EXECUTE, "On Update")
+        # self.add_output(sockets.PROPERTY, "Updated Property")
+        # self.add_output(sockets.BOOLEAN, "Updated Value")
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
+        layout.separator()
+        row = layout.row(align=True)
+        row.scale_y = 1.2
+        op = row.operator("sna.property_getter", text="Get", icon="SORT_DESC")
+        op.node = self.id
+        op.property_type = "BOOLEAN"
+        op = row.operator("sna.property_getter", text="Set", icon="SORT_ASC")
+        op.node = self.id
+        op.property_type = "BOOLEAN"
+        layout.separator(factor=0.6)
         row = layout.row()
         row.prop(self, "name", text="")
         row.operator(
@@ -37,7 +49,11 @@ class SNA_NodeBoolProperty(SNA_BaseNode, bpy.types.Node):
         return f"prop_{self.id}"  # TODO better identifier
 
     def generate(self, context, trigger):
-        self.require_register = True
+        has_group = (
+            self.inputs["Property Group"].editable
+            and self.inputs["Property Group"].has_next()
+        )
+        self.require_register = not has_group
 
         update = ""
         if self.outputs["On Update"].has_next():

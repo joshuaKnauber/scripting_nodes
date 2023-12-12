@@ -115,7 +115,7 @@ def draw_node_menu(self, context: bpy.types.Context):
     layout = self.layout
     layout.enabled = in_sn_tree(context)
     for cat in sorted(categories.keys()):
-        if not cat in blocklist and not cat == "Group":
+        if not cat in blocklist and not cat in ["Group", "Layout"]:
             layout.menu(
                 "SNA_MT_category_" + cat.replace(" ", "_"),
                 text=cat.replace("_", " ").title(),

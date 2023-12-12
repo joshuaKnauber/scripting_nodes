@@ -28,15 +28,7 @@ class SNA_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
 
     def draw_socket(self, context, layout, node, text):
         if not self.is_output:
-            if self.show_editable:
-                layout.prop(
-                    self,
-                    "editable",
-                    text="",
-                    icon="HIDE_OFF" if self.editable else "HIDE_ON",
-                    emboss=False,
-                )
-            if self.editable and not self.is_linked:
+            if not self.is_linked:
                 if self.value_named:
                     op = layout.operator(
                         "sna.select_icon", text="Icon", icon=self.value_named

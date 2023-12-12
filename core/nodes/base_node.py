@@ -3,11 +3,13 @@ import time
 
 import bpy
 
+
+from ..sockets.socket_ops import insert_dynamic_socket
 from ..sockets.base_socket import ScriptingSocket
 from ...core.node_tree.node_tree import ScriptingNodeTree
 from ...core.nodes.utils.references import get_references_to_node
 from ...core.utils.links import has_link_updates, revalidate_links
-from ...core.utils.sockets import add_socket, convert_socket_type
+from ...core.utils.sockets import add_socket, convert_socket_type, is_last_with_name
 from ...interface.overlays.nodes.node_overlays import set_node_error, set_node_time
 from ...utils import logger
 from ...utils.code import normalize_indents
@@ -121,8 +123,18 @@ class SNA_BaseNode(bpy.types.Node):
             lambda: revalidate_links(self.node_tree), first_interval=0.025
         )
 
+    def _add_dynamic_sockets(self):
+        """Adds dynamic sockets if the last socket is linked"""
+        for out in self.outputs:
+            if out.dynamic and out.is_linked and is_last_with_name(self, out):
+                insert_dynamic_socket(out, False)
+        for inp in self.inputs:
+            if inp.dynamic and inp.is_linked and is_last_with_name(self, inp):
+                insert_dynamic_socket(inp, False)
+
     def update_links(self):
         """Called on link updates"""
+        self._add_dynamic_sockets()
         self.mark_dirty()
 
     def get_code(self):

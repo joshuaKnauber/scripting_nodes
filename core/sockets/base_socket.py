@@ -51,10 +51,47 @@ class ScriptingSocket:
     def draw(self, context, layout, node, text):
         row = layout.row(align=False)
         row.alignment = "EXPAND" if not self.is_output else "RIGHT"
+        # draw socket code
         if context.scene.sna.show_socket_code and self.node.select:
             row.label(text=self.get_code())
+        # draw socket interface
         else:
-            self.draw_socket(context, row, node, text)
+            # draw main output interface
+            if self.is_output:
+                self.draw_socket(context, row, node, text)
+            # draw dynamic interface
+            if self.dynamic:
+                subrow = row.row(align=True)
+                op = subrow.operator(
+                    "sna.add_dynamic_socket", text="", emboss=False, icon="ADD"
+                )
+                op.node = node.id
+                op.is_output = self.is_output
+                op.index = self.index
+                if not sockets.is_only_with_name(self.node, self):
+                    op = subrow.operator(
+                        "sna.remove_socket", text="", emboss=False, icon="REMOVE"
+                    )
+                    op.node = node.id
+                    op.is_output = self.is_output
+                    op.index = self.index
+            # draw hide/show interface
+            if not self.is_output:
+                if self.show_editable:
+                    row.prop(
+                        self,
+                        "editable",
+                        text="",
+                        icon="HIDE_OFF" if self.editable else "HIDE_ON",
+                        emboss=False,
+                    )
+                    if self.editable and not self.is_linked:
+                        # draw main input interface
+                        self.draw_socket(context, row, node, text)
+                    else:
+                        row.label(text=text)
+                else:
+                    self.draw_socket(context, row, node, text)
 
     # callback for drawing the socket
     def draw_socket(self, context, layout, node, text):

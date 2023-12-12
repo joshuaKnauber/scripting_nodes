@@ -7,6 +7,7 @@ from ..base_node import SNA_BaseNode
 class SNA_NodePropertyGroup(SNA_BaseNode, bpy.types.Node):
     bl_idname = "SNA_NodePropertyGroup"
     bl_label = "Property Group"
+    bl_width_default = 200
 
     name: bpy.props.StringProperty(
         name="Name",
@@ -15,7 +16,8 @@ class SNA_NodePropertyGroup(SNA_BaseNode, bpy.types.Node):
     )
 
     def on_create(self):
-        self.add_output(sockets.PROPERTY, "Property Group")
+        out = self.add_output(sockets.EXECUTE, "Property Group")
+        out.dynamic = True
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         layout.prop(self, "name", text="")
