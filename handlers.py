@@ -1,5 +1,6 @@
 import bpy
 from bpy.app.handlers import persistent
+import atexit
 
 from .addon.info.info_properties import reset_addon_info_has_changes
 from .core.builder import builder, watcher
@@ -10,14 +11,33 @@ from .msgbus import subscribe_to_name_change
 
 def register():
     bpy.app.handlers.load_post.append(load_handler)
+    bpy.app.handlers.load_pre.append(load_pre_handler)
     bpy.app.handlers.depsgraph_update_post.append(depsgraph_handler)
+    atexit.register(on_exit)
 
 
 def unregister():
     bpy.app.handlers.load_post.remove(load_handler)
+    bpy.app.handlers.load_pre.remove(load_pre_handler)
     bpy.app.handlers.depsgraph_update_post.remove(depsgraph_handler)
     bpy.types.SpaceNodeEditor.draw_handler_remove(draw_errors, "WINDOW")
     bpy.types.SpaceNodeEditor.draw_handler_remove(draw_node_overlays, "WINDOW")
+    atexit.unregister(on_exit)
+
+
+def on_exit():
+    if bpy.context.scene.sna.info.persist_sessions:
+        builder.build_addon(builder._get_addons_dir(), True)
+    else:
+        builder.remove_addon()
+
+
+@persistent
+def load_pre_handler(dummy):
+    if bpy.context.scene.sna.info.persist_sessions:
+        builder.build_addon(builder._get_addons_dir(), True)
+    else:
+        builder.remove_addon()
 
 
 @persistent

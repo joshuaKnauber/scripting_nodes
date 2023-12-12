@@ -12,7 +12,8 @@ from ...utils.code import normalize_indents
 from ...utils import autopep8
 
 
-def build_addon(base_dir: str = None) -> str:
+def build_addon(base_dir: str = None, is_prod: bool = False) -> str:
+    # TODO prod build
     if not base_dir:
         base_dir = _get_addons_dir()
     if not _has_addon():
@@ -22,14 +23,24 @@ def build_addon(base_dir: str = None) -> str:
     return get_addon_dir(base_dir)
 
 
+def remove_addon():
+    _unregister_modules()
+    _reset_addon_dir(_get_addons_dir())
+    shutil.rmtree(get_addon_dir(_get_addons_dir()))
+
+
 def _reload_addon():
     t1 = time.time()
+    _unregister_modules()
+    addon_utils.enable("test_addon")
+    logger.info(f"Addon reloaded in {round(time.time() - t1, 4)}s")
+
+
+def _unregister_modules():
     addon_utils.disable("test_addon")
     for name in list(sys.modules.keys()):
         if name.startswith("test_addon"):
             del sys.modules[name]
-    addon_utils.enable("test_addon")
-    logger.info(f"Addon reloaded in {round(time.time() - t1, 4)}s")
 
 
 def _has_addon():
