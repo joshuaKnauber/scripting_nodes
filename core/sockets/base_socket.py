@@ -9,8 +9,40 @@ from .data.convert import convert_types
 
 class ScriptingSocket:
     is_sn_socket = True
-
     initialized: bpy.props.BoolProperty(default=False)
+
+    ### Socket Properties ###
+
+    dynamic: bpy.props.BoolProperty(
+        default=False,
+        name="Dynamic",
+        description="Enable or disable this socket",
+    )
+
+    @property
+    def index(self):
+        for i, sock in enumerate(
+            self.node.outputs if self.is_output else self.node.inputs
+        ):
+            if sock == self:
+                return i
+        return -1
+
+    ### SOCKET LIFE CYCLE ###
+
+    def init(self):
+        self.on_create(bpy.context)
+
+    # callback for when the socket is created
+    def on_create(self, context):
+        return
+
+    def __init__(self):
+        if not self.initialized:
+            self.init()
+            self.initialized = True
+
+    ### HIDE SOCKET ###
 
     editable: bpy.props.BoolProperty(
         default=True,
@@ -22,12 +54,6 @@ class ScriptingSocket:
         default=False, name="Show Enabled", description="Show the enable icon"
     )
 
-    dynamic: bpy.props.BoolProperty(
-        default=False,
-        name="Dynamic",
-        description="Enable or disable this socket",
-    )
-
     def make_disabled(self):
         self.show_editable = True
         self.editable = False
@@ -36,79 +62,7 @@ class ScriptingSocket:
         self.show_editable = True
         self.editable = True
 
-    def __init__(self):
-        if not self.initialized:
-            self.init()
-            self.initialized = True
-
-    def init(self):
-        self.on_create(bpy.context)
-
-    # callback for when the socket is created
-    def on_create(self, context):
-        return
-
-    def draw(self, context, layout, node, text):
-        row = layout.row(align=False)
-        row.alignment = "EXPAND" if not self.is_output else "RIGHT"
-        # draw socket code
-        if context.scene.sna.show_socket_code and self.node.select:
-            row.label(text=self.get_code())
-        # draw socket interface
-        else:
-            # draw main output interface
-            if self.is_output:
-                self.draw_socket(context, row, node, text)
-            # draw dynamic interface
-            if self.dynamic:
-                subrow = row.row(align=True)
-                op = subrow.operator(
-                    "sna.add_dynamic_socket", text="", emboss=False, icon="ADD"
-                )
-                op.node = node.id
-                op.is_output = self.is_output
-                op.index = self.index
-                if not sockets.is_only_with_name(self.node, self):
-                    op = subrow.operator(
-                        "sna.remove_socket", text="", emboss=False, icon="REMOVE"
-                    )
-                    op.node = node.id
-                    op.is_output = self.is_output
-                    op.index = self.index
-            # draw hide/show interface
-            if not self.is_output:
-                if self.show_editable:
-                    row.prop(
-                        self,
-                        "editable",
-                        text="",
-                        icon="HIDE_OFF" if self.editable else "HIDE_ON",
-                        emboss=False,
-                    )
-                    if self.editable and not self.is_linked:
-                        # draw main input interface
-                        self.draw_socket(context, row, node, text)
-                    else:
-                        row.label(text=text)
-                else:
-                    self.draw_socket(context, row, node, text)
-
-    # callback for drawing the socket
-    def draw_socket(self, context, layout, node, text):
-        raise NotImplementedError
-
-    @classmethod
-    def draw_color_simple(cls):
-        return cls.get_color(None, None, None)
-
-    def draw_color(self, context: bpy.types.Context, node: bpy.types.Node):
-        col = self.get_color(context, node)
-        enabled = self.editable or not self.show_editable
-        color = [col[0], col[1], col[2], 1.0 if enabled else 0.5]
-        return color
-
-    def get_color(self, context, node):
-        raise NotImplementedError
+    ### SOCKET CONNECTIONS ###
 
     def has_next(self) -> bool:
         """Returns a boolean saying if the node is connected to other valid sockets"""
@@ -117,6 +71,8 @@ class ScriptingSocket:
     def get_next(self) -> list[bpy.types.NodeSocket]:
         """Returns a list of all valid connected sockets"""
         return sockets.get_next_sockets(self)
+
+    ### SOCKET CODE ###
 
     def _python_value(self):
         raise NotImplementedError
@@ -194,11 +150,66 @@ class ScriptingSocket:
             return meta[key]
         return fallback
 
-    @property
-    def index(self):
-        for i, sock in enumerate(
-            self.node.outputs if self.is_output else self.node.inputs
-        ):
-            if sock == self:
-                return i
-        return -1
+    ### SOCKET UI ###
+
+    def draw(self, context, layout, node, text):
+        row = layout.row(align=False)
+        row.alignment = "EXPAND" if not self.is_output else "RIGHT"
+        # draw socket code
+        if context.scene.sna.show_socket_code and self.node.select:
+            row.label(text=self.get_code())
+        # draw socket interface
+        else:
+            # draw main output interface
+            if self.is_output:
+                self.draw_socket(context, row, node, text)
+            # draw dynamic interface
+            if self.dynamic:
+                subrow = row.row(align=True)
+                op = subrow.operator(
+                    "sna.add_dynamic_socket", text="", emboss=False, icon="ADD"
+                )
+                op.node = node.id
+                op.is_output = self.is_output
+                op.index = self.index
+                if not sockets.is_only_with_name(self.node, self):
+                    op = subrow.operator(
+                        "sna.remove_socket", text="", emboss=False, icon="REMOVE"
+                    )
+                    op.node = node.id
+                    op.is_output = self.is_output
+                    op.index = self.index
+            # draw hide/show interface
+            if not self.is_output:
+                if self.show_editable:
+                    row.prop(
+                        self,
+                        "editable",
+                        text="",
+                        icon="HIDE_OFF" if self.editable else "HIDE_ON",
+                        emboss=False,
+                    )
+                    if self.editable and not self.is_linked:
+                        # draw main input interface
+                        self.draw_socket(context, row, node, text)
+                    else:
+                        row.label(text=text)
+                else:
+                    self.draw_socket(context, row, node, text)
+
+    # callback for drawing the socket
+    def draw_socket(self, context, layout, node, text):
+        raise NotImplementedError
+
+    @classmethod
+    def draw_color_simple(cls):
+        return cls.get_color(None, None, None)
+
+    def draw_color(self, context: bpy.types.Context, node: bpy.types.Node):
+        col = self.get_color(context, node)
+        enabled = self.editable or not self.show_editable
+        color = [col[0], col[1], col[2], 1.0 if enabled else 0.5]
+        return color
+
+    def get_color(self, context, node):
+        raise NotImplementedError
