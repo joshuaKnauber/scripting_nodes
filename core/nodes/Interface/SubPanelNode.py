@@ -196,3 +196,34 @@ class SNA_NodeSubpanel(SNA_BaseNode, bpy.types.Node):
 
         self.outputs["Header"].set_meta("layout", "self.layout")
         self.outputs["Interface"].set_meta("layout", "self.layout")
+
+
+def draw_settings(layout: bpy.types.UILayout, node: bpy.types.Node):
+    layout.prop(node, "title")
+    layout.separator()
+    row = layout.row()
+    row.prop(node, "default_closed")
+    row.prop(node, "hide_header")
+    row = layout.row()
+    row.prop(node, "expand_header")
+    row.prop(node, "order")
+    layout.separator()
+    layout.prop(node, "origin")
+    if node.origin == "BLENDER":
+        layout.separator()
+        box = layout.box()
+        box.prop(
+            node,
+            "expand_internals",
+            text="Internal Settings",
+            icon="TRIA_DOWN" if node.expand_internals else "TRIA_RIGHT",
+            emboss=False,
+        )
+        if node.expand_internals:
+            box.prop(node, "blender_panel")
+            row = box.row()
+            row.prop(node, "blender_space")
+            row.prop(node, "blender_region")
+            row = box.row()
+            row.prop(node, "blender_category")
+            row.prop(node, "blender_context")

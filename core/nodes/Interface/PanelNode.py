@@ -134,3 +134,30 @@ class SNA_NodePanel(SNA_BaseNode, bpy.types.Node):
 
         self.outputs["Interface"].set_meta("layout", "self.layout")
         self.outputs["Header"].set_meta("layout", "self.layout")
+
+
+def draw_settings(layout: bpy.types.UILayout, node: bpy.types.Node):
+    layout.prop(node, "title")
+    layout.separator()
+    row = layout.row()
+    row.prop(node, "default_closed")
+    row.prop(node, "hide_header")
+    row = layout.row()
+    row.prop(node, "expand_header")
+    row.prop(node, "order")
+    layout.separator()
+    box = layout.box()
+    box.prop(
+        node,
+        "expand_internals",
+        text="Internal Settings",
+        icon="TRIA_DOWN" if node.expand_internals else "TRIA_RIGHT",
+        emboss=False,
+    )
+    if node.expand_internals:
+        row = box.row()
+        row.prop(node, "space")
+        row.prop(node, "region")
+        row = box.row()
+        row.prop(node, "category")
+        row.prop(node, "context")

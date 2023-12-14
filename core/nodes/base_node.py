@@ -29,26 +29,6 @@ class SNA_BaseNode(bpy.types.Node):
         default="", name="ID", description="Unique ID of the node"
     )
 
-    def _start_was_registered(self):
-        global _LAST_UPDATED
-        _LAST_UPDATED.add(self.id)
-        redraw.redraw(True)
-        bpy.app.timers.register(
-            functools.partial(self._finish_was_registered, self.id), first_interval=1
-        )
-
-    def _finish_was_registered(self, id):
-        global _LAST_UPDATED
-        if id in _LAST_UPDATED:
-            _LAST_UPDATED.remove(id)
-        redraw.redraw(True)
-
-    expand_internals: bpy.props.BoolProperty(
-        default=False, name="Expand Internals", description="Expand internal properties"
-    )
-
-    pause_updates: bpy.props.BoolProperty(default=False, name="Pause Updates")
-
     @classmethod
     def poll(cls, ntree):
         """Checks if the node is valid"""
@@ -62,6 +42,16 @@ class SNA_BaseNode(bpy.types.Node):
     def node_tree(self):
         """Returns the node tree this node lives in"""
         return self.id_data
+
+    ### NODE PROPERTIES ###
+
+    expand_internals: bpy.props.BoolProperty(
+        default=False, name="Expand Internals", description="Expand internal properties"
+    )
+
+    pause_updates: bpy.props.BoolProperty(default=False, name="Pause Updates")
+
+    ### NODE LIFE CYCLE ###
 
     def init(self, context: bpy.types.Context):
         """Called when the node is created"""
@@ -97,6 +87,12 @@ class SNA_BaseNode(bpy.types.Node):
     # Callback for when the node is deleted
     def on_delete(self):
         return
+
+    def on_reference_update(self, node: bpy.types.Node):
+        """Called on updates when a node is referenced by this node. Overrite this in nodes to handle updates"""
+        self.mark_dirty()
+
+    ### NODE SOCKETS ###
 
     def add_input(self, idname: str, name: str = "") -> ScriptingSocket:
         """Adds an input socket to the node"""
@@ -136,6 +132,15 @@ class SNA_BaseNode(bpy.types.Node):
         """Called on link updates"""
         self._add_dynamic_sockets()
         self.mark_dirty()
+
+    def _sockets_initialized(self):
+        """Returns a boolean saying if all sockets are initialized"""
+        for socket in [*self.inputs, *self.outputs]:
+            if not socket.initialized:
+                return False
+        return True
+
+    ### NODE CODE ###
 
     def get_code(self):
         return self.get("code", "")
@@ -188,19 +193,8 @@ class SNA_BaseNode(bpy.types.Node):
             code += socket.get_code()
         return code
 
-    def _sockets_initialized(self):
-        """Returns a boolean saying if all sockets are initialized"""
-        for socket in [*self.inputs, *self.outputs]:
-            if not socket.initialized:
-                return False
-        return True
-
     def generate(self, context: bpy.types.Context, trigger: bpy.types.Node):
         """Generates the code for the node. Overwrite this in nodes by setting the self.code... properties"""
-
-    def on_reference_update(self, node: bpy.types.Node):
-        """Called on updates when a node is referenced by this node. Overrite this in nodes to handle updates"""
-        self.mark_dirty()
 
     def mark_dirty(self, trigger: bpy.types.Node = None, retried: bool = False):
         """Called when the node changes. Forwards the update to the node tree if something has changed. Retries when the node is not ready"""
@@ -260,6 +254,22 @@ class SNA_BaseNode(bpy.types.Node):
             logger.error(f"Error in node '{self.name}'")  # TODO
             set_node_error(self.id, str(e))
         set_node_time(self.id, (time.time() - t1) * 1000)
+
+    ### Node UI ###
+
+    def _start_was_registered(self):
+        global _LAST_UPDATED
+        _LAST_UPDATED.add(self.id)
+        redraw.redraw(True)
+        bpy.app.timers.register(
+            functools.partial(self._finish_was_registered, self.id), first_interval=1
+        )
+
+    def _finish_was_registered(self, id):
+        global _LAST_UPDATED
+        if id in _LAST_UPDATED:
+            _LAST_UPDATED.remove(id)
+        redraw.redraw(True)
 
     def draw_buttons(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         """Draws the buttons on the node"""
