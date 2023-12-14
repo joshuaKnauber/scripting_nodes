@@ -1,8 +1,17 @@
 import bpy
 
+from .names_generator import generate_name
+
 
 def reset_addon_info_has_changes():
     bpy.context.scene.sna.info.has_changes = False
+
+
+def initialize_addon_info():
+    sna = bpy.context.scene.sna
+    if not sna.info.initialized:
+        sna.info.name = generate_name(style="capital") + " Addon"
+        sna.info.initialized = True
 
 
 class SNA_AddonInfoProperties(bpy.types.PropertyGroup):
@@ -10,6 +19,8 @@ class SNA_AddonInfoProperties(bpy.types.PropertyGroup):
         self.has_changes = True
 
     has_changes: bpy.props.BoolProperty(default=False)
+
+    initialized: bpy.props.BoolProperty(default=False)
 
     name: bpy.props.StringProperty(
         default="New Addon",
@@ -129,13 +140,19 @@ class SNA_AddonInfoProperties(bpy.types.PropertyGroup):
         update=update_changes,
     )
 
+    @property
+    def module_name(self):
+        if self.use_custom_module_name:
+            return self.custom_module_name
+        return self.name.lower().replace(" ", "_")
+
     use_custom_module_name: bpy.props.BoolProperty(
         default=False,
         name="Use Custom Identifier",
         description="Use a custom identifier for the addon",
     )
 
-    module_name: bpy.props.StringProperty(
+    custom_module_name: bpy.props.StringProperty(
         default="new_addon",
         name="Addon Identifier",
         description="The identifier of the addon",

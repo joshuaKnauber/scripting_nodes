@@ -16,7 +16,7 @@ def build_addon(base_dir: str = None, is_prod: bool = False) -> str:
     # TODO prod build
     if not base_dir:
         base_dir = _get_addons_dir()
-    if not _has_addon():
+    if not has_addon():
         return
     _prepare_addon_dir(base_dir)
     _reload_addon()
@@ -32,18 +32,18 @@ def remove_addon():
 def _reload_addon():
     t1 = time.time()
     _unregister_modules()
-    addon_utils.enable("test_addon")
+    addon_utils.enable(_module(), default_set=True, persistent=True)
     logger.info(f"Addon reloaded in {round(time.time() - t1, 4)}s")
 
 
 def _unregister_modules():
-    addon_utils.disable("test_addon")
+    addon_utils.disable(_module())
     for name in list(sys.modules.keys()):
-        if name.startswith("test_addon"):
+        if name.startswith(_module()):
             del sys.modules[name]
 
 
-def _has_addon():
+def has_addon():
     """Returns if the file contains a scripting nodes addon"""
     for ntree in bpy.data.node_groups:
         if getattr(ntree, "is_sn_ntree", False):
@@ -181,9 +181,14 @@ def _reset_addon_dir(base_dir: str):
 
 def get_addon_dir(base_dir: str):
     """Returns the addon directory"""
-    return os.path.join(base_dir, "test_addon")
+    return os.path.join(base_dir, _module())
 
 
 def _get_addons_dir():
     """Returns the addons directory"""
     return os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
+
+def _module():
+    """Returns the module name for this addon"""
+    return bpy.context.scene.sna.info.module_name

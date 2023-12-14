@@ -112,7 +112,7 @@ class SNA_PT_AddonDetailsPanel(bpy.types.Panel):
         row.prop(sna.info, "use_custom_module_name", text="")
         subrow = row.row()
         subrow.enabled = sna.info.use_custom_module_name
-        subrow.prop(sna.info, "module_name", text="")
+        subrow.prop(sna.info, "custom_module_name", text="")
 
         row = col.row(heading="Shorthand")
         row.prop(sna.info, "use_custom_shorthand", text="")

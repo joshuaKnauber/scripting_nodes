@@ -2,7 +2,10 @@ import bpy
 from bpy.app.handlers import persistent
 import atexit
 
-from .addon.info.info_properties import reset_addon_info_has_changes
+from .addon.info.info_properties import (
+    initialize_addon_info,
+    reset_addon_info_has_changes,
+)
 from .core.builder import builder, watcher
 from .interface.overlays.errors.error_drawing import draw_errors
 from .interface.overlays.nodes.node_overlays import draw_node_overlays
@@ -20,12 +23,20 @@ def unregister():
     bpy.app.handlers.load_post.remove(load_handler)
     bpy.app.handlers.load_pre.remove(load_pre_handler)
     bpy.app.handlers.depsgraph_update_post.remove(depsgraph_handler)
-    bpy.types.SpaceNodeEditor.draw_handler_remove(draw_errors, "WINDOW")
-    bpy.types.SpaceNodeEditor.draw_handler_remove(draw_node_overlays, "WINDOW")
+    try:
+        bpy.types.SpaceNodeEditor.draw_handler_remove(draw_errors, "WINDOW")
+    except:
+        pass
+    try:
+        bpy.types.SpaceNodeEditor.draw_handler_remove(draw_node_overlays, "WINDOW")
+    except:
+        pass
     atexit.unregister(on_exit)
 
 
-def on_exit():
+def on_exit():  # TODO not running
+    if not builder.has_addon():
+        return
     if bpy.context.scene.sna.info.persist_sessions:
         builder.build_addon(builder._get_addons_dir(), True)
     else:
@@ -34,6 +45,8 @@ def on_exit():
 
 @persistent
 def load_pre_handler(dummy):
+    if not builder.has_addon():
+        return
     if bpy.context.scene.sna.info.persist_sessions:
         builder.build_addon(builder._get_addons_dir(), True)
     else:
@@ -42,6 +55,7 @@ def load_pre_handler(dummy):
 
 @persistent
 def load_handler(dummy):
+    initialize_addon_info()
     subscribe_to_name_change()
     reset_addon_info_has_changes()
     builder.build_addon()
