@@ -23,12 +23,12 @@ class VariableReferenceTemplate:
 
     def on_variable_update_input(self, node: SNA_NodeLocalVariable):
         self.convert_socket(
-            self.inputs["Value"], sockets.VARIABLE_SOCKETS[node.variable_type]
+            self.inputs["Value"], sockets.SOCKET_IDNAMES[node.variable_type]
         )
 
     def on_variable_update_output(self, node: SNA_NodeLocalVariable):
         self.convert_socket(
-            self.outputs["Value"], sockets.VARIABLE_SOCKETS[node.variable_type]
+            self.outputs["Value"], sockets.SOCKET_IDNAMES[node.variable_type]
         )
 
     def draw_variable_selection(

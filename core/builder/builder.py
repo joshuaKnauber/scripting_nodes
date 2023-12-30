@@ -8,38 +8,137 @@ import addon_utils
 import bpy
 
 from ...utils import logger
-from ...utils.code import normalize_indents
+from ...utils.code import minimize_indents
 from ...utils import autopep8
 
 
-def build_addon(base_dir: str = None, is_prod: bool = False) -> str:
-    # TODO prod build
-    if not base_dir:
-        base_dir = _get_addons_dir()
-    if not has_addon():
+IS_PROD_BUILD = False  # This is True while a production build is running
+
+
+def build_addon(base_dir: str = None, prod_build: bool = False, module: str = None):
+    if not has_addon() or not module:
         return
-    _prepare_addon_dir(base_dir)
-    _reload_addon()
-    return get_addon_dir(base_dir)
+
+    global IS_PROD_BUILD
+    IS_PROD_BUILD = prod_build
+    sn = bpy.context.scene.sna
+
+    try:
+        if module != dev_module():
+            store_prod_module_name(module)
+
+        if sn.last_build_was_prod != prod_build:
+            reload_node_code()
+            sn.last_build_was_prod = prod_build
+
+        _prepare_addon_dir(_get_addons_dir() if not base_dir else base_dir, module)
+        _reload_addon(module)
+    except Exception as e:
+        logger.error("Failed to build addon")
+        logger.error(e)
+    finally:
+        IS_PROD_BUILD = False
+        build_complete_msg(prod_build)
 
 
-def remove_addon():
-    _unregister_modules()
-    _reset_addon_dir(_get_addons_dir())
-    shutil.rmtree(get_addon_dir(_get_addons_dir()))
+def reload_node_code():
+    """Reloads the code for all nodes. Call this before switching from or too production mode"""
+    for ntree in bpy.data.node_groups:
+        if getattr(ntree, "is_sn_ntree", False):
+            for node in ntree.nodes:
+                if getattr(node, "is_sn_node", False):
+                    node.mark_dirty()
 
 
-def _reload_addon():
+def remove_addon(module: str):
+    remove_prod_module_name(module)
+    addon_dir = get_addon_dir(_get_addons_dir(), module)
+    if not os.path.exists(addon_dir):
+        return
+
+    _unregister_modules(module)
+    _reset_addon_dir(_get_addons_dir(), module)
+    shutil.rmtree(get_addon_dir(_get_addons_dir(), module))
+    addon_utils.modules_refresh()
+
+
+def _reload_addon(module: str):
     t1 = time.time()
-    _unregister_modules()
-    addon_utils.enable(_module(), default_set=True, persistent=True)
+    _unregister_modules(module)
+    addon_utils.enable(module, default_set=True, persistent=True)
     logger.info(f"Addon reloaded in {round(time.time() - t1, 4)}s")
 
 
-def _unregister_modules():
-    addon_utils.disable(_module())
+def has_module(module: str):
+    for mod in addon_utils.modules():
+        if mod.__name__ == module:
+            return True
+    return False
+
+
+def persisted_modules_path():
+    return os.path.join(os.path.dirname(__file__), "persisted_modules.txt")
+
+
+def store_prod_module_name(module: str):
+    modules = get_stored_prod_modules()
+    if module in modules:
+        return
+    with open(persisted_modules_path(), "a") as write_file:
+        write_file.write(module + "\n")
+
+
+def remove_prod_module_name(module: str):
+    modules = get_stored_prod_modules()
+    if module in modules:
+        modules.remove(module)
+    with open(persisted_modules_path(), "w") as write_file:
+        for mod in modules:
+            write_file.write(mod + "\n")
+
+
+def get_stored_prod_modules():
+    if not os.path.exists(persisted_modules_path()):
+        return []
+    with open(persisted_modules_path(), "r") as read_file:
+        return [*filter(lambda l: l.strip() != "", read_file.read().split("\n"))]
+
+
+def toggle_stored_prod_modules():
+    for mod in get_stored_prod_modules():
+        if mod != module(prod_name=True):
+            enable_module(mod)
+        else:
+            disable_module(mod)
+
+
+def build_complete_msg(prod_build: bool):
+    bpy.context.workspace.status_text_set(
+        "✔️ Build Complete" + " (Production)" if prod_build else " (Development)"
+    )
+    bpy.app.timers.register(
+        lambda: bpy.context.workspace.status_text_set(None), first_interval=1.5
+    )
+
+
+def disable_module(module: str):
+    if not has_module(module):
+        return
+    addon_utils.disable(module, default_set=True)
+
+
+def enable_module(module: str):
+    if not has_module(module):
+        return
+    addon_utils.enable(module, default_set=True, persistent=True)
+
+
+def _unregister_modules(module: str):
+    if not has_module(module):
+        return
+    addon_utils.disable(module)
     for name in list(sys.modules.keys()):
-        if name.startswith(_module()):
+        if name.startswith(module):
             del sys.modules[name]
 
 
@@ -51,19 +150,19 @@ def has_addon():
     return False
 
 
-def _prepare_addon_dir(base_dir: str):
-    _reset_addon_dir(base_dir)
-    _add_dir_structure(base_dir)
-    _add_base_files(base_dir)
+def _prepare_addon_dir(base_dir: str, module: str):
+    _reset_addon_dir(base_dir, module)
+    _add_dir_structure(base_dir, module)
+    _add_base_files(base_dir, module)
     for ntree in bpy.data.node_groups:
         if getattr(ntree, "is_sn_ntree", False):
-            _add_node_tree(base_dir, ntree)
+            _add_node_tree(base_dir, module, ntree)
 
 
-def _add_node_tree(base_dir: str, ntree: bpy.types.NodeTree):
+def _add_node_tree(base_dir: str, module: str, ntree: bpy.types.NodeTree):
     """Adds the given node tree to the given directory"""
     with open(
-        os.path.join(_get_ntree_dir(base_dir), _get_ntree_filename(ntree)), "w"
+        os.path.join(_get_ntree_dir(base_dir, module), _get_ntree_filename(ntree)), "w"
     ) as write_file:
         write_file.write(_ntree_to_code(ntree))
 
@@ -74,17 +173,20 @@ def _get_ntree_filename(ntree: bpy.types.NodeTree):
     return f"{pythonic}.py"
 
 
-def _add_base_files(base_dir: str):
+def _add_base_files(base_dir: str, module: str):
     """Adds the base files to the addon directory"""
     sna = bpy.context.scene.sna
-    basedir = get_addon_dir(base_dir)
+    basedir = get_addon_dir(base_dir, module)
     # add init file
     with open(os.path.join(basedir, "__init__.py"), "w") as write_file:
         with open(
             os.path.join(os.path.dirname(__file__), "templates", "init.txt"), "r"
         ) as read_file:
             text = read_file.read()
-            text = text.replace("$NAME", sna.info.name)
+            if IS_PROD_BUILD:
+                text = text.replace("$NAME", sna.info.name)
+            else:
+                text = text.replace("$NAME", f"{sna.info.name} (Development)")
             text = text.replace("$AUTHOR", sna.info.author)
             text = text.replace("$DESCRIPTION", sna.info.description)
             version = (
@@ -122,7 +224,7 @@ def _ntree_to_code(ntree: bpy.types.NodeTree):
 
     for node in ntree.nodes:
         if getattr(node, "is_sn_node", False) and node.require_register:  # TODO
-            code += normalize_indents(node.code) + "\n"
+            code += minimize_indents(node.code) + "\n"
             if node.code_register:
                 register += "    " + node.code_register + "\n"
             if node.code_unregister:
@@ -135,40 +237,41 @@ def _ntree_to_code(ntree: bpy.types.NodeTree):
     if unregister:
         code += "def unregister():\n"
         code += unregister + "\n"
-
     return autopep8.fix_code(code)
 
 
-def _add_dir_structure(base_dir: str):
+def _add_dir_structure(base_dir: str, module: str):
     """Adds the directory structure to the addon directory"""
     # add addon directory
-    os.mkdir(_get_ntree_dir(base_dir))
-    with open(os.path.join(_get_ntree_dir(base_dir), "__init__.py"), "w") as write_file:
+    os.mkdir(_get_ntree_dir(base_dir, module))
+    with open(
+        os.path.join(_get_ntree_dir(base_dir, module), "__init__.py"), "w"
+    ) as write_file:
         write_file.write("")
     # add assets directory
-    os.mkdir(_get_assets_dir(base_dir))
+    os.mkdir(_get_assets_dir(base_dir, module))
     # add icons directory
-    os.mkdir(_get_icon_dir(base_dir))
+    os.mkdir(_get_icon_dir(base_dir, module))
 
 
-def _get_ntree_dir(base_dir: str):
+def _get_ntree_dir(base_dir: str, module: str):
     """Returns the directory for the given node tree"""
-    return os.path.join(get_addon_dir(base_dir), "addon")
+    return os.path.join(get_addon_dir(base_dir, module), "addon")
 
 
-def _get_assets_dir(base_dir: str):
+def _get_assets_dir(base_dir: str, module: str):
     """Returns the directory for the given node tree"""
-    return os.path.join(get_addon_dir(base_dir), "assets")
+    return os.path.join(get_addon_dir(base_dir, module), "assets")
 
 
-def _get_icon_dir(base_dir: str):
+def _get_icon_dir(base_dir: str, module: str):
     """Returns the directory for the given node tree"""
-    return os.path.join(get_addon_dir(base_dir), "icons")
+    return os.path.join(get_addon_dir(base_dir, module), "icons")
 
 
-def _reset_addon_dir(base_dir: str):
+def _reset_addon_dir(base_dir: str, module: str):
     """Removes the current files and adds the addon directory"""
-    addon_dir = get_addon_dir(base_dir)
+    addon_dir = get_addon_dir(base_dir, module)
     if os.path.exists(addon_dir):
         for filename in os.listdir(addon_dir):
             if os.path.isfile(os.path.join(addon_dir, filename)):
@@ -179,9 +282,9 @@ def _reset_addon_dir(base_dir: str):
         os.mkdir(addon_dir)
 
 
-def get_addon_dir(base_dir: str):
+def get_addon_dir(base_dir: str, module: str):
     """Returns the addon directory"""
-    return os.path.join(base_dir, _module())
+    return os.path.join(base_dir, module)
 
 
 def _get_addons_dir():
@@ -189,6 +292,13 @@ def _get_addons_dir():
     return os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 
-def _module():
+def dev_module():
+    """Returns the module name for this addon in development mode"""
+    return "scripting_nodes_dev"
+
+
+def module(prod_name: bool = None):
     """Returns the module name for this addon"""
+    if not prod_name:
+        return dev_module()
     return bpy.context.scene.sna.info.module_name

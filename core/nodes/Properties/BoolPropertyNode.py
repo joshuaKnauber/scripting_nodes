@@ -34,7 +34,7 @@ class SNA_NodeBoolProperty(SNA_BaseNode, bpy.types.Node):
         op = row.operator("sna.property_getter", text="Get", icon="SORT_DESC")
         op.node = self.id
         op.property_type = "BOOLEAN"
-        op = row.operator("sna.property_getter", text="Set", icon="SORT_ASC")
+        op = row.operator("sna.property_setter", text="Set", icon="SORT_ASC")
         op.node = self.id
         op.property_type = "BOOLEAN"
         layout.separator(factor=0.6)
@@ -45,30 +45,33 @@ class SNA_NodeBoolProperty(SNA_BaseNode, bpy.types.Node):
         ).node = self.id
         layout.prop(self, "source_type", text="")
 
+    def draw_label(self):
+        return f"Boolean Property ({self.name})"
+
     def identifier(self):
         return f"prop_{self.id}"  # TODO better identifier
 
     def generate(self, context, trigger):
-        has_group = (
-            self.inputs["Property Group"].editable
-            and self.inputs["Property Group"].has_next()
-        )
-        self.require_register = not has_group
+        # has_group = (
+        #     self.inputs["Property Group"].editable
+        #     and self.inputs["Property Group"].has_next()
+        # )
+        self.require_register = True
 
-        update = ""
-        if self.outputs["On Update"].has_next():
-            self.code = f"""
-                def on_update_{self.identifier()}(self, context):
-                    {self.outputs["On Update"].get_code(5, "pass")}
-            """
-            update = f", update=on_update_{self.identifier()}"
+        # update = ""
+        # if self.outputs["On Update"].has_next():
+        #     self.code = f"""
+        #         def on_update_{self.identifier()}(self, context):
+        #             {self.outputs["On Update"].get_code(5, "pass")}
+        #     """
+        #     update = f", update=on_update_{self.identifier()}"
 
-        self.outputs["Updated Property"].code = f"self.{self.identifier()}"
-        self.outputs["Updated Property"].set_meta("parent", "self")
-        self.outputs["Updated Property"].set_meta("identifier", self.identifier())
-        self.outputs["Updated Property"].set_meta("type", self.source_type)
+        # self.outputs["Updated Property"].code = f"self.{self.identifier()}"
+        # self.outputs["Updated Property"].set_meta("parent", "self")
+        # self.outputs["Updated Property"].set_meta("identifier", self.identifier())
+        # self.outputs["Updated Property"].set_meta("type", self.source_type)
 
-        self.outputs["Updated Value"].code = f"self.{self.identifier()}"
+        # self.outputs["Updated Value"].code = f"self.{self.identifier()}"
 
-        self.code_register = f"bpy.types.{self.source_type}.{self.identifier()} = bpy.props.BoolProperty(name='{self.name}'{update})"
+        self.code_register = f"bpy.types.{self.source_type}.{self.identifier()} = bpy.props.BoolProperty(name='{self.name}')"
         self.code_unregister = f"del bpy.types.{self.source_type}.{self.identifier()}"

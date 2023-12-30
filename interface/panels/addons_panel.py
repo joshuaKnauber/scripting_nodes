@@ -30,6 +30,7 @@ class SNA_PT_AddonPanel(bpy.types.Panel):
         col.prop(sna.info, "author")
 
         layout.separator()
+        layout.prop(sna, "production_build")
         layout.prop(sna.info, "persist_sessions")
         layout.separator()
 

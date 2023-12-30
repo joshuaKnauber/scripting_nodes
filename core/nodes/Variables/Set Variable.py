@@ -17,7 +17,8 @@ class SNA_NodeSetVariable(SNA_BaseNode, VariableReferenceTemplate, bpy.types.Nod
         self.add_input(sockets.DATA, "Value")
 
     def on_reference_update(self, node: SNA_NodeLocalVariable):
-        self.on_variable_update_input(node)
+        if node:
+            self.on_variable_update_input(node)
         self.mark_dirty()
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):

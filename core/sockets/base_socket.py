@@ -1,10 +1,11 @@
 import json
-from math import e
 
 import bpy
 
+from ...utils.code import indent_code, minimize_indents
 from ..utils import sockets
 from .data.convert import convert_types
+from ..builder import builder
 
 
 class ScriptingSocket:
@@ -94,11 +95,7 @@ class ScriptingSocket:
                     out_code = out._get_program_code(indent, "", True)
                     if out_code:
                         code.append(out_code)
-            # indent code
-            if len(code) > 1:
-                for i in range(1, len(code)):
-                    code[i] = f"{' ' * 4 * indent}{code[i]}"
-            elif len(code) == 0:
+            if len(code) == 0:
                 return fallback
             return "\n".join(code)
         # get this sockets code
@@ -106,7 +103,11 @@ class ScriptingSocket:
             if not self.has_next():
                 return fallback
             ntree = self.node.node_tree
-            return f"bpy.context.scene.sna._execute_node('{ntree.id}', '{self.get_next()[0].node.id}', locals(), globals())\n"
+            if not builder.IS_PROD_BUILD:
+                return f"bpy.context.scene.sna._execute_node('{ntree.id}', '{self.get_next()[0].node.id}', locals(), globals())\n"
+            return indent_code(
+                minimize_indents(self.get_next()[0].node.get_code()), indent
+            )
 
     def get_code(self, indent: int = 0, fallback: str = ""):
         if self.is_output:

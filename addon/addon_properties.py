@@ -1,5 +1,7 @@
 import bpy
 
+from ..utils.redraw import redraw
+from ..core.builder import builder
 from ..constants.properties import property_node_items
 from .info.info_properties import SNA_AddonInfoProperties
 from .references.reference_properties import SNA_Nodes
@@ -36,6 +38,24 @@ class SNA_AddonProperties(bpy.types.PropertyGroup):
     references: bpy.props.PointerProperty(type=SNA_Nodes)
 
     info: bpy.props.PointerProperty(type=SNA_AddonInfoProperties)
+
+    def update_production_build(self, context: bpy.types.Context):
+        builder.build_addon(
+            module=builder.dev_module(), prod_build=self.production_build
+        )
+
+    production_build: bpy.props.BoolProperty(
+        default=False,
+        name="Use Production",
+        description="Build the addon in production mode. Slower, but the addon uses the same code used when exported. Useful to test the addon before exporting",
+        update=update_production_build,
+    )
+
+    last_build_was_prod: bpy.props.BoolProperty(
+        default=False,
+        name="Last Build Was Production",
+        description="Internal prop set if the last build was in production mode",
+    )
 
     show_node_code: bpy.props.BoolProperty(
         default=False,

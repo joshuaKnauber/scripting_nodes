@@ -83,7 +83,7 @@ def register():
     register_node_menus()
     bpy.types.NODE_MT_add.append(draw_node_menu)
 
-    # add the node tree header
+    # add the headers
     bpy.types.NODE_HT_header.append(header_append)
     bpy.types.NODE_MT_editor_menus.append(header_prepend)
 
@@ -95,7 +95,7 @@ def register():
 
 
 def unregister():
-    # remove the node tree header
+    # remove the headers
     bpy.types.NODE_MT_editor_menus.remove(header_prepend)
     bpy.types.NODE_HT_header.remove(header_append)
 

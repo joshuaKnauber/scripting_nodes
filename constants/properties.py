@@ -25,6 +25,17 @@ def property_node_items(self, context):
     ]
 
 
+NODES = {
+    "SNA_NodeBoolProperty": "BOOLEAN",
+    # "SNA_NodeBoolProperty": "STRING", # TODO
+    # "SNA_NodeBoolProperty": "INT",
+    # "SNA_NodeBoolProperty": "FLOAT",
+    # "SNA_NodeBoolProperty": "ENUM",
+    # "SNA_NodeBoolProperty": "POINTER",
+    # "SNA_NodeBoolProperty": "COLLECTION",
+}
+
+
 def id_type_names():
     id_types = bpy.types.ID.__subclasses__()
     return list(map(lambda x: x.__name__, id_types))

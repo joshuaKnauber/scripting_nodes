@@ -12,7 +12,7 @@ from ...core.utils.links import has_link_updates, revalidate_links
 from ...core.utils.sockets import add_socket, convert_socket_type, is_last_with_name
 from ...interface.overlays.nodes.node_overlays import set_node_error, set_node_time
 from ...utils import logger
-from ...utils.code import normalize_indents
+from ...utils.code import minimize_indents
 from ...utils import redraw
 from ..utils.id import get_id
 from .utils.draw_code import draw_code
@@ -83,6 +83,13 @@ class SNA_BaseNode(bpy.types.Node):
         self.on_delete()
         sna.references.remove_reference(self)
         self.node_tree.mark_dirty(self)
+        refs = get_references_to_node(self)
+
+        def update_refs():
+            for ref in refs:
+                ref.on_reference_update(None)
+
+        bpy.app.timers.register(update_refs, first_interval=0.025)
 
     # Callback for when the node is deleted
     def on_delete(self):
@@ -248,7 +255,7 @@ class SNA_BaseNode(bpy.types.Node):
         """Executes the code for the node. Note that this code runs within the context of the running addon"""
         t1 = time.time()
         try:
-            exec(normalize_indents(self.code), local_vars, global_vars)
+            exec(minimize_indents(self.code), local_vars, global_vars)
             set_node_error(self.id, "")
         except Exception as e:
             logger.error(f"Error in node '{self.name}'")  # TODO

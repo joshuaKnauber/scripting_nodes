@@ -1,5 +1,6 @@
 import bpy
 from ...utils.is_serpens import in_sn_tree
+from ...core.builder import builder
 
 
 def header_prepend(self, context: bpy.types.Context):

@@ -14,7 +14,8 @@ class SNA_NodePortalOut(SNA_BaseNode, bpy.types.Node):
     portal: bpy.props.PointerProperty(type=NodePointer)
 
     def on_reference_update(self, node):
-        self.color = node.color
+        if node:
+            self.color = node.color
         self.mark_dirty()
 
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):

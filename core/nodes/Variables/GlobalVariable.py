@@ -10,7 +10,7 @@ class SNA_NodeGlobalVariable(SNA_BaseNode, bpy.types.Node):
 
     def update_type(self, context):
         self.convert_socket(
-            self.inputs["Default"], sockets.VARIABLE_SOCKETS[self.variable_type]
+            self.inputs["Default"], sockets.SOCKET_IDNAMES[self.variable_type]
         )
         self.mark_dirty()
 
