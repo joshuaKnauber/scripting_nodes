@@ -13,6 +13,7 @@ from ...utils import autopep8
 
 
 IS_PROD_BUILD = False  # This is True while a production build is running
+LAST_PROD_MODULE = None  # This is the last module name used for a production build
 
 
 def build_addon(base_dir: str = None, prod_build: bool = False, module: str = None):
@@ -110,6 +111,11 @@ def toggle_stored_prod_modules():
             enable_module(mod)
         else:
             disable_module(mod)
+
+
+def set_last_prod_module(module: str | None):
+    global LAST_PROD_MODULE
+    LAST_PROD_MODULE = module
 
 
 def build_complete_msg(prod_build: bool):

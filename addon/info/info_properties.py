@@ -1,5 +1,7 @@
 import bpy
 
+from ...core.builder import builder
+
 from .names_generator import generate_name
 
 
@@ -150,22 +152,28 @@ class SNA_AddonInfoProperties(bpy.types.PropertyGroup):
         default=False,
         name="Use Custom Identifier",
         description="Use a custom identifier for the addon",
+        update=update_changes,
     )
 
     custom_module_name: bpy.props.StringProperty(
         default="new_addon",
         name="Addon Identifier",
         description="The identifier of the addon",
+        update=update_changes,
     )
 
     use_custom_shorthand: bpy.props.BoolProperty(
         default=False,
         name="Use Custom Shorthand",
         description="Use a custom shorthand for the addon",
+        update=update_changes,
     )
 
     shorthand: bpy.props.StringProperty(
-        default="SNA", name="Addon Shorthand", description="The shorthand of the addon"
+        default="SNA",
+        name="Addon Shorthand",
+        description="The shorthand of the addon",
+        update=update_changes,
     )
 
     persist_sessions: bpy.props.BoolProperty(

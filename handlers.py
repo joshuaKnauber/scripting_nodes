@@ -37,6 +37,8 @@ def unregister():
 @persistent
 def save_post_handler(dummy):
     sn = bpy.context.scene.sna
+    if builder.LAST_PROD_MODULE != builder.module(prod_name=True):
+        builder.remove_addon(module=builder.LAST_PROD_MODULE)
     if sn.info.persist_sessions:
         builder.build_addon(prod_build=True, module=builder.module(prod_name=True))
         builder.disable_module(builder.module(prod_name=True))
@@ -55,6 +57,7 @@ atexit.register(on_exit)
 @persistent
 def load_pre_handler(dummy):
     builder.remove_addon(module=builder.dev_module())
+    builder.set_last_prod_module(module=None)
 
 
 @persistent
@@ -65,6 +68,7 @@ def load_post_handler(dummy):
     reset_addon_info_has_changes()
     builder.build_addon(module=builder.dev_module(), prod_build=sn.production_build)
     builder.toggle_stored_prod_modules()
+    builder.set_last_prod_module(module=builder.module(prod_name=True))
     bpy.types.SpaceNodeEditor.draw_handler_add(draw_errors, (), "WINDOW", "POST_PIXEL")
     bpy.types.SpaceNodeEditor.draw_handler_add(
         draw_node_overlays, (), "WINDOW", "POST_PIXEL"
