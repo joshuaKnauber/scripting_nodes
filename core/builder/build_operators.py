@@ -26,7 +26,7 @@ class SNA_OT_ExportAddon(bpy.types.Operator, ExportHelper):
         print(self.filepath)
         base_dir = os.path.dirname(self.filepath)
         if os.path.exists(base_dir):
-            addon_dir = builder.get_addon_dir(base_dir)
+            addon_dir = builder.get_addon_dir(base_dir, builder.module(prod_name=True))
             if os.path.exists(addon_dir):
                 shutil.rmtree(addon_dir)
             builder.build_addon(
