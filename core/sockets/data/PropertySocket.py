@@ -10,6 +10,7 @@ DATA_DEFAULTS = {
 
 class SNA_PropertySocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_PropertySocket"
+    bl_label = "Property"
 
     # Can have optional meta of
     # - parent: path to the parent data of the property

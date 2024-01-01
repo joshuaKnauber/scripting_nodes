@@ -5,7 +5,7 @@ import bpy
 
 from .... import auto_load
 from ....core.node_tree.node_tree import ScriptingNodeTree
-from ....utils.is_serpens import in_sn_tree
+from ....utils.is_serpens import in_sn_tree, is_sn_editor
 
 _node_categories = {}
 
@@ -111,9 +111,12 @@ def draw_submenu(self, context: bpy.types.Context):
 
 
 def draw_node_menu(self, context: bpy.types.Context):
-    categories = get_node_categories()
     layout = self.layout
+    if not is_sn_editor(context):
+        return
     layout.enabled = in_sn_tree(context)
+
+    categories = get_node_categories()
     for cat in sorted(categories.keys()):
         if not cat in blocklist and not cat in ["Group", "Layout"]:
             layout.menu(
@@ -123,5 +126,5 @@ def draw_node_menu(self, context: bpy.types.Context):
 
     layout.menu("SNA_MT_LayoutMenu", text="Layout")
 
-    # layout.separator()
-    # layout.menu("SNA_MT_GroupMenu", text="Group")
+    layout.separator()
+    layout.menu("SNA_MT_GroupMenu", text="Group")

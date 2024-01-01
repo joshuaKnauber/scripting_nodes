@@ -5,6 +5,7 @@ from ..base_socket import ScriptingSocket
 
 class SNA_IconSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_IconSocket"
+    bl_label = "Icon"
 
     value: bpy.props.IntProperty(
         default=0, update=lambda self, _: self.node.mark_dirty()

@@ -1,6 +1,24 @@
 import bpy
 
+from .....utils.is_serpens import in_sn_tree
 from .....core.node_tree.node_tree import ScriptingNodeTree
+
+
+class SNA_OT_AddGroupNode(bpy.types.Operator):
+    bl_idname = "sna.add_group_node"
+    bl_label = "Add Group"
+    bl_description = "Add this node group"
+    bl_options = {"REGISTER", "UNDO"}
+
+    ntree: bpy.props.StringProperty(name="Node Tree", default="")
+
+    def execute(self, context):
+        bpy.ops.node.add_node(
+            "INVOKE_DEFAULT", type="SNA_NodeGroupNode", use_transform=True
+        )
+        node = context.active_node
+        node.group_tree = bpy.data.node_groups[self.ntree]
+        return {"FINISHED"}
 
 
 class SNA_OT_MakeSerpensGroup(bpy.types.Operator):
@@ -8,6 +26,10 @@ class SNA_OT_MakeSerpensGroup(bpy.types.Operator):
     bl_label = "Make Group"
     bl_description = "Make a Serpens node group"
     bl_options = {"REGISTER", "UNDO"}
+
+    @classmethod
+    def poll(cls, context):
+        return in_sn_tree(context)
 
     def get_center(self, nodes):
         x = 0
@@ -44,9 +66,7 @@ class SNA_OT_MakeSerpensGroup(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class SNA_OT_EditSerpensGroup(
-    bpy.types.Operator
-):  # TODO, these ops are blocking other editors
+class SNA_OT_EditSerpensGroup(bpy.types.Operator):
     bl_idname = "sna.edit_serpens_node_group"
     bl_label = "Edit Serpens Group"
     bl_description = "Edit a Serpens node group"

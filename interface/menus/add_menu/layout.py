@@ -1,5 +1,6 @@
 import bpy
 
+from ....utils.is_serpens import in_sn_tree
 from ....core.nodes.Layout.PortalIn import SNA_NodePortalIn
 from ....core.nodes.Layout.PortalOut import SNA_NodePortalOut
 

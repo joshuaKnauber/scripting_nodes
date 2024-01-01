@@ -5,6 +5,7 @@ from ..base_socket import ScriptingSocket
 
 class SNA_StringSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_StringSocket"
+    bl_label = "String"
 
     value: bpy.props.StringProperty(
         default="",

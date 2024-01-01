@@ -5,6 +5,7 @@ from ..base_socket import ScriptingSocket
 
 class SNA_DataSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_DataSocket"
+    bl_label = "Data"
 
     def _python_value(self):
         if self.is_output:

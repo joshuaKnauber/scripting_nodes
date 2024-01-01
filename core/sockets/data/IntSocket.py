@@ -5,6 +5,7 @@ from ..base_socket import ScriptingSocket
 
 class SNA_IntSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_IntSocket"
+    bl_label = "Integer"
 
     value: bpy.props.IntProperty(
         default=0, update=lambda self, _: self.node.mark_dirty()

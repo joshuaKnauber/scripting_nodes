@@ -5,6 +5,7 @@ from ..base_socket import ScriptingSocket
 
 class SNA_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_BooleanSocket"
+    bl_label = "Boolean"
 
     value: bpy.props.BoolProperty(
         default=False, update=lambda self, _: self.node.mark_dirty()

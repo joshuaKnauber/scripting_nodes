@@ -125,6 +125,14 @@ class SNA_BaseNode(bpy.types.Node):
         bpy.app.timers.register(
             lambda: revalidate_links(self.node_tree), first_interval=0.025
         )
+        self.on_update()
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == ScriptingNodeTree.bl_idname:
+                for node in ntree.nodes:
+                    node.on_update()
+
+    def on_update(self):
+        """Called when the node is updated"""
 
     def _add_dynamic_sockets(self):
         """Adds dynamic sockets if the last socket is linked"""

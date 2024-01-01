@@ -5,6 +5,7 @@ from ..base_socket import ScriptingSocket
 
 class SNA_DictSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_DictSocket"
+    bl_label = "Dictionary"
 
     def on_create(self, context: bpy.types.Context):
         self.display_shape = "SQUARE"

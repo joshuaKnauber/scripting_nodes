@@ -1,3 +1,4 @@
+from typing import Any
 import bpy
 
 from ..utils.id import get_id
@@ -17,6 +18,10 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     id: bpy.props.StringProperty(
         default="", name="ID", description="Unique ID of the node tree"
     )
+
+    @classmethod
+    def valid_socket_type(cls, idname: str | Any) -> bool:
+        return idname.startswith("SNA_")
 
     def _init(self):
         """Called when the node tree is created by the depsgraph handler."""

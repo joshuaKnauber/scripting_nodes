@@ -5,6 +5,7 @@ from ..base_socket import ScriptingSocket
 
 class SNA_FloatSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_FloatSocket"
+    bl_label = "Float"
 
     value: bpy.props.FloatProperty(
         default=0.0, update=lambda self, _: self.node.mark_dirty()

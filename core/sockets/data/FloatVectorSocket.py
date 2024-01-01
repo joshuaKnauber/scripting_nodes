@@ -6,6 +6,7 @@ from ..base_socket import ScriptingSocket
 
 class SNA_FloatVectorSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_FloatVectorSocket"
+    bl_label = "Float Vector"
 
     value: bpy.props.FloatVectorProperty(
         size=32,

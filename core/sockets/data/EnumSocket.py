@@ -12,6 +12,7 @@ class SNA_EnumItem(bpy.types.PropertyGroup):
 
 class SNA_EnumSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_EnumSocket"
+    bl_label = "Enum"
 
     items: bpy.props.CollectionProperty(type=SNA_EnumItem)
 

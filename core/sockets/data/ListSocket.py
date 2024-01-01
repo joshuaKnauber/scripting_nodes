@@ -5,6 +5,7 @@ from ..base_socket import ScriptingSocket
 
 class SNA_ListSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_ListSocket"
+    bl_label = "List"
 
     def on_create(self, context: bpy.types.Context):
         self.display_shape = "SQUARE"

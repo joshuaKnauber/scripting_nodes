@@ -5,6 +5,7 @@ from ..base_socket import ScriptingSocket
 
 class SNA_ExecuteSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_ExecuteSocket"
+    bl_label = "Execute"
     is_program = True
 
     def on_create(self, context: bpy.types.Context):
