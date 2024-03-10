@@ -1,6 +1,6 @@
 from math import e
 import bpy
-from bpy.types import Context, Node
+from bpy.types import Context, Node, UILayout
 
 from ....core.node_tree.node_tree import ScriptingNodeTree
 from ..base_node import SNA_BaseNode
@@ -22,8 +22,18 @@ class SNA_NodeGroupNode(SNA_BaseNode, bpy.types.NodeCustomGroup):
         type=bpy.types.NodeTree, poll=poll_tree, update=update_tree
     )
 
+    hide_group: bpy.props.BoolProperty(
+        default=False,
+        name="Hide Group",
+        description="Hide the group selector from node",
+    )
+
     def draw_node(self, context, layout):
-        layout.template_ID(self, "group_tree", new="node.new_node_tree")
+        if not self.hide_group:
+            layout.template_ID(self, "group_tree", new="node.new_node_tree")
+
+    def draw_properties(self, context: Context, layout: UILayout):
+        layout.prop(self, "hide_group")
 
     def on_node_tree_update(self, ntree: bpy.types.NodeTree):
         if ntree == self.group_tree:

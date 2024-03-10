@@ -327,3 +327,9 @@ class SNA_BaseNode(bpy.types.Node):
     # Callback for when the node is drawn
     def draw_node(self, context: bpy.types.Context, layout: bpy.types.UILayout):
         return
+
+    def draw_buttons_ext(self, context: bpy.types.Context, layout: bpy.types.UILayout):
+        self.draw_properties(context, layout)
+
+    def draw_properties(self, context: bpy.types.Context, layout: bpy.types.UILayout):
+        return
