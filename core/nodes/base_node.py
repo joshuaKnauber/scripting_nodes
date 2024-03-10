@@ -126,8 +126,8 @@ class SNA_BaseNode(bpy.types.Node):
             lambda: revalidate_links(self.node_tree), first_interval=0.025
         )
 
-    def on_group_tree_update(self):
-        """Called by the node tree when this nodes group_tree node tree updates"""
+    def on_node_tree_update(self, node_tree: bpy.types.NodeTree):
+        """Called by node trees when they update"""
 
     def _add_dynamic_sockets(self):
         """Adds dynamic sockets if the last socket is linked"""
@@ -181,6 +181,11 @@ class SNA_BaseNode(bpy.types.Node):
         name="Code Global",
         description="Top level code for the node",
     )
+    code_imports: bpy.props.StringProperty(
+        default="",
+        name="Code Imports",
+        description="Imports for the node",
+    )
     code_register: bpy.props.StringProperty(
         default="",
         name="Code Register",
@@ -201,6 +206,7 @@ class SNA_BaseNode(bpy.types.Node):
     def _reset_code(self):
         self.code = ""
         self.code_global = ""
+        self.code_imports = ""
         self.code_register = ""
         self.code_unregister = ""
         self.require_register = False
@@ -213,7 +219,13 @@ class SNA_BaseNode(bpy.types.Node):
 
     def _get_code_summary(self):
         """Returns a summary of all the code stored in the node to check for changes"""
-        code = self.code + self.code_global + self.code_register + self.code_unregister
+        code = (
+            self.code
+            + self.code_global
+            + self.code_imports
+            + self.code_register
+            + self.code_unregister
+        )
         for socket in [*self.inputs, *self.outputs]:
             code += socket.meta
             code += socket.get_code()

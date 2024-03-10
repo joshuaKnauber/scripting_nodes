@@ -29,6 +29,10 @@ class ScriptingSocket:
                 return i
         return -1
 
+    @property
+    def function_input_name(self):
+        return f"inp_{self.index}"
+
     ### SOCKET LIFE CYCLE ###
 
     def init(self):
@@ -102,7 +106,11 @@ class ScriptingSocket:
         else:
             if not self.has_next():
                 return fallback
-            ntree = self.node.node_tree
+            ntree = (
+                self.node.node_tree
+                if getattr(self.node, "is_sn_node", False)
+                else self.get_next()[0].node.node_tree
+            )
             if not builder.IS_PROD_BUILD:
                 return f"bpy.context.scene.sna._execute_node('{getattr(ntree, 'id', '')}', '{getattr(self.get_next()[0].node, 'id', '')}', locals(), globals())\n"
             return indent_code(
@@ -118,7 +126,13 @@ class ScriptingSocket:
         elif not getattr(self, "is_program", False):
             if self.has_next():
                 from_socket = self.get_next()[0]
-                return convert_types(from_socket._python_value(), from_socket, self)
+                # Use function input name for group inputs, otherwise use the socket pythonified value
+                value = (
+                    from_socket._python_value()
+                    if not from_socket.node.bl_idname == "NodeGroupInput"
+                    else from_socket.function_input_name
+                )
+                return convert_types(value, from_socket, self)
             return self._python_value()
         return fallback
 
@@ -149,6 +163,11 @@ class ScriptingSocket:
         meta = json.loads(self.meta)
         if key in meta:
             return meta[key]
+        # Return socket function input name for group inputs
+        print(self.node)
+        if self.node.bl_idname == "NodeGroupInput":
+            print("getting it")
+            return self.function_input_name
         return fallback
 
     ### SOCKET UI ###

@@ -62,7 +62,7 @@ def get_next_sockets(socket: bpy.types.NodeSocket) -> list[bpy.types.NodeSocket]
                 next_sockets += get_next_sockets(
                     next.node.outputs[0] if socket.is_output else next.node.inputs[0]
                 )
-            elif getattr(next.node, "is_sn_node", False):
+            else:
                 next_sockets.append(next)
         # TODO validate sockets
     return next_sockets

@@ -167,18 +167,12 @@ def _prepare_addon_dir(base_dir: str, module: str):
 def _add_node_tree(base_dir: str, module: str, ntree: bpy.types.NodeTree):
     """Adds the given node tree to the given directory"""
     with open(
-        os.path.join(_get_ntree_dir(base_dir, module), _get_ntree_filename(ntree)), "w"
+        os.path.join(_get_ntree_dir(base_dir, module), f"{ntree.module_name()}.py"), "w"
     ) as write_file:
         if transpiler.ntree_is_function(ntree):
             write_file.write(transpiler.ntree_to_function(ntree))
         else:
             write_file.write(transpiler.ntree_to_code(ntree))
-
-
-def _get_ntree_filename(ntree: bpy.types.NodeTree):
-    """Returns the filename for the given node tree"""
-    pythonic = re.sub("\W|^(?=\d)", "_", ntree.name.lower())
-    return f"{pythonic}.py"
 
 
 def _add_base_files(base_dir: str, module: str):

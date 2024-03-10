@@ -1,3 +1,4 @@
+from math import e
 import bpy
 from bpy.types import Context, Node
 
@@ -24,9 +25,10 @@ class SNA_NodeGroupNode(SNA_BaseNode, bpy.types.NodeCustomGroup):
     def draw_node(self, context, layout):
         layout.template_ID(self, "group_tree", new="node.new_node_tree")
 
-    def on_group_tree_update(self):
-        print("group node update")
-        self.update_sockets()
+    def on_node_tree_update(self, ntree: bpy.types.NodeTree):
+        if ntree == self.group_tree:
+            print("group node update")
+            self.update_sockets()
 
     def update_sockets(self):
         self.inputs.clear()
@@ -38,11 +40,27 @@ class SNA_NodeGroupNode(SNA_BaseNode, bpy.types.NodeCustomGroup):
                     self.add_input(socket.socket_type, socket.name)
                 else:
                     self.add_output(socket.socket_type, socket.name)
-        else:
-            pass
 
     def generate(self, context: Context, trigger: Node):
-        self.code = f"""
-            {self.group_tree.function_name()}()
-            {self.outputs[0].get_code(3)}
-        """
+        if self.group_tree:
+            self.code_imports = f"from .{self.group_tree.module_name()} import {self.group_tree.function_name()}"
+
+            inputs = ", ".join(
+                [
+                    (
+                        socket.get_code()
+                        if not getattr(socket, "is_program", False)
+                        else (
+                            socket.get_meta("layout", "self.layout")
+                            if socket.bl_idname == "SNA_InterfaceSocket"
+                            else "None"
+                        )
+                    )
+                    for socket in self.inputs
+                ]
+            )
+
+            self.code = f"""
+                {self.group_tree.function_name()}({inputs})
+                {self.outputs[0].get_code(3)}
+            """
