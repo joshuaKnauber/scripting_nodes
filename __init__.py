@@ -19,7 +19,11 @@ from bpy.utils import previews
 
 from . import auto_load, handlers
 from .addon.addon_properties import SNA_AddonProperties
-from .interface.header.header import header_append, header_prepend
+from .interface.header.header import (
+    group_interface_append,
+    header_append,
+    header_prepend,
+)
 from .interface.menus.add_menu.node_categories import (
     draw_node_menu,
     register_node_menus,
@@ -86,6 +90,7 @@ def register():
     # add the headers
     bpy.types.NODE_HT_header.append(header_append)
     bpy.types.NODE_MT_editor_menus.append(header_prepend)
+    bpy.types.NODE_PT_node_tree_interface.append(group_interface_append)
 
     # app handlers
     handlers.register()
@@ -98,6 +103,7 @@ def unregister():
     # remove the headers
     bpy.types.NODE_MT_editor_menus.remove(header_prepend)
     bpy.types.NODE_HT_header.remove(header_append)
+    bpy.types.NODE_PT_node_tree_interface.remove(group_interface_append)
 
     # addon properties
     del bpy.types.Scene.sna

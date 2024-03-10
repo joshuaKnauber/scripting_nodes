@@ -1,6 +1,7 @@
 from typing import Any
 import bpy
 
+from ...utils.naming import pythonify_name
 from ..utils.id import get_id
 
 
@@ -32,6 +33,11 @@ class ScriptingNodeTree(bpy.types.NodeTree):
 
     def update(self):
         """Called when the node tree is updating."""
+        for ntree in bpy.data.node_groups:
+            if getattr(ntree, "is_sn_ntree", False):
+                for node in ntree.nodes:
+                    if getattr(node, "group_tree", None) == self:
+                        node.on_group_tree_update()
 
     def mark_dirty(self, node: bpy.types.Node):
         self.is_dirty = True
@@ -42,3 +48,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
             if getattr(node, "id", None) == node_id:
                 node._execute(local_vars, global_vars)
                 break
+
+    def function_name(self):
+        """Returns the name of the function for this node tree"""
+        return f"sna_{pythonify_name(self.name, 'function')}_{self.id}"

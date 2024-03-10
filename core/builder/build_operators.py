@@ -23,7 +23,6 @@ class SNA_OT_ExportAddon(bpy.types.Operator, ExportHelper):
     )
 
     def execute(self, context: bpy.types.Context):
-        print(self.filepath)
         base_dir = os.path.dirname(self.filepath)
         if os.path.exists(base_dir):
             addon_dir = builder.get_addon_dir(base_dir, builder.module(prod_name=True))

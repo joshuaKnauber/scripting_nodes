@@ -104,7 +104,7 @@ class ScriptingSocket:
                 return fallback
             ntree = self.node.node_tree
             if not builder.IS_PROD_BUILD:
-                return f"bpy.context.scene.sna._execute_node('{ntree.id}', '{self.get_next()[0].node.id}', locals(), globals())\n"
+                return f"bpy.context.scene.sna._execute_node('{getattr(ntree, 'id', '')}', '{getattr(self.get_next()[0].node, 'id', '')}', locals(), globals())\n"
             return indent_code(
                 minimize_indents(self.get_next()[0].node.get_code()), indent
             )

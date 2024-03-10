@@ -15,3 +15,12 @@ def header_append(self, context: bpy.types.Context):
     if in_sn_tree(context):
         sna = context.scene.sna
         layout = self.layout
+
+
+def group_interface_append(self, context: bpy.types.Context):
+    """Draws the UI for the node group interface"""
+    if in_sn_tree(context):
+        sna = context.scene.sna
+        layout = self.layout
+        layout.label(text="SERPENS Interface")
+        layout.label(text="panels not supported")

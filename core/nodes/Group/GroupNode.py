@@ -1,4 +1,5 @@
 import bpy
+from bpy.types import Context, Node
 
 from ....core.node_tree.node_tree import ScriptingNodeTree
 from ..base_node import SNA_BaseNode
@@ -23,11 +24,14 @@ class SNA_NodeGroupNode(SNA_BaseNode, bpy.types.NodeCustomGroup):
     def draw_node(self, context, layout):
         layout.template_ID(self, "group_tree", new="node.new_node_tree")
 
-    def on_update(self):
-        print("update")
+    def on_group_tree_update(self):
+        print("group node update")
         self.update_sockets()
 
     def update_sockets(self):
+        self.inputs.clear()
+        self.outputs.clear()
+        # TODO reconnect links
         if self.group_tree:
             for socket in self.group_tree.interface.items_tree:
                 if socket.in_out == "INPUT":
@@ -35,5 +39,10 @@ class SNA_NodeGroupNode(SNA_BaseNode, bpy.types.NodeCustomGroup):
                 else:
                     self.add_output(socket.socket_type, socket.name)
         else:
-            self.inputs.clear()
-            self.outputs.clear()
+            pass
+
+    def generate(self, context: Context, trigger: Node):
+        self.code = f"""
+            {self.group_tree.function_name()}()
+            {self.outputs[0].get_code(3)}
+        """

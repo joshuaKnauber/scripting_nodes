@@ -8,8 +8,7 @@ import addon_utils
 import bpy
 
 from ...utils import logger
-from ...utils.code import minimize_indents
-from ...utils import autopep8
+from . import transpiler
 
 
 IS_PROD_BUILD = False  # This is True while a production build is running
@@ -170,7 +169,10 @@ def _add_node_tree(base_dir: str, module: str, ntree: bpy.types.NodeTree):
     with open(
         os.path.join(_get_ntree_dir(base_dir, module), _get_ntree_filename(ntree)), "w"
     ) as write_file:
-        write_file.write(_ntree_to_code(ntree))
+        if transpiler.ntree_is_function(ntree):
+            write_file.write(transpiler.ntree_to_function(ntree))
+        else:
+            write_file.write(transpiler.ntree_to_code(ntree))
 
 
 def _get_ntree_filename(ntree: bpy.types.NodeTree):
@@ -220,30 +222,6 @@ def _add_base_files(base_dir: str, module: str):
             os.path.join(os.path.dirname(__file__), "templates", "auto_load.txt"), "r"
         ) as read_file:
             write_file.write(read_file.read())
-
-
-def _ntree_to_code(ntree: bpy.types.NodeTree):
-    """Converts the given node tree to code"""
-    code = "import bpy\n\n"
-    register = ""
-    unregister = ""
-
-    for node in ntree.nodes:
-        if getattr(node, "is_sn_node", False) and node.require_register:  # TODO
-            code += minimize_indents(node.code) + "\n"
-            if node.code_register:
-                register += "    " + node.code_register + "\n"
-            if node.code_unregister:
-                unregister += "    " + node.code_unregister + "\n"
-
-    code += "\n"
-    if register:
-        code += "def register():\n"
-        code += register + "\n"
-    if unregister:
-        code += "def unregister():\n"
-        code += unregister + "\n"
-    return autopep8.fix_code(code)
 
 
 def _add_dir_structure(base_dir: str, module: str):

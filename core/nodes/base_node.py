@@ -125,14 +125,9 @@ class SNA_BaseNode(bpy.types.Node):
         bpy.app.timers.register(
             lambda: revalidate_links(self.node_tree), first_interval=0.025
         )
-        self.on_update()
-        for ntree in bpy.data.node_groups:
-            if ntree.bl_idname == ScriptingNodeTree.bl_idname:
-                for node in ntree.nodes:
-                    node.on_update()
 
-    def on_update(self):
-        """Called when the node is updated"""
+    def on_group_tree_update(self):
+        """Called by the node tree when this nodes group_tree node tree updates"""
 
     def _add_dynamic_sockets(self):
         """Adds dynamic sockets if the last socket is linked"""
@@ -157,12 +152,15 @@ class SNA_BaseNode(bpy.types.Node):
 
     ### NODE CODE ###
 
+    def _clean_code(self, code: str):
+        """Cleans the code of the node"""
+        return "\n".join([*filter(lambda l: l.strip() != "", code.split("\n"))])
+
     def get_code(self):
         return self.get("code", "")
 
     def set_code(self, value):
-        clean = "\n".join([*filter(lambda l: l.strip() != "", value.split("\n"))])
-        self["code"] = clean
+        self["code"] = self._clean_code(value)
 
     code: bpy.props.StringProperty(
         default="",
@@ -170,6 +168,18 @@ class SNA_BaseNode(bpy.types.Node):
         description="Generated code for the node",
         set=set_code,
         get=get_code,
+    )
+
+    def get_code_global(self):
+        return self.get("code_global", "")
+
+    def set_code_global(self, value):
+        self["code_global"] = self._clean_code(value)
+
+    code_global: bpy.props.StringProperty(
+        default="",
+        name="Code Global",
+        description="Top level code for the node",
     )
     code_register: bpy.props.StringProperty(
         default="",
@@ -190,6 +200,7 @@ class SNA_BaseNode(bpy.types.Node):
 
     def _reset_code(self):
         self.code = ""
+        self.code_global = ""
         self.code_register = ""
         self.code_unregister = ""
         self.require_register = False
@@ -202,7 +213,7 @@ class SNA_BaseNode(bpy.types.Node):
 
     def _get_code_summary(self):
         """Returns a summary of all the code stored in the node to check for changes"""
-        code = self.code + self.code_register + self.code_unregister
+        code = self.code + self.code_global + self.code_register + self.code_unregister
         for socket in [*self.inputs, *self.outputs]:
             code += socket.meta
             code += socket.get_code()
@@ -233,7 +244,8 @@ class SNA_BaseNode(bpy.types.Node):
         # propagate changes and build addon if necessary
         self._start_was_registered()
         self._propagate_changes()
-        if self.require_register:
+        # TODO when code_global and dev run the group node instead of rebuilding
+        if self.require_register or self.code_global:
             self.node_tree.mark_dirty(self)
 
     def mark_dirty_delayed(self, trigger: bpy.types.Node = None):
@@ -247,7 +259,8 @@ class SNA_BaseNode(bpy.types.Node):
         for socket in [*self.inputs, *self.outputs]:
             if socket.has_next():
                 for next in socket.get_next():
-                    next.node.mark_dirty(self)
+                    if hasattr(next.node, "mark_dirty"):
+                        next.node.mark_dirty(self)
 
     def _propagate_change_to_references(self):
         """Propagates the changes to the surrounding and referencing nodes"""

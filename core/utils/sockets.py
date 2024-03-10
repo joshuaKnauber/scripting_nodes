@@ -34,8 +34,10 @@ def convert_socket_type(socket: bpy.types.NodeSocket, idname: str):
             socket_index = i
             break
     # delete socket
-    socket.node.outputs.remove(socket) if is_output else socket.node.inputs.remove(
-        socket
+    (
+        socket.node.outputs.remove(socket)
+        if is_output
+        else socket.node.inputs.remove(socket)
     )
     # add new socket
     new_socket = add_socket(node, idname, name, is_output)
@@ -60,7 +62,7 @@ def get_next_sockets(socket: bpy.types.NodeSocket) -> list[bpy.types.NodeSocket]
                 next_sockets += get_next_sockets(
                     next.node.outputs[0] if socket.is_output else next.node.inputs[0]
                 )
-            else:
+            elif getattr(next.node, "is_sn_node", False):
                 next_sockets.append(next)
         # TODO validate sockets
     return next_sockets
