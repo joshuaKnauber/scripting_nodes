@@ -7,24 +7,6 @@ from . import scraper
 
 SEARCH_RESULTS = {}  # group: { key, score }[]
 
-current_search_thread = None
-thread_lock = threading.Lock()
-
-
-def threaded_search(query: str, types: list[str]):
-    global current_search_thread
-
-    with thread_lock:
-        # Check if there is already a search thread running
-        if current_search_thread is not None and current_search_thread.is_alive():
-            return
-
-        # Start a new search thread
-        current_search_thread = threading.Thread(
-            target=update_search_results, args=(query, types)
-        )
-        current_search_thread.start()
-
 
 def update_search_results(query: str, types: [str], groupby: str):
     global SEARCH_RESULTS

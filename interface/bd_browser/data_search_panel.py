@@ -1,5 +1,5 @@
 import bpy
-from ...core.bd_browser import search, scraper
+from ...core.bd_browser import property_search, operator_search, scraper
 
 
 class SNA_PT_navigation_bar(bpy.types.Panel):
@@ -15,6 +15,10 @@ class SNA_PT_navigation_bar(bpy.types.Panel):
     def draw(self, context: bpy.types.Context):
         layout = self.layout
         sna = context.scene.sna
+
+        col = layout.column(align=True)
+        col.scale_y = 1.5
+        col.prop(sna, "bd_navigation", expand=True)
 
 
 class SNA_PT_FilterDataSettings(bpy.types.Panel):
@@ -42,7 +46,7 @@ class SNA_PT_data_search(bpy.types.Panel):
     def poll(cls, context):
         return context.scene.sna.show_bd_browser
 
-    def draw(self, context: bpy.types.Context):
+    def draw_properties(self, context: bpy.types.Context):
         layout = self.layout
         sna = context.scene.sna
 
@@ -67,18 +71,20 @@ class SNA_PT_data_search(bpy.types.Panel):
                 layout.prop(sna, "blend_data_filter")
                 layout.prop(sna, "blend_data_groupby")
 
-                for i, group in enumerate(search.SEARCH_RESULTS.keys()):
+                for i, group in enumerate(property_search.SEARCH_RESULTS.keys()):
                     if i >= 10:
-                        layout.label(text=f"{len(search.SEARCH_RESULTS) - i} more...")
+                        layout.label(
+                            text=f"{len(property_search.SEARCH_RESULTS) - i} more..."
+                        )
                         break
 
                     layout.label(text=f"{sna.blend_data_groupby}: {group}")
                     col = layout.column(align=True)
 
-                    for j, result in enumerate(search.SEARCH_RESULTS[group]):
+                    for j, result in enumerate(property_search.SEARCH_RESULTS[group]):
                         if j >= 10:
                             col.label(
-                                text=f"{len(search.SEARCH_RESULTS[group]) - i} more..."
+                                text=f"{len(property_search.SEARCH_RESULTS[group]) - i} more..."
                             )
                             break
                         item = scraper.BLENDER_DATA[result["key"]]
@@ -97,3 +103,36 @@ class SNA_PT_data_search(bpy.types.Panel):
                         row = boxcol.row()
                         row.enabled = False
                         row.label(text=", ".join(item["paths"]))
+
+    def draw_operators(self, context: bpy.types.Context):
+        layout = self.layout
+        sna = context.scene.sna
+
+        layout.operator("sna.scrape")
+
+        if scraper.BLENDER_OPERATORS:
+            layout.prop(sna, "operator_search", icon="VIEWZOOM", text="")
+
+            for i, operator in enumerate(operator_search.SEARCH_RESULTS):
+                if i >= 100:
+                    layout.label(
+                        text=f"{len(operator_search.SEARCH_RESULTS) - i} more..."
+                    )
+                    break
+
+                item = scraper.BLENDER_OPERATORS[operator]
+                box = layout.box()
+                col = box.column(align=True)
+                col.label(text=item["name"])
+                row = col.row()
+                row.enabled = False
+                row.label(text=item["description"])
+                row = col.row()
+                row.enabled = False
+                row.label(text=operator)
+
+    def draw(self, context: bpy.types.Context):
+        if context.scene.sna.bd_navigation == "PROPERTIES":
+            self.draw_properties(context)
+        elif context.scene.sna.bd_navigation == "OPERATORS":
+            self.draw_operators(context)

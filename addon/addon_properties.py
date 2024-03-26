@@ -1,10 +1,11 @@
 import bpy
 
+
 from ..core.builder import builder
 from ..constants.properties import property_node_items
 from .info.info_properties import SNA_AddonInfoProperties
 from .references.reference_properties import SNA_Nodes
-from ..core.bd_browser import search
+from ..core.bd_browser import property_search, operator_search
 
 
 class SNA_AddonProperties(bpy.types.PropertyGroup):
@@ -122,8 +123,17 @@ class SNA_AddonProperties(bpy.types.PropertyGroup):
         name="Show BD Browser", default=False, description="Show the BD Browser"
     )
 
+    bd_navigation: bpy.props.EnumProperty(
+        name="Navigation",
+        items=[
+            ("PROPERTIES", "Properties", "Properties"),
+            ("OPERATORS", "Operators", "Operators"),
+        ],
+        default="PROPERTIES",
+    )
+
     def update_search(self, _):
-        search.update_search_results(
+        property_search.update_search_results(
             self.blend_data_search,
             list(self.blend_data_filter),
             self.blend_data_groupby,
@@ -164,3 +174,13 @@ class SNA_AddonProperties(bpy.types.PropertyGroup):
     )
 
     blend_data_selected_result: bpy.props.StringProperty(default="")
+
+    operator_search: bpy.props.StringProperty(
+        default="",
+        name="Operator Search",
+        description="Search for an operator by name or ID",
+        # options={"TEXTEDIT_UPDATE"},
+        update=lambda self, _: operator_search.update_search_results(
+            self.operator_search
+        ),
+    )

@@ -4,11 +4,13 @@ import os
 
 
 BLENDER_DATA = {}  # stored scraped blender data
+BLENDER_OPERATORS = {}  # stored scraped blender operators
 
 
-def _debug_to_json(data):
-    for key, value in data.items():
-        data[key]["paths"] = list(value["paths"])
+def _debug_to_json(data, convert_paths=True):
+    if convert_paths:
+        for key, value in data.items():
+            data[key]["paths"] = list(value["paths"])
     path = os.path.join(os.path.dirname(__file__), "debug.json")
     with open(path, "w") as write_file:
         json.dump(data, write_file, indent=2)
@@ -16,10 +18,13 @@ def _debug_to_json(data):
 
 def store_blender_data():
     global BLENDER_DATA
-    BLENDER_DATA = scrape()
+    global BLENDER_OPERATORS
+
+    BLENDER_DATA = scrape_properties()
+    BLENDER_OPERATORS = scrape_operators()
 
 
-def scrape():
+def scrape_properties():
     scraped = {}
     max_depth = 10
     max_indexed = 1  # TODO index one max and allow to scrape specific one?
@@ -84,9 +89,21 @@ def scrape():
 
         # TODO functions
 
-    print("Scraping data...")
     scrape_data(bpy.context, "bpy.context")
     scrape_data(bpy.data, "bpy.data")
-    _debug_to_json(scraped)
-    print("Scraped data")
+    # _debug_to_json(scraped)
     return scraped
+
+
+def scrape_operators():
+    operators = {}
+    for operator in bpy.types.Operator.__subclasses__():
+        if getattr(operator, "is_registered", False):
+            operators[operator.bl_idname] = {
+                "name": operator.bl_label,
+                "description": getattr(
+                    operator, "bl_description", getattr(operator, "__doc__", "")
+                ),
+            }
+    _debug_to_json(operators, convert_paths=False)
+    return operators
