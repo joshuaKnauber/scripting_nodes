@@ -71,6 +71,7 @@ class SNA_PT_DeveloperSettingsPanel(bpy.types.Panel):
 
         col.separator()
         col.prop(sna, "show_node_refs", text="Show References")
+        col.operator("sna.scrape", text="Scrape")
 
         if sna.show_node_refs:
             self.draw_node_refs(context)

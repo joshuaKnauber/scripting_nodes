@@ -2,7 +2,7 @@ import bpy
 
 from ..utils.sockets import get_next_sockets
 from ...utils.code import indent_code, minimize_indents
-from ...utils import autopep8
+from ...utils.libraries import autopep8
 
 
 def ntree_is_function(ntree: bpy.types.NodeTree):

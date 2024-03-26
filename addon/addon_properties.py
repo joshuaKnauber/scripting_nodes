@@ -1,10 +1,10 @@
 import bpy
 
-from ..utils.redraw import redraw
 from ..core.builder import builder
 from ..constants.properties import property_node_items
 from .info.info_properties import SNA_AddonInfoProperties
 from .references.reference_properties import SNA_Nodes
+from ..core.bd_browser import search
 
 
 class SNA_AddonProperties(bpy.types.PropertyGroup):
@@ -116,4 +116,49 @@ class SNA_AddonProperties(bpy.types.PropertyGroup):
         name="Node Search",
         description="Search for a node by name or type",
         options={"TEXTEDIT_UPDATE"},
+    )
+
+    show_bd_browser: bpy.props.BoolProperty(
+        name="Show BD Browser", default=False, description="Show the BD Browser"
+    )
+
+    def update_search(self, _):
+        search.update_search_results(
+            self.blend_data_search,
+            list(self.blend_data_filter),
+            self.blend_data_groupby,
+        )
+
+    blend_data_search: bpy.props.StringProperty(
+        default="",
+        name="Blend Data Search",
+        description="Search for a blend data by name or type",
+        # options={"TEXTEDIT_UPDATE"},
+        update=update_search,
+    )
+
+    blend_data_filter: bpy.props.EnumProperty(
+        items=[
+            ("STRING", "String", "String"),
+            ("INT", "Integer", "Integer"),
+            ("FLOAT", "Float", "Float"),
+            ("BOOLEAN", "Boolean", "Boolean"),
+            ("ENUM", "Enum", "Enum"),
+            ("COLLECTION", "Collection", "Collection"),
+            ("POINTER", "Pointer", "Pointer"),
+        ],
+        name="Blend Data Filter",
+        description="Filter the blend data search",
+        options={"ENUM_FLAG"},
+        update=update_search,
+    )
+
+    blend_data_groupby: bpy.props.EnumProperty(
+        items=[
+            ("VALUE", "Value", "Group by value"),
+            ("NAME", "Name", "Group by name"),
+        ],
+        name="Blend Data Group By",
+        description="Group the blend data search by value or name",
+        update=update_search,
     )

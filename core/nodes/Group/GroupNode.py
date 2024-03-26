@@ -58,7 +58,7 @@ class SNA_NodeGroupNode(SNA_BaseNode, bpy.types.NodeCustomGroup):
             inputs = ", ".join(
                 [
                     (
-                        socket.get_code()
+                        socket.get_code()  # TODO properties as inputs & self for classes (probably just locals)
                         if not getattr(socket, "is_program", False)
                         else (
                             socket.get_meta("layout", "self.layout")
