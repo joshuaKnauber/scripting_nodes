@@ -1,3 +1,4 @@
+from unittest import result
 import bpy
 from bl_ui import space_userpref
 import threading
@@ -45,4 +46,28 @@ class SNA_OT_LaunchBrowser(bpy.types.Operator):
         context.scene.sna.show_bd_browser = True
         self.open_preferences(context)
         self.hide_preference_ui(context)
+        return {"FINISHED"}
+
+
+class SNA_OT_SelectResults(bpy.types.Operator):
+    bl_idname = "sna.select_result"
+    bl_label = "Select Result"
+    bl_description = "Select this result"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    key: bpy.props.StringProperty()
+
+    def execute(self, context):
+        bpy.context.scene.sna.blend_data_selected_result = self.key
+        return {"FINISHED"}
+
+
+class SNA_OT_DeselectResults(bpy.types.Operator):
+    bl_idname = "sna.deselect_result"
+    bl_label = "Deselect Result"
+    bl_description = "Deselect the current result"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        bpy.context.scene.sna.blend_data_selected_result = ""
         return {"FINISHED"}

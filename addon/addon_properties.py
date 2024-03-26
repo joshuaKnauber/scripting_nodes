@@ -162,3 +162,5 @@ class SNA_AddonProperties(bpy.types.PropertyGroup):
         description="Group the blend data search by value or name",
         update=update_search,
     )
+
+    blend_data_selected_result: bpy.props.StringProperty(default="")
