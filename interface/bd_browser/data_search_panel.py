@@ -1,3 +1,4 @@
+from math import e
 import bpy
 from ...core.bd_browser import property_search, operator_search, scraper
 
@@ -16,24 +17,16 @@ class SNA_PT_navigation_bar(bpy.types.Panel):
         layout = self.layout
         sna = context.scene.sna
 
+        row = layout.row()
+        row.operator("sna.toggle_browser", text="Exit", icon="X")
+        layout.separator(factor=1.5)
+
         col = layout.column(align=True)
         col.scale_y = 1.5
-        col.prop(sna, "bd_navigation", expand=True)
-
-
-class SNA_PT_FilterDataSettings(bpy.types.Panel):
-    bl_idname = "SNA_PT_FilterDataSettings"
-    bl_label = "Filter"
-    bl_space_type = "PREFERENCES"
-    bl_region_type = "WINDOW"
-    bl_options = {"HIDE_HEADER"}
-
-    @classmethod
-    def poll(cls, context):
-        return context.scene.sna.show_bd_browser
-
-    def draw(self, context: bpy.types.Context):
-        layout = self.layout
+        col.prop_enum(sna, "bd_navigation", "PROPERTIES")
+        col.prop_enum(sna, "bd_navigation", "OPERATORS")
+        col.separator()
+        col.prop_enum(sna, "bd_navigation", "BOOKMARKS")
 
 
 class SNA_PT_data_search(bpy.types.Panel):
@@ -50,8 +43,6 @@ class SNA_PT_data_search(bpy.types.Panel):
         layout = self.layout
         sna = context.scene.sna
 
-        layout.operator("sna.scrape")
-
         if scraper.BLENDER_DATA.keys():
             if sna.blend_data_selected_result:
                 if not sna.blend_data_selected_result in scraper.BLENDER_DATA:
@@ -67,9 +58,13 @@ class SNA_PT_data_search(bpy.types.Panel):
                     layout.label(text=path)
 
             else:
-                layout.prop(sna, "blend_data_search", icon="VIEWZOOM", text="")
+                split = layout.split(align=True, factor=0.85)
+                split.prop(sna, "blend_data_search", icon="VIEWZOOM", text="")
+                split.operator("sna.scrape", text="Refresh Data", icon="FILE_REFRESH")
                 layout.prop(sna, "blend_data_filter")
-                layout.prop(sna, "blend_data_groupby")
+                row = layout.row(align=False)
+                row.prop(sna, "blend_data_groupby", text="Group By")
+                row.prop(sna, "blend_data_type", text="Data Type")
 
                 for i, group in enumerate(property_search.SEARCH_RESULTS.keys()):
                     if i >= 10:
@@ -92,7 +87,9 @@ class SNA_PT_data_search(bpy.types.Panel):
                         box = col.box()
                         boxcol = box.column(align=True)
                         row = boxcol.row()
-                        row.label(text=f"{item['name']}")
+                        row.label(
+                            text=f"{item['name'] if sna.blend_data_groupby == 'VALUE' else item['last_value']}"
+                        )
                         row.operator(
                             "sna.select_result", text="", icon="CHECKBOX_HLT"
                         ).key = result["key"]
@@ -102,16 +99,28 @@ class SNA_PT_data_search(bpy.types.Panel):
                             row.label(text=item["description"])
                         row = boxcol.row()
                         row.enabled = False
-                        row.label(text=", ".join(item["paths"]))
+                        example = (
+                            sorted(list(item["paths"]), key=lambda p: len(p))[0]
+                            .replace("bpy.data.", "")
+                            .replace("bpy.context", "context")
+                            .replace(".", " > ")
+                            .title()
+                            .replace("_", " ")
+                        )
+                        row.label(text=f"E.g.: {example}")
+        else:
+            row = layout.row()
+            row.scale_y = 2
+            row.operator("sna.scrape", text="Load Data", icon="FILE_REFRESH")
 
     def draw_operators(self, context: bpy.types.Context):
         layout = self.layout
         sna = context.scene.sna
 
-        layout.operator("sna.scrape")
-
         if scraper.BLENDER_OPERATORS:
-            layout.prop(sna, "operator_search", icon="VIEWZOOM", text="")
+            split = layout.split(align=True, factor=0.85)
+            split.prop(sna, "operator_search", icon="VIEWZOOM", text="")
+            split.operator("sna.scrape", text="Refresh Data", icon="FILE_REFRESH")
 
             for i, operator in enumerate(operator_search.SEARCH_RESULTS):
                 if i >= 100:
@@ -130,9 +139,21 @@ class SNA_PT_data_search(bpy.types.Panel):
                 row = col.row()
                 row.enabled = False
                 row.label(text=operator)
+        else:
+            row = layout.row()
+            row.scale_y = 2
+            row.operator("sna.scrape", text="Load Data", icon="FILE_REFRESH")
+
+    def draw_bookmarks(self, context: bpy.types.Context):
+        layout = self.layout
+        sna = context.scene.sna
+
+        layout.label(text="Bookmarks")
 
     def draw(self, context: bpy.types.Context):
         if context.scene.sna.bd_navigation == "PROPERTIES":
             self.draw_properties(context)
         elif context.scene.sna.bd_navigation == "OPERATORS":
             self.draw_operators(context)
+        elif context.scene.sna.bd_navigation == "BOOKMARKS":
+            self.draw_bookmarks(context)

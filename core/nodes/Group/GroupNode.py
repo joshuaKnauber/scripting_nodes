@@ -37,19 +37,49 @@ class SNA_NodeGroupNode(SNA_BaseNode, bpy.types.NodeCustomGroup):
 
     def on_node_tree_update(self, ntree: bpy.types.NodeTree):
         if ntree == self.group_tree:
-            print("group node update")
-            self.update_sockets()
+            self.update_sockets(ntree)
 
-    def update_sockets(self):
-        self.inputs.clear()
-        self.outputs.clear()
-        # TODO reconnect links
+    def update_sockets(self, ntree):
         if self.group_tree:
+            # remember links
+            inpLinks = {}
+            outLinks = {}
+            for socket in self.inputs:
+                for link in socket.links:
+                    inpLinks[link.from_socket] = (socket.name, socket.bl_idname)
+            for socket in self.outputs:
+                for link in socket.links:
+                    outLinks[link.to_socket] = (socket.name, socket.bl_idname)
+            # clear inputs and outputs
+            self.inputs.clear()
+            self.outputs.clear()
+            # add inputs and outputs
             for socket in self.group_tree.interface.items_tree:
                 if socket.in_out == "INPUT":
                     self.add_input(socket.socket_type, socket.name)
-                else:
+                if socket.in_out == "OUTPUT":
                     self.add_output(socket.socket_type, socket.name)
+            # reconnect links
+            for from_socket, to_socket in inpLinks.items():
+                to_socket = next(
+                    filter(
+                        lambda inp: inp.name == to_socket[0]
+                        and inp.bl_idname == to_socket[1],
+                        self.inputs,
+                    )
+                )
+                if to_socket:
+                    from_socket.node.node_tree.links.new(to_socket, from_socket)
+            for to_socket, from_socket in outLinks.items():
+                from_socket = next(
+                    filter(
+                        lambda out: out.name == from_socket[0]
+                        and out.bl_idname == from_socket[1],
+                        self.outputs,
+                    )
+                )
+                if from_socket:
+                    to_socket.node.node_tree.links.new(from_socket, to_socket)
 
     def generate(self, context: Context, trigger: Node):
         if self.group_tree:

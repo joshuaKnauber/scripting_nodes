@@ -126,8 +126,9 @@ class SNA_AddonProperties(bpy.types.PropertyGroup):
     bd_navigation: bpy.props.EnumProperty(
         name="Navigation",
         items=[
-            ("PROPERTIES", "Properties", "Properties"),
-            ("OPERATORS", "Operators", "Operators"),
+            ("PROPERTIES", "Properties", "Properties", "NONE", 0),
+            ("OPERATORS", "Operators", "Operators", "NONE", 1),
+            ("BOOKMARKS", "Bookmarks", "Bookmarks", "BOOKMARKS", 2),
         ],
         default="PROPERTIES",
     )
@@ -137,6 +138,7 @@ class SNA_AddonProperties(bpy.types.PropertyGroup):
             self.blend_data_search,
             list(self.blend_data_filter),
             self.blend_data_groupby,
+            self.blend_data_type,
         )
 
     blend_data_search: bpy.props.StringProperty(
@@ -165,11 +167,30 @@ class SNA_AddonProperties(bpy.types.PropertyGroup):
 
     blend_data_groupby: bpy.props.EnumProperty(
         items=[
-            ("VALUE", "Value", "Group by value"),
-            ("NAME", "Name", "Group by name"),
+            ("VALUE", "Value", "Group results by the value of the property"),
+            ("NAME", "Name", "Group results by the name of the property"),
         ],
         name="Blend Data Group By",
         description="Group the blend data search by value or name",
+        update=update_search,
+    )
+
+    blend_data_type: bpy.props.EnumProperty(
+        items=[
+            ("ALL", "All Data", "All data found in the file"),
+            (
+                "DATA",
+                "General Data",
+                "Blender data found in the file such as collections of objects and materials",
+            ),
+            (
+                "CONTEXT",
+                "Area Context Data",
+                "Data for the context of the active area such as the active object or selected node tree",
+            ),
+        ],
+        name="Blend Data Type",
+        description="Group the blend data search by type",
         update=update_search,
     )
 

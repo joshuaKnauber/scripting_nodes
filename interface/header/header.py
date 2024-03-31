@@ -9,7 +9,7 @@ def header_prepend(self, context: bpy.types.Context):
         layout = self.layout
         row = layout.row()
 
-        row.operator("sna.launch_browser", text="Blend Data Browser", icon="VIEWZOOM")
+        row.operator("sna.toggle_browser", text="Blend Data Browser", icon="VIEWZOOM")
 
 
 def header_append(self, context: bpy.types.Context):

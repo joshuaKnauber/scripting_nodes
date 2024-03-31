@@ -1,7 +1,5 @@
 from typing import Any, Literal
 
-import bpy
-
 
 class bcolors:
     OKBLUE = "\033[94m"

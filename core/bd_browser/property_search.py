@@ -1,6 +1,4 @@
-import threading
 import re
-import bpy
 from ...utils.libraries.fuzzywuzzy import fuzz
 from . import scraper
 
@@ -8,19 +6,27 @@ from . import scraper
 SEARCH_RESULTS = {}  # group: { key, score }[]
 
 
-def update_search_results(query: str, types: [str], groupby: str):
+def update_search_results(query: str, types: [str], groupby: str, data_type: str):
     global SEARCH_RESULTS
 
     # filter data by type
     filtered_data = {}
     for key, value in scraper.BLENDER_DATA.items():
-        if not types or value["type"] in types:
+        has_bpydata = any(map(lambda p: p.startswith("bpy.data"), value["paths"]))
+        has_bpycontext = any(map(lambda p: p.startswith("bpy.context"), value["paths"]))
+        if (not types or value["type"] in types) or (
+            data_type == "ALL"
+            or (data_type == "DATA" and has_bpydata)
+            or (data_type == "CONTEXT" and has_bpycontext)
+        ):
             filtered_data[key] = value
 
     # assign a score to each key
     scores = {}
     for key, value in filtered_data.items():
-        clean_path = re.sub(r"\[.*\]", "", value["paths"][0]).replace(".", " ").lower()
+        clean_path = (
+            re.sub(r"\[.*\]", "", list(value["paths"])[0]).replace(".", " ").lower()
+        )
         path_score = fuzz.partial_ratio(query, clean_path)
         name_score = fuzz.partial_ratio(value["name"], query)
         desc_score = fuzz.partial_ratio(value["description"], query)

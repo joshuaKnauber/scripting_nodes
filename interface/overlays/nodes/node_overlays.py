@@ -1,5 +1,4 @@
 import math
-import os
 from typing import Tuple
 
 import blf
@@ -7,28 +6,11 @@ import bpy
 import gpu
 from gpu_extras.batch import batch_for_shader
 
+from ..utils.monospace_font import get_monospace_font
 from ....utils.is_serpens import in_sn_tree
 
 _node_times = {}  # times in milliseconds
 _node_errors = {}
-
-_monospace_font_id = 0
-
-
-def get_monospace_font() -> int:
-    """Loads the blender monospace font if not already loaded and returns the id"""
-    global _monospace_font_id
-    if not _monospace_font_id:
-        font_path = os.path.join(
-            os.path.dirname(
-                os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-            ),
-            "assets",
-            "fonts",
-            "DejaVuSansMono.woff2",
-        )
-        _monospace_font_id = blf.load(font_path)
-    return _monospace_font_id
 
 
 def set_node_time(id: str, time: int):

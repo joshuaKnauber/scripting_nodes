@@ -1,4 +1,5 @@
 import bpy
+
 from ..core.nodes.Group.operators.edit_operators import (
     SNA_OT_EditSerpensGroup,
     SNA_OT_MakeSerpensGroup,

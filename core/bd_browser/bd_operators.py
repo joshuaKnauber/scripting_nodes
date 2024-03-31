@@ -1,7 +1,5 @@
-from unittest import result
 import bpy
 from bl_ui import space_userpref
-import threading
 
 from . import scraper
 
@@ -13,18 +11,17 @@ class SNA_OT_Scrape(bpy.types.Operator):
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context):
-        thread = threading.Thread(target=scraper.store_blender_data)
-        thread.start()
+        scraper.start_threaded()
         return {"FINISHED"}
 
 
-class SNA_OT_LaunchBrowser(bpy.types.Operator):
-    bl_idname = "sna.launch_browser"
-    bl_label = "Launch Blend Data Browser"
-    bl_description = "Launches the blend data browser"
+class SNA_OT_ToggleBrowser(bpy.types.Operator):
+    bl_idname = "sna.toggle_browser"
+    bl_label = "Toggle Blend Data Browser"
+    bl_description = "Toggles the blend data browser"
     bl_options = {"REGISTER", "INTERNAL"}
 
-    def hide_preference_ui(self, context):
+    def toggle_preference_ui(self, context):
         sna = context.scene.sna
         for cls in space_userpref.classes:
             try:
@@ -43,9 +40,10 @@ class SNA_OT_LaunchBrowser(bpy.types.Operator):
             bpy.ops.screen.userpref_show("INVOKE_DEFAULT")
 
     def execute(self, context):
-        context.scene.sna.show_bd_browser = True
-        self.open_preferences(context)
-        self.hide_preference_ui(context)
+        context.scene.sna.show_bd_browser = not context.scene.sna.show_bd_browser
+        if context.scene.sna.show_bd_browser:
+            self.open_preferences(context)
+        self.toggle_preference_ui(context)
         return {"FINISHED"}
 
 

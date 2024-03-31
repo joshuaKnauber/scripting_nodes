@@ -164,9 +164,7 @@ class ScriptingSocket:
         if key in meta:
             return meta[key]
         # Return socket function input name for group inputs
-        print(self.node)
         if self.node.bl_idname == "NodeGroupInput":
-            print("getting it")
             return self.function_input_name
         return fallback
 
