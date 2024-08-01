@@ -7,3 +7,4 @@ update_log.json
 installed.json
 extensions/snippets/*
 !extensions/snippets/__init__.py
+blender_scripting_nodes*
