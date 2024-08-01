@@ -35,3 +35,21 @@ class SNA_BooleanSocket(bpy.types.NodeSocket, ScriptingSocket):
                 layout.label(text=text)
         else:
             layout.label(text=text)
+
+
+class SNA_BooleanSocketInterface(bpy.types.NodeTreeInterfaceSocket):
+
+    bl_idname = "SNA_BooleanSocketInterface"
+    bl_socket_idname = "SNA_BooleanSocket"
+    bl_label = "Boolean"
+
+    def draw(self, context: bpy.types.Context, layout: bpy.types.UILayout):
+        layout.label(text="drawing")
+
+
+def register():
+    bpy.utils.register_class(SNA_BooleanSocketInterface)
+
+
+def unregister():
+    bpy.utils.unregister_class(SNA_BooleanSocketInterface)

@@ -1,6 +1,7 @@
-from math import e
 import bpy
 from bpy.types import Context, Node, UILayout
+
+from ....utils.classes import extend_blender_class
 
 from ....core.node_tree.node_tree import ScriptingNodeTree
 from ..base_node import SNA_BaseNode
@@ -30,16 +31,16 @@ class SNA_NodeGroupNode(SNA_BaseNode, bpy.types.NodeCustomGroup):
 
     def draw_node(self, context, layout):
         if not self.hide_group:
-            layout.template_ID(self, "group_tree", new="node.new_node_tree")
+            layout.template_ID(self, "group_tree", new="sna.add_group_nodetree")
 
     def draw_properties(self, context: Context, layout: UILayout):
         layout.prop(self, "hide_group")
 
     def on_node_tree_update(self, ntree: bpy.types.NodeTree):
         if ntree == self.group_tree:
-            self.update_sockets(ntree)
+            self.update_sockets()
 
-    def update_sockets(self, ntree):
+    def update_sockets(self):
         if self.group_tree:
             # remember links
             inpLinks = {}
@@ -80,6 +81,7 @@ class SNA_NodeGroupNode(SNA_BaseNode, bpy.types.NodeCustomGroup):
                 )
                 if from_socket:
                     to_socket.node.node_tree.links.new(from_socket, to_socket)
+        self.mark_dirty()
 
     def generate(self, context: Context, trigger: Node):
         if self.group_tree:
@@ -104,3 +106,17 @@ class SNA_NodeGroupNode(SNA_BaseNode, bpy.types.NodeCustomGroup):
                 {self.group_tree.function_name()}({inputs})
                 {self.outputs[0].get_code(3)}
             """
+
+
+@extend_blender_class
+class NodeGroupInput(bpy.types.NodeGroupInput):
+    @property
+    def node_tree(self):
+        return self.id_data
+
+
+@extend_blender_class
+class NodeGroupOutput(bpy.types.NodeGroupOutput):
+    @property
+    def node_tree(self):
+        return self.id_data

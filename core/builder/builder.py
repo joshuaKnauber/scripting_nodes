@@ -33,9 +33,9 @@ def build_addon(base_dir: str = None, prod_build: bool = False, module: str = No
 
         _prepare_addon_dir(_get_addons_dir() if not base_dir else base_dir, module)
         _reload_addon(module)
-    except Exception as e:
-        logger.error("Failed to build addon")
-        logger.error(e)
+    # except Exception as e:
+    #     logger.error("Failed to build addon")
+    #     logger.error(e)
     finally:
         IS_PROD_BUILD = False
         build_complete_msg(prod_build)

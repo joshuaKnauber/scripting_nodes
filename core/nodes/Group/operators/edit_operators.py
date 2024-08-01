@@ -5,19 +5,27 @@ from .....core.node_tree.node_tree import ScriptingNodeTree
 
 
 class SNA_OT_AddGroupNode(bpy.types.Operator):
-    bl_idname = "sna.add_group_node"
-    bl_label = "Add Group"
-    bl_description = "Add this node group"
+    bl_idname = "sna.add_group_nodetree"
+    bl_label = "Add Group Node Tree"
+    bl_description = "Add node tree to this node"
     bl_options = {"REGISTER", "UNDO"}
 
-    ntree: bpy.props.StringProperty(name="Node Tree", default="")
-
     def execute(self, context):
-        bpy.ops.node.add_node(
-            "INVOKE_DEFAULT", type="SNA_NodeGroupNode", use_transform=True
-        )
         node = context.active_node
-        node.group_tree = bpy.data.node_groups[self.ntree]
+
+        tree = bpy.data.node_groups.new("NodeTree", ScriptingNodeTree.bl_idname)
+        tree.use_fake_user = True
+
+        node.group_tree = tree
+        inp = tree.nodes.new("NodeGroupInput")
+        inp.location = (-200, 0)
+        out = tree.nodes.new("NodeGroupOutput")
+        out.location = (200, 0)
+
+        def update_name():
+            tree.name = "Function NodeTree"
+
+        bpy.app.timers.register(update_name, first_interval=0.001)
         return {"FINISHED"}
 
 

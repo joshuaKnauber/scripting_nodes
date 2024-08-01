@@ -1,5 +1,6 @@
+from typing import Any
 import bpy
-from bpy.types import Context, UILayout
+from bpy.types import Context, Node, NodeSocket, UILayout
 
 from ..base_socket import ScriptingSocket
 
@@ -19,14 +20,19 @@ class SNA_InterfaceSocket(bpy.types.NodeSocket, ScriptingSocket):
         layout.label(text=text)
 
 
-# class SNA_GroupInterface_InterfaceSocket(bpy.types.NodeTreeInterfaceSocket):
+class SNA_InterfaceSocketInterface(bpy.types.NodeTreeInterfaceSocket):
 
-#     bl_idname = SNA_InterfaceSocket.bl_idname + "Interface"
-#     bl_socket_idname = SNA_InterfaceSocket.bl_idname
-#     bl_label = SNA_InterfaceSocket.bl_label
+    bl_idname = "SNA_InterfaceSocketInterface"
+    bl_socket_idname = "SNA_InterfaceSocket"
+    bl_label = "Interface"
 
-#     def draw(self, context: Context, layout: UILayout):
-#         layout.label(text="drawing")
+    def draw(self, context: Context, layout: UILayout):
+        pass
 
-#     def color(self, context: Context, node: bpy.types.Node):
-#         return (1, 0, 0, 1)
+
+def register():
+    bpy.utils.register_class(SNA_InterfaceSocketInterface)
+
+
+def unregister():
+    bpy.utils.unregister_class(SNA_InterfaceSocketInterface)

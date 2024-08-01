@@ -1,5 +1,6 @@
 import bpy
 
+from ...utils.node_tree import get_node_tree_by_id
 from ..base_socket import ScriptingSocket
 from ....utils.enum import make_enum_item
 
@@ -14,20 +15,25 @@ class SNA_EnumSocket(bpy.types.NodeSocket, ScriptingSocket):
     bl_idname = "SNA_EnumSocket"
     bl_label = "Enum"
 
-    items: bpy.props.CollectionProperty(type=SNA_EnumItem)
+    enum_items: bpy.props.CollectionProperty(type=SNA_EnumItem)
 
     def reset_items(self):
-        self.items.clear()
+        self.enum_items.clear()
 
     def add_item(self, value, name):
-        item = self.items.add()
+        item = self.enum_items.add()
         item.value = value
         item.name = name
         item.description = f"Input Value: {value}"
 
     def get_items(self, context):
+        # select sockets collection or group interface socket collection
+        items_collection = self.enum_items
+        if self.node_is_group():
+            items_collection = self.group_interface_socket().enum_items
+        # get items
         items = []
-        for i, item in enumerate(self.items):
+        for i, item in enumerate(items_collection):
             items.append(make_enum_item(item.value, item.name, item.description, 0, i))
         return items
 
@@ -60,3 +66,80 @@ class SNA_EnumSocket(bpy.types.NodeSocket, ScriptingSocket):
                 layout.label(text=text)
         else:
             layout.label(text=text)
+
+
+class SNA_AddSocketEnumItem(bpy.types.Operator):
+    bl_idname = "sna.add_socket_enum_item"
+    bl_label = "Add Enum Item"
+    bl_description = "Add an enum item to this socket"
+    bl_options = {"REGISTER", "UNDO"}
+
+    node_tree_id: bpy.props.StringProperty()
+    position: bpy.props.IntProperty()
+
+    def execute(self, context):
+        ntree = get_node_tree_by_id(self.node_tree_id)
+        if ntree:
+            socket = ntree.interface.items_tree[self.position]
+            socket.enum_items.add()
+        return {"FINISHED"}
+
+
+class SNA_DeleteSocketEnumItem(bpy.types.Operator):
+    bl_idname = "sna.delete_socket_enum_item"
+    bl_label = "Delete Enum Item"
+    bl_description = "Delete the selected enum item"
+    bl_options = {"REGISTER", "UNDO"}
+
+    node_tree_id: bpy.props.StringProperty()
+    position: bpy.props.IntProperty()
+    index: bpy.props.IntProperty()
+
+    def execute(self, context):
+        ntree = get_node_tree_by_id(self.node_tree_id)
+        if ntree:
+            socket = ntree.interface.items_tree[self.position]
+            socket.enum_items.remove(self.index)
+        return {"FINISHED"}
+
+
+class SNA_EnumSocketInterface(bpy.types.NodeTreeInterfaceSocket):
+
+    bl_idname = "SNA_EnumSocketInterface"
+    bl_socket_idname = "SNA_EnumSocket"
+    bl_label = "Enum"
+
+    enum_items: bpy.props.CollectionProperty(type=SNA_EnumItem)
+
+    def add_item(self, value, name):
+        item = self.enum_items.add()
+        item.value = value
+        item.name = name
+        item.description = f"Input Value: {value}"
+
+    def draw(self, context, layout):
+        col = layout.column(align=True)
+        for i, item in enumerate(self.enum_items):
+            box = col.box()
+            boxcol = box.column(align=True)
+            row = boxcol.row()
+            row.prop(item, "name", text="")
+            op = row.operator(
+                "sna.delete_socket_enum_item", text="", icon="TRASH", emboss=False
+            )
+            op.node_tree_id = self.id_data.id
+            op.position = self.position
+            op.index = i
+            boxcol.prop(item, "value", text="Value")
+            boxcol.prop(item, "description", text="Description")
+        op = layout.operator("sna.add_socket_enum_item", text="Add Item", icon="ADD")
+        op.node_tree_id = self.id_data.id
+        op.position = self.position
+
+
+def register():
+    bpy.utils.register_class(SNA_EnumSocketInterface)
+
+
+def unregister():
+    bpy.utils.unregister_class(SNA_EnumSocketInterface)

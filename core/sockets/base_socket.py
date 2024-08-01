@@ -77,6 +77,23 @@ class ScriptingSocket:
         """Returns a list of all valid connected sockets"""
         return sockets.get_next_sockets(self)
 
+    ### GROUP NODES ###
+
+    def node_is_group(self):
+        """Returns a boolean saying if the node this socket is on is a group node"""
+        return self.node.bl_idname == "SNA_NodeGroupNode"
+
+    def group_interface_socket(self):
+        """Returns the interface socket of the group node this socket is on"""
+        sockets = [
+            *filter(
+                lambda s: (self.is_output and s.in_out == "OUTPUT")
+                or (not self.is_output and s.in_out == "INPUT"),
+                self.node.group_tree.interface.items_tree,
+            )
+        ]
+        return sockets[self.index]
+
     ### SOCKET CODE ###
 
     def _python_value(self):
@@ -87,11 +104,11 @@ class ScriptingSocket:
     )
 
     def _get_program_code(
-        self, indent: int = 0, fallback: str = "", only_current: bool = False
+        self, indent: int = 0, fallback: str = "", ignore_dynamic: bool = False
     ):
         """Returns the code for a program output including potential dynamic outputs with the same name"""
         # get dynamic socket code
-        if self.dynamic and not only_current:
+        if self.dynamic and not ignore_dynamic:
             code = []
             # get individual socket code
             for out in self.node.outputs:
@@ -101,7 +118,7 @@ class ScriptingSocket:
                         code.append(out_code)
             if len(code) == 0:
                 return fallback
-            return "\n".join(code)
+            return indent_code("\n".join(code), indent)
         # get this sockets code
         else:
             if not self.has_next():
@@ -120,7 +137,10 @@ class ScriptingSocket:
     def get_code(self, indent: int = 0, fallback: str = ""):
         if self.is_output:
             if getattr(self, "is_program", False):
-                return self._get_program_code(indent, fallback)
+                return self._get_program_code(
+                    indent,
+                    fallback,
+                )
             else:
                 return self._python_value()
         elif not getattr(self, "is_program", False):

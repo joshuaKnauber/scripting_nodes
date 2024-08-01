@@ -234,31 +234,48 @@ class SNA_BaseNode(bpy.types.Node):
     def generate(self, context: bpy.types.Context, trigger: bpy.types.Node):
         """Generates the code for the node. Overwrite this in nodes by setting the self.code... properties"""
 
-    def mark_dirty(self, trigger: bpy.types.Node = None, retried: bool = False):
+    def mark_dirty(
+        self,
+        trigger: bpy.types.Node = None,
+        retried: bool = False,
+        ignore_no_updates=False,
+    ):
         """Called when the node changes. Forwards the update to the node tree if something has changed. Retries when the node is not ready"""
         if not self._sockets_initialized() or self.pause_updates:
             # retry when node not ready
             if not retried:
                 self.mark_dirty_delayed(trigger)
             return
+
         # reset code
         summary = self._get_code_summary()
         self._reset_code()
+
         # generate new code
         try:
             self.generate(bpy.context, trigger if trigger else self)
         except Exception as e:
             logger.error(f"Error in node '{self.name}'", e)
+
         # check if code has changed
-        if summary == self._get_code_summary():
+        if summary == self._get_code_summary() and not ignore_no_updates:
             self._propagate_change_to_references()
             return
+
         # propagate changes and build addon if necessary
         self._start_was_registered()
         self._propagate_changes()
         # TODO when code_global and dev run the group node instead of rebuilding
         if self.require_register or self.code_global:
             self.node_tree.mark_dirty(self)
+
+        # update node groups that use this nodes node tree
+        for ntree in bpy.data.node_groups:
+            if getattr(ntree, "is_sn_ntree", False):
+                for node in ntree.nodes:
+                    if getattr(node, "group_tree", None) == self.node_tree:
+                        node.mark_dirty(self, ignore_no_updates=True)
+                        node.node_tree.mark_dirty(node)
 
     def mark_dirty_delayed(self, trigger: bpy.types.Node = None):
         """Trigger mark dirty with a short delay"""
