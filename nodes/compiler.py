@@ -1,13 +1,21 @@
+from pydoc import doc
 import bpy
 import time
 from ..utils import indent_code, normalize_code
 from ..node_tree.sockets.conversions import CONVERT_UTILS
-from ..addon.properties.compiler_properties import property_imperative_code, property_register_code, property_unregister_code
-from ..addon.variables.compiler_variables import ntree_variable_register_code, variable_register_code
+from ..addon.properties.compiler_properties import (
+    property_imperative_code,
+    property_register_code,
+    property_unregister_code,
+)
+from ..addon.variables.compiler_variables import (
+    ntree_variable_register_code,
+    variable_register_code,
+)
 
 
 def unregister_addon():
-    """ Unregisters this addon """
+    """Unregisters this addon"""
     sn = bpy.context.scene.sn
     t1 = time.time()
     # if sn.addon_unregister:
@@ -27,7 +35,7 @@ def unregister_addon():
 
 
 def compile_addon():
-    """ Reregisters the current addon code and stores results """
+    """Reregisters the current addon code and stores results"""
     if not bpy.context.scene.sn.pause_reregister:
         t1 = time.time()
         sn = bpy.context.scene.sn
@@ -65,14 +73,18 @@ def compile_addon():
             sn.addon_modules.append(mod)
             mod.register()
             print(
-                "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+                "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            )
             print(
-                "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
+                "- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -"
+            )
             print("Compiled successfully!")
         except Exception as error:
             print(error)
             print("^ ERROR WHEN REGISTERING SERPENS ADDON ^\n")
-            if bpy.context.preferences.addons[__name__.partition('.')[0]].preferences.keep_last_error_file:
+            if bpy.context.preferences.addons[
+                __name__.partition(".")[0]
+            ].preferences.keep_last_error_file:
                 if not "serpens_error" in bpy.data.texts:
                     bpy.data.texts.new("serpens_error")
                 err = bpy.data.texts["serpens_error"]
@@ -128,10 +140,15 @@ addon_keymaps.clear()
 
 
 def format_single_file():
-    """ Returns the entire addon code (for development) formatted for a single python file """
+    """Returns the entire addon code (for development) formatted for a single python file"""
     sn = bpy.context.scene.sn
     imports, imperative, main, register, unregister = (
-        DEFAULT_IMPORTS, CONVERT_UTILS + GLOBAL_VARS, "", REGISTER, UNREGISTER)
+        DEFAULT_IMPORTS,
+        CONVERT_UTILS + GLOBAL_VARS,
+        "",
+        REGISTER,
+        UNREGISTER,
+    )
 
     # add property and variable code
     t1 = time.time()
@@ -162,7 +179,9 @@ def format_single_file():
 
     # add module store code
     if not sn.is_exporting:
-        register += "\n\nimport sys\nbpy.context.scene.sn.module_store.append([globals()])\n"
+        register += (
+            "\n\nimport sys\nbpy.context.scene.sn.module_store.append([globals()])\n"
+        )
         unregister += "\n\nbpy.context.scene.sn.module_store.clear()\n"
 
     # format register functions
@@ -187,15 +206,11 @@ def format_single_file():
     code = f"{LICENSE}\n{code}"
 
     if sn.debug_compile_time:
-        print(
-            f"--Variable register code generation took {round((t2-t1)*1000, 2)}ms")
-        print(
-            f"--Property register code generation took {round((t3-t2)*1000, 2)}ms")
-        print(
-            f"--Property unregister code generation took {round((t4-t3)*1000, 2)}ms")
+        print(f"--Variable register code generation took {round((t2-t1)*1000, 2)}ms")
+        print(f"--Property register code generation took {round((t3-t2)*1000, 2)}ms")
+        print(f"--Property unregister code generation took {round((t4-t3)*1000, 2)}ms")
         print(f"--Node code generation took {round((t5-t4)*1000, 2)}ms")
-        print(
-            f"--Property imperative code generation took {round((t6-t5)*1000, 2)}ms")
+        print(f"--Property imperative code generation took {round((t6-t5)*1000, 2)}ms")
         print(f"--Joining code took {round((t7-t6)*1000, 2)}ms")
         print(f"--Removing duplicate code took {round((t8-t7)*1000, 2)}ms")
         print(f"--Formatting linebreaks took {round((t9-t8)*1000, 2)}ms")
@@ -264,7 +279,13 @@ def format_linebreaks(code):
                 if newLines and len(newLines[-1]) - len(newLines[-1].lstrip()) > 0:
                     newLines.append("\n")
                 # linebreak for imperative functions
-                elif newLines and len(line) > 3 and len(newLines[-1].strip()) and line[:3] == "def" and not newLines[-1][0] == "@":
+                elif (
+                    newLines
+                    and len(line) > 3
+                    and len(newLines[-1].strip())
+                    and line[:3] == "def"
+                    and not newLines[-1][0] == "@"
+                ):
                     newLines.append("\n")
                 # linebreak for imperative functions
                 elif newLines and "import" in line and not "import" in newLines[-1]:
@@ -275,21 +296,30 @@ def format_linebreaks(code):
                 if line and line.lstrip()[0] == "@":
                     newLines.append("")
                 # linebreak for functions without decorator
-                elif len(line) > 3 and len(newLines[-1].strip()) and line.lstrip()[:3] == "def" and not newLines[-1].lstrip()[0] == "@":
+                elif (
+                    len(line) > 3
+                    and len(newLines[-1].strip())
+                    and line.lstrip()[:3] == "def"
+                    and not newLines[-1].lstrip()[0] == "@"
+                ):
                     newLines.append("")
             newLines.append(line)
 
     # insert linebreaks after last import
     for i in range(len(newLines)):
-        if "import" in newLines[i] and i < len(newLines)-1 and not "import" in newLines[i+1]:
-            newLines.insert(i+1, "\n")
+        if (
+            "import" in newLines[i]
+            and i < len(newLines) - 1
+            and not "import" in newLines[i + 1]
+        ):
+            newLines.insert(i + 1, "\n")
             break
 
     return "\n".join(newLines) + "\n"
 
 
 def get_trigger_nodes():
-    """ Returns a list of all trigger nodes in all node trees """
+    """Returns a list of all trigger nodes in all node trees"""
     nodes = []
     for ntree in bpy.data.node_groups:
         if ntree.bl_idname == "ScriptingNodesTree":
@@ -301,7 +331,7 @@ def get_trigger_nodes():
 
 
 def info():
-    """ Returns the bl_info for this addon """
+    """Returns the bl_info for this addon"""
     sn = bpy.context.scene.sn
     info = f"""
     bl_info = {{
@@ -321,18 +351,19 @@ def info():
 
 
 def format_multifile():
-    """ Returns the code for the entire addon as a dictionary of multiple files """
+    """Returns the code for the entire addon as a dictionary of multiple files"""
     files = {}
 
     register, unregister = "", ""
     for ntree in bpy.data.node_groups:
         if ntree.bl_idname == "ScriptingNodesTree":
             code, ntree_register, ntree_unregister = format_node_tree(ntree)
-            files[ntree.python_name] = code
+            files[ntree.python_name + ".py"] = code
             register += "\n" + ntree_register + "\n"
             unregister += "\n" + ntree_unregister + "\n"
 
-    files["__init__"] = format_multifile_init(register, unregister)
+    files["__init__.py"] = format_multifile_init(register, unregister)
+    files["blender_manifest.toml"] = format_blender_manifest()
     return files
 
 
@@ -371,8 +402,9 @@ def format_node_tree(ntree):
 
     for group in bpy.data.node_groups:
         if group != ntree and group.bl_idname == "ScriptingNodesTree":
-            code = code.replace(group.python_name,
-                                f"{group.python_name}.{group.python_name}")
+            code = code.replace(
+                group.python_name, f"{group.python_name}.{group.python_name}"
+            )
 
     code = imports + "\n" + code
 
@@ -384,7 +416,12 @@ def format_node_tree(ntree):
 
 def format_multifile_init(node_register, node_unregister):
     imports, imperative, main, register, unregister = (
-        DEFAULT_IMPORTS, CONVERT_UTILS + GLOBAL_VARS, "", REGISTER, UNREGISTER)
+        DEFAULT_IMPORTS,
+        CONVERT_UTILS + GLOBAL_VARS,
+        "",
+        REGISTER,
+        UNREGISTER,
+    )
 
     for ntree in bpy.data.node_groups:
         if ntree.bl_idname == "ScriptingNodesTree":
@@ -398,8 +435,9 @@ def format_multifile_init(node_register, node_unregister):
     register = "def register():\n" + indent_code(register, 1, 0)
     unregister = "def unregister():\n" + indent_code(unregister, 1, 0)
 
-    code = imports + "\n" + imperative + "\n" + \
-        main + "\n" + register + "\n" + unregister
+    code = (
+        imports + "\n" + imperative + "\n" + main + "\n" + register + "\n" + unregister
+    )
     code = remove_duplicates(code)
     code = format_linebreaks(code)
 
@@ -407,3 +445,27 @@ def format_multifile_init(node_register, node_unregister):
     code = f"{LICENSE}\n{code}"
 
     return code
+
+
+def format_blender_manifest():
+    sn = bpy.context.scene.sn
+    manifest = f"""
+        schema_version = "1.0.0"
+
+        id = "{sn.module_name}"
+        version = "{'.'.join(map(str, tuple(sn.version)))}"
+        name = "{sn.addon_name}"
+        tagline = "{sn.description if sn.description else sn.addon_name}"
+        maintainer = "{sn.author}"
+        type = "add-on"
+        {'website = "'+sn.doc_url+'"' if sn.doc_url else ""}
+
+        tags = ["{sn.category if not sn.category == 'CUSTOM' else sn.custom_category}"]
+
+        blender_version_min = "{'.'.join(map(str, tuple(sn.blender)))}"
+
+        license = [
+        "SPDX:GPL-2.0-or-later",
+        ]
+    """
+    return normalize_code(manifest)

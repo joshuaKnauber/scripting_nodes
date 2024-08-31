@@ -275,7 +275,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     )
 
     blender: bpy.props.IntVectorProperty(
-        default=(3, 0, 0),
+        default=(4, 2, 0),
         size=3,
         min=0,
         name="Minimum Blender",
@@ -397,9 +397,11 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
                     rna = op.get_rna_type()
                     ops.append(
                         {
-                            "name": getattr(rna, "name", op_name)
-                            if getattr(rna, "name", op_name)
-                            else op_name.replace("_", " ").title(),
+                            "name": (
+                                getattr(rna, "name", op_name)
+                                if getattr(rna, "name", op_name)
+                                else op_name.replace("_", " ").title()
+                            ),
                             "operator": op_name,
                         }
                     )
