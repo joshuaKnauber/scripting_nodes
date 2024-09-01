@@ -3,16 +3,18 @@ from ...base_node import SN_ScriptingBaseNode
 from ...templates.PropertyNode import PropertyNode
 
 
-
 class SN_PreferencesNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
 
     bl_idname = "SN_PreferencesNode"
     bl_label = "Preferences"
     bl_width_default = 200
-    def layout_type(self, _): return "layout"
+
+    def layout_type(self, _):
+        return "layout"
+
     is_trigger = True
     node_color = "INTERFACE"
-    
+
     def on_create(self, context):
         self.add_boolean_input("Hide").default_value = False
         self.add_dynamic_interface_output("Preferences")
@@ -22,7 +24,7 @@ class SN_PreferencesNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
         props_code_list = self.props_code(context).split("\n")
         props_register_list = self.props_register(context).split("\n")
         props_unregister_list = self.props_unregister(context).split("\n")
-        
+
         idname = f"SNA_TempAddonPreferences_{self.static_uid}"
         prop_name = f"sna_addon_prefs_temp"
 
@@ -59,7 +61,7 @@ class SN_PreferencesNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
         props_code_list = self.props_code(context).split("\n")
         props_register_list = self.props_register(context).split("\n")
         props_unregister_list = self.props_unregister(context).split("\n")
-        
+
         idname = f"SNA_AddonPreferences_{self.static_uid}"
 
         self.code = f"""
@@ -67,7 +69,7 @@ class SN_PreferencesNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
 
                     class {idname}(bpy.types.AddonPreferences):
 
-                        bl_idname = '{bpy.context.scene.sn.module_name}'
+                        bl_idname = {"__package__" if bpy.context.scene.sn.is_exporting else "'"+bpy.context.scene.sn.module_name+"'"}
                         
                         {self.indent(props_code_list, 6)}
 
@@ -94,6 +96,8 @@ class SN_PreferencesNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
             if ntree.bl_idname == "ScriptingNodesTree":
                 amount += len(ntree.node_collection(self.bl_idname).refs)
         if amount > 1:
-            layout.label(text="Multiple preferences nodes! Only one will be used", icon="ERROR")
-            
+            layout.label(
+                text="Multiple preferences nodes! Only one will be used", icon="ERROR"
+            )
+
         self.draw_list(layout)
