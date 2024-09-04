@@ -45,7 +45,7 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
         return get_python_name(
             bpy.context.scene.sn.addon_name,
             replacement=f"addon_{uuid4().hex[:5].upper()}",
-        )
+        ).replace("__", "_")
 
     def update_reregister(self, context):
         if not self.pause_reregister:
