@@ -36,7 +36,10 @@ def unregister_addon():
 
 def compile_addon():
     """Reregisters the current addon code and stores results"""
-    if not bpy.context.scene.sn.pause_reregister:
+    if (
+        not bpy.context.scene.sn.pause_reregister
+        and not bpy.context.scene.sn.is_exporting
+    ):
         t1 = time.time()
         sn = bpy.context.scene.sn
 

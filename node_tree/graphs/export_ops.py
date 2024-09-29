@@ -73,7 +73,6 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
 
     def add_code(self, path):
         """Creates the index file"""
-        bpy.context.scene.sn.is_exporting = True
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 ntree.reevaluate()
@@ -89,7 +88,6 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
                 code = files[name]
                 code = code.replace("from easybpy import", "from .easybpy import")
                 code_file.write(code)
-        bpy.context.scene.sn.is_exporting = False
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 ntree.reevaluate()
@@ -120,6 +118,7 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
             self.report({"WARNING"}, message=f"Error: {e.filename} - {e.strerror}.")
 
     def execute(self, context):
+        bpy.context.scene.sn.is_exporting = True
         context.window_manager.progress_begin(0, 100)
         try:
             name, _ = os.path.splitext(self.filepath)
@@ -137,6 +136,7 @@ class SN_OT_ExportAddon(bpy.types.Operator, ExportHelper):
             bpy.ops.sn.export_to_marketplace("INVOKE_DEFAULT")
         except Exception as e:
             self.report({"ERROR"}, message=f"Error: {e}")
+        bpy.context.scene.sn.is_exporting = False
         context.window_manager.progress_end()
         return {"FINISHED"}
 
