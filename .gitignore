@@ -2,3 +2,5 @@ __pycache__/
 *.log
 
 venv/
+
+to_remove.txt

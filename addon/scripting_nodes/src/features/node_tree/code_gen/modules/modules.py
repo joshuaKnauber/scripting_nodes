@@ -1,3 +1,6 @@
+from scripting_nodes.src.features.node_tree.code_gen.modules.to_remove import (
+    add_module_to_remove,
+)
 from scripting_nodes.src.lib.constants.paths import DEV_ADDON_MODULE
 from scripting_nodes.src.lib.utils.logger import log_if
 import addon_utils
@@ -25,17 +28,12 @@ def unregister_last_module():
 
 
 def unregister_module(module: str):
-    print(module)
     if not _has_module(module):
-        print("no module")
         return
-    print("yes module")
     if addon_utils.check(module)[0]:
-        print("disable")
         addon_utils.disable(module, default_set=True)
     for name in list(sys.modules.keys()):
         if name.startswith(module):
-            print("delete")
             del sys.modules[name]
 
 

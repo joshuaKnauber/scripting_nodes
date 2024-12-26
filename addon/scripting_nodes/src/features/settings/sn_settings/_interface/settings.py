@@ -42,3 +42,4 @@ class SNA_PT_Dev_Settings(bpy.types.Panel):
         col.use_property_decorate = False
 
         col.prop(context.scene.sna.dev, "log_tree_rebuilds")
+        col.prop(context.scene.sna.dev, "log_reload_times")
