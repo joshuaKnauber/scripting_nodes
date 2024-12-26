@@ -1,5 +1,5 @@
-from scripting_nodes.src.features.node_tree.code_gen.generator import (
-    generate_addon,
+from scripting_nodes.src.features.node_tree.code_gen.modules.modules import (
+    unregister_last_module,
 )
 from scripting_nodes.src.features.node_tree.code_gen.file_management.clear_addon import (
     clear_last_build,
@@ -12,6 +12,7 @@ import bpy
 
 @bpy.app.handlers.persistent
 def on_file_load_pre(dummy):
+    unregister_last_module()
     clear_last_build()
 
 

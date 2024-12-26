@@ -24,7 +24,7 @@ import bpy
 LAST_BUILT_PRODUCTION_ADDON = ""
 
 
-def generate_addon(dev=True):
+def generate_addon(dev=True) -> tuple:
     global LAST_BUILT_PRODUCTION_ADDON
 
     addon_path = DEV_ADDON_PATH if dev else PROD_ADDON_PATH()
@@ -50,9 +50,10 @@ def generate_addon(dev=True):
     # remove addon files if no addon exists
     if not has_addon():
         clear_addon_files(addon_path)
-        return
+        return (None, False)
 
     # clear addon files if dirty
+    addon_has_changes = bpy.context.scene.sna.addon.is_dirty
     if bpy.context.scene.sna.addon.is_dirty:
         clear_addon_files(addon_path)
         bpy.context.scene.sna.addon.is_dirty = False
@@ -65,6 +66,7 @@ def generate_addon(dev=True):
 
     # update node tree files
     node_tree_folder_path = os.path.join(addon_path, "addon")
+    ntree_has_changes = False
     for ntree in scripting_node_trees():
         if ntree.is_dirty or not os.path.exists(
             get_node_tree_file_path(node_tree_folder_path, ntree.name)
@@ -77,5 +79,10 @@ def generate_addon(dev=True):
             ntree_code = code_gen_node_tree(ntree)
             create_node_tree_file(node_tree_folder_path, ntree.name, ntree_code)
             ntree.is_dirty = False
+            ntree_has_changes = True
 
-    return DEV_ADDON_MODULE if dev else bpy.context.scene.sna.addon.module_name
+    has_changes = ntree_has_changes or addon_has_changes
+    return (
+        (DEV_ADDON_MODULE if dev else bpy.context.scene.sna.addon.module_name),
+        has_changes,
+    )

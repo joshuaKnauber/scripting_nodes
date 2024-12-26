@@ -4,19 +4,27 @@ import bpy
 
 class SNA_PT_Addon_Settings(bpy.types.Panel):
     bl_idname = "SNA_PT_Addon_Settings"
-    bl_label = "Addon"
+    bl_label = ""
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
     bl_category = "Scripting Nodes"
-    bl_options = {"DEFAULT_CLOSED"}
+    bl_options = {"DEFAULT_CLOSED", "HEADER_LAYOUT_EXPAND"}
     bl_order = 0
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
         return in_sn_tree(context)
 
+    def draw_header(self, context):
+        layout = self.layout
+        row = layout.row(align=True)
+        row.separator()
+        row.prop(context.scene.sna.addon, "enabled", text="")
+        row.label(text="Addon")
+
     def draw(self, context):
         layout = self.layout
+        layout.enabled = context.scene.sna.addon.enabled
 
         col = layout.column(heading="Info")
         col.use_property_split = True

@@ -23,6 +23,13 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
         description="If this is true, the entire addon will be rebuilt including assets and default files",
     )
 
+    enabled: bpy.props.BoolProperty(
+        name="Enabled",
+        description="Enable or disable the addon",
+        default=True,
+        update=update_is_dirty,
+    )
+
     module_name_overwrite: bpy.props.StringProperty(
         name="Module Name",
         description="An optional name for the folder the addon should be created in",
