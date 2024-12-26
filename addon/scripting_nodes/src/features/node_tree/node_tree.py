@@ -9,3 +9,5 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     type: bpy.props.EnumProperty(
         items=[("SCRIPTING", "Scripting", "Scripting")], name="Type"
     )
+
+    is_dirty: bpy.props.BoolProperty(default=True)
