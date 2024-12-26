@@ -17,3 +17,5 @@ A visual scripting addon builder for blender.
 ### Documentation
 
 `TODO`
+
+<!-- addon_utils.enable("some_addon", default_set=False, persistent=True) -->

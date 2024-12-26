@@ -28,7 +28,7 @@ class SNA_PT_Dev_Settings(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "Scripting Nodes"
     bl_options = {"DEFAULT_CLOSED"}
-    bl_order = 1
+    bl_order = 0
 
     @classmethod
     def poll(cls, context: bpy.types.Context):

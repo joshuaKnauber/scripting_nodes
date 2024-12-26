@@ -20,8 +20,10 @@ DEV_ADDON_PATH = os.path.join(
 )
 
 
-def PROD_ADDON_PATH():
+def PROD_ADDON_PATH(module_name=None):
+    if module_name is None:
+        module_name = bpy.context.scene.sna.addon.module_name
     return os.path.join(
         ADDON_FOLDER,
-        bpy.context.scene.sna.addon.module_name,
+        module_name,
     )

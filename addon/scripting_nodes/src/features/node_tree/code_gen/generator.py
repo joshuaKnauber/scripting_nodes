@@ -6,7 +6,11 @@ from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
 from .file_management.folder_structure import ensure_folder_structure
 from .file_management.clear_addon import clear_addon_files
 from .file_management.default_files import ensure_default_files
-from scripting_nodes.src.lib.constants.paths import DEV_ADDON_PATH, PROD_ADDON_PATH
+from scripting_nodes.src.lib.constants.paths import (
+    DEV_ADDON_MODULE,
+    DEV_ADDON_PATH,
+    PROD_ADDON_PATH,
+)
 from .file_management.node_tree_files import (
     create_node_tree_file,
     get_node_tree_file_path,
@@ -16,8 +20,32 @@ import os
 import bpy
 
 
+# stores the module name of the last production addon built
+LAST_BUILT_PRODUCTION_ADDON = ""
+
+
 def generate_addon(dev=True):
+    global LAST_BUILT_PRODUCTION_ADDON
+
     addon_path = DEV_ADDON_PATH if dev else PROD_ADDON_PATH()
+
+    # remove production files if dev
+    if dev:
+        clear_addon_files(
+            PROD_ADDON_PATH(
+                LAST_BUILT_PRODUCTION_ADDON if LAST_BUILT_PRODUCTION_ADDON else None
+            )
+        )
+        LAST_BUILT_PRODUCTION_ADDON = ""
+    # remove dev files and previous production files if production
+    else:
+        clear_addon_files(DEV_ADDON_PATH)
+        if (
+            LAST_BUILT_PRODUCTION_ADDON
+            and LAST_BUILT_PRODUCTION_ADDON != bpy.context.scene.sna.addon.module_name
+        ):
+            clear_addon_files(PROD_ADDON_PATH(LAST_BUILT_PRODUCTION_ADDON))
+        LAST_BUILT_PRODUCTION_ADDON = bpy.context.scene.sna.addon.module_name
 
     # remove addon files if no addon exists
     if not has_addon():
@@ -49,3 +77,5 @@ def generate_addon(dev=True):
             ntree_code = code_gen_node_tree(ntree)
             create_node_tree_file(node_tree_folder_path, ntree.name, ntree_code)
             ntree.is_dirty = False
+
+    return DEV_ADDON_MODULE if dev else bpy.context.scene.sna.addon.module_name
