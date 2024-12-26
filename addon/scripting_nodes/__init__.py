@@ -24,6 +24,7 @@ bl_info = {
 import bpy
 from . import auto_load
 
+
 auto_load.init()
 
 
