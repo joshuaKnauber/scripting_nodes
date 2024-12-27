@@ -5,10 +5,10 @@ import bpy
 class SNA_PT_AddonPanell(bpy.types.Panel):
     bl_idname = "SNA_PT_AddonPanell"
     bl_label = "WORKING"
-    bl_space_type = "NODE_EDITOR"
-    bl_region_type = "UI"
-    bl_category = "Scripting Nodes"
+    bl_space_type = 'PROPERTIES'
+    bl_region_type = 'WINDOW'
+    bl_context = "object"
 
     def draw(self, context: bpy.types.Context):
-        pass
+        self.layout.label(text="testing")
 """

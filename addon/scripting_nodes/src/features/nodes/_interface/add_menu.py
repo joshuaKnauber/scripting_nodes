@@ -22,3 +22,7 @@ def append_node_menu(self, context):
 
 def register():
     bpy.types.NODE_MT_add.append(append_node_menu)
+
+
+def unregister():
+    bpy.types.NODE_MT_add.remove(append_node_menu)

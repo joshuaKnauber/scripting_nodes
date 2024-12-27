@@ -1,6 +1,3 @@
-from scripting_nodes.src.features.node_tree.code_gen.modules.to_remove import (
-    add_module_to_remove,
-)
 from scripting_nodes.src.lib.constants.paths import DEV_ADDON_MODULE
 from scripting_nodes.src.lib.utils.logger import log_if
 import addon_utils
@@ -18,13 +15,6 @@ def reload_addon(module: str):
         "INFO",
         f"Addon reloaded in {round(time.time() - t1, 4)}s",
     )
-
-
-def unregister_last_module():
-    if bpy.context.scene.sna.addon.force_production:
-        unregister_module(bpy.context.scene.sna.addon.module_name)
-    else:
-        unregister_module(DEV_ADDON_MODULE)
 
 
 def unregister_module(module: str):

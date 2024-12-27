@@ -12,3 +12,7 @@ class SNA_Settings(bpy.types.PropertyGroup):
 
 def register():
     bpy.types.Scene.sna = bpy.props.PointerProperty(type=SNA_Settings)
+
+
+def unregister():
+    del bpy.types.Scene.sna
