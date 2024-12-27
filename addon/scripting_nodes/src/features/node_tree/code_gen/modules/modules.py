@@ -1,4 +1,3 @@
-from scripting_nodes.src.lib.constants.paths import DEV_ADDON_MODULE
 from scripting_nodes.src.lib.utils.logger import log_if
 import addon_utils
 import sys
@@ -18,17 +17,17 @@ def reload_addon(module: str):
 
 
 def unregister_module(module: str):
-    if not _has_module(module):
-        return
     if addon_utils.check(module)[0]:
         addon_utils.disable(module, default_set=True)
+
     for name in list(sys.modules.keys()):
         if name.startswith(module):
             del sys.modules[name]
 
 
-def _has_module(module: str):
+def get_module(module: str):
+    addon_utils.modules_refresh()
     for mod in addon_utils.modules():
         if mod.__name__ == module:
-            return True
-    return False
+            return mod
+    return None
