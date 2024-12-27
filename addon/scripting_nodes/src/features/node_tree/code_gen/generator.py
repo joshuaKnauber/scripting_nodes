@@ -19,8 +19,12 @@ import os
 import bpy
 
 
-def generate_addon(dev_module=True):
-    addon_path = DEV_ADDON_PATH if dev_module else PROD_ADDON_PATH()
+def generate_addon(dev_module=True, base_path=None):
+    addon_path = (
+        DEV_ADDON_PATH
+        if dev_module
+        else PROD_ADDON_PATH(bpy.context.scene.sna.addon.module_name, base_path)
+    )
 
     # remove previous production files
     if not dev_module:

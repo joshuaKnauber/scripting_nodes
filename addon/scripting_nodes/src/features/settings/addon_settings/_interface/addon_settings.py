@@ -41,6 +41,12 @@ class SNA_PT_Addon_Settings(bpy.types.Panel):
         col.prop(context.scene.sna.addon, "force_production")
         col.prop(context.scene.sna.addon, "persist_addon")
 
+        layout.separator()
+
+        row = layout.row()
+        row.scale_y = 1.5
+        row.operator("sna.export_addon", icon="EXPORT")
+
 
 class SNA_PT_Overwrite_Settings(bpy.types.Panel):
     bl_idname = "SNA_PT_Overwrite_Settings"
