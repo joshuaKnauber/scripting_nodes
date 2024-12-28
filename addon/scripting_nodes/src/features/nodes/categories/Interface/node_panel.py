@@ -15,8 +15,8 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
         self.code = f"""
             import bpy
 
-            class SNA_PT_AddonPanel(bpy.types.Panel):
-                bl_idname = "SNA_PT_AddonPanel"
+            class SNA_PT_AddonPanel_{self.id}(bpy.types.Panel):
+                bl_idname = "SNA_PT_AddonPanel_{self.id}"
                 bl_label = "WORKING GENERATED"
                 bl_space_type = 'PROPERTIES'
                 bl_region_type = 'WINDOW'
