@@ -59,7 +59,7 @@ def generate_addon(dev_module=True, base_path=ADDON_FOLDER):
     node_tree_folder_path = os.path.join(addon_path, "addon")
     for ntree in scripting_node_trees():
         if ntree.is_dirty or not os.path.exists(
-            get_node_tree_file_path(node_tree_folder_path, ntree.name)
+            get_node_tree_file_path(node_tree_folder_path, ntree.module_name)
         ):
             log_if(
                 bpy.context.scene.sna.dev.log_tree_rebuilds,
@@ -68,7 +68,9 @@ def generate_addon(dev_module=True, base_path=ADDON_FOLDER):
             )
             ntree_code = code_gen_node_tree(ntree)
             files_changed = (
-                create_node_tree_file(node_tree_folder_path, ntree.name, ntree_code)
+                create_node_tree_file(
+                    node_tree_folder_path, ntree.module_name, ntree_code
+                )
                 or files_changed
             )
             ntree.is_dirty = False

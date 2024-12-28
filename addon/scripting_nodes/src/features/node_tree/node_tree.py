@@ -1,3 +1,8 @@
+import re
+from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+    scripting_node_trees,
+    sn_nodes,
+)
 from scripting_nodes.src.lib.utils.sockets.sockets import from_nodes, to_nodes
 from scripting_nodes.src.lib.utils.is_sn import is_sn
 import bpy
@@ -17,8 +22,20 @@ class ScriptingNodeTree(bpy.types.NodeTree):
 
     is_dirty: bpy.props.BoolProperty(default=True)
 
+    @classmethod
+    def valid_socket_type(cls, idname):
+        return idname.startswith("Scripting")
+
+    @property
+    def module_name(self):
+        return (
+            re.sub(r"[^a-zA-Z\s]", "", self.name).replace(" ", "_").lower()
+            or "sn_module"
+        )
+
     def update(self):
         self.update_links()
+        self.update_group_sockets()
 
     def update_links(self):
         new_links = set([*map(lambda l: (l, l.from_node, l.to_node), self.links)])
@@ -59,3 +76,20 @@ class ScriptingNodeTree(bpy.types.NodeTree):
 
         # update previous links
         PREVIOUS_LINKS[self] = new_links
+
+    def update_group_sockets(self):
+        # update group nodes in all scripting node trees
+        group_nodes = [
+            node
+            for tree in scripting_node_trees()
+            for node in sn_nodes(tree)
+            if node.bl_idname == "SNA_Node_Group"
+        ]
+        group_inputs = [
+            node for node in self.nodes if node.bl_idname == "SNA_Node_GroupInput"
+        ]
+        group_outputs = [
+            node for node in self.nodes if node.bl_idname == "SNA_Node_GroupOutput"
+        ]
+        for node in [*group_nodes, *group_inputs, *group_outputs]:
+            node.on_group_socket_change(self)

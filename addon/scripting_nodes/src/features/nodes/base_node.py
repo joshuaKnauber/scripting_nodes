@@ -13,7 +13,7 @@ from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
 import bpy
 
 
-class ScriptingBaseNode(bpy.types.Node):
+class ScriptingBaseNode:
 
     @classmethod
     def poll(cls, ntree):
@@ -40,6 +40,7 @@ class ScriptingBaseNode(bpy.types.Node):
     )
 
     code: bpy.props.StringProperty()
+    code_global: bpy.props.StringProperty()
 
     ### Life Cycle
 
@@ -64,9 +65,23 @@ class ScriptingBaseNode(bpy.types.Node):
     ### Code Generation
 
     def _generate(self):
-        prev_code = self.code + "".join([socket.code for socket in self.outputs])
+        prev_code = (
+            self.code
+            + self.code_global
+            + "".join([socket.code for socket in self.outputs])
+        )
+        # reset code
+        self.code = ""
+        self.code_global = ""
+        for out in self.outputs:
+            out.code = ""
+        # generate new code
         self.generate()
-        new_code = self.code + "".join([socket.code for socket in self.outputs])
+        new_code = (
+            self.code
+            + self.code_global
+            + "".join([socket.code for socket in self.outputs])
+        )
         if prev_code != new_code:
             # propagate changes
             for out in self.outputs:

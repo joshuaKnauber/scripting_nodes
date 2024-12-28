@@ -1,4 +1,7 @@
 import inspect
+from scripting_nodes.src.features.nodes.categories.Groups.node_group import (
+    SNA_Node_Group,
+)
 from scripting_nodes import auto_load
 from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
 import nodeitems_utils
@@ -31,7 +34,12 @@ def get_node_categories():
 
     categories.append(
         ScriptingNodesCategory(
-            "Layout", "Layout", items=[NodeItem("NodeFrame"), NodeItem("NodeReroute")]
+            "Layout",
+            "Layout",
+            items=[
+                NodeItem("NodeFrame"),
+                NodeItem("NodeReroute"),
+            ],
         ),
     )
 

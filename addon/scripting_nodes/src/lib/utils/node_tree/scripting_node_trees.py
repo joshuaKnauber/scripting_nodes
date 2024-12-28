@@ -12,3 +12,11 @@ def has_addon():
 
 def sn_nodes(ntree):
     return [node for node in ntree.nodes if is_sn(node)]
+
+
+def node_by_id(node_id):
+    for ntree in scripting_node_trees():
+        for node in sn_nodes(ntree):
+            if node.id == node_id:
+                return node
+    return None

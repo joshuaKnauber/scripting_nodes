@@ -41,27 +41,3 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
 
     def _to_code(self):
         raise NotImplementedError
-
-
-# Customizable interface properties to generate a socket from.
-# class MyCustomInterfaceSocket(bpy.types.NodeTreeInterfaceSocket):
-#     # The type of socket that is generated.
-#     bl_socket_idname = "CustomSocketType"
-
-#     default_value: bpy.props.FloatProperty(
-#         default=1.0,
-#         description="Default input value for new sockets",
-#     )
-
-#     def draw(self, context, layout):
-#         # Display properties of the interface.
-#         layout.prop(self, "default_value")
-
-#     # Set properties of newly created sockets
-#     def init_socket(self, node, socket, data_path):
-#         socket.input_value = self.default_value
-
-#     # Use an existing socket to initialize the group interface
-#     def from_socket(self, node, socket):
-#         # Current value of the socket becomes the default
-#         self.default_value = socket.input_value
