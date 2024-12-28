@@ -11,4 +11,7 @@ def normalize_indents(code):
 
 
 def indent(code, level=1):
-    return "\n".join(" " * 4 * level + line for line in code.split("\n"))
+    lines = code.split("\n")
+    if len(lines) == 1:
+        return code
+    return "\n".join(" " * 4 * level + line for line in lines)

@@ -9,7 +9,9 @@ class SNA_Node_String(ScriptingBaseNode, bpy.types.Node):
     def update_value(self, context):
         self._generate()
 
-    value: bpy.props.StringProperty(default="", update=update_value)
+    value: bpy.props.StringProperty(
+        default="", update=update_value, options={"TEXTEDIT_UPDATE"}
+    )
 
     def draw(self, context, layout):
         layout.prop(self, "value", text="", placeholder="Value")

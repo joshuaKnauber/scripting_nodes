@@ -1,3 +1,4 @@
+from scripting_nodes.src.lib.utils.screen.screen import redraw_all
 from scripting_nodes.src.lib.constants.paths import DEV_ADDON_MODULE
 from .modules.modules import (
     reload_addon,
@@ -11,10 +12,12 @@ import bpy
 def watch_changes():
     if has_changes() and has_addon():
         if bpy.context.scene.sna.addon.enabled:
-            generate_addon()
-            reload_addon(DEV_ADDON_MODULE)
+            files_changed = generate_addon()
+            if files_changed:
+                reload_addon(DEV_ADDON_MODULE)
         else:
             unregister_module(DEV_ADDON_MODULE)
+        redraw_all()
 
     if bpy.context.scene.sna.addon.force_production:
         return 2

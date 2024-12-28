@@ -12,10 +12,6 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingInterfaceSocket")
 
     def generate(self):
-        # layout = self.inputs["Interface"].get_meta("layout", "self.layout")
-
-        # self.outputs["Interface"].set_meta("layout", layout)
-
         self.code = f"""
             import bpy
 

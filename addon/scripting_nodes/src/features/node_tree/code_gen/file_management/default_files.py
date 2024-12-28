@@ -3,23 +3,30 @@ import bpy
 
 
 def ensure_default_files(addon_path):
+    file_created = False
+
     # create init file
     init_file_path = os.path.join(addon_path, "__init__.py")
     if not os.path.exists(init_file_path):
+        file_created = True
         with open(init_file_path, "w") as f:
             _write_init_file(f)
 
     # create auto load file
     autoload_file_path = os.path.join(addon_path, "auto_load.py")
     if not os.path.exists(autoload_file_path):
+        file_created = True
         with open(autoload_file_path, "w") as f:
             _write_autoload_file(f)
 
     # create addon module init file
     addonmodule_init_file_path = os.path.join(addon_path, "addon", "__init__.py")
     if not os.path.exists(addonmodule_init_file_path):
+        file_created = True
         with open(addonmodule_init_file_path, "w") as f:
             f.write("")
+
+    return file_created
 
 
 def _write_init_file(init_file):

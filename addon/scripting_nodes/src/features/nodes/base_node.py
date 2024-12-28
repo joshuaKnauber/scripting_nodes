@@ -1,4 +1,7 @@
+from email.policy import default
 from typing import Literal, Set
+from scripting_nodes.src.lib.utils.screen.screen import redraw_all
+from scripting_nodes.src.lib.utils.code.format import normalize_indents
 from scripting_nodes.src.features.sockets.socket_types import SOCKET_IDNAMES
 from scripting_nodes.src.lib.utils.uuid import get_short_id
 from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
@@ -59,18 +62,24 @@ class ScriptingBaseNode(bpy.types.Node):
         prev_code = self.code + "".join([socket.code for socket in self.outputs])
         self.generate()
         new_code = self.code + "".join([socket.code for socket in self.outputs])
-        # todo: refactor?
         if prev_code != new_code:
-            self.node_tree.is_dirty = True
+            # propagate changes
             for out in self.outputs:
                 for link in out.links:
                     link.to_node._generate()
             for inpt in self.inputs:
                 for link in inpt.links:
                     link.from_node._generate()
+            # mark node tree as dirty
+            if "ROOT_NODE" in self.sn_options:
+                self.node_tree.is_dirty = True
+            redraw_all()
 
     def generate(self):
         raise NotImplementedError
+
+    def _execute(self, globals, locals):
+        exec(normalize_indents(self.code), globals, locals)
 
     ### Sockets
 
@@ -89,11 +98,9 @@ class ScriptingBaseNode(bpy.types.Node):
         socket.display_shape = socket.socket_shape
 
     def ntree_link_created(self):
-        print("create link")
         self._generate()
 
     def ntree_link_removed(self):
-        print("remove link")
         self._generate()
 
     def draw_buttons(self, context, layout):

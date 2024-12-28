@@ -26,6 +26,7 @@ def generate_addon(dev_module=True, base_path=ADDON_FOLDER):
         if dev_module
         else PROD_ADDON_PATH(bpy.context.scene.sna.addon.module_name, base_path)
     )
+    files_changed = False
 
     # remove previous production files
     if not dev_module:
@@ -34,18 +35,24 @@ def generate_addon(dev_module=True, base_path=ADDON_FOLDER):
     # remove addon files if no addon exists
     if not has_addon():
         clear_addon_files(addon_path)
-        return None
+        return True
 
     # clear addon files if dirty
     if bpy.context.scene.sna.addon.is_dirty:
         clear_addon_files(addon_path)
         bpy.context.scene.sna.addon.is_dirty = False
+        files_changed = True
 
     # ensure folder structure
     ensure_folder_structure(addon_path)
 
     # ensure default files
-    ensure_default_files(addon_path)
+    files_changed = ensure_default_files(addon_path) or files_changed
+
+    # regenerate nodes to match production or dev mode
+    for ntree in scripting_node_trees():
+        for node in ntree.nodes:
+            node._generate()
 
     # update node tree files
     node_tree_folder_path = os.path.join(addon_path, "addon")
@@ -59,8 +66,13 @@ def generate_addon(dev_module=True, base_path=ADDON_FOLDER):
                 f"Rebuilding {ntree.name}",
             )
             ntree_code = code_gen_node_tree(ntree)
-            create_node_tree_file(node_tree_folder_path, ntree.name, ntree_code)
+            files_changed = (
+                create_node_tree_file(node_tree_folder_path, ntree.name, ntree_code)
+                or files_changed
+            )
             ntree.is_dirty = False
+
+    return files_changed
 
 
 def has_changes():

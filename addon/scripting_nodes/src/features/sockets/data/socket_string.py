@@ -9,7 +9,9 @@ class ScriptingStringSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
     def update_value(self, context):
         self.node._generate()
 
-    value: bpy.props.StringProperty(default="", update=update_value)
+    value: bpy.props.StringProperty(
+        default="", update=update_value, options={"TEXTEDIT_UPDATE"}
+    )
 
     def _to_code(self):
         return f'"{self.value}"'

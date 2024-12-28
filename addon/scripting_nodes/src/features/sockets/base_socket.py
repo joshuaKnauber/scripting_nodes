@@ -23,7 +23,10 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
                 return self.links[0].to_socket.eval()
             return ""
         else:
-            return normalize_indents(self.node.code)
+            if bpy.context.scene.sna.addon.build_with_production_code:
+                return normalize_indents(self.node.code)
+            else:
+                return f"bpy.context.scene.sna.execute('{self.node.id}', globals(), locals())"
 
     def _eval_data(self):
         if self.is_output:
