@@ -1,14 +1,15 @@
-from scripting_nodes.src.features.nodes.base_node import SNA_BaseNode
+from scripting_nodes.src.lib.utils.code.format import indent
+from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
 import bpy
 
 
-class SNA_Node_Panel(SNA_BaseNode, bpy.types.Node):
+class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Panel"
     bl_label = "Panel"
     sn_options = {"ROOT_NODE"}
 
     def on_create(self):
-        pass
+        self.add_output("ScriptingInterfaceSocket")
 
     def generate(self):
         # layout = self.inputs["Interface"].get_meta("layout", "self.layout")
@@ -26,5 +27,5 @@ class SNA_Node_Panel(SNA_BaseNode, bpy.types.Node):
                 bl_context = "object"
 
                 def draw(self, context: bpy.types.Context):
-                    self.layout.label(text="testing")
+                    {indent(self.outputs["Interface"].eval("pass"), 5)}
         """

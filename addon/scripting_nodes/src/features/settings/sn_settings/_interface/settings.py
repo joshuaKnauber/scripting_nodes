@@ -43,3 +43,9 @@ class SNA_PT_Dev_Settings(bpy.types.Panel):
 
         col.prop(context.scene.sna.dev, "log_tree_rebuilds")
         col.prop(context.scene.sna.dev, "log_reload_times")
+
+        col = layout.column(heading="Code")
+        col.use_property_split = True
+        col.use_property_decorate = False
+
+        col.prop(context.scene.sna.dev, "show_node_code")

@@ -1,20 +1,17 @@
-from scripting_nodes.src.features.nodes.base_node import SNA_BaseNode
+from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
 import bpy
 
 
-class SNA_Node_Label(SNA_BaseNode, bpy.types.Node):
+class SNA_Node_Label(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Label"
     bl_label = "Label"
 
     def on_create(self):
-        pass
+        self.add_input("ScriptingInterfaceSocket")
+        self.add_input("ScriptingStringSocket", "Label")
+        self.add_output("ScriptingInterfaceSocket")
 
     def generate(self):
-        pass
-        # layout = self.inputs["Interface"].get_meta("layout", "self.layout")
-        # self.code = f"""
-        #     {layout}.label(text={self.inputs['Label'].get_code()})
-        #     {self.outputs["Interface"].get_code(3)}
-        # """
-
-        # self.outputs["Interface"].set_meta("layout", layout)
+        self.code = f"""
+            self.layout.label(text={self.inputs["Label"].eval()})
+        """
