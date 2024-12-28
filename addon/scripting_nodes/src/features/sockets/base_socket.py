@@ -1,4 +1,5 @@
 from typing import Literal
+from scripting_nodes.src.lib.utils.sockets.sockets import from_socket, to_socket
 from scripting_nodes.src.lib.utils.code.format import normalize_indents
 import bpy
 
@@ -19,8 +20,9 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
 
     def _eval_program(self):
         if self.is_output:
-            if len(self.links) > 0:
-                return self.links[0].to_socket.eval()
+            to = to_socket(self)
+            if to:
+                return to.eval()
             return ""
         else:
             if bpy.context.scene.sna.addon.build_with_production_code:
@@ -32,8 +34,9 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
         if self.is_output:
             return self.code
         else:
-            if len(self.links) > 0:
-                return self.links[0].from_socket.eval()
+            from_s = from_socket(self)
+            if from_s:
+                return from_s.eval()
             return self._to_code()
 
     def _to_code(self):

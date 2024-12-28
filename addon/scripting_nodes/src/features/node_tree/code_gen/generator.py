@@ -2,6 +2,7 @@ from scripting_nodes.src.lib.utils.logger import log_if
 from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
     has_addon,
     scripting_node_trees,
+    sn_nodes,
 )
 from .file_management.folder_structure import ensure_folder_structure
 from .file_management.clear_addon import clear_addon_files, clear_module_files
@@ -51,7 +52,7 @@ def generate_addon(dev_module=True, base_path=ADDON_FOLDER):
 
     # regenerate nodes to match production or dev mode
     for ntree in scripting_node_trees():
-        for node in ntree.nodes:
+        for node in sn_nodes(ntree):
             node._generate()
 
     # update node tree files

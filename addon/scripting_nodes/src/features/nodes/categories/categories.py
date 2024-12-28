@@ -29,6 +29,12 @@ def get_node_categories():
             items.append(NodeItem(cls.bl_idname))
         categories.append(ScriptingNodesCategory(category, category, items=items))
 
+    categories.append(
+        ScriptingNodesCategory(
+            "Layout", "Layout", items=[NodeItem("NodeFrame"), NodeItem("NodeReroute")]
+        ),
+    )
+
     return categories
 
 

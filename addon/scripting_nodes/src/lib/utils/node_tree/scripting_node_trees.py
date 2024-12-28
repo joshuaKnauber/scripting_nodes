@@ -1,4 +1,4 @@
-from .is_sn import is_sn
+from ..is_sn import is_sn
 import bpy
 
 
@@ -8,3 +8,7 @@ def scripting_node_trees():
 
 def has_addon():
     return len(scripting_node_trees()) > 0
+
+
+def sn_nodes(ntree):
+    return [node for node in ntree.nodes if is_sn(node)]

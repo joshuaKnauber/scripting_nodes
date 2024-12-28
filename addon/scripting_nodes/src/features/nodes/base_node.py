@@ -1,5 +1,10 @@
 from email.policy import default
 from typing import Literal, Set
+from scripting_nodes.src.lib.utils.sockets.sockets import (
+    from_nodes,
+    has_reroute_connections,
+    to_nodes,
+)
 from scripting_nodes.src.lib.utils.screen.screen import redraw_all
 from scripting_nodes.src.lib.utils.code.format import normalize_indents
 from scripting_nodes.src.features.sockets.socket_types import SOCKET_IDNAMES
@@ -65,11 +70,11 @@ class ScriptingBaseNode(bpy.types.Node):
         if prev_code != new_code:
             # propagate changes
             for out in self.outputs:
-                for link in out.links:
-                    link.to_node._generate()
+                for node in to_nodes(out):
+                    node._generate()
             for inpt in self.inputs:
-                for link in inpt.links:
-                    link.from_node._generate()
+                for node in from_nodes(inpt):
+                    node._generate()
             # mark node tree as dirty
             if "ROOT_NODE" in self.sn_options:
                 self.node_tree.is_dirty = True

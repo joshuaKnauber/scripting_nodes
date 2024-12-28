@@ -1,3 +1,4 @@
+from scripting_nodes.src.lib.utils.is_sn import is_sn
 import bpy
 
 
@@ -32,7 +33,7 @@ class SNA_UL_NodeTreesList(bpy.types.UIList):
 
         # Filter by node tree type
         for i, ntree in enumerate(groups):
-            if not getattr(ntree, "is_sn_ntree", False):
+            if not is_sn(ntree):
                 flt_flags[i] = 0
 
         return flt_flags, flt_neworder
