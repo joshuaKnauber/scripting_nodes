@@ -1,4 +1,5 @@
 import bpy
+import re
 
 
 class SNA_AddonSettings(bpy.types.PropertyGroup):
@@ -54,4 +55,8 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
 
     @property
     def module_name(self):
-        return self.module_name_overwrite or self.addon_name
+        return (
+            self.module_name_overwrite
+            or re.sub(r"[^a-zA-Z\s]", "", self.addon_name).replace(" ", "_").lower()
+            or "sna_addon"
+        )

@@ -7,6 +7,7 @@ from .file_management.folder_structure import ensure_folder_structure
 from .file_management.clear_addon import clear_addon_files, clear_module_files
 from .file_management.default_files import ensure_default_files
 from scripting_nodes.src.lib.constants.paths import (
+    ADDON_FOLDER,
     DEV_ADDON_PATH,
     PROD_ADDON_PATH,
 )
@@ -19,7 +20,7 @@ import os
 import bpy
 
 
-def generate_addon(dev_module=True, base_path=None):
+def generate_addon(dev_module=True, base_path=ADDON_FOLDER):
     addon_path = (
         DEV_ADDON_PATH
         if dev_module

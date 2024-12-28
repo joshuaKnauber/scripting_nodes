@@ -1,9 +1,9 @@
+from scripting_nodes.src.lib.libraries.name_generator.generator import generate_name
 from scripting_nodes.src.features.node_tree.code_gen.modules.persisted import (
     get_modules_to_persist,
 )
 from scripting_nodes.src.lib.constants.paths import DEV_ADDON_MODULE
 from scripting_nodes.src.features.node_tree.code_gen.modules.modules import (
-    reload_addon,
     unregister_module,
 )
 from scripting_nodes.src.features.node_tree.code_gen.file_management.clear_addon import (
@@ -12,6 +12,7 @@ from scripting_nodes.src.features.node_tree.code_gen.file_management.clear_addon
 from scripting_nodes.src.handlers.timers.node_tree_watcher import (
     register_node_tree_watcher,
 )
+import addon_utils
 import bpy
 from bpy.app.handlers import persistent
 
@@ -25,13 +26,22 @@ def on_file_load_pre(dummy):
 @persistent
 def on_file_load_post(dummy):
     bpy.context.scene.sna.addon.is_dirty = True
-    register_node_tree_watcher()
+
+    # update name
+    if bpy.context.scene.sna.addon.addon_name == "My Addon":
+        bpy.context.scene.sna.addon.addon_name = (
+            generate_name(style="capital") + " Addon"
+        )
+
     # reload all persisted modules
     for module in get_modules_to_persist():
         if module == bpy.context.scene.sna.addon.module_name:
             unregister_module(module)
         else:
-            reload_addon(module)
+            addon_utils.enable(module, default_set=True, persistent=True)
+
+    # watch changes
+    register_node_tree_watcher()
 
 
 def register():
