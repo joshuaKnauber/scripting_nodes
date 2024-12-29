@@ -59,6 +59,7 @@ def generate_addon(dev_module=True, base_path=ADDON_FOLDER):
     node_tree_folder_path = os.path.join(addon_path, "addon")
     stale_ntree_files = set(os.listdir(node_tree_folder_path)) - {"__init__.py"}
     for ntree in scripting_node_trees():
+        stale_ntree_files.discard(ntree.module_name + ".py")
         if ntree.is_dirty or not os.path.exists(
             get_node_tree_file_path(node_tree_folder_path, ntree.module_name)
         ):
@@ -67,7 +68,6 @@ def generate_addon(dev_module=True, base_path=ADDON_FOLDER):
                 "INFO",
                 f"Rebuilding {ntree.name}",
             )
-            stale_ntree_files.discard(f"{ntree.module_name}.py")
             ntree_code = code_gen_node_tree(ntree)
             files_changed = (
                 create_node_tree_file(
@@ -78,10 +78,10 @@ def generate_addon(dev_module=True, base_path=ADDON_FOLDER):
             ntree.is_dirty = False
 
     # remove deleted node tree files
-    for tree_file in stale_ntree_files:
-        path = os.path.join(node_tree_folder_path, tree_file)
+    for ntree_file in stale_ntree_files:
+        path = os.path.join(node_tree_folder_path, ntree_file)
         if os.path.exists(path) and os.path.isfile(path):
-            os.remove(os.path.join(node_tree_folder_path, tree_file))
+            os.remove(path)
             files_changed = True
 
     return files_changed

@@ -17,6 +17,7 @@ class SNA_OT_AddNodeTree(bpy.types.Operator):
             if node_tree == ntree:
                 context.scene.sna.ui.active_ntree_index = i
                 break
+        context.scene.sna.addon.is_dirty = True
         return {"FINISHED"}
 
 
@@ -34,4 +35,5 @@ class SNA_OT_RemoveNodeTree(bpy.types.Operator):
         ntree = bpy.data.node_groups[context.scene.sna.ui.active_ntree_index]
         bpy.data.node_groups.remove(ntree)
         context.scene.sna.ui.active_ntree_index = min(0, len(bpy.data.node_groups) - 1)
+        context.scene.sna.addon.is_dirty = True
         return {"FINISHED"}

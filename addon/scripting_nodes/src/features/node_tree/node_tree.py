@@ -1,4 +1,5 @@
 import re
+from scripting_nodes.src.lib.utils.uuid import get_short_id
 from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
     sn_nodes,
@@ -21,6 +22,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     )
 
     initialized: bpy.props.BoolProperty(default=False)
+    id: bpy.props.StringProperty(default="")
     is_dirty: bpy.props.BoolProperty(default=True)
 
     @classmethod
@@ -29,13 +31,20 @@ class ScriptingNodeTree(bpy.types.NodeTree):
 
     @property
     def module_name(self):
-        return (
-            re.sub(r"[^a-zA-Z\s]", "", self.name).replace(" ", "_").lower()
-            or "sn_module"
-        )
+        def clean_name(name):
+            return (
+                re.sub(r"[^a-zA-Z\s]", "", name).replace(" ", "_").lower()
+                or "sn_module"
+            )
+
+        cleaned_name = clean_name(self.name)
+        names = [*map(lambda n: clean_name(n.name), scripting_node_trees())]
+        same_names = [n for n in names if n == cleaned_name]
+        return f"{cleaned_name}_{self.id}" if len(same_names) > 1 else cleaned_name
 
     def init(self):
         self.name = "Node Tree"
+        self.id = get_short_id()
         self.use_fake_user = True
         self.initialized = True
 
