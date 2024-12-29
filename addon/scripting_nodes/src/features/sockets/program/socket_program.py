@@ -1,3 +1,6 @@
+from .socket_logic import ScriptingLogicSocket
+from scripting_nodes.src.lib.utils.sockets.sockets import from_socket, to_socket
+from .socket_interface import ScriptingInterfaceSocket
 from ..base_socket import ScriptingBaseSocket
 import bpy
 
@@ -15,6 +18,18 @@ class ScriptingProgramSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
     def _to_code(self):
         pass
 
-    @classmethod
-    def draw_color_simple(cls):
-        return (0.3, 0.3, 0.3, 1)
+    def draw_color(self, context, node):
+        connected = None
+        if len(node.inputs) > 0:
+            from_connected = from_socket(node.inputs[0])
+            if from_connected and from_connected.socket_type == "PROGRAM":
+                connected = from_connected
+        return (
+            connected.draw_color(context, connected.node)
+            if hasattr(connected, "draw_color")
+            else (
+                connected.draw_color_simple()
+                if hasattr(connected, "draw_color_simple")
+                else (0.35, 0.35, 0.35, 1)
+            )
+        )

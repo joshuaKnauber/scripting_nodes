@@ -2,12 +2,11 @@ from email.policy import default
 from typing import Literal, Set
 from scripting_nodes.src.lib.utils.sockets.sockets import (
     from_nodes,
-    has_reroute_connections,
     to_nodes,
 )
 from scripting_nodes.src.lib.utils.screen.screen import redraw_all
 from scripting_nodes.src.lib.utils.code.format import normalize_indents
-from scripting_nodes.src.features.sockets.socket_types import SOCKET_IDNAMES
+from scripting_nodes.src.features.sockets.socket_types import SOCKET_IDNAME_TYPE
 from scripting_nodes.src.lib.utils.uuid import get_short_id
 from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
 import bpy
@@ -104,12 +103,12 @@ class ScriptingBaseNode:
 
     ### Sockets
 
-    def add_input(self, idname: SOCKET_IDNAMES, label=""):
+    def add_input(self, idname: SOCKET_IDNAME_TYPE, label=""):
         socket = self.inputs.new(idname, label)
         self._initialize_socket(socket, label)
         return socket
 
-    def add_output(self, idname: SOCKET_IDNAMES, label=""):
+    def add_output(self, idname: SOCKET_IDNAME_TYPE, label=""):
         socket = self.outputs.new(idname, label)
         self._initialize_socket(socket, label)
         return socket

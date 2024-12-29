@@ -46,12 +46,3 @@ def from_nodes(socket):
 def from_node(socket):
     nodes = from_nodes(socket)
     return nodes[0] if nodes else None
-
-
-def has_reroute_connections(node):
-    return any(
-        link.from_node.bl_idname == "NodeReroute"
-        or link.to_node.bl_idname == "NodeReroute"
-        for socket in [*node.inputs] + [*node.outputs]
-        for link in socket.links
-    )
