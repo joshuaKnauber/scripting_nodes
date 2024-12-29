@@ -20,6 +20,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
         items=[("SCRIPTING", "Scripting", "Scripting")], name="Type"
     )
 
+    initialized: bpy.props.BoolProperty(default=False)
     is_dirty: bpy.props.BoolProperty(default=True)
 
     @classmethod
@@ -32,6 +33,11 @@ class ScriptingNodeTree(bpy.types.NodeTree):
             re.sub(r"[^a-zA-Z\s]", "", self.name).replace(" ", "_").lower()
             or "sn_module"
         )
+
+    def init(self):
+        self.name = "Node Tree"
+        self.use_fake_user = True
+        self.initialized = True
 
     def update(self):
         self.update_links()
