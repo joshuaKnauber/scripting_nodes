@@ -22,4 +22,4 @@ class ScriptingBooleanSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
 
     @classmethod
     def draw_color_simple(cls):
-        return (1, 0, 0, 1)
+        return (0.9, 0.7, 1, 1)

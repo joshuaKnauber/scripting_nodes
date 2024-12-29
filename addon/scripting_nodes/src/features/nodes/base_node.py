@@ -34,6 +34,7 @@ class ScriptingBaseNode:
     is_sn = True
 
     sn_options: Set[Literal["ROOT_NODE"]] = {}
+    sn_reference_properties: Set[str] = set()
 
     id: bpy.props.StringProperty(
         default="", name="ID", description="Unique ID of the node"

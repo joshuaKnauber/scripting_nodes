@@ -10,8 +10,12 @@ def normalize_indents(code):
     return "\n".join(line[min_indent:] for line in lines)
 
 
-def indent(code, level=1):
+def indent(code, level=1, keep_first=True):
     lines = code.split("\n")
-    if len(lines) == 1:
-        return code
-    return "\n".join(" " * 4 * level + line for line in lines)
+    lines = [*filter(lambda l: l.strip(), lines)]
+    indent = "    " * level
+    if not lines:
+        return ""
+    if keep_first:
+        return "\n".join([lines[0]] + [indent + line for line in lines[1:]])
+    return "\n".join([indent + line for line in lines])

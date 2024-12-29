@@ -1,3 +1,6 @@
+from scripting_nodes.src.features.nodes.references.reference_properties import (
+    SNA_NodeReference,
+)
 from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
     sn_nodes,
@@ -15,6 +18,8 @@ class SNA_Settings(bpy.types.PropertyGroup):
     dev: bpy.props.PointerProperty(type=SNA_DevSettings)
 
     ui: bpy.props.PointerProperty(type=SNA_UISettings)
+
+    references: bpy.props.CollectionProperty(type=SNA_NodeReference)
 
     def execute(self, node_id, globals, locals):
         nodes = [node for tree in scripting_node_trees() for node in sn_nodes(tree)]

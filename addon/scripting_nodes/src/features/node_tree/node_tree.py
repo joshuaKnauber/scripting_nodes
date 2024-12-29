@@ -51,6 +51,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     def update(self):
         self.update_links()
         self.update_group_sockets()
+        self.update_node_references()
 
     def update_links(self):
         new_links = set([*map(lambda l: (l, l.from_node, l.to_node), self.links)])
@@ -108,3 +109,24 @@ class ScriptingNodeTree(bpy.types.NodeTree):
         ]
         for node in [*group_nodes, *group_inputs, *group_outputs]:
             node.on_group_socket_change(self)
+
+    def update_node_references(self):
+        touched_refs = []
+        for node in sn_nodes(self):
+            # update existing reference
+            for ref in bpy.context.scene.sna.references:
+                if ref.node_id == node.id:
+                    touched_refs.append(ref)
+                    ref.name = f"{node.name} ({self.name})"
+                    break
+            # create new reference
+            else:
+                ref = bpy.context.scene.sna.references.add()
+                touched_refs.append(ref)
+                ref.name = f"{node.name} ({self.name})"
+                ref.node_id = node.id
+        # remove stale references
+        for index in range(len(bpy.context.scene.sna.references) - 1, -1, -1):
+            ref = bpy.context.scene.sna.references[index]
+            if ref not in touched_refs:
+                bpy.context.scene.sna.references.remove(index)
