@@ -1,9 +1,10 @@
+from .socket_interface import LayoutSocket
 from scripting_nodes.src.lib.utils.sockets.sockets import from_socket, to_socket
 from ..base_socket import ScriptingBaseSocket
 import bpy
 
 
-class ScriptingProgramSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
+class ScriptingProgramSocket(ScriptingBaseSocket, LayoutSocket, bpy.types.NodeSocket):
     bl_idname = "ScriptingProgramSocket"
     bl_label = "Program"
     socket_type = "PROGRAM"

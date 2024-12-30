@@ -14,6 +14,6 @@ class SNA_Node_Label(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         self.code = f"""
-            self.layout.label(text={self.inputs["Label"].eval()})
+            {self.inputs[0].layout}.label(text={self.inputs["Label"].eval()})
             {indent(self.outputs[0].eval(), 3)}
         """
