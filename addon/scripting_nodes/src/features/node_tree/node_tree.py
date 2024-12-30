@@ -5,7 +5,11 @@ from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
     sn_nodes,
 )
-from scripting_nodes.src.lib.utils.sockets.sockets import from_nodes, to_nodes
+from scripting_nodes.src.lib.utils.sockets.sockets import (
+    from_nodes,
+    from_socket,
+    to_nodes,
+)
 from scripting_nodes.src.lib.utils.is_sn import is_sn
 import bpy
 
@@ -53,6 +57,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
         self.update_links()
         self.update_group_sockets()
         self.update_node_references()
+        bpy.app.timers.register(lambda: self.update_reroutes(), first_interval=0.001)
 
     def update_links(self):
         new_links = set([*map(lambda l: (l, l.from_node, l.to_node), self.links)])
@@ -128,3 +133,12 @@ class ScriptingNodeTree(bpy.types.NodeTree):
             node = node_by_id(bpy.context.scene.sna.references[index].node_id)
             if node is None:
                 bpy.context.scene.sna.references.remove(index)
+
+    def update_reroutes(self):
+        for node in self.nodes:
+            if node.bl_idname == "NodeReroute":
+                connected = from_socket(node.inputs[0])
+                if connected and node.socket_idname != connected.bl_idname:
+                    node.socket_idname = connected.bl_idname
+                elif not connected and node.socket_idname != "ScriptingDataSocket":
+                    node.socket_idname = "ScriptingDataSocket"

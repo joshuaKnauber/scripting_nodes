@@ -2,8 +2,7 @@ from scripting_nodes.src.features.nodes.references.reference_properties import (
     SNA_NodeReference,
 )
 from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
-    scripting_node_trees,
-    sn_nodes,
+    node_by_id,
 )
 from .ui_settings.ui_properties import SNA_UISettings
 from .sn_settings.dev_properties import SNA_DevSettings
@@ -22,11 +21,9 @@ class SNA_Settings(bpy.types.PropertyGroup):
     references: bpy.props.CollectionProperty(type=SNA_NodeReference)
 
     def execute(self, node_id, globals, locals):
-        nodes = [node for tree in scripting_node_trees() for node in sn_nodes(tree)]
-        for node in nodes:
-            if node.id == node_id:
-                node._execute(globals, locals)
-                return
+        node = node_by_id(node_id)
+        if node:
+            node._execute(globals, locals)
 
 
 def register():

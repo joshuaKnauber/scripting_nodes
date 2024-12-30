@@ -50,8 +50,8 @@ class ScriptingBaseNode:
 
     def init(self, context: bpy.types.Context):
         """Called when the node is created"""
-        self.id = get_short_id()
         self.on_create()
+        self.id = get_short_id()
         self._generate()
 
     def on_create(self):
@@ -69,6 +69,8 @@ class ScriptingBaseNode:
     ### Code Generation
 
     def _generate(self):
+        if not self.id:
+            return
         prev_code = (
             self.code
             + self.code_global
