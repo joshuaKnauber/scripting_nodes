@@ -1,6 +1,7 @@
 import re
 from scripting_nodes.src.lib.utils.uuid import get_short_id
 from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+    node_by_id,
     scripting_node_trees,
     sn_nodes,
 )
@@ -111,22 +112,19 @@ class ScriptingNodeTree(bpy.types.NodeTree):
             node.on_group_socket_change(self)
 
     def update_node_references(self):
-        touched_ref_ids = []
         for node in sn_nodes(self):
             # update existing reference
             for ref in bpy.context.scene.sna.references:
                 if ref.node_id == node.id:
-                    touched_ref_ids.append(ref.node_id)
                     ref.name = f"{node.name} ({self.name})"
                     break
             # create new reference
             else:
                 ref = bpy.context.scene.sna.references.add()
-                touched_ref_ids.append(ref.node_id)
                 ref.name = f"{node.name} ({self.name})"
                 ref.node_id = node.id
         # remove stale references
         for index in range(len(bpy.context.scene.sna.references) - 1, -1, -1):
-            ref_id = bpy.context.scene.sna.references[index].node_id
-            if ref_id not in touched_ref_ids:
+            node = node_by_id(bpy.context.scene.sna.references[index].node_id)
+            if node is None:
                 bpy.context.scene.sna.references.remove(index)

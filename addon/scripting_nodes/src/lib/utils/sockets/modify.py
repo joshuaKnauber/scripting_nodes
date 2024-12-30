@@ -1,4 +1,7 @@
 def update_socket_type(socket, new_idname):
+    if socket.bl_idname == new_idname:
+        return
+
     old_index = (
         socket.node.outputs.find(socket.name)
         if socket.is_output

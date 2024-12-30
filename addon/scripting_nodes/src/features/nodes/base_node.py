@@ -1,5 +1,9 @@
 from email.policy import default
 from typing import Literal, Set
+from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+    scripting_node_trees,
+    sn_nodes,
+)
 from scripting_nodes.src.lib.utils.sockets.sockets import (
     from_nodes,
     to_nodes,
@@ -94,12 +98,20 @@ class ScriptingBaseNode:
             if "ROOT_NODE" in self.sn_options:
                 self.node_tree.is_dirty = True
             redraw_all()
+        # update references
+        for ntree in scripting_node_trees():
+            for node in sn_nodes(ntree):
+                for prop in node.sn_reference_properties:
+                    key = getattr(node, prop, "")
+                    ref = bpy.context.scene.sna.references.get(key)
+                    if ref and ref.node_id == self.id:
+                        node.on_ref_change(self)
 
     def generate(self):
         raise NotImplementedError
 
-    def _execute(self, globals, locals):
-        exec(normalize_indents(self.code), globals, locals)
+    def _execute(self, globs, locs):
+        exec(normalize_indents(self.code), globs, locs)
 
     ### Sockets
 

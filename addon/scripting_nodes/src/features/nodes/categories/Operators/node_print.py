@@ -8,9 +8,9 @@ class SNA_Node_Print(ScriptingBaseNode, bpy.types.Node):
     bl_label = "Print"
 
     def on_create(self):
-        self.add_input("ScriptingLogicSocket")
+        self.add_input("ScriptingProgramSocket")
         self.add_input("ScriptingStringSocket", "Text")
-        self.add_output("ScriptingLogicSocket")
+        self.add_output("ScriptingProgramSocket")
 
     def generate(self):
         self.code = f"""

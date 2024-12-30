@@ -1,6 +1,4 @@
-from .socket_logic import ScriptingLogicSocket
 from scripting_nodes.src.lib.utils.sockets.sockets import from_socket, to_socket
-from .socket_interface import ScriptingInterfaceSocket
 from ..base_socket import ScriptingBaseSocket
 import bpy
 
