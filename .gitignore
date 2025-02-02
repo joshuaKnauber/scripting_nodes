@@ -1,3 +1,5 @@
 __pycache__/
-persisted_modules.txt
 *.log
+
+venv/
+builds/

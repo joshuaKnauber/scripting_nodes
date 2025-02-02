@@ -1,0 +1,6 @@
+fake-bpy-module-latest
+pyyaml
+psutil
+colorama
+msvcrt
+select
