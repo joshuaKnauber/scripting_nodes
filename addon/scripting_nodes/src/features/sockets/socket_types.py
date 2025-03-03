@@ -16,6 +16,8 @@ SOCKET_IDNAME_TYPE = Literal[
     "ScriptingBooleanSocket",
     "ScriptingFloatSocket",
     "ScriptingIntegerSocket",
+    "ScriptingVectorSocket",
+    "ScriptingColorSocket",
 ]
 
 DATA_SOCKET_ICONS = {
@@ -24,6 +26,8 @@ DATA_SOCKET_ICONS = {
     "ScriptingBooleanSocket": "CHECKBOX_HLT",
     "ScriptingFloatSocket": "CON_TRANSLIKE",
     "ScriptingIntegerSocket": "CON_TRANSFORM",
+    "ScriptingVectorSocket": "EMPTY_AXIS",
+    "ScriptingColorSocket": "COLOR",
 }
 
 DATA_SOCKET_IDNAMES = [
@@ -32,6 +36,8 @@ DATA_SOCKET_IDNAMES = [
     "ScriptingBooleanSocket",
     "ScriptingFloatSocket",
     "ScriptingIntegerSocket",
+    "ScriptingVectorSocket",
+    "ScriptingColorSocket",
 ]
 
 DATA_SOCKET_ENUM_ITEMS = [
@@ -69,5 +75,19 @@ DATA_SOCKET_ENUM_ITEMS = [
         "Integer",
         DATA_SOCKET_ICONS["ScriptingIntegerSocket"],
         4,
+    ),
+    (
+        "ScriptingVectorSocket",
+        "Vector",
+        "Vector",
+        DATA_SOCKET_ICONS["ScriptingVectorSocket"],
+        5,
+    ),
+    (
+        "ScriptingColorSocket",
+        "Color",
+        "Color",
+        DATA_SOCKET_ICONS["ScriptingColorSocket"],
+        6,
     ),
 ]
