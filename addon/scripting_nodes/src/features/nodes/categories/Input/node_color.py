@@ -9,38 +9,40 @@ class SNA_Node_Color(ScriptingBaseNode, bpy.types.Node):
     def update_use_alpha(self, context):
         self.outputs[0].use_alpha = self.use_alpha
         self._generate()
-    
+
     # Whether to include alpha channel
     use_alpha: bpy.props.BoolProperty(
         name="Use Alpha",
         description="Include alpha channel in color values",
         default=False,
-        update=update_use_alpha
+        update=update_use_alpha,
     )
-    
+
     # RGB value
     rgb_value: bpy.props.FloatVectorProperty(
         name="Color",
-        subtype='COLOR',
+        subtype="COLOR",
         size=3,
-        min=0.0, max=1.0,
+        min=0.0,
+        max=1.0,
         default=(1.0, 1.0, 1.0),
-        update=lambda self, context: self._generate()
+        update=lambda self, context: self._generate(),
     )
-    
+
     # RGBA value
     rgba_value: bpy.props.FloatVectorProperty(
         name="Color",
-        subtype='COLOR',
+        subtype="COLOR",
         size=4,
-        min=0.0, max=1.0,
+        min=0.0,
+        max=1.0,
         default=(1.0, 1.0, 1.0, 1.0),
-        update=lambda self, context: self._generate()
+        update=lambda self, context: self._generate(),
     )
 
     def draw(self, context, layout):
         layout.prop(self, "use_alpha", text="Use Alpha")
-        
+
         # Show the appropriate color property
         if self.use_alpha:
             layout.prop(self, "rgba_value", text="")
@@ -55,6 +57,10 @@ class SNA_Node_Color(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         if len(self.outputs) > 0:
             if self.use_alpha:
-                self.outputs[0].code = f"({self.rgba_value[0]}, {self.rgba_value[1]}, {self.rgba_value[2]}, {self.rgba_value[3]})"
+                self.outputs[0].code = (
+                    f"({self.rgba_value[0]}, {self.rgba_value[1]}, {self.rgba_value[2]}, {self.rgba_value[3]})"
+                )
             else:
-                self.outputs[0].code = f"({self.rgb_value[0]}, {self.rgb_value[1]}, {self.rgb_value[2]})"
+                self.outputs[0].code = (
+                    f"({self.rgb_value[0]}, {self.rgb_value[1]}, {self.rgb_value[2]})"
+                )

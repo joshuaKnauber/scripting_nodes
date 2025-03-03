@@ -5,12 +5,14 @@ import bpy
 class ScriptingColorSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
     bl_idname = "ScriptingColorSocket"
     bl_label = "Color"
-    
+
     use_alpha: bpy.props.BoolProperty(default=False)
 
     def _to_code(self):
         if self.use_alpha:
-            return f"({self.value[0]}, {self.value[1]}, {self.value[2]}, {self.value[3]})"
+            return (
+                f"({self.value[0]}, {self.value[1]}, {self.value[2]}, {self.value[3]})"
+            )
         else:
             return f"({self.value[0]}, {self.value[1]}, {self.value[2]})"
 
