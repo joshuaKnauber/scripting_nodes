@@ -6,10 +6,6 @@ class SNA_Node_Compare(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Compare"
     bl_label = "Compare"
 
-    def init(self, context):
-        self.use_custom_color = True
-        self.color = (0.1, 0.1, 0.1)
-
     def on_create(self):
         self.add_input("ScriptingDataSocket", label="A")
         self.add_input("ScriptingDataSocket", label="B")
