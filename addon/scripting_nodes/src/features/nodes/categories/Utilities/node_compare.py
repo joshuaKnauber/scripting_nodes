@@ -13,12 +13,12 @@ class SNA_Node_Compare(ScriptingBaseNode, bpy.types.Node):
 
     # Enum for the comparison type
     comparison_types = [
-        ("==", "==", "Equal to"),
-        ("!=", "!=", "Not equal to"),
+        ("==", "=", "Equal to"),
+        ("!=", "≠", "Not equal to"),
         ("<", "<", "Less than"),
-        ("<=", "<=", "Less than or equal to"),
+        ("<=", "≤", "Less than or equal to"),
         (">", ">", "Greater than"),
-        (">=", ">=", "Greater than or equal to"),
+        (">=", "≥", "Greater than or equal to"),
     ]
     comparison_type: bpy.props.EnumProperty(
         items=comparison_types, name="Comparison Type"

@@ -14,7 +14,7 @@ class SNA_Node_SwitchData(ScriptingBaseNode, bpy.types.Node):
             self._generate()
 
     data_type: bpy.props.EnumProperty(
-        items=DATA_SOCKET_ENUM_ITEMS, name="Data Type", update=update_data_type
+        items=DATA_SOCKET_ENUM_ITEMS, name="Output Data Type", update=update_data_type
     )
 
     def draw(self, context, layout):
