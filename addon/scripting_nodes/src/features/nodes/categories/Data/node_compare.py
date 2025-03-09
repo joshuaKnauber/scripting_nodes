@@ -11,7 +11,6 @@ class SNA_Node_Compare(ScriptingBaseNode, bpy.types.Node):
         self.add_input("ScriptingDataSocket", label="B")
         self.add_output("ScriptingBooleanSocket", label="Result")
 
-    # Enum for the comparison type
     comparison_types = [
         ("==", "=", "Equal to"),
         ("!=", "≠", "Not equal to"),

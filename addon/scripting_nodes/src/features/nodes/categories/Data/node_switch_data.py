@@ -27,9 +27,6 @@ class SNA_Node_SwitchData(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingDataSocket", "Result")
 
     def generate(self):
-        if len(self.outputs) == 0:
-            return
-
         condition = self.inputs["Condition"].eval()
         false_value = self.inputs["False"].eval()
         true_value = self.inputs["True"].eval()
