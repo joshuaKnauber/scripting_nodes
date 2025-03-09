@@ -1,0 +1,3 @@
+# Dev Config: Launch using `python .\scripts\dev.py`
+BLENDER_EXECUTABLE: '...\blender.exe'
+ADDONS_PATH: '...\Blender\4.3\scripts\addons'
