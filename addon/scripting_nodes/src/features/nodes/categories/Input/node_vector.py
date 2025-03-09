@@ -15,7 +15,6 @@ class SNA_Node_Vector(ScriptingBaseNode, bpy.types.Node):
             self.outputs[0].dimension = self.dimension
         self._generate()
 
-    # Vector dimension options
     dimension_items = [
         ("2", "Vec2", "Two-dimensional vector"),
         ("3", "Vec3", "Three-dimensional vector"),
@@ -50,7 +49,6 @@ class SNA_Node_Vector(ScriptingBaseNode, bpy.types.Node):
 
     def on_create(self):
         self.add_output("ScriptingVectorSocket")
-        # Initialize the socket dimension to match the node
         if hasattr(self, "outputs") and len(self.outputs) > 0:
             self.outputs[0].dimension = self.dimension
 
@@ -59,7 +57,7 @@ class SNA_Node_Vector(ScriptingBaseNode, bpy.types.Node):
             self.outputs[0].code = f"({self.value_x}, {self.value_y})"
         elif self.dimension == "3":
             self.outputs[0].code = f"({self.value_x}, {self.value_y}, {self.value_z})"
-        else:  # dimension == '4'
+        else:
             self.outputs[0].code = (
                 f"({self.value_x}, {self.value_y}, {self.value_z}, {self.value_w})"
             )
