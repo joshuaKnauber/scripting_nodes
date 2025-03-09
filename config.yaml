@@ -1,3 +1,0 @@
-# Dev Config: Launch using `python .\scripts\dev.py`
-BLENDER_EXECUTABLE: 'C:\Users\crz\Downloads\blender-4.3.2-windows-x64\blender.exe'
-ADDONS_PATH: 'C:\Users\crz\AppData\Roaming\Blender Foundation\Blender\4.3\scripts\addons'
