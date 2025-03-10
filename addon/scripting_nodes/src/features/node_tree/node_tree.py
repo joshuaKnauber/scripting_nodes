@@ -29,6 +29,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     initialized: bpy.props.BoolProperty(default=False)
     id: bpy.props.StringProperty(default="")
     is_dirty: bpy.props.BoolProperty(default=True)
+    pause_updates: bpy.props.BoolProperty(default=False)
 
     @classmethod
     def valid_socket_type(cls, idname):
@@ -54,6 +55,8 @@ class ScriptingNodeTree(bpy.types.NodeTree):
         self.initialized = True
 
     def update(self):
+        if self.pause_updates:
+            return
         self.update_links()
         self.update_group_sockets()
         self.update_node_references()
