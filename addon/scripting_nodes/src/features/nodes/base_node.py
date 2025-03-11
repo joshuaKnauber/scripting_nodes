@@ -14,6 +14,7 @@ from scripting_nodes.src.features.sockets.socket_types import SOCKET_IDNAME_TYPE
 from scripting_nodes.src.lib.utils.uuid import get_short_id
 from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
 import bpy
+import textwrap
 
 
 class ScriptingBaseNode:
@@ -139,10 +140,22 @@ class ScriptingBaseNode:
 
     def draw_buttons(self, context, layout):
         if bpy.context.scene.sna.dev.show_node_code:
+            width = self.width
+            threshold = (int(width / 12) if int(width <= 150) else int(width / 7))
+            wrap_text = textwrap.TextWrapper(width=threshold)
+            
             box = layout.box()
-            for line in self.code.split("\n"):
-                box.label(text=line)
+            for line in self.code.split("\n"):     
+                
+                wrap_list = wrap_text.wrap(text=line)
+
+                for line2 in wrap_list:
+                    box.label(text=line2)
+
         self.draw(context, layout)
+
+             
+
 
     def draw(self, context, layout):
         pass
