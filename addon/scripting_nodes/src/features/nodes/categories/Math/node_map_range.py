@@ -8,10 +8,10 @@ class SNA_Node_MapRange(ScriptingBaseNode, bpy.types.Node):
 
     def on_create(self):
         self.add_input("ScriptingFloatSocket", "Value")
-        self.add_input("ScriptingFloatSocket", "Old Min")
+        self.add_input("ScriptingFloatSocket", "Old Min").value = 0
         self.add_input("ScriptingFloatSocket", "Old Max")
-        self.add_input("ScriptingFloatSocket", "New Min")
-        self.add_input("ScriptingFloatSocket", "New Max")
+        self.add_input("ScriptingFloatSocket", "New Min").value = 0
+        self.add_input("ScriptingFloatSocket", "New Max").value = 10
         self.add_output("ScriptingFloatSocket", "Float Result")
         self.add_output("ScriptingIntegerSocket", "Integer Result")
 

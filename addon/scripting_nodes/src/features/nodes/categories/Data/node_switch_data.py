@@ -9,9 +9,8 @@ class SNA_Node_SwitchData(ScriptingBaseNode, bpy.types.Node):
     bl_label = "Switch Data"
 
     def update_data_type(self, context):
-        if len(self.outputs) > 0:
-            update_socket_type(self.outputs[0], self.data_type)
-            self._generate()
+        update_socket_type(self.outputs[0], self.data_type)
+        self._generate()
 
     data_type: bpy.props.EnumProperty(
         items=DATA_SOCKET_ENUM_ITEMS, name="Output Data Type", update=update_data_type

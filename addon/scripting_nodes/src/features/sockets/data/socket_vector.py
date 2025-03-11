@@ -6,25 +6,27 @@ class ScriptingVectorSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
     bl_idname = "ScriptingVectorSocket"
     bl_label = "Vector"
 
-    def update_node(self, context):
+    def update_value(self, context):
         self.node._generate()
-
-    items = [
-        ("2", "Vec2", "Two-dimensional vector"),
-        ("3", "Vec3", "Three-dimensional vector"),
-        ("4", "Vec4", "Four-dimensional vector (with w component)"),
-    ]
 
     dimension: bpy.props.EnumProperty(
         name="Dimensions",
         description="Vector dimensions",
-        items=items,
+        items=[
+            ("2", "Vec2", "Two-dimensional vector"),
+            ("3", "Vec3", "Three-dimensional vector"),
+            ("4", "Vec4", "Four-dimensional vector (with w component)"),
+        ],
         default="3",
-        update=update_node,
+        update=update_value,
     )
 
     value: bpy.props.FloatVectorProperty(
-        name="Value", size=4, default=(0.0, 0.0, 0.0, 0.0), update=update_node
+        name="Value",
+        size=4,
+        default=(0.0, 0.0, 0.0, 0.0),
+        subtype="NONE",
+        update=update_value,
     )
 
     def _to_code(self):
@@ -41,15 +43,14 @@ class ScriptingVectorSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:
-            column = layout.column(align=True)
-
-            row = column.row()
-            row.label(text=self.name)
-            row.prop(self, "dimension", text="")
-
+            col = layout.column(align=True)
             dim = int(self.dimension)
-            for i in range(dim):
-                column.prop(self.value, index=i, text="XYZW"[i])
+            col.prop(self, "value", index=0, text="")
+            col.prop(self, "value", index=1, text="")
+            if dim >= 3:
+                col.prop(self, "value", index=2, text="")
+            if dim >= 4:
+                col.prop(self, "value", index=3, text="")
 
     @classmethod
     def draw_color_simple(cls):

@@ -4,3 +4,4 @@ __pycache__/
 venv/
 builds/
 config.yaml
+addon/scripting_nodes/src/features/nodes/categories/Operators/node_operator.py
