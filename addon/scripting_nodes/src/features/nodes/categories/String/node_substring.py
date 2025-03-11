@@ -27,7 +27,7 @@ class SNA_Node_Substring(ScriptingBaseNode, bpy.types.Node):
         string1 = self.inputs["String"].eval()
         string2 = self.inputs["Substring"].eval()
 
-        if not self.case_sensitive:
+        if self.case_sensitive:
             self.outputs[0].code = f"{string2} in {string1}"
         else:
             self.outputs[0].code = f"{string2}.lower() in {string1}.lower()"
