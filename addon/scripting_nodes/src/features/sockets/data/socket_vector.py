@@ -46,38 +46,55 @@ class ScriptingVectorSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
     def draw(self, context, layout, node, text):
         if self.is_output or self.is_linked:
             layout.label(text=text)
-        else:
+
             if self.is_dynamic:
                 row = layout.row(align=False)
-                col = row.column(align=True)
-                dim = int(self.dimension)
-                col.prop(self, "value", index=0, text="")
-                col.prop(self, "value", index=1, text="")
-                if dim >= 3:
-                    col.prop(self, "value", index=2, text="")
-                if dim >= 4:
-                    col.prop(self, "value", index=3, text="")
+                row.scale_x = 0.9
 
-                subrow = row.column()
-                op = subrow.operator(
-                    "sna.remove_socket", text="", icon="X", emboss=False
-                )
-                op.node_name = node.name
-                op.tree_name = node.id_data.name
-                for i, s in enumerate(node.inputs):
-                    if s == self:
-                        op.socket_index = i
-                        break
+                for icon, operator_name in [
+                    ("TRIA_UP", "sna.insert_socket"),
+                    ("REMOVE", "sna.remove_socket"),
+                ]:
+                    op = row.operator(operator_name, text="", icon=icon, emboss=False)
+                    op.node_name = node.name
+                    op.tree_name = node.id_data.name
 
-            else:
-                col = layout.column(align=True)
-                dim = int(self.dimension)
-                col.prop(self, "value", index=0, text="")
-                col.prop(self, "value", index=1, text="")
-                if dim >= 3:
-                    col.prop(self, "value", index=2, text="")
-                if dim >= 4:
-                    col.prop(self, "value", index=3, text="")
+                    if operator_name == "sna.insert_socket":
+                        op.socket_type = self.bl_idname
+                        op.socket_name = self.name
+
+                    for i, s in enumerate(node.inputs):
+                        if s == self:
+                            op.socket_index = i
+                            break
+
+        else:
+            dim = int(self.dimension)
+            col = layout.column(align=True)
+            for i in range(dim):
+                col.prop(self, "value", index=i, text="")
+
+            if self.is_dynamic:
+                layout.separator(factor=0.5)
+                row = layout.row(align=True)
+                row.scale_x = 0.9
+
+                for icon, operator_name in [
+                    ("TRIA_UP", "sna.insert_socket"),
+                    ("REMOVE", "sna.remove_socket"),
+                ]:
+                    op = row.operator(operator_name, text="", icon=icon, emboss=False)
+                    op.node_name = node.name
+                    op.tree_name = node.id_data.name
+
+                    if operator_name == "sna.insert_socket":
+                        op.socket_type = self.bl_idname
+                        op.socket_name = self.name
+
+                    for i, s in enumerate(node.inputs):
+                        if s == self:
+                            op.socket_index = i
+                            break
 
     @classmethod
     def draw_color_simple(cls):

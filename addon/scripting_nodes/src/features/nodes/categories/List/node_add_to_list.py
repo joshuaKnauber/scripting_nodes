@@ -1,5 +1,3 @@
-# addon/scripting_nodes/src/features/nodes/categories/Data/node_add_to_list.py
-
 from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
 import bpy
 

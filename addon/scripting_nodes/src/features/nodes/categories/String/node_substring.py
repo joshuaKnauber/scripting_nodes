@@ -5,6 +5,7 @@ import bpy
 class SNA_Node_Substring(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Substring"
     bl_label = "Substring In String"
+    bl_width_default = 180
 
     def update_data_type(self, context):
         self._generate()

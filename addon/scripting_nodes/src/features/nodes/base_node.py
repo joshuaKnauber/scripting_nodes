@@ -132,6 +132,9 @@ class ScriptingBaseNode:
         socket.display_shape = socket.socket_shape
 
     def ntree_link_created(self):
+        for socket in self.inputs:
+            if socket.links and socket.handles_dynamic_input:
+                socket.handle_dynamic_input()
         self._generate()
 
     def ntree_link_removed(self):

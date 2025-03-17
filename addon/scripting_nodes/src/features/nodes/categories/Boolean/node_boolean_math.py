@@ -22,13 +22,19 @@ class SNA_Node_BooleanMath(ScriptingBaseNode, bpy.types.Node):
     def on_create(self):
         self.add_input("ScriptingBooleanSocket", "Boolean")
         self.add_input("ScriptingBooleanSocket", "Boolean")
+        inp = self.add_input("ScriptingDynamicAddInputSocket", "Add Input")
+        inp.add_socket_type = "ScriptingBooleanSocket"
+        inp.add_socket_name = "Boolean"
         self.add_output("ScriptingBooleanSocket", "Result")
 
     def draw(self, context, layout):
         layout.prop(self, "comparison", text="")
 
     def generate(self):
-        value1 = self.inputs["Boolean"].eval()
-        value2 = self.inputs["Boolean"].eval()
+        boolean_inputs = []
+        for socket in self.inputs:
+            if socket.bl_idname == "ScriptingBooleanSocket" and socket.is_linked:
+                boolean_inputs.append(socket.eval())
 
-        self.outputs["Result"].code = f"{value1} {self.comparison.lower()} {value2}"
+        operator = f" {self.comparison.lower()} "
+        self.outputs["Result"].code = f"({operator.join(boolean_inputs)})"

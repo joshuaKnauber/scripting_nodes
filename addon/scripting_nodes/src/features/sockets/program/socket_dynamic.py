@@ -6,8 +6,10 @@ class ScriptingDynamicAddInputSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
     bl_idname = "ScriptingDynamicAddInputSocket"
     bl_label = "Dynamic Add Input"
 
-    add_socket_type: bpy.props.StringProperty(default="ScriptingDataSocket")
-    add_socket_name: bpy.props.StringProperty(default="Item")
+    def __init__(self):
+        super().__init__()
+        self.handles_dynamic_input = True
+        self.node._generate()
 
     def draw(self, context, layout, node, text):
         row = layout.row()

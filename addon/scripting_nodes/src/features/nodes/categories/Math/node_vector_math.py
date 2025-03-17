@@ -86,7 +86,9 @@ class SNA_Node_VectorMath(ScriptingBaseNode, bpy.types.Node):
     def draw(self, context, layout):
         layout = layout.column()
         layout.prop(self, "operation", text="")
-        if self.operation != "CROSS":
+        if self.operation != "CROSS" and any(
+            not socket.is_linked for socket in self.inputs
+        ):
             layout.prop(self, "dimension", text="")
 
     def generate(self):

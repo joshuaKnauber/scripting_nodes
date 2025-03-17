@@ -5,6 +5,7 @@ import bpy
 class SNA_Node_CombineString(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_CombineString"
     bl_label = "Combine String"
+    bl_width_default = 180
 
     def on_create(self):
         inp = self.add_input("ScriptingStringSocket", "String")
@@ -14,18 +15,6 @@ class SNA_Node_CombineString(ScriptingBaseNode, bpy.types.Node):
         inp.add_socket_name = "String"
 
         self.add_output("ScriptingStringSocket", "Combined String")
-
-    def on_socket_added(self, socket):
-        add_idx = -1
-        for i, s in enumerate(self.inputs):
-            if s.bl_idname == "ScriptingDynamicAddInputSocket":
-                add_idx = i
-                break
-
-        if add_idx >= 0 and add_idx < len(self.inputs) - 1:
-            self.inputs.move(add_idx, len(self.inputs) - 1)
-
-        socket.is_dynamic = True
 
     def generate(self):
         string_inputs = [

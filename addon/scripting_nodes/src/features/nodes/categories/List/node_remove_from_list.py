@@ -44,7 +44,7 @@ class SNA_Node_RemoveFromList(ScriptingBaseNode, bpy.types.Node):
                 {list_var} = {self.inputs['List'].eval()}
                 {list_var}.remove({self.inputs['Element'].eval()})
 
-                {indent(self.outputs[0].eval(), 3)}
+                {indent(self.outputs[0].eval(), 4)}
             """
         else:
 
@@ -52,7 +52,7 @@ class SNA_Node_RemoveFromList(ScriptingBaseNode, bpy.types.Node):
                 {list_var} = {self.inputs['List'].eval()}
                 del {list_var}[{self.inputs['Element'].eval()}]
 
-                {indent(self.outputs[0].eval(), 3)}
+                {indent(self.outputs[0].eval(), 4)}
             """
 
         self.outputs[1].code = list_var

@@ -3,7 +3,7 @@ import bpy
 
 
 class SNA_Node_InvertBoolean(ScriptingBaseNode, bpy.types.Node):
-    bl_idname = "SNA_InvertBoolean"
+    bl_idname = "SNA_Node_InvertBoolean"
     bl_label = "Invert Boolean"
 
     def on_create(self):
