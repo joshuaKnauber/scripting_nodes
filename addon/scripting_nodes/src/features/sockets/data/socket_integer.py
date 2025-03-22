@@ -9,12 +9,12 @@ class ScriptingIntegerSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
     def update_value(self, context):
         self.node._generate()
 
-    value: bpy.props.IntProperty(default=1, update=update_value)
+    value: bpy.props.IntProperty(default=0, update=update_value)
 
     def _to_code(self):
         return f"{self.value}"
 
-    def draw(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:
