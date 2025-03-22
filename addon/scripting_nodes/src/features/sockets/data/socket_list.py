@@ -18,10 +18,7 @@ class ScriptingListSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
         return f"{self.value}"
 
     def draw_socket(self, context, layout, node, text):
-        if self.is_output or self.is_linked:
-            layout.label(text=text)
-        else:
-            layout.prop(self, "value", text=self.name)
+        layout.label(text=text)
 
     @classmethod
     def draw_color_simple(cls):
