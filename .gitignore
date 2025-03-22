@@ -4,3 +4,6 @@ __pycache__/
 venv/
 builds/
 config.yaml
+addon/scripting_nodes/src/features/nodes/categories/Test Nodes/
+addon/scripting_nodes/src/features/nodes/categories/Operators/node_copy_to_clipboard.py
+addon/scripting_nodes/src/features/nodes/categories/Blend Data/node_blender_version.py
