@@ -12,6 +12,6 @@ class SNA_Node_List(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingListSocket", "List")
 
     def generate(self):
-        sockets = self.inputs[:-1]
+        sockets = [socket for socket in self.inputs[:-1] if socket.is_linked]
         items = [socket.eval() for socket in sockets]
         self.outputs[0].code = f"[{', '.join(items)}]"
