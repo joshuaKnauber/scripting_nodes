@@ -9,7 +9,7 @@ class ScriptingLogicSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
 
     socket_shape = "DIAMOND"
 
-    def draw(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text):
         layout.label(text=text)
 
     def _to_code(self):

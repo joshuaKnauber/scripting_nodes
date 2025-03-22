@@ -6,6 +6,7 @@ from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
 )
 from scripting_nodes.src.lib.utils.sockets.sockets import (
     from_nodes,
+    socket_index,
     to_nodes,
 )
 from scripting_nodes.src.lib.utils.screen.screen import redraw_all
@@ -117,25 +118,45 @@ class ScriptingBaseNode:
 
     ### Sockets
 
-    def add_input(self, idname: SOCKET_IDNAME_TYPE, label=""):
+    def add_input(self, idname: SOCKET_IDNAME_TYPE, label="", dynamic=False):
         socket = self.inputs.new(idname, label)
-        self._initialize_socket(socket, label)
+        self._initialize_socket(socket, label, dynamic)
         return socket
 
-    def add_output(self, idname: SOCKET_IDNAME_TYPE, label=""):
+    def add_output(self, idname: SOCKET_IDNAME_TYPE, label="", dynamic=False):
         socket = self.outputs.new(idname, label)
-        self._initialize_socket(socket, label)
+        self._initialize_socket(socket, label, dynamic)
         return socket
 
-    def _initialize_socket(self, socket, label):
+    def _initialize_socket(self, socket, label, dynamic):
         socket.name = label or socket.bl_label
         socket.display_shape = socket.socket_shape
+        socket.is_dynamic = dynamic
 
     def ntree_link_created(self):
+        self._update_dynamic_sockets()
         self._generate()
 
     def ntree_link_removed(self):
         self._generate()
+
+    def _update_dynamic_sockets(self):
+        # update inputs
+        for socket in self.inputs:
+            if socket.is_dynamic and socket.is_linked:
+                index = socket_index(self, socket)
+                self.add_input(socket.bl_idname, socket.label, dynamic=True)
+                self.inputs.move(len(self.inputs) - 1, index + 1)
+                socket.is_dynamic = False
+                socket.is_removable = True
+        # update outputs
+        for socket in self.outputs:
+            if socket.is_dynamic and socket.is_linked:
+                index = socket_index(self, socket)
+                self.add_output(socket.bl_idname, socket.label, dynamic=True)
+                self.outputs.move(len(self.outputs) - 1, index + 1)
+                socket.is_dynamic = False
+                socket.is_removable = True
 
     def draw_buttons(self, context, layout):
         if bpy.context.scene.sna.dev.show_node_code:
