@@ -14,7 +14,7 @@ class ScriptingFloatSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
     def _to_code(self):
         return f"{self.value}"
 
-    def draw(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:

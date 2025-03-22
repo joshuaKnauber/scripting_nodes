@@ -6,6 +6,9 @@ class SNA_Node_Compare(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Compare"
     bl_label = "Compare"
 
+    def update_comparison(self, context):
+        self._generate()
+
     def on_create(self):
         self.add_input("ScriptingDataSocket", label="A")
         self.add_input("ScriptingDataSocket", label="B")
@@ -20,7 +23,7 @@ class SNA_Node_Compare(ScriptingBaseNode, bpy.types.Node):
         (">=", "≥", "Greater than or equal to"),
     ]
     comparison_type: bpy.props.EnumProperty(
-        items=comparison_types, name="Comparison Type"
+        items=comparison_types, name="Comparison Type", update=update_comparison
     )
 
     def draw(self, context, layout):

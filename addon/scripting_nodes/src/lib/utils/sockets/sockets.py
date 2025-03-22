@@ -46,3 +46,17 @@ def from_nodes(socket):
 def from_node(socket):
     nodes = from_nodes(socket)
     return nodes[0] if nodes else None
+
+
+def dynamic_socket_by_label(node, label, is_output):
+    for socket in node.outputs if is_output else node.inputs:
+        if socket.label == label and socket.is_dynamic:
+            return socket
+    return None
+
+
+def socket_index(node, socket):
+    for i, s in enumerate(node.outputs if socket.is_output else node.inputs):
+        if s == socket:
+            return i
+    return -1
