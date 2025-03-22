@@ -1,5 +1,4 @@
 from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
-from scripting_nodes.src.lib.utils.sockets.modify import update_socket_type
 import bpy
 
 
@@ -27,6 +26,11 @@ class SNA_Node_RoundFloat(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingFloatSocket", "Rounded Float")
 
     def generate(self):
+        if self.round_up_or_down in ["UP", "DOWN"]:
+            self.code_global = "import math"
+        else:
+            self.code_global = ""
+
         value = self.inputs["Float"].eval()
         decimals = self.inputs["Decimals"].eval()
 
@@ -37,5 +41,4 @@ class SNA_Node_RoundFloat(ScriptingBaseNode, bpy.types.Node):
         elif self.round_up_or_down == "NEAREST":
             result = f"round({value}, {decimals})"
 
-        if len(self.outputs) > 0:
-            self.outputs[0].code = result
+        self.outputs[0].code = result
