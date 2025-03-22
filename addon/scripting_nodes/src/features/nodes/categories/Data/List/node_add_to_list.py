@@ -37,13 +37,13 @@ class SNA_Node_AddToList(ScriptingBaseNode, bpy.types.Node):
         item = self.inputs["Item"].eval()
 
         if self.operation == "APPEND":
-            self.outputs[0].code = f"{list_input} + [{item}]"
+            self.outputs[0].code = f"{list_input}.append({item}) or {list_input}"
 
         elif self.operation == "PREPEND":
-            self.outputs[0].code = f"[{item}] + {list_input}"
+            self.outputs[0].code = f"{list_input}.insert(0, {item}) or {list_input}"
 
         elif self.operation == "INSERT":
             index = self.inputs["Index"].eval()
             self.outputs[0].code = (
-                f"{list_input}[:{index}] + [{item}] + {list_input}[{index}:]"
+                f"{list_input}.insert({index}, {item}) or {list_input}"
             )
