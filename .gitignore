@@ -1,7 +1,0 @@
-__pycache__/
-*.log
-
-venv/
-builds/
-config.yaml
-addon/scripting_nodes/src/features/nodes/categories/Test Nodes/
