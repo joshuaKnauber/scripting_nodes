@@ -9,7 +9,7 @@ class ScriptingDataSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
     def _to_code(self):
         return "None"
 
-    def draw(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text):
         layout.label(text=text)
 
     @classmethod

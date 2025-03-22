@@ -39,7 +39,7 @@ class ScriptingVectorSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
                 f"({self.value[0]}, {self.value[1]}, {self.value[2]}, {self.value[3]})"
             )
 
-    def draw(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:

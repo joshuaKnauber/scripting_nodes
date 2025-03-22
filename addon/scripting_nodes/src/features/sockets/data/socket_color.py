@@ -28,7 +28,7 @@ class ScriptingColorSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
         else:
             return f"({self.value[0]}, {self.value[1]}, {self.value[2]})"
 
-    def draw(self, context, layout, node, text):
+    def draw_socket(self, context, layout, node, text):
         if self.is_output or self.is_linked:
             layout.label(text=text)
         else:

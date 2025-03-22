@@ -1,5 +1,9 @@
 from typing import Literal
-from scripting_nodes.src.lib.utils.sockets.sockets import from_socket, to_socket
+from scripting_nodes.src.lib.utils.sockets.sockets import (
+    from_socket,
+    socket_index,
+    to_socket,
+)
 from scripting_nodes.src.lib.utils.code.format import normalize_indents
 import bpy
 
@@ -11,6 +15,9 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
     socket_shape = "CIRCLE"
 
     code: bpy.props.StringProperty(default="")
+
+    is_dynamic: bpy.props.BoolProperty(default=False)
+    is_removable: bpy.props.BoolProperty(default=False)
 
     def eval(self, fallback=""):
         if self.socket_type == "PROGRAM":
@@ -41,3 +48,52 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
 
     def _to_code(self):
         raise NotImplementedError
+
+    def draw_socket(self, context, layout, node, text):
+        raise NotImplementedError
+
+    def draw(self, context, layout, node, text):
+        # dynamic socket UI
+        if self.is_output and (self.is_dynamic or self.is_removable):
+            if self.is_dynamic:
+                layout.label(text=text)
+                op = layout.operator(
+                    "sna.add_dynamic_socket", text="", icon="ADD", emboss=False
+                )
+                op.node_id = node.id
+                op.socket_label = self.label
+                op.is_output = self.is_output
+            elif self.is_removable:
+                op = layout.operator(
+                    "sna.remove_dynamic_socket",
+                    text="",
+                    icon="REMOVE",
+                    emboss=False,
+                )
+                op.node_id = node.id
+                op.socket_index = socket_index(node, self)
+                op.is_output = self.is_output
+
+        # dynamic socket UI
+        if not self.is_output and self.is_removable:
+            if self.is_removable:
+                op = layout.operator(
+                    "sna.remove_dynamic_socket", text="", icon="REMOVE", emboss=False
+                )
+                op.node_id = node.id
+                op.socket_index = socket_index(node, self)
+                op.is_output = self.is_output
+
+        # normal socket UI
+        if not self.is_dynamic:
+            self.draw_socket(context, layout, node, text)
+
+        # dynamic socket UI
+        if not self.is_output and self.is_dynamic:
+            op = layout.operator(
+                "sna.add_dynamic_socket", text="", icon="ADD", emboss=False
+            )
+            op.node_id = node.id
+            op.socket_label = self.label
+            op.is_output = self.is_output
+            layout.label(text=text)
