@@ -18,7 +18,7 @@ class SN_SleepNode(ScriptingBaseNode, bpy.types.Node):
 
 
     def generate(self):
-        self.code_global = "import time"
+        self.code_import = "import time"
         self.code = f"""
             var_{self.id} =  time.sleep({self.inputs[1].eval()})
             {indent(self.outputs[0].eval(), 3)}

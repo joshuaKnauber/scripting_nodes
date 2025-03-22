@@ -1,42 +1,26 @@
+from scripting_nodes.src.lib.utils.code.format import indent
 from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
 import bpy
 
 
-class SNA_Node_StringCase(ScriptingBaseNode, bpy.types.Node):
-    bl_idname = "SNA_Node_StringCase"
-    bl_label = "String Case"
+class SNA_Node_StringLower(ScriptingBaseNode, bpy.types.Node):
+    bl_idname = "SNA_Node_StringLower"
+    bl_label = "String Lower"
 
-    def update_value(self, context):
+    def update_data_type(self, context):
         self._generate()
 
-    string_case: bpy.props.EnumProperty(
-        name="string_case",
-        description="Select a string transformation mode",
-        items=[
-            ("LOWER", "Lowercase", "Convert to lowercase"),
-            ("UPPER", "Uppercase", "Convert to uppercase"),
-            ("CAMEL", "Camel Case", "Convert to camel case"),
-        ],
-        default="LOWER",
-        update=update_value,
-    )
-
-    def draw(self, context, layout):
-        layout.prop(self, "string_case", text="Case")
 
     def on_create(self):
-        self.add_input("ScriptingStringSocket")
-        self.add_output("ScriptingStringSocket")
+        self.add_input("ScriptingProgramSocket")
+        self.add_input("ScriptingStringSocket", "Initial Value")
+        self.add_output("ScriptingProgramSocket")
+        self.add_output("ScriptingStringSocket", "Value")
 
 
     def generate(self):
-        # Create the transformation code based on selected case
-        if self.string_case == "LOWER":
-            print("Lower")
-            self.outputs[0].code = self.inputs[0].eval().lower()
-        elif self.string_case == "UPPER":
-            print("Upper")
-            self.outputs[0].code = self.inputs[0].eval().upper()
-        elif self.string_case == "CAMEL":
-            print("Camel")
-            self.outputs[0].code = f"''.join(word.capitalize() for word in {self.inputs[0].eval()}.split())"
+        self.code = f"""
+            var_{self.id} = {self.inputs[1].eval().lower()}
+            {indent(self.outputs[0].eval(), 3)}
+        """
+        self.outputs[1].code = f"var_{self.id}.lower()"
