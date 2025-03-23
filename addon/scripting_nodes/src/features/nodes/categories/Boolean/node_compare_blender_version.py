@@ -2,9 +2,9 @@ from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
 import bpy
 
 
-class SNA_Node_If_Blender_Version(ScriptingBaseNode, bpy.types.Node):
-    bl_idname = "SNA_Node_If_Blender_Version"
-    bl_label = "If Blender Version"
+class SNA_Node_Compare_Blender_Version(ScriptingBaseNode, bpy.types.Node):
+    bl_idname = "SNA_Node_Compare_Blender_Version"
+    bl_label = "Compare Blender Version"
     bl_description = "Checks if the Blender version being used is equal to, greater than, or less than a specified version"
 
     def update_value(self, context):
