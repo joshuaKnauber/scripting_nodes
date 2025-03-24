@@ -46,8 +46,7 @@ class SNA_Node_In_Mode(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         mode = self.in_mode
         if mode.endswith("_GREASE_PENCIL"):          
-            if bpy.app.version < (4, 3, 0):
-                mode = mode.replace("_GREASE_PENCIL", "_GPENCIL")          
-
-        self.outputs[0].code = f"bpy.context.mode == '{mode}'"
+            self.outputs[0].code = f"bpy.context.mode == '{(mode.replace('_GREASE_PENCIL', '_GPENCIL') if bpy.app.version < (4, 3, 0) else mode)}'"
+        else:
+            self.outputs[0].code = f"bpy.context.mode == '{mode}'"
 

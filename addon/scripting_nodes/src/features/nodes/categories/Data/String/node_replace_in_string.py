@@ -26,4 +26,7 @@ class SNA_Node_Replace_In_String(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         self.code_global = "import re"
-        self.outputs[0].code = f"{self.inputs[0].eval()}.replace({self.inputs[1].eval()}, {self.inputs[2].eval()}) if {self.case_sensitive} else re.sub({self.inputs[1].eval()}, {self.inputs[2].eval()}, {self.inputs[0].eval()}, flags=re.IGNORECASE)"
+        if self.case_sensitive:
+            self.outputs[0].code = f"{self.inputs[0].eval()}.replace({self.inputs[1].eval()}, {self.inputs[2].eval()})"
+        else: 
+            self.outputs[0].code = f"re.sub({self.inputs[1].eval()}, {self.inputs[2].eval()}, {self.inputs[0].eval()}, flags=re.IGNORECASE)"

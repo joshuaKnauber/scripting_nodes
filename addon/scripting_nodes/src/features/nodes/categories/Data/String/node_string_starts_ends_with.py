@@ -38,14 +38,12 @@ class SNA_Node_String_Starts_Ends_With(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         if self.detection_mode == "STARTSWITH":
-            self.outputs[0].code = (
-                f"(False if not {self.inputs[1].eval()} else "
-                f"({self.inputs[0].eval()}.startswith({self.inputs[1].eval()}) " 
-                f"if {self.case_sensitive} else {self.inputs[0].eval()}.lower().startswith({self.inputs[1].eval()}.lower())))"
-            )
+            if self.case_sensitive:
+                self.outputs[0].code = f"{self.inputs[0].eval()}.startswith({self.inputs[1].eval()})" 
+            else: 
+                self.outputs[0].code = f"{self.inputs[0].eval()}.lower().startswith({self.inputs[1].eval()}.lower())"
         else:
-            self.outputs[0].code = (
-                f"(False if not {self.inputs[1].eval()} else "
-                f"({self.inputs[0].eval()}.endswith({self.inputs[1].eval()}) " 
-                f"if {self.case_sensitive} else {self.inputs[0].eval()}.lower().endswith({self.inputs[1].eval()}.lower())))"
-            )
+            if self.case_sensitive:
+                self.outputs[0].code = f"{self.inputs[0].eval()}.endswith({self.inputs[1].eval()})" 
+            else:
+                self.outputs[0].code = f"{self.inputs[0].eval()}.lower().endswith({self.inputs[1].eval()}.lower())"
