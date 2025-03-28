@@ -1,4 +1,5 @@
 from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
+from scripting_nodes.src.lib.utils.code.format import indent
 import bpy
 
 
@@ -24,10 +25,12 @@ class SNA_Node_AddToList(ScriptingBaseNode, bpy.types.Node):
     )
 
     def on_create(self):
+        self.add_input("ScriptingProgramSocket", "Program")
         inp = self.add_input("ScriptingListSocket", "List")
         self.add_input("ScriptingDataSocket", "Item")
         index_input = self.add_input("ScriptingIntegerSocket", "Index")
         index_input.hide = True
+        self.add_output("ScriptingProgramSocket", "Program")
         self.add_output("ScriptingListSocket", "Result")
 
     def draw(self, context, layout):
@@ -36,11 +39,26 @@ class SNA_Node_AddToList(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         list_input = self.inputs["List"].eval()
         item = self.inputs["Item"].eval()
+        result_list = f"list_{self.id}"
 
         if self.operation == "APPEND":
-            self.outputs[0].code = f"{list_input}.append({item})"
+            self.code = f"""
+                {result_list} = {list_input}.copy()
+                {result_list}.append({item})
+                {indent(self.outputs[0].eval(), 3)}
+            """
         elif self.operation == "PREPEND":
-            self.outputs[0].code = f"{list_input}.insert(0, {item})"
+            self.code = f"""
+                {result_list} = {list_input}.copy()
+                {result_list}.insert(0, {item})
+                {indent(self.outputs[0].eval(), 3)}
+            """
         elif self.operation == "INSERT":
             index = self.inputs["Index"].eval()
-            self.outputs[0].code = f"{list_input}.insert({index}, {item})"
+            self.code = f"""
+                {result_list} = {list_input}.copy()
+                {result_list}.insert({index}, {item})
+                {indent(self.outputs[0].eval(), 3)}
+            """
+
+        self.outputs[1].code = result_list
