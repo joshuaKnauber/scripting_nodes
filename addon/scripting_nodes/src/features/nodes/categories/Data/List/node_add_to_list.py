@@ -26,7 +26,7 @@ class SNA_Node_AddToList(ScriptingBaseNode, bpy.types.Node):
 
     def on_create(self):
         self.add_input("ScriptingProgramSocket", "Program")
-        inp = self.add_input("ScriptingListSocket", "List")
+        self.add_input("ScriptingListSocket", "List")
         self.add_input("ScriptingDataSocket", "Item")
         index_input = self.add_input("ScriptingIntegerSocket", "Index")
         index_input.hide = True
