@@ -3,11 +3,15 @@ from ..base_socket import ScriptingBaseSocket
 import bpy
 
 
+# External storage for layout property (NodeSockets don't support IDProperties)
+_layout_storage = {}
+
+
 class LayoutSocket:
 
     def get_layout(self):
         # return own layout or that of previous connected socket
-        own_layout = self.get("layout") or ""
+        own_layout = _layout_storage.get(self.as_pointer(), "")
         if self.is_output:
             if own_layout:
                 return own_layout
@@ -24,7 +28,7 @@ class LayoutSocket:
             return "self.layout"
 
     def set_layout(self, value):
-        self["layout"] = value
+        _layout_storage[self.as_pointer()] = value
 
     layout: bpy.props.StringProperty(default="", get=get_layout, set=set_layout)
 
