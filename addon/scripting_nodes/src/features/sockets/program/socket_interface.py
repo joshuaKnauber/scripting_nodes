@@ -4,29 +4,31 @@ import bpy
 
 
 class LayoutSocket:
+    # Blender 5.0: get/set renamed to get_transform/set_transform in bpy.props
+    # However, NodeSocket types don't support IDProperties, so using Python @property instead
 
-    def get_layout(self):
+    @property
+    def layout(self):
         # return own layout or that of previous connected socket
-        own_layout = self.get("layout") or ""
+        stored = getattr(self, "_layout_value", "")
+        if stored:
+            return stored
+            
         if self.is_output:
-            if own_layout:
-                return own_layout
-            else:
-                if len(self.node.inputs) > 0 and hasattr(self.node.inputs[0], "layout"):
-                    connected = from_socket(self.node.inputs[0])
-                    if connected and hasattr(connected, "layout"):
-                        return connected.layout
-                return "self.layout"
+            if len(self.node.inputs) > 0 and hasattr(self.node.inputs[0], "layout"):
+                connected = from_socket(self.node.inputs[0])
+                if connected and hasattr(connected, "layout"):
+                    return connected.layout
+            return "self.layout"
         else:
             connected = from_socket(self)
             if connected and hasattr(connected, "layout"):
                 return connected.layout
             return "self.layout"
-
-    def set_layout(self, value):
-        self["layout"] = value
-
-    layout: bpy.props.StringProperty(default="", get=get_layout, set=set_layout)
+    
+    @layout.setter
+    def layout(self, value):
+        self._layout_value = value
 
 
 class ScriptingInterfaceSocket(ScriptingBaseSocket, LayoutSocket, bpy.types.NodeSocket):
