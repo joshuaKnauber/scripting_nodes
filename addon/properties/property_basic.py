@@ -141,7 +141,7 @@ class BasicProperty():
     
 
     def get_name(self):
-        return self.get("name", "Prop Default")
+        return getattr(self, "name", "Prop Default")
 
     def get_unique_name(self, value):
         names = list(map(lambda item: item.name, list(filter(lambda item: item!=self, self.prop_collection))))
@@ -175,7 +175,7 @@ class BasicProperty():
                             to_update_props.append(subprop)
 
         # set value
-        self["name"] = value
+        setattr(self, "name", value)
 
         # update property references
         for prop in to_update_props:
@@ -276,14 +276,14 @@ class BasicProperty():
                                 description="The category this property is displayed in")
     
     def match_settings(self, new_prop):
-        new_prop["name"] = self.get_unique_name(self.get("name"))
-        new_prop["property_type"] = self.get("property_type")
-        new_prop["description"] = self.get("description")
-        new_prop["allow_pointers"] = self.get("allow_pointers")
-        new_prop["prop_options"] = self.get("prop_options")
-        new_prop["category"] = self.get("category")
+        setattr(new_prop, "name", self.get_unique_name(getattr(self, "name", "Prop Default")))
+        setattr(new_prop, "property_type", getattr(self, "property_type", "String"))
+        setattr(new_prop, "description", getattr(self, "description", ""))
+        setattr(new_prop, "allow_pointers", getattr(self, "allow_pointers", True))
+        setattr(new_prop, "prop_options", getattr(self, "prop_options", set()))
+        setattr(new_prop, "category", getattr(self, "category", "OTHER"))
         for attr in self.settings.copy_attributes:
-            new_prop.settings[attr] = self.settings.get(attr)
+            setattr(new_prop.settings, attr, getattr(self.settings, attr, None))
         self.settings.copy(new_prop.settings)
     
     def copy(self):
