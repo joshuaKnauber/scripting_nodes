@@ -27,22 +27,37 @@ class SN_RunScriptNode(SN_ScriptingBaseNode, bpy.types.Node):
     bl_width_default = 200
 
     def on_socket_name_change(self, socket):
+        # Prevent recursion
+        storage_key = f"_socket_updating_name_{id(socket)}"
+        if self.get(storage_key, False):
+            return
+        
+        # Get the current name value from stored value (set by update_socket_name)
+        name_storage_key = f"_socket_current_name_{id(socket)}"
+        current_name = self.get(name_storage_key, socket.name)  # Fallback to socket.name if not stored
+        
         if socket in self.inputs[2:-1]:
-            socket["name"] = get_python_name(socket.name, "Variable", lower=False)
-            socket["name"] = unique_collection_name(socket.name, "Variable", [inp.name for inp in self.inputs[2:-1]], "_", includes_name=True)
+            new_name = get_python_name(current_name, "Variable", lower=False)
+            new_name = unique_collection_name(new_name, "Variable", [inp.name for inp in self.inputs[2:-1]], "_", includes_name=True)
+            if new_name != current_name:
+                socket.set_name_silent(new_name)
         elif socket in self.outputs[1:-1]:
-            socket["name"] = get_python_name(socket.name, "Variable", lower=False)
-            socket["name"] = unique_collection_name(socket.name, "Variable", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
-            socket.python_value = socket.name
+            new_name = get_python_name(current_name, "Variable", lower=False)
+            new_name = unique_collection_name(new_name, "Variable", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+            if new_name != current_name:
+                socket.set_name_silent(new_name)
+                socket.python_value = socket.name
         self._evaluate(bpy.context)
 
     def on_dynamic_socket_add(self, socket):
         if socket in self.inputs[2:-1]:
-            socket["name"] = get_python_name(socket.name, "Variable", lower=False)
-            socket["name"] = unique_collection_name(socket.name, "Variable", [inp.name for inp in self.inputs[2:-1]], "_", includes_name=True)
+            new_name = get_python_name(socket.name, "Variable", lower=False)
+            new_name = unique_collection_name(new_name, "Variable", [inp.name for inp in self.inputs[2:-1]], "_", includes_name=True)
+            socket.set_name_silent(new_name)
         elif socket in self.outputs[1:-1]:
-            socket["name"] = get_python_name(socket.name, "Variable", lower=False)
-            socket["name"] = unique_collection_name(socket.name, "Variable", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+            new_name = get_python_name(socket.name, "Variable", lower=False)
+            new_name = unique_collection_name(new_name, "Variable", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+            socket.set_name_silent(new_name)
             socket.python_value = socket.name
 
 

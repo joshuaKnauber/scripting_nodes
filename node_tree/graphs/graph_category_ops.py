@@ -5,14 +5,15 @@ from ...interface.panels.graph_ui_list import get_selected_graph
 class SN_GraphCategory(bpy.types.PropertyGroup):
 
     def set_name(self, value):
+        current_name = self.get("_name", "New Category")
         for ntree in bpy.data.node_groups:
             if hasattr(ntree, "category"):
-                if ntree.category and ntree.category == self.name:
+                if ntree.category and ntree.category == current_name:
                     ntree.category = value
-        self["name"] = value
+        self["_name"] = value
 
     def get_name(self):
-        return self.get("name", "New Category")
+        return self.get("_name", "New Category")
     
     name: bpy.props.StringProperty(name="Name", default="New Category",
                             description="The name of this graph category",

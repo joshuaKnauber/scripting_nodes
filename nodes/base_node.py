@@ -177,9 +177,10 @@ class SN_ScriptingBaseNode:
         normalized = normalize_code(raw_code)
         if sn.format_code and sn.debug_code:
             normalized = format_linebreaks(normalized)
-        current_value = getattr(self, key, None)
-        if current_value == None or normalized != current_value:
-            setattr(self, key, normalized)
+        idprop_key = f"_{key}"
+        current_value = self.get(idprop_key, None)
+        if current_value is None or normalized != current_value:
+            self[idprop_key] = normalized
 
     def _set_code(self, raw_code):
         self._set_any_code("code", raw_code)
@@ -197,19 +198,19 @@ class SN_ScriptingBaseNode:
         self._set_any_code("code_unregister", raw_code)
 
     def _get_code(self):
-        return self.get("code", "")
+        return self.get("_code", "")
 
     def _get_code_import(self):
-        return self.get("code_import", "")
+        return self.get("_code_import", "")
 
     def _get_code_imperative(self):
-        return self.get("code_imperative", "")
+        return self.get("_code_imperative", "")
 
     def _get_code_register(self):
-        return self.get("code_register", "")
+        return self.get("_code_register", "")
 
     def _get_code_unregister(self):
-        return self.get("code_unregister", "")
+        return self.get("_code_unregister", "")
 
     code: bpy.props.StringProperty(
         name="Code",
@@ -546,7 +547,11 @@ class SN_ScriptingBaseNode:
     def _add_input(self, idname, label, dynamic=False):
         """Adds an input for this node. This function itself doesn't evaluate as it may be used before the node is ready"""
         socket = self.inputs.new(idname, label)
-        socket.name = label
+        # Use set_name_silent to avoid triggering update callbacks during socket creation
+        if hasattr(socket, "set_name_silent"):
+            socket.set_name_silent(label)
+        else:
+            socket.name = label
         socket.dynamic = dynamic
         socket.display_shape = socket.socket_shape
         return socket
@@ -554,7 +559,11 @@ class SN_ScriptingBaseNode:
     def _add_output(self, idname, label, dynamic=False):
         """Adds an output for this node. This function itself doesn't evaluate as it may be used before the node is ready"""
         socket = self.outputs.new(idname, label)
-        socket.name = label
+        # Use set_name_silent to avoid triggering update callbacks during socket creation
+        if hasattr(socket, "set_name_silent"):
+            socket.set_name_silent(label)
+        else:
+            socket.name = label
         socket.dynamic = dynamic
         socket.display_shape = socket.socket_shape
         return socket
@@ -848,11 +857,11 @@ class SN_ScriptingBaseNode:
 
     ### INTERFACE UTIL
     def get_active_layout(self):
-        return self.get("active_layout", "layout")
+        return self.get("_active_layout", "layout")
 
     def set_active_layout(self, value):
         if self.get_active_layout() != value:
-            self["active_layout"] = value
+            self["_active_layout"] = value
             self._evaluate(bpy.context)
 
         # trigger layout updates if passthrough

@@ -25,12 +25,12 @@ class SN_AssetProperties(bpy.types.PropertyGroup):
             node._evaluate(context)
 
     def get_asset_name(self):
-        return self.get("name", "Asset")
+        return self.get("_name", "Asset")
     
     def set_asset_name(self, new_name):
         # update asset nodes that had this asset
         to_update = self.get_to_update()
-        self["name"] = new_name
+        self["_name"] = new_name
         for node in to_update:
             node.asset = new_name
         

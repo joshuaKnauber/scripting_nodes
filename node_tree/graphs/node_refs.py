@@ -20,8 +20,8 @@ class NodeRef(bpy.types.PropertyGroup):
         return None
             
     def set_name(self, value):
-        prev_name = self.get("name", "")
-        self["name"] = value
+        prev_name = self.get("_name", "")
+        self["_name"] = value
         
         # update references
         if prev_name:
@@ -38,7 +38,7 @@ class NodeRef(bpy.types.PropertyGroup):
                                 setattr(node, f"from_node", value)
     
     def get_name(self):
-        return self.get("name", "")
+        return self.get("_name", "")
     
     uid: bpy.props.StringProperty(name="UID",
                                 description="The static_uid of the node that belongs to this reference")
@@ -74,8 +74,8 @@ class NodeRefCollection(bpy.types.PropertyGroup):
     def fix_ref_names(self):
         """ Makes sure all ref names match the node names """
         for ref in self.refs:
-            if ref.get("name") != ref.node.name:
-                ref["name"] = ref.node.name
+            if ref.get("_name") != ref.node.name:
+                ref["_name"] = ref.node.name
                 ref.node.on_node_name_change()
                 # ref.node._evaluate(bpy.context)
     

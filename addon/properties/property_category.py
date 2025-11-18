@@ -5,13 +5,14 @@ from ...interface.panels.property_ui_list import get_selected_property
 class SN_PropertyCategory(bpy.types.PropertyGroup):
 
     def set_name(self, value):
+        current_name = self.get("_name", "New Category")
         for prop in bpy.context.scene.sn.properties:
-            if prop.category and prop.category == self.name:
+            if prop.category and prop.category == current_name:
                 prop.category = value
-        self["name"] = value
+        self["_name"] = value
 
     def get_name(self):
-        return self.get("name", "New Category")
+        return self.get("_name", "New Category")
     
     name: bpy.props.StringProperty(name="Name", default="New Category",
                             description="The name of this property category",

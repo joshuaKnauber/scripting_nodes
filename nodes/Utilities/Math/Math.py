@@ -16,14 +16,14 @@ class SN_MathNode(SN_ScriptingBaseNode, bpy.types.Node):
         if len(self.inputs) > 26:
             self.inputs.remove(socket)
         for x, socket in enumerate(self.inputs):
-            socket.name = alphabet[x]
+            socket.set_name_silent(alphabet[x])
 
     def on_dynamic_socket_remove(self, index, is_output):
         alphabet = list(string.ascii_lowercase)
         if self.inputs[-2].name != "z" and self.inputs[-1].hide:
             self.inputs[-1].set_hide(False)
         if self.inputs[-2].name != "z":
-            self.inputs[-1].name = alphabet[alphabet.index(self.inputs[-2].name)+1]
+            self.inputs[-1].set_name_silent(alphabet[alphabet.index(self.inputs[-2].name)+1])
 
     operation: bpy.props.EnumProperty(items=[(" + ", "Add", "Add two numbers"),
                                              (" - ", "Subtract", "Subtract two numbers"),

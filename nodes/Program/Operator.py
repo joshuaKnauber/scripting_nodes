@@ -47,12 +47,12 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
                                               " ",
                                               includes_name=True)
             if not self.name == new_name:
-                self["name"] = new_name
+                self.name = new_name
             self.trigger_ref_update()
             self._evaluate(bpy.context)
 
     def update_description(self, context):
-        self["operator_description"] = self.operator_description.replace(
+        self.operator_description = self.operator_description.replace(
             '"', "'")
         self._evaluate(context)
 

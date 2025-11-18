@@ -20,6 +20,10 @@ class SN_EnumMapNode(SN_ScriptingBaseNode, bpy.types.Node):
         out.is_variable = True
         
     def on_socket_name_change(self, socket):
+        # Prevent recursion
+        storage_key = f"_socket_updating_name_{id(socket)}"
+        if self.get(storage_key, False):
+            return
         self._evaluate(bpy.context)
 
     def evaluate(self, context):

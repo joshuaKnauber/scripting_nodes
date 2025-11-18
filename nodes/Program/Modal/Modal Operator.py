@@ -52,7 +52,7 @@ class SN_ModalOperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
         self.add_execute_output("After Modal")
     
     def update_description(self, context):
-        self["operator_description"] = self.operator_description.replace("\"", "'")
+        self.operator_description = self.operator_description.replace("\"", "'")
         self._evaluate(context)
 
     operator_description: bpy.props.StringProperty(name="Description",

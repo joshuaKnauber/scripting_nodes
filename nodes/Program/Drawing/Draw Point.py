@@ -44,7 +44,7 @@ class SN_DrawPointNode(SN_ScriptingBaseNode, bpy.types.Node):
 
         self.add_float_input("Size").default_value = 1
 
-        self.add_enum_input("On Top")["items"] = str(
+        self.add_enum_input("On Top").items = str(
             [
                 "NONE",
                 "ALWAYS",

@@ -33,7 +33,10 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
             # inputs has been added
             if "added" in data:
                 socket_index = list(data["added"].node.outputs).index(data["added"])
-                self.add_input_from_socket(data["added"])
+                new_socket = self.add_input_from_socket(data["added"])
+                # Ensure the socket name is set correctly
+                if new_socket and data["added"].name:
+                    new_socket.set_name_silent(data["added"].name)
                 self.inputs.move(len(self.inputs)-1, socket_index)
             # input has been removed
             elif "removed" in data:
@@ -48,13 +51,18 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
                     self.update_vector_socket(data["changed"], self.inputs[data["changed"].index])
             # input has updated
             elif "updated" in data:
-                self.inputs[data["updated"].index].name = data["updated"].name
+                # Use new_name from data if available, otherwise fall back to socket.name
+                socket_name = data.get("new_name", data["updated"].name)
+                self.inputs[data["updated"].index].set_name_silent(socket_name)
             self._evaluate(bpy.context)
         elif node.bl_idname == "SN_FunctionReturnNode" and data:
             # output has been added
             if "added" in data:
                 socket_index = list(data["added"].node.inputs).index(data["added"])
-                self.add_output_from_socket(data["added"])
+                new_socket = self.add_output_from_socket(data["added"])
+                # Ensure the socket name is set correctly
+                if new_socket and data["added"].name:
+                    new_socket.set_name_silent(data["added"].name)
                 self.outputs.move(len(self.outputs)-1, socket_index)
             # output has been removed
             elif "removed" in data:
@@ -64,7 +72,9 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
                 self.convert_socket(self.outputs[data["changed"].index], data["changed"].bl_idname)
             # output has updated
             elif "updated" in data:
-                self.outputs[data["updated"].index].name = data["updated"].name
+                # Use new_name from data if available, otherwise fall back to socket.name
+                socket_name = data.get("new_name", data["updated"].name)
+                self.outputs[data["updated"].index].set_name_silent(socket_name)
             self._evaluate(bpy.context)
 
 
@@ -83,6 +93,9 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
         if self.ref_SN_FunctionNode in parent_tree.nodes:
             for out in parent_tree.nodes[self.ref_SN_FunctionNode].outputs[1:-1]:
                 inp = self.add_input_from_socket(out)
+                # Ensure the socket name is set correctly
+                if inp and out.name:
+                    inp.set_name_silent(out.name)
                 # update enum items
                 if out.bl_label == "Enum" or out.bl_label == "Enum Set":
                     self.update_enum_socket(out, inp)
@@ -109,7 +122,10 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
         # add new data outputs
         if self.ref_SN_FunctionReturnNode in parent_tree.nodes:
             for out in parent_tree.nodes[self.ref_SN_FunctionReturnNode].inputs[1:-1]:
-                self.add_output_from_socket(out)
+                new_socket = self.add_output_from_socket(out)
+                # Ensure the socket name is set correctly
+                if new_socket and out.name:
+                    new_socket.set_name_silent(out.name)
         # restore connections
         if len(links) == len(self.outputs)-1:
             for i, to_sockets in enumerate(links):

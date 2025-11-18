@@ -55,7 +55,7 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
     
     
     def get_name(self):
-        return self.get("name", "Variable Default")
+        return self.get("_name", "Variable Default")
     
     
     def get_to_update_nodes(self):
@@ -73,7 +73,7 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
         to_update = self.get_to_update_nodes()
 
         # set value
-        self["name"] = value
+        self["_name"] = value
         self.compile()
 
         # update node references

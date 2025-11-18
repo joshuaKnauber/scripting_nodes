@@ -19,8 +19,11 @@ class SN_FunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
 
 
     def on_dynamic_socket_add(self, socket):
-        socket["name"] = get_python_name(socket.name, "Input", lower=False)
-        socket["name"] = unique_collection_name(socket.name, "Input", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+        current_name = socket.name
+        new_name = get_python_name(current_name, "Input", lower=False)
+        new_name = unique_collection_name(new_name, "Input", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+        if new_name != current_name:
+            socket.set_name_silent(new_name)
         socket.python_value = socket.name
         if hasattr(socket, "size_editable"):
             socket.size_editable = True
@@ -43,11 +46,26 @@ class SN_FunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
 
 
     def on_socket_name_change(self, socket):
-        socket["name"] = get_python_name(socket.name, "Input", lower=False)
-        socket["name"] = unique_collection_name(socket.name, "Input", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
-        socket.python_value = socket.name
-        self.trigger_ref_update({ "updated": socket })
-        self._evaluate(bpy.context)
+        # Get current name value from stored value to avoid triggering callbacks
+        storage_key = f"_socket_updating_name_{id(socket)}"
+        if self.get(storage_key, False):
+            return  # Already updating, prevent recursion
+        
+        # Get the current name value from stored value (set by update_socket_name)
+        name_storage_key = f"_socket_current_name_{id(socket)}"
+        current_name = self.get(name_storage_key, socket.name)  # Fallback to socket.name if not stored
+        
+        new_name = get_python_name(current_name, "Input", lower=False)
+        new_name = unique_collection_name(new_name, "Input", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
+        
+        # Only update if the name actually changed
+        if new_name != current_name:
+            socket.set_name_silent(new_name)
+            # Access socket.name after set_name_silent completes (flag will be cleared)
+            # Use the new_name directly to ensure it's available for ref updates
+            socket.python_value = new_name
+            self.trigger_ref_update({ "updated": socket, "new_name": new_name })
+            self._evaluate(bpy.context)
 
 
     def update_fixed_name(self, context):

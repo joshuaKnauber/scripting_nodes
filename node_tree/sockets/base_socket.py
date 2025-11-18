@@ -13,11 +13,50 @@ class ScriptingSocket:
     socket_shape = "CIRCLE"  # CIRCLE | SQUARE | DIAMOND
 
     def update_socket_name(self, context):
-        self.node.on_socket_name_change(self)
+        # Prevent recursion when name is set programmatically
+        # Store updating flag on parent node since NodeSocket doesn't support arbitrary attributes
+        storage_key = f"_socket_updating_name_{id(self)}"
+        if self.node.get(storage_key, False):
+            return  # Already updating this socket, prevent recursion
 
-    name: bpy.props.StringProperty(name="Socket Name",
-                                   description="Name of this socket",
-                                   update=update_socket_name)
+        # Set flag FIRST to prevent any recursion
+        self.node[storage_key] = True
+
+        try:
+            # Get current name value and store it so on_socket_name_change can access it
+            # without triggering property access that might cause recursion
+            current_name = self.name
+            name_storage_key = f"_socket_current_name_{id(self)}"
+            self.node[name_storage_key] = current_name
+
+            # Only call on_socket_name_change if the node has this method
+            if hasattr(self.node, "on_socket_name_change"):
+                self.node.on_socket_name_change(self)
+        finally:
+            # Always clean up the flag and stored name
+            try:
+                if storage_key in self.node:
+                    del self.node[storage_key]
+                name_storage_key = f"_socket_current_name_{id(self)}"
+                if name_storage_key in self.node:
+                    del self.node[name_storage_key]
+            except:
+                pass  # Ignore errors during cleanup
+
+    def set_name_silent(self, value):
+        """Set the socket name without triggering the update callback"""
+        # Store updating flag on parent node since NodeSocket doesn't support arbitrary attributes
+        storage_key = f"_socket_updating_name_{id(self)}"
+        self.node[storage_key] = True
+        try:
+            self.name = value
+        finally:
+            if storage_key in self.node:
+                del self.node[storage_key]
+
+    name: bpy.props.StringProperty(
+        name="Socket Name", description="Name of this socket", update=update_socket_name
+    )
 
     ### SOCKET OPTIONS
     # OVERWRITE
@@ -30,8 +69,7 @@ class ScriptingSocket:
     prev_dynamic: bpy.props.BoolProperty(
         default=False,
         name="Previously Dynamic",
-        description=
-        "True if this socket was previously dynamic and can now be removed",
+        description="True if this socket was previously dynamic and can now be removed",
     )
 
     def update_conversion(self, context):
@@ -60,8 +98,7 @@ class ScriptingSocket:
     can_be_disabled: bpy.props.BoolProperty(
         default=False,
         name="Can Be Hidden",
-        description=
-        "Lets the user disable this socket which can be used for evaluation",
+        description="Lets the user disable this socket which can be used for evaluation",
     )
 
     # OVERWRITE
@@ -103,8 +140,7 @@ class ScriptingSocket:
         self.hide = value
 
     def update_index_type(self, context):
-        if self.indexable and self.bl_idname != self.node.socket_names[
-                self.index_type]:
+        if self.indexable and self.bl_idname != self.node.socket_names[self.index_type]:
             # hide all index sockets before blend data input
             hide = self.index_type == "Property"
             for inp in self.node.inputs:
@@ -113,14 +149,12 @@ class ScriptingSocket:
                 if inp.indexable:
                     inp.set_hide(hide)
             # convert socket
-            self.node.convert_socket(self,
-                                     self.node.socket_names[self.index_type])
+            self.node.convert_socket(self, self.node.socket_names[self.index_type])
 
     indexable: bpy.props.BoolProperty(
         default=False,
         name="Indexable",
-        description=
-        "If this socket is indexable. Switches between String, Integer and Blend Data",
+        description="If this socket is indexable. Switches between String, Integer and Blend Data",
     )
 
     index_type: bpy.props.EnumProperty(
@@ -143,13 +177,15 @@ class ScriptingSocket:
         used_idnames = []
         for name in list(self.node.socket_names.keys())[2:]:
             if not self.node.socket_names[name] in used_idnames:
-                items.append((
-                    self.node.socket_names[name],
-                    name,
-                    name,
-                    property_icons[name],
-                    len(items),
-                ))
+                items.append(
+                    (
+                        self.node.socket_names[name],
+                        name,
+                        name,
+                        property_icons[name],
+                        len(items),
+                    )
+                )
                 used_idnames.append(self.node.socket_names[name])
         return items
 
@@ -179,10 +215,7 @@ class ScriptingSocket:
 
     def _draw_removable_socket(self, layout, node):
         """Draws the operators for removable sockets"""
-        op = layout.operator("sn.remove_socket",
-                             text="",
-                             emboss=False,
-                             icon="REMOVE")
+        op = layout.operator("sn.remove_socket", text="", emboss=False, icon="REMOVE")
         op.node = node.name
         op.is_output = self.is_output
         op.index = self.index
@@ -194,10 +227,7 @@ class ScriptingSocket:
             layout.label(text=text)
 
         # draw add operator
-        op = layout.operator("sn.add_dynamic",
-                             text="",
-                             emboss=False,
-                             icon="ADD")
+        op = layout.operator("sn.add_dynamic", text="", emboss=False, icon="ADD")
         op.node = node.name
         op.is_output = self.is_output
         op.insert_above = False
@@ -214,10 +244,9 @@ class ScriptingSocket:
 
         # draw add above operator
         if context.scene.sn.insert_sockets:
-            op = layout.operator("sn.add_dynamic",
-                                 text="",
-                                 emboss=False,
-                                 icon="TRIA_UP")
+            op = layout.operator(
+                "sn.add_dynamic", text="", emboss=False, icon="TRIA_UP"
+            )
             op.node = node.name
             op.is_output = self.is_output
             op.insert_above = True
@@ -229,8 +258,9 @@ class ScriptingSocket:
         text = self.name
         # draw debug text for sockets
         if sn.debug_python_sockets and self.python_value:
-            if not sn.debug_selected_only or (sn.debug_selected_only
-                                              and self.node.select):
+            if not sn.debug_selected_only or (
+                sn.debug_selected_only and self.node.select
+            ):
                 text = self.python_value.replace("\n", " || ")
         # draw dynamic sockets
         if self.dynamic:
@@ -313,6 +343,13 @@ class ScriptingSocket:
         """Resets this sockets python value back to the default"""
         self.python_value = self.default_python_value
 
+    def _get_socket_storage_key(self, suffix=""):
+        """Returns a unique key for storing socket data on the parent node"""
+        socket_index = self.index
+        socket_name = self.name
+        is_output = "out" if self.is_output else "in"
+        return f"_socket_{is_output}_{socket_index}_{socket_name}{suffix}"
+
     def _get_python(self):
         """Returns the python value for this socket"""
         if self.is_program:
@@ -321,14 +358,17 @@ class ScriptingSocket:
                 to_socket = self.to_sockets()
                 if to_socket:
                     return to_socket[0].python_value
-                return self.get("python_value", self.default_python_value)
+                storage_key = self._get_socket_storage_key()
+                return self.node.get(storage_key, self.default_python_value)
             else:
                 # returns this program inputs python value or its default
-                return self.get("python_value", self.default_python_value)
+                storage_key = self._get_socket_storage_key()
+                return self.node.get(storage_key, self.default_python_value)
         else:
             if self.is_output:
                 # returns this data outputs current python value or its default
-                return self.get("python_value", self.default_python_value)
+                storage_key = self._get_socket_storage_key()
+                return self.node.get(storage_key, self.default_python_value)
             else:
                 # returns the connected data outputs current python value or the python representation for this input
                 from_out = self.from_socket()
@@ -337,24 +377,28 @@ class ScriptingSocket:
                     if self.convert_data:
                         # convert different socket types
                         if from_out.bl_label != self.bl_label:
-                            value = CONVERSIONS[from_out.bl_label][
-                                self.bl_label](from_out, self)
+                            value = CONVERSIONS[from_out.bl_label][self.bl_label](
+                                from_out, self
+                            )
                         # convert convertable subtypes of the same socket
                         elif from_out.subtype != self.subtype:
-                            if from_out.subtype in CONVERSIONS[
-                                    from_out.bl_label]:
-                                if (self.subtype in CONVERSIONS[
-                                        from_out.bl_label][from_out.subtype]):
+                            if from_out.subtype in CONVERSIONS[from_out.bl_label]:
+                                if (
+                                    self.subtype
+                                    in CONVERSIONS[from_out.bl_label][from_out.subtype]
+                                ):
                                     value = CONVERSIONS[from_out.bl_label][
-                                        from_out.subtype][self.subtype](
-                                            from_out, self)
+                                        from_out.subtype
+                                    ][self.subtype](from_out, self)
                     return value
                 return self.get_python_repr()
 
     def _set_python(self, value):
         """Sets the python value of this socket if it has changed and triggers an update"""
-        if self.get("python_value") == None or value != self["python_value"]:
-            self["python_value"] = value
+        storage_key = self._get_socket_storage_key()
+        current_value = self.node.get(storage_key, None)
+        if current_value is None or value != current_value:
+            self.node[storage_key] = value
             self._trigger_update()
 
     def _trigger_update(self):
@@ -386,11 +430,18 @@ class ScriptingSocket:
 
     def _get_value(self):
         """Returns the current value of this socket"""
-        return self.get(self.subtype_attr, self.default_prop_value)
+        # Store subtype property values on the parent node since NodeSocket doesn't support IDProperties
+        attr_name = self.subtype_attr
+        storage_key = self._get_socket_storage_key(f"_{attr_name}")
+        return self.node.get(storage_key, self.default_prop_value)
 
     def _set_value(self, value):
         """Sets the default value depending on the current subtype and updates the python value"""
-        self[self.subtype_attr] = value
+        # Store subtype property values on the parent node since NodeSocket doesn't support IDProperties
+        attr_name = self.subtype_attr
+        storage_key = self._get_socket_storage_key(f"_{attr_name}")
+        self.node[storage_key] = value
+        # Trigger update through the property system
         self.python_value = self._get_python()
 
     def _update_value(self, _):
@@ -398,10 +449,9 @@ class ScriptingSocket:
         self.force_update()
 
     # OVERWRITE
-    default_value: bpy.props.StringProperty(name="Value",
-                                            description="Value of this socket",
-                                            get=_get_value,
-                                            set=_set_value)
+    default_value: bpy.props.StringProperty(
+        name="Value", description="Value of this socket", get=_get_value, set=_set_value
+    )
 
     def force_update(self):
         """Triggers an update to the connected sockets, for both data and program sockets. Used to pretend the data of this node changed"""
@@ -414,12 +464,12 @@ class ScriptingSocket:
         # recursively find all sockets when splitting at reroutes
         if socket.node.bl_idname == "NodeReroute":
             for link in socket.node.outputs[0].links:
-                to_sockets += self._get_to_sockets(link.to_socket,
-                                                   check_validity)
+                to_sockets += self._get_to_sockets(link.to_socket, check_validity)
         else:
             # check validity of connection
             if not check_validity or self.node.node_tree.is_valid_connection(
-                    self, socket):
+                self, socket
+            ):
                 to_sockets.append(socket)
         return to_sockets
 
@@ -442,7 +492,8 @@ class ScriptingSocket:
                     return None
             # check connection validity
             if not check_validity or self.node.node_tree.is_valid_connection(
-                    from_out, self):
+                from_out, self
+            ):
                 return from_out
         return None
 
@@ -451,7 +502,8 @@ class ScriptingSocket:
     def index(self):
         """Returns the index of this socket on the node or -1 if it can't be found"""
         for index, socket in enumerate(
-                self.node.outputs if self.is_output else self.node.inputs):
+            self.node.outputs if self.is_output else self.node.inputs
+        ):
             if socket == self:
                 return index
         return -1

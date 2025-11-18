@@ -42,7 +42,7 @@ class SN_DrawQuadNode(SN_ScriptingBaseNode, bpy.types.Node):
         inp = self.add_float_vector_input("Color")
         inp.subtype = "COLOR_ALPHA"
 
-        self.add_enum_input("On Top")["items"] = str(
+        self.add_enum_input("On Top").items = str(
             [
                 "NONE",
                 "ALWAYS",
