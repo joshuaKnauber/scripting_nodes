@@ -2,7 +2,6 @@ import bpy
 from ...base_node import SN_ScriptingBaseNode
 
 
-
 class SN_DisplaySerpensShortcutNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_DisplaySerpensShortcutNode"
@@ -13,16 +12,20 @@ class SN_DisplaySerpensShortcutNode(SN_ScriptingBaseNode, bpy.types.Node):
     def on_create(self, context):
         self.add_interface_input()
         self.add_string_input("Label")
-        
-    ref_ntree: bpy.props.PointerProperty(type=bpy.types.NodeTree,
-                                    name="Panel Node Tree",
-                                    description="The node tree to select the panel from",
-                                    poll=SN_ScriptingBaseNode.ntree_poll,
-                                    update=SN_ScriptingBaseNode._evaluate)
-        
-    ref_SN_OnKeypressNode: bpy.props.StringProperty(name="Shortcut",
-                                                description="The shortcut to display",
-                                                update=SN_ScriptingBaseNode._evaluate)
+
+    ref_ntree: bpy.props.PointerProperty(
+        type=bpy.types.NodeTree,
+        name="Panel Node Tree",
+        description="The node tree to select the panel from",
+        poll=SN_ScriptingBaseNode.ntree_poll,
+        update=SN_ScriptingBaseNode._evaluate,
+    )
+
+    ref_SN_OnKeypressNode: bpy.props.StringProperty(
+        name="Shortcut",
+        description="The shortcut to display",
+        update=SN_ScriptingBaseNode._evaluate,
+    )
 
     def evaluate(self, context):
         if self.ref_ntree and self.ref_SN_OnKeypressNode in self.ref_ntree.nodes:
@@ -50,9 +53,26 @@ class SN_DisplaySerpensShortcutNode(SN_ScriptingBaseNode, bpy.types.Node):
         row = layout.row(align=True)
 
         parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
-        row.prop_search(self, "ref_ntree", bpy.data, "node_groups", text="")
+        row.prop_search(
+            self,
+            "ref_ntree",
+            bpy.data,
+            "node_groups",
+            text="",
+            item_search_property="name",
+        )
         subrow = row.row(align=True)
         subrow.enabled = self.ref_ntree != None
-        subrow.prop_search(self, "ref_SN_OnKeypressNode", parent_tree.node_collection("SN_OnKeypressNode"), "refs", text="")
+        subrow.prop_search(
+            self,
+            "ref_SN_OnKeypressNode",
+            parent_tree.node_collection("SN_OnKeypressNode"),
+            "refs",
+            text="",
+            item_search_property="name",
+        )
 
-        layout.label(text="Copy blender shortcuts from the blend data browser in display property", icon="INFO")
+        layout.label(
+            text="Copy blender shortcuts from the blend data browser in display property",
+            icon="INFO",
+        )
