@@ -1,5 +1,6 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
+from ...utils import collection_has_item
 
 
 def on_operator_ref_update(self, node, data, ntree, node_ref_name, input_offset=1):
@@ -8,7 +9,7 @@ def on_operator_ref_update(self, node, data, ntree, node_ref_name, input_offset=
             if "property_change" in data:
                 prop = data["property_change"]
                 for inp in self.inputs[input_offset:]:
-                    if not inp.name in node.properties:
+                    if not collection_has_item(node.properties, inp.name):
                         inp.name = prop.name
                     if inp.name == prop.name:
                         if (

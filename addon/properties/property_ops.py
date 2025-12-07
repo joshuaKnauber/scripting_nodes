@@ -4,6 +4,7 @@ from ...interface.panels.property_ui_list import (
     get_selected_property,
     get_selected_property_offset,
 )
+from ...utils import collection_has_item, collection_get_item
 
 
 class SN_OT_AddProperty(bpy.types.Operator):
@@ -288,8 +289,12 @@ class SN_OT_FindProperty(bpy.types.Operator):
                 for node in ngroup.nodes:
                     if node.bl_idname == "SN_SerpensPropertyNode":
                         prop_src = node.get_prop_source()
-                        if prop_src and node.prop_name in prop_src.properties:
-                            prop = prop_src.properties[node.prop_name]
+                        prop = (
+                            collection_get_item(prop_src.properties, node.prop_name)
+                            if prop_src
+                            else None
+                        )
+                        if prop:
                             if prop == property:
                                 property_nodes.append(node)
                         elif not prop_src or not node.prop_name:

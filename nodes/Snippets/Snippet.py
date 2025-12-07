@@ -2,7 +2,7 @@ import bpy
 import os
 import json
 
-from ...utils import normalize_code, get_python_name
+from ...utils import normalize_code, get_python_name, collection_get_item
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.PropertyReferenceNode import PropertyReferenceNode
 
@@ -212,25 +212,24 @@ class SN_SnippetNode(SN_ScriptingBaseNode, bpy.types.Node):
                 )
 
         for prop in self.prop_collection:
+            scene_prop = collection_get_item(bpy.context.scene.sn.properties, prop.prop_name)
             if (
                 prop.use_custom
-                and prop.prop_name in bpy.context.scene.sn.properties
-                and prop.type
-                == bpy.context.scene.sn.properties[prop.prop_name].property_type
-                and prop.attach_to
-                == bpy.context.scene.sn.properties[prop.prop_name].attach_to
+                and scene_prop
+                and prop.type == scene_prop.property_type
+                and prop.attach_to == scene_prop.attach_to
             ):
                 code = code.replace(
                     prop.python_name + "_vars_" + self.static_uid,
-                    bpy.context.scene.sn.properties[prop.prop_name].python_name,
+                    scene_prop.python_name,
                 )
                 self.code_register = self.code_register.replace(
                     prop.python_name + "_vars_" + self.static_uid,
-                    bpy.context.scene.sn.properties[prop.prop_name].python_name,
+                    scene_prop.python_name,
                 )
                 self.code_unregister = self.code_unregister.replace(
                     prop.python_name + "_vars_" + self.static_uid,
-                    bpy.context.scene.sn.properties[prop.prop_name].python_name,
+                    scene_prop.python_name,
                 )
 
         return code
@@ -387,12 +386,11 @@ class SN_SnippetNode(SN_ScriptingBaseNode, bpy.types.Node):
                         f"Choose a '{prop.type}' property thats attached to '{prop.attach_to}' to assign this snippet property to."
                     )
 
-                    if prop.prop_name in context.scene.sn.properties:
+                    scene_prop = collection_get_item(context.scene.sn.properties, prop.prop_name)
+                    if scene_prop:
                         if (
-                            prop.type
-                            != context.scene.sn.properties[prop.prop_name].property_type
-                            or prop.attach_to
-                            != context.scene.sn.properties[prop.prop_name].attach_to
+                            prop.type != scene_prop.property_type
+                            or prop.attach_to != scene_prop.attach_to
                         ):
                             row = layout.row()
                             row.alert = True

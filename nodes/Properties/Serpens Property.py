@@ -1,6 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.PropertyReferenceNode import PropertyReferenceNode
+from ...utils import collection_has_item, collection_get_item
 
 
 
@@ -23,8 +24,8 @@ class SN_SerpensPropertyNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyRefer
     def evaluate(self, context):
         prop_src = self.get_prop_source()
         # valid property selected
-        if prop_src and self.prop_name in prop_src.properties and not prop_src.properties[self.prop_name].property_type == "Group":
-            prop = prop_src.properties[self.prop_name]
+        prop = collection_get_item(prop_src.properties, self.prop_name) if prop_src else None
+        if prop and not prop.property_type == "Group":
             self.outputs["Property"].python_value = f"{self.inputs[0].python_value}.{prop.python_name}"
             self.outputs["Value"].python_value = f"{self.inputs[0].python_value}.{prop.python_name}"
         # no valid property selected
@@ -36,6 +37,7 @@ class SN_SerpensPropertyNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyRefer
     def draw_node(self, context, layout):
         self.draw_reference_selection(layout)
         prop_src = self.get_prop_source()
-        if self.prop_name and prop_src and self.prop_name in prop_src.properties:
-            if prop_src.properties[self.prop_name].property_type == "Group":
+        prop = collection_get_item(prop_src.properties, self.prop_name) if (self.prop_name and prop_src) else None
+        if prop:
+            if prop.property_type == "Group":
                 self.draw_warning(layout, "Can't return Group properties!")

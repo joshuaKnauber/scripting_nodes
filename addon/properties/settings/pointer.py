@@ -1,5 +1,6 @@
 import bpy
 from .settings import PropertySettings, id_items
+from ....utils import collection_has_item, collection_get_item
 
 
 class SN_PT_PointerProperty(PropertySettings, bpy.types.PropertyGroup):
@@ -28,8 +29,9 @@ class SN_PT_PointerProperty(PropertySettings, bpy.types.PropertyGroup):
             )
             row = layout.row()
             row.alert = True
-            if self.prop_group and self.prop_group in src.properties:
-                if not src.properties[self.prop_group].property_type == "Group":
+            prop_group = collection_get_item(src.properties, self.prop_group) if self.prop_group else None
+            if prop_group:
+                if not prop_group.property_type == "Group":
                     row.label(
                         text="The selected property is not a group!", icon="ERROR"
                     )
@@ -57,15 +59,15 @@ class SN_PT_PointerProperty(PropertySettings, bpy.types.PropertyGroup):
         else:
             src = self.prop.prop_collection_origin
             data_type = "bpy.types.Scene"
-            if (
-                self.prop_group in src.properties
-                and src.properties[self.prop_group].property_type == "Group"
-            ):
+            prop_group = collection_get_item(src.properties, self.prop_group)
+            if prop_group and prop_group.property_type == "Group":
                 if not hasattr(self.prop, "group_prop_parent") or (
                     hasattr(self.prop, "group_prop_parent")
                     and self.prop.group_prop_parent.name != self.prop_group
                 ):
-                    data_type = f"SNA_GROUP_{bpy.context.scene.sn.properties[self.prop_group].python_name}"
+                    scene_prop_group = collection_get_item(bpy.context.scene.sn.properties, self.prop_group)
+                    if scene_prop_group:
+                        data_type = f"SNA_GROUP_{scene_prop_group.python_name}"
         return f"type={data_type}{self.update_option}"
 
     def get_data_items(self, context):

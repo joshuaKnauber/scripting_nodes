@@ -1,6 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.PropertyReferenceNode import PropertyReferenceNode
+from ...utils import collection_has_item, collection_get_item
 
 
 
@@ -45,8 +46,8 @@ class SN_OnPropertyUpdateNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyRefe
 
     def evaluate(self, context):        
         prop_src = self.get_prop_source()
-        if prop_src and self.prop_name in prop_src.properties and not prop_src.properties[self.prop_name].property_type in ["Group", "Collection"]:
-            prop = prop_src.properties[self.prop_name]
+        prop = collection_get_item(prop_src.properties, self.prop_name) if prop_src else None
+        if prop and not prop.property_type in ["Group", "Collection"]:
             
             self.outputs["Attached To Item"].python_value = f"self"
             self.outputs["Value"].python_value = "sna_updated_prop"
@@ -64,8 +65,8 @@ class SN_OnPropertyUpdateNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyRefe
     def draw_node(self, context, layout):
         self.draw_reference_selection(layout)
         prop_src = self.get_prop_source()
-        if self.prop_name and prop_src and self.prop_name in prop_src.properties:
-            prop = prop_src.properties[self.prop_name]
+        prop = collection_get_item(prop_src.properties, self.prop_name) if (self.prop_name and prop_src) else None
+        if prop:
             if prop.property_type in ["Group", "Collection"]:
                 self.draw_warning(layout, "Can't update group properties!")
         else:

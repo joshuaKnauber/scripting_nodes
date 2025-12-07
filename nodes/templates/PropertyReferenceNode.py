@@ -1,6 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ...addon.properties.settings.settings import prop_to_socket
+from ...utils import collection_has_item, collection_get_item
 
 
 class PropertyReferenceNode:
@@ -17,8 +18,8 @@ class PropertyReferenceNode:
         if self.inputs and self.inputs[0].bl_label == "Property":
             self.inputs[0].name = "Data"
         if self.prop_name and prop_src:
-            if self.prop_name in prop_src.properties:
-                prop = prop_src.properties[self.prop_name]
+            prop = collection_get_item(prop_src.properties, self.prop_name)
+            if prop:
                 # property from group -> input is pointer
                 if self.inputs and self.inputs[0].bl_label == "Property":
                     if self.from_prop_group and self.inputs:
@@ -99,13 +100,10 @@ class PropertyReferenceNode:
             else:
                 return None
 
-        if (
-            self.from_prop_group
-            and hasattr(src, "properties")
-            and self.prop_group in src.properties
-            and src.properties[self.prop_group].property_type == "Group"
-        ):
-            return src.properties[self.prop_group].settings
+        if self.from_prop_group and hasattr(src, "properties"):
+            prop_group = collection_get_item(src.properties, self.prop_group)
+            if prop_group and prop_group.property_type == "Group":
+                return prop_group.settings
         elif not self.from_prop_group:
             return src
         return None
@@ -196,14 +194,15 @@ class PropertyReferenceNode:
 
         # warnings prop group
         if self.from_prop_group and self.prop_group and prop_group_src:
-            if not self.prop_group in prop_group_src.properties:
+            prop_group = collection_get_item(prop_group_src.properties, self.prop_group)
+            if not prop_group:
                 self.draw_warning(layout, "Can't find this property group!")
-            elif prop_group_src.properties[self.prop_group].property_type != "Group":
+            elif prop_group.property_type != "Group":
                 self.draw_warning(layout, "The selected property is not a group!")
 
         # warnings property
         if self.prop_name and prop_src:
-            if not self.prop_name in prop_src.properties:
+            if not collection_has_item(prop_src.properties, self.prop_name):
                 self.draw_warning(layout, "Can't find this property!")
 
         # multiple nodes warning

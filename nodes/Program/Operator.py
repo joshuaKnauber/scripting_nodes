@@ -1,7 +1,7 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.PropertyNode import PropertyNode
-from ...utils import get_python_name, unique_collection_name
+from ...utils import get_python_name, unique_collection_name, collection_has_item, collection_get_item
 
 
 class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
@@ -206,10 +206,8 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
                 text="",
                 item_search_property="name",
             )
-            if (
-                self.select_property in self.properties
-                and self.properties[self.select_property].property_type != "Enum"
-            ):
+            select_prop = collection_get_item(self.properties, self.select_property)
+            if select_prop and select_prop.property_type != "Enum":
                 row = layout.row()
                 row.alert = True
                 row.label(text="This property needs to be type Enum!")
@@ -223,9 +221,8 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
                 text="",
                 item_search_property="name",
             )
-            if self.select_property in self.properties and not self.properties[
-                self.select_property
-            ].property_type in ["Enum", "String"]:
+            select_prop = collection_get_item(self.properties, self.select_property)
+            if select_prop and not select_prop.property_type in ["Enum", "String"]:
                 row = layout.row()
                 row.alert = True
                 row.label(text="This property needs to be type Enum or String!")
@@ -247,10 +244,9 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
         invoke_inline = ""
 
         if not self.invoke_option in ["none", "invoke_confirm"]:
-            if self.select_property in self.properties and self.properties[
-                self.select_property
-            ].property_type in ["Enum", "String"]:
-                selected_property = f"bl_property = '{self.properties[self.select_property].python_name}'"
+            select_prop = collection_get_item(self.properties, self.select_property)
+            if select_prop and select_prop.property_type in ["Enum", "String"]:
+                selected_property = f"bl_property = '{select_prop.python_name}'"
 
         if self.invoke_option == "invoke_confirm":
             invoke_return = (
@@ -265,11 +261,9 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
             )
 
         elif self.invoke_option == "invoke_search_popup":
-            if (
-                self.select_property in self.properties
-                and self.properties[self.select_property].property_type == "Enum"
-            ):
-                selected_property = f"bl_property = '{self.properties[self.select_property].python_name}'"
+            select_prop = collection_get_item(self.properties, self.select_property)
+            if select_prop and select_prop.property_type == "Enum":
+                selected_property = f"bl_property = '{select_prop.python_name}'"
             invoke_inline = "context.window_manager." + self.invoke_option + "(self)"
 
         else:

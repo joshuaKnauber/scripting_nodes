@@ -1,5 +1,5 @@
 import bpy
-from ...utils import get_python_name, unique_collection_name
+from ...utils import get_python_name, unique_collection_name, collection_has_item
 from .settings.settings import property_icons
 from .settings.string import SN_PT_StringProperty
 from .settings.boolean import SN_PT_BooleanProperty
@@ -158,7 +158,7 @@ class BasicProperty:
             self.compile(context)
 
     def get_name(self):
-        return getattr(self, "name", "Prop Default")
+        return self.get("_name", "Prop Default")
 
     def get_unique_name(self, value):
         names = list(
@@ -188,14 +188,16 @@ class BasicProperty:
                             ):
                                 to_update_nodes.append((node, "prop_group"))
                         else:
-                            if (
-                                hasattr(node, "get_prop_source")
-                                and node.get_prop_source()
-                                and node.get_prop_source().properties
-                                == self.prop_collection
-                                and self.name in node.get_prop_source().properties
-                            ):
-                                to_update_nodes.append((node, "prop_name"))
+                            if hasattr(node, "get_prop_source"):
+                                prop_src = node.get_prop_source()
+                                if (
+                                    prop_src
+                                    and prop_src.properties == self.prop_collection
+                                    and collection_has_item(
+                                        prop_src.properties, self.name
+                                    )
+                                ):
+                                    to_update_nodes.append((node, "prop_name"))
 
         # get properties to update references
         to_update_props = []
@@ -214,8 +216,8 @@ class BasicProperty:
                         ):
                             to_update_props.append(subprop)
 
-        # set value
-        setattr(self, "name", value)
+        # set value using IDProperty storage (required for Blender 5.0+)
+        self["_name"] = value
 
         # update property references
         for prop in to_update_props:

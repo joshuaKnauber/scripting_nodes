@@ -1,5 +1,5 @@
 import bpy
-from ....utils import normalize_code
+from ....utils import normalize_code, collection_has_item, collection_get_item
 from .settings import PropertySettings
 
 
@@ -151,7 +151,8 @@ class SN_PT_EnumProperty(PropertySettings, bpy.types.PropertyGroup):
                 for ref in ntree.node_collection("SN_GenerateEnumItemsNode").refs:
                     node = ref.node
                     enum_src = node.get_prop_source()
-                    if enum_src and node.prop_name in enum_src.properties and enum_src.properties[node.prop_name] == self.prop:
+                    prop = collection_get_item(enum_src.properties, node.prop_name) if enum_src else None
+                    if prop and prop == self.prop:
                         return ""
 
         code = f"""
