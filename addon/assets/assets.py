@@ -2,46 +2,53 @@ import bpy
 import os
 
 
-
 class SN_AssetProperties(bpy.types.PropertyGroup):
 
-    def get_to_update(self):
+    def get_to_update(self, asset_name):
+        """Get nodes that reference this asset by name"""
         to_update = []
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
                     if node.bl_idname == "SN_AssetNode":
-                        if node.asset == self.name:
+                        if node.asset == asset_name:
                             to_update.append(node)
         return to_update
 
     def update_file_path(self, context):
-        if not self.path == bpy.path.abspath(self.path):
-            self["path"] = bpy.path.abspath(self.path)
+        abs_path = bpy.path.abspath(self.path)
+        if not self.path == abs_path:
+            self.path = abs_path
         else:
             if self.name == "Asset" and self.path:
                 self.name = os.path.basename(self.path)
-        for node in self.get_to_update():
+        for node in self.get_to_update(self.name):
             node._evaluate(context)
 
-    def get_asset_name(self):
-        return self.get("_name", "Asset")
-    
-    def set_asset_name(self, new_name):
-        # update asset nodes that had this asset
-        to_update = self.get_to_update()
-        self["_name"] = new_name
-        for node in to_update:
-            node.asset = new_name
-        
+    def update_name(self, context):
+        """Update asset nodes when name changes"""
+        prev_name = self.prev_name
+        new_name = self.name
 
-    name: bpy.props.StringProperty(name="Name",
-                                description="Name of the asset",
-                                default="Asset",
-                                get=get_asset_name,
-                                set=set_asset_name)
-    
-    path: bpy.props.StringProperty(name="Path",
-                                description="Path to the asset file",
-                                subtype="FILE_PATH",
-                                update=update_file_path)
+        if prev_name and prev_name != new_name:
+            for node in self.get_to_update(prev_name):
+                node.asset = new_name
+
+        self.prev_name = new_name
+
+    # Track previous name for reference updates
+    prev_name: bpy.props.StringProperty()
+
+    name: bpy.props.StringProperty(
+        name="Name",
+        description="Name of the asset",
+        default="Asset",
+        update=update_name,
+    )
+
+    path: bpy.props.StringProperty(
+        name="Path",
+        description="Path to the asset file",
+        subtype="FILE_PATH",
+        update=update_file_path,
+    )

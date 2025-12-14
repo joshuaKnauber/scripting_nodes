@@ -157,9 +157,6 @@ class BasicProperty:
         if hasattr(self, "compile"):
             self.compile(context)
 
-    def get_name(self):
-        return self.get("_name", "Prop Default")
-
     def get_unique_name(self, value):
         names = list(
             map(
@@ -169,8 +166,16 @@ class BasicProperty:
         )
         return unique_collection_name(value, "New Property", names, " ")
 
-    def set_name(self, value):
-        value = self.get_unique_name(value)
+    def update_name(self, context):
+        """Called when name changes - update references"""
+        prev_name = self.prev_name
+        new_name = self.name
+
+        # Only process if name actually changed
+        if not prev_name or prev_name == new_name:
+            self.prev_name = new_name
+            self._compile(context)
+            return
 
         # get nodes to update references
         to_update_nodes = []
@@ -178,8 +183,8 @@ class BasicProperty:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
                     if (
-                        getattr(node, "prop_name", None) == self.name
-                        or getattr(node, "prop_group", None) == self.name
+                        getattr(node, "prop_name", None) == prev_name
+                        or getattr(node, "prop_group", None) == prev_name
                     ):
                         if self.property_type == "Group":
                             if (
@@ -194,7 +199,7 @@ class BasicProperty:
                                     prop_src
                                     and prop_src.properties == self.prop_collection
                                     and collection_has_item(
-                                        prop_src.properties, self.name
+                                        prop_src.properties, prev_name
                                     )
                                 ):
                                     to_update_nodes.append((node, "prop_name"))
@@ -205,33 +210,36 @@ class BasicProperty:
             for prop in self.prop_collection:
                 if (
                     prop.property_type in ["Pointer", "Collection"]
-                    and prop.settings.prop_group == self.name
+                    and prop.settings.prop_group == prev_name
                 ):
                     to_update_props.append(prop)
                 elif prop.property_type == "Group" and prop != self:
                     for subprop in prop.settings.properties:
                         if (
                             subprop.property_type in ["Pointer", "Collection"]
-                            and subprop.settings.prop_group == self.name
+                            and subprop.settings.prop_group == prev_name
                         ):
                             to_update_props.append(subprop)
 
-        # set value using IDProperty storage (required for Blender 5.0+)
-        self["_name"] = value
+        # Store current name for next update
+        self.prev_name = new_name
 
         # update property references
         for prop in to_update_props:
-            prop.settings.prop_group = value
+            prop.settings.prop_group = new_name
         for node, key in to_update_nodes:
-            setattr(node, key, value)
+            setattr(node, key, new_name)
+
+        self._compile(context)
+
+    # Track previous name for reference updates
+    prev_name: bpy.props.StringProperty()
 
     name: bpy.props.StringProperty(
         name="Property Name",
         description="Name of this property",
-        default="Prop Default",
-        get=get_name,
-        set=set_name,
-        update=_compile,
+        default="New Property",
+        update=update_name,
     )
 
     description: bpy.props.StringProperty(

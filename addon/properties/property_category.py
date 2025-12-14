@@ -4,22 +4,26 @@ from ...interface.panels.property_ui_list import get_selected_property
 
 class SN_PropertyCategory(bpy.types.PropertyGroup):
 
-    def set_name(self, value):
-        current_name = self.get("_name", "New Category")
-        for prop in bpy.context.scene.sn.properties:
-            if prop.category and prop.category == current_name:
-                prop.category = value
-        self["_name"] = value
+    def update_name(self, context):
+        """Update property categories when name changes"""
+        prev_name = self.prev_name
+        new_name = self.name
 
-    def get_name(self):
-        return self.get("_name", "New Category")
+        if prev_name and prev_name != new_name:
+            for prop in context.scene.sn.properties:
+                if prop.category and prop.category == prev_name:
+                    prop.category = new_name
+
+        self.prev_name = new_name
+
+    # Track previous name for reference updates
+    prev_name: bpy.props.StringProperty()
 
     name: bpy.props.StringProperty(
         name="Name",
         default="New Category",
         description="The name of this property category",
-        set=set_name,
-        get=get_name,
+        update=update_name,
     )
 
 
