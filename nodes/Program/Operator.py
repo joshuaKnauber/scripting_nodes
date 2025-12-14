@@ -1,7 +1,12 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.PropertyNode import PropertyNode
-from ...utils import get_python_name, unique_collection_name, collection_has_item, collection_get_item
+from ...utils import (
+    get_python_name,
+    unique_collection_name,
+    collection_has_item,
+    collection_get_item,
+)
 
 
 class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
@@ -50,7 +55,9 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
             self._evaluate(bpy.context)
 
     def update_description(self, context):
-        self.operator_description = self.operator_description.replace('"', "'")
+        new_description = self.operator_description.replace('"', "'")
+        if self.operator_description != new_description:
+            self.operator_description = new_description
         self._evaluate(context)
 
     def update_popup(self, context):

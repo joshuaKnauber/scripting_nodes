@@ -467,9 +467,10 @@ class ScriptingSocket:
                 to_sockets += self._get_to_sockets(link.to_socket, check_validity)
         else:
             # check validity of connection
-            if not check_validity or self.node.node_tree.is_valid_connection(
+            node_tree = getattr(self.node, "node_tree", None)
+            if not check_validity or (node_tree and node_tree.is_valid_connection(
                 self, socket
-            ):
+            )):
                 to_sockets.append(socket)
         return to_sockets
 
@@ -491,9 +492,10 @@ class ScriptingSocket:
                 else:
                     return None
             # check connection validity
-            if not check_validity or self.node.node_tree.is_valid_connection(
+            node_tree = getattr(self.node, "node_tree", None)
+            if not check_validity or (node_tree and node_tree.is_valid_connection(
                 from_out, self
-            ):
+            )):
                 return from_out
         return None
 
