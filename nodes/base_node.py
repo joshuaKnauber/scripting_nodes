@@ -377,9 +377,13 @@ class SN_ScriptingBaseNode:
         self._set_node_color()
         # set up the node
         self.on_create(context)
-        # evaluate node for the first time
-        self.disable_evaluation = False
-        self._evaluate(context)
+        # Defer evaluation to avoid issues with Blender's internal state
+        # during node creation/paste operations.
+        def deferred_init():
+            self.disable_evaluation = False
+            self._evaluate(bpy.context)
+
+        bpy.app.timers.register(deferred_init, first_interval=0.01)
 
     ### COPY NODE
     def on_copy(self, old):
@@ -390,8 +394,13 @@ class SN_ScriptingBaseNode:
         self._create_node_collection_item()
         # set up the node
         self.on_copy(old)
-        # compile the node for the first time after copying
-        self._evaluate(bpy.context)
+        # Defer evaluation after copying to avoid issues with Blender's 
+        # internal state during duplication/paste operations.
+        def deferred_copy():
+            self.disable_evaluation = False
+            self._evaluate(bpy.context)
+
+        bpy.app.timers.register(deferred_copy, first_interval=0.01)
 
     ### FREE NODE
     def on_free(self):
