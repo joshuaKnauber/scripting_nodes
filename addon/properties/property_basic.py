@@ -168,6 +168,12 @@ class BasicProperty:
 
     def update_name(self, context):
         """Called when name changes - update references"""
+        # Ensure name is unique
+        unique_name = self.get_unique_name(self.name)
+        if unique_name != self.name:
+            self.name = unique_name
+            return
+
         prev_name = self.prev_name
         new_name = self.name
 

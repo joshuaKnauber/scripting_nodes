@@ -14,7 +14,7 @@ class SN_OT_AddVariable(bpy.types.Operator):
     def execute(self, context):
         ntree = bpy.data.node_groups[self.node_tree]
         new_var = ntree.variables.add()
-        new_var.name = "New Variable"
+        new_var.name = new_var.get_unique_name("New Variable")
         ntree.variables.move(len(ntree.variables)-1, ntree.variable_index+1)
         ntree.variable_index += 1
         ntree.variable_index = min(ntree.variable_index, len(ntree.variables)-1)
