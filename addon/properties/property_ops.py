@@ -17,8 +17,7 @@ class SN_OT_AddProperty(bpy.types.Operator):
         sn = context.scene.sn
         print(1)
         new_prop = sn.properties.add()
-        print(2)
-        new_prop.name = "New Property"
+        new_prop.name = new_prop.get_unique_name("New Property")
         print(3)
         if sn.active_prop_category:
             new_prop.category = sn.active_prop_category
@@ -198,7 +197,7 @@ class SN_OT_AddPropertyItem(bpy.types.Operator):
     def execute(self, context):
         prop = eval(self.group_data_path)
         new_prop = prop.settings.properties.add()
-        new_prop.name = "New Property"
+        new_prop.name = new_prop.get_unique_name("New Property")
         return {"FINISHED"}
 
 

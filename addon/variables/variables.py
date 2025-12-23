@@ -54,13 +54,15 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
         """Registers the variable and unregisters previous version"""
         compile_addon()
 
-    def get_to_update_nodes(self, prev_name):
-        """Get nodes that reference this variable by the previous name"""
+    def get_to_update_nodes(self, name=None):
+        """Get nodes that reference this variable"""
+        if name is None:
+            name = self.name
         to_update_nodes = []
         for ntree in bpy.data.node_groups:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.nodes:
-                    if getattr(node, "var_name", None) == prev_name:
+                    if getattr(node, "var_name", None) == name:
                         to_update_nodes.append(node)
         return to_update_nodes
 
