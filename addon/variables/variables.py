@@ -64,8 +64,18 @@ class SN_VariableProperties(bpy.types.PropertyGroup):
                         to_update_nodes.append(node)
         return to_update_nodes
 
+    def get_unique_name(self, value):
+        names = [v.name for v in self.id_data.variables if v != self]
+        return unique_collection_name(value, "New Variable", names, " ")
+
     def update_name(self, context):
         """Called when name changes - update node references"""
+        # Ensure name is unique
+        unique_name = self.get_unique_name(self.name)
+        if unique_name != self.name:
+            self.name = unique_name
+            return
+
         prev_name = self.prev_name
         new_name = self.name
 
