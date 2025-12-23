@@ -163,13 +163,12 @@ def format_single_file():
     t4 = time.time()
 
     # add node code
-    postprops = "" # PATCHED - Additional logic to handle preferences group properties
+    postprops = ""
     for node in get_trigger_nodes():
         if node.code_import and not node.code_import in imports:
             imports += "\n" + node.code_import
         if node.code_imperative and not node.code_imperative in imperative:
             imperative += "\n" + node.code_imperative
-        # PATCHED - Additional logic to handle preferences group properties
         if node.code and node.bl_idname != 'SN_PreferencesNode':
             main += "\n" + node.code
         if node.code and node.bl_idname == 'SN_PreferencesNode':
@@ -182,7 +181,7 @@ def format_single_file():
 
     # add property code
     main += "\n" + property_imperative_code() + "\n"
-    main += postprops + "\n" # PATCHED - Additional logic to handle preferences group properties
+    main += postprops + "\n"
     t6 = time.time()
 
     # add module store code

@@ -36,7 +36,6 @@ class SN_PT_CollectionProperty(PropertySettings, bpy.types.PropertyGroup):
     
     @property
     def register_options(self):
-        # PATCHED - Additional logic to handle preferences group properties
         altsrc = bpy.context.scene.sn
         if self.prop_group in altsrc.properties and altsrc.properties[self.prop_group].property_type == "Group":
             return f"type=SNA_GROUP_{altsrc.properties[self.prop_group].python_name}"
