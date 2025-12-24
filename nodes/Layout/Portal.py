@@ -21,7 +21,11 @@ class SN_PortalNode(SN_ScriptingBaseNode, bpy.types.Node):
     def update_direction(self, context):
         self.inputs[0].set_hide(self.direction == "OUTPUT")
         self.outputs[0].set_hide(self.direction == "INPUT")
-        self._evaluate(context)
+        # If switched to output, try to match the color of the target
+        if self.direction == "OUTPUT":
+            self.update_var_name(context)
+        else:
+            self._evaluate(context)
     
     direction: bpy.props.EnumProperty(name="Direction",
                                 description="The direction this portal goes in",
@@ -29,26 +33,44 @@ class SN_PortalNode(SN_ScriptingBaseNode, bpy.types.Node):
                                        ("OUTPUT", "Out", "Output", "FORWARD", 1)],
                                 update=update_direction)
 
-    def update_var_name(self, context):
+    def sync_portals(self):
+        try:
+            prev = self.get("_prev_var_name", self.var_name)
+            
+            # If we are an INPUT, update our children's names
+            if self.direction == "INPUT" and prev != self.var_name:
+                for ntree in bpy.data.node_groups:
+                    if ntree.bl_idname == "ScriptingNodesTree":
+                        coll = ntree.node_collection(self.bl_idname)
+                        for other in coll.nodes:
+                            if other and other.direction == "OUTPUT" and other.var_name == prev:
+                                other.var_name = self.var_name
+                                other.label = self.var_name
+
+            # If we are an OUTPUT, match the color of our target
+            elif self.direction == "OUTPUT":
+                for ntree in bpy.data.node_groups:
+                    if ntree.bl_idname == "ScriptingNodesTree":
+                        coll = ntree.node_collection(self.bl_idname)
+                        for other in coll.nodes:
+                            if other and other.direction == "INPUT" and other.var_name == self.var_name:
+                                self.custom_color = other.custom_color
+                                break
+            
+            self["_prev_var_name"] = self.var_name
+        except:
+            pass
+
+    def update_var_name(self, context=None):
         self.label = self.var_name
+        self.sync_portals()
         self._evaluate(context)
 
-    def get_var_name(self):
-        return self.get("_var_name", "")
-
-    def set_var_name(self, value):
-        if self.direction == "INPUT":
-            for ntree in bpy.data.node_groups:
-                if ntree.bl_idname == "ScriptingNodesTree":
-                    for node in ntree.node_collection(self.bl_idname).nodes:
-                        if node.direction == "OUTPUT" and node.var_name == self.var_name:
-                            node["_var_name"] = value
-        self["_var_name"] = value
-    
-    var_name: bpy.props.StringProperty(name="Name",
-                                description="The identifier that links this portal to another portal",
-                                get=get_var_name, set=set_var_name,
-                                update=update_var_name)
+    var_name: bpy.props.StringProperty(
+        name="Name",
+        description="The identifier that links this portal to another portal",
+        update=update_var_name,
+    )
     
     def update_custom_color(self, context):
         # update own color
@@ -71,8 +93,12 @@ class SN_PortalNode(SN_ScriptingBaseNode, bpy.types.Node):
         out = self.add_data_output()
         out.changeable = True
         out.set_hide(True)
-        self.var_name = self.uuid
-        self.custom_color = (uniform(0,1), uniform(0,1), uniform(0,1))
+        # Only assign a new UUID if we don't have a name (e.g. fresh node vs duplicated node)
+        if not self.var_name:
+            self.var_name = self.uuid
+        self["_prev_var_name"] = self.var_name
+        self.label = self.var_name
+        self.custom_color = (uniform(0, 1), uniform(0, 1), uniform(0, 1))
 
     def evaluate(self, context):
         if self.direction == "INPUT":
@@ -87,11 +113,15 @@ class SN_PortalNode(SN_ScriptingBaseNode, bpy.types.Node):
             self.outputs[0].reset_value()
     
     def draw_node(self, context, layout):
+        # Safeguard for Blender 5.0 reloads: if label is blank, restore it
+        if not self.label:
+            self.label = self.var_name
+
         layout.prop(self, "direction", expand=True)
-        if self.direction == "INPUT":
-            row = layout.row(align=True)
-            split = row.split(factor=0.6, align=True)
-            split.prop(self, "var_name", text="")
-            sub_split = split.split(factor=0.5, align=True)
-            sub_split.prop(self, "custom_color", text="")
-            sub_split.operator("sn.reset_portal", text="", icon="LOOP_BACK").node = self.name
+        
+        row = layout.row(align=True)
+        split = row.split(factor=0.6, align=True)
+        split.prop(self, "var_name", text="")
+        sub_split = split.split(factor=0.5, align=True)
+        sub_split.prop(self, "custom_color", text="")
+        sub_split.operator("sn.reset_portal", text="", icon="LOOP_BACK").node = self.name
