@@ -1,6 +1,6 @@
 import bpy
 from uuid import uuid4
-from ..utils import normalize_code, indent_code
+from ..utils import normalize_code, indent_code, unique_collection_name
 from .compiler import compile_addon, format_linebreaks
 
 
@@ -355,6 +355,24 @@ class SN_ScriptingBaseNode:
             else:
                 self.color = self._colors["DEFAULT"]
 
+    def ensure_project_unique_name(self):
+        """Ensures that trigger nodes (Functions, Operators, etc.) have a unique name across all node trees."""
+        if not getattr(self, "is_trigger", False):
+            return
+
+        all_names = []
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname == "ScriptingNodesTree":
+                for node in ntree.nodes:
+                    if node != self and node.bl_idname == self.bl_idname:
+                        all_names.append(node.name)
+
+        if self.name in all_names:
+            # Use '.' as separator to follow Blender's .001 convention
+            self.name = unique_collection_name(
+                self.name, self.bl_label, all_names, ".", includes_name=False
+            )
+
     def _create_node_collection_item(self):
         """Creates an item in the nodes collection of this node tree for this node"""
         # set a new collection uid for this node
@@ -377,9 +395,10 @@ class SN_ScriptingBaseNode:
         self._set_node_color()
         # set up the node
         self.on_create(context)
-        # Defer evaluation to avoid issues with Blender's internal state
-        # during node creation/paste operations.
+        # Defer evaluation and name uniqueness check to avoid issues with Blender's 
+        # internal state during node creation/paste operations.
         def deferred_init():
+            self.ensure_project_unique_name()
             self.disable_evaluation = False
             self._evaluate(bpy.context)
 
@@ -394,9 +413,10 @@ class SN_ScriptingBaseNode:
         self._create_node_collection_item()
         # set up the node
         self.on_copy(old)
-        # Defer evaluation after copying to avoid issues with Blender's 
-        # internal state during duplication/paste operations.
+        # Defer evaluation and name uniqueness check after copying to avoid issues 
+        # with Blender's internal state during duplication/paste operations.
         def deferred_copy():
+            self.ensure_project_unique_name()
             self.disable_evaluation = False
             self._evaluate(bpy.context)
 
@@ -496,7 +516,7 @@ class SN_ScriptingBaseNode:
         pass
 
     def on_node_name_change(self):
-        pass
+        self.ensure_project_unique_name()
 
     ### DRAW NODE
     def draw_node(self, context, layout):
