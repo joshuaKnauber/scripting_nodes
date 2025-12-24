@@ -68,6 +68,7 @@ class SN_ButtonNodeNew(SN_ScriptingBaseNode, bpy.types.Node):
                     socket.items = str(
                         list(map(lambda item: item.name, prop.stngs_enum.items))
                     )
+                    socket.can_be_disabled = True
                 else:
                     self._add_input(
                         self.socket_names[prop.property_type], prop.name
