@@ -12,6 +12,7 @@ from .settings.handle_script_changes import (
 )
 from .extensions.snippet_ops import load_snippets
 from .msgbus import subscribe_to_name_change
+from .node_tree.graphs.node_refs import clear_node_cache
 
 
 def migrate_socket_data():
@@ -283,6 +284,7 @@ def post_migration_cleanup(should_compile=True):
 
 @persistent
 def load_handler(dummy):
+    clear_node_cache()
     if hasattr(bpy.context.scene, "sn"):
         bpy.context.scene.sn.picker_active = False
         subscribe_to_name_change()
@@ -312,6 +314,7 @@ def unload_handler(dummy=None):
 
 @persistent
 def undo_post(dummy=None):
+    clear_node_cache()
     if hasattr(bpy.context, "space_data") and hasattr(
         bpy.context.space_data, "node_tree"
     ):

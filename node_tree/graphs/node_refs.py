@@ -3,7 +3,11 @@ import bpy
 
 node_cache = (
     {}
-)  # stores a cache of the nodes with key f"{node_tree.name};{node.static_uid}"
+)  # stores a cache of the nodes with key f"{node_tree.name};{self.uid}"
+
+
+def clear_node_cache():
+    node_cache.clear()
 
 
 class NodeRef(bpy.types.PropertyGroup):
