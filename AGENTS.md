@@ -86,6 +86,7 @@
 - Temporary dev module inside Blender: `scripting_nodes_temp` (see `lib/constants/paths.py`).
 
 ## 10. Tips for Future Agents
+- Use Context7 (`resolve-library-id` then `get-library-docs`) to check the most current Blender Python API (`bpy`) documentation when available. This ensures you're referencing up-to-date API signatures and best practices.
 - Never edit files inside Blender's add-ons directory directly; treat `addon/` as the source of truth and let tooling copy it.
 - Respect user-specific configs: avoid committing `config.yaml` or machine-specific paths.
 - Large directories (`addon/scripting_nodes/src/features/nodes/categories/*`) house many node definitions; add new nodes by mirroring existing category patterns and updating registries if necessary.
