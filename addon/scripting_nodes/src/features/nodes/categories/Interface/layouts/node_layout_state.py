@@ -19,8 +19,8 @@ class SNA_Node_LayoutState(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         self.code = f"""
-            {self.inputs[0].layout}.enabled = {self.inputs["Enabled"].eval()}
-            {self.inputs[0].layout}.active = {self.inputs["Active"].eval()}
-            {self.inputs[0].layout}.alert = {self.inputs["Alert"].eval()}
+            {self.inputs[0].get_layout()}.enabled = {self.inputs["Enabled"].eval()}
+            {self.inputs[0].get_layout()}.active = {self.inputs["Active"].eval()}
+            {self.inputs[0].get_layout()}.alert = {self.inputs["Alert"].eval()}
             {indent(self.outputs[0].eval(), 3)}
         """

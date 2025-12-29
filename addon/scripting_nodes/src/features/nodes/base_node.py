@@ -14,6 +14,7 @@ from scripting_nodes.src.lib.utils.code.format import normalize_indents
 from scripting_nodes.src.features.sockets.socket_types import SOCKET_IDNAME_TYPE
 from scripting_nodes.src.lib.utils.uuid import get_short_id
 from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
+from scripting_nodes.src.features.node_tree.code_gen.watcher import watch_changes
 import bpy
 
 
@@ -100,6 +101,8 @@ class ScriptingBaseNode:
             # mark node tree as dirty
             if "ROOT_NODE" in self.sn_options:
                 self.node_tree.is_dirty = True
+                # Trigger immediate regeneration to avoid stale file on redraw
+                watch_changes()
             redraw_all()
         # update references
         for ntree in scripting_node_trees():

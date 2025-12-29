@@ -27,7 +27,7 @@ class SNA_Node_LayoutScale(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         self.code = f"""
-            {self.inputs[0].layout}.{"ui_units_x" if self.fixed_scale else "scale_x"} = {self.inputs["Scale X"].eval()}
-            {self.inputs[0].layout}.{"ui_units_y" if self.fixed_scale else "scale_y"} = {self.inputs["Scale Y"].eval()}
+            {self.inputs[0].get_layout()}.{"ui_units_x" if self.fixed_scale else "scale_x"} = {self.inputs["Scale X"].eval()}
+            {self.inputs[0].get_layout()}.{"ui_units_y" if self.fixed_scale else "scale_y"} = {self.inputs["Scale Y"].eval()}
             {indent(self.outputs[0].eval(), 3)}
         """

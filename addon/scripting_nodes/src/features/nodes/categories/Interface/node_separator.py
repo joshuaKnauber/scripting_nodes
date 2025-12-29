@@ -23,6 +23,6 @@ class SNA_Node_Separator(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         self.code = f"""
-            {self.inputs[0].layout}.separator(factor={self.inputs["Factor"].eval()}, type="{"LINE" if self.line else "SPACE"}")
+            {self.inputs[0].get_layout()}.separator(factor={self.inputs["Factor"].eval()}, type="{"LINE" if self.line else "SPACE"}")
             {indent(self.outputs[0].eval(), 3)}
         """

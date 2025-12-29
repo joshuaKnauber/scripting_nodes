@@ -17,7 +17,7 @@ class SNA_Node_PropertyLayout(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         self.code = f"""
-            {self.inputs[0].layout}.use_property_decorate = {self.inputs["Decorated"].eval()}
-            {self.inputs[0].layout}.use_property_split = {self.inputs["Split"].eval()}
+            {self.inputs[0].get_layout()}.use_property_decorate = {self.inputs["Decorated"].eval()}
+            {self.inputs[0].get_layout()}.use_property_split = {self.inputs["Split"].eval()}
             {indent(self.outputs[0].eval(), 3)}
         """

@@ -13,9 +13,9 @@ class SNA_Node_Box(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingInterfaceSocket", "After")
 
     def generate(self):
+        self.outputs[0].layout = f"box_{self.id}"
         self.code = f"""
-            box_{self.id} = {self.inputs[0].layout}.box()
+            box_{self.id} = {self.inputs[0].get_layout()}.box()
             {indent(self.outputs[0].eval(), 3)}
             {indent(self.outputs[1].eval(), 3)}
         """
-        self.outputs[0].layout = f"box_{self.id}"

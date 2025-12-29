@@ -16,9 +16,9 @@ class SNA_Node_Column(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingInterfaceSocket", "After")
 
     def generate(self):
+        self.outputs[0].layout = f"col_{self.id}"
         self.code = f"""
-            col_{self.id} = {self.inputs[0].layout}.column(align={self.inputs["Align"].eval()}, heading={self.inputs["Heading"].eval()})
+            col_{self.id} = {self.inputs[0].get_layout()}.column(align={self.inputs["Align"].eval()}, heading={self.inputs["Heading"].eval()})
             {indent(self.outputs[0].eval(), 3)}
             {indent(self.outputs[1].eval(), 3)}
         """
-        self.outputs[0].layout = f"col_{self.id}"

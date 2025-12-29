@@ -4,29 +4,24 @@ import bpy
 
 
 class LayoutSocket:
+    layout: bpy.props.StringProperty(default="")
 
     def get_layout(self):
-        # return own layout or that of previous connected socket
-        own_layout = self.get("layout") or ""
+        """Return own layout or that of previous connected socket."""
         if self.is_output:
-            if own_layout:
-                return own_layout
+            if self.layout:
+                return self.layout
             else:
-                if len(self.node.inputs) > 0 and hasattr(self.node.inputs[0], "layout"):
+                if len(self.node.inputs) > 0 and hasattr(self.node.inputs[0], "get_layout"):
                     connected = from_socket(self.node.inputs[0])
-                    if connected and hasattr(connected, "layout"):
-                        return connected.layout
+                    if connected and hasattr(connected, "get_layout"):
+                        return connected.get_layout()
                 return "self.layout"
         else:
             connected = from_socket(self)
-            if connected and hasattr(connected, "layout"):
-                return connected.layout
+            if connected and hasattr(connected, "get_layout"):
+                return connected.get_layout()
             return "self.layout"
-
-    def set_layout(self, value):
-        self["layout"] = value
-
-    layout: bpy.props.StringProperty(default="", get=get_layout, set=set_layout)
 
 
 class ScriptingInterfaceSocket(ScriptingBaseSocket, LayoutSocket, bpy.types.NodeSocket):
