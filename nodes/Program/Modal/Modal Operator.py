@@ -173,6 +173,7 @@ class SN_ModalOperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
             {self.indent(props_imperative_list, 3)}
         
             _{self.static_uid}_running = False
+            _{self.static_uid}_handle = None
             class SNA_OT_{self.operator_python_name.title()}(bpy.types.Operator):
                 bl_idname = "sna.{self.operator_python_name}"
                 bl_label = "{self.name}"
@@ -200,6 +201,10 @@ class SN_ModalOperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
                     for option in event_options: self._event[option] = getattr(event, option)
                     
                 def draw_callback_px(self, context):
+                    try:
+                        _ = self.bl_idname
+                    except ReferenceError:
+                        return
                     event = self._event
                     if event.keys():
                         event = dotdict(event)
@@ -210,7 +215,9 @@ class SN_ModalOperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
 
                 def execute(self, context):
                     global _{self.static_uid}_running
+                    global _{self.static_uid}_handle
                     _{self.static_uid}_running = False
+                    _{self.static_uid}_handle = None
                     context.window.cursor_set("DEFAULT")
                     {f"bpy.types.{self.draw_space}.draw_handler_remove(self._handle, 'WINDOW')" if self.draw_text else ""}
                     {self.indent(self.outputs['After Modal'].python_value, 5)}
@@ -245,6 +252,8 @@ class SN_ModalOperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
                         {"args = (context,)" if self.draw_text else ""}
                         {f"self._handle = bpy.types.{self.draw_space}.draw_handler_add(self.draw_callback_px, args, 'WINDOW', 'POST_PIXEL')" if self.draw_text else ""}
                         context.window_manager.modal_handler_add(self)
+                        global _{self.static_uid}_handle
+                        _{self.static_uid}_handle = self._handle
                         _{self.static_uid}_running = True
                         return {{'RUNNING_MODAL'}}
             """
@@ -254,6 +263,15 @@ class SN_ModalOperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
                 bpy.utils.register_class(SNA_OT_{self.operator_python_name.title()})
                 """
         self.code_unregister = f"""
+                global _{self.static_uid}_running
+                _{self.static_uid}_running = False
+                global _{self.static_uid}_handle
+                if _{self.static_uid}_handle:
+                    try:
+                        bpy.types.{self.draw_space}.draw_handler_remove(_{self.static_uid}_handle, 'WINDOW')
+                    except:
+                        pass
+                    _{self.static_uid}_handle = None
                 {self.indent(props_unregister_list, 4)}
                 bpy.utils.unregister_class(SNA_OT_{self.operator_python_name.title()})
                 """
