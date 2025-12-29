@@ -1,4 +1,5 @@
 from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+    node_by_id,
     scripting_node_trees,
     sn_nodes,
 )
@@ -24,3 +25,8 @@ class SNA_NodeReference(bpy.types.PropertyGroup):
     name: bpy.props.StringProperty()
 
     node_id: bpy.props.StringProperty()
+
+    @property
+    def node(self):
+        """Returns the node that created this reference."""
+        return node_by_id(self.node_id)

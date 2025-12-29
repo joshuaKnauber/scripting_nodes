@@ -5,6 +5,7 @@ from scripting_nodes.src.lib.utils.sockets.sockets import (
     to_socket,
 )
 from scripting_nodes.src.lib.utils.code.format import normalize_indents
+from scripting_nodes.src.features.sockets.conversions import get_conversion
 import bpy
 
 
@@ -43,7 +44,9 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
         else:
             from_s = from_socket(self)
             if from_s:
-                return from_s.eval()
+                # Apply type conversion if connected socket is a different type
+                value_code = from_s.eval()
+                return get_conversion(from_s.bl_idname, self.bl_idname, value_code)
             return self._to_code()
 
     def _to_code(self):
