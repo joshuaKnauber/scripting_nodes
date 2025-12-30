@@ -50,7 +50,7 @@ class SNA_Node_Group(ScriptingBaseNode, bpy.types.Node):
         row = layout.row(align=True)
         row.template_ID(self, "group_tree")
         if not self.group_tree:
-            op = row.operator("sna.add_group", text="", icon="ADD")
+            op = row.operator("sna.add_group", text="Add", icon="ADD")
             op.node_id = self.id
 
     def generate(self):
