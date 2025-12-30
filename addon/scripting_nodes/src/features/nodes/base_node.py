@@ -47,6 +47,8 @@ class ScriptingBaseNode:
 
     code: bpy.props.StringProperty()
     code_global: bpy.props.StringProperty()
+    code_register: bpy.props.StringProperty()
+    code_unregister: bpy.props.StringProperty()
 
     ### Life Cycle
 
@@ -76,11 +78,15 @@ class ScriptingBaseNode:
         prev_code = (
             self.code
             + self.code_global
+            + self.code_register
+            + self.code_unregister
             + "".join([socket.code for socket in self.outputs])
         )
         # reset code
         self.code = ""
         self.code_global = ""
+        self.code_register = ""
+        self.code_unregister = ""
         for out in self.outputs:
             out.code = ""
         # generate new code
@@ -88,6 +94,8 @@ class ScriptingBaseNode:
         new_code = (
             self.code
             + self.code_global
+            + self.code_register
+            + self.code_unregister
             + "".join([socket.code for socket in self.outputs])
         )
         if prev_code != new_code:
@@ -98,8 +106,12 @@ class ScriptingBaseNode:
             for inpt in self.inputs:
                 for node in from_nodes(inpt):
                     node._generate()
-            # mark node tree as dirty
-            if "ROOT_NODE" in self.sn_options:
+            # mark node tree as dirty if root node OR if register code changed
+            if (
+                "ROOT_NODE" in self.sn_options
+                or self.code_register
+                or self.code_unregister
+            ):
                 self.node_tree.is_dirty = True
                 # Trigger immediate regeneration to avoid stale file on redraw
                 watch_changes()

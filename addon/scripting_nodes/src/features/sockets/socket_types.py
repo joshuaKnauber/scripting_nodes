@@ -12,6 +12,7 @@ SOCKET_IDNAME_TYPE = Literal[
     "ScriptingLogicSocket",
     "ScriptingProgramSocket",
     "ScriptingDataSocket",
+    "ScriptingBlendDataSocket",
     "ScriptingStringSocket",
     "ScriptingBooleanSocket",
     "ScriptingFloatSocket",
@@ -22,6 +23,7 @@ SOCKET_IDNAME_TYPE = Literal[
 
 DATA_SOCKET_ICONS = {
     "ScriptingDataSocket": "MOD_DATA_TRANSFER",
+    "ScriptingBlendDataSocket": "BLENDER",
     "ScriptingStringSocket": "SYNTAX_OFF",
     "ScriptingBooleanSocket": "CHECKBOX_HLT",
     "ScriptingFloatSocket": "CON_TRANSLIKE",
@@ -32,6 +34,7 @@ DATA_SOCKET_ICONS = {
 
 DATA_SOCKET_IDNAMES = [
     "ScriptingDataSocket",
+    "ScriptingBlendDataSocket",
     "ScriptingStringSocket",
     "ScriptingBooleanSocket",
     "ScriptingFloatSocket",
@@ -49,45 +52,52 @@ DATA_SOCKET_ENUM_ITEMS = [
         0,
     ),
     (
+        "ScriptingBlendDataSocket",
+        "Blend Data",
+        "Blend Data (Scene, Object, etc.)",
+        DATA_SOCKET_ICONS["ScriptingBlendDataSocket"],
+        1,
+    ),
+    (
         "ScriptingStringSocket",
         "String",
         "String",
         DATA_SOCKET_ICONS["ScriptingStringSocket"],
-        1,
+        2,
     ),
     (
         "ScriptingBooleanSocket",
         "Boolean",
         "Boolean",
         DATA_SOCKET_ICONS["ScriptingBooleanSocket"],
-        2,
+        3,
     ),
     (
         "ScriptingFloatSocket",
         "Float",
         "Float",
         DATA_SOCKET_ICONS["ScriptingFloatSocket"],
-        3,
+        4,
     ),
     (
         "ScriptingIntegerSocket",
         "Integer",
         "Integer",
         DATA_SOCKET_ICONS["ScriptingIntegerSocket"],
-        4,
+        5,
     ),
     (
         "ScriptingVectorSocket",
         "Vector",
         "Vector",
         DATA_SOCKET_ICONS["ScriptingVectorSocket"],
-        5,
+        6,
     ),
     (
         "ScriptingColorSocket",
         "Color",
         "Color",
         DATA_SOCKET_ICONS["ScriptingColorSocket"],
-        6,
+        7,
     ),
 ]

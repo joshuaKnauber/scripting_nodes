@@ -23,6 +23,7 @@ FLOW_SOCKET_TYPES = {
 # Valid socket types for group interfaces (data sockets only)
 SOCKET_TYPE_ITEMS = [
     ("ScriptingDataSocket", "Data", "Generic data"),
+    ("ScriptingBlendDataSocket", "Blend Data", "Blend data (Scene, Object, etc.)"),
     ("ScriptingStringSocket", "String", "Text value"),
     ("ScriptingBooleanSocket", "Boolean", "True/False value"),
     ("ScriptingFloatSocket", "Float", "Decimal number"),
