@@ -258,7 +258,7 @@ def depsgraph_handler(dummy):
         if group.bl_idname == "ScriptingNodesTree":
             group.use_fake_user = True
             # add empty collection for node drawing
-            if not "empty" in group.node_refs:
+            if not "empty" in group.node_refs.keys():
                 group.node_refs.add().name = "empty"
 
 

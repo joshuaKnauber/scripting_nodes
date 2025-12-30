@@ -378,7 +378,7 @@ class SN_ScriptingBaseNode:
         # set a new collection uid for this node
         self.static_uid = uuid4().hex[:5].upper()
         # add a new collection if it doesn't exist yet
-        if not self.collection_key in self.node_tree.node_refs:
+        if not self.collection_key in self.node_tree.node_refs.keys():
             collection = self.node_tree.node_refs.add()
             collection.name = self.collection_key
         # clear unused references

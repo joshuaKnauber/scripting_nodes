@@ -84,7 +84,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def node_collection(self, idname):
         """Returns the collection for the given node idname refs in this node trees"""
-        if idname in self.node_refs:
+        if idname in self.node_refs.keys():
             return self.node_refs[idname]
         return self.node_refs["empty"]
 
