@@ -15,6 +15,25 @@ import bpy
 
 
 PREVIOUS_LINKS = {}
+PREVIOUS_INTERFACE_STATE = {}
+
+
+def get_interface_state(tree):
+    """Get a hashable representation of the interface state."""
+    if not hasattr(tree, "interface"):
+        return None
+    state = []
+    for item in tree.interface.items_tree:
+        if hasattr(item, "in_out"):
+            # Include socket type, name, and direction
+            state.append(
+                (
+                    getattr(item, "bl_socket_idname", ""),
+                    item.name,
+                    item.in_out,
+                )
+            )
+    return tuple(state)
 
 
 class ScriptingNodeTree(bpy.types.NodeTree):
@@ -31,9 +50,28 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     is_dirty: bpy.props.BoolProperty(default=True)
     pause_updates: bpy.props.BoolProperty(default=False)
 
+    # Indicates this tree is a group (used as a group node)
+    is_group: bpy.props.BoolProperty(default=False)
+
+    # Socket types that should NOT appear in the interface socket type dropdown
+    # These are flow sockets that don't make sense for group inputs/outputs
+    _EXCLUDED_SOCKET_TYPES = {
+        "ScriptingInterfaceSocket",
+        "ScriptingProgramSocket",
+        "ScriptingLogicSocket",
+        "ScriptingBaseSocket",
+    }
+
     @classmethod
     def valid_socket_type(cls, idname):
-        return idname.startswith("Scripting")
+        """Filter socket types shown in the interface panel dropdown.
+
+        Only data sockets (not flow sockets) should be available for
+        group inputs/outputs.
+        """
+        if not idname.startswith("Scripting"):
+            return False
+        return idname not in cls._EXCLUDED_SOCKET_TYPES
 
     @property
     def module_name(self):
@@ -102,24 +140,54 @@ class ScriptingNodeTree(bpy.types.NodeTree):
         # update previous links
         PREVIOUS_LINKS[self] = new_links
 
-    def update_group_sockets(self):
+    def update_group_sockets(self, force=False):
+        # Check if interface has actually changed
+        current_state = get_interface_state(self)
+        previous_state = PREVIOUS_INTERFACE_STATE.get(self)
+
+        if not force and current_state == previous_state:
+            # No interface changes, skip updating
+            return
+
+        # Update stored state
+        PREVIOUS_INTERFACE_STATE[self] = current_state
+
         # update group nodes in all scripting node trees
-        group_nodes = [
+        # This notifies nodes when the interface sockets of a tree change
+        group_node_types = {
+            "SNA_Node_Group",
+        }
+        input_node_types = {
+            "SNA_Node_GroupInput",
+        }
+        output_node_types = {
+            "SNA_Node_GroupOutput",
+        }
+
+        # Find all nodes that reference function/group trees
+        referencing_nodes = [
             node
             for tree in scripting_node_trees()
             for node in sn_nodes(tree)
-            if node.bl_idname == "SNA_Node_Group"
+            if node.bl_idname in group_node_types
         ]
-        group_inputs = [
-            node for node in self.nodes if node.bl_idname == "SNA_Node_GroupInput"
+        # Find input/output nodes in this tree
+        input_nodes = [
+            node for node in self.nodes if node.bl_idname in input_node_types
         ]
-        group_outputs = [
-            node for node in self.nodes if node.bl_idname == "SNA_Node_GroupOutput"
+        output_nodes = [
+            node for node in self.nodes if node.bl_idname in output_node_types
         ]
-        for node in [*group_nodes, *group_inputs, *group_outputs]:
+        for node in [*referencing_nodes, *input_nodes, *output_nodes]:
             node.on_group_socket_change(self)
 
     def update_node_references(self):
+        # Safety check - ensure scene.sna is fully initialized
+        if not hasattr(bpy.context.scene, "sna") or not hasattr(
+            bpy.context.scene.sna, "references"
+        ):
+            return
+
         for node in sn_nodes(self):
             # update existing reference
             for ref in bpy.context.scene.sna.references:

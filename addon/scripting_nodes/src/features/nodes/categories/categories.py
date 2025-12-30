@@ -125,6 +125,10 @@ def draw_submenu(self, context):
 
     if "nodes" in category:
         for node in sorted(category["nodes"], key=lambda n: n.bl_label):
+            # Check if node's poll method allows it in this tree
+            tree = context.space_data.edit_tree
+            if tree and hasattr(node, "poll") and not node.poll(tree):
+                continue
             op = layout.operator("node.add_node", text=node.bl_label)
             op.type = node.bl_idname
             op.use_transform = True

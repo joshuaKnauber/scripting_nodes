@@ -146,7 +146,8 @@ class ScriptingBaseNode:
     def _update_dynamic_sockets(self):
         # update inputs
         for socket in self.inputs:
-            if socket.is_dynamic and socket.is_linked:
+            # Only check is_dynamic on our custom sockets
+            if hasattr(socket, "is_dynamic") and socket.is_dynamic and socket.is_linked:
                 index = socket_index(self, socket)
                 self.add_input(socket.bl_idname, socket.label, dynamic=True)
                 self.inputs.move(len(self.inputs) - 1, index + 1)
@@ -154,7 +155,8 @@ class ScriptingBaseNode:
                 socket.is_removable = True
         # update outputs
         for socket in self.outputs:
-            if socket.is_dynamic and socket.is_linked:
+            # Only check is_dynamic on our custom sockets
+            if hasattr(socket, "is_dynamic") and socket.is_dynamic and socket.is_linked:
                 index = socket_index(self, socket)
                 self.add_output(socket.bl_idname, socket.label, dynamic=True)
                 self.outputs.move(len(self.outputs) - 1, index + 1)

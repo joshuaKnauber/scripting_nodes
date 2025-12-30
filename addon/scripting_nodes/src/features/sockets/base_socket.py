@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Set
 from scripting_nodes.src.lib.utils.sockets.sockets import (
     from_socket,
     socket_index,
@@ -8,8 +8,18 @@ from scripting_nodes.src.lib.utils.code.format import normalize_indents
 from scripting_nodes.src.features.sockets.conversions import get_conversion
 import bpy
 
+# Thread-local set to track sockets currently being evaluated (recursion guard)
+_eval_stack: Set[str] = set()
+
 
 class ScriptingBaseSocket(bpy.types.NodeSocket):
+    """Base class for all scripting node sockets.
+
+    Not registered as a Blender type - subclasses are registered instead.
+    """
+
+    # Prevent auto_load from registering this base class
+    is_registered = True
 
     is_sn = True
     socket_type: Literal["DATA", "PROGRAM"] = "DATA"
@@ -20,11 +30,24 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
     is_dynamic: bpy.props.BoolProperty(default=False)
     is_removable: bpy.props.BoolProperty(default=False)
 
+    def _get_socket_id(self):
+        """Get a unique ID for this socket to detect recursion."""
+        return f"{self.node.id}:{self.name}:{self.is_output}"
+
     def eval(self, fallback=""):
-        if self.socket_type == "PROGRAM":
-            return self._eval_program() or fallback
-        elif self.socket_type == "DATA":
-            return self._eval_data() or fallback
+        # Recursion guard - prevent infinite loops
+        socket_id = self._get_socket_id()
+        if socket_id in _eval_stack:
+            return fallback
+
+        _eval_stack.add(socket_id)
+        try:
+            if self.socket_type == "PROGRAM":
+                return self._eval_program() or fallback
+            elif self.socket_type == "DATA":
+                return self._eval_data() or fallback
+        finally:
+            _eval_stack.discard(socket_id)
 
     def _eval_program(self):
         if self.is_output:
@@ -33,7 +56,10 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
                 return to.eval()
             return ""
         else:
-            if bpy.context.scene.sna.addon.build_with_production_code:
+            # Group trees must always use production code because
+            # return statements don't work with exec() in dev mode
+            is_group_tree = getattr(self.node.node_tree, "is_group", False)
+            if bpy.context.scene.sna.addon.build_with_production_code or is_group_tree:
                 return normalize_indents(self.node.code)
             else:
                 return f"bpy.context.scene.sna.execute('{self.node.id}', globals(), locals())"
