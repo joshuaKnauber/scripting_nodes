@@ -39,7 +39,7 @@ class SN_PrintNode(SN_ScriptingBaseNode, bpy.types.Node):
                                     description="Show print results on this node",
                                     update=SN_ScriptingBaseNode._evaluate)
     
-    limit_prints: bpy.props.IntProperty(default=0, min=0,
+    limit_prints: bpy.props.IntProperty(default=10, min=0,
                                     name="Amount of print messages that will be added to this node before a previous one is removed (0 is unlimited)",
                                     update=SN_ScriptingBaseNode._evaluate)
     

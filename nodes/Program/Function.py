@@ -22,7 +22,7 @@ class SN_FunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
         new_name = unique_collection_name(
             new_name,
             "Input",
-            [out.name for out in self.outputs[1:-1]],
+            [out.name for out in self.outputs],
             "_",
             includes_name=True,
         )
@@ -62,7 +62,7 @@ class SN_FunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
         new_name = unique_collection_name(
             new_name,
             "Input",
-            [out.name for out in self.outputs[1:-1]],
+            [out.name for out in self.outputs],
             "_",
             includes_name=True,
         )

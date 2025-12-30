@@ -544,9 +544,7 @@ class ScriptingSocket:
             self.dynamic = False
             self.prev_dynamic = True
 
-            if socket.dynamic:
-                self.node.on_dynamic_socket_add(self)
-            else:
-                self.node.on_dynamic_socket_add(socket)
+            # Trigger data shift using the NEW socket, which is now at the correct index
+            self.node.on_dynamic_socket_add(socket)
 
             socket.node._evaluate(bpy.context)

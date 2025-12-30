@@ -489,11 +489,57 @@ class SN_ScriptingBaseNode:
         self.on_link_remove(from_socket, to_socket, is_output)
 
     ### DYNAMIC SOCKET UPDATE
+    def _shift_socket_data(self, start_index, is_output, offset):
+        """Shifts socket data keys to handle insertion/removal"""
+        side_prefix = f"_socket_{'out' if is_output else 'in'}_"
+        data_to_move = []
+        
+        # 1. Collect all keys that need moving/deleting
+        # We look for keys starting with the side prefix
+        for key in list(self.keys()):
+            if key.startswith(side_prefix):
+                # Format: _socket_{side}_{index}_{rest}
+                # We need to extract index
+                try:
+                    parts = key.split("_")
+                    # _socket_in_0_String -> ['', 'socket', 'in', '0', 'String']
+                    # Index is parts[3]
+                    idx = int(parts[3])
+                    
+                    if offset < 0: # Removal
+                        # If index is the one removed, delete it
+                        if idx == start_index:
+                             del self[key]
+                        # If index is higher, it needs shifting down
+                        elif idx > start_index:
+                             data_to_move.append((idx, key))
+                             
+                    else: # Insertion (offset > 0)
+                        # If index is >= start_index, it needs shifting up
+                        if idx >= start_index:
+                            data_to_move.append((idx, key))
+                            
+                except (ValueError, IndexError):
+                    continue
+
+        # 2. Sort and Shift
+        # Descending for Move Up (Add), Ascending for Move Down (Remove)
+        data_to_move.sort(key=lambda x: x[0], reverse=(offset > 0))
+        
+        for idx, key in data_to_move:
+             parts = key.split("_")
+             parts[3] = str(idx + offset)
+             new_key = "_".join(parts)
+             
+             self[new_key] = self[key]
+             if key in self:
+                del self[key]
+
     def on_dynamic_socket_add(self, socket):
-        pass
+        self._shift_socket_data(socket.index, socket.is_output, 1)
 
     def on_dynamic_socket_remove(self, index, is_output):
-        pass
+        self._shift_socket_data(index, is_output, -1)
 
     ### SOCKET ATTRIBUTES CHANGE
     def on_socket_type_change(self, socket):

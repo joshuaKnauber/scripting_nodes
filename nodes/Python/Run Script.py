@@ -36,29 +36,22 @@ class SN_RunScriptNode(SN_ScriptingBaseNode, bpy.types.Node):
         name_storage_key = f"_socket_current_name_{id(socket)}"
         current_name = self.get(name_storage_key, socket.name)  # Fallback to socket.name if not stored
         
-        if socket in self.inputs[2:-1]:
+        if getattr(socket, "is_variable", False):
             new_name = get_python_name(current_name, "Variable", lower=False)
-            new_name = unique_collection_name(new_name, "Variable", [inp.name for inp in self.inputs[2:-1]], "_", includes_name=True)
+            new_name = unique_collection_name(new_name, "Variable", [s.name for s in (self.outputs if socket.is_output else self.inputs)], "_", includes_name=True)
             if new_name != current_name:
                 socket.set_name_silent(new_name)
-        elif socket in self.outputs[1:-1]:
-            new_name = get_python_name(current_name, "Variable", lower=False)
-            new_name = unique_collection_name(new_name, "Variable", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
-            if new_name != current_name:
-                socket.set_name_silent(new_name)
-                socket.python_value = socket.name
+                if socket.is_output:
+                    socket.python_value = socket.name
         self._evaluate(bpy.context)
 
     def on_dynamic_socket_add(self, socket):
-        if socket in self.inputs[2:-1]:
+        if getattr(socket, "is_variable", False):
             new_name = get_python_name(socket.name, "Variable", lower=False)
-            new_name = unique_collection_name(new_name, "Variable", [inp.name for inp in self.inputs[2:-1]], "_", includes_name=True)
+            new_name = unique_collection_name(new_name, "Variable", [s.name for s in (self.outputs if socket.is_output else self.inputs)], "_", includes_name=True)
             socket.set_name_silent(new_name)
-        elif socket in self.outputs[1:-1]:
-            new_name = get_python_name(socket.name, "Variable", lower=False)
-            new_name = unique_collection_name(new_name, "Variable", [out.name for out in self.outputs[1:-1]], "_", includes_name=True)
-            socket.set_name_silent(new_name)
-            socket.python_value = socket.name
+            if socket.is_output:
+                socket.python_value = socket.name
 
 
     def on_create(self, context):

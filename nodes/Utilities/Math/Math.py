@@ -11,19 +11,53 @@ class SN_MathNode(SN_ScriptingBaseNode, bpy.types.Node):
     bl_label = "Math"
     node_color = "FLOAT"
 
+    def _migrate_data(self, socket, new_name):
+        """Helper to migrate data keys when renaming sockets"""
+        if socket.name == new_name:
+            return
+
+        # Helpers to construct keys
+        is_output_str = "out" if socket.is_output else "in"
+        idx = socket.index
+        old_prefix = f"_socket_{is_output_str}_{idx}_{socket.name}"
+        new_prefix = f"_socket_{is_output_str}_{idx}_{new_name}"
+
+        # Find all keys belonging to this socket (including subtypes)
+        keys_to_migrate = []
+        for key in self.keys():
+            if key.startswith(old_prefix):
+                keys_to_migrate.append(key)
+        
+        # Move data
+        for old_key in keys_to_migrate:
+            new_key = old_key.replace(old_prefix, new_prefix, 1)
+            self[new_key] = self[old_key]
+            del self[old_key]
+
+        socket.set_name_silent(new_name)
+
     def on_dynamic_socket_add(self, socket):
+        super().on_dynamic_socket_add(socket)
         alphabet = list(string.ascii_lowercase)
         if len(self.inputs) > 26:
             self.inputs.remove(socket)
         for x, socket in enumerate(self.inputs):
-            socket.set_name_silent(alphabet[x])
+            target_name = alphabet[x]
+            self._migrate_data(socket, target_name)
 
     def on_dynamic_socket_remove(self, index, is_output):
+        super().on_dynamic_socket_remove(index, is_output)
         alphabet = list(string.ascii_lowercase)
         if self.inputs[-2].name != "z" and self.inputs[-1].hide:
             self.inputs[-1].set_hide(False)
         if self.inputs[-2].name != "z":
-            self.inputs[-1].set_name_silent(alphabet[alphabet.index(self.inputs[-2].name)+1])
+            # Just re-run the full rename loop to stick to consistent state
+            for x, socket in enumerate(self.inputs):
+                 # Skip the last one if it's hidden/dynamic placeholder logic (handled by Math logic usually)
+                 # But sticking to the pattern:
+                 if x < 26: 
+                     target_name = alphabet[x]
+                     self._migrate_data(socket, target_name)
 
     operation: bpy.props.EnumProperty(items=[(" + ", "Add", "Add two numbers"),
                                              (" - ", "Subtract", "Subtract two numbers"),
