@@ -84,7 +84,11 @@ class SN_DrawPointNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.code = f"""
             {coords}
 
-            shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+            prefs = bpy.context.preferences
+            if hasattr(prefs.system, "gpu_backend") and prefs.system.gpu_backend == 'VULKAN':
+                shader = gpu.shader.from_builtin('POINT_UNIFORM_COLOR')
+            else:
+                shader = gpu.shader.from_builtin('UNIFORM_COLOR')
             batch = gpu_extras.batch.batch_for_shader(shader, 'POINTS', {{"pos": coords}})
 
             shader.bind()
