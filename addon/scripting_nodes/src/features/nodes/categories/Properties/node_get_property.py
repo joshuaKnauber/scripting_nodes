@@ -19,6 +19,8 @@ class SNA_Node_GetProperty(ScriptingBaseNode, bpy.types.Node):
 
     def draw(self, context, layout):
         layout.prop_search(self, "prop", context.scene.sna, "references", text="")
+        if not self.inputs[1].is_linked:
+            layout.label(text="Connect a data source", icon="INFO")
 
     def on_create(self):
         self.add_input("ScriptingProgramSocket")
@@ -39,5 +41,13 @@ class SNA_Node_GetProperty(ScriptingBaseNode, bpy.types.Node):
         if ref and ref.node:
             prop_name = getattr(ref.node, "prop_name", "")
             if prop_name:
-                source_code = self.inputs[1].eval()
-                self.outputs[1].code = f"{source_code}.{prop_name}"
+                if self.inputs[1].is_linked:
+                    source_code = self.inputs[1].eval()
+                    self.outputs[1].code = f"{source_code}.{prop_name}"
+                else:
+                    # No source connected - return None and log
+                    self.outputs[1].code = "None"
+                    self.code = f"""
+                        print("Get Property: No data source connected for '{prop_name}'")
+                        {indent(self.outputs[0].eval(), 6)}
+                    """

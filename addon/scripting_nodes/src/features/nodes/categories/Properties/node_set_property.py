@@ -19,6 +19,8 @@ class SNA_Node_SetProperty(ScriptingBaseNode, bpy.types.Node):
 
     def draw(self, context, layout):
         layout.prop_search(self, "prop", context.scene.sna, "references", text="")
+        if not self.inputs[1].is_linked:
+            layout.label(text="Connect a data target", icon="INFO")
 
     def on_create(self):
         self.add_input("ScriptingProgramSocket")
@@ -36,11 +38,18 @@ class SNA_Node_SetProperty(ScriptingBaseNode, bpy.types.Node):
         if ref and ref.node:
             prop_name = getattr(ref.node, "prop_name", "")
             if prop_name:
-                target_code = self.inputs[1].eval()
-                self.code = f"""
-                    {target_code}.{prop_name} = {self.inputs[2].eval()}
-                    {indent(self.outputs[0].eval(), 5)}
-                """
+                if self.inputs[1].is_linked:
+                    target_code = self.inputs[1].eval()
+                    self.code = f"""
+                        {target_code}.{prop_name} = {self.inputs[2].eval()}
+                        {indent(self.outputs[0].eval(), 6)}
+                    """
+                else:
+                    # No target connected - skip set and log
+                    self.code = f"""
+                        print("Set Property: No data target connected for '{prop_name}'")
+                        {indent(self.outputs[0].eval(), 6)}
+                    """
             else:
                 self.code = f"""
                     {indent(self.outputs[0].eval(), 5)}

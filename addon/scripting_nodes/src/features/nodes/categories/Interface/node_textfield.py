@@ -22,6 +22,8 @@ class SNA_Node_TextField(ScriptingBaseNode, bpy.types.Node):
 
     def draw(self, context, layout):
         layout.prop_search(self, "prop", context.scene.sna, "references", text="")
+        if not self.inputs[1].is_linked:
+            layout.label(text="Connect data source", icon="INFO")
         layout.prop(self, "emboss")
 
     def on_create(self):
@@ -38,9 +40,18 @@ class SNA_Node_TextField(ScriptingBaseNode, bpy.types.Node):
         if ref and ref.node:
             prop_name = getattr(ref.node, "prop_name", "")
             if prop_name:
+                layout_code = self.inputs[0].get_layout()
+
+                if not self.inputs["Data"].is_linked:
+                    # No data connected - show fallback label
+                    self.code = f"""
+                        {layout_code}.label(text="No data connected", icon="ERROR")
+                        {indent(self.outputs[0].eval(), 6)}
+                    """
+                    return
+
                 data_code = self.inputs["Data"].eval()
                 text_code = self.inputs["Text"].eval()
-                layout_code = self.inputs[0].get_layout()
 
                 # Build prop arguments
                 args = [f"data={data_code}", f'property="{prop_name}"']
