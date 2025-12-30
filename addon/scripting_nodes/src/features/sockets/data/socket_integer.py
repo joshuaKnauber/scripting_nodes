@@ -9,7 +9,7 @@ class ScriptingIntegerSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
     def update_value(self, context):
         self.node._generate()
 
-    value: bpy.props.IntProperty(default=1, update=update_value)
+    value: bpy.props.IntProperty(default=0, update=update_value)
 
     def _to_code(self):
         return f"{self.value}"

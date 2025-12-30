@@ -9,7 +9,7 @@ class SNA_Node_Integer(ScriptingBaseNode, bpy.types.Node):
     def update_value(self, context):
         self._generate()
 
-    value: bpy.props.IntProperty(default=1, update=update_value)
+    value: bpy.props.IntProperty(default=0, update=update_value)
 
     def draw(self, context, layout):
         layout.prop(self, "value", text="")
