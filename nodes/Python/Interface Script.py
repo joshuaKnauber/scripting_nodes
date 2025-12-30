@@ -27,7 +27,7 @@ class SN_InterfaceScriptNode(SN_ScriptingBaseNode, bpy.types.Node):
         current_name = self.get(name_storage_key, socket.name)  # Fallback to socket.name if not stored
         
         new_name = get_python_name(current_name, "Variable", lower=False)
-        new_name = unique_collection_name(new_name, "Variable", [inp.name for inp in self.inputs[1:-1]], "_", includes_name=True)
+        new_name = unique_collection_name(new_name, "Variable", [inp.name for inp in self.inputs], "_", includes_name=True)
         if new_name != current_name:
             socket.set_name_silent(new_name)
         self._evaluate(bpy.context)
@@ -35,7 +35,7 @@ class SN_InterfaceScriptNode(SN_ScriptingBaseNode, bpy.types.Node):
     def on_dynamic_socket_add(self, socket):
         current_name = socket.name
         new_name = get_python_name(current_name, "Variable", lower=False)
-        new_name = unique_collection_name(new_name, "Variable", [inp.name for inp in self.inputs[1:-1]], "_", includes_name=True)
+        new_name = unique_collection_name(new_name, "Variable", [inp.name for inp in self.inputs], "_", includes_name=True)
         if new_name != current_name:
             socket.set_name_silent(new_name)
         self._evaluate(bpy.context)
