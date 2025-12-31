@@ -1,5 +1,6 @@
 from email.policy import default
 from typing import Literal, Set
+import traceback
 from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
     sn_nodes,
@@ -15,6 +16,7 @@ from scripting_nodes.src.features.sockets.socket_types import SOCKET_IDNAME_TYPE
 from scripting_nodes.src.lib.utils.uuid import get_short_id
 from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
 from scripting_nodes.src.features.node_tree.code_gen.watcher import watch_changes
+from scripting_nodes.src.lib.utils.logger import log
 import bpy
 
 
@@ -129,7 +131,14 @@ class ScriptingBaseNode:
         raise NotImplementedError
 
     def _execute(self, globs, locs):
-        exec(normalize_indents(self.code), globs, locs)
+        try:
+            exec(normalize_indents(self.code), globs, locs)
+        except Exception as e:
+            # Get the last line of the traceback for a concise error
+            tb_lines = traceback.format_exc().strip().split("\n")
+            error_msg = f"{self.bl_label}: {e}"
+            log("ERROR", error_msg)
+            raise
 
     ### Sockets
 

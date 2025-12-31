@@ -7,7 +7,16 @@ def log(level: Literal["INFO", "WARNING", "ERROR"], *args, **kwargs):
         "WARNING": "\033[93m",
         "ERROR": "\033[91m",
     }
+    message = " ".join(str(arg) for arg in args)
     print(colors[level] + f"[SN {level}]", *args, **kwargs)
+
+    # Also add to overlay
+    try:
+        from scripting_nodes.src.handlers.draw.log_overlay import add_log
+
+        add_log(level, message)
+    except Exception:
+        pass  # Overlay may not be available
 
 
 def log_if(

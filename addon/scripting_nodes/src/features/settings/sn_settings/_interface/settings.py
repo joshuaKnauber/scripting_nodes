@@ -43,6 +43,9 @@ class SNA_PT_Dev_Settings(bpy.types.Panel):
 
         col.prop(context.scene.sna.dev, "log_tree_rebuilds")
         col.prop(context.scene.sna.dev, "log_reload_times")
+        col.prop(context.scene.sna.dev, "show_log_overlay")
+        if context.scene.sna.dev.show_log_overlay:
+            col.prop(context.scene.sna.dev, "log_overlay_font_size")
 
         col = layout.column(heading="Code")
         col.use_property_split = True
