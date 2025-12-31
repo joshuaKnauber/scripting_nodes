@@ -36,6 +36,13 @@ class SN_AddonProperties(bpy.types.PropertyGroup):
     # stores the module store for the current addon
     module_store = []
 
+    # Blender 5.0 migration flag - True once the file has been migrated
+    migrated_blender_5: bpy.props.BoolProperty(
+        default=False,
+        name="Migrated Blender 5",
+        description="Whether this file has been migrated for Blender 5.0 API changes. Do not modify manually.",
+    )
+
     compile_time: bpy.props.FloatProperty(
         name="Compile Time", description="Time the addon took to compile"
     )

@@ -13,6 +13,7 @@ from .settings.handle_script_changes import (
 from .extensions.snippet_ops import load_snippets
 from .msgbus import subscribe_to_name_change
 from .node_tree.graphs.node_refs import clear_node_cache
+from .node_tree.graphs.node_tree import ScriptingNodesTree
 
 
 def migrate_socket_data():
@@ -276,7 +277,27 @@ def post_migration_cleanup(should_compile=True):
             for refs in ntree.node_refs:
                 refs.clear_unused_refs()
                 refs.fix_ref_names()
-            # Reevaluate all nodes in the tree (same as force compile)
+            
+            # Store all links then relink them to force node recalculation
+            links_to_restore = []
+            for link in ntree.links:
+                links_to_restore.append((link.from_socket, link.to_socket))
+            
+            # Remove all links
+            ntree.links.clear()
+            
+            # Restore all links - this triggers the proper update callbacks
+            for from_socket, to_socket in links_to_restore:
+                try:
+                    ntree.links.new(from_socket, to_socket)
+                except Exception:
+                    pass
+            
+            # Clear link cache to reset state
+            if id(ntree) in ScriptingNodesTree.link_cache:
+                del ScriptingNodesTree.link_cache[id(ntree)]
+            
+            # Reevaluate all nodes to ensure code is regenerated
             ntree.reevaluate()
     if should_compile:
         compile_addon()
@@ -286,22 +307,35 @@ def post_migration_cleanup(should_compile=True):
 def load_handler(dummy):
     clear_node_cache()
     if hasattr(bpy.context.scene, "sn"):
-        bpy.context.scene.sn.picker_active = False
+        sn = bpy.context.scene.sn
+        sn.picker_active = False
         subscribe_to_name_change()
         check_easy_bpy_install()
-        # Migrate old data storage to new format (Blender 5.0 API changes)
-        migrate_socket_data()
-        migrate_node_ref_data()
-        migrate_variable_data()
-        migrate_scene_property_groups()
-        # Sync refs with nodes after migration and optionally compile
-        post_migration_cleanup(should_compile=bpy.context.scene.sn.compile_on_load)
+        
+        # Only run Blender 5.0 migration once per file
+        if not sn.migrated_blender_5:
+            print("Serpens: Running Blender 5.0 migration...")
+            # Migrate old data storage to new format (Blender 5.0 API changes)
+            migrate_socket_data()
+            migrate_node_ref_data()
+            migrate_variable_data()
+            migrate_scene_property_groups()
+            # Sync refs with nodes and recalculate all links
+            post_migration_cleanup(should_compile=False)
+            # Mark migration as complete
+            sn.migrated_blender_5 = True
+            print("Serpens: Migration complete")
+        
+        # Compile if enabled (always, regardless of migration)
+        if sn.compile_on_load:
+            compile_addon()
+        
         check_serpens_updates(bl_info["version"])
         bpy.ops.sn.reload_packages()
         load_snippets()
-        bpy.context.scene.sn.hide_preferences = False
+        sn.hide_preferences = False
         unwatch_script_changes()
-        if bpy.context.scene.sn.watch_script_changes:
+        if sn.watch_script_changes:
             watch_script_changes()
 
 
