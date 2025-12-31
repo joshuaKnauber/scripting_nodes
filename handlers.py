@@ -277,26 +277,26 @@ def post_migration_cleanup(should_compile=True):
             for refs in ntree.node_refs:
                 refs.clear_unused_refs()
                 refs.fix_ref_names()
-            
+
             # Store all links then relink them to force node recalculation
             links_to_restore = []
             for link in ntree.links:
                 links_to_restore.append((link.from_socket, link.to_socket))
-            
+
             # Remove all links
             ntree.links.clear()
-            
+
             # Restore all links - this triggers the proper update callbacks
             for from_socket, to_socket in links_to_restore:
                 try:
                     ntree.links.new(from_socket, to_socket)
                 except Exception:
                     pass
-            
+
             # Clear link cache to reset state
             if id(ntree) in ScriptingNodesTree.link_cache:
                 del ScriptingNodesTree.link_cache[id(ntree)]
-            
+
             # Reevaluate all nodes to ensure code is regenerated
             ntree.reevaluate()
     if should_compile:
@@ -311,7 +311,7 @@ def load_handler(dummy):
         sn.picker_active = False
         subscribe_to_name_change()
         check_easy_bpy_install()
-        
+
         # Only run Blender 5.0 migration once per file
         if not sn.migrated_blender_5:
             print("Serpens: Running Blender 5.0 migration...")
@@ -325,11 +325,11 @@ def load_handler(dummy):
             # Mark migration as complete
             sn.migrated_blender_5 = True
             print("Serpens: Migration complete")
-        
+
         # Compile if enabled (always, regardless of migration)
         if sn.compile_on_load:
             compile_addon()
-        
+
         check_serpens_updates(bl_info["version"])
         bpy.ops.sn.reload_packages()
         load_snippets()
