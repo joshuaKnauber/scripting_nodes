@@ -253,6 +253,87 @@ def migrate_scene_property_groups():
         print(f"Serpens: Migrated {migrated_count} scene property group names")
 
 
+def migrate_portal_nodes():
+    """Migrate portal nodes to ensure proper initialization after Blender 5.0 load.
+
+    Portal nodes rely on:
+    - _prev_var_name IDProperty for tracking name changes
+    - use_custom_color enabled to show colors
+    - color synced with custom_color
+    - label synced with var_name
+    - OUTPUT portals synced to their INPUT portal colors
+    """
+    migrated_count = 0
+
+    # First pass: Initialize all portal nodes and collect INPUT portal colors
+    input_colors = {}  # var_name -> custom_color tuple
+
+    for ntree in bpy.data.node_groups:
+        if ntree.bl_idname != "ScriptingNodesTree":
+            continue
+
+        for node in ntree.nodes:
+            if node.bl_idname != "SN_PortalNode":
+                continue
+
+            actions = []
+
+            # Initialize _prev_var_name if missing
+            if node.get("_prev_var_name") is None:
+                node["_prev_var_name"] = node.var_name
+                actions.append("init _prev_var_name")
+
+            # Enable use_custom_color
+            try:
+                if not node.use_custom_color:
+                    node.use_custom_color = True
+                    actions.append("enable use_custom_color")
+            except Exception:
+                pass
+
+            # Sync display color with custom_color
+            try:
+                if tuple(node.color) != tuple(node.custom_color):
+                    node.color = node.custom_color
+                    actions.append("sync color")
+            except Exception:
+                pass
+
+            # Restore label from var_name if empty
+            if not node.label and node.var_name:
+                node.label = node.var_name
+                actions.append("restore label")
+
+            # Collect INPUT portal colors
+            if node.direction == "INPUT" and node.var_name:
+                input_colors[node.var_name] = tuple(node.custom_color)
+
+            if actions:
+                migrated_count += 1
+
+    # Second pass: Sync OUTPUT portal colors to their INPUT portals
+    for ntree in bpy.data.node_groups:
+        if ntree.bl_idname != "ScriptingNodesTree":
+            continue
+
+        for node in ntree.nodes:
+            if node.bl_idname != "SN_PortalNode":
+                continue
+
+            if node.direction == "OUTPUT" and node.var_name in input_colors:
+                target_color = input_colors[node.var_name]
+                try:
+                    if tuple(node.custom_color) != target_color:
+                        node.custom_color = target_color
+                        node.color = target_color
+                        migrated_count += 1
+                except Exception:
+                    pass
+
+    if migrated_count > 0:
+        print(f"Serpens: Migrated {migrated_count} portal node properties")
+
+
 @persistent
 def depsgraph_handler(dummy):
     for group in bpy.data.node_groups:
@@ -320,6 +401,7 @@ def load_handler(dummy):
             migrate_node_ref_data()
             migrate_variable_data()
             migrate_scene_property_groups()
+            migrate_portal_nodes()
             # Sync refs with nodes and recalculate all links
             post_migration_cleanup(should_compile=False)
             # Mark migration as complete
