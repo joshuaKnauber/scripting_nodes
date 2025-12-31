@@ -13,7 +13,7 @@ class SN_MenuNode(SN_ScriptingBaseNode, bpy.types.Node):
     bl_width_default = 200
 
     def on_create(self, context):
-        self.add_integer_input("Columns")["default_value"] = 1
+        self.add_integer_input("Columns").default_value = 1
         self.add_boolean_input("Hide")
         self.add_dynamic_interface_output("Menu")
 

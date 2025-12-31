@@ -15,8 +15,8 @@ def name_change_callback(cls):
                 node = ref.node
                 if node and node.name != ref.name:
                     ref.name = node.name
-                    node.on_node_name_change()
-                    node._evaluate(bpy.context)
+                    bpy.app.timers.register(node.on_node_name_change, first_interval=0.01)
+                    bpy.app.timers.register(lambda: node._evaluate(bpy.context), first_interval=0.01)
                     return
 
 

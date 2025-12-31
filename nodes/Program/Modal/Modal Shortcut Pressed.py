@@ -11,7 +11,7 @@ class SN_ModalShortcutPressedNode(SN_ScriptingBaseNode, bpy.types.Node):
 
     def on_create(self, context):
         items = bpy.types.Event.bl_rna.properties["type"].enum_items
-        self.add_enum_input("Type")["items"] = str([item.identifier for item in items])
+        self.add_enum_input("Type").items = str([item.identifier for item in items])
         self.add_boolean_input("Alt")
         self.add_boolean_input("Shift")
         self.add_boolean_input("Ctrl")

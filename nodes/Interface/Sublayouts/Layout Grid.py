@@ -22,14 +22,14 @@ class SN_LayoutGridNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.add_boolean_input("Even Columns").default_value = False
         self.add_boolean_input("Even Rows").default_value = False
         self.add_boolean_input("Align")
-        self.add_boolean_input("Enabled")["default_value"] = True
-        self.add_boolean_input("Active")["default_value"] = True
+        self.add_boolean_input("Enabled").default_value = True
+        self.add_boolean_input("Active").default_value = True
         self.add_boolean_input("Split Layout")
         self.add_boolean_input("Decorate Layout")
-        self.add_boolean_input("Use Invoke")["default_value"] = True
-        self.add_float_input("Scale X")["default_value"] = 1
-        self.add_float_input("Scale Y")["default_value"] = 1
-        self.add_enum_input("Alignment")["items"] = str(["Expand", "Left", "Center", "Right"])
+        self.add_boolean_input("Use Invoke").default_value = True
+        self.add_float_input("Scale X").default_value = 1
+        self.add_float_input("Scale Y").default_value = 1
+        self.add_enum_input("Alignment").items = str(["Expand", "Left", "Center", "Right"])
         self.add_dynamic_interface_output("Grid")
 
     def evaluate(self, context):

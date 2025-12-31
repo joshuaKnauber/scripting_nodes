@@ -18,8 +18,11 @@ class SN_FunctionReturnNode(SN_ScriptingBaseNode, bpy.types.Node):
         
         
     def on_dynamic_socket_add(self, socket):
-        socket["name"] = get_python_name(socket.name, "Output", lower=False)
-        socket["name"] = unique_collection_name(socket.name, "Output", [inp.name for inp in self.inputs[1:-1]], "_", includes_name=True)
+        current_name = socket.name
+        new_name = get_python_name(current_name, "Output", lower=False)
+        new_name = unique_collection_name(new_name, "Output", [inp.name for inp in self.inputs], "_", includes_name=True)
+        if new_name != current_name:
+            socket.set_name_silent(new_name)
         self.trigger_ref_update({ "added": socket })
         self._evaluate(bpy.context)
     
@@ -32,9 +35,20 @@ class SN_FunctionReturnNode(SN_ScriptingBaseNode, bpy.types.Node):
         self._evaluate(bpy.context)
         
     def on_socket_name_change(self, socket):
-        socket["name"] = get_python_name(socket.name, "Output", lower=False)
-        socket["name"] = unique_collection_name(socket.name, "Output", [inp.name for inp in self.inputs[1:-1]], "_", includes_name=True)
-        self.trigger_ref_update({ "updated": socket })
+        # Prevent recursion
+        storage_key = f"_socket_updating_name_{id(socket)}"
+        if self.get(storage_key, False):
+            return
+        
+        # Get the current name value from stored value (set by update_socket_name)
+        name_storage_key = f"_socket_current_name_{id(socket)}"
+        current_name = self.get(name_storage_key, socket.name)  # Fallback to socket.name if not stored
+        
+        new_name = get_python_name(current_name, "Output", lower=False)
+        new_name = unique_collection_name(new_name, "Output", [inp.name for inp in self.inputs], "_", includes_name=True)
+        if new_name != current_name:
+            socket.set_name_silent(new_name)
+        self.trigger_ref_update({ "updated": socket, "new_name": new_name })
         self._evaluate(bpy.context)
 
 

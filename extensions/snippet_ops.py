@@ -4,6 +4,7 @@ import os
 import shutil
 import json
 import zipfile
+from ..utils import collection_has_item, collection_get_item
 
 
 class SN_SnippetCategory(bpy.types.PropertyGroup):
@@ -180,8 +181,8 @@ class SN_OT_ExportSnippetDraw(bpy.types.Operator):
 
                 if hasattr(some_node, "prop_name"):
                     prop_src = some_node.get_prop_source()
-                    if prop_src and some_node.prop_name in prop_src.properties:
-                        prop = prop_src.properties[some_node.prop_name]
+                    prop = collection_get_item(prop_src.properties, some_node.prop_name) if prop_src else None
+                    if prop:
                         if not prop.name in props:
                             props.append(prop.name)
                             item = context.scene.sn.snippet_props_customizable.add()
@@ -336,8 +337,8 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
 
                     if hasattr(node, "prop_name"):
                         prop_src = node.get_prop_source()
-                        if prop_src and node.prop_name in prop_src.properties:
-                            prop = prop_src.properties[node.prop_name]
+                        prop = collection_get_item(prop_src.properties, node.prop_name) if prop_src else None
+                        if prop:
                             if not prop.name in properties:
                                 properties[prop.python_name] = [prop.register_code.replace(
                                     prop.python_name, prop.python_name+"_SNIPPET_VARS"), prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS")]
@@ -426,8 +427,8 @@ class SN_OT_ExportSnippet(bpy.types.Operator, ExportHelper):
 
                     if hasattr(node, "prop_name"):
                         prop_src = node.get_prop_source()
-                        if prop_src and node.prop_name in prop_src.properties:
-                            prop = prop_src.properties[node.prop_name]
+                        prop = collection_get_item(prop_src.properties, node.prop_name) if prop_src else None
+                        if prop:
                             if not prop.name in properties:
                                 properties[prop.python_name] = [prop.register_code.replace(
                                     prop.python_name, prop.python_name+"_SNIPPET_VARS"), prop.unregister_code.replace(prop.python_name, prop.python_name+"_SNIPPET_VARS")]

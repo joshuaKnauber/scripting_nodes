@@ -2,7 +2,6 @@ import bpy
 from ..base_node import SN_ScriptingBaseNode
 
 
-
 class SN_DisplaySearchNodeNew(SN_ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SN_DisplaySearchNodeNew"
@@ -19,9 +18,11 @@ class SN_DisplaySearchNodeNew(SN_ScriptingBaseNode, bpy.types.Node):
         self.add_interface_output().passthrough_layout_type = True
 
     def evaluate(self, context):
-        if len(self.inputs["String/Pointer"].links) and len(self.inputs["Collection"].links):
+        if len(self.inputs["String/Pointer"].links) and len(
+            self.inputs["Collection"].links
+        ):
             self.code = f"""
-                {self.active_layout}.prop_search({self.inputs['String/Pointer'].python_source}, '{self.inputs['String/Pointer'].python_attr.replace("'",'"')}', {self.inputs['Collection'].python_source}, '{self.inputs['Collection'].python_attr.replace("'",'"')}', text={self.inputs['Label'].python_value}, icon={self.inputs['Blender Icon'].python_value})
+                {self.active_layout}.prop_search({self.inputs['String/Pointer'].python_source}, '{self.inputs['String/Pointer'].python_attr.replace("'",'"')}', {self.inputs['Collection'].python_source}, '{self.inputs['Collection'].python_attr.replace("'",'"')}', text={self.inputs['Label'].python_value}, icon={self.inputs['Blender Icon'].python_value}, item_search_property="name")
                 {self.indent(self.outputs[0].python_value, 4)}
             """
         else:

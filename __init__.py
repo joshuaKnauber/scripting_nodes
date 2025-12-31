@@ -15,8 +15,8 @@ bl_info = {
     "name": "Serpens",
     "author": "Joshua Knauber, Finn Knauber",
     "description": "Adds a node editor for building addons with nodes",
-    "blender": (4, 2, 0),
-    "version": (3, 4, 0),
+    "blender": (5, 0, 0),
+    "version": (3, 5, 0),
     "location": "Editors -> Visual Scripting Editor",
     "doc_url": "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233",
     "tracker_url": "https://discord.com/invite/NK6kyae",
@@ -41,7 +41,6 @@ from .interface.header.header import (
     header_append,
     node_info_append,
 )
-from .interface.panels.warnings import append_warning
 from .interface.menus.rightclick import serpens_right_click
 from .msgbus import subscribe_to_name_change, unsubscribe_from_name_change
 
@@ -95,9 +94,6 @@ def register():
     bpy.types.NODE_PT_active_node_generic.append(node_info_append)
     bpy.types.STATUSBAR_HT_header.append(footer_status)
 
-    # add no edit warnings
-    bpy.types.NODE_PT_node_tree_interface.append(append_warning)
-
     # add name change update
     subscribe_to_name_change()
 
@@ -119,9 +115,6 @@ def unregister():
     bpy.types.NODE_HT_header.remove(header_append)
     bpy.types.NODE_PT_active_node_generic.remove(node_info_append)
     bpy.types.STATUSBAR_HT_header.remove(footer_status)
-
-    # remove no edit warnings
-    bpy.types.NODE_PT_node_tree_interface.remove(append_warning)
 
     # addon properties
     del bpy.types.Scene.sn

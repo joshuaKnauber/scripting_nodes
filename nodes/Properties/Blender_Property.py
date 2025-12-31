@@ -53,11 +53,11 @@ class SN_BlenderPropertyNode(SN_ScriptingBaseNode, bpy.types.Node):
                     name = segment.split("[")[0].replace("_", " ").title()
                     if '"' in segment or "'" in segment:
                         inp = self.add_string_input(name)
-                        inp["default_value"] = segment.split("[")[-1].split("]")[0][1:-1]
+                        inp.default_value = segment.split("[")[-1].split("]")[0][1:-1]
                         inp.index_type = "String"
                     else:
                         inp = self.add_integer_input(name)
-                        inp["default_value"] = int(segment.split("[")[-1].split("]")[0])
+                        inp.default_value = int(segment.split("[")[-1].split("]")[0])
                         inp.index_type = "Integer"
                     inp.indexable = True
         

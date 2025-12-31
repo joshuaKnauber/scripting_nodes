@@ -17,13 +17,13 @@ class SN_LayoutBoxNode(SN_ScriptingBaseNode, bpy.types.Node):
     def on_create(self, context):
         self.add_interface_input()
         self.add_boolean_input("Alert")
-        self.add_boolean_input("Enabled")["default_value"] = True
-        self.add_boolean_input("Active")["default_value"] = True
+        self.add_boolean_input("Enabled").default_value = True
+        self.add_boolean_input("Active").default_value = True
         self.add_boolean_input("Split Layout")
         self.add_boolean_input("Decorate Layout")
-        self.add_float_input("Scale X")["default_value"] = 1
-        self.add_float_input("Scale Y")["default_value"] = 1
-        self.add_enum_input("Alignment")["items"] = str(["Expand", "Left", "Center", "Right"])
+        self.add_float_input("Scale X").default_value = 1
+        self.add_float_input("Scale Y").default_value = 1
+        self.add_enum_input("Alignment").items = str(["Expand", "Left", "Center", "Right"])
         self.add_interface_output().prev_dynamic = True
         self.add_dynamic_interface_output()
 

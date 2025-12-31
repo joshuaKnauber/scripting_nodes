@@ -2,15 +2,14 @@ import bpy
 from ...addon.properties.settings.settings import property_icons
 from ...settings.data_properties import filter_defaults
 from ...settings import global_search
-        
-        
-        
+
+
 class SN_PT_navigation_bar(bpy.types.Panel):
     bl_label = "Preferences Navigation"
-    bl_space_type = 'PREFERENCES'
-    bl_region_type = 'NAVIGATION_BAR'
-    bl_options = {'HIDE_HEADER'}
-    
+    bl_space_type = "PREFERENCES"
+    bl_region_type = "UI"
+    bl_options = {"HIDE_HEADER"}
+
     @classmethod
     def poll(cls, context):
         return context.scene.sn.hide_preferences
@@ -25,14 +24,18 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         row.operator("sn.exit_search", text="Exit", icon="PANEL_CLOSE")
 
         layout.separator()
-        layout.operator("wm.url_open", text="How to", icon="QUESTION").url = "https://joshuaknauber.notion.site/Blend-Data-33e9f2ea40f44c2498cb26838662b621"
+        layout.operator("wm.url_open", text="How to", icon="QUESTION").url = (
+            "https://joshuaknauber.notion.site/Blend-Data-33e9f2ea40f44c2498cb26838662b621"
+        )
 
         layout.separator(factor=2)
         col = layout.column(align=True)
         col.scale_y = 1.4
         col.operator("sn.reload_data", text="Reload", icon="FILE_REFRESH")
         col.separator()
-        col.prop_enum(sn, "data_category", value="discover", text="Discover (BETA)", icon="WORLD")
+        col.prop_enum(
+            sn, "data_category", value="discover", text="Discover (BETA)", icon="WORLD"
+        )
 
         layout.separator()
         layout.label(text="Source:")
@@ -57,7 +60,7 @@ class SN_PT_navigation_bar(bpy.types.Panel):
             row = col.row()
             row.enabled = False
             row.label(text=f"Full Matches: {sn.discover_data['full_matches']} items")
-            
+
         row = col.row()
         row.scale_y = 1.2
         if sn.data_category == "discover":
@@ -67,15 +70,14 @@ class SN_PT_navigation_bar(bpy.types.Panel):
         subcol = col.column()
         subcol.enabled = sn.data_category != "ops"
         subcol.prop(sn, "data_filter", expand=True)
-        
+
         layout.separator()
         layout.prop(sn, "show_path")
         if sn.data_category == "discover":
             layout.prop(sn, "discover_full_only")
             layout.prop(sn, "discover_show_amount", text="Max Amount")
-        
-        
-        
+
+
 class SN_PT_FilterDataSettings(bpy.types.Panel):
     bl_idname = "SN_PT_FilterDataSettings"
     bl_label = "Filter"
@@ -92,49 +94,66 @@ class SN_PT_FilterDataSettings(bpy.types.Panel):
             col.prop(context.sn_filter_path, "data_filter")
 
 
-
 path_notes = {
     "bpy.context.preferences.keymap": "Copy shortcuts from Context -> Window Manager -> Keyconfigs -> Your Shortcut -> Type",
     "bpy.context.window_manager.keyconfigs": "To display a shortcut, find it in the User Key Config below, copy its Type property and check Full Shortcut on the node",
     "bpy.context.active_object": "To set the active object use the active object output on the Objects node or copy the active object from the active view layer",
 }
 
+
 class SN_PT_data_search(bpy.types.Panel):
-    bl_space_type = 'PREFERENCES'
-    bl_region_type = 'WINDOW'
+    bl_space_type = "PREFERENCES"
+    bl_region_type = "WINDOW"
     bl_label = "Display"
-    bl_options = {'HIDE_HEADER'}
-    
+    bl_options = {"HIDE_HEADER"}
+
     @classmethod
     def poll(cls, context):
         return context.scene.sn.hide_preferences
-    
+
     def should_draw(self, item, search_value, filters):
         if search_value.lower() in item["name"].lower():
             return item["type"] in filters
         return False
-    
+
     def draw_item(self, layout, item):
         box = layout.box()
         row = box.row()
-        
+
         if not item["has_properties"]:
             row.scale_y = 0.75
         else:
-            op = row.operator("sn.expand_data", text="", icon="TRIA_DOWN" if item["expanded"] else "TRIA_RIGHT", emboss=False)
+            op = row.operator(
+                "sn.expand_data",
+                text="",
+                icon="TRIA_DOWN" if item["expanded"] else "TRIA_RIGHT",
+                emboss=False,
+            )
             op.path = item["path"]
 
             subrow = row.row(align=True)
-            has_filters = item["data_search"] != "" or item["data_filter"] != filter_defaults
-            op = subrow.operator("sn.filter_data", text="", icon="FILTER", emboss=has_filters, depress=has_filters)
+            has_filters = (
+                item["data_search"] != "" or item["data_filter"] != filter_defaults
+            )
+            op = subrow.operator(
+                "sn.filter_data",
+                text="",
+                icon="FILTER",
+                emboss=has_filters,
+                depress=has_filters,
+            )
             op.path = item["path"]
             if has_filters:
-                op = subrow.operator("sn.reset_item_filters", text="", icon="LOOP_BACK", depress=True)
+                op = subrow.operator(
+                    "sn.reset_item_filters", text="", icon="LOOP_BACK", depress=True
+                )
                 op.path = item["path"]
 
         row.label(text=item["name"])
-        
-        icon = property_icons[item["type"]] if item["type"] in property_icons else "ERROR"
+
+        icon = (
+            property_icons[item["type"]] if item["type"] in property_icons else "ERROR"
+        )
         subrow = row.row()
         subrow.enabled = False
         subrow.label(text=item["type"], icon=icon)
@@ -143,27 +162,29 @@ class SN_PT_data_search(bpy.types.Panel):
             subrow = row.row()
             subrow.enabled = False
             subrow.label(text=item["path"])
-        
+
         if item["has_properties"]:
-            op = row.operator("sn.reload_item_data", text="", icon="FILE_REFRESH", emboss=False)
+            op = row.operator(
+                "sn.reload_item_data", text="", icon="FILE_REFRESH", emboss=False
+            )
             op.path = item["path"]
 
         op = row.operator("sn.copy_data_path", text="", icon="COPYDOWN", emboss=False)
         op.path = item["path"]
         op.type = item["type"]
         op.required = item["required"]
-        
+
         if item["expanded"]:
             row = box.row()
             split = row.split(factor=0.015)
             split.label(text="")
             col = split.column(align=True)
-                
+
             if item["path"] in path_notes:
                 box = col.box()
                 box.scale_y = 0.75
                 box.label(text=path_notes[item["path"]], icon="INFO")
-            
+
             is_empty = True
             for key in item["properties"].keys():
                 sub_item = item["properties"][key]
@@ -172,7 +193,9 @@ class SN_PT_data_search(bpy.types.Panel):
                     if sub_item["clamped"]:
                         box = col.box()
                         box.scale_y = 0.75
-                        box.label(text="... Shortened because of too many items", icon="PLUS")
+                        box.label(
+                            text="... Shortened because of too many items", icon="PLUS"
+                        )
                         col.separator()
                     is_empty = False
 
@@ -184,7 +207,16 @@ class SN_PT_data_search(bpy.types.Panel):
 
         box = layout.box()
         row = box.row()
-        op = row.operator("sn.expand_data", text="", icon="TRIA_DOWN" if sn.ops_items["operators"][category]["expanded"] else "TRIA_RIGHT", emboss=False)
+        op = row.operator(
+            "sn.expand_data",
+            text="",
+            icon=(
+                "TRIA_DOWN"
+                if sn.ops_items["operators"][category]["expanded"]
+                else "TRIA_RIGHT"
+            ),
+            emboss=False,
+        )
         op.path = f"bpy.ops.{category}"
         if category == "sn":
             row.label(text="Serpens")
@@ -212,16 +244,20 @@ class SN_PT_data_search(bpy.types.Panel):
                         subrow.enabled = False
                         subrow.label(text=path)
 
-                    op = row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False)
+                    op = row.operator(
+                        "sn.copy_python_name", text="", icon="COPYDOWN", emboss=False
+                    )
                     op.name = path
 
     def draw_global_search(self, layout):
         sn = bpy.context.scene.sn
 
         def is_section_in_search(section):
-            if sn.discover_search.startswith(section) or \
-                sn.discover_search.endswith(section) or \
-                f",{section}," in sn.discover_search:
+            if (
+                sn.discover_search.startswith(section)
+                or sn.discover_search.endswith(section)
+                or f",{section}," in sn.discover_search
+            ):
                 return True
             return False
 
@@ -238,8 +274,16 @@ class SN_PT_data_search(bpy.types.Panel):
                 if not section == "bpy":
                     display = section.replace("_", " ").title()
                     if "[" in display and "]" in display:
-                        display = display.split("[")[0] + ": " + display.split("[")[1].replace("]", "")
-                    subrow.operator("sn.add_to_search", text=display, emboss=not is_section_in_search(section)).section = section
+                        display = (
+                            display.split("[")[0]
+                            + ": "
+                            + display.split("[")[1].replace("]", "")
+                        )
+                    subrow.operator(
+                        "sn.add_to_search",
+                        text=display,
+                        emboss=not is_section_in_search(section),
+                    ).section = section
 
             row.label(text="")
 
@@ -247,10 +291,12 @@ class SN_PT_data_search(bpy.types.Panel):
                 subcol = row.column()
                 subcol.enabled = False
                 subcol.label(text=path)
-                
+
             row.label(text="")
 
-            op = row.operator("sn.copy_python_name", text="", icon="COPYDOWN", emboss=False)
+            op = row.operator(
+                "sn.copy_python_name", text="", icon="COPYDOWN", emboss=False
+            )
             op.name = path
 
     def draw(self, context):
@@ -266,8 +312,16 @@ class SN_PT_data_search(bpy.types.Panel):
             is_empty = True
             if sn.data_category == "ops":
                 row = col.row()
-                row.label(text="Use property functions instead of operators when possible!", icon="INFO")
-                row.operator("sn.expand_operators", text="", icon="FULLSCREEN_ENTER", emboss=False)
+                row.label(
+                    text="Use property functions instead of operators when possible!",
+                    icon="INFO",
+                )
+                row.operator(
+                    "sn.expand_operators",
+                    text="",
+                    icon="FULLSCREEN_ENTER",
+                    emboss=False,
+                )
                 col.separator()
                 for cat in sn.ops_items["operators"].keys():
                     if cat in sn.ops_items["filtered"].keys():
@@ -279,6 +333,6 @@ class SN_PT_data_search(bpy.types.Panel):
                     if self.should_draw(item, sn.data_search, sn.data_filter):
                         self.draw_item(col, item)
                         is_empty = False
-                        
+
             if is_empty:
                 layout.label(text="No Items for these filters!", icon="INFO")

@@ -30,7 +30,7 @@ class SN_DrawCircleNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.add_float_input("Width").default_value = 1
         self.add_integer_input("Segments").default_value = 32
 
-        self.add_enum_input("On Top")["items"] = str(["NONE", "ALWAYS", "LESS", "LESS_EQUAL", "EQUAL", "GREATER", "GREATER_EQUAL"])
+        self.add_enum_input("On Top").items = str(["NONE", "ALWAYS", "LESS", "LESS_EQUAL", "EQUAL", "GREATER", "GREATER_EQUAL"])
 
         inp = self.add_float_vector_input("Location")
         inp.size = 2

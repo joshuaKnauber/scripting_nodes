@@ -1,7 +1,12 @@
 import bpy
 from ..base_node import SN_ScriptingBaseNode
 from ..templates.PropertyNode import PropertyNode
-from ...utils import get_python_name, unique_collection_name
+from ...utils import (
+    get_python_name,
+    unique_collection_name,
+    collection_has_item,
+    collection_get_item,
+)
 
 
 class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
@@ -41,19 +46,18 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
                     for ref in ntree.node_collection("SN_OperatorNode").refs:
                         names.append(ref.node.name)
 
-            new_name = unique_collection_name(self.name,
-                                              "My Operator",
-                                              names,
-                                              " ",
-                                              includes_name=True)
+            new_name = unique_collection_name(
+                self.name, "My Operator", names, " ", includes_name=True
+            )
             if not self.name == new_name:
-                self["name"] = new_name
+                self.name = new_name
             self.trigger_ref_update()
             self._evaluate(bpy.context)
 
     def update_description(self, context):
-        self["operator_description"] = self.operator_description.replace(
-            '"', "'")
+        new_description = self.operator_description.replace('"', "'")
+        if self.operator_description != new_description:
+            self.operator_description = new_description
         self._evaluate(context)
 
     def update_popup(self, context):
@@ -105,8 +109,7 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
                 "Confirm",
                 "Shows a confirmation option for this operator",
             ),
-            ("invoke_props_dialog", "Popup",
-             "Opens a customizable property dialog"),
+            ("invoke_props_dialog", "Popup", "Opens a customizable property dialog"),
             (
                 "invoke_props_popup",
                 "Property Update",
@@ -117,10 +120,8 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
                 "Search Popup",
                 "Opens a search menu from a selected enum property",
             ),
-            ("IMPORT", "Import File Browser",
-             "Opens a filebrowser to select items"),
-            ("EXPORT", "Export File Browser",
-             "Opens a filebrowser to a location"),
+            ("IMPORT", "Import File Browser", "Opens a filebrowser to select items"),
+            ("EXPORT", "Export File Browser", "Opens a filebrowser to a location"),
             (
                 "invoke_popup",
                 "Show Properties",
@@ -132,8 +133,7 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
 
     select_property: bpy.props.StringProperty(
         name="Preselected Property",
-        description=
-        "The property that is preselected when the popup is opened. This can only be a String or Enum Property!",
+        description="The property that is preselected when the popup is opened. This can only be a String or Enum Property!",
         update=SN_ScriptingBaseNode._evaluate,
     )
 
@@ -151,8 +151,7 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
     extensions: bpy.props.StringProperty(
         default=".png,.jpg,.exr",
         name="File Extensions",
-        description=
-        "Allowed file extensions (separated by comma, empty means all are allowed)",
+        description="Allowed file extensions (separated by comma, empty means all are allowed)",
         update=SN_ScriptingBaseNode._evaluate,
     )
 
@@ -171,8 +170,10 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
 
     @property
     def operator_python_name(self):
-        return (get_python_name(self.name, replacement="my_generic_operator") +
-                f"_{self.static_uid.lower()}")
+        return (
+            get_python_name(self.name, replacement="my_generic_operator")
+            + f"_{self.static_uid.lower()}"
+        )
 
     def on_create(self, context):
         self.add_boolean_input("Disable")
@@ -183,12 +184,13 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
     def draw_node(self, context, layout):
         row = layout.row(align=True)
         row.prop(self, "name")
-        python_name = get_python_name(self.name,
-                                      replacement="my_generic_operator")
-        row.operator("sn.find_referencing_nodes", text="",
-                     icon="VIEWZOOM").node = self.name
-        row.operator("sn.copy_python_name", text="",
-                     icon="COPYDOWN").name = ("sna." + python_name)
+        python_name = get_python_name(self.name, replacement="my_generic_operator")
+        row.operator("sn.find_referencing_nodes", text="", icon="VIEWZOOM").node = (
+            self.name
+        )
+        row.operator("sn.copy_python_name", text="", icon="COPYDOWN").name = (
+            "sna." + python_name
+        )
 
         layout.label(text="Description: ")
         layout.prop(self, "operator_description", text="")
@@ -203,30 +205,34 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
                 layout.prop(self, "export_extension")
         elif self.invoke_option == "invoke_search_popup":
             layout.label(text="Search: ")
-            layout.prop_search(self,
-                               "select_property",
-                               self,
-                               "properties",
-                               text="")
-            if (self.select_property in self.properties
-                    and self.properties[self.select_property].property_type
-                    != "Enum"):
+            layout.prop_search(
+                self,
+                "select_property",
+                self,
+                "properties",
+                text="",
+                item_search_property="name",
+            )
+            select_prop = collection_get_item(self.properties, self.select_property)
+            if select_prop and select_prop.property_type != "Enum":
                 row = layout.row()
                 row.alert = True
                 row.label(text="This property needs to be type Enum!")
         elif not self.invoke_option in ["none", "invoke_confirm"]:
             layout.label(text="Selected: ")
-            layout.prop_search(self,
-                               "select_property",
-                               self,
-                               "properties",
-                               text="")
-            if self.select_property in self.properties and not self.properties[
-                    self.select_property].property_type in ["Enum", "String"]:
+            layout.prop_search(
+                self,
+                "select_property",
+                self,
+                "properties",
+                text="",
+                item_search_property="name",
+            )
+            select_prop = collection_get_item(self.properties, self.select_property)
+            if select_prop and not select_prop.property_type in ["Enum", "String"]:
                 row = layout.row()
                 row.alert = True
-                row.label(
-                    text="This property needs to be type Enum or String!")
+                row.label(text="This property needs to be type Enum or String!")
 
         if not self.hide_properties:
             self.draw_list(layout)
@@ -245,30 +251,33 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
         invoke_inline = ""
 
         if not self.invoke_option in ["none", "invoke_confirm"]:
-            if self.select_property in self.properties and self.properties[
-                    self.select_property].property_type in ["Enum", "String"]:
-                selected_property = f"bl_property = '{self.properties[self.select_property].python_name}'"
+            select_prop = collection_get_item(self.properties, self.select_property)
+            if select_prop and select_prop.property_type in ["Enum", "String"]:
+                selected_property = f"bl_property = '{select_prop.python_name}'"
 
         if self.invoke_option == "invoke_confirm":
-            invoke_return = ("context.window_manager." + self.invoke_option +
-                             "(self, event)")
+            invoke_return = (
+                "context.window_manager." + self.invoke_option + "(self, event)"
+            )
 
         elif self.invoke_option in ["invoke_props_dialog", "invoke_popup"]:
             invoke_return = (
-                "context.window_manager." + self.invoke_option +
-                f"(self, width={self.inputs['Width'].python_value})")
+                "context.window_manager."
+                + self.invoke_option
+                + f"(self, width={self.inputs['Width'].python_value})"
+            )
 
         elif self.invoke_option == "invoke_search_popup":
-            if (self.select_property in self.properties
-                    and self.properties[self.select_property].property_type
-                    == "Enum"):
-                selected_property = f"bl_property = '{self.properties[self.select_property].python_name}'"
+            select_prop = collection_get_item(self.properties, self.select_property)
+            if select_prop and select_prop.property_type == "Enum":
+                selected_property = f"bl_property = '{select_prop.python_name}'"
             invoke_inline = "context.window_manager." + self.invoke_option + "(self)"
 
         else:
             if not self.invoke_option in ["none", "IMPORT", "EXPORT"]:
-                invoke_inline = ("context.window_manager." +
-                                 self.invoke_option + "(self, event)")
+                invoke_inline = (
+                    "context.window_manager." + self.invoke_option + "(self, event)"
+                )
 
         draw_function = ""
         if self.invoke_option in ["invoke_props_dialog", "invoke_props_popup"]:
@@ -283,8 +292,9 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
         exp_ext = ""
         files = ""
         if self.invoke_option == "IMPORT" or self.invoke_option == "EXPORT":
-            helpers = (", ImportHelper"
-                       if self.invoke_option == "IMPORT" else ", ExportHelper")
+            helpers = (
+                ", ImportHelper" if self.invoke_option == "IMPORT" else ", ExportHelper"
+            )
             if self.extensions:
                 extensions = f"filter_glob: bpy.props.StringProperty( default='{self.extensions.replace('.', '*.').replace(',', ';')}', options={{'HIDDEN'}} )"
             if self.invoke_option == "EXPORT":
@@ -295,8 +305,9 @@ class SN_OperatorNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyNode):
 
             self.outputs["Filepath"].python_value = "self.filepath"
             if self.invoke_option == "IMPORT" and self.allow_multiselect:
-                self.outputs[
-                    "Filepaths"].python_value = "[os.path.join(os.path.dirname(self.filepath), f.name) for f in self.files]"
+                self.outputs["Filepaths"].python_value = (
+                    "[os.path.join(os.path.dirname(self.filepath), f.name) for f in self.files]"
+                )
 
         code = f"""
                     {self.indent(props_imperative_list, 5)}

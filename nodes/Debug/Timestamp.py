@@ -31,7 +31,7 @@ class SN_TimestampNode(SN_ScriptingBaseNode, bpy.types.Node):
         self._evaluate(context)
 
     def get_var_name(self):
-        return self.get("var_name", "")
+        return self.get("_var_name", "")
 
     def set_var_name(self, value):
         if self.timestamp_type == "INPUT":
@@ -39,8 +39,8 @@ class SN_TimestampNode(SN_ScriptingBaseNode, bpy.types.Node):
                 if ntree.bl_idname == "ScriptingNodesTree":
                     for node in ntree.node_collection(self.bl_idname).nodes:
                         if node.timestamp_type == "OUTPUT" and node.var_name == self.var_name:
-                            node["var_name"] = value
-        self["var_name"] = value
+                            node["_var_name"] = value
+        self["_var_name"] = value
     
     var_name: bpy.props.StringProperty(name="Name",
                                 description="The identifier that links this timestamp to other timestamps",

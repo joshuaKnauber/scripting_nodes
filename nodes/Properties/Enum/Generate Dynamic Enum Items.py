@@ -1,6 +1,7 @@
 import bpy
 from ...base_node import SN_ScriptingBaseNode
 from ...templates.PropertyReferenceNode import PropertyReferenceNode
+from ....utils import collection_has_item, collection_get_item
 
 
 
@@ -19,8 +20,8 @@ class SN_GenerateEnumItemsNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyRef
 
     def evaluate(self, context):        
         enum_src = self.get_prop_source()
-        if enum_src and self.prop_name in enum_src.properties and enum_src.properties[self.prop_name].property_type == "Enum":
-            prop = enum_src.properties[self.prop_name]
+        prop = collection_get_item(enum_src.properties, self.prop_name) if enum_src else None
+        if prop and prop.property_type == "Enum":
             self.code_imperative = f"""
                 _item_map = dict()
                 def make_enum_item(_id, name, descr, preview_id, uid):
@@ -47,10 +48,11 @@ class SN_GenerateEnumItemsNode(SN_ScriptingBaseNode, bpy.types.Node, PropertyRef
     def draw_node(self, context, layout):
         self.draw_reference_selection(layout, True)
         prop_src = self.get_prop_source()
-        if self.prop_name and prop_src and self.prop_name in prop_src.properties:
-            if prop_src.properties[self.prop_name].property_type != "Enum":
+        prop = collection_get_item(prop_src.properties, self.prop_name) if (self.prop_name and prop_src) else None
+        if prop:
+            if prop.property_type != "Enum":
                 self.draw_warning(layout, "The selected property is not an enum property!")
-            elif not prop_src.properties[self.prop_name].settings.is_dynamic:
+            elif not prop.settings.is_dynamic:
                 self.draw_warning(layout, "The selected property does not have dynamic items!")
         
         # add item button

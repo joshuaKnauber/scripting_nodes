@@ -1,7 +1,6 @@
 import bpy
 import re
 import gpu
-import bgl
 from gpu_extras.batch import batch_for_shader
 import os
 from .base_node import SN_ScriptingBaseNode
@@ -260,9 +259,9 @@ class SN_TutorialNode(SN_ScriptingBaseNode, bpy.types.Node):
                 row.prop(self, "x", text="X")
                 row.prop(self, "y", text="Y")
 
-        layout.operator(
-            "wm.url_open", text="See Docs", icon="URL"
-        ).url = "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233"
+        layout.operator("wm.url_open", text="See Docs", icon="URL").url = (
+            "https://joshuaknauber.notion.site/Serpens-Documentation-d44c98df6af64d7c9a7925020af11233"
+        )
 
         if self.index == CHAPTER_INDEX:
             layout.label(text="Chapters")

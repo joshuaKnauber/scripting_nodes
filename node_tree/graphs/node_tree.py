@@ -10,9 +10,9 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     bl_label = "Visual Scripting Editor"
     bl_icon = "FILE_SCRIPT"
     is_sn = True
-    type: bpy.props.EnumProperty(items=[("SCRIPTING", "Scripting", "Scripting")
-                                        ],
-                                 name="Type")
+    type: bpy.props.EnumProperty(
+        items=[("SCRIPTING", "Scripting", "Scripting")], name="Type"
+    )
 
     index: bpy.props.IntProperty(
         default=0,
@@ -37,15 +37,13 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     )
 
     variable_index: bpy.props.IntProperty(
-        name="Variable Index",
-        min=0,
-        description="Index of the selected variable")
+        name="Variable Index", min=0, description="Index of the selected variable"
+    )
 
     node_refs: bpy.props.CollectionProperty(
         type=NodeRefCollection,
         name="Node References",
-        description=
-        "A collection of groups that hold references to nodes of a specific idname",
+        description="A collection of groups that hold references to nodes of a specific idname",
     )
 
     show_debug: bpy.props.BoolProperty(
@@ -74,8 +72,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                 names.append(ntree.python_name)
 
         name = unique_collection_name(
-            f"{get_python_name(self.name, 'node_tree')}", "node_tree", names,
-            "_")
+            f"{get_python_name(self.name, 'node_tree')}", "node_tree", names, "_"
+        )
         try:
             self.cached_python_name = name
             self.cached_human_name = self.name
@@ -143,14 +141,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             if not getattr(link.from_socket, "changeable", False):
                 node = self.nodes.new("SN_DefineDataType")
                 if link.to_socket.bl_idname in list(
-                        map(lambda item: item[0],
-                            node.get_data_items(bpy.context))):
+                    map(lambda item: item[0], node.get_data_items(bpy.context))
+                ):
                     node.convert_to = link.to_socket.bl_idname
                 node.location = (
-                    (link.from_node.location[0] + link.to_node.location[0]) /
-                    2,
-                    (link.from_node.location[1] + link.to_node.location[1]) /
-                    2,
+                    (link.from_node.location[0] + link.to_node.location[0]) / 2,
+                    (link.from_node.location[1] + link.to_node.location[1]) / 2,
                 )
                 self.links.new(link.from_socket, node.inputs[0])
                 self.links.new(node.outputs[0], link.to_socket)
@@ -160,11 +156,11 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                 if not link.from_socket.dynamic and len(to_sockets) == 1:
                     to_socket = to_sockets[0]
                     if to_socket.bl_idname in list(
-                            map(
-                                lambda item: item[0],
-                                link.from_socket.get_data_type_items(
-                                    bpy.context),
-                            )):
+                        map(
+                            lambda item: item[0],
+                            link.from_socket.get_data_type_items(bpy.context),
+                        )
+                    ):
                         link.from_socket.data_type = to_socket.bl_idname
                         # link.from_socket.subtype = to_socket.subtype
 
@@ -193,12 +189,18 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             from_out_node = self._find_node_from_socket(from_out)
             # update data sockets
             try:
-                if (getattr(to_inp, "is_sn", False) and to_inp_node
-                        and not to_inp.is_program):
+                if (
+                    getattr(to_inp, "is_sn", False)
+                    and to_inp_node
+                    and not to_inp.is_program
+                ):
                     to_inp.force_update()
                 # update program sockets
-                elif (from_out_node and getattr(from_out, "is_sn", False)
-                      and from_out.is_program):
+                elif (
+                    from_out_node
+                    and getattr(from_out, "is_sn", False)
+                    and from_out.is_program
+                ):
                     from_out.force_update()
             except:
                 pass
@@ -207,10 +209,16 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         """Calls link_insert for all new links"""
         for from_inp, to_inp, from_real, _ in added:
             if from_real:
-                from_real.node.link_insert(from_real, to_inp, is_output=True)
-                to_inp.node.link_insert(from_real, to_inp, is_output=False)
-            elif (from_inp and getattr(from_inp.node, "is_sn", False)
-                  and to_inp and getattr(to_inp.node, "is_sn", False)):
+                if getattr(from_real.node, "is_sn", False):
+                    from_real.node.link_insert(from_real, to_inp, is_output=True)
+                if getattr(to_inp.node, "is_sn", False):
+                    to_inp.node.link_insert(from_real, to_inp, is_output=False)
+            elif (
+                from_inp
+                and getattr(from_inp.node, "is_sn", False)
+                and to_inp
+                and getattr(to_inp.node, "is_sn", False)
+            ):
                 from_inp.node.link_insert(from_inp, to_inp, is_output=True)
 
     def _call_link_removes(self, removed):
@@ -218,10 +226,10 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         for _, to_inp, from_real, _ in removed:
             if from_real:
                 node = self._find_node_from_socket(from_real)
-                if node:
+                if node and getattr(node, "is_sn", False):
                     node.link_remove(from_real, to_inp, is_output=True)
                 node = self._find_node_from_socket(to_inp)
-                if node:
+                if node and getattr(node, "is_sn", False):
                     node.link_remove(from_real, to_inp, is_output=False)
 
     def _update_added_links(self, added):
@@ -258,12 +266,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         for reroute in self.nodes:
             if reroute.bl_idname == "NodeReroute":
                 try:
-                    connections_left = [
-                        x.from_socket for x in reroute.inputs[0].links
-                    ]
-                    connections_right = [
-                        x.to_socket for x in reroute.outputs[0].links
-                    ]
+                    connections_left = [x.from_socket for x in reroute.inputs[0].links]
+                    connections_right = [x.to_socket for x in reroute.outputs[0].links]
                     if reroute.inputs[0].bl_idname != "SN_RerouteSocket":
                         reroute.inputs.remove(reroute.inputs[0])
                         reroute.outputs.remove(reroute.outputs[0])
@@ -275,10 +279,14 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                             self.links.new(c, o)
                     reroute.inputs[0].display_shape = (
                         connections_left[0].display_shape
-                        if connections_left else "CIRCLE")
+                        if connections_left
+                        else "CIRCLE"
+                    )
                     reroute.outputs[0].display_shape = (
                         connections_left[0].display_shape
-                        if connections_left else "CIRCLE")
+                        if connections_left
+                        else "CIRCLE"
+                    )
                 except:
                     pass
 

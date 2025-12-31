@@ -15,7 +15,7 @@ class SN_OT_AddNodeProperty(bpy.types.Operator):
         ntree = bpy.data.node_groups[self.node_tree]
         node = ntree.nodes[self.node]
         new_prop = node.properties.add()
-        new_prop.name = "New Property"
+        new_prop.name = new_prop.get_unique_name("New Property")
         node.on_node_property_add(new_prop)
         node.property_index = len(node.properties) - 1
         return {"FINISHED"}

@@ -2,6 +2,30 @@ import bpy
 import re
 
 
+def collection_has_item(collection, name):
+    """Check if a CollectionProperty contains an item with the given name.
+    
+    This is needed for Blender 5.0+ compatibility where 'name in collection' 
+    and 'collection.keys()' no longer work with custom get/set on the name property.
+    """
+    for item in collection:
+        if item.name == name:
+            return True
+    return False
+
+
+def collection_get_item(collection, name):
+    """Get an item from a CollectionProperty by name.
+    
+    This is needed for Blender 5.0+ compatibility where 'collection[name]' 
+    no longer works with custom get/set on the name property.
+    Returns None if not found.
+    """
+    for item in collection:
+        if item.name == name:
+            return item
+    return None
+
 
 def get_python_name(name, replacement="", separator="_", lower=True):
     """ Returns the given name as a valid python represention to use as variable names in scripts """

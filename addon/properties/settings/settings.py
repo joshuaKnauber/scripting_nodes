@@ -1,5 +1,5 @@
 import bpy
-
+from ....utils import collection_has_item, collection_get_item
 
 
 id_items = ["Scene", "Action", "Armature", "Brush", "CacheFile", "Camera",
@@ -117,8 +117,8 @@ class PropertySettings:
             if ntree.bl_idname == "ScriptingNodesTree":
                 for node in ntree.node_collection("SN_OnPropertyUpdateNode").nodes:
                     prop_src = node.get_prop_source()
-                    if prop_src and node.prop_name in prop_src.properties:
-                        prop = prop_src.properties[node.prop_name]
+                    prop = collection_get_item(prop_src.properties, node.prop_name) if prop_src else None
+                    if prop:
                         if prop.name == self.prop.name:
                             updates.append((node.update_func_name(prop), node.order))
         return list(map(lambda item: item[0], sorted(updates, key=lambda i: i[1])))

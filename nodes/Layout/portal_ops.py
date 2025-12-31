@@ -13,6 +13,6 @@ class SN_OT_ResetPortal(bpy.types.Operator):
 
     def execute(self, context):
         node = context.space_data.node_tree.nodes[self.node]
-        node["var_name"] = node.static_uid
+        node.var_name = node.static_uid
         node.custom_color = (uniform(0,1), uniform(0,1), uniform(0,1))
         return {"FINISHED"}
