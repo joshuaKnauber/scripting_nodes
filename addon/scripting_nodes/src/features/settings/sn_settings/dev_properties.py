@@ -20,3 +20,17 @@ class SNA_DevSettings(bpy.types.PropertyGroup):
         description="Show the generated code of the nodes",
         default=False,
     )
+
+    show_log_overlay: bpy.props.BoolProperty(
+        name="Log Overlay",
+        description="Show console logs overlaid in the node editor",
+        default=True,
+    )
+
+    log_overlay_font_size: bpy.props.IntProperty(
+        name="Overlay Font Size",
+        description="Font size for the log overlay",
+        default=18,
+        min=10,
+        max=36,
+    )

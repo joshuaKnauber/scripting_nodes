@@ -1,3 +1,4 @@
+from scripting_nodes.src.lib.editor.editor import is_sn_editor
 import bpy
 
 
@@ -8,6 +9,10 @@ class SNA_PT_NodeTrees(bpy.types.Panel):
     bl_region_type = "UI"
     bl_category = "Scripting Nodes"
     bl_order = 1
+
+    @classmethod
+    def poll(cls, context):
+        return is_sn_editor(context)
 
     def draw(self, context):
         layout = self.layout

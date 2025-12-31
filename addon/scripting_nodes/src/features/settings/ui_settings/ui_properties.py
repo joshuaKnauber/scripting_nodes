@@ -22,7 +22,23 @@ class SNA_UISettings(bpy.types.PropertyGroup):
     )
 
     # Data panel - active indices for filtered lists
-    active_property_index: bpy.props.IntProperty(default=0)
-    active_variable_index: bpy.props.IntProperty(default=0)
+    def update_active_property_index(self, context):
+        sna = context.scene.sna
+        if 0 <= self.active_property_index < len(sna.references):
+            ref = sna.references[self.active_property_index]
+            if ref.node:
+                bpy.ops.sna.go_to_node(node_id=ref.node.id)
 
+    def update_active_variable_index(self, context):
+        sna = context.scene.sna
+        if 0 <= self.active_variable_index < len(sna.references):
+            ref = sna.references[self.active_variable_index]
+            if ref.node:
+                bpy.ops.sna.go_to_node(node_id=ref.node.id)
 
+    active_property_index: bpy.props.IntProperty(
+        default=0, update=update_active_property_index
+    )
+    active_variable_index: bpy.props.IntProperty(
+        default=0, update=update_active_variable_index
+    )
