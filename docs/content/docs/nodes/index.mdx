@@ -1,0 +1,50 @@
+---
+title: Nodes Reference
+description: Complete reference for all Scripting Nodes
+---
+
+# Nodes Reference
+
+This section documents all nodes available in Scripting Nodes, organized by category.
+
+## Categories
+
+<Cards>
+  <Card title="Interface" href="/docs/nodes/interface" description="Operators, panels, menus, and UI elements" />
+  <Card title="Data" href="/docs/nodes/data" description="Properties, variables, and data access" />
+  <Card title="Logic" href="/docs/nodes/logic" description="Conditions, loops, and flow control" />
+  <Card title="Math" href="/docs/nodes/math" description="Mathematical operations and functions" />
+  <Card title="Blender" href="/docs/nodes/blender" description="Blender-specific operations" />
+</Cards>
+
+## Finding Nodes
+
+In the editor, press **Shift+A** to open the Add menu. Nodes are organized into categories:
+
+- **Interface**: Build UI and user interactions
+- **Data**: Work with properties and data
+- **Logic**: Control program flow
+- **Math**: Perform calculations
+- **Groups**: Reuse node setups
+
+You can also search for nodes by name using the search field at the top of the Add menu.
+
+## Node Structure
+
+Every node has:
+
+- **Header**: Shows the node name and can be clicked to collapse
+- **Input sockets**: Left side, receive data or program flow
+- **Output sockets**: Right side, send data or continue execution
+- **Properties**: Settings that configure the node's behavior
+
+## Common Patterns
+
+### Entry Points
+Use **Operator**, **Panel**, or **Handler** nodes to define where your code starts.
+
+### Data Flow
+Connect data outputs to inputs to pass values between nodes.
+
+### Program Flow
+Connect green program sockets to control the order of execution.

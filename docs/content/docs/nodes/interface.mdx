@@ -1,0 +1,58 @@
+---
+title: Interface Nodes
+description: Nodes for creating operators, panels, menus, and UI elements
+---
+
+# Interface Nodes
+
+Interface nodes let you create user-facing elements in Blender.
+
+## Operators
+
+### Operator
+Creates a new operator that can be run from menus, buttons, or the search menu.
+
+**Properties:**
+- **Label**: The display name shown to users
+- **ID Name**: The internal identifier (auto-generated)
+- **Description**: Tooltip text
+
+**Outputs:**
+- **Run**: Program flow for when the operator executes
+
+### Run Operator
+Executes another operator from within your script.
+
+**Inputs:**
+- **Program**: When to run
+- **Operator ID**: Which operator to run
+
+## Panels
+
+### Panel
+Creates a panel in Blender's UI (sidebar, properties, etc.).
+
+**Properties:**
+- **Label**: Panel header text
+- **Space Type**: Where the panel appears
+- **Region**: Which region of the space
+
+### UI Layout
+Defines the layout of UI elements within a panel.
+
+## Menus
+
+### Menu
+Creates a custom menu that can be added to Blender's menu bar or as a sub-menu.
+
+### Popup Menu
+Shows a popup menu when triggered.
+
+## Messages
+
+### Show Message
+Displays a popup message to the user.
+
+**Inputs:**
+- **Message**: The text to display
+- **Type**: Info, Warning, or Error

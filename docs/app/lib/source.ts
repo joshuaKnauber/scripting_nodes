@@ -3,5 +3,5 @@ import { docs } from "fumadocs-mdx:collections/server";
 
 export const source = loader({
   source: docs.toFumadocsSource(),
-  baseUrl: "/scripting_nodes/docs",
+  baseUrl: "/docs",
 });

@@ -1,0 +1,44 @@
+---
+title: Data Types
+description: Understanding socket types and data flow
+---
+
+# Data Types
+
+Scripting Nodes uses a type system to ensure connections are valid and data flows correctly.
+
+## Socket Colors
+
+Socket colors indicate the type of data they carry:
+
+| Color | Type | Description |
+|-------|------|-------------|
+| 🟢 Green | Program | Execution flow |
+| 🔵 Blue | Value | Numbers, strings, booleans |
+| 🟣 Purple | Object | Blender objects |
+| 🟡 Yellow | Collection | Lists and arrays |
+| ⚪ Gray | Any | Accepts multiple types |
+
+## Program Flow
+
+The green **program sockets** are special—they control *when* code runs, not *what* data it uses. Think of them as the "execution order" of your script.
+
+## Automatic Conversion
+
+Many data types convert automatically:
+
+- Integers ↔ Floats
+- Numbers → Strings
+- Single values → Lists
+
+When automatic conversion isn't possible, you'll see a warning and the connection won't be made.
+
+## Type-Specific Nodes
+
+Some nodes only work with specific types. For example:
+
+- **Math nodes** work with numbers
+- **String nodes** work with text
+- **Object nodes** work with Blender objects
+
+The Add menu organizes nodes by category to help you find type-appropriate nodes.

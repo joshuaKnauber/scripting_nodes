@@ -1,0 +1,45 @@
+---
+title: Concepts
+description: Core concepts and architecture of Scripting Nodes
+---
+
+# Concepts
+
+Understanding these core concepts will help you get the most out of Scripting Nodes.
+
+## Node Trees
+
+A **node tree** is a container for your visual script. Each node tree represents a self-contained piece of functionality, like an operator, a panel, or an entire add-on.
+
+Node trees are listed in the header dropdown and can be organized however you prefer.
+
+## Nodes
+
+**Nodes** are the building blocks of your scripts. Each node performs a specific function:
+
+- **Input nodes** provide data (numbers, strings, objects)
+- **Logic nodes** make decisions (if/else, loops)
+- **Action nodes** do things (create objects, modify properties)
+- **Output nodes** define results (return values, UI elements)
+
+## Sockets and Connections
+
+Nodes communicate through **sockets**:
+
+- **Input sockets** (left side) receive data
+- **Output sockets** (right side) send data
+
+Connect sockets by dragging from one to another. Colors indicate compatible types:
+- 🟢 Green: Program flow (execution order)
+- 🔵 Blue: Data values
+- 🟡 Yellow: Objects and references
+
+## Program Flow
+
+The **green program sockets** control execution order. Unlike data connections that can branch freely, program flow typically moves in sequence from top to bottom, left to right.
+
+<Cards>
+  <Card title="Node Trees" href="/docs/concepts/node-trees" description="Working with node trees" />
+  <Card title="Data Types" href="/docs/concepts/data-types" description="Understanding socket types" />
+  <Card title="Code Generation" href="/docs/concepts/code-generation" description="How code is generated" />
+</Cards>

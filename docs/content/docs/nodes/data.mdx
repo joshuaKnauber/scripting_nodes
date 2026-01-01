@@ -1,0 +1,60 @@
+---
+title: Data Nodes
+description: Nodes for working with properties, variables, and data
+---
+
+# Data Nodes
+
+Data nodes let you store, retrieve, and manipulate data in your scripts.
+
+## Properties
+
+### Property
+Defines a property that stores a value. Properties can be shown in panels and saved with the blend file.
+
+**Types:**
+- Boolean (checkbox)
+- Integer (whole number)
+- Float (decimal number)  
+- String (text)
+- Enum (dropdown selection)
+- Pointer (reference to Blender data)
+
+### Get Property
+Retrieves the current value of a property.
+
+### Set Property
+Changes the value of a property.
+
+## Variables
+
+### Variable
+Creates a temporary variable for use within your script. Unlike properties, variables are not saved.
+
+### Get Variable
+Reads the current value of a variable.
+
+### Set Variable
+Assigns a new value to a variable.
+
+## Data Access
+
+### Get Attribute
+Reads an attribute from a Blender object or data block.
+
+### Set Attribute
+Modifies an attribute on a Blender object or data block.
+
+### Data Path
+Accesses nested data using a path string (e.g., `object.location.x`).
+
+## Collections
+
+### Create List
+Creates a new list from multiple inputs.
+
+### For Each
+Iterates over items in a list, executing code for each one.
+
+### Get Item
+Retrieves an item from a list by index.

@@ -1,0 +1,51 @@
+---
+title: Code Generation
+description: How Scripting Nodes generates Python code
+---
+
+# Code Generation
+
+Scripting Nodes generates clean, readable Python code from your node graphs. Understanding this process helps you debug issues and learn Blender's Python API.
+
+## How It Works
+
+1. **Parse**: The node tree is analyzed to understand data flow
+2. **Order**: Nodes are sorted by dependency (inputs before outputs)
+3. **Generate**: Each node outputs its Python code snippet
+4. **Combine**: Snippets are assembled into a complete module
+5. **Format**: The code is cleaned up and formatted
+
+## Viewing Generated Code
+
+To see the Python code your nodes produce:
+
+1. Open the sidebar with **N**
+2. Look for the **Code** panel
+3. Toggle **Show Code** to see live output
+
+This is a great way to learn Blender's Python API!
+
+## Development vs Production
+
+Scripting Nodes has two modes:
+
+### Development Mode
+- Code updates instantly as you edit
+- Includes debug information
+- Optimized for iteration speed
+
+### Production Mode
+- Clean, optimized output
+- Ready for distribution
+- No development overhead
+
+Switch modes in the add-on preferences or when exporting.
+
+## Code Quality
+
+Generated code follows Python best practices:
+
+- PEP 8 formatting
+- Clear variable names
+- Proper Blender API usage
+- Appropriate error handling

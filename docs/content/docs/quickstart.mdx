@@ -1,0 +1,62 @@
+---
+title: Quickstart
+description: Get started with Scripting Nodes in 5 minutes
+---
+
+# Quickstart
+
+This guide will help you create your first add-on with Scripting Nodes.
+
+## Installation
+
+1. Open Blender 4.3 or later
+2. Go to **Edit → Preferences → Get Extensions**
+3. Search for "Scripting Nodes" and click **Install**
+4. Enable the add-on in the Extensions list
+
+## Opening the Editor
+
+1. In any Blender area, click the editor type dropdown (top-left corner)
+2. Select **Scripting Nodes** from the list
+3. You'll see an empty node editor ready for use
+
+## Creating Your First Node Tree
+
+1. Click **New** in the header to create a new node tree
+2. Give it a name like "My First Addon"
+3. Press **Shift+A** to open the Add menu
+4. Navigate to find nodes to add
+
+## Your First Operator
+
+Let's create a simple operator that shows a message:
+
+1. **Add an Operator node**: Press **Shift+A** → Interface → Operator
+2. **Name it**: Set the label to "Say Hello"
+3. **Add a Run Operator node**: This defines what happens when the operator runs
+4. **Add a Show Message node**: Connect it to show a popup message
+5. **Set the message**: Type "Hello from Scripting Nodes!"
+
+## Testing Your Add-on
+
+Your add-on is automatically compiled as you work. To test it:
+
+1. Open Blender's search menu with **F3**
+2. Search for your operator name ("Say Hello")
+3. Run it and see your message appear!
+
+## Exporting
+
+When you're ready to share your add-on:
+
+1. Go to the Scripting Nodes panel in the sidebar (**N** key)
+2. Click **Export Add-on**
+3. Choose a location and save the `.zip` file
+4. Share it with others or upload to Blender Extensions
+
+## Next Steps
+
+<Cards>
+  <Card title="Concepts" href="/docs/concepts" description="Learn the core concepts" />
+  <Card title="Nodes Reference" href="/docs/nodes" description="Explore all available nodes" />
+</Cards>

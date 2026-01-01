@@ -1,0 +1,40 @@
+---
+title: Node Trees
+description: Understanding and organizing node trees
+---
+
+# Node Trees
+
+Node trees are the foundation of Scripting Nodes. Each tree is an independent script that gets compiled into Python code.
+
+## Creating Node Trees
+
+Create a new node tree using the **New** button in the editor header, or duplicate an existing one for quick iteration.
+
+## Organization
+
+You can have multiple node trees in a single Blender file. Consider organizing by functionality:
+
+- One tree per operator
+- One tree for all UI panels
+- One tree for shared utilities
+
+## The Node Tree Interface
+
+The header provides quick access to:
+
+- **Tree selector**: Switch between node trees
+- **Add menu** (Shift+A): Insert new nodes
+- **View controls**: Zoom, pan, and frame selection
+
+## Live Compilation
+
+As you work, Scripting Nodes continuously compiles your node tree in the background. This means:
+
+- Changes are reflected immediately
+- Errors are caught as you build
+- You can test without explicit "run" steps
+
+## Frames and Comments
+
+Use **Frame nodes** to group related nodes together. Add **Comment nodes** to document your logic for future reference.

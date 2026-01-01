@@ -1,0 +1,86 @@
+---
+title: Blender Nodes
+description: Nodes for Blender-specific operations
+---
+
+# Blender Nodes
+
+These nodes interact directly with Blender's data and functionality.
+
+## Objects
+
+### Get Active Object
+Returns the currently selected object.
+
+### Get Object
+Gets an object by name.
+
+### Create Object
+Creates a new object in the scene.
+
+### Delete Object
+Removes an object from the scene.
+
+## Transformations
+
+### Get Location
+Reads an object's position.
+
+### Set Location
+Moves an object to a position.
+
+### Get Rotation
+Reads an object's rotation.
+
+### Set Rotation
+Rotates an object.
+
+### Get Scale
+Reads an object's scale.
+
+### Set Scale
+Scales an object.
+
+## Selection
+
+### Get Selected
+Returns all currently selected objects.
+
+### Select Object
+Adds an object to the selection.
+
+### Deselect All
+Clears the current selection.
+
+## Scene
+
+### Get Scene
+Returns the current scene.
+
+### Get Frame
+Returns the current animation frame.
+
+### Set Frame
+Changes the current frame.
+
+## Context
+
+### Get Context
+Accesses Blender's context for the current state.
+
+### Override Context
+Temporarily changes context for an operation.
+
+## Handlers
+
+### On Load
+Executes when a file is loaded.
+
+### On Save
+Executes before a file is saved.
+
+### On Frame Change
+Executes when the animation frame changes.
+
+### On Depsgraph Update
+Executes when scene data changes.
