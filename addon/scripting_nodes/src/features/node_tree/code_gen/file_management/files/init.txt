@@ -11,14 +11,19 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+# Create module alias for extension compatibility
+# Extensions are loaded as bl_ext.<repo>.<name>, but imports may use the module name directly
+import sys
+sys.modules['$MODULE_NAME'] = sys.modules[__name__]
+
 bl_info = {
     "name": "$ADDON_NAME",
-    "author": "Joshua Knauber, Finn Knauber",
-    "description": "Adds a node editor for building addons with nodes",
-    "blender": (4, 3, 0),
-    "version": (4, 0, 0),
-    "location": "Editors -> Visual Scripting Editor",
-    "category": "Node",
+    "author": "Unknown",
+    "description": "Add-on created with Scripting Nodes",
+    "blender": (4, 2, 0),
+    "version": (1, 0, 0),
+    "location": "",
+    "category": "General",
 }
 
 import bpy

@@ -1,4 +1,3 @@
-from scripting_nodes.src.lib.libraries import autopep8
 from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import sn_nodes
 from scripting_nodes.src.lib.utils.code.format import normalize_indents
 import bpy
@@ -45,5 +44,10 @@ def code_gen_node_tree(ntree):
         code += "\ndef unregister():\n    pass\n"
 
     if bpy.context.scene.sna.addon.build_with_production_code:
-        code = autopep8.fix_code(code)
+        try:
+            import autopep8
+
+            code = autopep8.fix_code(code, options={"aggressive": 1})
+        except Exception as e:
+            print(f"[SN] autopep8 formatting failed: {e}")
     return code

@@ -7,7 +7,7 @@ tagline = "Build Blender addons visually with nodes"
 maintainer = "Joshua Knauber, Finn Knauber"
 type = "add-on"
 
-website = "https://github.com/joshuaKnauber/scripting_nodes"
+website = "https://joshuaknauber.github.io/scripting_nodes/"
 
 blender_version_min = "5.0.0"
 
@@ -17,6 +17,14 @@ license = [
 
 # Tags for categorization on the extensions platform
 tags = ["Development", "Node"]
+
+# Bundle Python wheels for dependencies
+wheels = [
+  "./wheels/autopep8-2.3.2-py2.py3-none-any.whl",
+  "./wheels/pycodestyle-2.14.0-py2.py3-none-any.whl",
+  "./wheels/names_generator-0.2.0-py3-none-any.whl",
+  "./wheels/cmdkit-2.7.7-py3-none-any.whl",
+]
 
 [build]
 paths_exclude_pattern = [

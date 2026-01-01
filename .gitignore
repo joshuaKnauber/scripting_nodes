@@ -4,6 +4,7 @@ __pycache__/
 venv/
 builds/
 config.yaml
+.dev_build/
 
 # Docs
 docs/node_modules/

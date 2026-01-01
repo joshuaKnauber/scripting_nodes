@@ -1,5 +1,5 @@
 from scripting_nodes.src.handlers.msgbus.node_tree_name import subscribe_to_name_change
-from scripting_nodes.src.lib.libraries.name_generator.generator import generate_name
+from names_generator import generate_name
 from scripting_nodes.src.features.node_tree.code_gen.modules.persisted import (
     get_modules_to_persist,
 )

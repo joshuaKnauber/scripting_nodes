@@ -1,0 +1,21 @@
+schema_version = "1.0.0"
+
+id = "$MODULE_NAME"
+version = "1.0.0"
+name = "$ADDON_NAME"
+tagline = "Add-on created with Scripting Nodes"
+maintainer = "Unknown"
+type = "add-on"
+
+blender_version_min = "4.2.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+
+[build]
+paths_exclude_pattern = [
+  "__pycache__/",
+  ".*",
+  "*.zip",
+]

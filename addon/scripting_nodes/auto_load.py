@@ -64,9 +64,12 @@ def unregister():
 # Import modules
 #################################################
 
+# Store the package name at module load time
+_package_name = __package__
+
 
 def get_all_submodules(directory):
-    return list(iter_submodules(directory, directory.name))
+    return list(iter_submodules(directory, _package_name))
 
 
 def iter_submodules(path, package_name):

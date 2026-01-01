@@ -17,30 +17,37 @@ class SNA_OT_ExportAddon(bpy.types.Operator):
         context.scene.sna.addon.is_exporting = True
 
         try:
-            path = (
-                self.filepath + ".zip"
-                if not self.filepath.endswith(".zip")
-                else self.filepath
-            )
+            # Ensure filepath ends with .zip
+            path = self.filepath
+            if not path.endswith(".zip"):
+                path = path + ".zip"
 
             # generate addon folder
-            folder_path = os.path.join(
-                os.path.dirname(path), bpy.context.scene.sna.addon.module_name
-            )
+            export_dir = os.path.dirname(path)
+            module_name = bpy.context.scene.sna.addon.module_name
+            folder_path = os.path.join(export_dir, module_name)
+
             if os.path.exists(folder_path):
                 shutil.rmtree(folder_path)
-            generate_addon(dev_module=False, base_path=os.path.dirname(path))
+            generate_addon(dev_module=False, base_path=export_dir)
 
             # zip folder
             if os.path.exists(path):
                 os.remove(path)
             if os.path.exists(folder_path):
-                parent_dir = os.path.dirname(folder_path)
-                folder_name = os.path.basename(folder_path)
-                shutil.make_archive(path[:-4], "zip", parent_dir, folder_name)
+                # Create zip with folder contents at root level (for extension compatibility)
+                shutil.make_archive(path[:-4], "zip", folder_path)
                 shutil.rmtree(folder_path)
+                self.report({"INFO"}, f"Exported to {path}")
+            else:
+                self.report(
+                    {"ERROR"}, f"Failed to generate addon folder: {folder_path}"
+                )
         except Exception as e:
-            print(e)
+            self.report({"ERROR"}, f"Export failed: {str(e)}")
+            import traceback
+
+            traceback.print_exc()
         finally:
             context.scene.sna.addon.is_exporting = False
 

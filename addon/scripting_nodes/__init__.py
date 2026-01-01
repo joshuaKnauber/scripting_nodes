@@ -11,6 +11,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+# Create module alias for extension compatibility
+# Extensions are loaded as bl_ext.<repo>.<name>, but imports use 'scripting_nodes'
+import sys
+from pathlib import Path
+
+sys.modules["scripting_nodes"] = sys.modules[__name__]
+
+# Load bundled wheels (needed for dev workflow; installed extensions load these automatically)
+_wheels_dir = Path(__file__).parent / "wheels"
+if _wheels_dir.exists():
+    for whl in _wheels_dir.glob("*.whl"):
+        whl_path = str(whl)
+        if whl_path not in sys.path:
+            sys.path.insert(0, whl_path)
+
 bl_info = {
     "name": "Scripting Nodes",
     "author": "Joshua Knauber, Finn Knauber",

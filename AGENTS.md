@@ -14,8 +14,9 @@
     - `features/settings/`: `Scene.sna` property groups (addon/dev/ui settings, node references).
     - `features/sockets/`: custom socket classes and utilities.
     - `handlers/`: Blender handlers for events, msgbus, timers; `timers/node_tree_watcher.py` hooks the code-gen watcher.
-    - `lib/`: shared utilities (code formatting, logging, bpy helpers, name generator, autopep8 vendor drop-in).
+    - `lib/`: shared utilities (code formatting, logging, bpy helpers, name generator).
     - `assets/`: placeholder for bundled resources (currently empty).
+  - `wheels/`: bundled Python wheels (Black formatter and dependencies) loaded by Blender's extension system.
 - `scripts/`: host tooling.
   - `dev.py`: syncs the local addon into Blender's add-ons directory, launches Blender, handles restart shortcuts.
   - `build.py`: packages the addon into `builds/scripting_nodes_<version>.zip`.
@@ -60,7 +61,7 @@
 
 ## 7. Coding Standards and Patterns
 - Follow Blender API expectations (subclass `bpy.types.Node`, `Operator`, etc.) and register via `auto_load`.
-- Keep Python roughly PEP 8; repository vendors `autopep8.py` for formatting support if desired, but external formatting is not automated.
+- Keep Python roughly PEP 8; Black is bundled as wheels for production code formatting.
 - Nodes should:
   - Subclass `ScriptingBaseNode` (see `features/nodes/base_node.py`).
   - Define `bl_idname`, `bl_label`, sockets in `on_create`, and implement `generate()` to populate output code strings.
