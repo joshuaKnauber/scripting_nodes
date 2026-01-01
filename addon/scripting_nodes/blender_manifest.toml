@@ -1,0 +1,26 @@
+schema_version = "1.0.0"
+
+id = "scripting_nodes"
+version = "4.0.0"
+name = "Scripting Nodes"
+tagline = "Build Blender addons visually with nodes"
+maintainer = "Joshua Knauber, Finn Knauber"
+type = "add-on"
+
+website = "https://github.com/joshuaKnauber/scripting_nodes"
+
+blender_version_min = "5.0.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+
+# Tags for categorization on the extensions platform
+tags = ["Development", "Node"]
+
+[build]
+paths_exclude_pattern = [
+  "__pycache__/",
+  ".*",
+  "*.zip",
+]
