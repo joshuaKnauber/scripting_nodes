@@ -1,6 +1,6 @@
 import type { Config } from "@react-router/dev/config";
+import fg from "fast-glob";
 import { createGetUrl, getSlugs } from "fumadocs-core/source";
-import { glob } from "node:fs/promises";
 
 const getUrl = createGetUrl("/docs");
 
@@ -14,7 +14,8 @@ export default {
       if (!excluded.includes(path)) paths.push(path);
     }
 
-    for await (const entry of glob("**/*.mdx", { cwd: "content/docs" })) {
+    const entries = await fg("**/*.mdx", { cwd: "content/docs" });
+    for (const entry of entries) {
       paths.push(getUrl(getSlugs(entry)));
     }
 
