@@ -20,6 +20,9 @@ export default {
       paths.push(getUrl(getSlugs(entry)));
     }
 
+    // Include the search API route for static search index
+    paths.push("/api/search");
+
     return paths;
   },
 } satisfies Config;

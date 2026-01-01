@@ -1,3 +1,4 @@
 {
+  "public": "scripting_nodes",
   "rewrites": [{ "source": "/**", "destination": "/index.html" }]
 }
