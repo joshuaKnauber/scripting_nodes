@@ -4,3 +4,9 @@ __pycache__/
 venv/
 builds/
 config.yaml
+
+# Docs
+docs/node_modules/
+docs/build/
+docs/.source/
+docs/.react-router/
