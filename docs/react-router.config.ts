@@ -1,8 +1,8 @@
-import type { Config } from '@react-router/dev/config';
-import { glob } from 'node:fs/promises';
-import { createGetUrl, getSlugs } from 'fumadocs-core/source';
+import type { Config } from "@react-router/dev/config";
+import { createGetUrl, getSlugs } from "fumadocs-core/source";
+import { glob } from "node:fs/promises";
 
-const getUrl = createGetUrl('/docs');
+const getUrl = createGetUrl("/docs");
 
 export default {
   ssr: true,
@@ -14,7 +14,7 @@ export default {
       if (!excluded.includes(path)) paths.push(path);
     }
 
-    for await (const entry of glob('**/*.mdx', { cwd: 'content/docs' })) {
+    for await (const entry of glob("**/*.mdx", { cwd: "content/docs" })) {
       paths.push(getUrl(getSlugs(entry)));
     }
 
