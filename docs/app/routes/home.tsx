@@ -17,7 +17,7 @@ export default function Home() {
         <h1 className="text-xl font-bold mb-2">Scripting Nodes</h1>
         <p className="text-fd-muted-foreground mb-4">
           Visual scripting add-on for Blender that lets you create add-ons
-          through node graphs.
+          through node graphs
         </p>
         <Link
           className="text-sm bg-fd-primary text-fd-primary-foreground rounded-full font-medium px-4 py-2.5"
