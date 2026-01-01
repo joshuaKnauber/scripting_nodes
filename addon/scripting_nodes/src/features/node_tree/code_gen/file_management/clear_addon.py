@@ -9,5 +9,7 @@ def clear_addon_files(addon_path):
 
 
 def clear_module_files(module_name):
+    # Just clear the files - don't disable the addon here
+    # Disabling should be done explicitly when needed
     path = os.path.join(ADDON_FOLDER, module_name)
     clear_addon_files(path)

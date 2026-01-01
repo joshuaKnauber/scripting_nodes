@@ -1,5 +1,11 @@
 import bpy
 import re
+from uuid import uuid4
+
+
+def get_short_id():
+    """Returns a unique id"""
+    return uuid4().hex[:8].upper()
 
 
 class SNA_AddonSettings(bpy.types.PropertyGroup):
@@ -52,6 +58,18 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
         description="Persist the addon when switching files",
         default=False,
     )
+
+    addon_uid: bpy.props.StringProperty(
+        name="UID",
+        description="Unique identifier for this file's addon",
+        default="",
+    )
+
+    def get_uid(self):
+        """Get or generate a unique ID for this file."""
+        if not self.addon_uid:
+            self.addon_uid = get_short_id()
+        return self.addon_uid
 
     ### Calculated Values
 

@@ -1,23 +1,38 @@
-from scripting_nodes.src.features.node_tree.code_gen.file_management.clear_addon import (
-    clear_module_files,
+from scripting_nodes.src.features.node_tree.code_gen.generator import generate_addon
+from scripting_nodes.src.features.node_tree.code_gen.modules.modules import (
+    unregister_module,
 )
 from scripting_nodes.src.features.node_tree.code_gen.modules.persisted import (
-    add_module_to_persist,
-    remove_module_to_persist,
+    track_module,
 )
-from scripting_nodes.src.features.node_tree.code_gen.generator import generate_addon
+import addon_utils
 import bpy
 from bpy.app.handlers import persistent
 
 
 @persistent
 def on_save_pre(dummy):
-    if bpy.context.scene.sna.addon.persist_addon:
-        generate_addon(dev_module=False)
-        add_module_to_persist(bpy.context.scene.sna.addon.module_name)
-    else:
-        clear_module_files(bpy.context.scene.sna.addon.module_name)
-        remove_module_to_persist(bpy.context.scene.sna.addon.module_name)
+    addon = bpy.context.scene.sna.addon
+    uid = addon.get_uid()
+    module_name = addon.module_name
+    persist = addon.persist_addon
+
+    # Track module by UID (handles rename detection) and set persist status
+    track_module(uid, module_name, persist=persist)
+
+    if persist:
+        # Unregister the current addon first
+        unregister_module(module_name)
+
+        # Generate with production code
+        addon.is_exporting = True
+        try:
+            generate_addon()
+        finally:
+            addon.is_exporting = False
+
+        # Enable the addon
+        addon_utils.enable(module_name, default_set=False, persistent=False)
 
 
 def register():

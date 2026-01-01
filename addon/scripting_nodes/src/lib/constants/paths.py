@@ -20,18 +20,11 @@ def _get_addon_folder():
 
 ADDON_FOLDER = _get_addon_folder()
 
-DEV_ADDON_MODULE = "scripting_nodes_temp"
 
-DEV_ADDON_PATH = os.path.join(
-    ADDON_FOLDER,
-    DEV_ADDON_MODULE,
-)
-
-
-def PROD_ADDON_PATH(module_name=None, base_path=ADDON_FOLDER):
+def get_addon_path(module_name=None, base_path=None):
+    """Get the path for a generated addon module."""
+    if base_path is None:
+        base_path = ADDON_FOLDER
     if module_name is None:
         module_name = bpy.context.scene.sna.addon.module_name
-    return os.path.join(
-        base_path,
-        module_name,
-    )
+    return os.path.join(base_path, module_name)

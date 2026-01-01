@@ -16,7 +16,7 @@ def log(level: Literal["INFO", "WARNING", "ERROR"], *args, **kwargs):
 
         add_log(level, message)
     except Exception:
-        pass  # Overlay may not be available
+        pass  # May fail during startup/shutdown
 
 
 def log_if(

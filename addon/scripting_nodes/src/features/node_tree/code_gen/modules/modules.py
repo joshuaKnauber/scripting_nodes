@@ -1,14 +1,27 @@
 from scripting_nodes.src.lib.utils.logger import log_if
+from scripting_nodes.src.lib.constants.paths import ADDON_FOLDER
 import addon_utils
 import sys
 import bpy
 import time
+import os
 
 
 def reload_addon(module: str):
+    """Reload an addon module."""
     t1 = time.time()
     unregister_module(module)
-    addon_utils.enable(module, default_set=True, persistent=True)
+
+    module_init_path = os.path.join(ADDON_FOLDER, module, "__init__.py")
+    if not os.path.exists(module_init_path):
+        log_if(
+            bpy.context.scene.sna.dev.log_reload_times,
+            "WARNING",
+            f"Cannot reload addon '{module}': __init__.py not found",
+        )
+        return
+
+    addon_utils.enable(module, default_set=False, persistent=False)
     log_if(
         bpy.context.scene.sna.dev.log_reload_times,
         "INFO",
@@ -17,8 +30,12 @@ def reload_addon(module: str):
 
 
 def unregister_module(module: str):
-    if addon_utils.check(module)[0]:
-        addon_utils.disable(module, default_set=True)
+    """Unregister a module and remove from sys.modules."""
+    # addon_utils.check returns (is_default, is_loaded)
+    is_default, is_loaded = addon_utils.check(module)
+
+    if is_loaded:
+        addon_utils.disable(module, default_set=False)
 
     for name in list(sys.modules.keys()):
         if name.startswith(module):

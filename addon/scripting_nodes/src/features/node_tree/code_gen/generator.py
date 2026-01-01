@@ -5,12 +5,11 @@ from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
     sn_nodes,
 )
 from .file_management.folder_structure import ensure_folder_structure
-from .file_management.clear_addon import clear_addon_files, clear_module_files
+from .file_management.clear_addon import clear_addon_files
 from .file_management.default_files import ensure_default_files
 from scripting_nodes.src.lib.constants.paths import (
     ADDON_FOLDER,
-    DEV_ADDON_PATH,
-    PROD_ADDON_PATH,
+    get_addon_path,
 )
 from .file_management.node_tree_files import (
     create_node_tree_file,
@@ -21,17 +20,10 @@ import os
 import bpy
 
 
-def generate_addon(dev_module=True, base_path=ADDON_FOLDER):
-    addon_path = (
-        DEV_ADDON_PATH
-        if dev_module
-        else PROD_ADDON_PATH(bpy.context.scene.sna.addon.module_name, base_path)
-    )
+def generate_addon(base_path=ADDON_FOLDER):
+    """Generate the addon files for the current module."""
+    addon_path = get_addon_path(base_path=base_path)
     files_changed = False
-
-    # remove previous production files
-    if not dev_module:
-        clear_module_files(bpy.context.scene.sna.addon.module_name)
 
     # remove addon files if no addon exists
     if not has_addon():

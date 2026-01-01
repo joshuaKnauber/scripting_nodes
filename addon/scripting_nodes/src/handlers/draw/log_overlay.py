@@ -15,18 +15,31 @@ EXPIRE_SECONDS = 10.0
 FADE_DURATION = 2.0
 PADDING = (15, 40)  # x, y from edges
 
+# Use a global namespace to ensure all module instances share the same state
+# This fixes the issue where the module gets loaded multiple times
+_GLOBAL_KEY = "_sn_log_overlay_state"
+
 
 @dataclass
 class LogEntry:
     level: Literal["INFO", "WARNING", "ERROR"]
     message: str
     timestamp: float = field(default_factory=time.time)
+    count: int = 1  # For deduplication
 
 
-# State
-_entries: deque[LogEntry] = deque(maxlen=MAX_ENTRIES)
+def _get_state():
+    """Get the shared state dict from bpy.app.driver_namespace."""
+    if _GLOBAL_KEY not in bpy.app.driver_namespace:
+        bpy.app.driver_namespace[_GLOBAL_KEY] = {
+            "entries": deque(maxlen=MAX_ENTRIES),
+            "timer_running": False,
+        }
+    return bpy.app.driver_namespace[_GLOBAL_KEY]
+
+
+# Module-level draw handler (not shared - each module instance registers its own)
 _draw_handler = None
-_timer_running = False
 
 # Colors per level
 COLORS = {
@@ -34,11 +47,22 @@ COLORS = {
     "WARNING": (1.0, 0.8, 0.2, 0.9),
     "ERROR": (1.0, 0.3, 0.3, 0.9),
 }
+SHADOW_COLOR = (0.0, 0.0, 0.0, 0.6)
 
 
 def add_log(level: Literal["INFO", "WARNING", "ERROR"], message: str):
-    """Add a log entry to the overlay."""
-    _entries.append(LogEntry(level, message))
+    """Add a log entry to the overlay, deduplicating consecutive identical messages."""
+    state = _get_state()
+    entries = state["entries"]
+
+    # Deduplicate: if same level and message as the last entry, increment count
+    if entries and entries[-1].level == level and entries[-1].message == message:
+        # Update timestamp to keep it visible longer and increment count
+        entries[-1].timestamp = time.time()
+        entries[-1].count += 1
+    else:
+        entries.append(LogEntry(level, message))
+
     _start_timer()
     try:
         _redraw_editors()
@@ -48,7 +72,7 @@ def add_log(level: Literal["INFO", "WARNING", "ERROR"], message: str):
 
 def clear_logs():
     """Clear all log entries."""
-    _entries.clear()
+    _get_state()["entries"].clear()
 
 
 def _redraw_editors():
@@ -61,14 +85,22 @@ def _redraw_editors():
 
 def _timer_tick():
     """Timer callback for smooth animation."""
-    global _timer_running
+    state = _get_state()
 
     try:
         if not bpy.context.scene.sna.dev.show_log_overlay:
-            _timer_running = False
+            state["timer_running"] = False
             return None
     except (AttributeError, KeyError):
-        _timer_running = False
+        state["timer_running"] = False
+        return None
+
+    # Auto-stop timer when no visible entries remain
+    entries = state["entries"]
+    now = time.time()
+    has_visible = any(now - e.timestamp < EXPIRE_SECONDS for e in entries)
+    if not has_visible:
+        state["timer_running"] = False
         return None
 
     _redraw_editors()
@@ -77,24 +109,39 @@ def _timer_tick():
 
 def _start_timer():
     """Start the redraw timer if not running."""
-    global _timer_running
-    if not _timer_running:
-        _timer_running = True
+    state = _get_state()
+    if not state["timer_running"]:
+        state["timer_running"] = True
         try:
             bpy.app.timers.register(_timer_tick, first_interval=0.05)
         except Exception:
-            _timer_running = False
+            state["timer_running"] = False
 
 
 def _stop_timer():
     """Stop the redraw timer."""
-    global _timer_running
-    if _timer_running:
+    state = _get_state()
+    if state["timer_running"]:
         try:
             bpy.app.timers.unregister(_timer_tick)
         except ValueError:
             pass
-        _timer_running = False
+        state["timer_running"] = False
+
+
+def _draw_text_with_shadow(text: str, x: float, y: float, color: tuple, fade: float):
+    """Draw text with a shadow for better readability."""
+    # Shadow (offset by 1 pixel)
+    r, g, b, a = SHADOW_COLOR
+    blf.color(0, r, g, b, a * fade)
+    blf.position(0, x + 1, y - 1, 0)
+    blf.draw(0, text)
+
+    # Main text
+    r, g, b, a = color
+    blf.color(0, r, g, b, a * fade)
+    blf.position(0, x, y, 0)
+    blf.draw(0, text)
 
 
 def _draw_overlay():
@@ -116,8 +163,9 @@ def _draw_overlay():
     except (AttributeError, KeyError):
         font_size = 18  # Default if settings not available
 
+    entries = _get_state()["entries"]
     now = time.time()
-    visible = [e for e in _entries if now - e.timestamp < EXPIRE_SECONDS][-MAX_VISIBLE:]
+    visible = [e for e in entries if now - e.timestamp < EXPIRE_SECONDS][-MAX_VISIBLE:]
     if not visible:
         return
 
@@ -136,10 +184,15 @@ def _draw_overlay():
             if age > EXPIRE_SECONDS - FADE_DURATION
             else 1.0
         )
-        r, g, b, a = COLORS.get(entry.level, COLORS["INFO"])
-        blf.color(0, r, g, b, a * fade)
-        blf.position(0, x, y, 0)
-        blf.draw(0, f"[{entry.level}] {entry.message}")
+        color = COLORS.get(entry.level, COLORS["INFO"])
+
+        # Format message with count if duplicated
+        if entry.count > 1:
+            text = f"[{entry.level}] {entry.message} (x{entry.count})"
+        else:
+            text = f"[{entry.level}] {entry.message}"
+
+        _draw_text_with_shadow(text, x, y, color, fade)
         y -= line_height
 
 
@@ -156,4 +209,4 @@ def unregister():
     if _draw_handler:
         bpy.types.SpaceNodeEditor.draw_handler_remove(_draw_handler, "WINDOW")
         _draw_handler = None
-    _entries.clear()
+    _get_state()["entries"].clear()
