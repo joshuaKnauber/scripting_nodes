@@ -36,13 +36,23 @@ jobs:
         working-directory: docs
         run: npm run build
 
+      - name: Restructure build for GitHub Pages
+        working-directory: docs
+        run: |
+          # Move assets into the basename folder so /scripting_nodes/assets/ works
+          mv build/client/assets build/client/scripting_nodes/assets
+          # Copy favicon
+          cp build/client/favicon.ico build/client/scripting_nodes/favicon.ico
+          # Copy SPA fallback
+          cp build/client/__spa-fallback.html build/client/scripting_nodes/__spa-fallback.html
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/build/client
+          path: docs/build/client/scripting_nodes
 
   deploy:
     environment:
