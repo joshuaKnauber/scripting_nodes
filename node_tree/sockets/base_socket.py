@@ -358,8 +358,7 @@ class ScriptingSocket:
                 to_socket = self.to_sockets()
                 if to_socket:
                     return to_socket[0].python_value
-                storage_key = self._get_socket_storage_key()
-                return self.node.get(storage_key, self.default_python_value)
+                return self.default_python_value
             else:
                 # returns this program inputs python value or its default
                 storage_key = self._get_socket_storage_key()
@@ -468,9 +467,9 @@ class ScriptingSocket:
         else:
             # check validity of connection
             node_tree = getattr(self.node, "node_tree", None)
-            if not check_validity or (node_tree and node_tree.is_valid_connection(
-                self, socket
-            )):
+            if not check_validity or (
+                node_tree and node_tree.is_valid_connection(self, socket)
+            ):
                 to_sockets.append(socket)
         return to_sockets
 
@@ -493,9 +492,9 @@ class ScriptingSocket:
                     return None
             # check connection validity
             node_tree = getattr(self.node, "node_tree", None)
-            if not check_validity or (node_tree and node_tree.is_valid_connection(
-                from_out, self
-            )):
+            if not check_validity or (
+                node_tree and node_tree.is_valid_connection(from_out, self)
+            ):
                 return from_out
         return None
 
