@@ -82,7 +82,9 @@ class ScriptingBaseNode:
             + self.code_global
             + self.code_register
             + self.code_unregister
-            + "".join([socket.code for socket in self.outputs])
+            + "".join(
+                [socket.code for socket in self.outputs if hasattr(socket, "code")]
+            )
         )
         # reset code
         self.code = ""
@@ -90,7 +92,12 @@ class ScriptingBaseNode:
         self.code_register = ""
         self.code_unregister = ""
         for out in self.outputs:
-            out.code = ""
+            if hasattr(out, "code"):
+                out.code = ""
+        # Skip generation if any sockets are not custom sockets (e.g. during reroute operations)
+        for socket in list(self.inputs) + list(self.outputs):
+            if not hasattr(socket, "eval"):
+                return
         # generate new code
         self.generate()
         new_code = (
@@ -98,7 +105,9 @@ class ScriptingBaseNode:
             + self.code_global
             + self.code_register
             + self.code_unregister
-            + "".join([socket.code for socket in self.outputs])
+            + "".join(
+                [socket.code for socket in self.outputs if hasattr(socket, "code")]
+            )
         )
         if prev_code != new_code:
             # propagate changes

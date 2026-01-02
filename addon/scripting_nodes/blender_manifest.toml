@@ -20,11 +20,19 @@ tags = ["Development", "Node"]
 
 # Bundle Python wheels for dependencies
 wheels = [
+  # Core addon dependencies
   "./wheels/autopep8-2.3.2-py2.py3-none-any.whl",
   "./wheels/pycodestyle-2.14.0-py2.py3-none-any.whl",
   "./wheels/names_generator-0.2.0-py3-none-any.whl",
   "./wheels/cmdkit-2.7.7-py3-none-any.whl",
-  "./wheels/langchain-1.2.0-py3-none-any.whl",
+  # HTTP client for AI API calls
+  "./wheels/httpx-0.28.1-py3-none-any.whl",
+  "./wheels/httpcore-1.0.9-py3-none-any.whl",
+  "./wheels/h11-0.16.0-py3-none-any.whl",
+  "./wheels/certifi-2025.11.12-py3-none-any.whl",
+  "./wheels/idna-3.11-py3-none-any.whl",
+  "./wheels/sniffio-1.3.1-py3-none-any.whl",
+  "./wheels/anyio-4.12.0-py3-none-any.whl",
 ]
 
 [build]
