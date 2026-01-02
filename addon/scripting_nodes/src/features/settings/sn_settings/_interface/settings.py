@@ -1,5 +1,5 @@
 from email import header
-from scripting_nodes.src.lib.editor.editor import in_sn_tree
+from .....lib.editor.editor import in_sn_tree
 import bpy
 
 

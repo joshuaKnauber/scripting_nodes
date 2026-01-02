@@ -10,10 +10,10 @@ This node:
 6. For LOGIC type: calls function with data arguments, provides return values
 """
 
-from scripting_nodes.src.lib.utils.code.format import indent
-from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
-from scripting_nodes.src.features.nodes.categories.Groups.group_utils import (
+from .....lib.utils.code.format import indent
+from ....node_tree.node_tree import ScriptingNodeTree
+from ...base_node import ScriptingBaseNode
+from .group_utils import (
     FLOW_SOCKET_TYPES,
     get_group_input_node,
     get_socket_idname,

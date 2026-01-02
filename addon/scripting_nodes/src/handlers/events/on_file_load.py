@@ -1,18 +1,18 @@
-from scripting_nodes.src.handlers.msgbus.node_tree_name import subscribe_to_name_change
+from ..msgbus.node_tree_name import subscribe_to_name_change
 from names_generator import generate_name
-from scripting_nodes.src.features.node_tree.code_gen.modules.modules import (
+from ...features.node_tree.code_gen.modules.modules import (
     unregister_module,
 )
-from scripting_nodes.src.features.node_tree.code_gen.modules.persisted import (
+from ...features.node_tree.code_gen.modules.persisted import (
     get_persisted_modules,
     get_pending_removal,
     clear_pending_removal,
 )
-from scripting_nodes.src.features.node_tree.code_gen.file_management.clear_addon import (
+from ...features.node_tree.code_gen.file_management.clear_addon import (
     clear_module_files,
 )
-from scripting_nodes.src.lib.constants.paths import ADDON_FOLDER
-from scripting_nodes.src.handlers.timers.node_tree_watcher import (
+from ...lib.constants.paths import ADDON_FOLDER
+from ..timers.node_tree_watcher import (
     register_node_tree_watcher,
 )
 import addon_utils

@@ -1,11 +1,11 @@
 from typing import Literal, Set
-from scripting_nodes.src.lib.utils.sockets.sockets import (
+from ...lib.utils.sockets.sockets import (
     from_socket,
     socket_index,
     to_socket,
 )
-from scripting_nodes.src.lib.utils.code.format import normalize_indents
-from scripting_nodes.src.features.sockets.conversions import get_conversion
+from ...lib.utils.code.format import normalize_indents
+from .conversions import get_conversion
 import bpy
 
 # Thread-local set to track sockets currently being evaluated (recursion guard)

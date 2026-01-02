@@ -1,5 +1,5 @@
-from scripting_nodes.src.lib.utils.code.format import indent
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
+from ......lib.utils.code.format import indent
+from ....base_node import ScriptingBaseNode
 import bpy
 
 

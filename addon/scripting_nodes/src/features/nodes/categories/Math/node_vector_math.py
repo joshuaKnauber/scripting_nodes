@@ -1,5 +1,5 @@
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
-from scripting_nodes.src.lib.utils.sockets.modify import update_socket_type
+from ...base_node import ScriptingBaseNode
+from .....lib.utils.sockets.modify import update_socket_type
 import bpy
 
 

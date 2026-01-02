@@ -1,5 +1,5 @@
-from scripting_nodes.src.lib.utils.code.format import indent
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
+from .....lib.utils.code.format import indent
+from ...base_node import ScriptingBaseNode
 import bpy
 
 
@@ -26,7 +26,7 @@ class SNA_Node_Print(ScriptingBaseNode, bpy.types.Node):
             _print_msg = {text_eval}
             print(_print_msg)
             try:
-                from scripting_nodes.src.handlers.draw.log_overlay import add_log
+                from .....handlers.draw.log_overlay import add_log
                 add_log("INFO", str(_print_msg))
             except: pass
             {next_code} 

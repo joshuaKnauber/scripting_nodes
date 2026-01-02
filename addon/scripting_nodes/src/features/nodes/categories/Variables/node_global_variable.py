@@ -1,7 +1,7 @@
-from scripting_nodes.src.features.sockets.socket_types import DATA_SOCKET_ENUM_ITEMS
-from scripting_nodes.src.lib.utils.sockets.modify import update_socket_type
-from scripting_nodes.src.lib.utils.code.format import indent
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
+from ....sockets.socket_types import DATA_SOCKET_ENUM_ITEMS
+from .....lib.utils.sockets.modify import update_socket_type
+from .....lib.utils.code.format import indent
+from ...base_node import ScriptingBaseNode
 import bpy
 
 

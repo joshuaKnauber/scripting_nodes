@@ -1,7 +1,7 @@
-from scripting_nodes.src.features.nodes.references.reference_properties import (
+from ..nodes.references.reference_properties import (
     SNA_NodeReference,
 )
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+from ...lib.utils.node_tree.scripting_node_trees import (
     node_by_id,
 )
 from .ui_settings.ui_properties import SNA_UISettings

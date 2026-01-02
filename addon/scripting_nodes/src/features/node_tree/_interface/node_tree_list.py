@@ -1,4 +1,4 @@
-from scripting_nodes.src.lib.utils.is_sn import is_sn
+from ....lib.utils.is_sn import is_sn
 import bpy
 
 

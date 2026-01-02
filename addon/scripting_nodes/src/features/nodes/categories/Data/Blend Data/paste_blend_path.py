@@ -2,7 +2,7 @@ import bpy
 import re
 from typing import List, Tuple, Optional
 
-from scripting_nodes.src.lib.utils.blend_data.path_utils import (
+from ......lib.utils.blend_data.path_utils import (
     parse_blend_data_path,
     infer_output_type as _infer_output_type,
 )

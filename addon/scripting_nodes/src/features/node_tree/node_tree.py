@@ -1,16 +1,16 @@
 import re
-from scripting_nodes.src.lib.utils.uuid import get_short_id
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+from ...lib.utils.uuid import get_short_id
+from ...lib.utils.node_tree.scripting_node_trees import (
     node_by_id,
     scripting_node_trees,
     sn_nodes,
 )
-from scripting_nodes.src.lib.utils.sockets.sockets import (
+from ...lib.utils.sockets.sockets import (
     from_nodes,
     from_socket,
     to_nodes,
 )
-from scripting_nodes.src.lib.utils.is_sn import is_sn
+from ...lib.utils.is_sn import is_sn
 import bpy
 
 

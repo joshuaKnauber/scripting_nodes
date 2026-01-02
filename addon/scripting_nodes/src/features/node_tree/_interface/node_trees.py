@@ -1,4 +1,4 @@
-from scripting_nodes.src.lib.editor.editor import is_sn_editor
+from ....lib.editor.editor import is_sn_editor
 import bpy
 
 

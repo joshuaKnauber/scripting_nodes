@@ -1,6 +1,6 @@
 import shutil
 import os
-from scripting_nodes.src.lib.constants.paths import ADDON_FOLDER
+from .....lib.constants.paths import ADDON_FOLDER
 
 
 def clear_addon_files(addon_path):

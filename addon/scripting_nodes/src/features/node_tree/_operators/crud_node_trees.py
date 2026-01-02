@@ -1,7 +1,7 @@
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+from ....lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
 )
-from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
+from ..node_tree import ScriptingNodeTree
 import bpy
 
 

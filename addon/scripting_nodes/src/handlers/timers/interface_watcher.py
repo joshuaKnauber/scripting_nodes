@@ -5,7 +5,7 @@ This monitors changes to the interface items (sockets) in group trees
 and triggers socket synchronization when changes are detected.
 """
 
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+from ...lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
 )
 import bpy

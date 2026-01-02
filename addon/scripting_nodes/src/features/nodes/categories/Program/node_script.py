@@ -1,7 +1,7 @@
-from scripting_nodes.src.lib.utils.code.format import indent
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import node_by_id
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
-from scripting_nodes.src.features.sockets.socket_types import (
+from .....lib.utils.code.format import indent
+from .....lib.utils.node_tree.scripting_node_trees import node_by_id
+from ...base_node import ScriptingBaseNode
+from ....sockets.socket_types import (
     DATA_SOCKET_ENUM_ITEMS,
     DATA_SOCKET_ICONS,
 )

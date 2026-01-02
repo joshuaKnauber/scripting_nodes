@@ -1,6 +1,6 @@
-from scripting_nodes.src.lib.utils.code.format import indent
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
-from scripting_nodes.src.features.nodes.categories.Interface.blend_data_mixin import (
+from .....lib.utils.code.format import indent
+from ...base_node import ScriptingBaseNode
+from .blend_data_mixin import (
     BlendDataModeMixin,
 )
 import bpy

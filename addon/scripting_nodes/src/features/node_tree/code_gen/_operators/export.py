@@ -1,4 +1,4 @@
-from scripting_nodes.src.features.node_tree.code_gen.generator import generate_addon
+from ..generator import generate_addon
 import os
 import bpy
 import shutil

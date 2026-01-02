@@ -6,7 +6,7 @@ Patches for Blender's node tree interface menus to:
 """
 
 import bpy
-from scripting_nodes.src.lib.editor.editor import in_sn_tree
+from ....lib.editor.editor import in_sn_tree
 
 
 # Store references to original functions

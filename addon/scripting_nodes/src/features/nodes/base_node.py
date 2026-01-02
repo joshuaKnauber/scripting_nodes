@@ -1,22 +1,22 @@
 from email.policy import default
 from typing import Literal, Set
 import traceback
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+from ...lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
     sn_nodes,
 )
-from scripting_nodes.src.lib.utils.sockets.sockets import (
+from ...lib.utils.sockets.sockets import (
     from_nodes,
     socket_index,
     to_nodes,
 )
-from scripting_nodes.src.lib.utils.screen.screen import redraw_all
-from scripting_nodes.src.lib.utils.code.format import normalize_indents
-from scripting_nodes.src.features.sockets.socket_types import SOCKET_IDNAME_TYPE
-from scripting_nodes.src.lib.utils.uuid import get_short_id
-from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
-from scripting_nodes.src.features.node_tree.code_gen.watcher import watch_changes
-from scripting_nodes.src.lib.utils.logger import log
+from ...lib.utils.screen.screen import redraw_all
+from ...lib.utils.code.format import normalize_indents
+from ..sockets.socket_types import SOCKET_IDNAME_TYPE
+from ...lib.utils.uuid import get_short_id
+from ..node_tree.node_tree import ScriptingNodeTree
+from ..node_tree.code_gen.watcher import watch_changes
+from ...lib.utils.logger import log
 import bpy
 
 

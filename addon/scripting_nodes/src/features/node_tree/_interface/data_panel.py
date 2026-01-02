@@ -1,10 +1,10 @@
 import bpy
-from scripting_nodes.src.lib.editor.editor import in_sn_tree
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+from ....lib.editor.editor import in_sn_tree
+from ....lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
     sn_nodes,
 )
-from scripting_nodes.src.features.sockets.socket_types import DATA_SOCKET_ICONS
+from ...sockets.socket_types import DATA_SOCKET_ICONS
 
 # Node type identifiers for properties and variables
 PROPERTY_NODE_TYPES = {

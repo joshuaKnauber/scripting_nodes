@@ -1,6 +1,6 @@
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
-from scripting_nodes.src.lib.utils.sockets.modify import update_socket_type
-from scripting_nodes.src.features.sockets.socket_types import DATA_SOCKET_ENUM_ITEMS
+from ...base_node import ScriptingBaseNode
+from .....lib.utils.sockets.modify import update_socket_type
+from ....sockets.socket_types import DATA_SOCKET_ENUM_ITEMS
 import bpy
 
 

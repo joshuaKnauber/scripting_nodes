@@ -5,7 +5,7 @@ and BLENDER (direct blend data path) modes.
 
 import bpy
 
-from scripting_nodes.src.lib.utils.blend_data.path_utils import format_name
+from .....lib.utils.blend_data.path_utils import format_name
 
 
 class BlendDataModeMixin:

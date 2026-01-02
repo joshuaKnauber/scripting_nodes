@@ -1,7 +1,7 @@
-from scripting_nodes.src.lib.utils.code.format import indent
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import node_by_id
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
-from scripting_nodes.src.features.nodes.categories.Interface._operators.panel_picker import (
+from .....lib.utils.code.format import indent
+from .....lib.utils.node_tree.scripting_node_trees import node_by_id
+from ...base_node import ScriptingBaseNode
+from ._operators.panel_picker import (
     is_picker_active,
     get_active_picker_node_id,
     get_space_type_items,

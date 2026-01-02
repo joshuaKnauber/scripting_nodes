@@ -1,4 +1,4 @@
-from scripting_nodes.src.features.node_tree.code_gen.watcher import watch_changes
+from ...features.node_tree.code_gen.watcher import watch_changes
 import bpy
 
 

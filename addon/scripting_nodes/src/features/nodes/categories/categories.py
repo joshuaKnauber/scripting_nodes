@@ -1,9 +1,8 @@
 import inspect
-from scripting_nodes.src.features.nodes.categories.Groups.node_group import (
+from .Groups.node_group import (
     SNA_Node_Group,
 )
-from scripting_nodes import auto_load
-from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
+from ...node_tree.node_tree import ScriptingNodeTree
 import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
 import os
@@ -30,6 +29,9 @@ _node_categories = {}
 
 def get_node_categories():
     global _node_categories
+    # Import auto_load lazily to avoid circular import during module initialization
+    from ..... import auto_load
+
     if _node_categories:
         return _node_categories
     else:

@@ -1,5 +1,5 @@
 import bpy
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import node_by_id
+from ....lib.utils.node_tree.scripting_node_trees import node_by_id
 
 
 def go_to_node(context, node):

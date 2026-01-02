@@ -1,10 +1,10 @@
 import bpy
 
-from scripting_nodes.src.lib.utils.sockets.sockets import (
+from ....lib.utils.sockets.sockets import (
     dynamic_socket_by_label,
     socket_index,
 )
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import node_by_id
+from ....lib.utils.node_tree.scripting_node_trees import node_by_id
 
 
 class SNA_OT_AddDynamicSocket(bpy.types.Operator):

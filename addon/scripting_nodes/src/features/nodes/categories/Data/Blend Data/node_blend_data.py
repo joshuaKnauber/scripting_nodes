@@ -1,5 +1,5 @@
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
-from scripting_nodes.src.lib.utils.blend_data.path_utils import (
+from ....base_node import ScriptingBaseNode
+from ......lib.utils.blend_data.path_utils import (
     format_name,
     get_label_from_path,
     get_socket_name_from_path,

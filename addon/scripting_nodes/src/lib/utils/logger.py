@@ -12,7 +12,7 @@ def log(level: Literal["INFO", "WARNING", "ERROR"], *args, **kwargs):
 
     # Also add to overlay
     try:
-        from scripting_nodes.src.handlers.draw.log_overlay import add_log
+        from ...handlers.draw.log_overlay import add_log
 
         add_log(level, message)
     except Exception:

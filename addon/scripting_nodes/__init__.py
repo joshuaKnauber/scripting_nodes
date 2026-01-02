@@ -11,20 +11,40 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-# Create module alias for extension compatibility
-# Extensions are loaded as bl_ext.<repo>.<name>, but imports use 'scripting_nodes'
 import sys
+import os
 from pathlib import Path
 
-sys.modules["scripting_nodes"] = sys.modules[__name__]
 
-# Load bundled wheels (needed for dev workflow; installed extensions load these automatically)
-_wheels_dir = Path(__file__).parent / "wheels"
-if _wheels_dir.exists():
-    for whl in _wheels_dir.glob("*.whl"):
-        whl_path = str(whl)
-        if whl_path not in sys.path:
-            sys.path.insert(0, whl_path)
+def _is_extension():
+    """Check if running as a Blender extension (bl_ext.*)."""
+    return __name__.startswith("bl_ext.")
+
+
+def _wheels_available():
+    """Check if wheel packages are already available."""
+    try:
+        import names_generator
+
+        return True
+    except ImportError:
+        return False
+
+
+# Wheel loading strategy:
+# 1. When running as extension AND wheels are available: Blender loaded them, do nothing
+# 2. When running as extension but wheels missing: dev workflow issue, load manually
+# 3. When not running as extension: legacy addon mode, load manually
+#
+# We only avoid sys.path modification when Blender has properly loaded the wheels,
+# which is the case for proper extension installations from the repository.
+if not _wheels_available():
+    _wheels_dir = Path(__file__).parent / "wheels"
+    if _wheels_dir.exists():
+        for whl in _wheels_dir.glob("*.whl"):
+            whl_path = str(whl)
+            if whl_path not in sys.path:
+                sys.path.insert(0, whl_path)
 
 bl_info = {
     "name": "Scripting Nodes",

@@ -8,8 +8,8 @@ This node:
 4. For LOGIC type: returns data values
 """
 
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
-from scripting_nodes.src.features.nodes.categories.Groups.group_utils import (
+from ...base_node import ScriptingBaseNode
+from .group_utils import (
     FLOW_SOCKET_TYPES,
     get_group_type,
     get_socket_idname,

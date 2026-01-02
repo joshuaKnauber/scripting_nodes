@@ -1,6 +1,6 @@
-from scripting_nodes.src.lib.utils.code.format import indent
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import node_by_id
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
+from .....lib.utils.code.format import indent
+from .....lib.utils.node_tree.scripting_node_trees import node_by_id
+from ...base_node import ScriptingBaseNode
 import bpy
 
 

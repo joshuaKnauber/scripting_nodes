@@ -41,7 +41,7 @@ class SNA_OT_BlendDataPastePath(bpy.types.Operator):
             self.report({"WARNING"}, "Clipboard doesn't contain a valid bpy path")
             return {"CANCELLED"}
 
-        from scripting_nodes.src.lib.utils.blend_data.path_utils import (
+        from ......lib.utils.blend_data.path_utils import (
             parse_blend_data_path,
         )
 

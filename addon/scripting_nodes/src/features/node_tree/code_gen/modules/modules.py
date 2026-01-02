@@ -1,5 +1,5 @@
-from scripting_nodes.src.lib.utils.logger import log_if
-from scripting_nodes.src.lib.constants.paths import ADDON_FOLDER
+from .....lib.utils.logger import log_if
+from .....lib.constants.paths import ADDON_FOLDER
 import addon_utils
 import sys
 import bpy

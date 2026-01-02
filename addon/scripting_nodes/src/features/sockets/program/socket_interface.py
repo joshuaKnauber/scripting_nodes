@@ -1,4 +1,4 @@
-from scripting_nodes.src.lib.utils.sockets.sockets import from_socket
+from ....lib.utils.sockets.sockets import from_socket
 from ..base_socket import ScriptingBaseSocket
 import bpy
 

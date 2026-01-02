@@ -5,7 +5,7 @@ BlendDataIndex - Singleton index of all blend data properties with search.
 from typing import Dict, List, Tuple
 from difflib import SequenceMatcher
 
-from scripting_nodes.src.features.blend_data.property_info import PropertyInfo
+from .property_info import PropertyInfo
 
 
 class BlendDataIndex:

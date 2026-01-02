@@ -1,4 +1,4 @@
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+from ....lib.utils.node_tree.scripting_node_trees import (
     node_by_id,
     scripting_node_trees,
     sn_nodes,

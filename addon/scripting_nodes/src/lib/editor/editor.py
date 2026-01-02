@@ -1,4 +1,4 @@
-from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
+from ...features.node_tree.node_tree import ScriptingNodeTree
 import bpy
 
 

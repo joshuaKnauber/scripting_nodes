@@ -5,10 +5,10 @@ Functions for indexing Blender RNA properties.
 import bpy
 from typing import Any, List, Set, Tuple
 
-from scripting_nodes.src.lib.utils.blend_data.path_utils import format_name
-from scripting_nodes.src.features.blend_data.property_info import PropertyInfo
-from scripting_nodes.src.features.blend_data.index import BlendDataIndex
-from scripting_nodes.src.features.blend_data.constants import AREA_NAMES
+from ...lib.utils.blend_data.path_utils import format_name
+from .property_info import PropertyInfo
+from .index import BlendDataIndex
+from .constants import AREA_NAMES
 
 
 def index_rna_properties(

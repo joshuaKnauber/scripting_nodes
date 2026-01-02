@@ -1,5 +1,5 @@
 from .socket_interface import LayoutSocket
-from scripting_nodes.src.lib.utils.sockets.sockets import from_socket, to_socket
+from ....lib.utils.sockets.sockets import from_socket, to_socket
 from ..base_socket import ScriptingBaseSocket
 import bpy
 

@@ -1,5 +1,5 @@
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import sn_nodes
-from scripting_nodes.src.lib.utils.code.format import normalize_indents
+from .....lib.utils.node_tree.scripting_node_trees import sn_nodes
+from .....lib.utils.code.format import normalize_indents
 import bpy
 
 

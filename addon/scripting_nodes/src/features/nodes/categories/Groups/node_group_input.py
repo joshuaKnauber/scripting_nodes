@@ -9,9 +9,9 @@ This node:
 5. For LOGIC type: just generates the function with data parameters
 """
 
-from scripting_nodes.src.lib.utils.code.format import indent
-from scripting_nodes.src.features.nodes.base_node import ScriptingBaseNode
-from scripting_nodes.src.features.nodes.categories.Groups.group_utils import (
+from .....lib.utils.code.format import indent
+from ...base_node import ScriptingBaseNode
+from .group_utils import (
     FLOW_SOCKET_TYPES,
     get_socket_idname,
     socket_name_to_param,

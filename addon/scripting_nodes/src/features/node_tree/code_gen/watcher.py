@@ -1,9 +1,9 @@
-from scripting_nodes.src.lib.utils.screen.screen import redraw_all
+from ....lib.utils.screen.screen import redraw_all
 from .modules.modules import (
     reload_addon,
     unregister_module,
 )
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import has_addon
+from ....lib.utils.node_tree.scripting_node_trees import has_addon
 from .generator import generate_addon, has_changes
 import bpy
 

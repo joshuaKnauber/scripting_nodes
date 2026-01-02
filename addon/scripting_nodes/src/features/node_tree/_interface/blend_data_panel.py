@@ -1,6 +1,6 @@
 import bpy
-from scripting_nodes.src.lib.editor.editor import in_sn_tree
-from scripting_nodes.src.features.blend_data import BlendDataIndex
+from ....lib.editor.editor import in_sn_tree
+from ...blend_data import BlendDataIndex
 
 
 class SNA_OT_CopyPropertyPath(bpy.types.Operator):

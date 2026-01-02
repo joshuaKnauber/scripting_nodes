@@ -1,5 +1,5 @@
-from scripting_nodes.src.lib.utils.logger import log_if
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
+from ....lib.utils.logger import log_if
+from ....lib.utils.node_tree.scripting_node_trees import (
     has_addon,
     scripting_node_trees,
     sn_nodes,
@@ -7,7 +7,7 @@ from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import (
 from .file_management.folder_structure import ensure_folder_structure
 from .file_management.clear_addon import clear_addon_files
 from .file_management.default_files import ensure_default_files
-from scripting_nodes.src.lib.constants.paths import (
+from ....lib.constants.paths import (
     ADDON_FOLDER,
     get_addon_path,
 )

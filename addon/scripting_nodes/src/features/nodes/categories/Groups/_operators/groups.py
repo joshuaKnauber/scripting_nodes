@@ -2,15 +2,15 @@
 Operators for creating and editing group node trees.
 """
 
-from scripting_nodes.src.features.nodes.categories.Groups.node_group_output import (
+from ..node_group_output import (
     SNA_Node_GroupOutput,
 )
-from scripting_nodes.src.features.nodes.categories.Groups.node_group_input import (
+from ..node_group_input import (
     SNA_Node_GroupInput,
 )
 import bpy
-from scripting_nodes.src.features.node_tree.node_tree import ScriptingNodeTree
-from scripting_nodes.src.lib.utils.node_tree.scripting_node_trees import node_by_id
+from .....node_tree.node_tree import ScriptingNodeTree
+from ......lib.utils.node_tree.scripting_node_trees import node_by_id
 
 
 class SNA_OT_AddGroup(bpy.types.Operator):
