@@ -16,5 +16,3 @@ A visual scripting addon for blender.
 - To create a new build run `python .\scripts\build.py`
 
 ### Documentation
-
-`TODO`

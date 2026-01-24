@@ -1,0 +1,121 @@
+from .....lib.utils.code.format import indent
+from ...base_node import ScriptingBaseNode
+from .blend_data_mixin import BlendDataModeMixin
+import bpy
+
+
+class SNA_Node_EnumMenu(BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node):
+    """Display an enum property as a dropdown menu"""
+
+    bl_idname = "SNA_Node_EnumMenu"
+    bl_label = "Enum Menu"
+    sn_reference_properties = {"prop"}
+
+    def update_prop(self, context):
+        self._generate()
+
+    # Mode properties from mixin
+    mode: bpy.props.EnumProperty(
+        name="Mode",
+        items=BlendDataModeMixin.get_mode_items(),
+        default="CUSTOM",
+        update=BlendDataModeMixin.update_mode,
+    )
+
+    blend_data_path: bpy.props.StringProperty(
+        name="Blend Data Path",
+        description="The full blend data path",
+        default="",
+    )
+
+    blend_prop_name: bpy.props.StringProperty(
+        name="Property Name",
+        description="The property name (last segment)",
+        default="",
+    )
+
+    needs_data_input: bpy.props.BoolProperty(
+        name="Needs Data Input",
+        description="Whether the Data input socket is needed",
+        default=False,
+    )
+
+    # Node-specific properties
+    prop: bpy.props.StringProperty(name="Property", update=update_prop)
+
+    emboss: bpy.props.BoolProperty(
+        name="Emboss",
+        description="Draw the button with an embossed look",
+        default=True,
+        update=update_prop,
+    )
+
+    expand: bpy.props.BoolProperty(
+        name="Expand",
+        description="Expand enum items as individual buttons",
+        default=False,
+        update=update_prop,
+    )
+
+    icon_only: bpy.props.BoolProperty(
+        name="Icon Only",
+        description="Draw only the icon for enum items",
+        default=False,
+        update=update_prop,
+    )
+
+    def draw(self, context, layout):
+        self.draw_mode_toggle(layout, context)
+        row = layout.row(align=True)
+        row.prop(self, "emboss", toggle=True)
+        row.prop(self, "expand", toggle=True)
+        row.prop(self, "icon_only", toggle=True)
+
+    def on_create(self):
+        self.add_input("ScriptingInterfaceSocket")
+        self.add_input("ScriptingBlendDataSocket", "Data")
+        self.add_input("ScriptingStringSocket", "Text")
+        self.add_output("ScriptingInterfaceSocket")
+
+    def on_ref_change(self, node):
+        self._generate()
+
+    def generate(self):
+        layout_code = self.inputs[0].get_layout()
+        output_code = self.outputs[0].eval()
+
+        data_code, prop_name, error = self.get_prop_data_and_name()
+
+        if error:
+            self.code = f"""
+                {layout_code}.label(text="{error}", icon="ERROR")
+                {indent(output_code, 4)}
+            """
+            return
+
+        if not prop_name:
+            self.code = f"""
+                {indent(output_code, 4)}
+            """
+            return
+
+        text_code = self.inputs["Text"].eval()
+
+        args = [f"data={data_code}", f'property="{prop_name}"']
+        args.append(f"text={text_code}")
+
+        if not self.emboss:
+            args.append("emboss=False")
+
+        if self.expand:
+            args.append("expand=True")
+
+        if self.icon_only:
+            args.append("icon_only=True")
+
+        args_str = ", ".join(args)
+
+        self.code = f"""
+            {layout_code}.prop({args_str})
+            {indent(output_code, 3)}
+        """

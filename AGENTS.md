@@ -1,25 +1,48 @@
 # Scripting Nodes - Agent Handbook
 
 ## 1. Project Snapshot
-- Visual scripting add-on targeting Blender 4.3; ships under `addon/scripting_nodes` with `__init__.py` registering via `auto_load.py`.
+- Visual scripting add-on targeting Blender 5.0+ (manifest minimum version 5.0.0, compatible with 4.3+); ships under `addon/scripting_nodes` with `__init__.py` registering via `auto_load.py`.
+- Current version: 4.0.0 (see `blender_manifest.toml`).
 - Goal: let users construct Blender add-ons through node graphs that generate Python modules.
 - Runtime state is stored on `bpy.context.scene.sna` (see `addon/scripting_nodes/src/features/settings`), which controls dev flags and generated addon metadata.
 
 ## 2. Repository Layout
 - `addon/`: Blender add-on package copied into Blender's add-ons directory.
   - `scripting_nodes/auto_load.py`: discovers submodules, topologically registers classes.
+  - `scripting_nodes/blender_manifest.toml`: extension manifest defining version, dependencies, and bundled wheels.
   - `scripting_nodes/src/`: core source tree (features, handlers, libraries, utils).
+    - `features/ai/`: AI integration for node generation via OpenAI-compatible APIs.
+      - `generation.py`: threaded AI generation engine using httpx for streaming responses.
+      - `operators.py`: modal operators for AI chat interactions in script nodes.
+    - `features/blend_data/`: runtime indexing and search system for Blender RNA properties.
+      - `index.py`: singleton BlendDataIndex for property storage and fuzzy search.
+      - `indexer.py`: recursive RNA property indexer with configurable depth and context.
+      - `property_info.py`: metadata structure for indexed properties.
+      - `constants.py`: mappings for area types and property categorization.
     - `features/nodes/`: node definitions grouped by category; every node subclasses `features/nodes/base_node.py`.
     - `features/node_tree/`: custom `ScriptingNodeTree`, code generation pipeline, operators, UI integration.
+      - `_interface/blend_data_panel.py`: sidebar panel for browsing and searching indexed Blender data.
+      - `_interface/blend_data_operators.py`: operators for indexing and pasting property paths.
+      - `_interface/ai_panel.py`: UI integration for AI generation features.
     - `features/settings/`: `Scene.sna` property groups (addon/dev/ui settings, node references).
+      - `addon_settings/preferences.py`: addon preferences including AI provider configuration (OpenRouter, OpenAI, Anthropic).
     - `features/sockets/`: custom socket classes and utilities.
     - `handlers/`: Blender handlers for events, msgbus, timers; `timers/node_tree_watcher.py` hooks the code-gen watcher.
     - `lib/`: shared utilities (code formatting, logging, bpy helpers, name generator).
     - `assets/`: placeholder for bundled resources (currently empty).
-  - `wheels/`: bundled Python wheels (Black formatter and dependencies) loaded by Blender's extension system.
+  - `wheels/`: bundled Python wheels loaded by Blender's extension system:
+    - HTTP client stack: `httpx`, `httpcore`, `h11`, `certifi`, `idna`, `sniffio`, `anyio`
+    - Code formatting: `autopep8`, `pycodestyle`
+    - Utilities: `names_generator`, `cmdkit`
 - `scripts/`: host tooling.
   - `dev.py`: syncs the local addon into Blender's add-ons directory, launches Blender, handles restart shortcuts.
   - `build.py`: packages the addon into `builds/scripting_nodes_<version>.zip`.
+- `docs/`: React Router + Fumadocs documentation website (separate from addon).
+  - Built with Vite, TypeScript, and TailwindCSS.
+  - `content/docs/`: MDX documentation content (concepts, nodes, quickstart).
+  - `app/`: React Router application source.
+  - `build/client/`: production build output (static site).
+  - Run `npm run dev` in the docs folder to develop documentation locally.
 - `config.template.yaml`: sample config; copy to `config.yaml` with machine-specific Blender paths (ignored by Git).
 - `requirements.txt`: Python tooling needed for scripts (`fake-bpy-module`, `pyyaml`, `psutil`, `colorama`).
 - `venv/`: committed convenience virtualenv. Prefer local venvs for isolation; avoid modifying this copy.
@@ -58,10 +81,12 @@
 - **Scene store**: `Scene.sna` aggregate holds addon settings (`addon_properties.py`), developer options (`dev_properties.py`), UI state, and a reference collection linking generated code to nodes.
 - **Sockets and references**: custom sockets live under `src/features/sockets`; utilities help with dynamic sockets and link traversal (`lib/utils/sockets`).
 - **Handlers**: event handlers respond to file load/save, depsgraph updates, etc., ensuring modules persist across sessions and watchers stay registered.
+- **AI Integration**: threaded generation system (`features/ai/generation.py`) supports OpenAI-compatible APIs (OpenRouter, OpenAI, Anthropic) configured via addon preferences. Modal operators handle streaming responses without blocking Blender's UI.
+- **Blend Data Indexing**: singleton `BlendDataIndex` (`features/blend_data/index.py`) recursively indexes RNA properties from `bpy.data` and `bpy.context` with fuzzy search. Users can index specific contexts (areas) or the full data set. Indexed properties are browsable/searchable via sidebar panel.
 
 ## 7. Coding Standards and Patterns
 - Follow Blender API expectations (subclass `bpy.types.Node`, `Operator`, etc.) and register via `auto_load`.
-- Keep Python roughly PEP 8; Black is bundled as wheels for production code formatting.
+- Keep Python roughly PEP 8; autopep8 is bundled as wheels for production code formatting.
 - Nodes should:
   - Subclass `ScriptingBaseNode` (see `features/nodes/base_node.py`).
   - Define `bl_idname`, `bl_label`, sockets in `on_create`, and implement `generate()` to populate output code strings.
@@ -69,7 +94,8 @@
   - Manage dynamic sockets via provided helpers (`add_input`, `add_output`).
 - Code interacting with generated files must honour dirtiness flags (`is_dirty`, `node_tree.is_dirty`) to avoid unnecessary rebuilds.
 - When introducing new handlers or property groups, ensure they cleanly register/unregister to avoid Blender residual state.
-- External dependencies should be added to `requirements.txt` and, if needed in Blender runtime, bundled or lazily imported.
+- External dependencies should be added to `requirements.txt` and, if needed in Blender runtime, bundled as wheels in `addon/scripting_nodes/wheels/` and registered in `blender_manifest.toml`.
+- AI features use httpx for async HTTP calls; keep network operations in background threads to avoid blocking the UI.
 
 ## 8. Testing and Validation
 - No automated tests are present; validation is manual within Blender.
@@ -85,8 +111,26 @@
 - `rg <pattern> addon/scripting_nodes/src`: fast code search.
 - Generated dev addon path: `<ADDONS_PATH>\scripting_nodes` (overwritten on each sync).
 - Temporary dev module inside Blender: `scripting_nodes_temp` (see `lib/constants/paths.py`).
+- Documentation site:
+  - `cd docs && npm run dev`: launch local documentation server.
+  - `cd docs && npm run build`: build static documentation site to `docs/build/client/`.
+  - Documentation uses Fumadocs (React Router + MDX) for content management.
 
-## 10. Tips for Future Agents
+## 10. Documentation System
+- The `docs/` directory contains a separate React Router + Fumadocs website for user-facing documentation.
+- Built with modern web stack: React Router 7, TypeScript, Vite, TailwindCSS, and Fumadocs.
+- Content is written in MDX format under `docs/content/docs/` with categories for concepts, nodes, and quickstart guides.
+- Search powered by Orama with local indexing.
+- To work on documentation:
+  1. Navigate to `docs/` directory.
+  2. Run `npm install` if dependencies aren't installed.
+  3. Use `npm run dev` for hot-reloading development server.
+  4. Edit MDX files in `content/docs/` - changes appear live.
+  5. Build for production with `npm run build`.
+- Documentation is separate from the Blender addon but shares the same version. Keep docs in sync with addon features.
+- The built static site can be deployed to any static hosting (GitHub Pages, Vercel, Netlify, etc.).
+
+## 11. Tips for Future Agents
 - Use Context7 (`resolve-library-id` then `get-library-docs`) to check the most current Blender Python API (`bpy`) documentation when available. This ensures you're referencing up-to-date API signatures and best practices.
 - Never edit files inside Blender's add-ons directory directly; treat `addon/` as the source of truth and let tooling copy it.
 - Respect user-specific configs: avoid committing `config.yaml` or machine-specific paths.

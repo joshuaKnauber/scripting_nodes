@@ -126,6 +126,39 @@ CONVERSIONS = {
     ("ScriptingIntegerSocket", "ScriptingBlendDataSocket"): "None",
     ("ScriptingVectorSocket", "ScriptingBlendDataSocket"): "None",
     ("ScriptingColorSocket", "ScriptingBlendDataSocket"): "None",
+    ("ScriptingListSocket", "ScriptingBlendDataSocket"): "None",
+    # To List
+    ("ScriptingStringSocket", "ScriptingListSocket"): "list({value})",
+    ("ScriptingBooleanSocket", "ScriptingListSocket"): "[{value}]",
+    ("ScriptingFloatSocket", "ScriptingListSocket"): "[{value}]",
+    ("ScriptingIntegerSocket", "ScriptingListSocket"): "[{value}]",
+    ("ScriptingVectorSocket", "ScriptingListSocket"): "list({value})",
+    ("ScriptingColorSocket", "ScriptingListSocket"): "list({value})",
+    (
+        "ScriptingDataSocket",
+        "ScriptingListSocket",
+    ): "({value} if isinstance({value}, list) else [{value}])",
+    ("ScriptingBlendDataSocket", "ScriptingListSocket"): "[{value}]",
+    # From List to other types
+    ("ScriptingListSocket", "ScriptingStringSocket"): "str({value})",
+    ("ScriptingListSocket", "ScriptingBooleanSocket"): "bool({value})",
+    (
+        "ScriptingListSocket",
+        "ScriptingFloatSocket",
+    ): "(float({value}[0]) if {value} else 0.0)",
+    (
+        "ScriptingListSocket",
+        "ScriptingIntegerSocket",
+    ): "(int({value}[0]) if {value} else 0)",
+    (
+        "ScriptingListSocket",
+        "ScriptingVectorSocket",
+    ): "(tuple({value}[:3]) if len({value}) >= 3 else (0.0, 0.0, 0.0))",
+    (
+        "ScriptingListSocket",
+        "ScriptingColorSocket",
+    ): "(tuple({value}[:4]) if len({value}) >= 4 else (0.0, 0.0, 0.0, 1.0))",
+    ("ScriptingListSocket", "ScriptingDataSocket"): "{value}",
 }
 
 

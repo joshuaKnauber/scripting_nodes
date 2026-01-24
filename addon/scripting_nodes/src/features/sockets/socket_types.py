@@ -19,6 +19,7 @@ SOCKET_IDNAME_TYPE = Literal[
     "ScriptingIntegerSocket",
     "ScriptingVectorSocket",
     "ScriptingColorSocket",
+    "ScriptingListSocket",
 ]
 
 DATA_SOCKET_ICONS = {
@@ -30,6 +31,7 @@ DATA_SOCKET_ICONS = {
     "ScriptingIntegerSocket": "CON_TRANSFORM",
     "ScriptingVectorSocket": "EMPTY_AXIS",
     "ScriptingColorSocket": "COLOR",
+    "ScriptingListSocket": "OUTLINER_OB_GROUP_INSTANCE",
 }
 
 DATA_SOCKET_IDNAMES = [
@@ -41,6 +43,7 @@ DATA_SOCKET_IDNAMES = [
     "ScriptingIntegerSocket",
     "ScriptingVectorSocket",
     "ScriptingColorSocket",
+    "ScriptingListSocket",
 ]
 
 DATA_SOCKET_ENUM_ITEMS = [
@@ -99,5 +102,12 @@ DATA_SOCKET_ENUM_ITEMS = [
         "Color",
         DATA_SOCKET_ICONS["ScriptingColorSocket"],
         7,
+    ),
+    (
+        "ScriptingListSocket",
+        "List",
+        "List (Array)",
+        DATA_SOCKET_ICONS["ScriptingListSocket"],
+        8,
     ),
 ]
