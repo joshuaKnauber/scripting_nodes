@@ -149,7 +149,7 @@ class BlenderLauncher:
 
     def quit_blender(self):
         """Terminate any running Blender instances."""
-        exe_name = os.path.split(self.config["BLENDER_EXECUTABLE"])[1]
+        exe_name = os.path.split(self.config["BLENDER_EXECUTABLE"])[1].lower()
         for proc in psutil.process_iter(["pid", "name"]):
             if exe_name in proc.info["name"].lower():
                 proc.terminate()
@@ -172,6 +172,15 @@ class BlenderLauncher:
     def run(self):
         """Main run loop."""
         colorama.init(autoreset=True)
+
+        # On Unix, switch terminal to cbreak mode so keypresses are immediate
+        old_tty_settings = None
+        if os.name != "nt":
+            import tty
+            import termios
+
+            old_tty_settings = termios.tcgetattr(sys.stdin)
+            tty.setcbreak(sys.stdin.fileno())
 
         try:
             while True:
@@ -201,6 +210,11 @@ class BlenderLauncher:
         except KeyboardInterrupt:
             print(colorama.Fore.GREEN + "\nExiting...")
             self.quit_blender()
+        finally:
+            if old_tty_settings is not None:
+                import termios
+
+                termios.tcsetattr(sys.stdin, termios.TCSADRAIN, old_tty_settings)
 
 
 if __name__ == "__main__":
