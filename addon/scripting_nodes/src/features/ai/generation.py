@@ -193,60 +193,62 @@ def _execute_tool(tool_name: str, arguments: dict, node) -> str:
         return f"Error: Unknown tool '{tool_name}'"
 
 
-SYSTEM_PROMPT = """You are an expert Blender Python (bpy) script writer and assistant working within the Scripting Nodes addon.
+SYSTEM_PROMPT = """You are an expert Blender Python (bpy) assistant working within the Scripting Nodes addon.
 
 ## About Scripting Nodes
-Scripting Nodes (formerly known as Serpens) is a visual scripting addon for Blender that allows users to build Blender addons using a node-based system. Instead of writing Python code from scratch, users connect nodes together to create functionality. The node system then generates Python code that becomes a working Blender addon.
+Scripting Nodes is a visual scripting addon for Blender that allows users to build Blender addons using a node-based system. Users connect nodes together to create functionality. The node system generates Python code that becomes a working Blender addon. One special node type is the Script Node, which lets users write custom Python that integrates with the visual node system.
 
-## Your Context
-You are helping the user write code inside a **Script Node**. The Script Node allows users to write custom Python code that integrates with the visual node system.
+## Your Role
+You are a general assistant for users working in the Scripting Nodes editor. You can:
+- Answer questions about Blender, Python scripting, and the node system
+- Help users understand their node setup
+- Write and edit code in Script Nodes (when one is selected)
 
-## CRITICAL: What You Can Write
-Your script runs INSIDE an operator, panel, or other Blender construct created by the node system. You can ONLY write:
-- **Functions** (def my_function():)
-- **Imperative code** (direct bpy calls, loops, conditionals)
-- **Variables and data structures**
+The user's current node selection context is provided with each message. If a Script Node is actively selected and has a script file, you can use tools to edit it.
 
-## NEVER Write These (the node system creates them):
-- Operators (class ... bpy.types.Operator)
-- Panels (class ... bpy.types.Panel)
-- Property groups
-- Menus
-- Any bpy.types subclass
+## When Editing Script Nodes
+Scripts run INSIDE operators, panels, or other constructs created by the node system. You can ONLY write:
+- Functions (def my_function():)
+- Imperative code (direct bpy calls, loops, conditionals)
+- Variables and data structures
+
+NEVER write these (the node system creates them):
+- Operators, Panels, Property groups, Menus, or any bpy.types subclass
 - register() / unregister() functions
 - bl_info dictionaries
-- if __name__ == "__main__" blocks
-- bpy.utils.register_class() calls
 
-## Access to bpy
-The `bpy` module is always available. Import other standard library modules as needed at the top of your script.
+The bpy module is always available. Import other standard library modules as needed.
 
 ## Tools Available
-You have tools to directly edit the user's script file:
+You have tools to edit the active Script Node's file (only usable when a Script Node is selected):
 - write_script: Write a complete new script, replacing everything in the file
 - replace_in_script: Replace specific text in the script (old_text must match exactly)
 
+If no Script Node is selected, do NOT use these tools. Just answer conversationally.
+
 ## Response Style
-- Be **concise**. Keep explanations short (1-2 sentences max).
+- Be concise. Keep explanations short (1-2 sentences max).
 - Focus on what you did, not lengthy explanations of how the code works.
-- The user can read the code - don't repeat what's obvious from reading it.
 - Skip unnecessary pleasantries or filler text.
+- IMPORTANT: Use plain text only. No markdown formatting (no headers, bold, italic, bullet points, or code blocks). Your responses are displayed in a simple text widget that cannot render markdown.
 
 ## Guidelines
-1. Analyze the current script content provided
-2. Use the appropriate tool to make changes directly to the file
-3. Briefly state what you did (e.g., "Added an operator that creates a cube")
-
-IMPORTANT: Always use the tools to make changes. Do not just show code - actually write it using the tools."""
+- If a Script Node is selected with a script file, analyze the content and use tools to make changes directly.
+- If no Script Node is selected, answer the user's question conversationally.
+- Briefly state what you did after making changes."""
 
 
 def _generation_thread(
-    node, user_message: str, script_content: str, response_queue: queue.Queue
+    node, user_message: str, script_content: str, response_queue: queue.Queue,
+    conversation_history=None, context_info=""
 ):
     """Background thread that handles the API calls."""
     try:
         # Build conversation history
-        messages = node.get_ai_messages()
+        if conversation_history is not None:
+            messages = conversation_history
+        else:
+            messages = node.get_ai_messages() if node else []
 
         # Build the messages list for the API
         api_messages = [{"role": "system", "content": SYSTEM_PROMPT}]
@@ -256,12 +258,15 @@ def _generation_thread(
             api_messages.append({"role": msg["role"], "content": msg["content"]})
 
         # Add current context to the user message
-        context_message = f"""Current script content:
-```python
-{script_content if script_content else "# Empty script"}
-```
-
-User request: {user_message}"""
+        context_parts = []
+        if context_info:
+            context_parts.append(context_info)
+        if script_content:
+            context_parts.append(f"Current script content:\n```python\n{script_content}\n```")
+        elif node:
+            context_parts.append("Current script content:\n```python\n# Empty script\n```")
+        context_parts.append(f"User request: {user_message}")
+        context_message = "\n\n".join(context_parts)
 
         api_messages.append({"role": "user", "content": context_message})
 
@@ -414,7 +419,11 @@ User request: {user_message}"""
         response_queue.put(full_response)
 
     except httpx.HTTPStatusError as e:
-        response_queue.put(f"API Error: {e.response.status_code} - {e.response.text}")
+        try:
+            detail = e.response.read().decode()
+        except Exception:
+            detail = str(e)
+        response_queue.put(f"API Error: {e.response.status_code} - {detail}")
     except Exception as e:
         response_queue.put(f"Error: {str(e)}")
     finally:
@@ -426,21 +435,23 @@ User request: {user_message}"""
         _generation_state["current_node"] = None
 
 
-def start_generation(node, user_message: str):
+def start_generation(node, user_message: str, conversation_history=None, context_info=""):
     """Start AI generation in a background thread.
 
     Args:
-        node: The script node to work with
+        node: The script node to work with (can be None for general chat)
         user_message: The user's message
+        conversation_history: Optional list of message dicts to use instead of node messages
+        context_info: Optional extra context string about selected nodes etc.
     """
     global _generation_state
 
     # Get script content before starting thread (must be done from main thread)
-    script_content = _get_script_content(node)
+    script_content = _get_script_content(node) if node else ""
 
     _generation_state["is_generating"] = True
     _generation_state["should_stop"] = False
-    _generation_state["current_node_id"] = node.id
+    _generation_state["current_node_id"] = node.id if node else "__global__"
     _generation_state["current_node"] = node
     _generation_state["response_queue"] = queue.Queue()
 
@@ -448,6 +459,7 @@ def start_generation(node, user_message: str):
     thread = threading.Thread(
         target=_generation_thread,
         args=(node, user_message, script_content, _generation_state["response_queue"]),
+        kwargs={"conversation_history": conversation_history, "context_info": context_info},
         daemon=True,
     )
     _generation_state["thread"] = thread
