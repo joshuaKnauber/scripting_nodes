@@ -55,14 +55,9 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
             if to:
                 return to.eval()
             return ""
-        else:
-            # Group trees must always use production code because
-            # return statements don't work with exec() in dev mode
-            is_group_tree = getattr(self.node.node_tree, "is_group", False)
-            if bpy.context.scene.sna.addon.build_with_production_code or is_group_tree:
-                return normalize_indents(self.node.code)
-            else:
-                return f"bpy.context.scene.sna.execute('{self.node.id}', globals(), locals())"
+        if bpy.context.scene.sna.addon.build_with_production_code:
+            return normalize_indents(self.node.code)
+        return f"bpy.context.scene.sna.execute('{self.node.id}', globals(), locals())"
 
     def _eval_data(self):
         if self.is_output:

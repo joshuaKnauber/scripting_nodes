@@ -1,7 +1,4 @@
 import inspect
-from .Groups.node_group import (
-    SNA_Node_Group,
-)
 from ...node_tree.node_tree import ScriptingNodeTree
 import nodeitems_utils
 from nodeitems_utils import NodeCategory, NodeItem
