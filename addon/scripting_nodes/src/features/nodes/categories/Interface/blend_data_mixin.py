@@ -35,7 +35,7 @@ class BlendDataModeMixin:
         if register_on == "Operator":
             return "self"
         if register_on == "Preferences":
-            return "bpy.context.preferences.addons[__package__].preferences"
+            return 'bpy.context.preferences.addons[__package__.rsplit(".", 1)[0]].preferences'
         return None
 
     def apply_class_body_socket_visibility(self, prop_ref_attr: str = "prop"):

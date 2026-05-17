@@ -67,7 +67,7 @@ class SNA_Node_SetProperty(ScriptingBaseNode, bpy.types.Node):
             return
         if register_on == "Preferences":
             self.code_inline = f"""
-                bpy.context.preferences.addons[__package__].preferences.{prop_name} = {self.inputs[2].eval()}
+                bpy.context.preferences.addons[__package__.rsplit(".", 1)[0]].preferences.{prop_name} = {self.inputs[2].eval()}
                 {indent(self.outputs[0].eval(), 4)}
             """
             return

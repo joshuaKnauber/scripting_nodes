@@ -67,7 +67,7 @@ class SNA_Node_GetProperty(ScriptingBaseNode, bpy.types.Node):
             return
         if register_on == "Preferences":
             self.outputs[1].code = (
-                f"bpy.context.preferences.addons[__package__].preferences.{prop_name}"
+                f'bpy.context.preferences.addons[__package__.rsplit(".", 1)[0]].preferences.{prop_name}'
             )
             return
 

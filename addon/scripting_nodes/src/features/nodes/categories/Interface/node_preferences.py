@@ -39,10 +39,16 @@ class SNA_Node_Preferences(
             if line:
                 annotations.append(line)
 
-        # bl_idname must match the addon's package name so Blender resolves
-        # context.preferences.addons[__package__].preferences correctly.
-        # __package__ is the top-level module name at runtime.
-        class_attrs = ['bl_idname = __package__']
+        addon = bpy.context.scene.sna.addon
+        class_name = f"{addon.class_prefix}_AP_Preferences_{self.id}"
+
+        # bl_idname must match the addon's top-level package so Blender
+        # resolves context.preferences.addons[<name>].preferences correctly.
+        # Tree modules live at <addon>/addon/<tree>.py, so __package__ is
+        # "<addon>.addon" (legacy) or "bl_ext.<repo>.<addon>.addon"
+        # (extension). Trimming the final ".addon" segment yields the
+        # right bl_idname in both cases.
+        class_attrs = ['bl_idname = __package__.rsplit(".", 1)[0]']
         class_attrs.extend(annotations)
         attrs_code = "\n    ".join(class_attrs)
 
@@ -51,7 +57,7 @@ class SNA_Node_Preferences(
         draw_body = draw_socket.eval("pass")
 
         self.code_module = f"""
-class SNA_AP_Preferences_{self.id}(bpy.types.AddonPreferences):
+class {class_name}(bpy.types.AddonPreferences):
     {attrs_code}
 
     def draw(self, context):
