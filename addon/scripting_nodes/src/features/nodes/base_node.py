@@ -1,6 +1,5 @@
 from email.policy import default
 from typing import Literal, Set
-import contextvars
 import traceback
 from ...lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
@@ -19,13 +18,6 @@ from ..node_tree.node_tree import ScriptingNodeTree
 from ..node_tree.code_gen.watcher import watch_changes
 from ...lib.utils.logger import log
 import bpy
-
-
-# Tracks nodes currently mid-_generate to break cascade cycles.
-# Acyclic graphs never see this fire.
-_generate_stack: contextvars.ContextVar[frozenset] = contextvars.ContextVar(
-    "_generate_stack", default=frozenset()
-)
 
 
 class ScriptingBaseNode:
@@ -87,20 +79,6 @@ class ScriptingBaseNode:
     def _generate(self):
         if not self.id:
             return
-        visited = _generate_stack.get()
-        if self.id in visited:
-            log(
-                "WARN",
-                f"_generate cycle detected at {self.bl_label} ({self.id})",
-            )
-            return
-        token = _generate_stack.set(visited | {self.id})
-        try:
-            self._generate_body()
-        finally:
-            _generate_stack.reset(token)
-
-    def _generate_body(self):
         prev_code = (
             self.code_imports
             + self.code_module
@@ -140,7 +118,8 @@ class ScriptingBaseNode:
             )
         )
         if prev_code != new_code:
-            # propagate changes
+            # propagate changes - cycles are prevented at link creation, so
+            # this naturally terminates via the prev_code != new_code check
             for out in self.outputs:
                 for node in to_nodes(out):
                     node._generate()

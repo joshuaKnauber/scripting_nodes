@@ -11,6 +11,7 @@ from ...lib.utils.sockets.sockets import (
     to_nodes,
 )
 from ...lib.utils.is_sn import is_sn
+from ...lib.utils.logger import log
 import bpy
 
 
@@ -53,9 +54,44 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     def update(self):
         if self.pause_updates:
             return
+        self._remove_cyclic_links()
         self.update_links()
         self.update_node_references()
         bpy.app.timers.register(lambda: self.update_reroutes(), first_interval=0.001)
+
+    def _remove_cyclic_links(self):
+        """Strip any links that participate in a cycle. Logs each removal."""
+        cyclic = [link for link in self.links if self._creates_cycle(link)]
+        if not cyclic:
+            return
+        self.pause_updates = True
+        try:
+            for link in cyclic:
+                log(
+                    "WARNING",
+                    f"Removed cyclic link: {link.from_node.name} -> {link.to_node.name}",
+                )
+                self.links.remove(link)
+        finally:
+            self.pause_updates = False
+
+    def _creates_cycle(self, link):
+        """True if from_node is reachable from to_node via downstream links."""
+        target = link.from_node
+        visited = set()
+        stack = [link.to_node]
+        while stack:
+            node = stack.pop()
+            if node is target:
+                return True
+            key = node.name
+            if key in visited:
+                continue
+            visited.add(key)
+            for out in node.outputs:
+                for next_link in out.links:
+                    stack.append(next_link.to_node)
+        return False
 
     def update_links(self):
         new_links = set([*map(lambda l: (l, l.from_node, l.to_node), self.links)])

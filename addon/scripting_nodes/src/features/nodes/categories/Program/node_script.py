@@ -179,27 +179,6 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
     # JSON-encoded list of variables: [{"name": str, "socket_type": str, "is_output": bool}, ...]
     variables_json: bpy.props.StringProperty(default="[]")
 
-    # AI Chat properties
-    ai_message_input: bpy.props.StringProperty(
-        name="Message",
-        description="Enter your message to the AI",
-        default="",
-    )
-
-    # JSON-encoded list of messages: [{"role": str, "content": str}, ...]
-    ai_messages_json: bpy.props.StringProperty(default="[]")
-
-    def get_ai_messages(self):
-        """Get the list of AI messages as Python list."""
-        try:
-            return json.loads(self.ai_messages_json)
-        except json.JSONDecodeError:
-            return []
-
-    def set_ai_messages(self, messages):
-        """Set the list of AI messages from Python list."""
-        self.ai_messages_json = json.dumps(messages)
-
     def get_variables(self):
         """Get the list of variables as Python list."""
         try:

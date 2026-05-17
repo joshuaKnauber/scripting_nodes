@@ -20,8 +20,15 @@ import os
 import bpy
 
 
+# Last-seen value of build_with_production_code. Used to trigger a full regen
+# of every node only when the flag flips (since that changes every node's
+# inline code). Per-edit changes rely on the _generate cascade instead.
+_last_production_flag = None
+
+
 def generate_addon(base_path=ADDON_FOLDER):
     """Generate the addon files for the current module."""
+    global _last_production_flag
     addon_path = get_addon_path(base_path=base_path)
     files_changed = False
 
@@ -42,10 +49,14 @@ def generate_addon(base_path=ADDON_FOLDER):
     # ensure default files
     files_changed = ensure_default_files(addon_path) or files_changed
 
-    # regenerate nodes to match production or dev mode
-    for ntree in scripting_node_trees():
-        for node in sn_nodes(ntree):
-            node._generate()
+    # regenerate every node only when the dev/prod flag changes (or first run);
+    # otherwise the per-node _generate cascade already kept things current.
+    current_flag = bpy.context.scene.sna.addon.build_with_production_code
+    if _last_production_flag != current_flag:
+        _last_production_flag = current_flag
+        for ntree in scripting_node_trees():
+            for node in sn_nodes(ntree):
+                node._generate()
 
     # update node tree files
     node_tree_folder_path = os.path.join(addon_path, "addon")
