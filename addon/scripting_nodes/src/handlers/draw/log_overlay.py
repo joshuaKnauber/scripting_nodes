@@ -13,7 +13,8 @@ MAX_ENTRIES = 50
 MAX_VISIBLE = 20
 EXPIRE_SECONDS = 10.0
 FADE_DURATION = 2.0
-PADDING = (15, 40)  # x, y from edges
+PADDING = (25, 40)  # x, y from edges
+BREADCRUMB_GAP = 12  # extra vertical pixels between breadcrumb and the first log line
 
 # Use a global namespace to ensure all module instances share the same state
 # This fixes the issue where the module gets loaded multiple times
@@ -48,6 +49,7 @@ COLORS = {
     "ERROR": (1.0, 0.3, 0.3, 0.9),
 }
 SHADOW_COLOR = (0.0, 0.0, 0.0, 0.6)
+BREADCRUMB_COLOR = (1.0, 1.0, 1.0, 1.0)
 
 
 def add_log(level: Literal["INFO", "WARNING", "ERROR"], message: str):
@@ -144,8 +146,16 @@ def _draw_text_with_shadow(text: str, x: float, y: float, color: tuple, fade: fl
     blf.draw(0, text)
 
 
+def _breadcrumb_text(space):
+    """Return the path breadcrumb string, or None if not inside a group."""
+    if not space or len(space.path) <= 1:
+        return None
+    names = [item.node_tree.name for item in space.path if item.node_tree]
+    return "  >  ".join(names) if names else None
+
+
 def _draw_overlay():
-    """Draw handler callback."""
+    """Draw handler callback - breadcrumb (always) + log overlay (when enabled)."""
     ctx = bpy.context
     if not ctx.area or ctx.area.type != "NODE_EDITOR":
         return
@@ -154,20 +164,11 @@ def _draw_overlay():
     if not is_sn_editor(ctx):
         return
 
-    # Check settings - default to showing if we can't access them
+    # Font size - shared across breadcrumb and logs
     try:
-        dev = ctx.scene.sna.dev
-        if not dev.show_log_overlay:
-            return
-        font_size = dev.log_overlay_font_size
+        font_size = ctx.scene.sna.dev.log_overlay_font_size
     except (AttributeError, KeyError):
-        font_size = 18  # Default if settings not available
-
-    entries = _get_state()["entries"]
-    now = time.time()
-    visible = [e for e in entries if now - e.timestamp < EXPIRE_SECONDS][-MAX_VISIBLE:]
-    if not visible:
-        return
+        font_size = 18
 
     region = ctx.region
     if not region:
@@ -176,6 +177,26 @@ def _draw_overlay():
     blf.size(0, font_size)
     line_height = int(font_size * 1.3)
     x, y = PADDING[0], region.height - PADDING[1]
+
+    # Breadcrumb - drawn first when inside a group, pushes logs down with an
+    # extra gap below for separation from the (visually distinct) log lines
+    crumb = _breadcrumb_text(ctx.space_data)
+    if crumb:
+        _draw_text_with_shadow(crumb, x, y, BREADCRUMB_COLOR, 1.0)
+        y -= line_height + BREADCRUMB_GAP
+
+    # Logs - only when enabled
+    try:
+        if not ctx.scene.sna.dev.show_log_overlay:
+            return
+    except (AttributeError, KeyError):
+        return
+
+    entries = _get_state()["entries"]
+    now = time.time()
+    visible = [e for e in entries if now - e.timestamp < EXPIRE_SECONDS][-MAX_VISIBLE:]
+    if not visible:
+        return
 
     for entry in visible:
         age = now - entry.timestamp

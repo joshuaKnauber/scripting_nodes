@@ -38,6 +38,9 @@ class ScriptingBaseNode:
 
     sn_options: Set[Literal["ROOT_NODE"]] = {}
     sn_reference_properties: Set[str] = set()
+    # PointerProperty fields whose value is another ScriptingNodeTree. Used by
+    # the dependency tracker to know "this node depends on that tree's file".
+    sn_tree_reference_properties: Set[str] = set()
 
     id: bpy.props.StringProperty(
         default="", name="ID", description="Unique ID of the node"
@@ -123,13 +126,16 @@ class ScriptingBaseNode:
                 for node in from_nodes(inpt):
                     node._generate()
             # mark node tree as dirty if this node contributes to the file's
-            # written content (root code, register/unregister, imports, globals)
+            # written content (root code, register/unregister, imports, globals).
+            # For group trees, ANY node change can affect the emitted function
+            # body, so mark dirty unconditionally.
             if (
                 "ROOT_NODE" in self.sn_options
                 or self.code_register
                 or self.code_unregister
                 or self.code_imports
                 or self.code_global
+                or getattr(self.node_tree, "is_group", False)
             ):
                 self.node_tree.is_dirty = True
                 # Trigger immediate regeneration to avoid stale file on redraw

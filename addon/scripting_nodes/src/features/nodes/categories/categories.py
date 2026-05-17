@@ -35,7 +35,8 @@ def get_node_categories():
         node_categories = {}
 
         for cls in auto_load.ordered_classes:
-            if cls.bl_rna.base and cls.bl_rna.base.identifier == "Node":
+            # issubclass picks up NodeCustomGroup subclasses too
+            if isinstance(cls, type) and issubclass(cls, bpy.types.Node):
                 path = os.path.dirname(inspect.getfile(cls))
                 dirs = path.split(os.sep)
 

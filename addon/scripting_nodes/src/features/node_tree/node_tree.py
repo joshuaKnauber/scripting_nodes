@@ -31,19 +31,31 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     id: bpy.props.StringProperty(default="")
     is_dirty: bpy.props.BoolProperty(default=True)
     pause_updates: bpy.props.BoolProperty(default=False)
+    is_group: bpy.props.BoolProperty(
+        default=False,
+        description=(
+            "If true, this tree is a function (node group) - it compiles to a "
+            "Python function rather than addon-level code, and is callable from "
+            "Group nodes in other trees"
+        ),
+    )
 
     @property
     def module_name(self):
+        """Stable Python module name for this tree.
+
+        Always suffixed with the tree's id so adding/removing sibling trees
+        with the same display name never changes any other tree's module
+        name. Renaming the tree itself still rotates the name (handled by
+        a separate dep-tracking path)."""
+
         def clean_name(name):
             return (
                 re.sub(r"[^a-zA-Z\s]", "", name).replace(" ", "_").lower()
                 or "sn_module"
             )
 
-        cleaned_name = clean_name(self.name)
-        names = [*map(lambda n: clean_name(n.name), scripting_node_trees())]
-        same_names = [n for n in names if n == cleaned_name]
-        return f"{cleaned_name}_{self.id}" if len(same_names) > 1 else cleaned_name
+        return f"{clean_name(self.name)}_{self.id}"
 
     def init(self):
         self.name = "Node Tree"

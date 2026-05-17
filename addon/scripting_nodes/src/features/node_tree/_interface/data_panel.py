@@ -258,3 +258,117 @@ class SNA_PT_DataVariables(bpy.types.Panel):
         )
         if ref and ref.node:
             draw_referencing_nodes(layout, ref.name)
+
+
+def _count_group_interface(tree):
+    """Return (param_count, return_count) for a group tree."""
+    in_count = 0
+    out_count = 0
+    for node in tree.nodes:
+        if node.bl_idname == "SNA_Node_GroupInput":
+            in_count = len(node.get_items())
+        elif node.bl_idname == "SNA_Node_GroupOutput":
+            out_count = len(node.get_items())
+    return in_count, out_count
+
+
+def _count_group_callers(group_tree):
+    """How many SNA_Node_Group instances reference this group tree."""
+    count = 0
+    for ntree in scripting_node_trees():
+        for node in sn_nodes(ntree):
+            if (
+                getattr(node, "bl_idname", "") == "SNA_Node_Group"
+                and getattr(node, "node_tree", None) is group_tree
+            ):
+                count += 1
+    return count
+
+
+def _draw_group_callers(layout, group_tree):
+    """List the Call Group nodes that reference this group tree."""
+    callers = []
+    for ntree in scripting_node_trees():
+        for node in sn_nodes(ntree):
+            if (
+                getattr(node, "bl_idname", "") == "SNA_Node_Group"
+                and getattr(node, "node_tree", None) is group_tree
+            ):
+                callers.append(node)
+    if not callers:
+        return
+    box = layout.box()
+    col = box.column(align=True)
+    for node in callers:
+        row = col.row(align=True)
+        row.label(text=node.bl_label, icon="NODE")
+        row.label(text=f"[{node.id_data.name}]")
+        op = row.operator("sna.go_to_node", text="", icon="VIEWZOOM")
+        op.node_id = node.id
+
+
+class SNA_UL_FunctionsList(bpy.types.UIList):
+    bl_idname = "SNA_UL_FunctionsList"
+
+    def draw_item(
+        self, context, layout, data, item, icon, active_data, active_propname
+    ):
+        # item is a NodeTree from bpy.data.node_groups
+        in_count, out_count = _count_group_interface(item)
+        ref_count = _count_group_callers(item)
+
+        if self.layout_type in {"DEFAULT", "COMPACT"}:
+            row = layout.row(align=True)
+            row.label(text=item.name, icon="NODETREE")
+            sub = row.row()
+            sub.alignment = "RIGHT"
+            sub.label(text=f"in:{in_count} out:{out_count}")
+            sub.label(text=f"({ref_count})")
+        elif self.layout_type == "GRID":
+            layout.alignment = "CENTER"
+            layout.label(text=item.name, icon="NODETREE")
+
+    def filter_items(self, context, data, propname):
+        trees = getattr(data, propname)
+        flt_flags = [self.bitflag_filter_item] * len(trees)
+        for i, tree in enumerate(trees):
+            if not (
+                getattr(tree, "is_sn", False)
+                and getattr(tree, "is_group", False)
+            ):
+                flt_flags[i] = 0
+        return flt_flags, []
+
+
+class SNA_PT_DataFunctions(bpy.types.Panel):
+    bl_idname = "SNA_PT_DataFunctions"
+    bl_label = "Functions"
+    bl_space_type = "NODE_EDITOR"
+    bl_region_type = "UI"
+    bl_category = "Scripting Nodes"
+    bl_parent_id = "SNA_PT_Data"
+
+    @classmethod
+    def poll(cls, context):
+        return in_sn_tree(context)
+
+    def draw(self, context):
+        layout = self.layout
+        sna = context.scene.sna
+
+        row = layout.row()
+        row.template_list(
+            "SNA_UL_FunctionsList",
+            "",
+            bpy.data,
+            "node_groups",
+            sna.ui,
+            "active_function_index",
+            rows=4,
+        )
+
+        # Show the Call Group nodes that reference the active function
+        if 0 <= sna.ui.active_function_index < len(bpy.data.node_groups):
+            tree = bpy.data.node_groups[sna.ui.active_function_index]
+            if getattr(tree, "is_sn", False) and getattr(tree, "is_group", False):
+                _draw_group_callers(layout, tree)

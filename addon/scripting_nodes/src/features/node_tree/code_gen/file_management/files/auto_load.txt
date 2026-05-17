@@ -145,7 +145,9 @@ def iter_my_deps_from_parent_id(cls, my_classes_by_idname):
 def iter_my_classes(modules):
     base_types = get_register_base_types()
     for cls in get_classes_in_modules(modules):
-        if any(base in base_types for base in cls.__bases__):
+        # issubclass (not __bases__) so that classes inheriting through
+        # intermediates like NodeCustomGroup are still picked up.
+        if any(issubclass(cls, base) for base in base_types):
             if not getattr(cls, "is_registered", False):
                 yield cls
 
