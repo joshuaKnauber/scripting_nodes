@@ -28,7 +28,7 @@ class SNA_Node_NumberField(ScriptingBaseNode, bpy.types.Node):
     )
 
     def draw(self, context, layout):
-        layout.prop_search(self, "prop", context.scene.sna, "references", text="")
+        self.draw_reference_prop(layout, "prop")
         if not self.inputs[1].is_linked:
             layout.label(text="Connect data source", icon="INFO")
         row = layout.row(align=True)
@@ -48,14 +48,8 @@ class SNA_Node_NumberField(ScriptingBaseNode, bpy.types.Node):
         layout_code = self.inputs[0].get_layout()
         output_code = self.outputs[0].eval()
 
-        ref = bpy.context.scene.sna.references.get(self.prop)
-        if not ref or not ref.node:
-            self.code_inline = f"""
-                {indent(output_code, 4)}
-            """
-            return
-
-        prop_name = getattr(ref.node, "prop_name", "")
+        target = self.resolve_reference("prop")
+        prop_name = getattr(target, "prop_name", "") if target else ""
         if not prop_name:
             self.code_inline = f"""
                 {indent(output_code, 4)}

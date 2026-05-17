@@ -26,5 +26,12 @@ class SNA_Node_GlobalVariable(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         self.code_module = f"""
-            var_{self.id} = {self.inputs[0].eval()}
+            _var_{self.id} = {self.inputs[0].eval()}
+
+            def get_var_{self.id}():
+                return _var_{self.id}
+
+            def set_var_{self.id}(value):
+                global _var_{self.id}
+                _var_{self.id} = value
         """

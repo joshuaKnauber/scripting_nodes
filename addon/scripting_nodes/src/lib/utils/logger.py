@@ -1,6 +1,15 @@
 from typing import Literal
 
 
+def fmt_duration(seconds: float) -> str:
+    """Human-friendly duration string."""
+    if seconds < 1e-3:
+        return f"{seconds * 1e6:.0f}us"
+    if seconds < 1:
+        return f"{seconds * 1e3:.1f}ms"
+    return f"{seconds:.2f}s"
+
+
 def log(level: Literal["INFO", "WARNING", "ERROR"], *args, **kwargs):
     colors = {
         "INFO": "\033[92m",

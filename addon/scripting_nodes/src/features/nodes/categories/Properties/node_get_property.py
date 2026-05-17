@@ -10,15 +10,15 @@ class SNA_Node_GetProperty(ScriptingBaseNode, bpy.types.Node):
     sn_reference_properties = {"prop"}
 
     def update_prop(self, context):
-        ref = bpy.context.scene.sna.references.get(self.prop)
-        if ref and ref.node and hasattr(ref.node, "data_type"):
-            update_socket_type(self.outputs[1], ref.node.data_type)
+        target = self.resolve_reference("prop")
+        if target and hasattr(target, "data_type"):
+            update_socket_type(self.outputs[1], target.data_type)
         self._generate()
 
     prop: bpy.props.StringProperty(name="Property", update=update_prop)
 
     def draw(self, context, layout):
-        layout.prop_search(self, "prop", context.scene.sna, "references", text="")
+        self.draw_reference_prop(layout, "prop")
         if not self.inputs[1].is_linked:
             layout.label(text="Connect a data source", icon="INFO")
 
@@ -37,17 +37,19 @@ class SNA_Node_GetProperty(ScriptingBaseNode, bpy.types.Node):
         self.code_inline = f"""
             {indent(self.outputs[0].eval(), 3)}
         """
-        ref = bpy.context.scene.sna.references.get(self.prop)
-        if ref and ref.node:
-            prop_name = getattr(ref.node, "prop_name", "")
-            if prop_name:
-                if self.inputs[1].is_linked:
-                    source_code = self.inputs[1].eval()
-                    self.outputs[1].code = f"{source_code}.{prop_name}"
-                else:
-                    # No source connected - return None and log
-                    self.outputs[1].code = "None"
-                    self.code_inline = f"""
-                        print("Get Property: No data source connected for '{prop_name}'")
-                        {indent(self.outputs[0].eval(), 6)}
-                    """
+        target = self.resolve_reference("prop")
+        if not target:
+            return
+        prop_name = getattr(target, "prop_name", "")
+        if not prop_name:
+            return
+        if self.inputs[1].is_linked:
+            source_code = self.inputs[1].eval()
+            self.outputs[1].code = f"{source_code}.{prop_name}"
+        else:
+            # No source connected - return None and log
+            self.outputs[1].code = "None"
+            self.code_inline = f"""
+                print("Get Property: No data source connected for '{prop_name}'")
+                {indent(self.outputs[0].eval(), 6)}
+            """

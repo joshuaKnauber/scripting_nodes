@@ -52,11 +52,10 @@ def code_gen_node_tree(ntree):
     else:
         code += "\ndef unregister():\n    pass\n"
 
-    if bpy.context.scene.sna.addon.build_with_production_code:
-        try:
-            import autopep8
+    try:
+        import autopep8
 
-            code = autopep8.fix_code(code, options={"aggressive": 1})
-        except Exception as e:
-            print(f"[SN] autopep8 formatting failed: {e}")
+        code = autopep8.fix_code(code, options={"aggressive": 1})
+    except Exception as e:
+        print(f"[SN] autopep8 formatting failed: {e}")
     return code

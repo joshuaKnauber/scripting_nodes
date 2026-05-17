@@ -38,7 +38,6 @@ class SNA_PT_Addon_Settings(bpy.types.Panel):
         col.use_property_split = True
         col.use_property_decorate = False
 
-        col.prop(context.scene.sna.addon, "force_production")
         col.prop(context.scene.sna.addon, "persist_addon")
 
         layout.separator()

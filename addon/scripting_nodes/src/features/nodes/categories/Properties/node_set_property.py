@@ -10,15 +10,15 @@ class SNA_Node_SetProperty(ScriptingBaseNode, bpy.types.Node):
     sn_reference_properties = {"prop"}
 
     def update_prop(self, context):
-        ref = bpy.context.scene.sna.references.get(self.prop)
-        if ref and ref.node and hasattr(ref.node, "data_type"):
-            update_socket_type(self.inputs[2], ref.node.data_type)
+        target = self.resolve_reference("prop")
+        if target and hasattr(target, "data_type"):
+            update_socket_type(self.inputs[2], target.data_type)
         self._generate()
 
     prop: bpy.props.StringProperty(name="Property", update=update_prop)
 
     def draw(self, context, layout):
-        layout.prop_search(self, "prop", context.scene.sna, "references", text="")
+        self.draw_reference_prop(layout, "prop")
         if not self.inputs[1].is_linked:
             layout.label(text="Connect a data target", icon="INFO")
 
@@ -34,27 +34,22 @@ class SNA_Node_SetProperty(ScriptingBaseNode, bpy.types.Node):
         self._generate()
 
     def generate(self):
-        ref = bpy.context.scene.sna.references.get(self.prop)
-        if ref and ref.node:
-            prop_name = getattr(ref.node, "prop_name", "")
-            if prop_name:
-                if self.inputs[1].is_linked:
-                    target_code = self.inputs[1].eval()
-                    self.code_inline = f"""
-                        {target_code}.{prop_name} = {self.inputs[2].eval()}
-                        {indent(self.outputs[0].eval(), 6)}
-                    """
-                else:
-                    # No target connected - skip set and log
-                    self.code_inline = f"""
-                        print("Set Property: No data target connected for '{prop_name}'")
-                        {indent(self.outputs[0].eval(), 6)}
-                    """
-            else:
-                self.code_inline = f"""
-                    {indent(self.outputs[0].eval(), 5)}
-                """
-        else:
+        target = self.resolve_reference("prop")
+        prop_name = getattr(target, "prop_name", "") if target else ""
+        if not prop_name:
             self.code_inline = f"""
                 {indent(self.outputs[0].eval(), 4)}
+            """
+            return
+        if self.inputs[1].is_linked:
+            target_code = self.inputs[1].eval()
+            self.code_inline = f"""
+                {target_code}.{prop_name} = {self.inputs[2].eval()}
+                {indent(self.outputs[0].eval(), 6)}
+            """
+        else:
+            # No target connected - skip set and log
+            self.code_inline = f"""
+                print("Set Property: No data target connected for '{prop_name}'")
+                {indent(self.outputs[0].eval(), 6)}
             """

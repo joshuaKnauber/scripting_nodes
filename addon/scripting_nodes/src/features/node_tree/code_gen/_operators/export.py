@@ -14,8 +14,6 @@ class SNA_OT_ExportAddon(bpy.types.Operator):
     filter_folder: bpy.props.BoolProperty(default=True, options={"HIDDEN"})
 
     def execute(self, context):
-        context.scene.sna.addon.is_exporting = True
-
         try:
             # Ensure filepath ends with .zip
             path = self.filepath
@@ -29,7 +27,7 @@ class SNA_OT_ExportAddon(bpy.types.Operator):
 
             if os.path.exists(folder_path):
                 shutil.rmtree(folder_path)
-            generate_addon(dev_module=False, base_path=export_dir)
+            generate_addon(base_path=export_dir)
 
             # zip folder
             if os.path.exists(path):
@@ -48,8 +46,6 @@ class SNA_OT_ExportAddon(bpy.types.Operator):
             import traceback
 
             traceback.print_exc()
-        finally:
-            context.scene.sna.addon.is_exporting = False
 
         return {"FINISHED"}
 

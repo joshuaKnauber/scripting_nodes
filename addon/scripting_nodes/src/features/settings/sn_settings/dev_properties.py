@@ -5,13 +5,19 @@ class SNA_DevSettings(bpy.types.PropertyGroup):
 
     log_tree_rebuilds: bpy.props.BoolProperty(
         name="Log Tree Rebuilds",
-        description="Log when a dirty node tree gets rebuilt",
+        description=(
+            "For each dirty tree: log node count, codegen time, and whether the "
+            "file was actually written (i.e. content differed) or skipped"
+        ),
         default=False,
     )
 
     log_reload_times: bpy.props.BoolProperty(
         name="Log Reload Times",
-        description="Log the time it takes to reload the addon",
+        description=(
+            "Log each addon reload: smart (per-module) or full, which trees + "
+            "dependents reloaded, codegen vs reload time"
+        ),
         default=False,
     )
 

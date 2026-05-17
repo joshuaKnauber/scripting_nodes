@@ -1,4 +1,4 @@
-from ....lib.utils.logger import log_if
+from ....lib.utils.logger import fmt_duration, log_if
 from ....lib.utils.node_tree.scripting_node_trees import (
     has_addon,
     scripting_node_trees,
@@ -17,48 +17,43 @@ from .file_management.node_tree_files import (
 )
 from .generators.node_tree import code_gen_node_tree
 import os
+import time
 import bpy
 
 
-# Last-seen value of build_with_production_code. Used to trigger a full regen
-# of every node only when the flag flips (since that changes every node's
-# inline code). Per-edit changes rely on the _generate cascade instead.
-_last_production_flag = None
-
-
 def generate_addon(base_path=ADDON_FOLDER):
-    """Generate the addon files for the current module."""
-    global _last_production_flag
+    """Generate the addon files for the current module.
+
+    Returns (changed_tree_modules, needs_full_reload):
+      - changed_tree_modules: set of tree module names whose .py was rewritten
+      - needs_full_reload: True if the change requires a full addon reload
+        (default files changed, is_dirty wipe, stale tree files removed, etc.)
+    """
     addon_path = get_addon_path(base_path=base_path)
-    files_changed = False
+    changed_trees = set()
+    needs_full_reload = False
 
     # remove addon files if no addon exists
     if not has_addon():
         clear_addon_files(addon_path)
-        return True
+        return changed_trees, True
 
-    # clear addon files if dirty
+    # clear addon files if dirty - full wipe means we need full reload
     if bpy.context.scene.sna.addon.is_dirty:
         clear_addon_files(addon_path)
         bpy.context.scene.sna.addon.is_dirty = False
-        files_changed = True
+        needs_full_reload = True
 
     # ensure folder structure
     ensure_folder_structure(addon_path)
 
-    # ensure default files
-    files_changed = ensure_default_files(addon_path) or files_changed
-
-    # regenerate every node only when the dev/prod flag changes (or first run);
-    # otherwise the per-node _generate cascade already kept things current.
-    current_flag = bpy.context.scene.sna.addon.build_with_production_code
-    if _last_production_flag != current_flag:
-        _last_production_flag = current_flag
-        for ntree in scripting_node_trees():
-            for node in sn_nodes(ntree):
-                node._generate()
+    # ensure default files - if they changed (e.g. first creation, settings
+    # update later), the addon's top-level __init__ / manifest need full reload
+    if ensure_default_files(addon_path):
+        needs_full_reload = True
 
     # update node tree files
+    log_rebuilds = bpy.context.scene.sna.dev.log_tree_rebuilds
     node_tree_folder_path = os.path.join(addon_path, "addon")
     stale_ntree_files = set(os.listdir(node_tree_folder_path)) - {"__init__.py"}
     for ntree in scripting_node_trees():
@@ -66,28 +61,34 @@ def generate_addon(base_path=ADDON_FOLDER):
         if ntree.is_dirty or not os.path.exists(
             get_node_tree_file_path(node_tree_folder_path, ntree.module_name)
         ):
-            log_if(
-                bpy.context.scene.sna.dev.log_tree_rebuilds,
-                "INFO",
-                f"Rebuilding {ntree.name}",
-            )
+            t_start = time.perf_counter()
             ntree_code = code_gen_node_tree(ntree)
-            files_changed = (
-                create_node_tree_file(
-                    node_tree_folder_path, ntree.module_name, ntree_code
-                )
-                or files_changed
+            gen_time = time.perf_counter() - t_start
+            file_written = create_node_tree_file(
+                node_tree_folder_path, ntree.module_name, ntree_code
             )
+            if file_written:
+                changed_trees.add(ntree.module_name)
             ntree.is_dirty = False
+            if log_rebuilds:
+                node_count = sum(1 for _ in sn_nodes(ntree))
+                status = "written" if file_written else "skipped"
+                log_if(
+                    True,
+                    "INFO",
+                    f"codegen {ntree.name}: {node_count} nodes, "
+                    f"{fmt_duration(gen_time)}, {status}",
+                )
 
-    # remove deleted node tree files
+    # remove deleted node tree files - removed trees mean classes need to be
+    # unregistered, easiest done via full reload
     for ntree_file in stale_ntree_files:
         path = os.path.join(node_tree_folder_path, ntree_file)
         if os.path.exists(path) and os.path.isfile(path):
             os.remove(path)
-            files_changed = True
+            needs_full_reload = True
 
-    return files_changed
+    return changed_trees, needs_full_reload
 
 
 def has_changes():

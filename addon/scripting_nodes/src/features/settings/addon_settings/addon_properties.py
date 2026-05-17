@@ -24,8 +24,6 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
 
     ### Build Settings
 
-    is_exporting: bpy.props.BoolProperty()
-
     is_dirty: bpy.props.BoolProperty(
         default=True,
         name="Is Dirty",
@@ -43,13 +41,6 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
         name="Module Name",
         description="An optional name for the folder the addon should be created in",
         default="",
-        update=update_is_dirty,
-    )
-
-    force_production: bpy.props.BoolProperty(
-        name="Force Production",
-        description="Force the addon to be built in its production version",
-        default=False,
         update=update_is_dirty,
     )
 
@@ -80,7 +71,3 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
             or re.sub(r"[^a-zA-Z\s]", "", self.addon_name).replace(" ", "_").lower()
             or "sna_addon"
         )
-
-    @property
-    def build_with_production_code(self):
-        return self.force_production or self.is_exporting

@@ -87,9 +87,7 @@ class BlendDataModeMixin:
         row = layout.row(align=True)
 
         if self.mode == "CUSTOM":
-            row.prop_search(
-                self, prop_ref_attr, context.scene.sna, "references", text=""
-            )
+            self.draw_reference_prop(row, prop_ref_attr)
             row.prop(self, "mode", icon="BLENDER", icon_only=True, text="")
             if not self.inputs["Data"].is_linked:
                 layout.label(text="Connect data source", icon="INFO")
@@ -141,9 +139,9 @@ class BlendDataModeMixin:
             return data_code, self.blend_prop_name, None
         else:
             # CUSTOM mode
-            ref = bpy.context.scene.sna.references.get(getattr(self, prop_ref_attr))
-            if ref and ref.node:
-                prop_name = getattr(ref.node, "prop_name", "")
+            target = self.resolve_reference(prop_ref_attr)
+            if target:
+                prop_name = getattr(target, "prop_name", "")
                 if prop_name:
                     if not self.inputs["Data"].is_linked:
                         return None, None, "No data connected"

@@ -1,6 +1,4 @@
-from email.policy import default
 from typing import Literal, Set
-import traceback
 from ...lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
     sn_nodes,
@@ -11,12 +9,10 @@ from ...lib.utils.sockets.sockets import (
     to_nodes,
 )
 from ...lib.utils.screen.screen import redraw_all
-from ...lib.utils.code.format import normalize_indents
 from ..sockets.socket_types import SOCKET_IDNAME_TYPE
 from ...lib.utils.uuid import get_short_id
 from ..node_tree.node_tree import ScriptingNodeTree
 from ..node_tree.code_gen.watcher import watch_changes
-from ...lib.utils.logger import log
 import bpy
 
 
@@ -126,11 +122,14 @@ class ScriptingBaseNode:
             for inpt in self.inputs:
                 for node in from_nodes(inpt):
                     node._generate()
-            # mark node tree as dirty if root node OR if register code changed
+            # mark node tree as dirty if this node contributes to the file's
+            # written content (root code, register/unregister, imports, globals)
             if (
                 "ROOT_NODE" in self.sn_options
                 or self.code_register
                 or self.code_unregister
+                or self.code_imports
+                or self.code_global
             ):
                 self.node_tree.is_dirty = True
                 # Trigger immediate regeneration to avoid stale file on redraw
@@ -148,15 +147,23 @@ class ScriptingBaseNode:
     def generate(self):
         raise NotImplementedError
 
-    def _execute(self, globs, locs):
-        try:
-            exec(normalize_indents(self.code_inline), globs, locs)
-        except Exception as e:
-            # Get the last line of the traceback for a concise error
-            tb_lines = traceback.format_exc().strip().split("\n")
-            error_msg = f"{self.bl_label}: {e}"
-            log("ERROR", error_msg)
-            raise
+    ### Reference helpers
+
+    def resolve_reference(self, prop_name):
+        """Return the node a reference-property points to, or None."""
+        ref = bpy.context.scene.sna.references.get(getattr(self, prop_name, ""))
+        return ref.node if ref else None
+
+    def draw_reference_prop(self, layout, prop_name, text=""):
+        """Standard UI for picking another SN node by reference."""
+        layout.prop_search(
+            self, prop_name, bpy.context.scene.sna, "references", text=text
+        )
+
+    def reference_is_cross_tree(self, prop_name):
+        """True iff the referenced node lives in a different tree."""
+        target = self.resolve_reference(prop_name)
+        return target is not None and target.id_data is not self.node_tree
 
     ### Sockets
 

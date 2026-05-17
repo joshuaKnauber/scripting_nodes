@@ -140,22 +140,42 @@ class ScriptingNodeTree(bpy.types.NodeTree):
         ):
             return
 
+        refs = bpy.context.scene.sna.references
+        # Track ref names that changed - referencing nodes need to regenerate
+        # so their code (e.g. cross-tree imports) reflects the new target id.
+        affected_names = set()
+
         for node in sn_nodes(self):
-            # update existing reference
-            for ref in bpy.context.scene.sna.references:
+            new_name = f"{node.name} ({self.name})"
+            for ref in refs:
                 if ref.node_id == node.id:
-                    ref.name = f"{node.name} ({self.name})"
+                    if ref.name != new_name:
+                        affected_names.add(ref.name)
+                        affected_names.add(new_name)
+                        ref.name = new_name
                     break
-            # create new reference
             else:
-                ref = bpy.context.scene.sna.references.add()
-                ref.name = f"{node.name} ({self.name})"
+                ref = refs.add()
+                ref.name = new_name
                 ref.node_id = node.id
+                affected_names.add(new_name)
+
         # remove stale references
-        for index in range(len(bpy.context.scene.sna.references) - 1, -1, -1):
-            node = node_by_id(bpy.context.scene.sna.references[index].node_id)
-            if node is None:
-                bpy.context.scene.sna.references.remove(index)
+        for index in range(len(refs) - 1, -1, -1):
+            ref = refs[index]
+            if node_by_id(ref.node_id) is None:
+                affected_names.add(ref.name)
+                refs.remove(index)
+
+        # Notify referencing nodes whose ref-property points to a changed name.
+        if affected_names:
+            for ntree in scripting_node_trees():
+                for node in sn_nodes(ntree):
+                    ref_props = getattr(node, "sn_reference_properties", set())
+                    for prop in ref_props:
+                        if getattr(node, prop, "") in affected_names:
+                            node._generate()
+                            break
 
     def update_reroutes(self):
         for node in self.nodes:

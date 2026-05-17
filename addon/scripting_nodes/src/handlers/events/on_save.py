@@ -23,15 +23,8 @@ def on_save_pre(dummy):
     if persist:
         # Unregister the current addon first
         unregister_module(module_name)
-
-        # Generate with production code
-        addon.is_exporting = True
-        try:
-            generate_addon()
-        finally:
-            addon.is_exporting = False
-
-        # Enable the addon
+        # Regenerate and re-enable so the saved .blend points at fresh files
+        generate_addon()
         addon_utils.enable(module_name, default_set=False, persistent=False)
 
 

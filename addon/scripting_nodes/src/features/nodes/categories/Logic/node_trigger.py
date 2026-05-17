@@ -6,34 +6,36 @@ import bpy
 class SNA_Node_Trigger(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Trigger"
     bl_label = "Trigger"
+    sn_options = {"ROOT_NODE"}
+
+    @property
+    def operator_idname(self):
+        return f"sna.trigger_{self.id.lower()}"
+
+    @property
+    def operator_class_name(self):
+        return f"SNA_OT_Trigger_{self.id}"
 
     def draw(self, context, layout):
-        if bpy.context.scene.sna.addon.force_production:
-            box = layout.box()
-            box.alert = True
-            box.label(text="This node is disabled with force production on!")
         row = layout.row()
         row.scale_y = 1.5
-        row.operator("sna.trigger_node", text="Trigger").node_id = self.id
+        try:
+            row.operator(self.operator_idname, text="Trigger")
+        except (RuntimeError, AttributeError):
+            row.label(text="Trigger (addon not loaded)", icon="ERROR")
 
     def on_create(self):
         self.add_output("ScriptingLogicSocket")
 
     def generate(self):
-        self.code_inline = f"""
-            {indent(self.outputs[0].eval(), 3)}
-        """
-
-
-class SNA_OT_Trigger(bpy.types.Operator):
-    bl_idname = "sna.trigger_node"
+        body = self.outputs[0].eval("pass")
+        self.code_module = f"""
+class {self.operator_class_name}(bpy.types.Operator):
+    bl_idname = "{self.operator_idname}"
     bl_label = "Trigger"
-    bl_description = "Trigger the node"
-
-    node_id: bpy.props.StringProperty()
+    bl_options = {{"REGISTER", "UNDO"}}
 
     def execute(self, context):
-        for node in context.space_data.edit_tree.nodes:
-            if getattr(node, "id", None) == self.node_id:
-                node._execute(globals(), locals())
-        return {"FINISHED"}
+        {indent(body, 2)}
+        return {{"FINISHED"}}
+"""

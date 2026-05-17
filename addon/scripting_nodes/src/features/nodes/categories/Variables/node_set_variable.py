@@ -10,15 +10,15 @@ class SNA_Node_SetVariable(ScriptingBaseNode, bpy.types.Node):
     sn_reference_properties = {"var"}
 
     def update_var(self, context):
-        ref = bpy.context.scene.sna.references.get(self.var)
-        if ref and ref.node and hasattr(ref.node, "data_type"):
-            update_socket_type(self.inputs[1], ref.node.data_type)
+        target = self.resolve_reference("var")
+        if target and hasattr(target, "data_type"):
+            update_socket_type(self.inputs[1], target.data_type)
         self._generate()
 
     var: bpy.props.StringProperty(name="Variable", update=update_var)
 
     def draw(self, context, layout):
-        layout.prop_search(self, "var", context.scene.sna, "references", text="")
+        self.draw_reference_prop(layout, "var")
 
     def on_create(self):
         self.add_input("ScriptingProgramSocket")
@@ -30,13 +30,18 @@ class SNA_Node_SetVariable(ScriptingBaseNode, bpy.types.Node):
         self._generate()
 
     def generate(self):
-        ref = bpy.context.scene.sna.references.get(self.var)
-        if ref:
-            self.code_inline = f"""
-                var_{ref.node_id} = {self.inputs[1].eval()}
-                {indent(self.outputs[0].eval(), 4)}
-            """
-        else:
+        target = self.resolve_reference("var")
+        if not target:
             self.code_inline = f"""
                 {indent(self.outputs[0].eval(), 4)}
             """
+            return
+        setter = f"set_var_{target.id}"
+        if self.reference_is_cross_tree("var"):
+            self.code_imports = (
+                f"from .{target.id_data.module_name} import {setter}"
+            )
+        self.code_inline = f"""
+            {setter}({self.inputs[1].eval()})
+            {indent(self.outputs[0].eval(), 4)}
+        """

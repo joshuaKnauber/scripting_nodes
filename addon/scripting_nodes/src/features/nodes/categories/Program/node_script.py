@@ -265,7 +265,6 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
             layout.prop(self, "filepath", text="")
 
     def generate(self):
-        is_production = bpy.context.scene.sna.addon.build_with_production_code
         variables = self.get_variables()
 
         # Build variable assignments for inputs
@@ -289,51 +288,15 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
 
         input_code = "\n".join(input_assignments) if input_assignments else ""
 
-        if is_production:
-            # Production: embed script content directly
-            script_content = self._get_script_content()
+        script_content = self._get_script_content()
+        if not script_content.strip():
+            script_content = "pass"
 
-            if not script_content.strip():
-                script_content = "pass"
-
-            self.code_inline = f"""
-                {indent(input_code, 4)}
-                {indent(script_content, 4)}
-                {indent(self.outputs[0].eval(), 4)}
-            """
-        else:
-            # Development: load script content live at runtime
-            if self.source_type == "INTERNAL":
-                if self.text_block:
-                    text_name = self.text_block.name
-                    self.code_inline = f"""
-                        {indent(input_code, 6)}
-                        if bpy.data.texts.get({repr(text_name)}):
-                            exec(bpy.data.texts[{repr(text_name)}].as_string(), globals(), locals())
-                        {indent(self.outputs[0].eval(), 6)}
-                    """
-                else:
-                    self.code_inline = f"""
-                        {indent(input_code, 6)}
-                        pass
-                        {indent(self.outputs[0].eval(), 6)}
-                    """
-            else:
-                if self.filepath:
-                    filepath = bpy.path.abspath(self.filepath)
-                    self.code_inline = f"""
-                        {indent(input_code, 6)}
-                        if os.path.exists({repr(filepath)}):
-                            with open({repr(filepath)}, 'r', encoding='utf-8') as _sna_script_file:
-                                exec(_sna_script_file.read(), globals(), locals())
-                        {indent(self.outputs[0].eval(), 6)}
-                    """
-                else:
-                    self.code_inline = f"""
-                        {indent(input_code, 6)}
-                        pass
-                        {indent(self.outputs[0].eval(), 6)}
-                    """
+        self.code_inline = f"""
+            {indent(input_code, 4)}
+            {indent(script_content, 4)}
+            {indent(self.outputs[0].eval(), 4)}
+        """
 
     def _get_script_content(self):
         """Get the script content for production embedding."""
