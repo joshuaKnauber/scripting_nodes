@@ -1,10 +1,37 @@
+def _link_is_usable(link):
+    """A link is usable iff both endpoints carry compatible socket_type
+    (or one is a reroute, which is type-agnostic) and Blender hasn't
+    flagged it as muted/invalid. Skipping invalid links here is what
+    breaks the program<->data recursion when a user drops the wrong
+    kind of node into a flow.
+    """
+    if getattr(link, "is_muted", False):
+        return False
+    if not getattr(link, "is_valid", True):
+        return False
+    from_type = getattr(link.from_socket, "socket_type", None)
+    to_type = getattr(link.to_socket, "socket_type", None)
+    # Reroute - no socket_type attr - assume usable; chain ends are checked
+    # by the next hop's link validation.
+    if from_type is None or to_type is None:
+        return True
+    return from_type == to_type
+
+
 def to_sockets(socket):
     sockets = []
     for link in socket.links:
+        if not _link_is_usable(link):
+            continue
         if link.to_node.bl_idname == "NodeReroute":
             sockets.extend(to_sockets(link.to_node.outputs[0]))
         else:
             sockets.append(link.to_socket)
+    # Endpoint type guard - catches mismatches that pass through reroutes
+    # (per-link check can't tell, since reroutes have no socket_type).
+    src_type = getattr(socket, "socket_type", None)
+    if src_type is not None:
+        sockets = [s for s in sockets if getattr(s, "socket_type", None) == src_type]
     return sockets
 
 
@@ -26,10 +53,17 @@ def to_node(socket):
 def from_sockets(socket):
     sockets = []
     for link in socket.links:
+        if not _link_is_usable(link):
+            continue
         if link.from_node.bl_idname == "NodeReroute":
             sockets.extend(from_sockets(link.from_node.inputs[0]))
         else:
             sockets.append(link.from_socket)
+    # Endpoint type guard - catches mismatches that pass through reroutes
+    # (per-link check can't tell, since reroutes have no socket_type).
+    src_type = getattr(socket, "socket_type", None)
+    if src_type is not None:
+        sockets = [s for s in sockets if getattr(s, "socket_type", None) == src_type]
     return sockets
 
 

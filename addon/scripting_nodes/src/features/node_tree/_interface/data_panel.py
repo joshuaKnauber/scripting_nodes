@@ -12,7 +12,11 @@ PROPERTY_NODE_TYPES = {
     "SNA_Node_IntProperty",
     "SNA_Node_FloatProperty",
     "SNA_Node_StringProperty",
+    "SNA_Node_FloatVectorProperty",
+    "SNA_Node_EnumProperty",
+    "SNA_Node_PointerProperty",
     "SNA_Node_CollectionProperty",
+    "SNA_Node_PropertyGroup",
 }
 
 VARIABLE_NODE_TYPES = {
@@ -26,7 +30,11 @@ PROPERTY_ICONS = {
     "SNA_Node_IntProperty": DATA_SOCKET_ICONS["ScriptingIntegerSocket"],
     "SNA_Node_FloatProperty": DATA_SOCKET_ICONS["ScriptingFloatSocket"],
     "SNA_Node_StringProperty": DATA_SOCKET_ICONS["ScriptingStringSocket"],
+    "SNA_Node_FloatVectorProperty": "ORIENTATION_GLOBAL",
+    "SNA_Node_EnumProperty": "PRESET",
+    "SNA_Node_PointerProperty": "OBJECT_DATAMODE",
     "SNA_Node_CollectionProperty": "OUTLINER_COLLECTION",
+    "SNA_Node_PropertyGroup": "OUTLINER_DATA_POINTCLOUD",
 }
 
 # Icons for variable types

@@ -91,10 +91,15 @@ def code_gen_node_tree(ntree):
         if node.code_global:
             code += normalize_indents(node.code_global) + "\n"
 
-    # root nodes (skipped naturally for group trees; they typically have none)
-    for node in sn_nodes(ntree):
-        if "ROOT_NODE" in node.sn_options:
-            code += normalize_indents(node.code_module) + "\n"
+    # root nodes (skipped naturally for group trees; they typically have none).
+    # Emit PropertyGroup containers first so Operator/Preferences/etc. class
+    # bodies that reference them (PointerProperty(type=PG), etc.) resolve at
+    # class-definition time. Operator/Preferences/Panel evaluate their
+    # annotations eagerly, so the target class must already exist.
+    root_nodes = [n for n in sn_nodes(ntree) if "ROOT_NODE" in n.sn_options]
+    root_nodes.sort(key=lambda n: 0 if n.bl_idname == "SNA_Node_PropertyGroup" else 1)
+    for node in root_nodes:
+        code += normalize_indents(node.code_module) + "\n"
 
     # group function (group trees only)
     if getattr(ntree, "is_group", False):

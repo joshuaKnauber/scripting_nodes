@@ -75,6 +75,7 @@ class SNA_OT_PointerPropertySettings(bpy.types.Operator):
 class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_PointerProperty"
     bl_label = "Pointer Property"
+    sn_reference_properties = {"group"}
 
     def update_props(self, context):
         self._generate()
@@ -207,6 +208,26 @@ class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
         update=update_props,
     )
 
+    pointer_source: bpy.props.EnumProperty(
+        items=[
+            ("BLENDER", "Blender Type", "Reference a built-in Blender data type", "BLENDER", 0),
+            (
+                "PROPERTY_GROUP",
+                "Property Group",
+                "Reference a custom Property Group node defined in this addon",
+                "OUTLINER_DATA_POINTCLOUD",
+                1,
+            ),
+        ],
+        name="Source",
+        default="BLENDER",
+        update=update_props,
+    )
+
+    # Reference to a Property Group container node (used when
+    # pointer_source == "PROPERTY_GROUP")
+    group: bpy.props.StringProperty(name="Property Group", update=update_props)
+
     use_poll_function: bpy.props.BoolProperty(
         name="Use Poll Function",
         description="Use a custom poll function to filter which objects can be selected",
@@ -254,15 +275,32 @@ class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
         candidate_socket = self.add_output("ScriptingBlendDataSocket", "Poll: Object")
         candidate_socket.hide = True
 
+    def on_ref_change(self, node):
+        self._generate()
+
     def draw(self, context, layout):
         layout.prop(self, "register_on", text="")
         layout.prop(self, "prop_label", text="Label")
+        layout.prop(self, "pointer_source", text="")
+        if self.pointer_source == "PROPERTY_GROUP":
+            self.draw_reference_prop(layout, "group", text="Group")
 
         # Settings button
         op = layout.operator(
             "sna.pointer_property_settings", text="Settings", icon="PREFERENCES"
         )
         op.node_id = self.id
+
+    def _resolve_type_expr(self):
+        """Return the `type=...` expression for this pointer, or None if
+        the user picked Property Group mode but didn't connect a group."""
+        if self.pointer_source == "PROPERTY_GROUP":
+            target = self.resolve_reference("group")
+            class_name = getattr(target, "class_name", None) if target else None
+            if not class_name:
+                return None
+            return class_name
+        return f"bpy.types.{self.prop_type}"
 
     def _build_prop_args(self):
         options = []
@@ -280,21 +318,31 @@ class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
         poll_socket = self.outputs.get("Poll Function")
         has_poll = self.use_poll_function and poll_socket and poll_socket.is_linked
 
-        prop_args = [
-            f"type=bpy.types.{self.prop_type}",
-            f'name="{self.prop_label}"',
-            f'description="{self.prop_description}"',
-        ]
+        type_expr = self._resolve_type_expr()
+        prop_args = []
+        if type_expr:
+            prop_args.append(f"type={type_expr}")
+        prop_args.append(f'name="{self.prop_label}"')
+        prop_args.append(f'description="{self.prop_description}"')
         if options_str != "set()":
             prop_args.append(f"options={options_str}")
         if has_update:
             prop_args.append(f"update=update_{self.prop_name}")
         if has_poll:
             prop_args.append(f"poll=poll_{self.prop_name}")
-        return prop_args, has_update, update_socket, has_poll, poll_socket
+        return (
+            prop_args,
+            has_update,
+            update_socket,
+            has_poll,
+            poll_socket,
+            type_expr,
+        )
 
     def class_body_annotation(self):
-        prop_args, *_ = self._build_prop_args()
+        prop_args, _, _, _, _, type_expr = self._build_prop_args()
+        if not type_expr:
+            return ""
         return (
             f"{self.prop_name}: bpy.props.PointerProperty("
             + ", ".join(prop_args)
@@ -302,10 +350,14 @@ class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
         )
 
     def generate(self):
-        prop_args, has_update, update_socket, has_poll, poll_socket = (
-            self._build_prop_args()
-        )
-        args_str = ",\n        ".join(prop_args)
+        (
+            prop_args,
+            has_update,
+            update_socket,
+            has_poll,
+            poll_socket,
+            type_expr,
+        ) = self._build_prop_args()
 
         update_code = ""
         if has_update:
@@ -330,9 +382,15 @@ def poll_{self.prop_name}(self, object):
 {update_code}{poll_code}
 """
 
+        # Property Group source with no group connected - skip emitting
+        # register so the generated module stays valid.
+        if not type_expr:
+            return
+
         if self.is_class_body_target:
             return
 
+        args_str = ",\n        ".join(prop_args)
         self.code_register = f"""
 bpy.types.{self.register_on}.{self.prop_name} = bpy.props.PointerProperty(
     {args_str}
