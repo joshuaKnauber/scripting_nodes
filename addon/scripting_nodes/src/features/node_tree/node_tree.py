@@ -66,10 +66,67 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     def update(self):
         if self.pause_updates:
             return
+        self._mute_incompatible_links()
         self._remove_cyclic_links()
         self.update_links()
         self.update_node_references()
         bpy.app.timers.register(lambda: self.update_reroutes(), first_interval=0.001)
+
+    def _mute_incompatible_links(self):
+        """Mute links whose endpoints carry mismatched socket_type (DATA vs
+        PROGRAM). Eval already filters these out via the socket helpers,
+        but muting also gives the user a visual cue (Blender renders muted
+        links dashed) so they see why their wiring didn't work.
+
+        Handles two cases:
+          1. Direct link between two SN sockets with mismatched types.
+          2. Chain through reroutes - walk forward from each SN output and
+             mute the final segment that lands on an SN socket of the
+             wrong type. The reroute pass-through links stay unmuted so
+             other (valid) branches off the same reroute keep working.
+        """
+        # 1. Direct SN-to-SN mismatches. Reroute-touching links get reset
+        #    to unmuted here; the chain walk below re-mutes bad endpoints.
+        for link in self.links:
+            from_type = getattr(link.from_socket, "socket_type", None)
+            to_type = getattr(link.to_socket, "socket_type", None)
+            if from_type is not None and to_type is not None:
+                should_mute = from_type != to_type
+                if link.is_muted != should_mute:
+                    link.is_muted = should_mute
+            elif link.is_muted:
+                link.is_muted = False
+
+        # 2. Walk chains through reroutes from each SN output socket.
+        for node in self.nodes:
+            if node.bl_idname == "NodeReroute":
+                continue
+            for out in node.outputs:
+                src_type = getattr(out, "socket_type", None)
+                if src_type is None:
+                    continue
+                self._mute_chain_mismatches(out, src_type)
+
+    def _mute_chain_mismatches(self, start_socket, src_type):
+        """BFS through reroutes from `start_socket`, muting any link whose
+        final SN target's socket_type doesn't match `src_type`."""
+        visited = set()
+        # Seed with links leaving start_socket
+        queue = list(start_socket.links)
+        while queue:
+            link = queue.pop()
+            to_node = link.to_node
+            if to_node.bl_idname == "NodeReroute":
+                key = to_node.as_pointer()
+                if key in visited:
+                    continue
+                visited.add(key)
+                queue.extend(to_node.outputs[0].links)
+            else:
+                target_type = getattr(link.to_socket, "socket_type", None)
+                if target_type is not None and target_type != src_type:
+                    if not link.is_muted:
+                        link.is_muted = True
 
     def _remove_cyclic_links(self):
         """Strip any links that participate in a cycle. Logs each removal."""
