@@ -34,7 +34,7 @@ class SNA_Node_GetProperty(ScriptingBaseNode, bpy.types.Node):
         self._generate()
 
     def generate(self):
-        self.code = f"""
+        self.code_inline = f"""
             {indent(self.outputs[0].eval(), 3)}
         """
         ref = bpy.context.scene.sna.references.get(self.prop)
@@ -47,7 +47,7 @@ class SNA_Node_GetProperty(ScriptingBaseNode, bpy.types.Node):
                 else:
                     # No source connected - return None and log
                     self.outputs[1].code = "None"
-                    self.code = f"""
+                    self.code_inline = f"""
                         print("Get Property: No data source connected for '{prop_name}'")
                         {indent(self.outputs[0].eval(), 6)}
                     """

@@ -17,8 +17,6 @@ class SNA_Node_Menu(ScriptingBaseNode, bpy.types.Node):
         self.outputs["Menu"].layout = f"menu_{self.id}"
 
         self.code_global = f"""
-            import bpy
-
             class SNA_MT_Menu_{self.id}(bpy.types.Menu):
                 bl_idname = "SNA_MT_Menu_{self.id}"
                 bl_label = {self.inputs["Label"].eval()}
@@ -28,7 +26,7 @@ class SNA_Node_Menu(ScriptingBaseNode, bpy.types.Node):
                     {indent(self.outputs["Menu"].eval("pass"), 5)}
         """
 
-        self.code = f"""
+        self.code_inline = f"""
             {self.inputs[0].get_layout()}.menu("SNA_MT_Menu_{self.id}", text={self.inputs["Label"].eval()})
             {indent(self.outputs["After"].eval(), 3)}
         """

@@ -16,7 +16,7 @@ class SNA_Node_IfElse(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         has_else = self.outputs[1].is_linked
-        self.code = f"""
+        self.code_inline = f"""
             if {self.inputs[1].eval()}:
                 {indent(self.outputs[0].eval("pass"), 4)}
             {"else:" if has_else else ""}

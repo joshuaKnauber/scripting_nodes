@@ -32,11 +32,11 @@ class SNA_Node_SetVariable(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         ref = bpy.context.scene.sna.references.get(self.var)
         if ref:
-            self.code = f"""
+            self.code_inline = f"""
                 var_{ref.node_id} = {self.inputs[1].eval()}
                 {indent(self.outputs[0].eval(), 4)}
             """
         else:
-            self.code = f"""
+            self.code_inline = f"""
                 {indent(self.outputs[0].eval(), 4)}
             """

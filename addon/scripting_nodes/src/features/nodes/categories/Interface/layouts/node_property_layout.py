@@ -16,7 +16,7 @@ class SNA_Node_PropertyLayout(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingInterfaceSocket")
 
     def generate(self):
-        self.code = f"""
+        self.code_inline = f"""
             {self.inputs[0].get_layout()}.use_property_decorate = {self.inputs["Decorated"].eval()}
             {self.inputs[0].get_layout()}.use_property_split = {self.inputs["Split"].eval()}
             {indent(self.outputs[0].eval(), 3)}

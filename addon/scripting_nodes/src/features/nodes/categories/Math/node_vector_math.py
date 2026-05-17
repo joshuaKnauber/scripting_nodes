@@ -91,9 +91,7 @@ class SNA_Node_VectorMath(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         if self.operation in self.OPERATIONS_NEEDING_MATH:
-            self.code_global = "import math"
-        else:
-            self.code_global = ""
+            self.code_imports = "import math"
 
         a = self.inputs["A"].eval()
         dim = int(self.dimension)

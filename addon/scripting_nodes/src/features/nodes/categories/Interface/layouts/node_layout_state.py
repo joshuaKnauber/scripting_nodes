@@ -18,7 +18,7 @@ class SNA_Node_LayoutState(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingInterfaceSocket")
 
     def generate(self):
-        self.code = f"""
+        self.code_inline = f"""
             {self.inputs[0].get_layout()}.enabled = {self.inputs["Enabled"].eval()}
             {self.inputs[0].get_layout()}.active = {self.inputs["Active"].eval()}
             {self.inputs[0].get_layout()}.alert = {self.inputs["Alert"].eval()}

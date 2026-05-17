@@ -1,5 +1,6 @@
 from email.policy import default
 from typing import Literal, Set
+import contextvars
 import traceback
 from ...lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
@@ -18,6 +19,13 @@ from ..node_tree.node_tree import ScriptingNodeTree
 from ..node_tree.code_gen.watcher import watch_changes
 from ...lib.utils.logger import log
 import bpy
+
+
+# Tracks nodes currently mid-_generate to break cascade cycles.
+# Acyclic graphs never see this fire.
+_generate_stack: contextvars.ContextVar[frozenset] = contextvars.ContextVar(
+    "_generate_stack", default=frozenset()
+)
 
 
 class ScriptingBaseNode:
@@ -47,7 +55,9 @@ class ScriptingBaseNode:
         default="", name="ID", description="Unique ID of the node"
     )
 
-    code: bpy.props.StringProperty()
+    code_imports: bpy.props.StringProperty()
+    code_module: bpy.props.StringProperty()
+    code_inline: bpy.props.StringProperty()
     code_global: bpy.props.StringProperty()
     code_register: bpy.props.StringProperty()
     code_unregister: bpy.props.StringProperty()
@@ -77,8 +87,24 @@ class ScriptingBaseNode:
     def _generate(self):
         if not self.id:
             return
+        visited = _generate_stack.get()
+        if self.id in visited:
+            log(
+                "WARN",
+                f"_generate cycle detected at {self.bl_label} ({self.id})",
+            )
+            return
+        token = _generate_stack.set(visited | {self.id})
+        try:
+            self._generate_body()
+        finally:
+            _generate_stack.reset(token)
+
+    def _generate_body(self):
         prev_code = (
-            self.code
+            self.code_imports
+            + self.code_module
+            + self.code_inline
             + self.code_global
             + self.code_register
             + self.code_unregister
@@ -87,7 +113,9 @@ class ScriptingBaseNode:
             )
         )
         # reset code
-        self.code = ""
+        self.code_imports = ""
+        self.code_module = ""
+        self.code_inline = ""
         self.code_global = ""
         self.code_register = ""
         self.code_unregister = ""
@@ -101,7 +129,9 @@ class ScriptingBaseNode:
         # generate new code
         self.generate()
         new_code = (
-            self.code
+            self.code_imports
+            + self.code_module
+            + self.code_inline
             + self.code_global
             + self.code_register
             + self.code_unregister
@@ -141,7 +171,7 @@ class ScriptingBaseNode:
 
     def _execute(self, globs, locs):
         try:
-            exec(normalize_indents(self.code), globs, locs)
+            exec(normalize_indents(self.code_inline), globs, locs)
         except Exception as e:
             # Get the last line of the traceback for a concise error
             tb_lines = traceback.format_exc().strip().split("\n")
@@ -196,7 +226,8 @@ class ScriptingBaseNode:
     def draw_buttons(self, context, layout):
         if bpy.context.scene.sna.dev.show_node_code:
             box = layout.box()
-            for line in self.code.split("\n"):
+            shown = self.code_module or self.code_inline
+            for line in shown.split("\n"):
                 box.label(text=line)
         self.draw(context, layout)
 

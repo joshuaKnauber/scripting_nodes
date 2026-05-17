@@ -13,7 +13,7 @@ class SNA_Node_Label(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingInterfaceSocket")
 
     def generate(self):
-        self.code = f"""
+        self.code_inline = f"""
             {self.inputs[0].get_layout()}.label(text={self.inputs["Label"].eval()})
             {indent(self.outputs[0].eval(), 3)}
         """

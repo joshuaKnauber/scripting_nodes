@@ -40,21 +40,21 @@ class SNA_Node_SetProperty(ScriptingBaseNode, bpy.types.Node):
             if prop_name:
                 if self.inputs[1].is_linked:
                     target_code = self.inputs[1].eval()
-                    self.code = f"""
+                    self.code_inline = f"""
                         {target_code}.{prop_name} = {self.inputs[2].eval()}
                         {indent(self.outputs[0].eval(), 6)}
                     """
                 else:
                     # No target connected - skip set and log
-                    self.code = f"""
+                    self.code_inline = f"""
                         print("Set Property: No data target connected for '{prop_name}'")
                         {indent(self.outputs[0].eval(), 6)}
                     """
             else:
-                self.code = f"""
+                self.code_inline = f"""
                     {indent(self.outputs[0].eval(), 5)}
                 """
         else:
-            self.code = f"""
+            self.code_inline = f"""
                 {indent(self.outputs[0].eval(), 4)}
             """

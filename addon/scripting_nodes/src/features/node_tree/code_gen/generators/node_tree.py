@@ -4,9 +4,18 @@ import bpy
 
 
 def code_gen_node_tree(ntree):
-    code = "import bpy\n\n"
     register_code = ""
     unregister_code = ""
+
+    # imports (collected and deduplicated)
+    import_lines = {"import bpy"}
+    for node in sn_nodes(ntree):
+        if node.code_imports:
+            for line in normalize_indents(node.code_imports).split("\n"):
+                stripped = line.strip()
+                if stripped:
+                    import_lines.add(stripped)
+    code = "\n".join(sorted(import_lines)) + "\n\n"
 
     # global scope code
     for node in sn_nodes(ntree):
@@ -16,7 +25,7 @@ def code_gen_node_tree(ntree):
     # root nodes
     for node in sn_nodes(ntree):
         if "ROOT_NODE" in node.sn_options:
-            code += normalize_indents(node.code) + "\n"
+            code += normalize_indents(node.code_module) + "\n"
 
     # collect register/unregister code from all nodes
     for node in sn_nodes(ntree):

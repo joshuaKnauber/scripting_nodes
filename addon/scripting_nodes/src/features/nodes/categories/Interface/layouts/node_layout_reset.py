@@ -14,7 +14,7 @@ class SNA_Node_LayoutReset(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         self.outputs[1].layout = "self.layout"
-        self.code = f"""
+        self.code_inline = f"""
             {indent(self.outputs[0].eval(), 3)}
             {indent(self.outputs[1].eval(), 3)}
         """

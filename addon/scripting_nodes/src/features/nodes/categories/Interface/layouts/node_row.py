@@ -17,7 +17,7 @@ class SNA_Node_Row(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         self.outputs[0].layout = f"row_{self.id}"
-        self.code = f"""
+        self.code_inline = f"""
             row_{self.id} = {self.inputs[0].get_layout()}.row(align={self.inputs["Align"].eval()}, heading={self.inputs["Heading"].eval()})
             {indent(self.outputs[0].eval(), 3)}
             {indent(self.outputs[1].eval(), 3)}

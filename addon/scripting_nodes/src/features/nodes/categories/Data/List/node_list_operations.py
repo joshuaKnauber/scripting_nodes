@@ -49,7 +49,7 @@ class SNA_Node_ListAppend(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         list_code = self.inputs["List"].eval("[]")
         item_code = self.inputs["Item"].eval("None")
-        self.code = f"""
+        self.code_inline = f"""
             {list_code}.append({item_code})
             {indent(self.outputs[0].eval(), 3)}
         """
@@ -75,7 +75,7 @@ class SNA_Node_ListInsert(ScriptingBaseNode, bpy.types.Node):
         list_code = self.inputs["List"].eval("[]")
         index_code = self.inputs["Index"].eval("0")
         item_code = self.inputs["Item"].eval("None")
-        self.code = f"""
+        self.code_inline = f"""
             {list_code}.insert({index_code}, {item_code})
             {indent(self.outputs[0].eval(), 3)}
         """
@@ -99,7 +99,7 @@ class SNA_Node_ListRemove(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         list_code = self.inputs["List"].eval("[]")
         item_code = self.inputs["Item"].eval("None")
-        self.code = f"""
+        self.code_inline = f"""
             if {item_code} in {list_code}:
                 {list_code}.remove({item_code})
             {indent(self.outputs[0].eval(), 3)}
@@ -125,7 +125,7 @@ class SNA_Node_ListPop(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         list_code = self.inputs["List"].eval("[]")
         index_code = self.inputs["Index"].eval("-1")
-        self.code = f"""
+        self.code_inline = f"""
             _pop_result_{self.id} = {list_code}.pop({index_code}) if {list_code} else None
             {indent(self.outputs[0].eval(), 3)}
         """
@@ -174,7 +174,7 @@ class SNA_Node_ListSetItem(ScriptingBaseNode, bpy.types.Node):
         list_code = self.inputs["List"].eval("[]")
         index_code = self.inputs["Index"].eval("0")
         item_code = self.inputs["Item"].eval("None")
-        self.code = f"""
+        self.code_inline = f"""
             if len({list_code}) > {index_code}:
                 {list_code}[{index_code}] = {item_code}
             {indent(self.outputs[0].eval(), 3)}
@@ -215,7 +215,7 @@ class SNA_Node_ListClear(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         list_code = self.inputs["List"].eval("[]")
-        self.code = f"""
+        self.code_inline = f"""
             {list_code}.clear()
             {indent(self.outputs[0].eval(), 3)}
         """
@@ -263,7 +263,7 @@ class SNA_Node_ListExtend(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         list_code = self.inputs["List"].eval("[]")
         items_code = self.inputs["Items"].eval("[]")
-        self.code = f"""
+        self.code_inline = f"""
             {list_code}.extend({items_code})
             {indent(self.outputs[0].eval(), 3)}
         """
@@ -285,7 +285,7 @@ class SNA_Node_ListReverse(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         list_code = self.inputs["List"].eval("[]")
-        self.code = f"""
+        self.code_inline = f"""
             {list_code}.reverse()
             {indent(self.outputs[0].eval(), 3)}
         """
@@ -318,7 +318,7 @@ class SNA_Node_ListSort(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         list_code = self.inputs["List"].eval("[]")
         reverse_str = "True" if self.reverse else "False"
-        self.code = f"""
+        self.code_inline = f"""
             {list_code}.sort(reverse={reverse_str})
             {indent(self.outputs[0].eval(), 3)}
         """
@@ -389,7 +389,7 @@ class SNA_Node_ForEachList(ScriptingBaseNode, bpy.types.Node):
         done_body = indent(self.outputs["Done"].eval(), 2)
         self.outputs["Item"].code = f"_item_{self.id}"
         self.outputs["Index"].code = f"_index_{self.id}"
-        self.code = f"""
+        self.code_inline = f"""
             for _index_{self.id}, _item_{self.id} in enumerate({list_code}):
                 {loop_body}
             {done_body}

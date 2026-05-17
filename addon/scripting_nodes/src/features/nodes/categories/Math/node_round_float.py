@@ -27,9 +27,7 @@ class SNA_Node_RoundFloat(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         if self.round_up_or_down in ["UP", "DOWN"]:
-            self.code_global = "import math"
-        else:
-            self.code_global = ""
+            self.code_imports = "import math"
 
         value = self.inputs["Float"].eval()
         decimals = self.inputs["Decimals"].eval()

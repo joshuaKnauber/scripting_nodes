@@ -217,9 +217,7 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
         {indent(header_code, 2)}
 """
 
-        self.code = f"""
-import bpy
-
+        self.code_module = f"""
 class SNA_PT_Panel_{self.id}(bpy.types.Panel):
     {attrs_code}
 {poll_method}{draw_header_method}

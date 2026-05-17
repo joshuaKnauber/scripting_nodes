@@ -31,9 +31,9 @@ class SNA_Node_OnRedo(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         output_code = self.outputs[0].eval()
 
-        self.code_global = "from bpy.app.handlers import persistent"
+        self.code_imports = "from bpy.app.handlers import persistent"
 
-        self.code = f"""
+        self.code_module = f"""
 @persistent
 def {self.handler_name}(dummy):
     {indent(output_code, 1) if output_code.strip() else 'pass'}

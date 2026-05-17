@@ -28,7 +28,7 @@ class SNA_Node_LocalVariable(ScriptingBaseNode, bpy.types.Node):
         layout.prop(self, "data_type", text="")
 
     def generate(self):
-        self.code = f"""
+        self.code_inline = f"""
             var_{self.id} = {self.inputs[1].eval()}
             {indent(self.outputs[0].eval(), 3)}
         """

@@ -1,4 +1,4 @@
-from typing import Literal, Set
+from typing import Literal
 from ...lib.utils.sockets.sockets import (
     from_socket,
     socket_index,
@@ -7,9 +7,6 @@ from ...lib.utils.sockets.sockets import (
 from ...lib.utils.code.format import normalize_indents
 from .conversions import get_conversion
 import bpy
-
-# Thread-local set to track sockets currently being evaluated (recursion guard)
-_eval_stack: Set[str] = set()
 
 
 class ScriptingBaseSocket(bpy.types.NodeSocket):
@@ -30,24 +27,11 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
     is_dynamic: bpy.props.BoolProperty(default=False)
     is_removable: bpy.props.BoolProperty(default=False)
 
-    def _get_socket_id(self):
-        """Get a unique ID for this socket to detect recursion."""
-        return f"{self.node.id}:{self.name}:{self.is_output}"
-
     def eval(self, fallback=""):
-        # Recursion guard - prevent infinite loops
-        socket_id = self._get_socket_id()
-        if socket_id in _eval_stack:
-            return fallback
-
-        _eval_stack.add(socket_id)
-        try:
-            if self.socket_type == "PROGRAM":
-                return self._eval_program() or fallback
-            elif self.socket_type == "DATA":
-                return self._eval_data() or fallback
-        finally:
-            _eval_stack.discard(socket_id)
+        if self.socket_type == "PROGRAM":
+            return self._eval_program() or fallback
+        elif self.socket_type == "DATA":
+            return self._eval_data() or fallback
 
     def _eval_program(self):
         if self.is_output:
@@ -56,7 +40,7 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
                 return to.eval()
             return ""
         if bpy.context.scene.sna.addon.build_with_production_code:
-            return normalize_indents(self.node.code)
+            return normalize_indents(self.node.code_inline)
         return f"bpy.context.scene.sna.execute('{self.node.id}', globals(), locals())"
 
     def _eval_data(self):

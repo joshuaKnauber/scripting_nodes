@@ -14,7 +14,7 @@ class SNA_Node_Box(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         self.outputs[0].layout = f"box_{self.id}"
-        self.code = f"""
+        self.code_inline = f"""
             box_{self.id} = {self.inputs[0].get_layout()}.box()
             {indent(self.outputs[0].eval(), 3)}
             {indent(self.outputs[1].eval(), 3)}

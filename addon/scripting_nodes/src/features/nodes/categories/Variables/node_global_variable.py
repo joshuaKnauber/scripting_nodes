@@ -25,6 +25,6 @@ class SNA_Node_GlobalVariable(ScriptingBaseNode, bpy.types.Node):
         layout.prop(self, "data_type", text="")
 
     def generate(self):
-        self.code = f"""
+        self.code_module = f"""
             var_{self.id} = {self.inputs[0].eval()}
         """

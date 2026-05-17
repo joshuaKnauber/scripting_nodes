@@ -20,7 +20,7 @@ class SNA_Node_Trigger(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingLogicSocket")
 
     def generate(self):
-        self.code = f"""
+        self.code_inline = f"""
             {indent(self.outputs[0].eval(), 3)}
         """
 

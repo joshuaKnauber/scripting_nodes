@@ -291,9 +291,7 @@ class SNA_Node_Operator(ScriptingBaseNode, bpy.types.Node):
         {indent(draw_code, 2)}
 """
 
-        self.code = f"""
-import bpy
-
+        self.code_module = f"""
 class SNA_OT_Operator_{self.id}(bpy.types.Operator):
     {attrs_code}
 {poll_method}{invoke_method}{draw_method}{execute_method}

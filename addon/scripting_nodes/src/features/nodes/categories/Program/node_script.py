@@ -317,7 +317,7 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
             if not script_content.strip():
                 script_content = "pass"
 
-            self.code = f"""
+            self.code_inline = f"""
                 {indent(input_code, 4)}
                 {indent(script_content, 4)}
                 {indent(self.outputs[0].eval(), 4)}
@@ -327,14 +327,14 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
             if self.source_type == "INTERNAL":
                 if self.text_block:
                     text_name = self.text_block.name
-                    self.code = f"""
+                    self.code_inline = f"""
                         {indent(input_code, 6)}
                         if bpy.data.texts.get({repr(text_name)}):
                             exec(bpy.data.texts[{repr(text_name)}].as_string(), globals(), locals())
                         {indent(self.outputs[0].eval(), 6)}
                     """
                 else:
-                    self.code = f"""
+                    self.code_inline = f"""
                         {indent(input_code, 6)}
                         pass
                         {indent(self.outputs[0].eval(), 6)}
@@ -342,7 +342,7 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
             else:
                 if self.filepath:
                     filepath = bpy.path.abspath(self.filepath)
-                    self.code = f"""
+                    self.code_inline = f"""
                         {indent(input_code, 6)}
                         if os.path.exists({repr(filepath)}):
                             with open({repr(filepath)}, 'r', encoding='utf-8') as _sna_script_file:
@@ -350,7 +350,7 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
                         {indent(self.outputs[0].eval(), 6)}
                     """
                 else:
-                    self.code = f"""
+                    self.code_inline = f"""
                         {indent(input_code, 6)}
                         pass
                         {indent(self.outputs[0].eval(), 6)}

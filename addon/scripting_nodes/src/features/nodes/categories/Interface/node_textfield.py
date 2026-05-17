@@ -70,14 +70,14 @@ class SNA_Node_TextField(BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node):
         data_code, prop_name, error = self.get_prop_data_and_name()
 
         if error:
-            self.code = f"""
+            self.code_inline = f"""
                 {layout_code}.label(text="{error}", icon="ERROR")
                 {indent(output_code, 4)}
             """
             return
 
         if not prop_name:
-            self.code = f"""
+            self.code_inline = f"""
                 {indent(output_code, 4)}
             """
             return
@@ -92,7 +92,7 @@ class SNA_Node_TextField(BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node):
 
         args_str = ", ".join(args)
 
-        self.code = f"""
+        self.code_inline = f"""
             {layout_code}.prop({args_str})
             {indent(output_code, 3)}
         """

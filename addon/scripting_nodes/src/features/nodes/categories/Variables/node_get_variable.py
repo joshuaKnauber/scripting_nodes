@@ -30,7 +30,7 @@ class SNA_Node_GetVariable(ScriptingBaseNode, bpy.types.Node):
         self._generate()
 
     def generate(self):
-        self.code = f"""
+        self.code_inline = f"""
             {indent(self.outputs[0].eval(), 3)}
         """
         ref = bpy.context.scene.sna.references.get(self.var)

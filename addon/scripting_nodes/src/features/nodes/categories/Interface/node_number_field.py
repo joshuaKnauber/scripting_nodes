@@ -50,20 +50,20 @@ class SNA_Node_NumberField(ScriptingBaseNode, bpy.types.Node):
 
         ref = bpy.context.scene.sna.references.get(self.prop)
         if not ref or not ref.node:
-            self.code = f"""
+            self.code_inline = f"""
                 {indent(output_code, 4)}
             """
             return
 
         prop_name = getattr(ref.node, "prop_name", "")
         if not prop_name:
-            self.code = f"""
+            self.code_inline = f"""
                 {indent(output_code, 4)}
             """
             return
 
         if not self.inputs["Data"].is_linked:
-            self.code = f"""
+            self.code_inline = f"""
                 {layout_code}.label(text="No data connected", icon="ERROR")
                 {indent(output_code, 4)}
             """
@@ -83,7 +83,7 @@ class SNA_Node_NumberField(ScriptingBaseNode, bpy.types.Node):
 
         args_str = ", ".join(args)
 
-        self.code = f"""
+        self.code_inline = f"""
             {layout_code}.prop({args_str})
             {indent(output_code, 3)}
         """

@@ -17,8 +17,6 @@ class SNA_Node_Subpanel(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         self.code_global = f"""
-            import bpy
-
             class SNA_PT_AddonPanel_{self.id}(bpy.types.Panel):
                 bl_idname = "SNA_PT_AddonPanel_{self.id}"
         """
@@ -26,7 +24,7 @@ class SNA_Node_Subpanel(ScriptingBaseNode, bpy.types.Node):
         self.outputs["Header"].layout = f"header_{self.id}"
         self.outputs["Panel"].layout = f"panel_{self.id}"
 
-        self.code = f"""
+        self.code_inline = f"""
             header_{self.id}, panel_{self.id} = {self.inputs[0].get_layout()}.panel("SNA_PT_AddonPanel_{self.id}", default_closed={self.inputs[1].eval()})
             {indent(self.outputs["Header"].eval(), 3)}
             if panel_{self.id}:

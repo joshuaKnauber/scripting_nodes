@@ -18,9 +18,9 @@ class SNA_Node_OnBlenderClose(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         output_code = self.outputs[0].eval()
 
-        self.code_global = "import atexit"
+        self.code_imports = "import atexit"
 
-        self.code = f"""
+        self.code_module = f"""
 def {self.handler_name}():
     {indent(output_code, 1) if output_code.strip() else 'pass'}
 """
