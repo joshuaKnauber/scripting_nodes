@@ -111,7 +111,7 @@ class BlendDataModeMixin:
 
         if self.mode == "CUSTOM":
             self.draw_reference_prop(row, prop_ref_attr)
-            row.prop(self, "mode", icon="BLENDER", icon_only=True, text="")
+            row.prop(self, "mode", icon="USER", icon_only=True, text="")
             # Class-body properties have an implicit data path - no warning
             if self._class_body_data_code(prop_ref_attr) is None:
                 if not self.inputs["Data"].is_linked:
@@ -128,7 +128,7 @@ class BlendDataModeMixin:
                     "sna.blend_data_paste_path", text="Paste Path", icon="PASTEDOWN"
                 )
                 op.node_name = self.name
-            row.prop(self, "mode", icon="USER", icon_only=True, text="")
+            row.prop(self, "mode", icon="BLENDER", icon_only=True, text="")
 
             if (
                 self.blend_prop_name

@@ -1,83 +1,71 @@
 from .....lib.utils.sockets.modify import update_socket_type
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
+from ..Interface.blend_data_mixin import BlendDataModeMixin
 import bpy
 
 
-class SNA_Node_GetProperty(ScriptingBaseNode, bpy.types.Node):
+class SNA_Node_GetProperty(
+    BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node
+):
     bl_idname = "SNA_Node_GetProperty"
     bl_label = "Get Property"
     sn_reference_properties = {"prop"}
 
-    def _apply_source_visibility(self):
-        # Class-body targets (Operator/Preferences) have a fixed access path,
-        # so the Source input is meaningless - hide it from the node UI.
-        target = self.resolve_reference("prop")
-        register_on = getattr(target, "register_on", "") if target else ""
-        self.inputs[1].enabled = register_on not in {"Operator", "Preferences"}
-
     def update_prop(self, context):
         target = self.resolve_reference("prop")
         if target and hasattr(target, "data_type"):
-            update_socket_type(self.outputs[1], target.data_type)
-        self._apply_source_visibility()
+            update_socket_type(self.outputs["Value"], target.data_type)
+        self.apply_class_body_socket_visibility()
         self._generate()
+
+    # Mode properties from mixin
+    mode: bpy.props.EnumProperty(
+        name="Mode",
+        items=BlendDataModeMixin.get_mode_items(),
+        default="CUSTOM",
+        update=BlendDataModeMixin.update_mode,
+    )
+
+    blend_data_path: bpy.props.StringProperty(default="")
+    blend_prop_name: bpy.props.StringProperty(default="")
+    needs_data_input: bpy.props.BoolProperty(default=False)
 
     prop: bpy.props.StringProperty(name="Property", update=update_prop)
 
     def draw(self, context, layout):
-        self.draw_reference_prop(layout, "prop")
-        target = self.resolve_reference("prop")
-        register_on = getattr(target, "register_on", "") if target else ""
-        # Class-body targets have an implicit access path, no source needed
-        if register_on in {"Operator", "Preferences"}:
-            return
-        if not self.inputs[1].is_linked:
-            layout.label(text="Connect a data source", icon="INFO")
+        self.draw_mode_toggle(layout, context)
 
     def on_create(self):
         self.add_input("ScriptingProgramSocket")
-        self.add_input("ScriptingBlendDataSocket", "Source")
+        self.add_input("ScriptingBlendDataSocket", "Data")
         self.add_output("ScriptingProgramSocket")
         self.add_output("ScriptingStringSocket", "Value")
 
     def on_ref_change(self, node):
         if hasattr(node, "data_type"):
-            update_socket_type(self.outputs[1], node.data_type)
-        self._apply_source_visibility()
+            update_socket_type(self.outputs["Value"], node.data_type)
+        self.apply_class_body_socket_visibility()
         self._generate()
 
     def generate(self):
+        next_code = indent(self.outputs[0].eval(), 3)
         self.code_inline = f"""
-            {indent(self.outputs[0].eval(), 3)}
+            {next_code}
         """
-        target = self.resolve_reference("prop")
-        if not target:
-            return
-        prop_name = getattr(target, "prop_name", "")
-        if not prop_name:
-            return
 
-        # Class-body properties have a fixed access path - the Source input
-        # is irrelevant (operator-attached -> self.X inside the operator
-        # body; preferences-attached -> the addon's preferences instance).
-        register_on = getattr(target, "register_on", "")
-        if register_on == "Operator":
-            self.outputs[1].code = f"self.{prop_name}"
-            return
-        if register_on == "Preferences":
-            self.outputs[1].code = (
-                f'bpy.context.preferences.addons[__package__.rsplit(".", 1)[0]].preferences.{prop_name}'
-            )
-            return
+        data_code, prop_name, error = self.get_prop_data_and_name()
 
-        if self.inputs[1].is_linked:
-            source_code = self.inputs[1].eval()
-            self.outputs[1].code = f"{source_code}.{prop_name}"
-        else:
-            # No source connected - return None and log
-            self.outputs[1].code = "None"
+        if error:
+            self.outputs["Value"].code = "None"
             self.code_inline = f"""
-                print("Get Property: No data source connected for '{prop_name}'")
+                print("Get Property: {error}")
                 {indent(self.outputs[0].eval(), 6)}
             """
+            return
+
+        if not prop_name:
+            self.outputs["Value"].code = "None"
+            return
+
+        self.outputs["Value"].code = f"{data_code}.{prop_name}"
