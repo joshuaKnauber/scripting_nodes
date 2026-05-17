@@ -1,4 +1,5 @@
 from ..generator import generate_addon
+from ..build_context import set_building
 import os
 import bpy
 import shutil
@@ -27,7 +28,15 @@ class SNA_OT_ExportAddon(bpy.types.Operator):
 
             if os.path.exists(folder_path):
                 shutil.rmtree(folder_path)
-            generate_addon(base_path=export_dir)
+
+            # Flag emitted as build-time so nodes strip dev-only affordances
+            # (e.g. Print's SN overlay hook). Wrapped in try/finally so a
+            # codegen error can never leave the live editor in build mode.
+            set_building(True)
+            try:
+                generate_addon(base_path=export_dir)
+            finally:
+                set_building(False)
 
             # zip folder
             if os.path.exists(path):

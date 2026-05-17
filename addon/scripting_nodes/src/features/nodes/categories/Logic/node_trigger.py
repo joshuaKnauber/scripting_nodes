@@ -10,11 +10,13 @@ class SNA_Node_Trigger(ScriptingBaseNode, bpy.types.Node):
 
     @property
     def operator_idname(self):
-        return f"sna.trigger_{self.id.lower()}"
+        namespace = bpy.context.scene.sna.addon.idname_namespace
+        return f"{namespace}.trigger_{self.id.lower()}"
 
     @property
     def operator_class_name(self):
-        return f"SNA_OT_Trigger_{self.id}"
+        class_prefix = bpy.context.scene.sna.addon.class_prefix
+        return f"{class_prefix}_OT_Trigger_{self.id}"
 
     def draw(self, context, layout):
         row = layout.row()

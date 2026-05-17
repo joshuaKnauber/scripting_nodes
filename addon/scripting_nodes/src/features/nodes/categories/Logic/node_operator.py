@@ -1,6 +1,7 @@
 from .....lib.utils.code.format import indent
 from .....lib.utils.node_tree.scripting_node_trees import node_by_id
 from ...base_node import ScriptingBaseNode
+from ..._class_body import ClassBodyContainerMixin
 import bpy
 
 
@@ -71,7 +72,9 @@ class SNA_OT_OperatorNodeSettings(bpy.types.Operator):
         return context.window_manager.invoke_popup(self, width=220)
 
 
-class SNA_Node_Operator(ScriptingBaseNode, bpy.types.Node):
+class SNA_Node_Operator(
+    ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.Node
+):
     bl_idname = "SNA_Node_Operator"
     bl_label = "Operator"
     sn_options = {"ROOT_NODE"}
@@ -195,8 +198,12 @@ class SNA_Node_Operator(ScriptingBaseNode, bpy.types.Node):
         settings_op.node_id = self.id
 
         # Play button to run the operator
-        operator_idname = f"sna.operator_{self.id.lower()}"
+        namespace = bpy.context.scene.sna.addon.idname_namespace
+        operator_idname = f"{namespace}.operator_{self.id.lower()}"
         row.operator(operator_idname, text="", icon="PLAY")
+
+        # Attached operator properties (only those whose register_on=Operator)
+        self.draw_class_body_properties(layout, label="Properties")
 
     def generate(self):
         # Safety check: ensure inputs exist before generating
@@ -220,7 +227,9 @@ class SNA_Node_Operator(ScriptingBaseNode, bpy.types.Node):
         options_str = "{" + ", ".join(options) + "}" if options else "set()"
 
         # Generate operator idname
-        operator_idname = f"sna.operator_{self.id.lower()}"
+        addon = bpy.context.scene.sna.addon
+        operator_idname = f"{addon.idname_namespace}.operator_{self.id.lower()}"
+        class_name = f"{addon.class_prefix}_OT_Operator_{self.id}"
 
         # Build class attributes list
         class_attrs = [
@@ -234,6 +243,19 @@ class SNA_Node_Operator(ScriptingBaseNode, bpy.types.Node):
 
         # Add options
         class_attrs.append(f"bl_options = {options_str}")
+
+        # Attached operator properties become annotations alongside bl_*
+        # attrs. We filter to entries whose register_on is "Operator" so a
+        # property accidentally flagged as Preferences/PropertyGroup doesn't
+        # end up here.
+        annotation_attrs = []
+        for entry, prop_node in self.iter_attached_property_nodes():
+            if getattr(prop_node, "register_on", "") != "Operator":
+                continue
+            line = prop_node.class_body_annotation()
+            if line:
+                annotation_attrs.append(line)
+        class_attrs.extend(annotation_attrs)
 
         # Format class attributes
         attrs_code = "\n    ".join(class_attrs)
@@ -292,7 +314,7 @@ class SNA_Node_Operator(ScriptingBaseNode, bpy.types.Node):
 """
 
         self.code_module = f"""
-class SNA_OT_Operator_{self.id}(bpy.types.Operator):
+class {class_name}(bpy.types.Operator):
     {attrs_code}
 {poll_method}{invoke_method}{draw_method}{execute_method}
 """

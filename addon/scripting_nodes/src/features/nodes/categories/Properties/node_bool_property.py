@@ -1,6 +1,10 @@
 from ...base_node import ScriptingBaseNode
 from .....lib.utils.node_tree.scripting_node_trees import node_by_id
 from .....lib.utils.code.format import indent
+from ._class_body_support import (
+    CLASS_BODY_REGISTER_ON_ITEMS,
+    is_class_body_target,
+)
 import bpy
 
 
@@ -115,12 +119,17 @@ class SNA_Node_BoolProperty(ScriptingBaseNode, bpy.types.Node):
                 "WINDOW",
                 14,
             ),
+            *CLASS_BODY_REGISTER_ON_ITEMS,
         ],
         name="Register On",
         description="Blender data type to register this property on",
         default="Scene",
         update=update_props,
     )
+
+    @property
+    def is_class_body_target(self):
+        return is_class_body_target(self.register_on)
 
     prop_label: bpy.props.StringProperty(
         name="Label",
@@ -192,8 +201,7 @@ class SNA_Node_BoolProperty(ScriptingBaseNode, bpy.types.Node):
         )
         op.node_id = self.id
 
-    def generate(self):
-        # Build options set
+    def _build_prop_args(self):
         options = []
         if self.option_hidden:
             options.append("'HIDDEN'")
@@ -205,25 +213,27 @@ class SNA_Node_BoolProperty(ScriptingBaseNode, bpy.types.Node):
             options.append("'LIBRARY_EDITABLE'")
         options_str = "{" + ", ".join(options) + "}" if options else "set()"
 
-        # Check if update callback is connected
         update_socket = self.outputs.get("On Update")
         has_update = update_socket and update_socket.is_linked
 
-        # Build property definition code
         prop_args = [
             f'name="{self.prop_label}"',
             f'description="{self.prop_description}"',
             f"default={self.prop_default}",
         ]
-
         prop_args.append(f"options={options_str}")
-
         if has_update:
             prop_args.append(f"update=update_{self.prop_name}")
+        return prop_args, has_update, update_socket
 
+    def class_body_annotation(self):
+        prop_args, _, _ = self._build_prop_args()
+        return f"{self.prop_name}: bpy.props.BoolProperty({', '.join(prop_args)})"
+
+    def generate(self):
+        prop_args, has_update, update_socket = self._build_prop_args()
         args_str = ",\n        ".join(prop_args)
 
-        # Generate update callback if connected
         update_code = ""
         if has_update:
             update_body = indent(update_socket.eval("pass"), 2)
@@ -231,12 +241,14 @@ class SNA_Node_BoolProperty(ScriptingBaseNode, bpy.types.Node):
 def update_{self.prop_name}(self, context):
     {update_body}
 """
-            # Set output codes for update function parameters
             self.outputs["Update Source"].code = "self"
 
         self.code_global = f"""
 {update_code}
 """
+
+        if self.is_class_body_target:
+            return
 
         self.code_register = f"""
 bpy.types.{self.register_on}.{self.prop_name} = bpy.props.BoolProperty(

@@ -141,14 +141,43 @@ class ScriptingBaseNode:
                 # Trigger immediate regeneration to avoid stale file on redraw
                 watch_changes()
             redraw_all()
-        # update references
+        # Keep refs membership in sync. update_node_references() fires only
+        # on link edits (NodeTree.update() doesn't fire on bare node add), so
+        # a freshly added/duplicated node would never land in refs until the
+        # user happens to make a link. Self-heal here so the picker dropdowns
+        # see new nodes immediately.
+        refs = bpy.context.scene.sna.references
+        new_ref_name = f"{self.name} ({self.node_tree.name})"
+        existing_ref_index = None
+        for index, ref in enumerate(refs):
+            if ref.node_id == self.id:
+                existing_ref_index = index
+                break
+        if existing_ref_index is not None:
+            if refs[existing_ref_index].name != new_ref_name:
+                refs[existing_ref_index].name = new_ref_name
+        else:
+            ref = refs.add()
+            ref.name = new_ref_name
+            ref.node_id = self.id
+
+        # notify referencing nodes
         for ntree in scripting_node_trees():
             for node in sn_nodes(ntree):
                 for prop in node.sn_reference_properties:
                     key = getattr(node, prop, "")
-                    ref = bpy.context.scene.sna.references.get(key)
+                    ref = refs.get(key)
                     if ref and ref.node_id == self.id:
                         node.on_ref_change(self)
+                # Container nodes hold refs in a CollectionProperty - notify
+                # them when one of their attached properties changes signature
+                cb_entries = getattr(node, "class_body_properties", None)
+                if cb_entries is not None:
+                    for entry in cb_entries:
+                        ref = refs.get(entry.prop)
+                        if ref and ref.node_id == self.id:
+                            node._generate()
+                            break
 
     def generate(self):
         raise NotImplementedError

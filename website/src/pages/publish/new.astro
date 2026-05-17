@@ -1,0 +1,228 @@
+---
+import Site from '../../layouts/Site.astro';
+---
+
+<Site title="Publish — Scripting Nodes" description="Publish an addon to the Scripting Nodes store.">
+  <main>
+    <h1>Publish an addon</h1>
+    <p class="lead">Drop a built .zip and we'll extract everything from the manifest.</p>
+
+    <form class="form">
+      <section>
+        <div class="dropzone">
+          <input type="file" accept=".zip" id="zip" />
+          <label for="zip">
+            <strong>Drop your built .zip here</strong>
+            <span>or click to browse</span>
+          </label>
+        </div>
+      </section>
+
+      <section class="extracted">
+        <h2>From manifest</h2>
+        <dl>
+          <div><dt>id</dt><dd>—</dd></div>
+          <div><dt>name</dt><dd>—</dd></div>
+          <div><dt>version</dt><dd>—</dd></div>
+          <div><dt>blender_version_min</dt><dd>—</dd></div>
+          <div><dt>license</dt><dd>—</dd></div>
+          <div><dt>tags</dt><dd>—</dd></div>
+        </dl>
+      </section>
+
+      <section>
+        <label class="field-label" for="cover">
+          Cover image <span class="required">*</span>
+        </label>
+        <p class="hint">1280×720 recommended. PNG, JPG, or WebP. Shown on the store card.</p>
+        <div class="dropzone small">
+          <input type="file" accept="image/png,image/jpeg,image/webp" id="cover" />
+          <label for="cover"><span>Drop cover image</span></label>
+        </div>
+      </section>
+
+      <section>
+        <label class="field-label" for="screenshots">Screenshots</label>
+        <p class="hint">Up to 6 images. Shown on the addon detail page.</p>
+        <div class="dropzone small">
+          <input type="file" accept="image/png,image/jpeg,image/webp" id="screenshots" multiple />
+          <label for="screenshots"><span>Drop screenshots</span></label>
+        </div>
+      </section>
+
+      <section>
+        <label class="field-label" for="description">Description</label>
+        <p class="hint">Markdown supported. Shown on the addon detail page.</p>
+        <textarea
+          id="description"
+          rows="10"
+          placeholder="What does your addon do? Add usage notes, links, install steps, etc."
+        ></textarea>
+      </section>
+
+      <section>
+        <label class="field-label" for="changelog">Changelog</label>
+        <p class="hint">
+          Optional. What changed in this version? Markdown supported. Shown on the version history
+          page. Only meaningful for updates to an existing addon.
+        </p>
+        <textarea
+          id="changelog"
+          rows="6"
+          placeholder="- Added …&#10;- Fixed …&#10;- Breaking: …"
+        ></textarea>
+      </section>
+
+      <div class="actions">
+        <a href="/store" class="cancel">Cancel</a>
+        <button type="submit" class="publish">Publish</button>
+      </div>
+    </form>
+  </main>
+
+  <style>
+    main {
+      max-width: 44rem;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+    h1 {
+      font-size: 1.875rem;
+    }
+    .lead {
+      color: var(--muted);
+      margin: 0.5rem 0 2rem;
+    }
+
+    .form {
+      display: grid;
+      gap: 2rem;
+    }
+    section {
+      display: grid;
+      gap: 0.25rem;
+    }
+    .field-label {
+      font-weight: 500;
+      font-size: 0.95rem;
+    }
+    .required {
+      color: var(--danger);
+    }
+    .hint {
+      color: var(--muted);
+      font-size: 0.85rem;
+      margin: 0 0 0.5rem;
+    }
+
+    .dropzone {
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      text-align: center;
+      background: var(--bg-elevated);
+      cursor: pointer;
+      transition:
+        border-color 0.15s,
+        background 0.15s;
+    }
+    .dropzone:hover {
+      border-color: var(--border-hover);
+    }
+    .dropzone input {
+      display: none;
+    }
+    .dropzone label {
+      cursor: pointer;
+      display: grid;
+      gap: 0.25rem;
+    }
+    .dropzone label strong {
+      font-size: 1rem;
+    }
+    .dropzone label span {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .dropzone.small {
+      padding: 1.25rem;
+    }
+
+    .extracted h2 {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin: 0 0 0.5rem;
+    }
+    .extracted dl {
+      margin: 0;
+      display: grid;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+    }
+    .extracted dl > div {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .extracted dl > div:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .extracted dt {
+      color: var(--muted);
+      margin: 0;
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+    }
+    .extracted dd {
+      margin: 0;
+      color: var(--muted-2);
+    }
+
+    textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+      font-family: ui-monospace, monospace;
+      font-size: 0.875rem;
+      resize: vertical;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: var(--border-hover);
+    }
+
+    .actions {
+      display: flex;
+      justify-content: end;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+    .cancel {
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .cancel:hover {
+      color: var(--fg);
+      border-color: var(--border-hover);
+    }
+    .publish {
+      padding: 0.625rem 1.25rem;
+      border-radius: var(--radius);
+      border: none;
+      background: var(--accent);
+      color: var(--accent-fg);
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .publish:hover {
+      background: #ffffff;
+    }
+  </style>
+</Site>

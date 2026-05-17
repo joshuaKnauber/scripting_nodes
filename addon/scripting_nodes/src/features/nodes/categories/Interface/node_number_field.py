@@ -8,7 +8,22 @@ class SNA_Node_NumberField(ScriptingBaseNode, bpy.types.Node):
     bl_label = "Number Field"
     sn_reference_properties = {"prop"}
 
+    def _class_body_data_code(self):
+        target = self.resolve_reference("prop")
+        register_on = getattr(target, "register_on", "") if target else ""
+        if register_on == "Operator":
+            return "self"
+        if register_on == "Preferences":
+            return "bpy.context.preferences.addons[__package__].preferences"
+        return None
+
+    def _apply_class_body_socket_visibility(self):
+        data_socket = self.inputs.get("Data")
+        if data_socket:
+            data_socket.hide = self._class_body_data_code() is not None
+
     def update_prop(self, context):
+        self._apply_class_body_socket_visibility()
         self._generate()
 
     prop: bpy.props.StringProperty(name="Property", update=update_prop)
@@ -29,7 +44,8 @@ class SNA_Node_NumberField(ScriptingBaseNode, bpy.types.Node):
 
     def draw(self, context, layout):
         self.draw_reference_prop(layout, "prop")
-        if not self.inputs[1].is_linked:
+        # Class-body properties have an implicit data path - no warning
+        if self._class_body_data_code() is None and not self.inputs[1].is_linked:
             layout.label(text="Connect data source", icon="INFO")
         row = layout.row(align=True)
         row.prop(self, "emboss", toggle=True)
@@ -42,6 +58,7 @@ class SNA_Node_NumberField(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingInterfaceSocket")
 
     def on_ref_change(self, node):
+        self._apply_class_body_socket_visibility()
         self._generate()
 
     def generate(self):
@@ -56,14 +73,18 @@ class SNA_Node_NumberField(ScriptingBaseNode, bpy.types.Node):
             """
             return
 
-        if not self.inputs["Data"].is_linked:
+        # Class-body targets bypass the Data input
+        class_body_data = self._class_body_data_code()
+        if class_body_data is not None:
+            data_code = class_body_data
+        elif not self.inputs["Data"].is_linked:
             self.code_inline = f"""
                 {layout_code}.label(text="No data connected", icon="ERROR")
                 {indent(output_code, 4)}
             """
             return
-
-        data_code = self.inputs["Data"].eval()
+        else:
+            data_code = self.inputs["Data"].eval()
         text_code = self.inputs["Text"].eval()
 
         args = [f"data={data_code}", f'property="{prop_name}"']

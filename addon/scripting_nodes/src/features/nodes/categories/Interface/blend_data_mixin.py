@@ -26,6 +26,27 @@ class BlendDataModeMixin:
             ("BLENDER", "Blender", "Use Blender data path"),
         ]
 
+    def _class_body_data_code(self, prop_ref_attr: str = "prop"):
+        """If the referenced property is class-body (Operator/Preferences),
+        return the implicit data access expression for it. Otherwise None.
+        """
+        target = self.resolve_reference(prop_ref_attr)
+        register_on = getattr(target, "register_on", "") if target else ""
+        if register_on == "Operator":
+            return "self"
+        if register_on == "Preferences":
+            return "bpy.context.preferences.addons[__package__].preferences"
+        return None
+
+    def apply_class_body_socket_visibility(self, prop_ref_attr: str = "prop"):
+        """Hide the Data socket when the referenced property is class-body -
+        the access path is implicit so a Data input would be meaningless."""
+        if self.mode != "CUSTOM":
+            return
+        data_socket = self.inputs.get("Data")
+        if data_socket:
+            data_socket.hide = self._class_body_data_code(prop_ref_attr) is not None
+
     def update_mode(self, context):
         """Update socket visibility based on mode."""
         if len(self.inputs) > 1:
@@ -36,7 +57,9 @@ class BlendDataModeMixin:
                         self.blend_data_path != "" and not self.needs_data_input
                     )
                 else:
-                    data_socket.hide = False
+                    data_socket.hide = (
+                        self._class_body_data_code() is not None
+                    )
         self._generate()
 
     def setup_from_path(self, path: str, prop_name: str, needs_input: bool):
@@ -89,8 +112,10 @@ class BlendDataModeMixin:
         if self.mode == "CUSTOM":
             self.draw_reference_prop(row, prop_ref_attr)
             row.prop(self, "mode", icon="BLENDER", icon_only=True, text="")
-            if not self.inputs["Data"].is_linked:
-                layout.label(text="Connect data source", icon="INFO")
+            # Class-body properties have an implicit data path - no warning
+            if self._class_body_data_code(prop_ref_attr) is None:
+                if not self.inputs["Data"].is_linked:
+                    layout.label(text="Connect data source", icon="INFO")
             return False
         else:  # BLENDER mode
             if self.blend_prop_name:
@@ -143,6 +168,10 @@ class BlendDataModeMixin:
             if target:
                 prop_name = getattr(target, "prop_name", "")
                 if prop_name:
+                    # Class-body targets bypass the Data input
+                    class_body_data = self._class_body_data_code(prop_ref_attr)
+                    if class_body_data is not None:
+                        return class_body_data, prop_name, None
                     if not self.inputs["Data"].is_linked:
                         return None, None, "No data connected"
                     data_code = self.inputs["Data"].eval()

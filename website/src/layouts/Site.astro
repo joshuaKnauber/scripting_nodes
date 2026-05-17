@@ -1,0 +1,86 @@
+---
+import '../styles/theme.css';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+const path = Astro.url.pathname;
+const inStore = path === '/store' || path.startsWith('/store/');
+const inDocs = path.startsWith('/docs');
+const inPublish = path.startsWith('/publish');
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <a class="brand" href="/">Scripting Nodes</a>
+        <nav>
+          <a href="/store" class:list={[{ active: inStore }]}>Store</a>
+          <a href="/docs/" class:list={[{ active: inDocs }]}>Docs</a>
+          <a href="/publish/new" class:list={['publish', { active: inPublish }]}>Publish</a>
+        </nav>
+      </div>
+    </header>
+    <slot />
+
+    <style>
+      .site-header {
+        border-bottom: 1px solid var(--border);
+        background: var(--bg);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+      }
+      .container {
+        max-width: var(--max-width);
+        margin: 0 auto;
+        padding: 0.875rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .brand {
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      nav {
+        display: flex;
+        gap: 0.25rem;
+      }
+      nav a {
+        padding: 0.5rem 0.875rem;
+        border-radius: var(--radius);
+        color: var(--muted);
+        font-size: 0.9rem;
+        transition:
+          color 0.15s,
+          background 0.15s,
+          border-color 0.15s;
+      }
+      nav a:hover {
+        color: var(--fg);
+      }
+      nav a.active {
+        color: var(--fg);
+      }
+      nav a.publish {
+        border: 1px solid var(--border);
+        color: var(--fg);
+      }
+      nav a.publish:hover {
+        border-color: var(--border-hover);
+      }
+    </style>
+  </body>
+</html>

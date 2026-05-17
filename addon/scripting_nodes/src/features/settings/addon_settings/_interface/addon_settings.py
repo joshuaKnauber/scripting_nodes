@@ -63,9 +63,24 @@ class SNA_PT_Overwrite_Settings(bpy.types.Panel):
 
     def draw(self, context):
         layout = self.layout
+        addon = context.scene.sna.addon
 
         col = layout.column()
         col.use_property_split = True
         col.use_property_decorate = False
 
-        col.prop(context.scene.sna.addon, "module_name_overwrite")
+        def field_with_hint(prop_name, example):
+            col.prop(addon, prop_name)
+            hint = col.row()
+            hint.alignment = "RIGHT"
+            hint.active = False
+            hint.label(text=example)
+            col.separator(factor=0.5)
+
+        field_with_hint("module_name_overwrite", f"import {addon.module_name}")
+        field_with_hint(
+            "class_prefix_overwrite", f"{addon.class_prefix}_PT_MyPanel"
+        )
+        field_with_hint(
+            "idname_namespace_overwrite", f"{addon.idname_namespace}.my_operator"
+        )

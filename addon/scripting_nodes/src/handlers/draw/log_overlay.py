@@ -5,6 +5,8 @@ from dataclasses import dataclass, field
 from typing import Literal
 import time
 
+from bpy.app.handlers import persistent
+
 from ...lib.editor.editor import is_sn_editor
 
 
@@ -217,11 +219,34 @@ def _draw_overlay():
         y -= line_height
 
 
+# Stable global handle that generated addons can call without knowing SN's
+# package name (which differs between dev / extension installs). Generated
+# Print nodes look this up via bpy.app.driver_namespace and fall through
+# silently if SN isn't installed.
+OVERLAY_LOG_KEY = "_sn_overlay_log"
+
+# Bind the hook at module import time as well as in register(). Reason: the
+# hook needs to be present whenever SN's module is loaded, even if register()
+# hasn't fired yet (or partially failed). Idempotent - just a dict assignment.
+bpy.app.driver_namespace[OVERLAY_LOG_KEY] = add_log
+
+
+@persistent
+def _rebind_overlay_hook(_):
+    # driver_namespace is wiped by Blender on every file load, so generated
+    # Print nodes would silently no-op the overlay branch after the user
+    # opens a blend. Rebind here so the hook survives load.
+    bpy.app.driver_namespace[OVERLAY_LOG_KEY] = add_log
+
+
 def register():
     global _draw_handler
     _draw_handler = bpy.types.SpaceNodeEditor.draw_handler_add(
         _draw_overlay, (), "WINDOW", "POST_PIXEL"
     )
+    bpy.app.driver_namespace[OVERLAY_LOG_KEY] = add_log
+    if _rebind_overlay_hook not in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.append(_rebind_overlay_hook)
 
 
 def unregister():
@@ -231,3 +256,6 @@ def unregister():
         bpy.types.SpaceNodeEditor.draw_handler_remove(_draw_handler, "WINDOW")
         _draw_handler = None
     _get_state()["entries"].clear()
+    bpy.app.driver_namespace.pop(OVERLAY_LOG_KEY, None)
+    if _rebind_overlay_hook in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(_rebind_overlay_hook)

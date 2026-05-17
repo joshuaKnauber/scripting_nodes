@@ -1,6 +1,10 @@
 from ...base_node import ScriptingBaseNode
 from .....lib.utils.node_tree.scripting_node_trees import node_by_id
 from .....lib.utils.code.format import indent
+from ._class_body_support import (
+    CLASS_BODY_REGISTER_ON_ITEMS,
+    is_class_body_target,
+)
 import bpy
 
 
@@ -140,12 +144,17 @@ class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
                 "WINDOW",
                 14,
             ),
+            *CLASS_BODY_REGISTER_ON_ITEMS,
         ],
         name="Register On",
         description="Blender data type to register this property on",
         default="Scene",
         update=update_props,
     )
+
+    @property
+    def is_class_body_target(self):
+        return is_class_body_target(self.register_on)
 
     prop_label: bpy.props.StringProperty(
         name="Label",
@@ -255,45 +264,49 @@ class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
         )
         op.node_id = self.id
 
-    def generate(self):
-        # Build options set
+    def _build_prop_args(self):
         options = []
         if self.option_hidden:
             options.append("'HIDDEN'")
         if self.option_skip_save:
             options.append("'SKIP_SAVE'")
-        # Note: ANIMATABLE is typically not used for pointer properties
         if self.option_library_editable:
             options.append("'LIBRARY_EDITABLE'")
         options_str = "{" + ", ".join(options) + "}" if options else "set()"
 
-        # Check if update callback is connected
         update_socket = self.outputs.get("On Update")
         has_update = update_socket and update_socket.is_linked
 
-        # Check if poll function is connected
         poll_socket = self.outputs.get("Poll Function")
         has_poll = self.use_poll_function and poll_socket and poll_socket.is_linked
 
-        # Build property definition code
         prop_args = [
             f"type=bpy.types.{self.prop_type}",
             f'name="{self.prop_label}"',
             f'description="{self.prop_description}"',
         ]
-
         if options_str != "set()":
             prop_args.append(f"options={options_str}")
-
         if has_update:
             prop_args.append(f"update=update_{self.prop_name}")
-
         if has_poll:
             prop_args.append(f"poll=poll_{self.prop_name}")
+        return prop_args, has_update, update_socket, has_poll, poll_socket
 
+    def class_body_annotation(self):
+        prop_args, *_ = self._build_prop_args()
+        return (
+            f"{self.prop_name}: bpy.props.PointerProperty("
+            + ", ".join(prop_args)
+            + ")"
+        )
+
+    def generate(self):
+        prop_args, has_update, update_socket, has_poll, poll_socket = (
+            self._build_prop_args()
+        )
         args_str = ",\n        ".join(prop_args)
 
-        # Generate update callback if connected
         update_code = ""
         if has_update:
             update_body = indent(update_socket.eval("pass"), 2)
@@ -301,10 +314,8 @@ class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
 def update_{self.prop_name}(self, context):
     {update_body}
 """
-            # Set output codes for update function parameters
             self.outputs["Update Source"].code = "self"
 
-        # Generate poll function if enabled and connected
         poll_code = ""
         if has_poll:
             poll_body = indent(poll_socket.eval("return True"), 2)
@@ -312,13 +323,15 @@ def update_{self.prop_name}(self, context):
 def poll_{self.prop_name}(self, object):
     {poll_body}
 """
-            # Set output codes for poll function parameters
             self.outputs["Poll: Self"].code = "self"
             self.outputs["Poll: Object"].code = "object"
 
         self.code_global = f"""
 {update_code}{poll_code}
 """
+
+        if self.is_class_body_target:
+            return
 
         self.code_register = f"""
 bpy.types.{self.register_on}.{self.prop_name} = bpy.props.PointerProperty(

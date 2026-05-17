@@ -1,0 +1,204 @@
+---
+import Site from '../../../layouts/Site.astro';
+import { stubAddons, getAddon, latestVersion, formatBytes } from '../../../lib/stubAddons';
+
+export async function getStaticPaths() {
+  return stubAddons.map((addon) => ({ params: { id: addon.id } }));
+}
+
+const { id } = Astro.params;
+const addon = getAddon(id!);
+if (!addon) throw new Error(`Addon not found: ${id}`);
+const current = latestVersion(addon);
+---
+
+<Site title={`${addon.name} — Scripting Nodes Store`} description={addon.tagline}>
+  <div
+    class="hero"
+    style={`background: linear-gradient(135deg, ${addon.cover.from}, ${addon.cover.to});`}
+  >
+  </div>
+
+  <main>
+    <a href="/store" class="back">← Store</a>
+    <h1>{addon.name}</h1>
+    <p class="tagline">{addon.tagline}</p>
+    <p class="byline">by {addon.owner} · updated {current.released_at}</p>
+
+    <div class="layout">
+      <article class="content">
+        <h2>About</h2>
+        <p>{addon.description}</p>
+
+        {
+          addon.gallery.length > 0 && (
+            <>
+              <h2>Screenshots</h2>
+              <div class="gallery">
+                {addon.gallery.map((img) => (
+                  <div
+                    class="shot"
+                    role="img"
+                    aria-label={img.alt}
+                    style={`background: linear-gradient(135deg, ${img.from}, ${img.to});`}
+                  />
+                ))}
+              </div>
+            </>
+          )
+        }
+      </article>
+
+      <aside>
+        <button class="install" type="button">Install in Blender</button>
+        <dl class="facts">
+          <div><dt>Version</dt><dd>{current.version}</dd></div>
+          <div><dt>Blender</dt><dd>{current.blender_min}+</dd></div>
+          <div><dt>License</dt><dd>{addon.license}</dd></div>
+          <div><dt>Size</dt><dd>{formatBytes(current.size_bytes)}</dd></div>
+          <div>
+            <dt>Tags</dt>
+            <dd class="tags">{addon.tags.map((t) => <span>{t}</span>)}</dd>
+          </div>
+        </dl>
+        <a href={`/store/${addon.id}/versions`} class="versions-link">
+          Version history ({addon.versions.length}) →
+        </a>
+      </aside>
+    </div>
+  </main>
+
+  <style>
+    .hero {
+      aspect-ratio: 16 / 5;
+      max-height: 320px;
+    }
+
+    main {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+    .back {
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+    }
+    .back:hover {
+      color: var(--fg);
+    }
+    main h1 {
+      font-size: 2.25rem;
+      margin: 0 0 0.5rem;
+    }
+    .tagline {
+      font-size: 1.125rem;
+      color: var(--muted);
+      margin: 0;
+    }
+    .byline {
+      font-size: 0.85rem;
+      color: var(--muted-2);
+      margin: 0.5rem 0 0;
+    }
+
+    .layout {
+      margin-top: 2.5rem;
+      display: grid;
+      grid-template-columns: 1fr 16rem;
+      gap: 2.5rem;
+    }
+    @media (max-width: 720px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .content h2 {
+      font-size: 1.1rem;
+      margin: 2rem 0 0.75rem;
+    }
+    .content h2:first-child {
+      margin-top: 0;
+    }
+    .content p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 0.75rem;
+    }
+    .shot {
+      aspect-ratio: 16 / 10;
+      border-radius: var(--radius);
+    }
+
+    aside .install {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: var(--accent-fg);
+      border: none;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    aside .install:hover {
+      background: #ffffff;
+    }
+
+    .facts {
+      margin: 1.5rem 0 0;
+      font-size: 0.875rem;
+      display: grid;
+      gap: 0.75rem;
+    }
+    .facts > div {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .facts > div:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .facts dt {
+      color: var(--muted);
+      margin: 0;
+    }
+    .facts dd {
+      margin: 0;
+      text-align: right;
+    }
+    .tags {
+      display: flex;
+      gap: 0.25rem;
+      flex-wrap: wrap;
+      justify-content: end;
+    }
+    .tags span {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      padding: 0.125rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.75rem;
+    }
+
+    .versions-link {
+      display: inline-block;
+      margin-top: 1rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .versions-link:hover {
+      color: var(--fg);
+    }
+  </style>
+</Site>

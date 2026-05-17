@@ -1,0 +1,134 @@
+---
+import Site from '../../../layouts/Site.astro';
+import { stubAddons, getAddon, formatBytes } from '../../../lib/stubAddons';
+
+export async function getStaticPaths() {
+  return stubAddons.map((addon) => ({ params: { id: addon.id } }));
+}
+
+const { id } = Astro.params;
+const addon = getAddon(id!);
+if (!addon) throw new Error(`Addon not found: ${id}`);
+---
+
+<Site
+  title={`${addon.name} version history — Scripting Nodes Store`}
+  description={`Release history for ${addon.name}.`}
+>
+  <main>
+    <a href={`/store/${addon.id}`} class="back">← {addon.name}</a>
+    <h1>Version history</h1>
+    <p class="lead">{addon.versions.length} releases</p>
+
+    <ol class="versions">
+      {
+        addon.versions.map((v) => (
+          <li>
+            <header>
+              <div class="version-line">
+                <span class="version">v{v.version}</span>
+                <span class="date">{v.released_at}</span>
+              </div>
+              <div class="meta">
+                <span>Blender {v.blender_min}+</span>
+                <span>·</span>
+                <span>{formatBytes(v.size_bytes)}</span>
+                <span>·</span>
+                <code class="hash">{v.hash}</code>
+              </div>
+            </header>
+            {v.changelog ? (
+              <div class="changelog">{v.changelog}</div>
+            ) : (
+              <p class="empty">No changelog for this release</p>
+            )}
+          </li>
+        ))
+      }
+    </ol>
+  </main>
+
+  <style>
+    main {
+      max-width: 44rem;
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+    .back {
+      color: var(--muted);
+      font-size: 0.9rem;
+      display: inline-block;
+      margin-bottom: 1.5rem;
+    }
+    .back:hover {
+      color: var(--fg);
+    }
+    h1 {
+      font-size: 1.875rem;
+    }
+    .lead {
+      color: var(--muted);
+      margin: 0.5rem 0 2.5rem;
+    }
+
+    .versions {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 2rem;
+    }
+    .versions li {
+      padding-bottom: 2rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .versions li:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .version-line {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .version {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+    }
+    .date {
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+
+    .meta {
+      margin-top: 0.5rem;
+      color: var(--muted-2);
+      font-size: 0.8rem;
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .hash {
+      font-family: ui-monospace, monospace;
+      font-size: 0.75rem;
+    }
+
+    .changelog {
+      margin-top: 1rem;
+      white-space: pre-wrap;
+      color: var(--fg);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+    .empty {
+      margin-top: 1rem;
+      color: var(--muted-2);
+      font-size: 0.875rem;
+      font-style: italic;
+    }
+  </style>
+</Site>

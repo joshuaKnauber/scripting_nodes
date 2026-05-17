@@ -172,7 +172,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
                 ref.node_id = node.id
                 affected_names.add(new_name)
 
-        # remove stale references
+        # remove stale references (node deleted)
         for index in range(len(refs) - 1, -1, -1):
             ref = refs[index]
             if node_by_id(ref.node_id) is None:
@@ -188,6 +188,13 @@ class ScriptingNodeTree(bpy.types.NodeTree):
                         if getattr(node, prop, "") in affected_names:
                             node._generate()
                             break
+                    # Container nodes hold refs in a CollectionProperty
+                    cb_entries = getattr(node, "class_body_properties", None)
+                    if cb_entries is not None:
+                        for entry in cb_entries:
+                            if entry.prop in affected_names:
+                                node._generate()
+                                break
 
     def update_reroutes(self):
         for node in self.nodes:

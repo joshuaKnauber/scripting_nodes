@@ -167,6 +167,8 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
         if "Label" not in self.inputs or "Is Visible" not in self.inputs:
             return
 
+        class_prefix = bpy.context.scene.sna.addon.class_prefix
+
         # Build bl_options set
         options = []
         if self.option_default_closed:
@@ -177,7 +179,7 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
 
         # Build class attributes list
         class_attrs = [
-            f'bl_idname = "SNA_PT_Panel_{self.id}"',
+            f'bl_idname = "{class_prefix}_PT_Panel_{self.id}"',
             f"bl_label = {self.inputs['Label'].eval()}",
             f"bl_space_type = '{self.panel_space_type}'",
             f"bl_region_type = '{self.panel_region_type}'",
@@ -218,7 +220,7 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
 """
 
         self.code_module = f"""
-class SNA_PT_Panel_{self.id}(bpy.types.Panel):
+class {class_prefix}_PT_Panel_{self.id}(bpy.types.Panel):
     {attrs_code}
 {poll_method}{draw_header_method}
     def draw(self, context):

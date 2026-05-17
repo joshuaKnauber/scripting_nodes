@@ -12,6 +12,7 @@ class SNA_Node_VectorField(BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node
     sn_reference_properties = {"prop"}
 
     def update_prop(self, context):
+        self.apply_class_body_socket_visibility()
         self._generate()
 
     # Mode properties from mixin
@@ -78,6 +79,7 @@ class SNA_Node_VectorField(BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node
         self.add_output("ScriptingInterfaceSocket")
 
     def on_ref_change(self, node):
+        self.apply_class_body_socket_visibility()
         self._generate()
 
     def generate(self):

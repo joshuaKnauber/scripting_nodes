@@ -1,0 +1,134 @@
+---
+import Site from '../../layouts/Site.astro';
+import { stubAddons, latestVersion } from '../../lib/stubAddons';
+---
+
+<Site title="Store — Scripting Nodes" description="Browse addons built with Scripting Nodes.">
+  <main>
+    <div class="header">
+      <div>
+        <h1>Store</h1>
+        <p>Addons built with Scripting Nodes.</p>
+      </div>
+      <a href="/publish/new" class="publish-cta">Publish an addon →</a>
+    </div>
+
+    <div class="search">
+      <input type="search" placeholder="Search addons…" disabled />
+    </div>
+
+    <ul class="grid">
+      {
+        stubAddons.map((addon) => (
+          <li>
+            <a href={`/store/${addon.id}`} class="card">
+              <div
+                class="cover"
+                style={`background: linear-gradient(135deg, ${addon.cover.from}, ${addon.cover.to});`}
+              />
+              <div class="body">
+                <h2>{addon.name}</h2>
+                <p class="tagline">{addon.tagline}</p>
+                <div class="meta">
+                  <span>by {addon.owner}</span>
+                  <span>v{latestVersion(addon).version}</span>
+                </div>
+              </div>
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </main>
+
+  <style>
+    main {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 3rem 1.5rem 4rem;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .header h1 {
+      font-size: 2rem;
+    }
+    .header p {
+      color: var(--muted);
+      margin: 0.25rem 0 0;
+    }
+    .publish-cta {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+    .publish-cta:hover {
+      color: var(--fg);
+    }
+
+    .search {
+      margin: 1.75rem 0 2rem;
+    }
+    .search input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--bg-elevated);
+    }
+    .search input:focus {
+      outline: none;
+      border-color: var(--border-hover);
+    }
+
+    .grid {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1rem;
+    }
+    .card {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--bg-elevated);
+      transition:
+        border-color 0.15s,
+        transform 0.15s;
+    }
+    .card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-2px);
+    }
+    .cover {
+      aspect-ratio: 16 / 9;
+    }
+    .body {
+      padding: 1rem;
+    }
+    h2 {
+      font-size: 1.05rem;
+      margin: 0 0 0.25rem;
+    }
+    .tagline {
+      color: var(--muted);
+      font-size: 0.9rem;
+      margin: 0;
+      line-height: 1.4;
+      min-height: 2.5em;
+    }
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 0.75rem;
+      color: var(--muted-2);
+      font-size: 0.8rem;
+    }
+  </style>
+</Site>
