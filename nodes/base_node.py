@@ -111,19 +111,30 @@ class SN_ScriptingBaseNode:
     @property
     def root_nodes(self):
         """Returns the trigger nodes that are connected to this node"""
-        return list(filter(lambda node: node.is_trigger, self._get_linked_nodes()))
+        return list(
+            filter(
+                lambda node: getattr(node, "is_trigger", False),
+                self._get_linked_nodes(),
+            )
+        )
 
     def _get_linked_nodes(self, linked=None, started_at_trigger=False):
-        """Recursively returns a list of all nodes linked to the given node"""
+        """Recursively return linked Serpens nodes.
+
+        Blender keeps unavailable custom node types as generic Node
+        placeholders. Treat those nodes as graph boundaries until their
+        package is installed again.
+        """
         if linked == None:
             linked = [self]
         new_linked = []
 
         # get all nodes connected to this nodes input
         for inp in self.inputs:
-            from_out = inp.from_socket()
+            from_out = inp.from_socket(check_validity=False)
             if (
                 from_out
+                and hasattr(from_out.node, "_get_linked_nodes")
                 and not from_out.node in linked
                 and not from_out.node in new_linked
             ):
@@ -134,8 +145,12 @@ class SN_ScriptingBaseNode:
 
         # get all nodes connected to this nodes output
         for out in self.outputs:
-            for to_inp in out.to_sockets():
-                if not to_inp.node in linked and not to_inp.node in new_linked:
+            for to_inp in out.to_sockets(check_validity=False):
+                if (
+                    hasattr(to_inp.node, "_get_linked_nodes")
+                    and not to_inp.node in linked
+                    and not to_inp.node in new_linked
+                ):
                     if not started_at_trigger or (
                         started_at_trigger and to_inp.is_program
                     ):

@@ -130,8 +130,50 @@ def _repair_compile_metadata(ntree):
         refs.fix_ref_names()
         if refs.name == "SN_OnKeypressNode":
             for node in refs.nodes:
-                if node.order == 0:
+                if node and getattr(node, "order", None) == 0:
                     node.order = 3
+
+
+def _get_unavailable_custom_nodes():
+    """Return placeholders for custom node classes unavailable in this install."""
+    unavailable = []
+    builtin_node_types = {"NodeFrame", "NodeReroute"}
+
+    for ntree in bpy.data.node_groups:
+        if ntree.bl_idname != "ScriptingNodesTree":
+            continue
+        for node in ntree.nodes:
+            if getattr(node, "is_sn", False):
+                continue
+            if node.bl_idname in builtin_node_types:
+                continue
+            unavailable.append((ntree, node))
+
+    return unavailable
+
+
+def _print_unavailable_custom_nodes(unavailable, limit=25):
+    """Explain missing package nodes without flooding the console."""
+    if not unavailable:
+        return
+
+    print(
+        "Serpens: Found"
+        f" {len(unavailable)} unavailable custom/package nodes."
+        " Migration will continue, but affected graph branches will remain"
+        " inactive until their packages are restored."
+    )
+    for ntree, node in unavailable[:limit]:
+        node_type = node.bl_idname or type(node).__name__
+        print(
+            "Serpens Missing Node:"
+            f" tree={ntree.name!r}, node={node.name!r}, type={node_type!r}"
+        )
+    if len(unavailable) > limit:
+        print(
+            "Serpens:"
+            f" {len(unavailable) - limit} additional missing nodes omitted"
+        )
 
 
 def _finalize_migrated_addon(filepath, previous_pause_reregister, should_compile):
@@ -944,6 +986,7 @@ def load_handler(dummy):
             socket_snapshots,
             legacy_candidates,
         ) = _get_blender_5_migration_status(sn)
+        unavailable_custom_nodes = _get_unavailable_custom_nodes()
         if bpy.data.filepath:
             print(
                 "Serpens: Migration check:"
@@ -954,6 +997,7 @@ def load_handler(dummy):
                 f" recovery_candidates={len(legacy_candidates)},"
                 f" decision={migration_reason}"
             )
+            _print_unavailable_custom_nodes(unavailable_custom_nodes)
 
         # Only migrate a loaded Serpens project, never Blender's startup scene.
         migration_ready_for_finalization = False

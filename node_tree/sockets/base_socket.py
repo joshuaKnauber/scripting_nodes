@@ -468,6 +468,8 @@ class ScriptingSocket:
             for link in socket.node.outputs[0].links:
                 to_sockets += self._get_to_sockets(link.to_socket, check_validity)
         else:
+            if not getattr(socket.node, "is_sn", False):
+                return to_sockets
             # check validity of connection
             node_tree = getattr(self.node, "node_tree", None)
             if not check_validity or (
@@ -493,6 +495,8 @@ class ScriptingSocket:
                     from_out = from_out.node.inputs[0].links[0].from_socket
                 else:
                     return None
+            if not getattr(from_out.node, "is_sn", False):
+                return None
             # check connection validity
             node_tree = getattr(self.node, "node_tree", None)
             if not check_validity or (
