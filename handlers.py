@@ -176,7 +176,22 @@ def _print_unavailable_custom_nodes(unavailable, limit=25):
         )
 
 
-def _finalize_migrated_addon(filepath, previous_pause_reregister, should_compile):
+def _print_unavailable_custom_node_summary(count):
+    """Repeat the missing package-node count at the end of loading."""
+    if count:
+        print(
+            "Serpens: Load completed with"
+            f" {count} unavailable custom/package nodes reported."
+            " Install the missing packages to restore those graph branches."
+        )
+
+
+def _finalize_migrated_addon(
+    filepath,
+    previous_pause_reregister,
+    should_compile,
+    unavailable_custom_node_count,
+):
     """Run a force-compile-equivalent pass after Blender's load timers settle."""
     global _pending_migration_finalization
 
@@ -205,11 +220,15 @@ def _finalize_migrated_addon(filepath, previous_pause_reregister, should_compile
         "Serpens: Migrated addon finalized in"
         f" {time.perf_counter() - started:.2f}s"
     )
+    _print_unavailable_custom_node_summary(unavailable_custom_node_count)
     return None
 
 
 def _schedule_migration_finalization(
-    filepath, previous_pause_reregister, should_compile
+    filepath,
+    previous_pause_reregister,
+    should_compile,
+    unavailable_custom_node_count,
 ):
     """Defer final reevaluation until queued Blender node updates have run."""
     global _pending_migration_finalization
@@ -217,7 +236,10 @@ def _schedule_migration_finalization(
     _pending_migration_finalization = filepath
     bpy.app.timers.register(
         lambda: _finalize_migrated_addon(
-            filepath, previous_pause_reregister, should_compile
+            filepath,
+            previous_pause_reregister,
+            should_compile,
+            unavailable_custom_node_count,
         ),
         first_interval=0.1,
     )
@@ -1048,6 +1070,7 @@ def load_handler(dummy):
                 bpy.data.filepath,
                 previous_pause_reregister,
                 sn.compile_on_load,
+                len(unavailable_custom_nodes),
             )
         elif sn.compile_on_load:
             compile_started = time.perf_counter()
@@ -1078,6 +1101,10 @@ def load_handler(dummy):
             "Serpens: Load handler completed in"
             f" {time.perf_counter() - load_started:.2f}s"
         )
+        if not migration_ready_for_finalization:
+            _print_unavailable_custom_node_summary(
+                len(unavailable_custom_nodes)
+            )
 
 
 @persistent
