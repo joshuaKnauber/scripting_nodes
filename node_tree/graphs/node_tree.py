@@ -242,6 +242,16 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         self._update_changed_links(removed)
         self._call_link_removes(removed)
 
+    def _notify_topology_changed(self):
+        """Notify nodes that cache data derived from graph connectivity."""
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname != "ScriptingNodesTree":
+                continue
+            for node in ntree.nodes:
+                callback = getattr(node, "on_tree_topology_change", None)
+                if callback:
+                    callback(self)
+
     def _update_tree_links(self):
         """Finds all changed node links and updates the connections"""
         # get current links
@@ -254,6 +264,8 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             # update removed links
             removed = list(set(self.link_cache[id(self)]) - set(curr_links))
             self._update_removed_links(removed)
+            if added or removed:
+                self._notify_topology_changed()
 
         # update cached current links
         self.link_cache[id(self)] = curr_links

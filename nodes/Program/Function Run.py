@@ -8,6 +8,7 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SN_RunFunctionNode"
     bl_label = "Function Run (Execute)"
     bl_width_default = 240
+    _return_connection_invalid_key = "_return_connection_invalid"
 
     def on_create(self, context):
         self.add_execute_input()
@@ -83,7 +84,31 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
                 # Use new_name from data if available, otherwise fall back to socket.name
                 socket_name = data.get("new_name", data["updated"].name)
                 self.outputs[data["updated"].index].set_name_silent(socket_name)
+            self._refresh_return_connection_validation()
             self._evaluate(bpy.context)
+
+    def _refresh_return_connection_validation(self):
+        """Cache whether the selected Return belongs to the selected Function."""
+        parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
+        invalid = False
+
+        if (
+            parent_tree
+            and self.ref_SN_FunctionNode
+            and self.ref_SN_FunctionReturnNode
+            and self.ref_SN_FunctionNode in parent_tree.nodes
+            and self.ref_SN_FunctionReturnNode in parent_tree.nodes
+        ):
+            function_node = parent_tree.nodes[self.ref_SN_FunctionNode]
+            return_node = parent_tree.nodes[self.ref_SN_FunctionReturnNode]
+            invalid = function_node not in return_node.root_nodes
+
+        self[self._return_connection_invalid_key] = invalid
+
+    def on_tree_topology_change(self, node_tree):
+        parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
+        if node_tree == parent_tree:
+            self._refresh_return_connection_validation()
 
     def update_function_reference(self, context):
         parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
@@ -113,6 +138,7 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
             for i, from_socket in enumerate(links):
                 if from_socket:
                     self.node_tree.links.new(from_socket, self.inputs[i + 1])
+        self._refresh_return_connection_validation()
         self._evaluate(context)
 
     def update_function_return_reference(self, context):
@@ -138,6 +164,7 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
             for i, to_sockets in enumerate(links):
                 for to_socket in to_sockets:
                     self.node_tree.links.new(self.outputs[i + 1], to_socket)
+        self._refresh_return_connection_validation()
         self._evaluate(context)
 
     ref_SN_FunctionNode: bpy.props.StringProperty(
@@ -173,6 +200,7 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
     )
 
     def evaluate(self, context):
+        self._refresh_return_connection_validation()
         parent_tree = self.ref_ntree if self.ref_ntree else self.node_tree
         if self.ref_SN_FunctionNode in parent_tree.nodes:
             # get input values
@@ -279,11 +307,7 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
             and self.ref_SN_FunctionNode
             and self.ref_SN_FunctionReturnNode
         ):
-            return_node = self.ref_ntree.nodes[self.ref_SN_FunctionReturnNode]
-            if (
-                not self.ref_ntree.nodes[self.ref_SN_FunctionNode]
-                in return_node.root_nodes
-            ):
+            if self.get(self._return_connection_invalid_key, False):
                 row = layout.row()
                 row.alert = True
                 row.label(
