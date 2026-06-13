@@ -1,4 +1,5 @@
 import bpy
+import time
 from bpy.app.handlers import persistent
 from .interface.menus.rightclick import serpens_right_click
 from . import bl_info
@@ -14,21 +15,200 @@ from .extensions.snippet_ops import load_snippets
 from .msgbus import subscribe_to_name_change
 from .node_tree.graphs.node_refs import clear_node_cache
 from .node_tree.graphs.node_tree import ScriptingNodesTree
+from .nodes.base_node import SN_ScriptingBaseNode
 
 
-def migrate_socket_data():
-    """Migrate socket data from old storage (on socket) to new storage (on node).
+SOCKET_CONFIG_PROPERTIES = (
+    "name",
+    "subtype",
+    "size",
+    "size_editable",
+    "dynamic",
+    "prev_dynamic",
+    "convert_data",
+    "disabled",
+    "can_be_disabled",
+    "indexable",
+    "index_type",
+    "changeable",
+    "data_type",
+    "is_variable",
+    "items",
+    "custom_items_editable",
+    "passthrough_layout_type",
+)
 
-    This handles files created before the Blender 5.0 API changes where
-    bpy.props properties can no longer store IDProperties on NodeSocket.
-    Old files stored values like socket["python_value"] or socket["default_value"],
-    but now we store them on the parent node with a unique key.
+_pending_migration_finalization = None
 
-    There are two types of old storage:
-    1. Custom IDProperties on socket (accessed via socket["key"] or socket.keys())
-    2. Default bpy.props storage (accessed via socket.bl_system_properties_get())
-    """
-    migrated_count = 0
+
+def _migration_values_equal(first, second):
+    """Compare Blender values while tolerating IDProperty array conversions."""
+    def comparable(value):
+        if isinstance(value, (str, bytes, dict)):
+            return value
+        if isinstance(value, (list, tuple)):
+            return tuple(comparable(item) for item in value)
+        try:
+            return tuple(comparable(item) for item in value)
+        except TypeError:
+            return value
+
+    return comparable(first) == comparable(second)
+
+
+def _coerce_legacy_property_value(socket, property_name, value):
+    """Convert Blender's raw legacy RNA values to assignable Python values."""
+    if not isinstance(value, int):
+        return value
+
+    if property_name == "subtype":
+        subtypes = list(getattr(socket, "subtypes", ()))
+        if 0 <= value < len(subtypes):
+            return subtypes[value]
+
+    if property_name == "data_type":
+        try:
+            items = socket.get_data_type_items(bpy.context)
+            if 0 <= value < len(items):
+                return items[value][0]
+        except (AttributeError, IndexError, RuntimeError, TypeError):
+            pass
+
+    if property_name == "index_type":
+        index_types = ("String", "Integer", "Property")
+        if 0 <= value < len(index_types):
+            return index_types[value]
+
+    try:
+        rna_property = socket.bl_rna.properties[property_name]
+    except (AttributeError, KeyError):
+        return value
+
+    if rna_property.type != "ENUM":
+        return value
+
+    try:
+        enum_items = list(rna_property.enum_items)
+    except (AttributeError, TypeError):
+        return value
+
+    for item in enum_items:
+        if item.value == value:
+            return item.identifier
+
+    if isinstance(value, int) and 0 <= value < len(enum_items):
+        return enum_items[value].identifier
+
+    return value
+
+
+def _print_migration_warnings(warnings, heading="Migration Warning", limit=50):
+    """Print a bounded warning list and preserve the useful summary."""
+    for warning in warnings[:limit]:
+        print(f"Serpens {heading}: {warning}")
+    if len(warnings) > limit:
+        print(
+            f"Serpens: {len(warnings) - limit} additional"
+            f" {heading.lower()}s omitted from console output"
+        )
+
+
+def _restore_pause_reregister(sn, value):
+    """Restore the pause flag without invoking an implicit compilation."""
+    previous_exporting = sn.is_exporting
+    sn.is_exporting = True
+    try:
+        sn.pause_reregister = value
+    finally:
+        sn.is_exporting = previous_exporting
+
+
+def _repair_compile_metadata(ntree):
+    """Apply the reference fixes used by the manual force-compile operator."""
+    for refs in ntree.node_refs:
+        refs.clear_unused_refs()
+        refs.fix_ref_names()
+        if refs.name == "SN_OnKeypressNode":
+            for node in refs.nodes:
+                if node.order == 0:
+                    node.order = 3
+
+
+def _finalize_migrated_addon(filepath, previous_pause_reregister, should_compile):
+    """Run a force-compile-equivalent pass after Blender's load timers settle."""
+    global _pending_migration_finalization
+
+    if _pending_migration_finalization != filepath:
+        return None
+    _pending_migration_finalization = None
+
+    if bpy.data.filepath != filepath or not hasattr(bpy.context.scene, "sn"):
+        return None
+
+    started = time.perf_counter()
+    sn = bpy.context.scene.sn
+    print("Serpens: Finalizing migrated addon...")
+    try:
+        for ntree in bpy.data.node_groups:
+            if ntree.bl_idname != "ScriptingNodesTree":
+                continue
+            _repair_compile_metadata(ntree)
+            ntree.reevaluate()
+    finally:
+        _restore_pause_reregister(sn, previous_pause_reregister)
+
+    if should_compile and not previous_pause_reregister:
+        compile_addon()
+    print(
+        "Serpens: Migrated addon finalized in"
+        f" {time.perf_counter() - started:.2f}s"
+    )
+    return None
+
+
+def _schedule_migration_finalization(
+    filepath, previous_pause_reregister, should_compile
+):
+    """Defer final reevaluation until queued Blender node updates have run."""
+    global _pending_migration_finalization
+
+    _pending_migration_finalization = filepath
+    bpy.app.timers.register(
+        lambda: _finalize_migrated_addon(
+            filepath, previous_pause_reregister, should_compile
+        ),
+        first_interval=0.1,
+    )
+
+
+def _get_legacy_properties(item):
+    """Get legacy properties with direct IDProperties taking precedence."""
+    system_props = {}
+    direct_props = {}
+
+    try:
+        props = item.bl_system_properties_get()
+        if props:
+            system_props = {key: props[key] for key in props.keys()}
+    except (AttributeError, RuntimeError, TypeError, UnicodeDecodeError):
+        pass
+
+    try:
+        if hasattr(item, "keys"):
+            direct_props = {key: item[key] for key in list(item.keys())}
+    except (RuntimeError, TypeError, KeyError, UnicodeDecodeError):
+        pass
+
+    # Older Serpens versions explicitly wrote widget values as socket
+    # IDProperties, so those values are more authoritative than RNA defaults.
+    properties = dict(system_props)
+    properties.update(direct_props)
+    return properties, system_props, direct_props
+
+
+def _snapshot_socket_migration():
+    """Capture legacy socket data before callbacks or relinking can mutate it."""
+    snapshots = []
 
     for node_tree in bpy.data.node_groups:
         if node_tree.bl_idname != "ScriptingNodesTree":
@@ -38,77 +218,236 @@ def migrate_socket_data():
             if not getattr(node, "is_sn", False):
                 continue
 
-            # Process all sockets (inputs and outputs)
-            for is_output, sockets in [(False, node.inputs), (True, node.outputs)]:
+            for is_output, sockets in ((False, node.inputs), (True, node.outputs)):
                 for index, socket in enumerate(sockets):
                     if not getattr(socket, "is_sn", False):
                         continue
 
-                    # Build the new storage key prefix
-                    socket_name = socket.name
-                    is_output_str = "out" if is_output else "in"
-                    key_prefix = f"_socket_{is_output_str}_{index}_{socket_name}"
-
-                    # Collect old property values from multiple sources
-                    old_props = {}
-
-                    # Method 1: Try bl_system_properties_get (Blender 5.0 versioning API)
-                    # This accesses properties that used default bpy.props storage
-                    try:
-                        sys_props = socket.bl_system_properties_get()
-                        if sys_props:
-                            for key in sys_props.keys():
-                                if key not in old_props:
-                                    old_props[key] = sys_props[key]
-                    except (AttributeError, RuntimeError, TypeError):
-                        pass
-
-                    # Method 2: Try direct dict-like access on socket keys (custom properties)
-                    # This accesses IDProperties that were set with socket["key"] = value
-                    try:
-                        if hasattr(socket, "keys"):
-                            socket_keys = list(socket.keys())
-                            for key in socket_keys:
-                                if key not in old_props:
-                                    old_props[key] = socket[key]
-                    except (RuntimeError, TypeError, KeyError):
-                        pass
-
-                    if not old_props:
-                        continue
-
-                    # Migrate python_value
-                    if "python_value" in old_props:
-                        new_key = key_prefix
-                        if new_key not in node:
-                            node[new_key] = old_props["python_value"]
-                            migrated_count += 1
-
-                    # Migrate subtype values (default_value, value_file_path, color_value, etc.)
-                    subtype_values = getattr(
-                        socket, "subtype_values", {"NONE": "default_value"}
+                    properties, system_props, direct_props = _get_legacy_properties(
+                        socket
                     )
-                    for subtype, attr_name in subtype_values.items():
-                        if attr_name in old_props:
-                            new_key = f"{key_prefix}_{attr_name}"
-                            if new_key not in node:
-                                node[new_key] = old_props[attr_name]
-                                migrated_count += 1
+                    value_properties = set()
+                    value_properties.update(
+                        getattr(
+                            socket,
+                            "subtype_values",
+                            {"NONE": "default_value"},
+                        ).values()
+                    )
+                    value_properties.update(
+                        {
+                            "default_value",
+                            "value_file_path",
+                            "value_dir_path",
+                            "color_value",
+                            "color_alpha_value",
+                            "factor_value",
+                        }
+                    )
 
-                    # Also check for color values stored with different keys
-                    # (before they used default bpy.props storage, now they use node storage)
-                    color_keys = ["color_value", "color_alpha_value", "factor_value"]
-                    for color_key in color_keys:
-                        if color_key in old_props:
-                            new_key = f"{key_prefix}_{color_key}"
-                            if new_key not in node:
-                                node[new_key] = old_props[color_key]
-                                migrated_count += 1
+                    snapshots.append(
+                        {
+                            "tree": node_tree,
+                            "node": node,
+                            "socket": socket,
+                            "is_output": is_output,
+                            "index": index,
+                            "name": socket.name,
+                            "properties": properties,
+                            "system_properties": system_props,
+                            "direct_properties": direct_props,
+                            "value_properties": {
+                                key: properties[key]
+                                for key in value_properties
+                                if key in properties
+                            },
+                            "config_properties": {
+                                key: _coerce_legacy_property_value(
+                                    socket, key, properties[key]
+                                )
+                                for key in SOCKET_CONFIG_PROPERTIES
+                                if key in properties and hasattr(socket, key)
+                            },
+                        }
+                    )
 
-    if migrated_count > 0:
+    return snapshots
+
+
+def _socket_storage_key(snapshot, property_name):
+    """Build the current parent-node storage key for a socket property."""
+    socket = snapshot["socket"]
+    key_prefix = socket._get_socket_storage_key()
+    return f"{key_prefix}_{property_name}"
+
+
+def _restore_socket_configuration(snapshots):
+    """Restore socket UI configuration that survived in Blender's old storage."""
+    restored_count = 0
+    failed = []
+
+    snapshots_by_node = {}
+    for snapshot in snapshots:
+        node_key = id(snapshot["node"])
+        snapshots_by_node.setdefault(
+            node_key,
+            {"node": snapshot["node"], "snapshots": []},
+        )["snapshots"].append(snapshot)
+
+    for node_data in snapshots_by_node.values():
+        node = node_data["node"]
+        node_snapshots = node_data["snapshots"]
+        previous_disable_evaluation = node.disable_evaluation
+        node.disable_evaluation = True
+        try:
+            for snapshot in node_snapshots:
+                socket = snapshot["socket"]
+                for property_name, value in snapshot["config_properties"].items():
+                    try:
+                        current_value = getattr(socket, property_name)
+                        if _migration_values_equal(current_value, value):
+                            continue
+                        if property_name == "name" and hasattr(
+                            socket, "set_name_silent"
+                        ):
+                            socket.set_name_silent(value)
+                        else:
+                            setattr(socket, property_name, value)
+                        restored_count += 1
+                    except (
+                        AttributeError,
+                        RuntimeError,
+                        TypeError,
+                        ValueError,
+                    ) as error:
+                        failed.append(
+                            f"{snapshot['node'].name}.{snapshot['name']}"
+                            f" config {property_name}: {error}"
+                        )
+        finally:
+            node.disable_evaluation = previous_disable_evaluation
+
+    return restored_count, failed
+
+
+def _write_socket_values(snapshots):
+    """Write snapshotted widget values to parent-node storage."""
+    migrated_count = 0
+    overwritten_count = 0
+
+    for snapshot in snapshots:
+        node = snapshot["node"]
+        for property_name, value in snapshot["value_properties"].items():
+            storage_key = _socket_storage_key(snapshot, property_name)
+            if storage_key in node:
+                if _migration_values_equal(node[storage_key], value):
+                    continue
+                overwritten_count += 1
+            node[storage_key] = value
+            migrated_count += 1
+
+    return migrated_count, overwritten_count
+
+
+def _validate_socket_values(snapshots, phase):
+    """Confirm migrated values remain readable under each socket's current key."""
+    failures = []
+
+    for snapshot in snapshots:
+        node = snapshot["node"]
+        for property_name, expected in snapshot["value_properties"].items():
+            try:
+                storage_key = _socket_storage_key(snapshot, property_name)
+            except (AttributeError, ReferenceError, RuntimeError) as error:
+                failures.append(
+                    f"{phase}: {snapshot['node'].name}.{snapshot['name']}"
+                    f" could not resolve its current storage key: {error}"
+                )
+                continue
+            if storage_key not in node:
+                failures.append(
+                    f"{phase}: {snapshot['node'].name}.{snapshot['name']}"
+                    f" missing {storage_key}"
+                )
+                continue
+            actual = node[storage_key]
+            if not _migration_values_equal(actual, expected):
+                failures.append(
+                    f"{phase}: {snapshot['node'].name}.{snapshot['name']}"
+                    f" {property_name} expected {expected!r}, got {actual!r}"
+                )
+
+    return failures
+
+
+def migrate_socket_data(snapshots=None):
+    """Migrate old socket storage and return snapshots plus a result report.
+
+    This handles files created before the Blender 5.0 API changes where
+    bpy.props properties can no longer store IDProperties on NodeSocket.
+    Old files stored widget values like socket["default_value"],
+    but now we store them on the parent node with a unique key.
+
+    There are two types of old storage:
+    1. Custom IDProperties on socket (accessed via socket["key"] or socket.keys())
+    2. Default bpy.props storage (accessed via socket.bl_system_properties_get())
+    """
+    if snapshots is None:
+        snapshots = _snapshot_socket_migration()
+    restored_count, config_failures = _restore_socket_configuration(snapshots)
+    migrated_count, overwritten_count = _write_socket_values(snapshots)
+    validation_failures = _validate_socket_values(snapshots, "before cleanup")
+
+    direct_socket_count = sum(
+        bool(item["direct_properties"]) for item in snapshots
+    )
+    system_socket_count = sum(
+        bool(item["system_properties"]) for item in snapshots
+    )
+    source_conflicts = []
+    for snapshot in snapshots:
+        system_props = snapshot["system_properties"]
+        direct_props = snapshot["direct_properties"]
+        relevant_properties = set(snapshot["value_properties"])
+        relevant_properties.update(snapshot["config_properties"])
+        for property_name in relevant_properties & system_props.keys() & direct_props.keys():
+            if not _migration_values_equal(
+                system_props[property_name], direct_props[property_name]
+            ):
+                source_conflicts.append(
+                    f"{snapshot['node'].name}.{snapshot['name']}"
+                    f" {property_name}: system={system_props[property_name]!r},"
+                    f" direct={direct_props[property_name]!r}; using direct"
+                )
+    print(
+        "Serpens: Socket migration snapshot:"
+        f" {len(snapshots)} sockets,"
+        f" {direct_socket_count} with direct properties,"
+        f" {system_socket_count} with system properties"
+    )
+    print(
+        "Serpens: Socket migration wrote"
+        f" {migrated_count} values"
+        f" ({overwritten_count} replaced existing parent-node values)"
+        f" and restored {restored_count} configuration values"
+    )
+    if source_conflicts:
         print(
-            f"Serpens: Migrated {migrated_count} socket properties to new storage format"
+            "Serpens: Found"
+            f" {len(source_conflicts)} conflicting legacy socket values"
         )
+        for conflict in source_conflicts[:25]:
+            print(f"Serpens Migration Source Conflict: {conflict}")
+        if len(source_conflicts) > 25:
+            print(
+                "Serpens: Additional source conflicts omitted from console output"
+            )
+    _print_migration_warnings(config_failures + validation_failures)
+
+    return snapshots, {
+        "config_failures": config_failures,
+        "validation_failures": validation_failures,
+    }
 
 
 def _get_old_property_value(item, key):
@@ -116,22 +455,8 @@ def _get_old_property_value(item, key):
 
     Returns the value if found, None otherwise.
     """
-    # Method 1: Try bl_system_properties_get (Blender 5.0 versioning API)
-    try:
-        sys_props = item.bl_system_properties_get()
-        if sys_props and key in sys_props:
-            return sys_props[key]
-    except (AttributeError, RuntimeError, TypeError):
-        pass
-
-    # Method 2: Try direct dict-like access (old IDProperty storage)
-    try:
-        if hasattr(item, "keys") and key in item.keys():
-            return item[key]
-    except (RuntimeError, TypeError, KeyError, UnicodeDecodeError):
-        pass
-
-    return None
+    properties, _, _ = _get_legacy_properties(item)
+    return properties.get(key)
 
 
 def migrate_node_ref_data():
@@ -347,78 +672,368 @@ def depsgraph_handler(dummy):
 def post_migration_cleanup(should_compile=True):
     """Run cleanup operations after migration to ensure all refs are synced.
 
-    This is similar to what force_compile does - it ensures node refs
-    are properly synced with their nodes after migration.
+    Existing links are replayed through the same link-insert callbacks used
+    when a user connects sockets. This refreshes dynamic sockets and layout
+    state without destructively removing and recreating every link.
 
     Args:
         should_compile: Whether to compile the addon after cleanup
     """
-    for ntree in bpy.data.node_groups:
-        if ntree.bl_idname == "ScriptingNodesTree":
-            for refs in ntree.node_refs:
-                refs.clear_unused_refs()
-                refs.fix_ref_names()
+    node_trees = [
+        ntree
+        for ntree in bpy.data.node_groups
+        if ntree.bl_idname == "ScriptingNodesTree"
+    ]
+    window_manager = bpy.context.window_manager
+    total_trees = len(node_trees)
+    total_work = sum(
+        len(ntree.links)
+        + sum(getattr(node, "is_sn", False) for node in ntree.nodes)
+        for ntree in node_trees
+    )
+    completed_work = 0
+    progress_interval = max(1, total_work // 100)
 
-            # Store all links then relink them to force node recalculation
-            links_to_restore = []
-            for link in ntree.links:
-                links_to_restore.append((link.from_socket, link.to_socket))
+    if total_work:
+        window_manager.progress_begin(0, total_work)
 
-            # Remove all links
-            ntree.links.clear()
+    try:
+        for tree_index, ntree in enumerate(node_trees, start=1):
+            tree_started = time.perf_counter()
+            print(
+                "Serpens: Refreshing migrated graph"
+                f" {tree_index}/{total_trees}: {ntree.name}"
+                f" ({len(ntree.nodes)} nodes, {len(ntree.links)} links)"
+            )
+            if total_work:
+                window_manager.progress_update(completed_work)
 
-            # Restore all links - this triggers the proper update callbacks
-            for from_socket, to_socket in links_to_restore:
+            _repair_compile_metadata(ntree)
+
+            SN_ScriptingBaseNode.batch_evaluation = True
+            callback_started = time.perf_counter()
+            # Replay the callbacks that normally run when each existing link
+            # is inserted. Work from a snapshot because dynamic callbacks may
+            # add sockets while the graph is refreshed.
+            mapped_links = [
+                ntree._map_link_to_sockets(link) for link in list(ntree.links)
+            ]
+            for from_socket, to_socket, from_real, _ in mapped_links:
                 try:
-                    ntree.links.new(from_socket, to_socket)
+                    if from_real:
+                        if getattr(from_real.node, "is_sn", False):
+                            from_real.node.link_insert(
+                                from_real, to_socket, is_output=True
+                            )
+                        if getattr(to_socket.node, "is_sn", False):
+                            to_socket.node.link_insert(
+                                from_real, to_socket, is_output=False
+                            )
+                    elif (
+                        from_socket
+                        and getattr(from_socket.node, "is_sn", False)
+                        and to_socket
+                        and getattr(to_socket.node, "is_sn", False)
+                    ):
+                        from_socket.node.link_insert(
+                            from_socket, to_socket, is_output=True
+                        )
                 except Exception:
                     pass
+                completed_work += 1
+                if completed_work % progress_interval == 0:
+                    window_manager.progress_update(completed_work)
+            callback_duration = time.perf_counter() - callback_started
 
-            # Clear link cache to reset state
-            if id(ntree) in ScriptingNodesTree.link_cache:
-                del ScriptingNodesTree.link_cache[id(ntree)]
+            ScriptingNodesTree.link_cache[id(ntree)] = list(
+                map(ntree._map_link_to_sockets, ntree.links.values())
+            )
 
-            # Reevaluate all nodes to ensure code is regenerated
-            ntree.reevaluate()
+            evaluation_started = time.perf_counter()
+            nodes = [
+                node for node in ntree.nodes if getattr(node, "is_sn", False)
+            ]
+            dependencies = {node: set() for node in nodes}
+            dependents = {node: set() for node in nodes}
+
+            for link in ntree.links:
+                from_socket, to_socket, from_real, _ = ntree._map_link_to_sockets(
+                    link
+                )
+                source_socket = from_real or from_socket
+                source_node = getattr(source_socket, "node", None)
+                target_node = getattr(to_socket, "node", None)
+                if source_node not in dependencies or target_node not in dependencies:
+                    continue
+
+                if getattr(source_socket, "is_program", False):
+                    dependency, dependent = target_node, source_node
+                else:
+                    dependency, dependent = source_node, target_node
+
+                if dependency != dependent:
+                    dependencies[dependent].add(dependency)
+                    dependents[dependency].add(dependent)
+
+            ready = [node for node in nodes if not dependencies[node]]
+            evaluation_order = []
+            while ready:
+                node = ready.pop()
+                evaluation_order.append(node)
+                for dependent in dependents[node]:
+                    dependencies[dependent].discard(node)
+                    if not dependencies[dependent]:
+                        ready.append(dependent)
+
+            # Cycles are legal in some data layouts. Preserve tree order for
+            # anything that could not be topologically ordered.
+            evaluated = set(evaluation_order)
+            evaluation_order.extend(node for node in nodes if node not in evaluated)
+
+            for node in evaluation_order:
+                node._evaluate(bpy.context)
+                completed_work += 1
+                if completed_work % progress_interval == 0:
+                    window_manager.progress_update(completed_work)
+            evaluation_duration = time.perf_counter() - evaluation_started
+
+            if total_work:
+                window_manager.progress_update(completed_work)
+            print(
+                "Serpens: Refreshed graph"
+                f" {tree_index}/{total_trees} in"
+                f" {time.perf_counter() - tree_started:.2f}s"
+                f" (links {callback_duration:.2f}s,"
+                f" nodes {evaluation_duration:.2f}s)"
+            )
+
+        trigger_started = time.perf_counter()
+        trigger_count = 0
+        for ntree in node_trees:
+            for node in ntree.nodes:
+                if getattr(node, "is_sn", False) and getattr(
+                    node, "is_trigger", False
+                ):
+                    node._evaluate(bpy.context)
+                    trigger_count += 1
+        print(
+            "Serpens: Finalized"
+            f" {trigger_count} trigger nodes in"
+            f" {time.perf_counter() - trigger_started:.2f}s"
+        )
+    finally:
+        SN_ScriptingBaseNode.batch_evaluation = False
+        if total_work:
+            window_manager.progress_end()
+
     if should_compile:
         compile_addon()
 
 
+def _get_legacy_socket_evidence(snapshots):
+    """Count legacy values that are not represented in parent-node storage."""
+    candidates = []
+
+    for snapshot in snapshots:
+        node = snapshot["node"]
+        direct_props = snapshot["direct_properties"]
+        system_props = snapshot["system_properties"]
+
+        for property_name, value in snapshot["value_properties"].items():
+            if property_name in direct_props:
+                source = "direct"
+            elif property_name in system_props:
+                source = "system"
+            else:
+                continue
+
+            try:
+                storage_key = _socket_storage_key(snapshot, property_name)
+            except (AttributeError, ReferenceError, RuntimeError):
+                continue
+
+            if storage_key not in node or not _migration_values_equal(
+                node[storage_key], value
+            ):
+                candidates.append(
+                    {
+                        "node": snapshot["node"].name,
+                        "socket": snapshot["name"],
+                        "property": property_name,
+                        "source": source,
+                        "storage_key": storage_key,
+                    }
+                )
+
+    return candidates
+
+
+def _get_blender_5_migration_status(sn):
+    """Return migration eligibility and the reason for the decision."""
+    serpens_tree_count = sum(
+        ntree.bl_idname == "ScriptingNodesTree" for ntree in bpy.data.node_groups
+    )
+
+    # load_post also runs for Blender's startup file. A real opened .blend has
+    # a filepath, while the default/startup session does not.
+    if not bpy.data.filepath:
+        return (
+            False,
+            "no loaded .blend filepath",
+            serpens_tree_count,
+            [],
+            [],
+        )
+
+    if not serpens_tree_count:
+        return (
+            False,
+            "no Serpens node trees found",
+            serpens_tree_count,
+            [],
+            [],
+        )
+
+    snapshots = _snapshot_socket_migration()
+    legacy_candidates = _get_legacy_socket_evidence(snapshots)
+    if legacy_candidates:
+        if sn.migrated_blender_5:
+            reason = (
+                "migration flag is set but"
+                f" {len(legacy_candidates)} legacy socket values need recovery"
+            )
+        else:
+            reason = (
+                f"{len(legacy_candidates)} legacy socket values need recovery"
+            )
+        return True, reason, serpens_tree_count, snapshots, legacy_candidates
+
+    if sn.migrated_blender_5:
+        return (
+            False,
+            "migration flag is set and no legacy socket values need recovery",
+            serpens_tree_count,
+            snapshots,
+            legacy_candidates,
+        )
+
+    return (
+        True,
+        "unmarked Serpens project detected",
+        serpens_tree_count,
+        snapshots,
+        legacy_candidates,
+    )
+
+
 @persistent
 def load_handler(dummy):
+    load_started = time.perf_counter()
     clear_node_cache()
     if hasattr(bpy.context.scene, "sn"):
         sn = bpy.context.scene.sn
+        previous_pause_reregister = sn.pause_reregister
         sn.picker_active = False
         subscribe_to_name_change()
         check_easy_bpy_install()
 
-        # Only run Blender 5.0 migration once per file
-        if not sn.migrated_blender_5:
+        (
+            should_migrate,
+            migration_reason,
+            serpens_tree_count,
+            socket_snapshots,
+            legacy_candidates,
+        ) = _get_blender_5_migration_status(sn)
+        if bpy.data.filepath:
+            print(
+                "Serpens: Migration check:"
+                f" filepath={bpy.data.filepath!r},"
+                f" scene={bpy.context.scene.name!r},"
+                f" trees={serpens_tree_count},"
+                f" migrated_flag={sn.migrated_blender_5!r},"
+                f" recovery_candidates={len(legacy_candidates)},"
+                f" decision={migration_reason}"
+            )
+
+        # Only migrate a loaded Serpens project, never Blender's startup scene.
+        migration_ready_for_finalization = False
+        if should_migrate:
+            migration_started = time.perf_counter()
+            sn.pause_reregister = True
             print("Serpens: Running Blender 5.0 migration...")
-            # Migrate old data storage to new format (Blender 5.0 API changes)
-            migrate_socket_data()
-            migrate_node_ref_data()
-            migrate_variable_data()
-            migrate_scene_property_groups()
-            migrate_portal_nodes()
-            # Sync refs with nodes and recalculate all links
-            post_migration_cleanup(should_compile=False)
-            # Mark migration as complete
-            sn.migrated_blender_5 = True
-            print("Serpens: Migration complete")
+            try:
+                # Migrate old data storage to new format (Blender 5.0 API changes)
+                socket_snapshots, socket_report = migrate_socket_data(
+                    socket_snapshots
+                )
+                migrate_node_ref_data()
+                migrate_variable_data()
+                migrate_scene_property_groups()
+                migrate_portal_nodes()
+                # Sync refs with nodes and recalculate all links
+                post_migration_cleanup(should_compile=False)
+                post_cleanup_failures = _validate_socket_values(
+                    socket_snapshots, "after cleanup"
+                )
+                _print_migration_warnings(post_cleanup_failures)
 
-        # Compile if enabled (always, regardless of migration)
-        if sn.compile_on_load:
+                migration_failures = (
+                    socket_report["config_failures"]
+                    + socket_report["validation_failures"]
+                    + post_cleanup_failures
+                )
+                if migration_failures:
+                    print(
+                        "Serpens: Migration did not validate;"
+                        " the file has not been marked as migrated"
+                    )
+                else:
+                    sn.migrated_blender_5 = True
+                    print("Serpens: Migration complete and validated")
+                migration_ready_for_finalization = True
+            finally:
+                print(
+                    "Serpens: Migration phase took"
+                    f" {time.perf_counter() - migration_started:.2f}s"
+                )
+                if not migration_ready_for_finalization:
+                    _restore_pause_reregister(sn, previous_pause_reregister)
+
+        if migration_ready_for_finalization:
+            _schedule_migration_finalization(
+                bpy.data.filepath,
+                previous_pause_reregister,
+                sn.compile_on_load,
+            )
+        elif sn.compile_on_load:
+            compile_started = time.perf_counter()
             compile_addon()
+            print(
+                "Serpens: Compile-on-load phase took"
+                f" {time.perf_counter() - compile_started:.2f}s"
+            )
 
+        setup_started = time.perf_counter()
         check_serpens_updates(bl_info["version"])
+        print(
+            "Serpens: Update-check phase took"
+            f" {time.perf_counter() - setup_started:.2f}s"
+        )
+        setup_started = time.perf_counter()
         bpy.ops.sn.reload_packages()
         load_snippets()
+        print(
+            "Serpens: Package/snippet phase took"
+            f" {time.perf_counter() - setup_started:.2f}s"
+        )
         sn.hide_preferences = False
         unwatch_script_changes()
         if sn.watch_script_changes:
             watch_script_changes()
+        print(
+            "Serpens: Load handler completed in"
+            f" {time.perf_counter() - load_started:.2f}s"
+        )
 
 
 @persistent

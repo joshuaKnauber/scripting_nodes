@@ -7,6 +7,7 @@ from .compiler import compile_addon, format_linebreaks
 class SN_ScriptingBaseNode:
 
     is_sn = True
+    batch_evaluation = False
     bl_width_default = 160
     bl_width_min = 40
     bl_width_max = 5000
@@ -302,10 +303,23 @@ class SN_ScriptingBaseNode:
         node_code_changed = prev_code != self.code
 
         # trigger compiler updates
-        if other_code_changed and not self.is_trigger:
+        if self.batch_evaluation and not self.is_trigger:
+            # Program inputs store this node's generated code for the upstream
+            # Execute output. Refresh them even when self.code itself did not
+            # change because the socket cache may have been migrated.
+            for inp in self.inputs:
+                if inp.is_program:
+                    inp.python_value = self.code
+
+        if (
+            other_code_changed
+            and not self.is_trigger
+            and not self.batch_evaluation
+        ):
             self._trigger_root_nodes()
         if node_code_changed or (other_code_changed and self.is_trigger):
-            self._node_code_changed()
+            if not self.batch_evaluation:
+                self._node_code_changed()
 
     def evaluate(self, context):
         """Updates this nodes code and the code of all changed data outputs

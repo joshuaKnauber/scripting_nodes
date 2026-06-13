@@ -33,7 +33,8 @@ class SN_ModalEventNode(SN_ScriptingBaseNode, bpy.types.Node):
         self.outputs["Alt"].python_value = f"event.alt"
         self.outputs["Shift"].python_value = f"event.shift"
         self.outputs["Ctrl"].python_value = f"event.ctrl"
-        self.outputs["Os Key"].python_value = f"event.oskey"
+        if "Os Key" in self.outputs:
+            self.outputs["Os Key"].python_value = f"event.oskey"
         self.outputs["Mouse Region"].python_value = f"(event.mouse_region_x, event.mouse_region_y)"
         self.outputs["Mouse Window"].python_value = f"(event.mouse_x, event.mouse_y)"
         self.outputs["Mouse Offset"].python_value = f"((event.mouse_x - self.start_pos[0]), (event.mouse_y - self.start_pos[1]))"

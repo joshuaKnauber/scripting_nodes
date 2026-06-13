@@ -402,6 +402,9 @@ class ScriptingSocket:
 
     def _trigger_update(self):
         """Triggers node evaluation depending on the type of this socket"""
+        if getattr(self.node, "batch_evaluation", False):
+            return
+
         if self.is_program:
             # evaluate this node if this is a program output
             if self.is_output:

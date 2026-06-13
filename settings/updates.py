@@ -79,7 +79,7 @@ def check_serpens_updates(current_version):
         url = "https://raw.githubusercontent.com/joshuaKnauber/serpens_addon_market/main/version.json"
 
         try:
-            content = requests.get(url).json()
+            content = requests.get(url, timeout=10).json()
             version = tuple(content["version"])
             if exists_newer_version(version, current_version):
                 message = content["content"]
