@@ -16,15 +16,21 @@ def _cross_tree_targets(node):
     """Yield trees (other than `node`'s own) that `node` depends on.
 
     Two channels:
-      - sn_reference_properties: name-keyed refs through scene.sna.references
-        (Get/Set Variable, Get/Set Property, the Interface widgets, ...)
+      - sn_reference_properties: name-keyed refs through per-signature
+        collections under scene.sna (Get/Set Variable, Get/Set Property,
+        the Interface widgets, ...)
       - sn_tree_reference_properties: direct PointerProperty fields holding a
         NodeTree (the Call Group node's inherited `node_tree`)
     """
     own_tree = node.id_data
+    settings = bpy.context.scene.sna
 
-    for prop in getattr(node, "sn_reference_properties", set()):
-        ref = bpy.context.scene.sna.references.get(getattr(node, prop, ""))
+    for prop in getattr(node, "sn_reference_properties", {}):
+        key = getattr(node, prop, "")
+        if not key:
+            continue
+        coll = getattr(settings, node._ref_collection_attr(prop))
+        ref = coll.get(key)
         if not ref:
             continue
         target = node_by_id(ref.node_id)

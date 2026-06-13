@@ -1,4 +1,5 @@
 from ...base_node import ScriptingBaseNode
+from ..._reference_signatures import VARIABLE_NODES
 from .....lib.utils.node_tree.scripting_node_trees import node_by_id
 from .....lib.utils.code.format import indent
 from ._class_body_support import (
@@ -70,7 +71,7 @@ class SNA_OT_EnumPropertySettings(bpy.types.Operator):
 class SNA_Node_EnumProperty(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_EnumProperty"
     bl_label = "Enum Property"
-    sn_reference_properties = {"items_variable"}
+    sn_reference_properties = {"items_variable": VARIABLE_NODES}
 
     def update_props(self, context):
         self._generate()
@@ -298,9 +299,9 @@ class SNA_Node_EnumProperty(ScriptingBaseNode, bpy.types.Node):
                 update_items_socket and update_items_socket.is_linked
             )
             var_code = "[]"
-            ref = bpy.context.scene.sna.references.get(self.items_variable)
-            if ref:
-                var_code = f"var_{ref.node_id}"
+            ref_target = self.resolve_reference("items_variable")
+            if ref_target:
+                var_code = f"var_{ref_target.id}"
             if has_update_items:
                 update_items_body = indent(
                     update_items_socket.eval(f"return {var_code}"), 2

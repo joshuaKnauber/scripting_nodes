@@ -1,5 +1,6 @@
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
+from ..._reference_signatures import FLOAT_VECTOR_PROPERTY_NODES
 from .blend_data_mixin import BlendDataModeMixin
 import bpy
 
@@ -9,7 +10,7 @@ class SNA_Node_VectorField(BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node
 
     bl_idname = "SNA_Node_VectorField"
     bl_label = "Vector Field"
-    sn_reference_properties = {"prop"}
+    sn_reference_properties = {"prop": FLOAT_VECTOR_PROPERTY_NODES}
 
     def update_prop(self, context):
         self.apply_class_body_socket_visibility()

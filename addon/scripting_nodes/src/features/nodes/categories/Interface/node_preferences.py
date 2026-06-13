@@ -12,6 +12,7 @@ just emit duplicate classes that fail registration.
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
 from ..._class_body import ClassBodyContainerMixin
+from ..._reference_signatures import PROPERTY_NODES
 import bpy
 
 
@@ -21,6 +22,7 @@ class SNA_Node_Preferences(
     bl_idname = "SNA_Node_Preferences"
     bl_label = "Preferences"
     sn_options = {"ROOT_NODE"}
+    sn_class_body_signature = PROPERTY_NODES
 
     def on_create(self):
         # Draw output - what to render inside the preferences panel
