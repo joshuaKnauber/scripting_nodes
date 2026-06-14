@@ -505,6 +505,10 @@ class SN_ScriptingBaseNode:
     def on_node_update(self):
         pass
 
+    def on_tree_topology_change(self, node_tree):
+        """Called when links change in any Serpens node tree."""
+        pass
+
     def update(self):
         """Update on node graph topology changes (adding or removing nodes and links)"""
         self.on_node_update()
