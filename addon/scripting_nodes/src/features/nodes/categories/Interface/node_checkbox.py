@@ -1,5 +1,6 @@
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
+from ..._reference_signatures import BOOL_PROPERTY_NODES
 from .blend_data_mixin import (
     BlendDataModeMixin,
 )
@@ -9,7 +10,7 @@ import bpy
 class SNA_Node_Checkbox(BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Checkbox"
     bl_label = "Checkbox"
-    sn_reference_properties = {"prop"}
+    sn_reference_properties = {"prop": BOOL_PROPERTY_NODES}
 
     def update_prop(self, context):
         self.apply_class_body_socket_visibility()

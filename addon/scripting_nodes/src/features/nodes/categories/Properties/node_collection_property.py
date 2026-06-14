@@ -1,4 +1,5 @@
 from ...base_node import ScriptingBaseNode
+from ..._reference_signatures import PROPERTY_GROUP_NODES
 from .....lib.utils.node_tree.scripting_node_trees import node_by_id
 from .....lib.utils.code.format import indent
 from ._class_body_support import (
@@ -56,7 +57,7 @@ class SNA_OT_CollectionPropertySettings(bpy.types.Operator):
 class SNA_Node_CollectionProperty(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_CollectionProperty"
     bl_label = "Collection Property"
-    sn_reference_properties = {"group"}
+    sn_reference_properties = {"group": PROPERTY_GROUP_NODES}
 
     def update_props(self, context):
         self._generate()

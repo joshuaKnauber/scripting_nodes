@@ -1,6 +1,7 @@
 from .....lib.utils.sockets.modify import update_socket_type
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
+from ..._reference_signatures import PROPERTY_NODES
 from ..Interface.blend_data_mixin import BlendDataModeMixin
 import bpy
 
@@ -10,7 +11,7 @@ class SNA_Node_SetProperty(
 ):
     bl_idname = "SNA_Node_SetProperty"
     bl_label = "Set Property"
-    sn_reference_properties = {"prop"}
+    sn_reference_properties = {"prop": PROPERTY_NODES}
 
     def update_prop(self, context):
         target = self.resolve_reference("prop")

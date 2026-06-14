@@ -293,9 +293,9 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
             script_content = "pass"
 
         self.code_inline = f"""
-            {indent(input_code, 4)}
-            {indent(script_content, 4)}
-            {indent(self.outputs[0].eval(), 4)}
+            {indent(input_code, 3)}
+            {indent(script_content, 3)}
+            {indent(self.outputs[0].eval(), 3)}
         """
 
     def _get_script_content(self):

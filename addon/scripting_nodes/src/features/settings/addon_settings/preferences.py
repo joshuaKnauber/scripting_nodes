@@ -23,9 +23,26 @@ class SNA_AddonPreferences(AddonPreferences):
 
     bl_idname = _addon_name
 
+    mcp_port: bpy.props.IntProperty(
+        name="MCP Server Port",
+        description="TCP port the MCP server listens on (localhost only)",
+        default=7423,
+        min=1024,
+        max=65535,
+    )
+
     def draw(self, context):
         layout = self.layout
-        layout.label(text="No preferences yet.")
+
+        box = layout.box()
+        box.label(text="MCP Server", icon="PLUGIN")
+        col = box.column()
+        col.use_property_split = True
+        col.prop(self, "mcp_port")
+        col.label(
+            text="Start/stop the server from the node editor sidebar (N panel).",
+            icon="INFO",
+        )
 
 
 def get_preferences() -> SNA_AddonPreferences:

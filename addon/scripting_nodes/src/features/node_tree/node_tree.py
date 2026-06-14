@@ -204,43 +204,51 @@ class ScriptingNodeTree(bpy.types.NodeTree):
 
     def update_node_references(self):
         # Safety check - ensure scene.sna is fully initialized
-        if not hasattr(bpy.context.scene, "sna") or not hasattr(
-            bpy.context.scene.sna, "references"
-        ):
+        if not hasattr(bpy.context.scene, "sna"):
+            return
+        from ...features.settings.settings_properties import (
+            SIGNATURE_INDEX,
+            iter_reference_collections,
+        )
+        if not SIGNATURE_INDEX:
             return
 
-        refs = bpy.context.scene.sna.references
         # Track ref names that changed - referencing nodes need to regenerate
         # so their code (e.g. cross-tree imports) reflects the new target id.
         affected_names = set()
 
-        for node in sn_nodes(self):
-            new_name = f"{node.name} ({self.name})"
-            for ref in refs:
-                if ref.node_id == node.id:
-                    if ref.name != new_name:
-                        affected_names.add(ref.name)
-                        affected_names.add(new_name)
-                        ref.name = new_name
-                    break
-            else:
-                ref = refs.add()
-                ref.name = new_name
-                ref.node_id = node.id
-                affected_names.add(new_name)
+        # Add/rename: for every signature collection, sync the entries for
+        # nodes in this tree whose bl_idname matches that signature.
+        for _key, sig, coll in iter_reference_collections():
+            for node in sn_nodes(self):
+                if node.bl_idname not in sig:
+                    continue
+                new_name = f"{node.name} ({self.name})"
+                for ref in coll:
+                    if ref.node_id == node.id:
+                        if ref.name != new_name:
+                            affected_names.add(ref.name)
+                            affected_names.add(new_name)
+                            ref.name = new_name
+                        break
+                else:
+                    ref = coll.add()
+                    ref.name = new_name
+                    ref.node_id = node.id
+                    affected_names.add(new_name)
 
-        # remove stale references (node deleted)
-        for index in range(len(refs) - 1, -1, -1):
-            ref = refs[index]
-            if node_by_id(ref.node_id) is None:
-                affected_names.add(ref.name)
-                refs.remove(index)
+            # remove stale references (node deleted)
+            for index in range(len(coll) - 1, -1, -1):
+                ref = coll[index]
+                if node_by_id(ref.node_id) is None:
+                    affected_names.add(ref.name)
+                    coll.remove(index)
 
         # Notify referencing nodes whose ref-property points to a changed name.
         if affected_names:
             for ntree in scripting_node_trees():
                 for node in sn_nodes(ntree):
-                    ref_props = getattr(node, "sn_reference_properties", set())
+                    ref_props = getattr(node, "sn_reference_properties", {})
                     for prop in ref_props:
                         if getattr(node, prop, "") in affected_names:
                             node._generate()

@@ -1,12 +1,13 @@
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
+from ..._reference_signatures import NUMBER_PROPERTY_NODES
 import bpy
 
 
 class SNA_Node_NumberField(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_NumberField"
     bl_label = "Number Field"
-    sn_reference_properties = {"prop"}
+    sn_reference_properties = {"prop": NUMBER_PROPERTY_NODES}
 
     def _class_body_data_code(self):
         target = self.resolve_reference("prop")

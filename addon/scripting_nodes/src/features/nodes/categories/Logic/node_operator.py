@@ -2,6 +2,7 @@ from .....lib.utils.code.format import indent
 from .....lib.utils.node_tree.scripting_node_trees import node_by_id
 from ...base_node import ScriptingBaseNode
 from ..._class_body import ClassBodyContainerMixin
+from ..._reference_signatures import PROPERTY_NODES
 import bpy
 
 
@@ -78,6 +79,7 @@ class SNA_Node_Operator(
     bl_idname = "SNA_Node_Operator"
     bl_label = "Operator"
     sn_options = {"ROOT_NODE"}
+    sn_class_body_signature = PROPERTY_NODES
 
     # -- Properties --
 

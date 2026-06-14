@@ -1,5 +1,5 @@
-from typing import Literal, Set
 from textwrap import wrap
+from typing import Dict, Literal, Set, Tuple
 from ...lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
     sn_nodes,
@@ -38,7 +38,12 @@ class ScriptingBaseNode:
     is_sn = True
 
     sn_options: Set[Literal["ROOT_NODE"]] = {}
-    sn_reference_properties: Set[str] = set()
+    # {prop_name: tuple-of-allowed-bl_idnames}. Each entry declares a string
+    # reference field on the node, plus which node types are valid targets.
+    # Discovery in settings_properties uses these tuples to create one
+    # CollectionProperty per unique signature on scene.sna, so prop_search
+    # dropdowns only show the relevant nodes.
+    sn_reference_properties: Dict[str, Tuple[str, ...]] = {}
     # PointerProperty fields whose value is another ScriptingNodeTree. Used by
     # the dependency tracker to know "this node depends on that tree's file".
     sn_tree_reference_properties: Set[str] = set()
@@ -146,36 +151,46 @@ class ScriptingBaseNode:
         # on link edits (NodeTree.update() doesn't fire on bare node add), so
         # a freshly added/duplicated node would never land in refs until the
         # user happens to make a link. Self-heal here so the picker dropdowns
-        # see new nodes immediately.
-        refs = bpy.context.scene.sna.references
+        # see new nodes immediately. Self lands in every signature-collection
+        # whose filter accepts this node's bl_idname.
+        from ..settings.settings_properties import (
+            collections_for_bl_idname,
+            signature_key,
+        )
         new_ref_name = f"{self.name} ({self.node_tree.name})"
-        existing_ref_index = None
-        for index, ref in enumerate(refs):
-            if ref.node_id == self.id:
-                existing_ref_index = index
-                break
-        if existing_ref_index is not None:
-            if refs[existing_ref_index].name != new_ref_name:
-                refs[existing_ref_index].name = new_ref_name
-        else:
-            ref = refs.add()
-            ref.name = new_ref_name
-            ref.node_id = self.id
+        for coll in collections_for_bl_idname(self.bl_idname):
+            for ref in coll:
+                if ref.node_id == self.id:
+                    if ref.name != new_ref_name:
+                        ref.name = new_ref_name
+                    break
+            else:
+                ref = coll.add()
+                ref.name = new_ref_name
+                ref.node_id = self.id
 
         # notify referencing nodes
+        settings = bpy.context.scene.sna
         for ntree in scripting_node_trees():
             for node in sn_nodes(ntree):
                 for prop in node.sn_reference_properties:
                     key = getattr(node, prop, "")
-                    ref = refs.get(key)
+                    if not key:
+                        continue
+                    coll = getattr(settings, node._ref_collection_attr(prop))
+                    ref = coll.get(key)
                     if ref and ref.node_id == self.id:
                         node.on_ref_change(self)
                 # Container nodes hold refs in a CollectionProperty - notify
                 # them when one of their attached properties changes signature
                 cb_entries = getattr(node, "class_body_properties", None)
-                if cb_entries is not None:
+                cb_sig = getattr(node, "sn_class_body_signature", ())
+                if cb_entries is not None and cb_sig:
+                    coll = getattr(settings, signature_key(cb_sig))
                     for entry in cb_entries:
-                        ref = refs.get(entry.prop)
+                        if not entry.prop:
+                            continue
+                        ref = coll.get(entry.prop)
                         if ref and ref.node_id == self.id:
                             node._generate()
                             break
@@ -185,15 +200,26 @@ class ScriptingBaseNode:
 
     ### Reference helpers
 
+    @classmethod
+    def _ref_collection_attr(cls, prop_name):
+        """scene.sna attribute name of the collection backing this ref-property."""
+        from ..settings.settings_properties import signature_key
+        return signature_key(cls.sn_reference_properties[prop_name])
+
     def resolve_reference(self, prop_name):
         """Return the node a reference-property points to, or None."""
-        ref = bpy.context.scene.sna.references.get(getattr(self, prop_name, ""))
+        coll = getattr(bpy.context.scene.sna, self._ref_collection_attr(prop_name))
+        ref = coll.get(getattr(self, prop_name, ""))
         return ref.node if ref else None
 
     def draw_reference_prop(self, layout, prop_name, text=""):
         """Standard UI for picking another SN node by reference."""
         layout.prop_search(
-            self, prop_name, bpy.context.scene.sna, "references", text=text
+            self,
+            prop_name,
+            bpy.context.scene.sna,
+            self._ref_collection_attr(prop_name),
+            text=text,
         )
 
     def reference_is_cross_tree(self, prop_name):

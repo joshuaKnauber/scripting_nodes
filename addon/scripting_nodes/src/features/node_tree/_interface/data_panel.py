@@ -67,12 +67,11 @@ def get_reference_count(ref_name):
     return len(get_nodes_referencing(ref_name))
 
 
-def get_selected_reference(sna, node_types, index):
-    """Get the selected reference from the list by index into the full references collection"""
-    # The index is into the full references collection, not the filtered one
-    if 0 <= index < len(sna.references):
-        ref = sna.references[index]
-        # Check if it's the right type
+def get_selected_reference(sna, collection_attr, node_types, index):
+    """Return the selected reference from a per-signature collection by index."""
+    coll = getattr(sna, collection_attr)
+    if 0 <= index < len(coll):
+        ref = coll[index]
         if ref.node and ref.node.bl_idname in node_types:
             return ref
     return None
@@ -211,6 +210,7 @@ class SNA_PT_DataProperties(bpy.types.Panel):
         return in_sn_tree(context)
 
     def draw(self, context):
+        from ...settings.settings_properties import DATA_PANEL_PROPERTIES_ATTR
         layout = self.layout
         sna = context.scene.sna
 
@@ -219,7 +219,7 @@ class SNA_PT_DataProperties(bpy.types.Panel):
             "SNA_UL_PropertyNodesList",
             "",
             sna,
-            "references",
+            DATA_PANEL_PROPERTIES_ATTR,
             sna.ui,
             "active_property_index",
             rows=4,
@@ -227,7 +227,10 @@ class SNA_PT_DataProperties(bpy.types.Panel):
 
         # Show referencing nodes for selected property
         ref = get_selected_reference(
-            sna, PROPERTY_NODE_TYPES, sna.ui.active_property_index
+            sna,
+            DATA_PANEL_PROPERTIES_ATTR,
+            PROPERTY_NODE_TYPES,
+            sna.ui.active_property_index,
         )
         if ref and ref.node:
             draw_referencing_nodes(layout, ref.name)
@@ -246,6 +249,7 @@ class SNA_PT_DataVariables(bpy.types.Panel):
         return in_sn_tree(context)
 
     def draw(self, context):
+        from ...settings.settings_properties import DATA_PANEL_VARIABLES_ATTR
         layout = self.layout
         sna = context.scene.sna
 
@@ -254,7 +258,7 @@ class SNA_PT_DataVariables(bpy.types.Panel):
             "SNA_UL_VariableNodesList",
             "",
             sna,
-            "references",
+            DATA_PANEL_VARIABLES_ATTR,
             sna.ui,
             "active_variable_index",
             rows=4,
@@ -262,7 +266,10 @@ class SNA_PT_DataVariables(bpy.types.Panel):
 
         # Show referencing nodes for selected variable
         ref = get_selected_reference(
-            sna, VARIABLE_NODE_TYPES, sna.ui.active_variable_index
+            sna,
+            DATA_PANEL_VARIABLES_ATTR,
+            VARIABLE_NODE_TYPES,
+            sna.ui.active_variable_index,
         )
         if ref and ref.node:
             draw_referencing_nodes(layout, ref.name)

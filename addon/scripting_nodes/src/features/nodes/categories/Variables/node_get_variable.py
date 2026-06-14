@@ -1,13 +1,14 @@
 from .....lib.utils.sockets.modify import update_socket_type
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
+from ..._reference_signatures import VARIABLE_NODES
 import bpy
 
 
 class SNA_Node_GetVariable(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_GetVariable"
     bl_label = "Get Variable"
-    sn_reference_properties = {"var"}
+    sn_reference_properties = {"var": VARIABLE_NODES}
 
     def update_var(self, context):
         target = self.resolve_reference("var")
