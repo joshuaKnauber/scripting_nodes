@@ -136,6 +136,10 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
     )
 
     def on_create(self):
+        self.panel_space_type = "VIEW_3D"
+        self.panel_region_type = "UI"
+        self.panel_context = "NONE"
+
         # Inputs
         self.add_input("ScriptingStringSocket", "Label").value = "Panel"
         self.add_input("ScriptingBooleanSocket", "Is Visible").value = True
