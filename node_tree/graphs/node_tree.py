@@ -29,6 +29,12 @@ class ScriptingNodesTree(bpy.types.NodeTree):
     link_cache = (
         {}
     )  # stores cache of the links from the previous update for all node trees based on their memory adress
+    _deferred_update_generations = {}
+
+    pause_updates: bpy.props.BoolProperty(
+        default=False,
+        options={"SKIP_SAVE"},
+    )
 
     variables: bpy.props.CollectionProperty(
         type=SN_VariableProperties,
@@ -270,8 +276,25 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         # update cached current links
         self.link_cache[id(self)] = curr_links
 
-        # calls a function after the links are realized
-        bpy.app.timers.register(self._update_post, first_interval=0.001)
+    def _run_deferred_update(self, tree_pointer, generation):
+        if self._deferred_update_generations.get(tree_pointer) != generation:
+            return None
+        self._deferred_update_generations.pop(tree_pointer, None)
+        if self.as_pointer() != tree_pointer:
+            return None
+        self._update_post()
+        self._update_reroutes()
+        return None
+
+    def schedule_deferred_update(self):
+        """Debounce visual/link maintenance until the current edit settles."""
+        tree_pointer = self.as_pointer()
+        generation = self._deferred_update_generations.get(tree_pointer, 0) + 1
+        self._deferred_update_generations[tree_pointer] = generation
+        bpy.app.timers.register(
+            lambda: self._run_deferred_update(tree_pointer, generation),
+            first_interval=0.001,
+        )
 
     def _update_reroutes(self):
         """Updates all inputs and display shapes of the reroutes in this node tree"""
@@ -303,9 +326,13 @@ class ScriptingNodesTree(bpy.types.NodeTree):
                     pass
 
     def update(self):
+        if self.pause_updates:
+            return
         # update tree links
         self._update_tree_links()
-        self._update_reroutes()
+        # Newly inserted reroutes do not expose their realized links until the
+        # node tree update has completed.
+        self.schedule_deferred_update()
 
     def reevaluate(self):
         """Reevaluates all nodes in this node tree"""

@@ -18,6 +18,7 @@ def _finish_deferred_node_setup(node_tree_name, static_uid):
             node.ensure_project_unique_name()
             node.disable_evaluation = False
             node._evaluate(bpy.context)
+            node_tree.schedule_deferred_update()
             break
     return None
 
@@ -436,15 +437,21 @@ class SN_ScriptingBaseNode:
         node_ref.name = self.name
 
     def init(self, context):
-        # create node collection item
-        self._create_node_collection_item()
-        # set up custom color
-        self._set_node_color()
-        # set up the node
-        self.on_create(context)
+        node_tree = self.node_tree
+        previous_pause_updates = node_tree.pause_updates
+        node_tree.pause_updates = True
+        try:
+            # create node collection item
+            self._create_node_collection_item()
+            # set up custom color
+            self._set_node_color()
+            # set up the node
+            self.on_create(context)
+        finally:
+            node_tree.pause_updates = previous_pause_updates
         # Defer evaluation and name uniqueness check to avoid issues with Blender's 
         # internal state during node creation/paste operations.
-        node_tree_name = self.node_tree.name
+        node_tree_name = node_tree.name
         static_uid = self.static_uid
         bpy.app.timers.register(
             lambda: _finish_deferred_node_setup(node_tree_name, static_uid),
@@ -463,13 +470,19 @@ class SN_ScriptingBaseNode:
             _temporary_clipboard_node_pointers.add(self.as_pointer())
             return
 
-        # create node collection item
-        self._create_node_collection_item()
-        # set up the node
-        self.on_copy(old)
+        node_tree = self.node_tree
+        previous_pause_updates = node_tree.pause_updates
+        node_tree.pause_updates = True
+        try:
+            # create node collection item
+            self._create_node_collection_item()
+            # set up the node
+            self.on_copy(old)
+        finally:
+            node_tree.pause_updates = previous_pause_updates
         # Defer evaluation and name uniqueness check after copying to avoid issues 
         # with Blender's internal state during duplication/paste operations.
-        node_tree_name = self.node_tree.name
+        node_tree_name = node_tree.name
         static_uid = self.static_uid
         bpy.app.timers.register(
             lambda: _finish_deferred_node_setup(node_tree_name, static_uid),
