@@ -1,3 +1,4 @@
+from textwrap import wrap
 from typing import Dict, Literal, Set, Tuple
 from ...lib.utils.node_tree.scripting_node_trees import (
     scripting_node_trees,
@@ -270,12 +271,38 @@ class ScriptingBaseNode:
                 socket.is_dynamic = False
                 socket.is_removable = True
 
+    def _shown_code_lines(self):
+        """Return compact code lines for the in-node dev preview.
+
+        This only affects the node UI preview. The generated code strings stay
+        untouched so file output keeps its normal formatting.
+        """
+        shown = self.code_module or self.code_inline
+        if not shown:
+            return []
+
+        lines = [line.rstrip() for line in shown.strip().splitlines()]
+        lines = [line for line in lines if line.strip()]
+
+        display_lines = []
+        for line in lines:
+            indent = line[: len(line) - len(line.lstrip())]
+            chunks = wrap(
+                line,
+                width=96,
+                subsequent_indent=f"{indent}    ",
+                replace_whitespace=False,
+                drop_whitespace=False,
+            )
+            display_lines.extend(chunks or [line])
+        return display_lines
+
     def draw_buttons(self, context, layout):
         if bpy.context.scene.sna.dev.show_node_code:
             box = layout.box()
-            shown = self.code_module or self.code_inline
-            for line in shown.split("\n"):
-                box.label(text=line)
+            col = box.column(align=True)
+            for line in self._shown_code_lines():
+                col.label(text=line)
         self.draw(context, layout)
 
     def draw(self, context, layout):
