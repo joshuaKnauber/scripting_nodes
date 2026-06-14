@@ -4,6 +4,24 @@ from ..utils import normalize_code, indent_code, unique_collection_name
 from .compiler import compile_addon, format_linebreaks
 
 
+_temporary_clipboard_node_pointers = set()
+
+
+def _finish_deferred_node_setup(node_tree_name, static_uid):
+    """Finish node setup only if the node still exists in a live node tree."""
+    node_tree = bpy.data.node_groups.get(node_tree_name)
+    if not node_tree or node_tree.bl_idname != "ScriptingNodesTree":
+        return None
+
+    for node in node_tree.nodes:
+        if getattr(node, "static_uid", None) == static_uid:
+            node.ensure_project_unique_name()
+            node.disable_evaluation = False
+            node._evaluate(bpy.context)
+            break
+    return None
+
+
 class SN_ScriptingBaseNode:
 
     is_sn = True
@@ -426,30 +444,37 @@ class SN_ScriptingBaseNode:
         self.on_create(context)
         # Defer evaluation and name uniqueness check to avoid issues with Blender's 
         # internal state during node creation/paste operations.
-        def deferred_init():
-            self.ensure_project_unique_name()
-            self.disable_evaluation = False
-            self._evaluate(bpy.context)
-
-        bpy.app.timers.register(deferred_init, first_interval=0.01)
+        node_tree_name = self.node_tree.name
+        static_uid = self.static_uid
+        bpy.app.timers.register(
+            lambda: _finish_deferred_node_setup(node_tree_name, static_uid),
+            first_interval=0.01,
+        )
 
     ### COPY NODE
     def on_copy(self, old):
         pass
 
     def copy(self, old):
+        # Blender creates temporary node copies while filling its clipboard.
+        # Those copies are not members of a live node tree and are destroyed
+        # immediately after clipboard serialization.
+        if not any(node == self for node in self.node_tree.nodes):
+            _temporary_clipboard_node_pointers.add(self.as_pointer())
+            return
+
         # create node collection item
         self._create_node_collection_item()
         # set up the node
         self.on_copy(old)
         # Defer evaluation and name uniqueness check after copying to avoid issues 
         # with Blender's internal state during duplication/paste operations.
-        def deferred_copy():
-            self.ensure_project_unique_name()
-            self.disable_evaluation = False
-            self._evaluate(bpy.context)
-
-        bpy.app.timers.register(deferred_copy, first_interval=0.01)
+        node_tree_name = self.node_tree.name
+        static_uid = self.static_uid
+        bpy.app.timers.register(
+            lambda: _finish_deferred_node_setup(node_tree_name, static_uid),
+            first_interval=0.01,
+        )
 
     ### FREE NODE
     def on_free(self):
@@ -463,6 +488,11 @@ class SN_ScriptingBaseNode:
                 break
 
     def free(self):
+        node_pointer = self.as_pointer()
+        if node_pointer in _temporary_clipboard_node_pointers:
+            _temporary_clipboard_node_pointers.discard(node_pointer)
+            return
+
         # remove node reference from node tree references
         self._remove_node_collection_item()
         # free node
