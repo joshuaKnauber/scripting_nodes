@@ -99,7 +99,8 @@ class NodeRefCollection(bpy.types.PropertyGroup):
             node = ref.node
             if node and ref.name != node.name:
                 ref.name = node.name
-                node.on_node_name_change()
+                if hasattr(node, "on_node_name_change"):
+                    node.on_node_name_change()
                 # node._evaluate(bpy.context)
 
     @property
