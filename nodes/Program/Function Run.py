@@ -60,7 +60,10 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
             elif "updated" in data:
                 # Use new_name from data if available, otherwise fall back to socket.name
                 socket_name = data.get("new_name", data["updated"].name)
-                self.inputs[data["updated"].index].set_name_silent(socket_name)
+                socket_index = data["updated"].index
+                sockets_in_sync = len(node.outputs) - 2 == len(self.inputs) - 1
+                if sockets_in_sync and 0 <= socket_index < len(self.inputs):
+                    self.inputs[socket_index].set_name_silent(socket_name)
             self._evaluate(bpy.context)
         elif node.bl_idname == "SN_FunctionReturnNode" and data:
             # output has been added
@@ -83,7 +86,10 @@ class SN_RunFunctionNode(SN_ScriptingBaseNode, bpy.types.Node):
             elif "updated" in data:
                 # Use new_name from data if available, otherwise fall back to socket.name
                 socket_name = data.get("new_name", data["updated"].name)
-                self.outputs[data["updated"].index].set_name_silent(socket_name)
+                socket_index = data["updated"].index
+                sockets_in_sync = len(node.inputs) - 2 == len(self.outputs) - 1
+                if sockets_in_sync and 0 <= socket_index < len(self.outputs):
+                    self.outputs[socket_index].set_name_silent(socket_name)
             self._refresh_return_connection_validation()
             self._evaluate(bpy.context)
 

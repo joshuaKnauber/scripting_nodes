@@ -18,9 +18,14 @@ class SN_FunctionReturnNode(SN_ScriptingBaseNode, bpy.types.Node):
         
         
     def on_dynamic_socket_add(self, socket):
+        if socket.dynamic:
+            socket = self.inputs[socket.index - 1]
         current_name = socket.name
+        used_names = [
+            inp.name for inp in self.inputs if inp != socket and not inp.dynamic
+        ]
         new_name = get_python_name(current_name, "Output", lower=False)
-        new_name = unique_collection_name(new_name, "Output", [inp.name for inp in self.inputs], "_", includes_name=True)
+        new_name = unique_collection_name(new_name, "Output", used_names, "_")
         if new_name != current_name:
             socket.set_name_silent(new_name)
         self.trigger_ref_update({ "added": socket })
@@ -43,9 +48,12 @@ class SN_FunctionReturnNode(SN_ScriptingBaseNode, bpy.types.Node):
         # Get the current name value from stored value (set by update_socket_name)
         name_storage_key = f"_socket_current_name_{id(socket)}"
         current_name = self.get(name_storage_key, socket.name)  # Fallback to socket.name if not stored
+        used_names = [
+            inp.name for inp in self.inputs if inp != socket and not inp.dynamic
+        ]
         
         new_name = get_python_name(current_name, "Output", lower=False)
-        new_name = unique_collection_name(new_name, "Output", [inp.name for inp in self.inputs], "_", includes_name=True)
+        new_name = unique_collection_name(new_name, "Output", used_names, "_")
         if new_name != current_name:
             socket.set_name_silent(new_name)
         self.trigger_ref_update({ "updated": socket, "new_name": new_name })
