@@ -259,6 +259,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
         """Finds all changed node links and updates the connections"""
         # get current links
         curr_links = list(map(self._map_link_to_sockets, self.links.values()))
+        topology_changed = id(self) not in self.link_cache
 
         if id(self) in self.link_cache:
             # update added links
@@ -268,6 +269,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
             removed = list(set(self.link_cache[id(self)]) - set(curr_links))
             self._update_removed_links(removed)
             if added or removed:
+                topology_changed = True
                 self._notify_topology_changed()
 
         # update cached current links
@@ -275,6 +277,7 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
         # calls a function after the links are realized
         bpy.app.timers.register(self._update_post, first_interval=0.001)
+        return topology_changed
 
     def _reroute_source_socket(self, reroute, visited=None):
         """Return the first non-reroute socket connected upstream."""
@@ -300,10 +303,10 @@ class ScriptingNodesTree(bpy.types.NodeTree):
 
     def update(self):
         # update tree links
-        self._update_tree_links()
-        # Newly inserted reroutes do not expose their realized links until the
-        # node tree update has completed.
-        bpy.app.timers.register(self._update_reroutes, first_interval=0.001)
+        topology_changed = self._update_tree_links()
+        if topology_changed:
+            # Newly inserted reroutes expose their realized links after this update.
+            bpy.app.timers.register(self._update_reroutes, first_interval=0.001)
 
     def reevaluate(self):
         """Reevaluates all nodes in this node tree"""
