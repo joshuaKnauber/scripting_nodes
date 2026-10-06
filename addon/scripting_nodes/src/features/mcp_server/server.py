@@ -4,8 +4,13 @@ The server binds 127.0.0.1 only (loopback), runs in a daemon thread, and
 hands every tool body to `bridge.call_on_main` so bpy access happens on
 Blender's main thread.
 
-Scope: read-only methods needed by current MCP clients (initialize,
-tools/list, tools/call, ping). No sessions, no SSE streaming.
+Scope: the methods needed by current MCP clients (initialize, tools/list,
+tools/call, ping). Tools can modify node trees. No sessions, no SSE streaming.
+
+Security: loopback alone isn't enough - any web page open in a browser can
+POST to 127.0.0.1. Requests are rejected unless they look like they come from
+a local MCP client: no browser `Origin`, a loopback `Host` (blocks DNS
+rebinding) and a JSON content type (forces a CORS preflight we never answer).
 """
 
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -25,6 +30,18 @@ SERVER_INFO = {"name": "scripting-nodes", "version": "4.0.0"}
 # it up. Codegen for a big tree can be a few seconds; 30s is a generous
 # upper bound that still surfaces real hangs.
 TOOL_TIMEOUT_SECONDS = 30.0
+
+
+_LOOPBACK_HOSTS = {"127.0.0.1", "localhost", "::1"}
+
+
+def _is_loopback_url(url: str) -> bool:
+    from urllib.parse import urlparse
+
+    try:
+        return urlparse(url).hostname in _LOOPBACK_HOSTS
+    except ValueError:
+        return False
 
 
 _SERVER: "ThreadingHTTPServer | None" = None
@@ -158,7 +175,25 @@ class _Handler(BaseHTTPRequestHandler):
         # Session termination on Streamable HTTP. We're stateless, so just ack.
         self._send_empty(204)
 
+    def _reject_reason(self):
+        """Return why this request must be refused, or None if it's allowed."""
+        origin = self.headers.get("Origin")
+        if origin and not _is_loopback_url(origin):
+            return f"origin {origin!r} not allowed"
+        host = (self.headers.get("Host") or "").rsplit(":", 1)[0].strip("[]")
+        if host not in _LOOPBACK_HOSTS:
+            return f"host {host!r} not allowed"
+        content_type = (self.headers.get("Content-Type") or "").split(";")[0]
+        if content_type.strip().lower() != "application/json":
+            return "Content-Type must be application/json"
+        return None
+
     def do_POST(self):
+        reason = self._reject_reason()
+        if reason:
+            self.log_message("rejected request: %s", reason)
+            self._send_json(403, {"error": reason})
+            return
         length = int(self.headers.get("Content-Length") or 0)
         if length == 0:
             self._send_json(400, {"error": "empty body"})

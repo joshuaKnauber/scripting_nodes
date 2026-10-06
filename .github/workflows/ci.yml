@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main, v4]
+  pull_request:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: check
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: format --check
+
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        blender: ["5.0.1", "5.1.1"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cache Blender
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/blender
+          key: blender-${{ matrix.blender }}
+      - name: Download Blender
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          series=$(echo "${{ matrix.blender }}" | cut -d. -f1,2)
+          mkdir -p ~/blender
+          curl -sSL "https://download.blender.org/release/Blender${series}/blender-${{ matrix.blender }}-linux-x64.tar.xz" \
+            | tar -xJ -C ~/blender --strip-components=1
+      - name: System libraries
+        run: sudo apt-get update && sudo apt-get install -y libxi6 libxkbcommon0 libsm6 libgl1 libxrender1 libxfixes3 libegl1
+      - name: Validate manifest
+        run: ~/blender/blender --command extension validate addon/scripting_nodes
+      - name: Run tests
+        run: BLENDER=~/blender/blender python3 scripts/test.py -v
