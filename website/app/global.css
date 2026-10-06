@@ -1,0 +1,146 @@
+@import 'tailwindcss';
+@import 'fumadocs-ui/css/neutral.css';
+@import 'fumadocs-ui/css/preset.css';
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}
+
+/*
+ * Typography modeled on linear.app/docs: sizes, weights, spacing only.
+ * Colors stay Fumadocs' neutral theme.
+ */
+@theme {
+  --font-weight-medium: 510;
+  --font-weight-semibold: 590;
+}
+
+body {
+  /* Inter's alternate 1 and rounded quotes/commas, as Linear uses */
+  font-feature-settings: 'cv01', 'ss03';
+}
+
+.prose {
+  font-size: 15px;
+  line-height: 24px;
+  letter-spacing: -0.011em;
+}
+
+/*
+ * Every rule below skips components that opt out with `not-prose` (card
+ * titles, code block chrome, ...). Rhythm: 12px between text blocks, 24px
+ * around anything boxed (cards, callouts, steps, images, code).
+ */
+.prose :is(p, ul, ol):not(.not-prose, .not-prose *) {
+  margin-block: 12px 0;
+}
+
+.prose li:not(.not-prose *) + li {
+  margin-top: 8px;
+}
+
+.prose :is(h2, h3):not(.not-prose, .not-prose *) {
+  font-weight: 590;
+  margin-block: 0;
+}
+
+.prose h2:not(.not-prose, .not-prose *) {
+  font-size: 24px;
+  line-height: 32px;
+  letter-spacing: -0.012em;
+  margin-top: 56px;
+}
+
+.prose h3:not(.not-prose, .not-prose *) {
+  font-size: 20px;
+  line-height: 32px;
+  margin-top: 40px;
+}
+
+/* Steps: spacing lives between steps, not on their headings */
+.prose .fd-step h3 {
+  margin-top: 0;
+}
+
+.prose .fd-step + .fd-step {
+  margin-top: 32px;
+}
+
+.prose > :is(div, figure, pre, table),
+.prose .fd-step > :is(div, figure, pre, table),
+.prose img {
+  margin-block: 24px;
+}
+
+.prose > :first-child {
+  margin-top: 0;
+}
+
+.prose > :last-child {
+  margin-bottom: 0;
+}
+
+.prose img {
+  border-radius: 8px;
+}
+
+/* Sidebar: denser rows, medium weight */
+#nd-sidebar [data-id$='-viewport'] :is(a, button) {
+  padding-block: 6px;
+  font-weight: 510;
+}
+
+/* Table of contents */
+#nd-toc :is(a, h3) {
+  font-size: 13px;
+  line-height: 19.5px;
+  letter-spacing: normal;
+}
+
+/*
+ * Layout chrome modeled on linear.app/docs: flat sidebar whose header lines up
+ * with the 64px top bar, no tree guide lines, quiet active state.
+ */
+#nd-sidebar {
+  background: var(--color-fd-background);
+}
+
+#nd-sidebar > div:first-child {
+  height: var(--fd-header-height);
+  justify-content: center;
+  padding-block: 0;
+  border-bottom: 1px solid var(--color-fd-border);
+}
+
+#nd-sidebar [data-id$='-viewport'] {
+  padding-top: 12px;
+}
+
+#nd-sidebar [data-id$='-viewport'] *::before {
+  content: none;
+}
+
+#nd-sidebar [data-id$='-viewport'] a[data-active='true'] {
+  background: transparent;
+  color: var(--color-fd-foreground);
+}
+
+#nd-sidebar > div:last-child {
+  border-top: 1px solid var(--color-fd-border);
+  padding-top: 12px;
+}
+
+/* TOC sits below the header row and starts level with the page title */
+#nd-toc {
+  top: var(--fd-docs-row-2);
+  height: calc(var(--fd-docs-height) - var(--fd-docs-row-2));
+}
+
+#toc-title {
+  display: none;
+}

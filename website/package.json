@@ -1,23 +1,36 @@
 {
-  "name": "website",
-  "type": "module",
-  "version": "0.0.1",
+  "name": "scripting-nodes-website",
+  "version": "0.0.0",
+  "private": true,
   "scripts": {
-    "dev": "astro dev",
-    "start": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "generate-types": "wrangler types"
+    "build": "next build",
+    "dev": "next dev",
+    "start": "wrangler dev",
+    "types:check": "next typegen && tsc --noEmit",
+    "screenshots": "python3 ../scripts/docs_screenshots.py",
+    "deploy": "next build && wrangler deploy"
   },
   "dependencies": {
-    "@astrojs/cloudflare": "^13.5.1",
-    "@astrojs/starlight": "^0.39.2",
-    "astro": "^6.3.1",
-    "sharp": "^0.34.5",
-    "wrangler": "^4.92.0"
+    "cn": "^0.4.0",
+    "fumadocs-core": "16.16.2",
+    "fumadocs-mdx": "15.4.6",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.16.2",
+    "lucide-react": "^1.50.0",
+    "next": "16.3.8",
+    "next-themes": "^0.4.6",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0"
   },
-  "overrides": {
-    "vite": "^7"
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^26.6.4",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "postcss": "^8.5.28",
+    "serve": "^14.2.6",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^7.0.2",
+    "wrangler": "^4.147.0"
   }
 }

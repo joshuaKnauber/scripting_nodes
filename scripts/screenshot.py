@@ -21,11 +21,11 @@ NO_SPLASH = (
 DRIVER = os.path.join(REPO_ROOT, "tests", "visual", "driver.py")
 
 
-def main():
-    if len(sys.argv) < 3:
-        sys.exit(__doc__)
-    scenario = os.path.abspath(sys.argv[1])
-    output = os.path.abspath(sys.argv[2])
+def take(scenario, output, size=(1600, 1000)):
+    """Screenshot `scenario` into `output`. Returns Blender's output on failure."""
+    scenario = os.path.abspath(scenario)
+    output = os.path.abspath(output)
+    os.makedirs(os.path.dirname(output), exist_ok=True)
     user_resources = make_user_resources()
     env = dict(os.environ, BLENDER_USER_RESOURCES=user_resources)
     # Save prefs without the splash / quick-setup screen into the temp profile
@@ -39,8 +39,8 @@ def main():
         "--window-geometry",
         "0",
         "0",
-        "1600",
-        "1000",
+        str(size[0]),
+        str(size[1]),
         "--python",
         DRIVER,
         "--",
@@ -55,9 +55,18 @@ def main():
         shutil.rmtree(user_resources, ignore_errors=True)
     out = result.stdout + result.stderr
     if "SCREENSHOT FAILED" in out or not os.path.exists(output):
-        print(out[-4000:])
+        return out[-4000:]
+    return None
+
+
+def main():
+    if len(sys.argv) < 3:
+        sys.exit(__doc__)
+    error = take(sys.argv[1], sys.argv[2])
+    if error:
+        print(error)
         sys.exit(1)
-    print(output)
+    print(os.path.abspath(sys.argv[2]))
 
 
 if __name__ == "__main__":

@@ -1,23 +1,29 @@
-# build output
-dist/
-# generated types
-.astro/
-# wrangler local state
-.wrangler/
+# deps
+/node_modules
 
-# dependencies
-node_modules/
+# generated content
+.source
 
-# logs
+# test & build
+/coverage
+/.next/
+/out/
+/build
+*.tsbuildinfo
+
+# misc
+.DS_Store
+*.pem
+/.pnp
+.pnp.js
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
-
-# environment variables
-.env
-.env.production
-
-# macOS-specific files
-.DS_Store
+# others
+.env*.local
+.vercel
+next-env.d.ts
+# fumadocs-mdx
+.source
+.wrangler
