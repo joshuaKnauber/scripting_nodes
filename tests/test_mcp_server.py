@@ -20,7 +20,7 @@ def free_port():
 class MCPServerSecurityTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.server = helpers.sn("src.features.mcp_server.server")
+        cls.server = helpers.sn("src.mcp_server.server")
         cls.port = free_port()
         cls.server.start(cls.port)
 

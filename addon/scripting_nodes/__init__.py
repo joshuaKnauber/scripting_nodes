@@ -11,53 +11,21 @@
 # You should have received a copy of the GNU General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+# Version, name and Blender compatibility live in blender_manifest.toml.
+
+import importlib.util
 import sys
-import os
 from pathlib import Path
 
+# Blender installs the manifest wheels when the extension is installed from a
+# zip. When the source folder is linked into a repo directly (dev / tests),
+# they aren't installed, so put the bundled wheels on sys.path instead.
+if importlib.util.find_spec("autopep8") is None:
+    for whl in (Path(__file__).parent / "wheels").glob("*.whl"):
+        if str(whl) not in sys.path:
+            sys.path.insert(0, str(whl))
 
-def _is_extension():
-    """Check if running as a Blender extension (bl_ext.*)."""
-    return __name__.startswith("bl_ext.")
-
-
-def _wheels_available():
-    """Check if wheel packages are already available."""
-    try:
-        import names_generator
-
-        return True
-    except ImportError:
-        return False
-
-
-# Wheel loading strategy:
-# 1. When running as extension AND wheels are available: Blender loaded them, do nothing
-# 2. When running as extension but wheels missing: dev workflow issue, load manually
-# 3. When not running as extension: legacy addon mode, load manually
-#
-# We only avoid sys.path modification when Blender has properly loaded the wheels,
-# which is the case for proper extension installations from the repository.
-if not _wheels_available():
-    _wheels_dir = Path(__file__).parent / "wheels"
-    if _wheels_dir.exists():
-        for whl in _wheels_dir.glob("*.whl"):
-            whl_path = str(whl)
-            if whl_path not in sys.path:
-                sys.path.insert(0, whl_path)
-
-bl_info = {
-    "name": "Scripting Nodes",
-    "author": "Joshua Knauber, Finn Knauber",
-    "description": "Adds a node editor for building addons with nodes",
-    "blender": (4, 3, 0),
-    "version": (4, 0, 0),
-    "location": "Editors -> Visual Scripting Editor",
-    "category": "Node",
-}
-
-import bpy
-from . import auto_load
+from . import auto_load  # noqa: E402
 
 
 def register():

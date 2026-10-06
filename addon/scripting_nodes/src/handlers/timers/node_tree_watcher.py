@@ -1,4 +1,4 @@
-from ...features.node_tree.code_gen.watcher import watch_changes
+from ...core.watcher import watch_changes
 import bpy
 
 

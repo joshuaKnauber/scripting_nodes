@@ -1,2 +1,5 @@
-# Dev Config: Launch using `python .\scripts\dev.py`
-BLENDER_EXECUTABLE: '...\blender.exe'
+# Dev config, used by scripts/dev.py, scripts/test.py and scripts/screenshot.py
+# macOS:   /Applications/Blender.app/Contents/MacOS/Blender
+# Windows: C:\Program Files\Blender Foundation\Blender 5.1\blender.exe
+# Linux:   /path/to/blender
+BLENDER_EXECUTABLE: '/Applications/Blender.app/Contents/MacOS/Blender'

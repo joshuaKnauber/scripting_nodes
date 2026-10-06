@@ -68,14 +68,12 @@ def link(tree, from_socket, to_socket):
 
 def flush():
     """Run all pending regeneration / compile / reload work synchronously."""
-    sn("src.features.node_tree.code_gen.watcher").watch_changes()
+    sn("src.core.watcher").watch_changes()
 
 
 def tree_source(tree):
     """Generated Python source for a single tree module."""
-    return sn(
-        "src.features.node_tree.code_gen.generators.node_tree"
-    ).code_gen_node_tree(tree)
+    return sn("src.core.generators.node_tree").code_gen_node_tree(tree)
 
 
 def addon_files(build=False):
@@ -85,7 +83,7 @@ def addon_files(build=False):
 
 def node_classes():
     """Every registered Scripting Nodes node class."""
-    base = sn("src.features.nodes.base_node").ScriptingBaseNode
+    base = sn("src.nodes.base_node").ScriptingBaseNode
     out = []
 
     def walk(cls):

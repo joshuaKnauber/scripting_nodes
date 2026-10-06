@@ -22,9 +22,11 @@ tags = ["Development", "Node"]
 wheels = [
   "./wheels/autopep8-2.3.2-py2.py3-none-any.whl",
   "./wheels/pycodestyle-2.14.0-py2.py3-none-any.whl",
-  "./wheels/names_generator-0.2.0-py3-none-any.whl",
-  "./wheels/cmdkit-2.7.7-py3-none-any.whl",
 ]
+
+[permissions]
+files = "Writes the generated add-ons to the user scripts folder"
+network = "Optional local MCP server so AI assistants can edit node trees"
 
 [build]
 paths_exclude_pattern = [

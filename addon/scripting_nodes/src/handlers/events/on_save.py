@@ -1,8 +1,8 @@
-from ...features.node_tree.code_gen.generator import generate_addon
-from ...features.node_tree.code_gen.modules.modules import (
+from ...core.generator import generate_addon
+from ...core.modules.modules import (
     unregister_module,
 )
-from ...features.node_tree.code_gen.modules.persisted import (
+from ...core.modules.persisted import (
     track_module,
 )
 import addon_utils

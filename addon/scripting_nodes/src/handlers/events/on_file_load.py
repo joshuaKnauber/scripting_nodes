@@ -1,17 +1,17 @@
 from ..msgbus.node_tree_name import subscribe_to_name_change
-from names_generator import generate_name
-from ...features.node_tree.code_gen.modules.modules import (
+from ...lib.names import random_addon_name
+from ...core.modules.modules import (
     unregister_module,
 )
-from ...features.node_tree.code_gen.modules.persisted import (
+from ...core.modules.persisted import (
     get_persisted_modules,
     get_pending_removal,
     clear_pending_removal,
 )
-from ...features.node_tree.code_gen.file_management.clear_addon import (
+from ...core.files.clear_addon import (
     clear_module_files,
 )
-from ...lib.constants.paths import ADDON_FOLDER
+from ...lib.paths import ADDON_FOLDER
 from ..timers.node_tree_watcher import (
     register_node_tree_watcher,
 )
@@ -53,9 +53,7 @@ def on_file_load_post(dummy):
 
     # update name
     if bpy.context.scene.sna.addon.addon_name == "My Addon":
-        bpy.context.scene.sna.addon.addon_name = (
-            generate_name(style="capital") + " Addon"
-        )
+        bpy.context.scene.sna.addon.addon_name = random_addon_name()
 
     # Enable all persisted modules
     for module in get_persisted_modules():

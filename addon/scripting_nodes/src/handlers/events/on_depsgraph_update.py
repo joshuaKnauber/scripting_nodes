@@ -1,4 +1,4 @@
-from ...lib.utils.node_tree.scripting_node_trees import (
+from ...lib.trees import (
     scripting_node_trees,
 )
 import bpy

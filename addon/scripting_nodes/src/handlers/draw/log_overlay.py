@@ -7,7 +7,8 @@ import time
 
 from bpy.app.handlers import persistent
 
-from ...lib.editor.editor import is_sn_editor
+from ...lib import logger
+from ...node_tree.editor import is_sn_editor
 
 
 # Configuration
@@ -245,12 +246,14 @@ def register():
         _draw_overlay, (), "WINDOW", "POST_PIXEL"
     )
     bpy.app.driver_namespace[OVERLAY_LOG_KEY] = add_log
+    logger.add_listener(add_log)
     if _rebind_overlay_hook not in bpy.app.handlers.load_post:
         bpy.app.handlers.load_post.append(_rebind_overlay_hook)
 
 
 def unregister():
     global _draw_handler
+    logger.remove_listener(add_log)
     _stop_timer()
     if _draw_handler:
         bpy.types.SpaceNodeEditor.draw_handler_remove(_draw_handler, "WINDOW")
