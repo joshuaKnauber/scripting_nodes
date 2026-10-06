@@ -17,6 +17,11 @@ import bpy
 
 PREVIOUS_LINKS = {}
 
+# False until every class is registered and again during unregister. Blender
+# calls NodeTree.update() on existing trees while node/socket classes are
+# (un)registered one by one; touching them in that window crashes Blender.
+_READY = False
+
 
 class ScriptingNodeTree(bpy.types.NodeTree):
     bl_idname = "ScriptingNodeTree"
@@ -64,7 +69,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
         self.initialized = True
 
     def update(self):
-        if self.pause_updates:
+        if not _READY or self.pause_updates:
             return
         self._mute_incompatible_links()
         self._remove_cyclic_links()
@@ -269,3 +274,14 @@ class ScriptingNodeTree(bpy.types.NodeTree):
                     node.socket_idname = connected.bl_idname
                 elif not connected and node.socket_idname != "ScriptingDataSocket":
                     node.socket_idname = "ScriptingDataSocket"
+
+
+def register():
+    global _READY
+    _READY = True
+
+
+def unregister():
+    global _READY
+    _READY = False
+    PREVIOUS_LINKS.clear()

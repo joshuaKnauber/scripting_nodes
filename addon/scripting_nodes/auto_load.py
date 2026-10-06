@@ -5,6 +5,7 @@ import typing
 import inspect
 import pkgutil
 import importlib
+import traceback
 from pathlib import Path
 
 __all__ = (
@@ -29,14 +30,7 @@ def init():
 
 def register():
     for cls in ordered_classes:
-        isContextMenu = getattr(cls, "__name__", None) == "WM_MT_button_context"
-        if not isContextMenu or (
-            isContextMenu and getattr(bpy.types, "WM_MT_button_context", None) == None
-        ):
-            try:
-                bpy.utils.register_class(cls)
-            except:
-                pass
+        bpy.utils.register_class(cls)
 
     for module in modules:
         if module.__name__ == __name__:
@@ -46,19 +40,33 @@ def register():
 
 
 def unregister():
-    for cls in reversed(ordered_classes):
-        isContextMenu = getattr(cls, "__name__", None) == "WM_MT_button_context"
-        if not isContextMenu:
-            try:
-                bpy.utils.unregister_class(cls)
-            except:
-                pass
-
-    for module in modules:
+    # exact reverse of register: module hooks first, then classes
+    for module in reversed(modules):
         if module.__name__ == __name__:
             continue
         if hasattr(module, "unregister"):
-            module.unregister()
+            try:
+                module.unregister()
+            except Exception:
+                traceback.print_exc()
+
+    for cls in reversed(ordered_classes):
+        if getattr(cls, "is_registered", False):
+            try:
+                bpy.utils.unregister_class(cls)
+            except Exception:
+                traceback.print_exc()
+
+
+def purge_modules():
+    """Drop our submodules from sys.modules so the next init() re-imports them."""
+    global modules, ordered_classes
+    prefix = _package_name + "."
+    for name in list(sys.modules):
+        if name.startswith(prefix) and name != __name__:
+            del sys.modules[name]
+    modules = None
+    ordered_classes = None
 
 
 # Import modules
@@ -191,16 +199,37 @@ def get_register_base_types():
 #################################################
 
 
+_BASE_PRIORITY = (
+    "PropertyGroup",
+    "NodeTree",
+    "NodeSocket",
+    "Node",
+)
+
+
+def _sort_key(cls):
+    """Deterministic order: data types and trees/sockets before nodes."""
+    for i, name in enumerate(_BASE_PRIORITY):
+        if issubclass(cls, getattr(bpy.types, name)):
+            return (i, cls.__module__, cls.__name__)
+    return (len(_BASE_PRIORITY), cls.__module__, cls.__name__)
+
+
 def toposort(deps_dict):
     sorted_list = []
     sorted_values = set()
     while len(deps_dict) > 0:
         unsorted = []
+        ready = []
         for value, deps in deps_dict.items():
             if len(deps) == 0:
-                sorted_list.append(value)
-                sorted_values.add(value)
+                ready.append(value)
             else:
                 unsorted.append(value)
+        if not ready:
+            raise RuntimeError(f"Cyclic register dependencies: {list(deps_dict)}")
+        ready.sort(key=_sort_key)
+        sorted_list.extend(ready)
+        sorted_values.update(ready)
         deps_dict = {value: deps_dict[value] - sorted_values for value in unsorted}
     return sorted_list
