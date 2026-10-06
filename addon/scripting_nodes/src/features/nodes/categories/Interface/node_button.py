@@ -4,6 +4,7 @@ Targets either an SN Operator node or a built-in Blender operator. Operator
 properties become input sockets and are emitted as `op.prop = value`
 assignments after the `layout.operator(...)` call.
 """
+
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
 from ..._operator_call import OperatorCallMixin

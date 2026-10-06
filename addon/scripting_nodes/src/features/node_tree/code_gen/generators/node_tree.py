@@ -1,6 +1,5 @@
 from .....lib.utils.node_tree.scripting_node_trees import sn_nodes
 from .....lib.utils.code.format import normalize_indents
-import bpy
 
 
 def _find_group_interface(ntree):
@@ -33,9 +32,7 @@ def _emit_group_function(ntree):
     group_input, group_output = _find_group_interface(ntree)
 
     # Parameters from the Group Input node's items list
-    params = (
-        [item["name"] for item in group_input.get_items()] if group_input else []
-    )
+    params = [item["name"] for item in group_input.get_items()] if group_input else []
     params.append("_locals=None")
 
     # Body: traverse the program chain from Group Input's "Function" output
@@ -56,7 +53,7 @@ def _emit_group_function(ntree):
         if len(returns) == 1:
             return_line = f"return {returns[0]}"
         elif len(returns) > 1:
-            return_line = f"return (" + ", ".join(returns) + ")"
+            return_line = "return (" + ", ".join(returns) + ")"
 
     lines = [f"def {ntree.module_name}({', '.join(params)}):"]
     # Pull caller's method-scope names into our locals so bare references
@@ -114,7 +111,7 @@ def code_gen_node_tree(ntree):
 
     # add register function
     if register_code:
-        code += f"\ndef register():\n"
+        code += "\ndef register():\n"
         for line in register_code.strip().split("\n"):
             code += f"    {line}\n"
     else:
@@ -122,7 +119,7 @@ def code_gen_node_tree(ntree):
 
     # add unregister function
     if unregister_code:
-        code += f"\ndef unregister():\n"
+        code += "\ndef unregister():\n"
         for line in unregister_code.strip().split("\n"):
             code += f"    {line}\n"
     else:

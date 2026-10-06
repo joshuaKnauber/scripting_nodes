@@ -57,9 +57,7 @@ class BlendDataModeMixin:
                         self.blend_data_path != "" and not self.needs_data_input
                     )
                 else:
-                    data_socket.hide = (
-                        self._class_body_data_code() is not None
-                    )
+                    data_socket.hide = self._class_body_data_code() is not None
         self._generate()
 
     def setup_from_path(self, path: str, prop_name: str, needs_input: bool):

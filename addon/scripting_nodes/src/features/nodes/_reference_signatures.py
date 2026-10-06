@@ -4,7 +4,6 @@ requires editing one place to widen every consumer that accepts "any
 property" or "any variable".
 """
 
-
 VARIABLE_NODES = (
     "SNA_Node_GlobalVariable",
     "SNA_Node_LocalVariable",

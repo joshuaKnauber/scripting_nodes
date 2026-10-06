@@ -5,6 +5,7 @@ a built-in Blender operator (chosen from a searchable enum). Operator
 properties become input sockets that get reconciled when the chosen
 operator changes; their values are emitted as kwargs to the bpy.ops call.
 """
+
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
 from ..._operator_call import (
@@ -14,9 +15,7 @@ from ..._operator_call import (
 import bpy
 
 
-class SNA_Node_RunOperator(
-    OperatorCallMixin, ScriptingBaseNode, bpy.types.Node
-):
+class SNA_Node_RunOperator(OperatorCallMixin, ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_RunOperator"
     bl_label = "Run Operator"
 

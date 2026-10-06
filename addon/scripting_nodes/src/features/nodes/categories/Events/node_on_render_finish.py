@@ -37,8 +37,12 @@ class SNA_Node_OnRenderFinish(ScriptingBaseNode, bpy.types.Node):
         self.code_module = f"""
 @persistent
 def {self.handler_name}(dummy):
-    {indent(output_code, 1) if output_code.strip() else 'pass'}
+    {indent(output_code, 1) if output_code.strip() else "pass"}
 """
 
-        self.code_register = f"bpy.app.handlers.{self.action}.append({self.handler_name})"
-        self.code_unregister = f"bpy.app.handlers.{self.action}.remove({self.handler_name})"
+        self.code_register = (
+            f"bpy.app.handlers.{self.action}.append({self.handler_name})"
+        )
+        self.code_unregister = (
+            f"bpy.app.handlers.{self.action}.remove({self.handler_name})"
+        )

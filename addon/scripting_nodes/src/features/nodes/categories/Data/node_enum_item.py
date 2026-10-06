@@ -41,6 +41,6 @@ class SNA_Node_EnumItem(ScriptingBaseNode, bpy.types.Node):
         identifier = re.sub(r"_+", "_", identifier).strip("_")
         if not identifier:
             identifier = "OPTION"
-        self.outputs["Item"].code = (
-            f'("{identifier}", "{self.name_prop}", "{self.description}")'
-        )
+        self.outputs[
+            "Item"
+        ].code = f'("{identifier}", "{self.name_prop}", "{self.description}")'

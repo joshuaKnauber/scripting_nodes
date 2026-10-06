@@ -110,7 +110,7 @@ def build(version: str = None):
     if result.returncode == 0:
         output_file = os.path.join(builds_dir, f"scripting_nodes-{version}.zip")
         print()
-        print(f"Build successful!")
+        print("Build successful!")
         print(f"Output: {output_file}")
     else:
         print()
@@ -138,7 +138,7 @@ def validate():
         "validate",
     ]
 
-    print(f"Validating extension manifest...")
+    print("Validating extension manifest...")
     result = subprocess.run(cmd, cwd=source_dir)
 
     if result.returncode == 0:

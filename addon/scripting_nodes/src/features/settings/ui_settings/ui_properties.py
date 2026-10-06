@@ -2,7 +2,6 @@ import bpy
 
 
 class SNA_UISettings(bpy.types.PropertyGroup):
-
     def update_active_ntree_index(self, context):
         if (
             self.active_ntree_index < len(bpy.data.node_groups)
@@ -24,6 +23,7 @@ class SNA_UISettings(bpy.types.PropertyGroup):
     # Data panel - active indices for filtered lists
     def update_active_property_index(self, context):
         from ..settings_properties import DATA_PANEL_PROPERTIES_ATTR
+
         coll = getattr(context.scene.sna, DATA_PANEL_PROPERTIES_ATTR)
         if 0 <= self.active_property_index < len(coll):
             ref = coll[self.active_property_index]
@@ -32,6 +32,7 @@ class SNA_UISettings(bpy.types.PropertyGroup):
 
     def update_active_variable_index(self, context):
         from ..settings_properties import DATA_PANEL_VARIABLES_ATTR
+
         coll = getattr(context.scene.sna, DATA_PANEL_VARIABLES_ATTR)
         if 0 <= self.active_variable_index < len(coll):
             ref = coll[self.active_variable_index]

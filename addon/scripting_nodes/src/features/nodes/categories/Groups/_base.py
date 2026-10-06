@@ -1,9 +1,9 @@
 """Shared base for Group Input / Group Output nodes - both store a list of
 (name, socket_type) items as JSON, and rebuild dynamic sockets to match."""
+
 import json
 import bpy
 
-from ...base_node import ScriptingBaseNode
 from ._interface import slugify
 
 
@@ -66,6 +66,7 @@ class GroupInterfaceMixin:
             scripting_node_trees,
             sn_nodes,
         )
+
         target_tree = self.node_tree
         for ntree in scripting_node_trees():
             for node in sn_nodes(ntree):
@@ -107,7 +108,4 @@ class GroupInterfaceMixin:
 
 
 def _poll_group_tree(cls, ntree):
-    return (
-        ntree.bl_idname == "ScriptingNodeTree"
-        and getattr(ntree, "is_group", False)
-    )
+    return ntree.bl_idname == "ScriptingNodeTree" and getattr(ntree, "is_group", False)

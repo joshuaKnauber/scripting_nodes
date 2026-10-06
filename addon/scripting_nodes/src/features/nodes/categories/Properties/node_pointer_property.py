@@ -211,7 +211,13 @@ class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
 
     pointer_source: bpy.props.EnumProperty(
         items=[
-            ("BLENDER", "Blender Type", "Reference a built-in Blender data type", "BLENDER", 0),
+            (
+                "BLENDER",
+                "Blender Type",
+                "Reference a built-in Blender data type",
+                "BLENDER",
+                0,
+            ),
             (
                 "PROPERTY_GROUP",
                 "Property Group",
@@ -345,9 +351,7 @@ class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
         if not type_expr:
             return ""
         return (
-            f"{self.prop_name}: bpy.props.PointerProperty("
-            + ", ".join(prop_args)
-            + ")"
+            f"{self.prop_name}: bpy.props.PointerProperty(" + ", ".join(prop_args) + ")"
         )
 
     def generate(self):

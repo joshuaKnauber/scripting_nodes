@@ -73,7 +73,9 @@ def flush():
 
 def tree_source(tree):
     """Generated Python source for a single tree module."""
-    return sn("src.features.node_tree.code_gen.generators.node_tree").code_gen_node_tree(tree)
+    return sn(
+        "src.features.node_tree.code_gen.generators.node_tree"
+    ).code_gen_node_tree(tree)
 
 
 def addon_files(build=False):

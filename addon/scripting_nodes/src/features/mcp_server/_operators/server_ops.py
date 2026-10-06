@@ -19,10 +19,7 @@ def _snippet_claude_code(port: int) -> str:
 
 def _snippet_codex(port: int) -> str:
     # ~/.codex/config.toml stanza. Codex reads HTTP MCP servers via the `url` key.
-    return (
-        f"[mcp_servers.{SERVER_NAME}]\n"
-        f'url = "{_server_url(port)}"\n'
-    )
+    return f'[mcp_servers.{SERVER_NAME}]\nurl = "{_server_url(port)}"\n'
 
 
 def _snippet_json(port: int) -> str:

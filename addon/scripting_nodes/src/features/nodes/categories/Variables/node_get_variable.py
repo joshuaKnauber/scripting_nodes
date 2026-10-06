@@ -39,7 +39,5 @@ class SNA_Node_GetVariable(ScriptingBaseNode, bpy.types.Node):
             return
         getter = f"get_var_{target.id}"
         if self.reference_is_cross_tree("var"):
-            self.code_imports = (
-                f"from .{target.id_data.module_name} import {getter}"
-            )
+            self.code_imports = f"from .{target.id_data.module_name} import {getter}"
         self.outputs[1].code = f"{getter}()"

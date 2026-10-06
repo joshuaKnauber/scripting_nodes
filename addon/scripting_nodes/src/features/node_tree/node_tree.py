@@ -215,6 +215,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
             SIGNATURE_INDEX,
             iter_reference_collections,
         )
+
         if not SIGNATURE_INDEX:
             return
 

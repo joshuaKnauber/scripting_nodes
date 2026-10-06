@@ -5,6 +5,7 @@ the current one — typically targeting a specific viewport area/region. Only
 the override-kwargs whose input sockets are linked are passed; unconnected
 keys are left at the current context's defaults.
 """
+
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
 import bpy

@@ -1,6 +1,5 @@
 from ....sockets.socket_types import DATA_SOCKET_ENUM_ITEMS
 from .....lib.utils.sockets.modify import update_socket_type
-from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
 import bpy
 

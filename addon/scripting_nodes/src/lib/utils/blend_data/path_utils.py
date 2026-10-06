@@ -9,7 +9,7 @@ This module provides common functions for:
 """
 
 import re
-from typing import List, Optional
+from typing import List
 
 
 def format_name(text: str) -> str:

@@ -1,7 +1,6 @@
 from ...base_node import ScriptingBaseNode
 from ..._reference_signatures import PROPERTY_GROUP_NODES
 from .....lib.utils.node_tree.scripting_node_trees import node_by_id
-from .....lib.utils.code.format import indent
 from ._class_body_support import (
     CLASS_BODY_REGISTER_ON_ITEMS,
     is_class_body_target,

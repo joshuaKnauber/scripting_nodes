@@ -14,7 +14,11 @@ _cached_locations = None
 
 def _discover_panel_attributes():
     """Discover all panel attributes from registered panels and cache them."""
-    global _cached_space_types, _cached_region_types, _cached_context_types, _cached_locations
+    global \
+        _cached_space_types, \
+        _cached_region_types, \
+        _cached_context_types, \
+        _cached_locations
 
     space_types = {}
     region_types = {}
@@ -117,7 +121,11 @@ def get_panel_locations():
 
 def invalidate_cache():
     """Invalidate the cached panel attributes (call if panels are registered/unregistered)."""
-    global _cached_space_types, _cached_region_types, _cached_context_types, _cached_locations
+    global \
+        _cached_space_types, \
+        _cached_region_types, \
+        _cached_context_types, \
+        _cached_locations
     _cached_space_types = None
     _cached_region_types = None
     _cached_context_types = None

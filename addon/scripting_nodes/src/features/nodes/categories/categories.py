@@ -1,7 +1,5 @@
 import inspect
 from ...node_tree.node_tree import ScriptingNodeTree
-import nodeitems_utils
-from nodeitems_utils import NodeCategory, NodeItem
 import os
 import bpy
 
@@ -44,10 +42,10 @@ def get_node_categories():
                     node_path = dirs[dirs.index("categories") + 1 :]
                     parent = node_categories
                     for dir in node_path:
-                        if not dir in parent:
+                        if dir not in parent:
                             parent[dir] = {}
                         parent = parent[dir]
-                    if not "nodes" in parent:
+                    if "nodes" not in parent:
                         parent["nodes"] = []
                     parent["nodes"].append(cls)
 

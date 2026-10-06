@@ -6,9 +6,7 @@ from ..Interface.blend_data_mixin import BlendDataModeMixin
 import bpy
 
 
-class SNA_Node_GetProperty(
-    BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node
-):
+class SNA_Node_GetProperty(BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_GetProperty"
     bl_label = "Get Property"
     sn_reference_properties = {"prop": PROPERTY_NODES}

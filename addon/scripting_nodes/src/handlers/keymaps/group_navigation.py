@@ -8,6 +8,7 @@ manipulate the editor's tree path directly.
 The path push/pop is exactly what Blender's own navigation does - we just
 control the poll ourselves.
 """
+
 import bpy
 
 

@@ -18,7 +18,6 @@ import bpy
 
 
 class ScriptingBaseNode:
-
     @classmethod
     def poll(cls, ntree):
         """Checks if the node is valid"""
@@ -157,6 +156,7 @@ class ScriptingBaseNode:
             collections_for_bl_idname,
             signature_key,
         )
+
         new_ref_name = f"{self.name} ({self.node_tree.name})"
         for coll in collections_for_bl_idname(self.bl_idname):
             for ref in coll:
@@ -204,6 +204,7 @@ class ScriptingBaseNode:
     def _ref_collection_attr(cls, prop_name):
         """scene.sna attribute name of the collection backing this ref-property."""
         from ..settings.settings_properties import signature_key
+
         return signature_key(cls.sn_reference_properties[prop_name])
 
     def resolve_reference(self, prop_name):

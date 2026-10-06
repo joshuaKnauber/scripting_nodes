@@ -51,10 +51,10 @@ class SNA_Node_Color(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         if self.use_alpha:
-            self.outputs[0].code = (
-                f"({self.rgba_value[0]}, {self.rgba_value[1]}, {self.rgba_value[2]}, {self.rgba_value[3]})"
-            )
+            self.outputs[
+                0
+            ].code = f"({self.rgba_value[0]}, {self.rgba_value[1]}, {self.rgba_value[2]}, {self.rgba_value[3]})"
         else:
-            self.outputs[0].code = (
-                f"({self.rgb_value[0]}, {self.rgb_value[1]}, {self.rgb_value[2]})"
-            )
+            self.outputs[
+                0
+            ].code = f"({self.rgb_value[0]}, {self.rgb_value[1]}, {self.rgb_value[2]})"

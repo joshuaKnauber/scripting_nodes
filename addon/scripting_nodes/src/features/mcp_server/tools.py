@@ -384,9 +384,7 @@ def _coerce_reference_value(node, prop_name, value):
                 "{'sn_id': '<target node id>'}"
             )
         if coll is None:
-            raise ValueError(
-                f"Signature collection for {prop_name!r} is unavailable"
-            )
+            raise ValueError(f"Signature collection for {prop_name!r} is unavailable")
         for entry in coll:
             if entry.node_id == sn_id:
                 return entry.name
@@ -564,7 +562,11 @@ def resolve_node_reference(node_id: str, prop_name: str = None):
     ref_props = getattr(node, "sn_reference_properties", {}) or {}
     keys = [prop_name] if prop_name is not None else list(ref_props.keys())
     return {
-        "node": {"sn_id": node.id, "tree_name": node.id_data.name, "bl_idname": node.bl_idname},
+        "node": {
+            "sn_id": node.id,
+            "tree_name": node.id_data.name,
+            "bl_idname": node.bl_idname,
+        },
         "references": [_resolve_one(node, k) for k in keys],
     }
 
@@ -629,7 +631,7 @@ def read_script_content(
                 content = tb.as_string()
         else:
             source = "external"
-            filepath = (getattr(node, "filepath", "") or "")
+            filepath = getattr(node, "filepath", "") or ""
             ref = filepath
             if not filepath:
                 note = "Script node has no filepath assigned"
@@ -830,17 +832,13 @@ def create_node(
                 raise ValueError(
                     f"Input socket {sock_name!r} ({sock.bl_idname}) has no settable `value`"
                 )
-            sock.value = _coerce_prop_value(
-                sock.bl_rna.properties["value"], raw
-            )
+            sock.value = _coerce_prop_value(sock.bl_rna.properties["value"], raw)
     return {"tree_name": ntree.name, "node": _node_summary(node)}
 
 
 def delete_node(tree_name: str, node_id: str):
     ntree = _find_tree(tree_name)
-    target = next(
-        (n for n in ntree.nodes if getattr(n, "id", "") == node_id), None
-    )
+    target = next((n for n in ntree.nodes if getattr(n, "id", "") == node_id), None)
     if target is None:
         raise ValueError(f"No node with id {node_id!r} in tree {tree_name!r}")
     info = {"sn_id": node_id, "name": target.name, "bl_idname": target.bl_idname}
@@ -1225,9 +1223,7 @@ TOOLS = {
                     "items": {"type": "number"},
                     "minItems": 2,
                     "maxItems": 2,
-                    "description": (
-                        "[x, y] in node-editor units. Defaults to [0, 0]."
-                    ),
+                    "description": ("[x, y] in node-editor units. Defaults to [0, 0]."),
                 },
                 "socket_values": {
                     "type": "object",

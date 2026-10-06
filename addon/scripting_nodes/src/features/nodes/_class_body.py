@@ -11,11 +11,10 @@ container): matches Blender's mental model (properties belong to a class),
 keeps all of an operator's interface visible on one node, and reuse of a
 single property across operators comes for free.
 """
+
 from typing import Tuple
 from ...lib.utils.node_tree.scripting_node_trees import (
     node_by_id,
-    scripting_node_trees,
-    sn_nodes,
 )
 import bpy
 
@@ -127,22 +126,19 @@ class ClassBodyContainerMixin:
     # concrete container.
     sn_class_body_signature: Tuple[str, ...] = ()
 
-    class_body_properties: bpy.props.CollectionProperty(
-        type=SNA_ClassBodyPropertyEntry
-    )
+    class_body_properties: bpy.props.CollectionProperty(type=SNA_ClassBodyPropertyEntry)
 
     @classmethod
     def _class_body_collection_attr(cls):
         from ..settings.settings_properties import signature_key
+
         return signature_key(cls.sn_class_body_signature)
 
     def draw_class_body_properties(self, layout, label="Properties"):
         """Draw the property list with add/remove buttons + per-row dropdowns."""
         header = layout.row(align=True)
         header.label(text=label)
-        add_op = header.operator(
-            "sna.add_class_body_property", text="", icon="ADD"
-        )
+        add_op = header.operator("sna.add_class_body_property", text="", icon="ADD")
         add_op.node_id = self.id
 
         if len(self.class_body_properties) == 0:
@@ -160,9 +156,7 @@ class ClassBodyContainerMixin:
                 text="",
                 icon="DOT",
             )
-            rm = row.operator(
-                "sna.remove_class_body_property", text="", icon="X"
-            )
+            rm = row.operator("sna.remove_class_body_property", text="", icon="X")
             rm.node_id = self.id
             rm.index = i
 

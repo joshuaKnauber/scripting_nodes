@@ -1,4 +1,5 @@
 """Operators that create / manage group trees from the UI."""
+
 import bpy
 
 
@@ -52,11 +53,7 @@ class SNA_OT_NewGroup(bpy.types.Operator):
 
         # Switch the editor's path so the user lands inside the new group
         space = context.space_data
-        if (
-            space
-            and space.type == "NODE_EDITOR"
-            and hasattr(space, "path")
-        ):
+        if space and space.type == "NODE_EDITOR" and hasattr(space, "path"):
             space.path.append(new_tree, node=target_node)
 
         self.report({"INFO"}, f"Created group '{new_tree.name}'")

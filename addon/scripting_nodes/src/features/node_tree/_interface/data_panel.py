@@ -211,6 +211,7 @@ class SNA_PT_DataProperties(bpy.types.Panel):
 
     def draw(self, context):
         from ...settings.settings_properties import DATA_PANEL_PROPERTIES_ATTR
+
         layout = self.layout
         sna = context.scene.sna
 
@@ -250,6 +251,7 @@ class SNA_PT_DataVariables(bpy.types.Panel):
 
     def draw(self, context):
         from ...settings.settings_properties import DATA_PANEL_VARIABLES_ATTR
+
         layout = self.layout
         sna = context.scene.sna
 
@@ -347,10 +349,7 @@ class SNA_UL_FunctionsList(bpy.types.UIList):
         trees = getattr(data, propname)
         flt_flags = [self.bitflag_filter_item] * len(trees)
         for i, tree in enumerate(trees):
-            if not (
-                getattr(tree, "is_sn", False)
-                and getattr(tree, "is_group", False)
-            ):
+            if not (getattr(tree, "is_sn", False) and getattr(tree, "is_group", False)):
                 flt_flags[i] = 0
         return flt_flags, []
 

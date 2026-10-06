@@ -7,7 +7,6 @@ import shutil
 from threading import Thread
 import time
 import sys
-import tempfile
 
 
 class BlenderLauncher:

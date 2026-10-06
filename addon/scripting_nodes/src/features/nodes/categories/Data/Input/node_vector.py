@@ -49,10 +49,10 @@ class SNA_Node_Vector(ScriptingBaseNode, bpy.types.Node):
         if self.dimension == "2":
             self.outputs[0].code = f"({self.vector[0]}, {self.vector[1]})"
         elif self.dimension == "3":
-            self.outputs[0].code = (
-                f"({self.vector[0]}, {self.vector[1]}, {self.vector[2]})"
-            )
+            self.outputs[
+                0
+            ].code = f"({self.vector[0]}, {self.vector[1]}, {self.vector[2]})"
         else:
-            self.outputs[0].code = (
-                f"({self.vector[0]}, {self.vector[1]}, {self.vector[2]}, {self.vector[3]})"
-            )
+            self.outputs[
+                0
+            ].code = f"({self.vector[0]}, {self.vector[1]}, {self.vector[2]}, {self.vector[3]})"

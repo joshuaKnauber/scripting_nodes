@@ -4,6 +4,7 @@ Subclasses bpy.types.NodeCustomGroup to inherit Tab-to-enter group navigation
 and the `contains_tree` recursion check. Sockets are managed manually because
 SN uses its own custom socket types instead of NodeTreeInterface.
 """
+
 import bpy
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
@@ -21,10 +22,7 @@ def _poll_group_tree_target(self, tree):
     explicit assignments, so without this filter the dropdown shows every
     ScriptingNodeTree (addon trees and groups alike).
     """
-    return (
-        tree.bl_idname == "ScriptingNodeTree"
-        and getattr(tree, "is_group", False)
-    )
+    return tree.bl_idname == "ScriptingNodeTree" and getattr(tree, "is_group", False)
 
 
 class SNA_Node_Group(bpy.types.NodeCustomGroup, ScriptingBaseNode):
@@ -240,9 +238,7 @@ class SNA_Node_Group(bpy.types.NodeCustomGroup, ScriptingBaseNode):
                     self.outputs[1].code = ret_var
                 stmt = f"{ret_var} = {call_expr}"
             else:
-                ret_vars = [
-                    f"_group_ret_{self.id}_{i}" for i in range(return_count)
-                ]
+                ret_vars = [f"_group_ret_{self.id}_{i}" for i in range(return_count)]
                 for i, name in enumerate(ret_vars):
                     if i + 1 < len(self.outputs):
                         self.outputs[i + 1].code = name

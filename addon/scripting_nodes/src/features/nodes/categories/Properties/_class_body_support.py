@@ -7,7 +7,6 @@ emits no code_register/unregister; instead it exposes a
 to inject the property into its emitted class.
 """
 
-
 # Append these to each property node's `register_on` enum items list. Keeping
 # the entries here keeps the enum definitions in property nodes mostly
 # unchanged while ensuring all class-body targets stay in sync.

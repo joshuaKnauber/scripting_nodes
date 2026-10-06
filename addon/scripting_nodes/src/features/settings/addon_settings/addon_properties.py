@@ -21,7 +21,6 @@ def _sanitize_identifier(raw):
 
 
 class SNA_AddonSettings(bpy.types.PropertyGroup):
-
     def update_is_dirty(self, context):
         self.is_dirty = True
 

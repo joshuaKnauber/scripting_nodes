@@ -11,8 +11,8 @@ Other nodes (Collection Property, Pointer Property) reference this node
 through the standard ref system; they read `class_name` to wire up
 `type=<class>` in their bpy.props.* calls.
 """
+
 import re
-from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
 from ..._class_body import ClassBodyContainerMixin
 from ..._reference_signatures import PROPERTY_NODES

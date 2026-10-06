@@ -73,9 +73,7 @@ class SNA_OT_OperatorNodeSettings(bpy.types.Operator):
         return context.window_manager.invoke_popup(self, width=220)
 
 
-class SNA_Node_Operator(
-    ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.Node
-):
+class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Operator"
     bl_label = "Operator"
     sn_options = {"ROOT_NODE"}

@@ -13,4 +13,4 @@ class SNA_Node_None(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingDataSocket", label="None")
 
     def generate(self):
-        self.outputs[0].code = f"None"
+        self.outputs[0].code = "None"

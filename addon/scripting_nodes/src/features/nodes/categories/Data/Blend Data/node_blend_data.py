@@ -1,6 +1,5 @@
 from ....base_node import ScriptingBaseNode
 from ......lib.utils.blend_data.path_utils import (
-    format_name,
     get_label_from_path,
     get_socket_name_from_path,
 )
@@ -207,7 +206,7 @@ class SNA_OT_SetupBlendDataNode(bpy.types.Operator):
             return {"CANCELLED"}
 
         # Import the parser
-        from .paste_blend_path import parse_blend_data_path, _infer_output_type
+        from .paste_blend_path import parse_blend_data_path
 
         segments = parse_blend_data_path(clipboard)
 

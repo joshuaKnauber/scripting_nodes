@@ -11,3 +11,7 @@ docs/node_modules/
 docs/build/
 docs/.source/
 docs/.react-router/
+
+# Tooling
+.ruff_cache/
+.DS_Store

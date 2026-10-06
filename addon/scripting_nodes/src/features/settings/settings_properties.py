@@ -62,7 +62,6 @@ def _collect_signatures():
 
 
 class SNA_Settings(bpy.types.PropertyGroup):
-
     addon: bpy.props.PointerProperty(type=SNA_AddonSettings)
 
     dev: bpy.props.PointerProperty(type=SNA_DevSettings)

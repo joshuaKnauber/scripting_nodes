@@ -1,10 +1,9 @@
-from .....lib.utils.logger import log, log_if
+from .....lib.utils.logger import log
 from .....lib.constants.paths import ADDON_FOLDER
 import addon_utils
 import importlib
 import sys
 import bpy
-import time
 import os
 import types
 
@@ -62,7 +61,10 @@ def reload_tree_module(addon_module_name: str, tree_module_name: str):
         try:
             new_mod = importlib.import_module(full_name)
         except Exception as e:
-            log("ERROR", f"reload_tree_module: initial import failed for {full_name}: {e}")
+            log(
+                "ERROR",
+                f"reload_tree_module: initial import failed for {full_name}: {e}",
+            )
             return
         for cls in _classes_in_module(new_mod):
             try:
@@ -73,7 +75,10 @@ def reload_tree_module(addon_module_name: str, tree_module_name: str):
             try:
                 new_mod.register()
             except Exception as e:
-                log("WARNING", f"reload_tree_module: register failed for {full_name}: {e}")
+                log(
+                    "WARNING",
+                    f"reload_tree_module: register failed for {full_name}: {e}",
+                )
         return
 
     # 1. unregister old classes
@@ -89,7 +94,9 @@ def reload_tree_module(addon_module_name: str, tree_module_name: str):
         try:
             old_mod.unregister()
         except Exception as e:
-            log("WARNING", f"reload_tree_module: unregister failed for {full_name}: {e}")
+            log(
+                "WARNING", f"reload_tree_module: unregister failed for {full_name}: {e}"
+            )
 
     # 3. snapshot for rebinding (exclude modules and dunders)
     old_attrs = {
@@ -124,12 +131,17 @@ def reload_tree_module(addon_module_name: str, tree_module_name: str):
         try:
             bpy.utils.register_class(cls)
         except Exception as e:
-            log("WARNING", f"reload_tree_module: register_class failed for {cls.__name__}: {e}")
+            log(
+                "WARNING",
+                f"reload_tree_module: register_class failed for {cls.__name__}: {e}",
+            )
     if hasattr(new_mod, "register"):
         try:
             new_mod.register()
         except Exception as e:
-            log("WARNING", f"reload_tree_module: register() failed for {full_name}: {e}")
+            log(
+                "WARNING", f"reload_tree_module: register() failed for {full_name}: {e}"
+            )
 
     # 7. rebind dependent sibling modules
     addon_pkg_prefix = f"{addon_module_name}.addon."

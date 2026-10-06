@@ -1,5 +1,6 @@
 """Operators shared by Group Input / Group Output nodes for managing their
 parameter / return-value lists."""
+
 import re
 import bpy
 

@@ -9,6 +9,7 @@ Only one Preferences node per tree makes sense (the generated addon has
 one preferences class), but we don't hard-enforce that - extra ones would
 just emit duplicate classes that fail registration.
 """
+
 from .....lib.utils.code.format import indent
 from ...base_node import ScriptingBaseNode
 from ..._class_body import ClassBodyContainerMixin
@@ -16,9 +17,7 @@ from ..._reference_signatures import PROPERTY_NODES
 import bpy
 
 
-class SNA_Node_Preferences(
-    ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.Node
-):
+class SNA_Node_Preferences(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Preferences"
     bl_label = "Preferences"
     sn_options = {"ROOT_NODE"}

@@ -295,9 +295,7 @@ class SNA_Node_EnumProperty(ScriptingBaseNode, bpy.types.Node):
             get_items_code = ""
         else:
             update_items_socket = self.outputs.get("Update Items")
-            has_update_items = (
-                update_items_socket and update_items_socket.is_linked
-            )
+            has_update_items = update_items_socket and update_items_socket.is_linked
             var_code = "[]"
             ref_target = self.resolve_reference("items_variable")
             if ref_target:
@@ -325,16 +323,10 @@ def get_items_{self.prop_name}(self, context):
 
     def class_body_annotation(self):
         prop_args, *_ = self._build_prop_args()
-        return (
-            f"{self.prop_name}: bpy.props.EnumProperty("
-            + ", ".join(prop_args)
-            + ")"
-        )
+        return f"{self.prop_name}: bpy.props.EnumProperty(" + ", ".join(prop_args) + ")"
 
     def generate(self):
-        prop_args, has_update, update_socket, get_items_code = (
-            self._build_prop_args()
-        )
+        prop_args, has_update, update_socket, get_items_code = self._build_prop_args()
         args_str = ",\n        ".join(prop_args)
 
         update_code = ""

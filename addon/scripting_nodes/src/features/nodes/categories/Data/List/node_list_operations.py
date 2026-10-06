@@ -149,7 +149,9 @@ class SNA_Node_ListGetItem(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         list_code = self.inputs["List"].eval("[]")
         index_code = self.inputs["Index"].eval("0")
-        self.outputs["Item"].code = (
+        self.outputs[
+            "Item"
+        ].code = (
             f"({list_code}[{index_code}] if len({list_code}) > {index_code} else None)"
         )
 
@@ -239,7 +241,9 @@ class SNA_Node_ListIndex(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         list_code = self.inputs["List"].eval("[]")
         item_code = self.inputs["Item"].eval("None")
-        self.outputs["Index"].code = (
+        self.outputs[
+            "Index"
+        ].code = (
             f"({list_code}.index({item_code}) if {item_code} in {list_code} else -1)"
         )
         self.outputs["Found"].code = f"({item_code} in {list_code})"

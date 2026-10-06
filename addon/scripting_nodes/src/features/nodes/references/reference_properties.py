@@ -7,7 +7,6 @@ import bpy
 
 
 class SNA_NodeReference(bpy.types.PropertyGroup):
-
     def get_name(self):
         return self["name"]
 

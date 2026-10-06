@@ -11,9 +11,7 @@ class LayoutSocket:
         if self.is_output:
             if self.layout:
                 return self.layout
-            if len(self.node.inputs) > 0 and hasattr(
-                self.node.inputs[0], "get_layout"
-            ):
+            if len(self.node.inputs) > 0 and hasattr(self.node.inputs[0], "get_layout"):
                 connected = from_socket(self.node.inputs[0])
                 if connected and hasattr(connected, "get_layout"):
                     return connected.get_layout()

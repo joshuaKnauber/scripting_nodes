@@ -1,4 +1,3 @@
-from email import header
 from .....lib.editor.editor import in_sn_tree
 import bpy
 

@@ -69,13 +69,17 @@ def _prop_spec(prop) -> Optional[Tuple[str, str, object, int, str]]:
         # String socket in enum-dropdown mode: identifier stored in `value`,
         # items list serialized into `enum_items_data` so the socket renders
         # a dropdown instead of a free text field.
-        items = [(item.identifier, item.name or item.identifier) for item in prop.enum_items]
+        items = [
+            (item.identifier, item.name or item.identifier) for item in prop.enum_items
+        ]
         return ("ScriptingStringSocket", str(prop.default), 0, encode_enum_items(items))
     # POINTER / COLLECTION fall through.
     return None
 
 
-def _apply_default(socket, idname: str, default, vector_dim: int, enum_data: str = "") -> None:
+def _apply_default(
+    socket, idname: str, default, vector_dim: int, enum_data: str = ""
+) -> None:
     """Set the socket's `value` to the operator-provided default. For enum
     props on a StringSocket, also seed `enum_items_data` so the socket
     renders as a dropdown."""
@@ -188,7 +192,9 @@ def _sn_operator_prop_specs(op_node) -> List[Tuple[str, str, object, int, str]]:
         if idname is None:
             continue
         default = _default_for_sn_property(prop_node, idname)
-        vector_dim = 3 if idname in {"ScriptingVectorSocket", "ScriptingColorSocket"} else 0
+        vector_dim = (
+            3 if idname in {"ScriptingVectorSocket", "ScriptingColorSocket"} else 0
+        )
         specs.append((name, idname, default, vector_dim, ""))
     return specs
 
@@ -271,7 +277,11 @@ def unregister():
 # only; Button takes its context from the UI.
 EXEC_CONTEXT_ITEMS = [
     ("EXEC_DEFAULT", "Exec Default", "Run execute() directly"),
-    ("INVOKE_DEFAULT", "Invoke Default", "Run invoke() then execute() (uses UI context)"),
+    (
+        "INVOKE_DEFAULT",
+        "Invoke Default",
+        "Run invoke() then execute() (uses UI context)",
+    ),
     ("EXEC_REGION_WIN", "Exec Region Win", "Run execute() in window region context"),
     ("INVOKE_REGION_WIN", "Invoke Region Win", "Run invoke() in window region context"),
     ("EXEC_AREA", "Exec Area", "Run execute() in area context"),
@@ -369,7 +379,9 @@ class OperatorCallMixin:
         # operator changed but a same-typed socket survived (e.g. another
         # operator with an `align` enum), the dropdown options need to
         # match the new operator's items.
-        for target_idx, (name, idname, default, vector_dim, enum_data) in enumerate(target):
+        for target_idx, (name, idname, default, vector_dim, enum_data) in enumerate(
+            target
+        ):
             existing = self.inputs.get(name)
             desired_idx = offset + target_idx
             if existing is None:
@@ -377,7 +389,10 @@ class OperatorCallMixin:
                 _apply_default(socket, idname, default, vector_dim, enum_data)
                 self.inputs.move(len(self.inputs) - 1, desired_idx)
             else:
-                if idname == "ScriptingStringSocket" and existing.enum_items_data != enum_data:
+                if (
+                    idname == "ScriptingStringSocket"
+                    and existing.enum_items_data != enum_data
+                ):
                     existing.enum_items_data = enum_data
                 current_idx = list(self.inputs).index(existing)
                 if current_idx != desired_idx:
@@ -385,7 +400,7 @@ class OperatorCallMixin:
 
     def iter_operator_arg_sockets(self):
         """Yield the dynamic op-arg sockets in declaration order."""
-        for socket in list(self.inputs)[self.operator_arg_offset:]:
+        for socket in list(self.inputs)[self.operator_arg_offset :]:
             yield socket
 
     def on_ref_change(self, node):

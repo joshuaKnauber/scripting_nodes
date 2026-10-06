@@ -5,7 +5,6 @@ Operator for indexing blend data properties.
 import bpy
 
 from ...blend_data import (
-    BlendDataIndex,
     build_blend_data_index,
     AREA_NAMES,
 )

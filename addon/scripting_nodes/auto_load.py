@@ -1,4 +1,3 @@
-import os
 import bpy
 import sys
 import typing

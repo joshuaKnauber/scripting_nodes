@@ -97,30 +97,38 @@ class SNA_Node_VectorMath(ScriptingBaseNode, bpy.types.Node):
         dim = int(self.dimension)
 
         if self.operation == "NORMALIZE":
-            self.outputs[0].code = (
-                f"tuple(v / math.sqrt(sum(x*x for x in {a})) for v in {a})"
-            )
+            self.outputs[
+                0
+            ].code = f"tuple(v / math.sqrt(sum(x*x for x in {a})) for v in {a})"
 
         elif self.operation == "LENGTH":
             self.outputs[0].code = f"math.sqrt(sum(x*x for x in {a}))"
 
         elif self.operation == "ADD":
-            self.outputs[0].code = (
+            self.outputs[
+                0
+            ].code = (
                 f"tuple({a}[i] + {self.inputs['B'].eval()}[i] for i in range({dim}))"
             )
 
         elif self.operation == "SUBTRACT":
-            self.outputs[0].code = (
+            self.outputs[
+                0
+            ].code = (
                 f"tuple({a}[i] - {self.inputs['B'].eval()}[i] for i in range({dim}))"
             )
 
         elif self.operation == "MULTIPLY":
-            self.outputs[0].code = (
+            self.outputs[
+                0
+            ].code = (
                 f"tuple({a}[i] * {self.inputs['B'].eval()}[i] for i in range({dim}))"
             )
 
         elif self.operation == "DIVIDE":
-            self.outputs[0].code = (
+            self.outputs[
+                0
+            ].code = (
                 f"tuple({a}[i] / {self.inputs['B'].eval()}[i] for i in range({dim}))"
             )
 
@@ -133,12 +141,12 @@ class SNA_Node_VectorMath(ScriptingBaseNode, bpy.types.Node):
             )
 
         elif self.operation == "DOT":
-            self.outputs[0].code = (
-                f"sum({a}[i] * {self.inputs['B'].eval()}[i] for i in range({dim}))"
-            )
+            self.outputs[
+                0
+            ].code = f"sum({a}[i] * {self.inputs['B'].eval()}[i] for i in range({dim}))"
 
         elif self.operation == "DISTANCE":
             b = self.inputs["B"].eval()
-            self.outputs[0].code = (
-                f"math.sqrt(sum(({a}[i] - {b}[i])**2 for i in range({dim})))"
-            )
+            self.outputs[
+                0
+            ].code = f"math.sqrt(sum(({a}[i] - {b}[i])**2 for i in range({dim})))"

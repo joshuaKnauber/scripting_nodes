@@ -78,9 +78,7 @@ class SNA_PT_Overwrite_Settings(bpy.types.Panel):
             col.separator(factor=0.5)
 
         field_with_hint("module_name_overwrite", f"import {addon.module_name}")
-        field_with_hint(
-            "class_prefix_overwrite", f"{addon.class_prefix}_PT_MyPanel"
-        )
+        field_with_hint("class_prefix_overwrite", f"{addon.class_prefix}_PT_MyPanel")
         field_with_hint(
             "idname_namespace_overwrite", f"{addon.idname_namespace}.my_operator"
         )

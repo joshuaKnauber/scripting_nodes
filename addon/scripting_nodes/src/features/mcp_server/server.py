@@ -87,9 +87,7 @@ def _handle_tools_call(req_id, params):
         return _ok(
             req_id,
             {
-                "content": [
-                    {"type": "text", "text": f"{type(exc).__name__}: {exc}"}
-                ],
+                "content": [{"type": "text", "text": f"{type(exc).__name__}: {exc}"}],
                 "isError": True,
             },
         )
@@ -133,7 +131,6 @@ def _dispatch(message):
 
 
 class _Handler(BaseHTTPRequestHandler):
-
     # Quiet the default per-request stderr log — re-route everything through
     # a single SN-prefixed channel.
     def log_message(self, format, *args):

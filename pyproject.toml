@@ -1,0 +1,29 @@
+# Dev tooling only - the addon itself is packaged via blender_manifest.toml.
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+extend-exclude = ["website", "venv", "builds", ".dev_build", "addon/scripting_nodes/wheels"]
+
+[tool.ruff.lint]
+select = [
+    "E9", "E7", # syntax / statement errors
+    "F",        # pyflakes
+    "B006",     # mutable default args
+    "E722",     # bare except
+]
+ignore = [
+    "F722", # bpy annotations look like syntax errors in forward refs
+    "F821", # bpy annotations
+    "E731", # lambdas are idiomatic for bpy update callbacks
+    "E741", # `l` for links is fine
+]
+
+[tool.ruff.lint.per-file-ignores]
+"addon/scripting_nodes/__init__.py" = ["E402"]
+
+[tool.pyright]
+include = ["addon/scripting_nodes", "tests"]
+pythonVersion = "3.11"
+typeCheckingMode = "off"
+reportMissingModuleSource = false

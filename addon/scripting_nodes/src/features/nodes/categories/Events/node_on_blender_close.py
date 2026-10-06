@@ -22,7 +22,7 @@ class SNA_Node_OnBlenderClose(ScriptingBaseNode, bpy.types.Node):
 
         self.code_module = f"""
 def {self.handler_name}():
-    {indent(output_code, 1) if output_code.strip() else 'pass'}
+    {indent(output_code, 1) if output_code.strip() else "pass"}
 """
 
         self.code_register = f"atexit.register({self.handler_name})"

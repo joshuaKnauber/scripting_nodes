@@ -4,6 +4,7 @@ Used by the smart-reload mechanism to compute which generated tree modules
 need to reload alongside a changed tree. There's no stored dependency map -
 queries walk the live graph, using the reference system as the source of truth.
 """
+
 from ....lib.utils.node_tree.scripting_node_trees import (
     node_by_id,
     scripting_node_trees,
