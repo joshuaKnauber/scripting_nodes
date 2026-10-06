@@ -54,6 +54,9 @@ def main():
     parser.add_argument("-k", dest="pattern", default="", help="substring filter")
     parser.add_argument("--keep", action="store_true", help="keep temp dir")
     parser.add_argument("-v", "--verbose", action="store_true")
+    parser.add_argument(
+        "--gui", action="store_true", help="also run tests/gui/*.py in GUI Blender"
+    )
     args = parser.parse_args()
 
     blender = find_blender()
@@ -80,7 +83,52 @@ def main():
             print(f"Kept user resources at {user_resources}")
         else:
             shutil.rmtree(user_resources, ignore_errors=True)
-    sys.exit(result.returncode)
+    failed = result.returncode != 0
+    if args.gui:
+        failed |= not run_gui_tests(blender, args.pattern)
+    sys.exit(1 if failed else 0)
+
+
+def run_gui_tests(blender, pattern=""):
+    """Each tests/gui/*.py drives a real Blender window and prints
+    "GUI TEST PASSED" / "GUI TEST FAILED"."""
+    gui_dir = os.path.join(REPO_ROOT, "tests", "gui")
+    ok = True
+    for name in sorted(os.listdir(gui_dir)):
+        if not name.endswith(".py") or pattern not in name:
+            continue
+        user_resources = make_user_resources()
+        env = dict(os.environ, BLENDER_USER_RESOURCES=user_resources)
+        subprocess.run(
+            [blender, "-b", "--factory-startup", "--python-expr", NO_SPLASH],
+            env=env,
+            capture_output=True,
+        )
+        try:
+            result = subprocess.run(
+                [blender, "--python", os.path.join(gui_dir, name)],
+                env=env,
+                capture_output=True,
+                text=True,
+                timeout=180,
+            )
+            output = result.stdout + result.stderr
+        except subprocess.TimeoutExpired as e:
+            output = f"timeout\n{e.stdout or ''}"
+        finally:
+            shutil.rmtree(user_resources, ignore_errors=True)
+        passed = "GUI TEST PASSED" in output
+        print(f"gui/{name}: {'ok' if passed else 'FAILED'}")
+        if not passed:
+            print(output[-3000:])
+            ok = False
+    return ok
+
+
+NO_SPLASH = (
+    "import bpy; bpy.context.preferences.view.show_splash = False; "
+    "bpy.ops.wm.save_userpref()"
+)
 
 
 if __name__ == "__main__":

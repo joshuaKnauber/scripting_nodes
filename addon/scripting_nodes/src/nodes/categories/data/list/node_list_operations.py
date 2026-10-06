@@ -356,8 +356,8 @@ class SNA_Node_ListSlice(ScriptingBaseNode, bpy.types.Node):
 
     def on_create(self):
         self.add_input("ScriptingListSocket", "List")
-        self.add_input("ScriptingIntegerSocket", "Start")
-        self.add_input("ScriptingIntegerSocket", "End")
+        self.add_input("ScriptingIntegerSocket", "Start").value = 0
+        self.add_input("ScriptingIntegerSocket", "End").value = 0
         self.add_output("ScriptingListSocket", "Slice")
 
     def draw(self, context, layout):
@@ -366,7 +366,9 @@ class SNA_Node_ListSlice(ScriptingBaseNode, bpy.types.Node):
     def generate(self):
         list_code = self.inputs["List"].eval("[]")
         start_code = self.inputs["Start"].eval("0")
-        end_code = self.inputs["End"].eval("None")
+        end = self.inputs["End"]
+        # an unconnected End of 0 means "until the end of the list"
+        end_code = "None" if not end.is_linked and end.value == 0 else end.eval()
         self.outputs["Slice"].code = f"{list_code}[{start_code}:{end_code}]"
 
 

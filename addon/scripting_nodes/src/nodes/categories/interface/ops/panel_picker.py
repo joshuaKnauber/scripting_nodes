@@ -1,4 +1,6 @@
 import bpy
+
+from .....lib.logger import log
 from .....lib.trees import node_by_id
 
 # Store registered picker panels for cleanup
@@ -202,7 +204,7 @@ class SNA_OT_PanelPickerStart(bpy.types.Operator):
                 bpy.utils.register_class(panel_class)
                 _picker_panels.append(panel_class)
             except Exception as e:
-                print(f"Failed to register picker panel for {desc}: {e}")
+                log("WARNING", f"Failed to register picker panel for {desc}: {e}")
 
         # Force UI redraw
         for area in context.screen.areas:
@@ -271,7 +273,7 @@ def cleanup_picker_panels():
         try:
             bpy.utils.unregister_class(panel_class)
         except Exception as e:
-            print(f"Failed to unregister picker panel: {e}")
+            log("WARNING", f"Failed to unregister picker panel: {e}")
 
     _picker_panels = []
     _active_picker_node_id = None

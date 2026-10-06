@@ -10,7 +10,7 @@ from ..lib.logger import log
 from ..lib.trees import sn_nodes
 from .references import find_node_by_display_name, ref_id_key
 
-DATA_VERSION = 2
+DATA_VERSION = 3
 
 
 def _v1_references_by_id(tree):
@@ -42,9 +42,21 @@ def _v2_single_flow_links(tree):
                 out.link_limit = 1
 
 
+def _v3_list_slice_defaults(tree):
+    """List Slice inputs defaulted to 1 (always an empty slice when left
+    unconnected); untouched ones now mean "whole list"."""
+    for node in sn_nodes(tree):
+        if node.bl_idname == "SNA_Node_ListSlice":
+            for name in ("Start", "End"):
+                socket = node.inputs.get(name)
+                if socket is not None and "value" not in socket.keys():
+                    socket.value = 0
+
+
 STEPS = {
     1: _v1_references_by_id,
     2: _v2_single_flow_links,
+    3: _v3_list_slice_defaults,
 }
 
 

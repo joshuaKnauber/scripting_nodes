@@ -253,3 +253,31 @@ class CoreTest(unittest.TestCase):
         for rel, src in files.items():
             if rel.endswith(".py"):
                 compile(src, rel, "exec")
+
+
+class FileTest(unittest.TestCase):
+    def test_save_open_other_and_reopen(self):
+        import tempfile
+
+        helpers.reset_file()
+        addon_settings().addon_name = "File Test"
+        tree, _, _ = trigger_print_tree("saved")
+        module = addon_settings().module_name
+        path = os.path.join(tempfile.mkdtemp(), "file_test.blend")
+        bpy.ops.wm.save_mainfile(filepath=path)
+
+        # another file: this file's addon goes away (it doesn't persist)
+        helpers.reset_file()
+        self.assertFalse(runtime().is_loaded(module))
+
+        bpy.ops.wm.open_mainfile(filepath=path)
+        helpers.flush()
+        self.assertEqual(addon_settings().module_name, module)
+        self.assertTrue(runtime().is_loaded(module))
+        tree = bpy.data.node_groups["Tree"]
+        self.assertIn(repr("saved"), read(module_file(tree)))
+
+        for t in list(bpy.data.node_groups):
+            bpy.data.node_groups.remove(t)
+        helpers.sn("src.core.scheduler").request_full()
+        helpers.flush()

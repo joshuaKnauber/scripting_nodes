@@ -1,7 +1,6 @@
 import yaml
 import subprocess
 import os
-import psutil
 import colorama
 import shutil
 from threading import Thread
@@ -147,13 +146,15 @@ class BlenderLauncher:
         return proc
 
     def quit_blender(self):
-        """Terminate any running Blender instances."""
-        exe_name = os.path.split(self.config["BLENDER_EXECUTABLE"])[1].lower()
-        for proc in psutil.process_iter(["pid", "name"]):
-            if exe_name in proc.info["name"].lower():
-                proc.terminate()
-                proc.wait()
-                break
+        """Terminate the Blender instance this script launched (only that one)."""
+        proc = getattr(self, "proc", None)
+        if proc is None or proc.poll() is not None:
+            return
+        proc.terminate()
+        try:
+            proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            proc.kill()
 
     def check_input(self):
         """Check for user input without blocking."""
@@ -188,7 +189,7 @@ class BlenderLauncher:
                     time.sleep(2)
                     continue
 
-                self.launch_blender()
+                self.proc = self.launch_blender()
                 print(
                     colorama.Fore.GREEN + "Press 'r' to restart Blender or 'q' to quit."
                 )

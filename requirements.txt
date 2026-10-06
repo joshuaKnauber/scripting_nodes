@@ -1,4 +1,4 @@
-fake-bpy-module-latest
+# Dev tooling (not needed by the addon itself)
+fake-bpy-module-5.0  # type stubs for the minimum supported Blender
 pyyaml
-psutil
 colorama
