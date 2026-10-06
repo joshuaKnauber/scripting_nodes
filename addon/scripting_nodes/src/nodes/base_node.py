@@ -1,23 +1,46 @@
 from textwrap import wrap
 from typing import Dict, Literal, Set, Tuple
-from ..lib.trees import (
-    scripting_node_trees,
-    sn_nodes,
-)
-from ..lib.sockets import (
-    from_nodes,
-    socket_index,
-    to_nodes,
-)
-from ..lib.screen import redraw_all
-from ..sockets.socket_types import SOCKET_IDNAME_TYPE
-from ..lib.ids import get_short_id
-from ..node_tree.node_tree import ScriptingNodeTree
-from ..core.watcher import watch_changes
+
 import bpy
+
+from ..core import errors, scheduler
+from ..core.references import (
+    find_node,
+    install_reference_properties,
+    ref_id_key,
+)
+from ..lib.ids import get_short_id
+from ..lib.sockets import from_nodes, socket_index, to_nodes
+from ..node_tree.node_tree import ScriptingNodeTree
+from ..sockets.socket_types import SOCKET_IDNAME_TYPE
+
+CODE_FIELDS = (
+    "code_imports",
+    "code_module",
+    "code_inline",
+    "code_global",
+    "code_register",
+    "code_unregister",
+)
 
 
 class ScriptingBaseNode:
+    """Base class of every Scripting Nodes node.
+
+    Subclasses implement `on_create()` (add sockets) and `generate()` (fill
+    the code fields below and `output.code` of data outputs). Anything that
+    changes the generated code calls `self._generate()`, which only *requests*
+    regeneration - the scheduler runs `generate()` on its next flush.
+
+    Code fields:
+      code_imports     import lines, deduplicated per module
+      code_global      module-level code
+      code_module      module-level code of ROOT_NODE nodes (classes, ...)
+      code_inline      statement(s) inside a program flow
+      code_register    lines for the module's register()
+      code_unregister  lines for the module's unregister()
+    """
+
     @classmethod
     def poll(cls, ntree):
         """Checks if the node is valid"""
@@ -29,22 +52,19 @@ class ScriptingBaseNode:
 
     @property
     def node_tree(self):
-        """Returns the node tree this node lives in"""
+        """Returns the node tree this node lives in (overridden by Group)."""
         return self.id_data
 
     ### Properties
 
     is_sn = True
 
-    sn_options: Set[Literal["ROOT_NODE"]] = {}
+    sn_options: Set[Literal["ROOT_NODE"]] = set()
     # {prop_name: tuple-of-allowed-bl_idnames}. Each entry declares a string
-    # reference field on the node, plus which node types are valid targets.
-    # Discovery in settings_properties uses these tuples to create one
-    # CollectionProperty per unique signature on scene.sna, so prop_search
-    # dropdowns only show the relevant nodes.
+    # field referencing another node. The field is stored by node id (see
+    # core/references.py); the tuple filters which nodes the picker shows.
     sn_reference_properties: Dict[str, Tuple[str, ...]] = {}
-    # PointerProperty fields whose value is another ScriptingNodeTree. Used by
-    # the dependency tracker to know "this node depends on that tree's file".
+    # PointerProperty fields whose value is another ScriptingNodeTree.
     sn_tree_reference_properties: Set[str] = set()
 
     id: bpy.props.StringProperty(
@@ -57,6 +77,11 @@ class ScriptingBaseNode:
     code_global: bpy.props.StringProperty()
     code_register: bpy.props.StringProperty()
     code_unregister: bpy.props.StringProperty()
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if cls.sn_reference_properties:
+            install_reference_properties(cls, cls.sn_reference_properties)
 
     ### Life Cycle
 
@@ -76,142 +101,102 @@ class ScriptingBaseNode:
 
     def free(self):
         """Called when the node is deleted"""
-        self.node_tree.is_dirty = True
+        errors.clear_node_error(self.id)
+        scheduler.request_tree(self.id_data)
 
     ### Code Generation
 
     def _generate(self):
-        if not self.id:
-            return
-        prev_code = (
-            self.code_imports
-            + self.code_module
-            + self.code_inline
-            + self.code_global
-            + self.code_register
-            + self.code_unregister
-            + "".join(
-                [socket.code for socket in self.outputs if hasattr(socket, "code")]
-            )
-        )
-        # reset code
-        self.code_imports = ""
-        self.code_module = ""
-        self.code_inline = ""
-        self.code_global = ""
-        self.code_register = ""
-        self.code_unregister = ""
-        for out in self.outputs:
-            if hasattr(out, "code"):
-                out.code = ""
-        # Skip generation if any sockets are not custom sockets (e.g. during reroute operations)
-        for socket in list(self.inputs) + list(self.outputs):
-            if not hasattr(socket, "eval"):
-                return
-        # generate new code
-        self.generate()
-        new_code = (
-            self.code_imports
-            + self.code_module
-            + self.code_inline
-            + self.code_global
-            + self.code_register
-            + self.code_unregister
-            + "".join(
-                [socket.code for socket in self.outputs if hasattr(socket, "code")]
-            )
-        )
-        if prev_code != new_code:
-            # propagate changes - cycles are prevented at link creation, so
-            # this naturally terminates via the prev_code != new_code check
-            for out in self.outputs:
-                for node in to_nodes(out):
-                    node._generate()
-            for inpt in self.inputs:
-                for node in from_nodes(inpt):
-                    node._generate()
-            # mark node tree as dirty if this node contributes to the file's
-            # written content (root code, register/unregister, imports, globals).
-            # For group trees, ANY node change can affect the emitted function
-            # body, so mark dirty unconditionally.
-            if (
-                "ROOT_NODE" in self.sn_options
-                or self.code_register
-                or self.code_unregister
-                or self.code_imports
-                or self.code_global
-                or getattr(self.node_tree, "is_group", False)
-            ):
-                self.node_tree.is_dirty = True
-                # Trigger immediate regeneration to avoid stale file on redraw
-                watch_changes()
-            redraw_all()
-        # Keep refs membership in sync. update_node_references() fires only
-        # on link edits (NodeTree.update() doesn't fire on bare node add), so
-        # a freshly added/duplicated node would never land in refs until the
-        # user happens to make a link. Self-heal here so the picker dropdowns
-        # see new nodes immediately. Self lands in every signature-collection
-        # whose filter accepts this node's bl_idname.
-        from ..settings.settings import (
-            collections_for_bl_idname,
-            signature_key,
-        )
-
-        new_ref_name = f"{self.name} ({self.node_tree.name})"
-        for coll in collections_for_bl_idname(self.bl_idname):
-            for ref in coll:
-                if ref.node_id == self.id:
-                    if ref.name != new_ref_name:
-                        ref.name = new_ref_name
-                    break
-            else:
-                ref = coll.add()
-                ref.name = new_ref_name
-                ref.node_id = self.id
-
-        # notify referencing nodes
-        settings = bpy.context.scene.sna
-        for ntree in scripting_node_trees():
-            for node in sn_nodes(ntree):
-                for prop in node.sn_reference_properties:
-                    key = getattr(node, prop, "")
-                    if not key:
-                        continue
-                    coll = getattr(settings, node._ref_collection_attr(prop))
-                    ref = coll.get(key)
-                    if ref and ref.node_id == self.id:
-                        node.on_ref_change(self)
-                # Container nodes hold refs in a CollectionProperty - notify
-                # them when one of their attached properties changes signature
-                cb_entries = getattr(node, "class_body_properties", None)
-                cb_sig = getattr(node, "sn_class_body_signature", ())
-                if cb_entries is not None and cb_sig:
-                    coll = getattr(settings, signature_key(cb_sig))
-                    for entry in cb_entries:
-                        if not entry.prop:
-                            continue
-                        ref = coll.get(entry.prop)
-                        if ref and ref.node_id == self.id:
-                            node._generate()
-                            break
+        """Request regeneration of this node (runs on the next flush)."""
+        scheduler.request_node(self)
 
     def generate(self):
         raise NotImplementedError
+
+    def _code_snapshot(self):
+        """(statement/module code, data output code, layout names)"""
+        return (
+            tuple(getattr(self, field) for field in CODE_FIELDS),
+            tuple(getattr(s, "code", "") for s in self.outputs),
+            tuple(getattr(s, "layout", "") for s in self.outputs),
+        )
+
+    def regenerate(self) -> tuple[bool, bool, bool]:
+        """Run generate() now. Only the scheduler calls this.
+
+        Returns which parts changed: (code, data outputs, layouts). Errors in
+        generate() are stored per node and shown on it; the node then
+        contributes no code.
+        """
+        unchanged = (False, False, False)
+        if not self.id:
+            return unchanged
+        # Mid-edit states (e.g. a reroute being inserted) can leave non-SN
+        # sockets on the node; keep the previous code until it settles.
+        for socket in list(self.inputs) + list(self.outputs):
+            if not hasattr(socket, "eval"):
+                return unchanged
+        before = self._code_snapshot()
+        self._clear_code()
+        try:
+            self.generate()
+            errors.clear_node_error(self.id)
+        except Exception as exc:
+            errors.set_node_error(self.id, exc)
+            self._clear_code()
+        after = self._code_snapshot()
+        return tuple(a != b for a, b in zip(before, after))
+
+    def _clear_code(self):
+        for field in CODE_FIELDS:
+            setattr(self, field, "")
+        for out in self.outputs:
+            out.code = ""
+
+    def dependent_nodes(self, changes):
+        """Nodes whose generated code reads the parts of this node that changed.
+
+        - code: upstream nodes embed our `code_inline` (via program inputs)
+        - data outputs: downstream nodes read `output.code`
+        - layouts: downstream program/interface nodes read the layout name
+        """
+        code, outputs, layouts = changes
+        for out in self.outputs:
+            if getattr(out, "socket_type", None) == "DATA":
+                if outputs:
+                    yield from to_nodes(out)
+            elif layouts:
+                yield from to_nodes(out)
+        if code:
+            for inp in self.inputs:
+                if getattr(inp, "socket_type", None) == "PROGRAM":
+                    yield from from_nodes(inp)
+
+    def code_dependencies(self):
+        """Nodes whose code should be generated before this one."""
+        for inp in self.inputs:
+            if getattr(inp, "socket_type", None) == "DATA":
+                yield from from_nodes(inp)
+        for out in self.outputs:
+            if getattr(out, "socket_type", None) == "PROGRAM":
+                yield from to_nodes(out)
+
+    def on_ref_change(self, node):
+        """A node this node references changed its code."""
+        self._generate()
 
     ### Reference helpers
 
     @classmethod
     def _ref_collection_attr(cls, prop_name):
-        """scene.sna attribute name of the collection backing this ref-property."""
+        """scene.sna attribute name of the picker collection for this field."""
         from ..settings.settings import signature_key
 
         return signature_key(cls.sn_reference_properties[prop_name])
 
     def resolve_reference(self, prop_name):
         """Return the node a reference-property points to, or None."""
-        coll = getattr(bpy.context.scene.sna, self._ref_collection_attr(prop_name))
-        ref = coll.get(getattr(self, prop_name, ""))
-        return ref.node if ref else None
+        return find_node(self.get(ref_id_key(prop_name), ""))
 
     def draw_reference_prop(self, layout, prop_name, text=""):
         """Standard UI for picking another SN node by reference."""
@@ -226,7 +211,7 @@ class ScriptingBaseNode:
     def reference_is_cross_tree(self, prop_name):
         """True iff the referenced node lives in a different tree."""
         target = self.resolve_reference(prop_name)
-        return target is not None and target.id_data is not self.node_tree
+        return target is not None and target.id_data is not self.id_data
 
     ### Sockets
 
@@ -245,39 +230,25 @@ class ScriptingBaseNode:
         socket.display_shape = socket.socket_shape
         socket.is_dynamic = dynamic
 
-    def ntree_link_created(self):
-        self._update_dynamic_sockets()
-        self._generate()
+    def update_dynamic_sockets(self):
+        """A linked dynamic socket becomes a normal (removable) one and a new
+        empty dynamic socket is added after it."""
+        for sockets, add in (
+            (self.inputs, self.add_input),
+            (self.outputs, self.add_output),
+        ):
+            for socket in list(sockets):
+                if getattr(socket, "is_dynamic", False) and socket.is_linked:
+                    index = socket_index(self, socket)
+                    add(socket.bl_idname, socket.label, dynamic=True)
+                    sockets.move(len(sockets) - 1, index + 1)
+                    socket.is_dynamic = False
+                    socket.is_removable = True
 
-    def ntree_link_removed(self):
-        self._generate()
-
-    def _update_dynamic_sockets(self):
-        # update inputs
-        for socket in self.inputs:
-            # Only check is_dynamic on our custom sockets
-            if hasattr(socket, "is_dynamic") and socket.is_dynamic and socket.is_linked:
-                index = socket_index(self, socket)
-                self.add_input(socket.bl_idname, socket.label, dynamic=True)
-                self.inputs.move(len(self.inputs) - 1, index + 1)
-                socket.is_dynamic = False
-                socket.is_removable = True
-        # update outputs
-        for socket in self.outputs:
-            # Only check is_dynamic on our custom sockets
-            if hasattr(socket, "is_dynamic") and socket.is_dynamic and socket.is_linked:
-                index = socket_index(self, socket)
-                self.add_output(socket.bl_idname, socket.label, dynamic=True)
-                self.outputs.move(len(self.outputs) - 1, index + 1)
-                socket.is_dynamic = False
-                socket.is_removable = True
+    ### UI
 
     def _shown_code_lines(self):
-        """Return compact code lines for the in-node dev preview.
-
-        This only affects the node UI preview. The generated code strings stay
-        untouched so file output keeps its normal formatting.
-        """
+        """Compact code lines for the in-node dev preview."""
         shown = self.code_module or self.code_inline
         if not shown:
             return []
@@ -299,6 +270,11 @@ class ScriptingBaseNode:
         return display_lines
 
     def draw_buttons(self, context, layout):
+        error = errors.node_errors.get(self.id)
+        if error:
+            box = layout.box()
+            box.alert = True
+            box.label(text=error, icon="ERROR")
         if bpy.context.scene.sna.dev.show_node_code:
             box = layout.box()
             col = box.column(align=True)

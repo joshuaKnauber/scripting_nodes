@@ -329,7 +329,7 @@ class SNA_Node_IntProperty(ScriptingBaseNode, bpy.types.Node):
         # registered (Blender resolves the function name either way)
         update_code = ""
         if has_update:
-            update_body = indent(update_socket.eval("pass"), 2)
+            update_body = indent(update_socket.eval("pass"), 1)
             update_code = f"""
 def update_{self.prop_name}(self, context):
     {update_body}

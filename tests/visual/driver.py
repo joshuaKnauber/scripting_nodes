@@ -5,7 +5,9 @@ area into a node editor showing the returned tree, waits for a few redraws,
 saves a screenshot and quits.
 
 A scenario may also define `after(context)` which runs once the addon has
-flushed (e.g. to open panels or trigger generated operators).
+flushed (e.g. to open panels or trigger generated operators), and set
+`AREA_ONLY = True` to capture just the node editor instead of the window and
+`ZOOM_OUT = n` to zoom out n steps after framing the nodes.
 """
 
 import importlib.util
@@ -49,11 +51,13 @@ def show_tree(tree):
     space.show_region_ui = True
 
 
-def frame_all():
+def frame_all(zoom_out=0):
     window, area = main_area()
     region = next(r for r in area.regions if r.type == "WINDOW")
     with bpy.context.temp_override(window=window, area=area, region=region):
         bpy.ops.node.view_all()
+        for _ in range(zoom_out):
+            bpy.ops.view2d.zoom_out()
 
 
 def step():
@@ -72,13 +76,18 @@ def step():
             if after:
                 after(bpy.context)
             helpers.flush()
-        elif s == 3:
+        elif s in (3, 4):
+            # Twice: the first pass can run before nodes have drawn dimensions
             if _state["tree"] is not None:
-                frame_all()
+                frame_all(getattr(_state["scenario"], "ZOOM_OUT", 0))
         elif s == 5:
-            window, _ = main_area()
-            with bpy.context.temp_override(window=window):
-                bpy.ops.screen.screenshot(filepath=OUTPUT)
+            window, area = main_area()
+            if getattr(_state["scenario"], "AREA_ONLY", False):
+                with bpy.context.temp_override(window=window, area=area):
+                    bpy.ops.screen.screenshot_area(filepath=OUTPUT)
+            else:
+                with bpy.context.temp_override(window=window):
+                    bpy.ops.screen.screenshot(filepath=OUTPUT)
             print(f"SCREENSHOT {OUTPUT}")
         elif s == 6:
             bpy.ops.wm.quit_blender()

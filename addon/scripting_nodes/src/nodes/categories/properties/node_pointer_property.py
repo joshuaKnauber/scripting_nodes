@@ -366,7 +366,7 @@ class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
 
         update_code = ""
         if has_update:
-            update_body = indent(update_socket.eval("pass"), 2)
+            update_body = indent(update_socket.eval("pass"), 1)
             update_code = f"""
 def update_{self.prop_name}(self, context):
     {update_body}
@@ -375,7 +375,7 @@ def update_{self.prop_name}(self, context):
 
         poll_code = ""
         if has_poll:
-            poll_body = indent(poll_socket.eval("return True"), 2)
+            poll_body = indent(poll_socket.eval("return True"), 1)
             poll_code = f"""
 def poll_{self.prop_name}(self, object):
     {poll_body}

@@ -44,6 +44,8 @@ def reset_file():
 
 def new_tree(name="Tree"):
     tree = bpy.data.node_groups.new(name, "ScriptingNodeTree")
+    # the depsgraph handler does this in the UI (not in background mode)
+    sn("src.core.scheduler").request_full()
     flush()
     return tree
 
@@ -63,22 +65,26 @@ def add_node(tree, idname, location=(0, 0)):
 
 
 def link(tree, from_socket, to_socket):
-    return tree.links.new(from_socket, to_socket)
+    # Blender runs NodeTree.update() for Python-made links only later (never
+    # in background mode), so request the regeneration explicitly.
+    new = tree.links.new(from_socket, to_socket)
+    tree.update()
+    return new
 
 
 def flush():
     """Run all pending regeneration / compile / reload work synchronously."""
-    sn("src.core.watcher").watch_changes()
+    sn("src.core.scheduler").flush()
 
 
 def tree_source(tree):
     """Generated Python source for a single tree module."""
-    return sn("src.core.generators.node_tree").code_gen_node_tree(tree)
+    return sn("src.core.compiler").compile_tree(tree)
 
 
-def addon_files(build=False):
+def addon_files():
     """All generated files of the addon as {relpath: source}."""
-    raise NotImplementedError
+    return sn("src.core.compiler").compile_addon()
 
 
 def node_classes():

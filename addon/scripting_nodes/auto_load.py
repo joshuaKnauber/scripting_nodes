@@ -28,8 +28,16 @@ def init():
 
 
 def register():
-    for cls in ordered_classes:
-        bpy.utils.register_class(cls)
+    registered = []
+    try:
+        for cls in ordered_classes:
+            bpy.utils.register_class(cls)
+            registered.append(cls)
+    except Exception:
+        # leave nothing half-registered behind
+        for cls in reversed(registered):
+            bpy.utils.unregister_class(cls)
+        raise
 
     for module in modules:
         if module.__name__ == __name__:

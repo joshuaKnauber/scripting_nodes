@@ -1,21 +1,15 @@
 import re
-from ..lib.ids import get_short_id
-from ..lib.trees import (
-    node_by_id,
-    scripting_node_trees,
-    sn_nodes,
-)
-from ..lib.sockets import (
-    from_nodes,
-    from_socket,
-    to_nodes,
-)
-from ..lib.is_sn import is_sn
-from ..lib.logger import log
+from collections import defaultdict
+
 import bpy
 
+from ..core import scheduler
+from ..core.versioning import DATA_VERSION
+from ..lib.ids import get_short_id
+from ..lib.logger import log
+from ..lib.sockets import from_socket
+from ..lib.trees import sn_nodes
 
-PREVIOUS_LINKS = {}
 
 # False until every class is registered and again during unregister. Blender
 # calls NodeTree.update() on existing trees while node/socket classes are
@@ -34,7 +28,8 @@ class ScriptingNodeTree(bpy.types.NodeTree):
 
     initialized: bpy.props.BoolProperty(default=False)
     id: bpy.props.StringProperty(default="")
-    is_dirty: bpy.props.BoolProperty(default=True)
+    # Version of the saved data layout, see core/versioning.py
+    data_version: bpy.props.IntProperty(default=0)
     pause_updates: bpy.props.BoolProperty(default=False)
     is_group: bpy.props.BoolProperty(
         default=False,
@@ -47,97 +42,85 @@ class ScriptingNodeTree(bpy.types.NodeTree):
 
     @property
     def module_name(self):
-        """Stable Python module name for this tree.
+        """Python module name of this tree, e.g. `main_tree_3fa2c1d9e0`.
 
-        Always suffixed with the tree's id so adding/removing sibling trees
-        with the same display name never changes any other tree's module
-        name. Renaming the tree itself still rotates the name (handled by
-        a separate dep-tracking path)."""
-
-        def clean_name(name):
-            return (
-                re.sub(r"[^a-zA-Z\s]", "", name).replace(" ", "_").lower()
-                or "sn_module"
-            )
-
-        return f"{clean_name(self.name)}_{self.id}"
+        Suffixed with the tree's unique id, so trees with the same display
+        name never collide. Also used as the function name of group trees,
+        so it must be a valid identifier."""
+        name = re.sub(r"[^a-zA-Z0-9\s]", "", self.name).strip()
+        name = re.sub(r"\s+", "_", name).lower()
+        if not name or name[0].isdigit():
+            name = "tree_" + name
+        return f"{name.rstrip('_')}_{self.id.lower()}"
 
     def init(self):
-        self.name = "Node Tree"
         self.id = get_short_id()
+        self.data_version = DATA_VERSION
         self.use_fake_user = True
         self.initialized = True
 
     def update(self):
         if not _READY or self.pause_updates:
             return
-        self._mute_incompatible_links()
-        self._remove_cyclic_links()
-        self.update_links()
-        self.update_node_references()
-        bpy.app.timers.register(lambda: self.update_reroutes(), first_interval=0.001)
+        self._remove_cyclic_links(list(self.links))
+        self._mute_incompatible_links(list(self.links))
+        for node in sn_nodes(self):
+            node.update_dynamic_sockets()
+        # Links or nodes changed: regenerate this tree on the next flush
+        scheduler.request_tree(self)
 
-    def _mute_incompatible_links(self):
-        """Mute links whose endpoints carry mismatched socket_type (DATA vs
-        PROGRAM). Eval already filters these out via the socket helpers,
-        but muting also gives the user a visual cue (Blender renders muted
-        links dashed) so they see why their wiring didn't work.
+    def _mute_incompatible_links(self, links):
+        """Mute links that connect a DATA socket with a PROGRAM socket.
 
-        Handles two cases:
-          1. Direct link between two SN sockets with mismatched types.
-          2. Chain through reroutes - walk forward from each SN output and
-             mute the final segment that lands on an SN socket of the
-             wrong type. The reroute pass-through links stay unmuted so
-             other (valid) branches off the same reroute keep working.
+        Eval already ignores these, muting gives the user a visual cue
+        (dashed link). Through reroutes, only the final segment landing on
+        an incompatible SN socket is muted, so other branches off the same
+        reroute keep working. Linear in the number of links.
         """
-        # 1. Direct SN-to-SN mismatches. Reroute-touching links get reset
-        #    to unmuted here; the chain walk below re-mutes bad endpoints.
-        for link in self.links:
-            from_type = getattr(link.from_socket, "socket_type", None)
-            to_type = getattr(link.to_socket, "socket_type", None)
-            if from_type is not None and to_type is not None:
-                should_mute = from_type != to_type
-                if link.is_muted != should_mute:
-                    link.is_muted = should_mute
-            elif link.is_muted:
-                link.is_muted = False
+        reroute_out = defaultdict(list)  # reroute name -> links leaving it
+        for link in links:
+            if link.from_node.bl_idname == "NodeReroute":
+                reroute_out[link.from_node.name].append(link)
 
-        # 2. Walk chains through reroutes from each SN output socket.
-        for node in self.nodes:
-            if node.bl_idname == "NodeReroute":
-                continue
-            for out in node.outputs:
-                src_type = getattr(out, "socket_type", None)
-                if src_type is None:
+        mute = set()
+        for link in links:
+            src_type = getattr(link.from_socket, "socket_type", None)
+            if src_type is None:
+                continue  # starts at a reroute or non-SN node
+            # follow the link (and reroute chains) to SN targets
+            stack, seen = [link], set()
+            while stack:
+                current = stack.pop()
+                to_node = current.to_node
+                if to_node.bl_idname == "NodeReroute":
+                    if to_node.name not in seen:
+                        seen.add(to_node.name)
+                        stack.extend(reroute_out[to_node.name])
                     continue
-                self._mute_chain_mismatches(out, src_type)
+                to_type = getattr(current.to_socket, "socket_type", None)
+                if to_type is not None and to_type != src_type:
+                    mute.add(current.as_pointer())
 
-    def _mute_chain_mismatches(self, start_socket, src_type):
-        """BFS through reroutes from `start_socket`, muting any link whose
-        final SN target's socket_type doesn't match `src_type`."""
-        visited = set()
-        # Seed with links leaving start_socket
-        queue = list(start_socket.links)
-        while queue:
-            link = queue.pop()
-            to_node = link.to_node
-            if to_node.bl_idname == "NodeReroute":
-                key = to_node.as_pointer()
-                if key in visited:
-                    continue
-                visited.add(key)
-                queue.extend(to_node.outputs[0].links)
-            else:
-                target_type = getattr(link.to_socket, "socket_type", None)
-                if target_type is not None and target_type != src_type:
-                    if not link.is_muted:
-                        link.is_muted = True
+        for link in links:
+            should_mute = link.as_pointer() in mute
+            if link.is_muted != should_mute:
+                link.is_muted = should_mute
 
-    def _remove_cyclic_links(self):
-        """Strip any links that participate in a cycle. Logs each removal."""
-        cyclic = [link for link in self.links if self._creates_cycle(link)]
+    def _remove_cyclic_links(self, links):
+        """Remove links that are part of a cycle (strongly connected component
+        with more than one node, or a self-loop). Linear in links + nodes."""
+        graph = defaultdict(list)
+        for link in links:
+            graph[link.from_node.name].append(link.to_node.name)
+        component = _strongly_connected_components(graph)
+        cyclic = [
+            link
+            for link in links
+            if component.get(link.from_node.name) is not None
+            and component.get(link.from_node.name) == component.get(link.to_node.name)
+        ]
         if not cyclic:
-            return
+            return False
         self.pause_updates = True
         try:
             for link in cyclic:
@@ -148,124 +131,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
                 self.links.remove(link)
         finally:
             self.pause_updates = False
-
-    def _creates_cycle(self, link):
-        """True if from_node is reachable from to_node via downstream links."""
-        target = link.from_node
-        visited = set()
-        stack = [link.to_node]
-        while stack:
-            node = stack.pop()
-            if node is target:
-                return True
-            key = node.name
-            if key in visited:
-                continue
-            visited.add(key)
-            for out in node.outputs:
-                for next_link in out.links:
-                    stack.append(next_link.to_node)
-        return False
-
-    def update_links(self):
-        new_links = set([*map(lambda l: (l, l.from_node, l.to_node), self.links)])
-        prev_links = PREVIOUS_LINKS[self] if self in PREVIOUS_LINKS else set()
-        if self in PREVIOUS_LINKS:
-            # added links
-            for _, from_node, to_node in new_links - prev_links:
-                if from_node in self.nodes.values():
-                    if is_sn(from_node):
-                        from_node.ntree_link_created()
-                    elif from_node.bl_idname == "NodeReroute":
-                        nodes = from_nodes(from_node.inputs[0])
-                        for node in nodes:
-                            node.ntree_link_created()
-                if to_node in self.nodes.values():
-                    if is_sn(to_node):
-                        to_node.ntree_link_created()
-                    elif to_node.bl_idname == "NodeReroute":
-                        nodes = to_nodes(to_node.outputs[0])
-                        for node in nodes:
-                            node.ntree_link_created()
-            # removed links
-            for _, from_node, to_node in prev_links - new_links:
-                if from_node in self.nodes.values():
-                    if is_sn(from_node):
-                        from_node.ntree_link_removed()
-                    elif from_node.bl_idname == "NodeReroute":
-                        nodes = from_nodes(from_node.inputs[0])
-                        for node in nodes:
-                            node.ntree_link_removed()
-                if to_node in self.nodes.values():
-                    if is_sn(to_node):
-                        to_node.ntree_link_removed()
-                    elif to_node.bl_idname == "NodeReroute":
-                        nodes = to_nodes(to_node.outputs[0])
-                        for node in nodes:
-                            node.ntree_link_removed()
-
-        # update previous links
-        PREVIOUS_LINKS[self] = new_links
-
-    def update_node_references(self):
-        # Safety check - ensure scene.sna is fully initialized
-        if not hasattr(bpy.context.scene, "sna"):
-            return
-        from ..settings.settings import (
-            SIGNATURE_INDEX,
-            iter_reference_collections,
-        )
-
-        if not SIGNATURE_INDEX:
-            return
-
-        # Track ref names that changed - referencing nodes need to regenerate
-        # so their code (e.g. cross-tree imports) reflects the new target id.
-        affected_names = set()
-
-        # Add/rename: for every signature collection, sync the entries for
-        # nodes in this tree whose bl_idname matches that signature.
-        for _key, sig, coll in iter_reference_collections():
-            for node in sn_nodes(self):
-                if node.bl_idname not in sig:
-                    continue
-                new_name = f"{node.name} ({self.name})"
-                for ref in coll:
-                    if ref.node_id == node.id:
-                        if ref.name != new_name:
-                            affected_names.add(ref.name)
-                            affected_names.add(new_name)
-                            ref.name = new_name
-                        break
-                else:
-                    ref = coll.add()
-                    ref.name = new_name
-                    ref.node_id = node.id
-                    affected_names.add(new_name)
-
-            # remove stale references (node deleted)
-            for index in range(len(coll) - 1, -1, -1):
-                ref = coll[index]
-                if node_by_id(ref.node_id) is None:
-                    affected_names.add(ref.name)
-                    coll.remove(index)
-
-        # Notify referencing nodes whose ref-property points to a changed name.
-        if affected_names:
-            for ntree in scripting_node_trees():
-                for node in sn_nodes(ntree):
-                    ref_props = getattr(node, "sn_reference_properties", {})
-                    for prop in ref_props:
-                        if getattr(node, prop, "") in affected_names:
-                            node._generate()
-                            break
-                    # Container nodes hold refs in a CollectionProperty
-                    cb_entries = getattr(node, "class_body_properties", None)
-                    if cb_entries is not None:
-                        for entry in cb_entries:
-                            if entry.prop in affected_names:
-                                node._generate()
-                                break
+        return True
 
     def update_reroutes(self):
         for node in self.nodes:
@@ -277,6 +143,51 @@ class ScriptingNodeTree(bpy.types.NodeTree):
                     node.socket_idname = "ScriptingDataSocket"
 
 
+def _strongly_connected_components(graph):
+    """{node: component id} for nodes on a cycle (iterative Tarjan).
+
+    Nodes not on any cycle are left out. `graph` maps node -> successors."""
+    index, low, on_stack, stack = {}, {}, set(), []
+    result, counter = {}, [0]
+    for root in list(graph):
+        if root in index:
+            continue
+        work = [(root, iter(graph.get(root, ())))]
+        index[root] = low[root] = counter[0]
+        counter[0] += 1
+        stack.append(root)
+        on_stack.add(root)
+        while work:
+            node, successors = work[-1]
+            for succ in successors:
+                if succ not in index:
+                    index[succ] = low[succ] = counter[0]
+                    counter[0] += 1
+                    stack.append(succ)
+                    on_stack.add(succ)
+                    work.append((succ, iter(graph.get(succ, ()))))
+                    break
+                if succ in on_stack:
+                    low[node] = min(low[node], index[succ])
+            else:
+                work.pop()
+                if work:
+                    parent = work[-1][0]
+                    low[parent] = min(low[parent], low[node])
+                if low[node] == index[node]:
+                    members = []
+                    while True:
+                        member = stack.pop()
+                        on_stack.discard(member)
+                        members.append(member)
+                        if member == node:
+                            break
+                    if len(members) > 1 or node in graph.get(node, ()):
+                        for member in members:
+                            result[member] = node
+    return result
+
+
 def register():
     global _READY
     _READY = True
@@ -285,4 +196,3 @@ def register():
 def unregister():
     global _READY
     _READY = False
-    PREVIOUS_LINKS.clear()

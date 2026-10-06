@@ -58,8 +58,8 @@ class SNA_Node_GetProperty(BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node
         if error:
             self.outputs["Value"].code = "None"
             self.code_inline = f"""
-                print("Get Property: {error}")
-                {indent(self.outputs[0].eval(), 6)}
+                print({("Get Property: " + error)!r})
+                {indent(self.outputs[0].eval(), 4)}
             """
             return
 

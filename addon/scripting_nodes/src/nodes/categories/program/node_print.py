@@ -15,7 +15,7 @@ class SNA_Node_Print(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         text_eval = self.inputs[1].eval()
-        next_code = indent(self.outputs[0].eval(), 3)
+        next_code = indent(self.outputs[0].eval(), 4)
         # During the live editor pass, route prints to SN's canvas overlay so
         # debug output is visible without alt-tabbing to the console. The
         # exported build strips this - shipped addons just print().

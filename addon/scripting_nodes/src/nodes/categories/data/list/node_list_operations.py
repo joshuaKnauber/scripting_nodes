@@ -389,8 +389,8 @@ class SNA_Node_ForEachList(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         list_code = self.inputs["List"].eval("[]")
-        loop_body = indent(self.outputs["Loop"].eval("pass"), 3)
-        done_body = indent(self.outputs["Done"].eval(), 2)
+        loop_body = indent(self.outputs["Loop"].eval("pass"), 4)
+        done_body = indent(self.outputs["Done"].eval(), 3)
         self.outputs["Item"].code = f"_item_{self.id}"
         self.outputs["Index"].code = f"_index_{self.id}"
         self.code_inline = f"""

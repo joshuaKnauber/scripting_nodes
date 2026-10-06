@@ -1,68 +1,27 @@
-from ..msgbus.node_tree_name import subscribe_to_name_change
-from ...lib.names import random_addon_name
-from ...core.modules.modules import (
-    unregister_module,
-)
-from ...core.modules.persisted import (
-    get_persisted_modules,
-    get_pending_removal,
-    clear_pending_removal,
-)
-from ...core.files.clear_addon import (
-    clear_module_files,
-)
-from ...lib.paths import ADDON_FOLDER
-from ..timers.node_tree_watcher import (
-    register_node_tree_watcher,
-)
-import addon_utils
 import bpy
-import os
 from bpy.app.handlers import persistent
 
-
-# Store the current module name so we can unregister it before loading a new file
-_current_module = None
+from ...core import runtime, scheduler
+from ...lib.names import random_addon_name
+from ..msgbus.node_tree_name import subscribe_to_name_change
 
 
 @persistent
 def on_file_load_pre(dummy):
-    """Unregister the current session's addon before loading a new file."""
-    global _current_module
-
-    # Try to get the current module name before the scene is replaced
-    try:
-        _current_module = bpy.context.scene.sna.addon.module_name
-        unregister_module(_current_module)
-    except:
-        pass
+    """Unload this file's addon before another file replaces it."""
+    scene = bpy.context.scene
+    if scene is None or not hasattr(scene, "sna") or not scene.sna.addon.persist_addon:
+        runtime.unload_current()
 
 
 @persistent
 def on_file_load_post(dummy):
-    global _current_module
-    # Clean up all modules pending removal
-    for module in get_pending_removal():
-        unregister_module(module)
-        clear_module_files(module)
-    clear_pending_removal()
-
     subscribe_to_name_change()
-
-    bpy.context.scene.sna.addon.is_dirty = True
-
-    # update name
-    if bpy.context.scene.sna.addon.addon_name == "My Addon":
-        bpy.context.scene.sna.addon.addon_name = random_addon_name()
-
-    # Enable all persisted modules
-    for module in get_persisted_modules():
-        module_init_path = os.path.join(ADDON_FOLDER, module, "__init__.py")
-        if os.path.exists(module_init_path):
-            addon_utils.enable(module, default_set=False, persistent=False)
-
-    # watch changes
-    register_node_tree_watcher()
+    runtime.enable_persisted()
+    addon = bpy.context.scene.sna.addon
+    if addon.addon_name == "My Addon":
+        addon.addon_name = random_addon_name()
+    scheduler.request_full()
 
 
 def register():

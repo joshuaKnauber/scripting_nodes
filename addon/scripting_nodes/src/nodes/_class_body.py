@@ -13,9 +13,8 @@ single property across operators comes for free.
 """
 
 from typing import Tuple
-from ..lib.trees import (
-    node_by_id,
-)
+from ..core.references import find_node, make_reference_property
+from ..lib.trees import node_by_id
 import bpy
 
 
@@ -48,16 +47,19 @@ def _entry_prop_changed(self, context):
 class SNA_ClassBodyPropertyEntry(bpy.types.PropertyGroup):
     """An entry in a container's class_body_properties collection.
 
-    `prop` stores the ref name (e.g. "My Integer (Main Tree)") - the same
-    string that appears in the per-signature reference collection on
-    scene.sna chosen by the owning container's sn_class_body_signature.
+    `prop` shows the attached property node's display name ("My Integer
+    (Main Tree)") but stores its id in `prop_ref_id` (see core/references.py).
     """
 
-    prop: bpy.props.StringProperty(
-        name="Property",
-        description="Property node attached to this container",
-        update=_entry_prop_changed,
+    prop: make_reference_property(
+        "prop",
+        bpy.props.StringProperty(
+            name="Property",
+            description="Property node attached to this container",
+            update=_entry_prop_changed,
+        ),
     )
+    prop_ref_id: bpy.props.StringProperty(options={"HIDDEN"})
 
 
 # -----------------------------------------------------------------------------
@@ -80,8 +82,6 @@ class SNA_OT_AddClassBodyProperty(bpy.types.Operator):
             return {"CANCELLED"}
         node.class_body_properties.add()
         node._generate()
-        if node.node_tree:
-            node.node_tree.is_dirty = True
         return {"FINISHED"}
 
 
@@ -102,8 +102,6 @@ class SNA_OT_RemoveClassBodyProperty(bpy.types.Operator):
         if 0 <= self.index < len(node.class_body_properties):
             node.class_body_properties.remove(self.index)
             node._generate()
-            if node.node_tree:
-                node.node_tree.is_dirty = True
         return {"FINISHED"}
 
 
@@ -166,17 +164,10 @@ class ClassBodyContainerMixin:
         Entries whose `prop` is empty or resolves to a missing node are skipped
         silently - container generation should treat them as no-ops.
         """
-        coll = getattr(bpy.context.scene.sna, self._class_body_collection_attr())
         for entry in self.class_body_properties:
-            if not entry.prop:
-                continue
-            ref = coll.get(entry.prop)
-            if not ref:
-                continue
-            prop_node = ref.node
-            if prop_node is None:
-                continue
-            yield entry, prop_node
+            prop_node = find_node(entry.prop_ref_id)
+            if prop_node is not None:
+                yield entry, prop_node
 
     def collect_class_body_annotations(self):
         """Return a list of annotation lines for this container's class body.

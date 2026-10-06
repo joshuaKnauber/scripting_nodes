@@ -331,7 +331,7 @@ def get_items_{self.prop_name}(self, context):
 
         update_code = ""
         if has_update:
-            update_body = indent(update_socket.eval("pass"), 2)
+            update_body = indent(update_socket.eval("pass"), 1)
             update_code = f"""
 def update_{self.prop_name}(self, context):
     {update_body}

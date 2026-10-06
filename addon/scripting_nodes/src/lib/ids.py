@@ -2,5 +2,5 @@ from uuid import uuid4
 
 
 def get_short_id():
-    """Returns a unique id"""
-    return uuid4().hex[:5].upper()
+    """A unique id for nodes and trees. Used in generated identifiers."""
+    return uuid4().hex[:10].upper()

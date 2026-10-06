@@ -49,22 +49,20 @@ class SNA_Node_SetProperty(BlendDataModeMixin, ScriptingBaseNode, bpy.types.Node
 
     def generate(self):
         data_code, prop_name, error = self.get_prop_data_and_name()
-        next_code = indent(self.outputs[0].eval(), 4)
+        next_code = self.outputs[0].eval()
 
         if error:
             self.code_inline = f"""
-                print("Set Property: {error}")
-                {next_code}
+                print({("Set Property: " + error)!r})
+                {indent(next_code, 4)}
             """
             return
 
         if not prop_name:
-            self.code_inline = f"""
-                {next_code}
-            """
+            self.code_inline = next_code
             return
 
         self.code_inline = f"""
             {data_code}.{prop_name} = {self.inputs["Value"].eval()}
-            {next_code}
+            {indent(next_code, 3)}
         """

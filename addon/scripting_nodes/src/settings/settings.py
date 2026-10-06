@@ -48,7 +48,12 @@ def _collect_signatures():
     Returns {sig_key: frozenset(bl_idnames)}.
     """
     sigs = {}
-    for cls in ScriptingBaseNode.__subclasses__():
+    classes, stack = [], list(ScriptingBaseNode.__subclasses__())
+    while stack:
+        cls = stack.pop()
+        classes.append(cls)
+        stack.extend(cls.__subclasses__())
+    for cls in classes:
         for tup in getattr(cls, "sn_reference_properties", {}).values():
             if not tup:
                 continue

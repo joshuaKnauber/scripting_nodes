@@ -76,7 +76,6 @@ class GroupInterfaceMixin:
                 ):
                     if node._sync_sockets():
                         node._generate()
-                        ntree.is_dirty = True
 
     def _socket_collection(self):
         return self.outputs if self.socket_direction == "OUTPUT" else self.inputs

@@ -205,7 +205,7 @@ class SNA_Node_Group(bpy.types.NodeCustomGroup, ScriptingBaseNode):
         if not self.node_tree or not getattr(self.node_tree, "is_group", False):
             if not self.data_only and len(self.outputs) > 0:
                 next_code = self.outputs[0].eval()
-                self.code_inline = f"{indent(next_code, 3)}"
+                self.code_inline = next_code
             return
 
         func_name = self.node_tree.module_name

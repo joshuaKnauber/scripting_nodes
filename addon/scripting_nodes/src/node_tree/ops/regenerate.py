@@ -1,19 +1,16 @@
-from ...lib.trees import (
-    scripting_node_trees,
-    sn_nodes,
-)
 import bpy
+
+from ...core import scheduler
 
 
 class SNA_OT_RegenerateAllNodes(bpy.types.Operator):
     bl_idname = "sna.regenerate"
     bl_label = "Regenerate All Nodes"
-    bl_description = "Regenerates the code for all nodes in your addon"
+    bl_description = "Regenerate the code of all nodes and reload the addon"
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context: bpy.types.Context):
-        for ntree in scripting_node_trees():
-            for node in sn_nodes(ntree):
-                node._generate()
+        scheduler.request_full()
+        scheduler.flush()
         self.report({"INFO"}, "Regenerated all nodes")
         return {"FINISHED"}

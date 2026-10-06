@@ -42,5 +42,5 @@ class SNA_Node_SetVariable(ScriptingBaseNode, bpy.types.Node):
             self.code_imports = f"from .{target.id_data.module_name} import {setter}"
         self.code_inline = f"""
             {setter}({self.inputs[1].eval()})
-            {indent(self.outputs[0].eval(), 4)}
+            {indent(self.outputs[0].eval(), 3)}
         """

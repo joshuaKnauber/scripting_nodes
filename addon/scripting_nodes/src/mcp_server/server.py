@@ -18,6 +18,7 @@ from threading import Thread
 import json
 import traceback
 
+from ..core import scheduler
 from ..lib.version import addon_version
 from . import bridge
 from .tools import TOOLS
@@ -91,6 +92,14 @@ def _handle_tools_list(req_id, params):
     return _ok(req_id, {"tools": tools})
 
 
+def _run_tool(fn, args):
+    """Runs on the main thread: the tool, then any regeneration it caused, so
+    the result (and the next tool call) sees up-to-date code."""
+    result = fn(**args)
+    scheduler.flush()
+    return result
+
+
 def _handle_tools_call(req_id, params):
     name = (params or {}).get("name")
     args = (params or {}).get("arguments") or {}
@@ -98,7 +107,9 @@ def _handle_tools_call(req_id, params):
         return _err(req_id, -32602, f"Unknown tool: {name!r}")
     fn = TOOLS[name]["fn"]
     try:
-        result = bridge.call_on_main(fn, timeout=TOOL_TIMEOUT_SECONDS, **args)
+        result = bridge.call_on_main(
+            _run_tool, timeout=TOOL_TIMEOUT_SECONDS, fn=fn, args=args
+        )
         text = json.dumps(result, indent=2, default=str)
         return _ok(req_id, {"content": [{"type": "text", "text": text}]})
     except Exception as exc:

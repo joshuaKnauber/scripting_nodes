@@ -17,7 +17,7 @@ from ..lib.trees import (
 )
 from ..nodes.base_node import ScriptingBaseNode
 from ..nodes.categories.categories import category_label
-from ..core.generators.node_tree import code_gen_node_tree
+from ..core import compiler, scheduler
 
 
 _READ_MAX_LINES = 300
@@ -413,12 +413,12 @@ def _coerce_reference_value(node, prop_name, value):
 # --- tree update plumbing ---------------------------------------------------
 
 
-# NodeTree.update only fires on UI-driven edits — call this after any
-# Python-driven node/link mutation so SN's update_links → _generate
-# propagation runs. The first call for a tree is snapshot-only (PREVIOUS_LINKS
-# gate), so callers should also _generate() the affected endpoints explicitly.
+# NodeTree.update only fires on UI-driven edits - call this after any
+# Python-driven node/link mutation so the tree is regenerated. Every tool call
+# ends with a scheduler flush (see server._run_tool).
 def _drive_tree_update(ntree):
     ntree.update()
+    scheduler.request_tree(ntree)
 
 
 def _force_regen(*nodes):
@@ -438,7 +438,7 @@ def list_node_trees():
                 "id": ntree.id,
                 "module_name": ntree.module_name,
                 "is_group": bool(ntree.is_group),
-                "is_dirty": bool(ntree.is_dirty),
+                "has_pending_changes": scheduler.has_pending(),
                 "node_count": sum(1 for _ in sn_nodes(ntree)),
                 "link_count": len(ntree.links),
             }
@@ -454,7 +454,7 @@ def get_node_tree(tree_name: str):
         "id": ntree.id,
         "module_name": ntree.module_name,
         "is_group": bool(ntree.is_group),
-        "is_dirty": bool(ntree.is_dirty),
+        "has_pending_changes": scheduler.has_pending(),
         "nodes": [_node_summary(n) for n in sn_nodes(ntree)],
         "links": [_serialize_link(l) for l in ntree.links],
     }
@@ -478,7 +478,7 @@ def get_tree_code(tree_name: str):
         "name": ntree.name,
         "module_name": ntree.module_name,
         "is_group": bool(ntree.is_group),
-        "code": code_gen_node_tree(ntree),
+        "code": compiler.compile_tree(ntree),
     }
 
 
@@ -489,7 +489,7 @@ def get_addon_code():
                 "name": ntree.name,
                 "module_name": ntree.module_name,
                 "is_group": bool(ntree.is_group),
-                "code": code_gen_node_tree(ntree),
+                "code": compiler.compile_tree(ntree),
             }
             for ntree in scripting_node_trees()
         ]

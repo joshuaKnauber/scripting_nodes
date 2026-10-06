@@ -4,6 +4,7 @@ parameter / return-value lists."""
 import re
 import bpy
 
+from ....core import scheduler
 from ....lib.trees import node_by_id
 from ....sockets.socket_types import DATA_SOCKET_ENUM_ITEMS
 
@@ -21,8 +22,8 @@ def slugify(name, fallback):
 
 def _mark_dirty(node):
     """Force the tree to regenerate after the interface changes."""
-    if node and node.node_tree:
-        node.node_tree.is_dirty = True
+    if node:
+        scheduler.request_tree(node.id_data)
 
 
 class SNA_OT_AddGroupItem(bpy.types.Operator):

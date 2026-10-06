@@ -1,11 +1,24 @@
-import bpy
 import re
-from uuid import uuid4
+import sys
+
+import bpy
+
+from ..core import scheduler
+from ..lib.ids import get_short_id
+
+# Module names that would shadow something Blender or Python needs
+_RESERVED_MODULES = {"bpy", "bmesh", "mathutils", "gpu", "gpu_extras", "blf", "aud"}
+_RESERVED_MODULES |= {"bl_math", "freestyle", "idprop", "imbuf", "addon_utils"}
 
 
-def get_short_id():
-    """Returns a unique id"""
-    return uuid4().hex[:8].upper()
+def _safe_module_name(name):
+    if (
+        name in _RESERVED_MODULES
+        or name in sys.stdlib_module_names
+        or name.startswith(("bl_", "_"))
+    ):
+        return name + "_addon"
+    return name
 
 
 def _sanitize_identifier(raw):
@@ -20,78 +33,47 @@ def _sanitize_identifier(raw):
     return s.lstrip("0123456789")
 
 
+def _rebuild(self, context):
+    # Addon-level settings (name, prefix, namespace, ...) feed into the code
+    # of many nodes, so regenerate everything.
+    scheduler.request_full()
+
+
+def _normalized(prop, transform):
+    def update(self, context):
+        cleaned = transform(_sanitize_identifier(getattr(self, prop)))
+        if cleaned != getattr(self, prop):
+            setattr(self, prop, cleaned)  # re-enters this callback once
+        else:
+            scheduler.request_full()
+
+    return update
+
+
 class SNA_AddonSettings(bpy.types.PropertyGroup):
-    def update_is_dirty(self, context):
-        self.is_dirty = True
-
-    def _refresh_all_codegen(self):
-        """Re-run generate() on every SN node. Required when an addon-level
-        setting (class prefix, idname namespace, ...) feeds into emitted code
-        - nodes cache their generated strings, so without this the rewritten
-        files would still embed the old prefix."""
-        # Lazy import: this module loads before features/nodes during register.
-        from ..lib.trees import (
-            scripting_node_trees,
-            sn_nodes,
-        )
-
-        for ntree in scripting_node_trees():
-            for node in sn_nodes(ntree):
-                node._generate()
-
-    def _normalize_module_name(self, context):
-        cleaned = _sanitize_identifier(self.module_name_overwrite).lower()
-        if cleaned != self.module_name_overwrite:
-            self.module_name_overwrite = cleaned
-        else:
-            self._refresh_all_codegen()
-            self.is_dirty = True
-
-    def _normalize_class_prefix(self, context):
-        cleaned = _sanitize_identifier(self.class_prefix_overwrite).upper()
-        if cleaned != self.class_prefix_overwrite:
-            self.class_prefix_overwrite = cleaned
-        else:
-            self._refresh_all_codegen()
-            self.is_dirty = True
-
-    def _normalize_idname_namespace(self, context):
-        cleaned = _sanitize_identifier(self.idname_namespace_overwrite).lower()
-        if cleaned != self.idname_namespace_overwrite:
-            self.idname_namespace_overwrite = cleaned
-        else:
-            self._refresh_all_codegen()
-            self.is_dirty = True
-
     ### General Settings
 
     addon_name: bpy.props.StringProperty(
         name="Addon Name",
         description="The name of the addon",
         default="My Addon",
-        update=update_is_dirty,
+        update=_rebuild,
     )
 
     ### Build Settings
-
-    is_dirty: bpy.props.BoolProperty(
-        default=True,
-        name="Is Dirty",
-        description="If this is true, the entire addon will be rebuilt including assets and default files",
-    )
 
     enabled: bpy.props.BoolProperty(
         name="Enabled",
         description="Enable or disable the addon",
         default=True,
-        update=update_is_dirty,
+        update=_rebuild,
     )
 
     module_name_overwrite: bpy.props.StringProperty(
         name="Module Name",
         description="An optional name for the folder the addon should be created in",
         default="",
-        update=_normalize_module_name,
+        update=_normalized("module_name_overwrite", str.lower),
     )
 
     class_prefix_overwrite: bpy.props.StringProperty(
@@ -101,7 +83,7 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
             "MYADDON_PT_Panel_xxx). Defaults to the uppercased module name"
         ),
         default="",
-        update=_normalize_class_prefix,
+        update=_normalized("class_prefix_overwrite", str.upper),
     )
 
     idname_namespace_overwrite: bpy.props.StringProperty(
@@ -111,13 +93,14 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
             "myaddon.operator_xxx). Defaults to the module name"
         ),
         default="",
-        update=_normalize_idname_namespace,
+        update=_normalized("idname_namespace_overwrite", str.lower),
     )
 
     persist_addon: bpy.props.BoolProperty(
         name="Persist Addon",
-        description="Persist the addon when switching files",
+        description="Keep the addon enabled when switching files",
         default=False,
+        update=_rebuild,
     )
 
     addon_uid: bpy.props.StringProperty(
@@ -136,11 +119,12 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
 
     @property
     def module_name(self):
-        return (
-            self.module_name_overwrite
-            or re.sub(r"[^a-zA-Z\s]", "", self.addon_name).replace(" ", "_").lower()
-            or "sna_addon"
-        )
+        if self.module_name_overwrite:
+            name = self.module_name_overwrite
+        else:
+            words = re.sub(r"[^a-zA-Z\s]", "", self.addon_name).split()
+            name = "_".join(words).lower()
+        return _safe_module_name(name or "sna_addon")
 
     @property
     def class_prefix(self):

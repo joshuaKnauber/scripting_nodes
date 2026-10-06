@@ -55,5 +55,5 @@ class SNA_Node_RunOperator(OperatorCallMixin, ScriptingBaseNode, bpy.types.Node)
 
         self.code_inline = f"""
             bpy.ops.{bl_idname}({args})
-            {indent(self.outputs[0].eval(), 4)}
+            {indent(self.outputs[0].eval(), 3)}
         """
