@@ -1,4 +1,4 @@
-# Scripting Nodes website
+# Scripting Nodes
 
 Docs site built with [Fumadocs](https://fumadocs.dev) on Next.js, exported as a static site.
 
