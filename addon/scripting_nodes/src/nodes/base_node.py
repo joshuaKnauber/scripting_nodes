@@ -229,6 +229,9 @@ class ScriptingBaseNode:
         socket.name = label or socket.bl_label
         socket.display_shape = socket.socket_shape
         socket.is_dynamic = dynamic
+        if socket.is_output and socket.socket_type == "PROGRAM":
+            # flow code is pulled from a single downstream node
+            socket.link_limit = 1
 
     def update_dynamic_sockets(self):
         """A linked dynamic socket becomes a normal (removable) one and a new
@@ -270,7 +273,7 @@ class ScriptingBaseNode:
         return display_lines
 
     def draw_buttons(self, context, layout):
-        error = errors.node_errors.get(self.id)
+        error = errors.node_message(self.id)
         if error:
             box = layout.box()
             box.alert = True

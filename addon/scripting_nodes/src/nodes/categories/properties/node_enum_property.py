@@ -284,11 +284,11 @@ class SNA_Node_EnumProperty(ScriptingBaseNode, bpy.types.Node):
             items_code = self.inputs["Items"].eval("[]")
             prop_args = [
                 f"items={items_code}",
-                f'name="{self.prop_label}"',
-                f'description="{self.prop_description}"',
+                f"name={self.prop_label!r}",
+                f"description={self.prop_description!r}",
             ]
             if self.prop_default:
-                prop_args.append(f'default="{self.prop_default}"')
+                prop_args.append(f"default={self.prop_default!r}")
             prop_args.append(f"options={options_str}")
             if has_update:
                 prop_args.append(f"update=update_{self.prop_name}")
@@ -312,8 +312,8 @@ def get_items_{self.prop_name}(self, context):
 """
             prop_args = [
                 f"items=get_items_{self.prop_name}",
-                f'name="{self.prop_label}"',
-                f'description="{self.prop_description}"',
+                f"name={self.prop_label!r}",
+                f"description={self.prop_description!r}",
             ]
             prop_args.append(f"options={options_str}")
             if has_update:

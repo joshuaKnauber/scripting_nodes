@@ -12,4 +12,4 @@ class SNA_Node_InvertBoolean(ScriptingBaseNode, bpy.types.Node):
 
     def generate(self):
         value = self.inputs["Boolean"].eval()
-        self.outputs["Result"].code = f"not {value}"
+        self.outputs["Result"].code = f"(not {value})"

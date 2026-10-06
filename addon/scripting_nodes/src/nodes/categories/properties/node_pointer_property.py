@@ -329,8 +329,8 @@ class SNA_Node_PointerProperty(ScriptingBaseNode, bpy.types.Node):
         prop_args = []
         if type_expr:
             prop_args.append(f"type={type_expr}")
-        prop_args.append(f'name="{self.prop_label}"')
-        prop_args.append(f'description="{self.prop_description}"')
+        prop_args.append(f"name={self.prop_label!r}")
+        prop_args.append(f"description={self.prop_description!r}")
         if options_str != "set()":
             prop_args.append(f"options={options_str}")
         if has_update:

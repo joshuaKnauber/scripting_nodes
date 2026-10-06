@@ -192,8 +192,8 @@ class SNA_Node_CollectionProperty(ScriptingBaseNode, bpy.types.Node):
         prop_args = []
         if group_class:
             prop_args.append(f"type={group_class}")
-        prop_args.append(f'name="{self.prop_label}"')
-        prop_args.append(f'description="{self.prop_description}"')
+        prop_args.append(f"name={self.prop_label!r}")
+        prop_args.append(f"description={self.prop_description!r}")
         if options_str != "set()":
             prop_args.append(f"options={options_str}")
         return prop_args, group_class

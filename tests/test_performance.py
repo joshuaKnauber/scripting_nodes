@@ -39,7 +39,7 @@ class PerformanceTest(unittest.TestCase):
             f"\n  {CHAIN + 1} nodes: full flush {full * 1000:.0f}ms, "
             f"edit {incremental * 1000:.0f}ms"
         )
-        self.assertIn('"changed"', helpers.tree_source(tree))
+        self.assertIn(repr("changed"), helpers.tree_source(tree))
         self.assertLess(full, 3)
         self.assertLess(incremental, 1)
         bpy.data.node_groups.remove(tree)

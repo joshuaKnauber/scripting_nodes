@@ -1,5 +1,6 @@
-from ....lib.code_format import indent
-from ....lib.trees import node_by_id
+from ....lib.code_format import flatten_multiline_strings, indent
+from ....core import scheduler
+from ....lib.trees import node_by_id, scripting_node_trees
 from ...base_node import ScriptingBaseNode
 from ....sockets.socket_types import (
     DATA_SOCKET_ENUM_ITEMS,
@@ -210,7 +211,20 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
             self._generate()
 
     def _sync_sockets(self):
-        """Synchronize sockets with the variables list."""
+        """Synchronize sockets with the variables list, keeping links of
+        variables that still exist (matched by name)."""
+        tree = self.id_data
+        saved_in = {s.name: [l.from_socket for l in s.links] for s in self.inputs[1:]}
+        saved_out = {s.name: [l.to_socket for l in s.links] for s in self.outputs[1:]}
+        self._rebuild_variable_sockets()
+        for socket in self.inputs[1:]:
+            for other in saved_in.get(socket.name, ()):
+                tree.links.new(other, socket)
+        for socket in self.outputs[1:]:
+            for other in saved_out.get(socket.name, ()):
+                tree.links.new(socket, other)
+
+    def _rebuild_variable_sockets(self):
         variables = self.get_variables()
 
         # Get expected input/output variable sockets
@@ -288,7 +302,7 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
 
         input_code = "\n".join(input_assignments) if input_assignments else ""
 
-        script_content = self._get_script_content()
+        script_content = flatten_multiline_strings(self._get_script_content())
         if not script_content.strip():
             script_content = "pass"
 
@@ -297,6 +311,17 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
             {indent(script_content, 3)}
             {indent(self.outputs[0].eval(), 3)}
         """
+
+    def source_fingerprint(self):
+        """Changes whenever the script source changes (see _watch_scripts)."""
+        if self.source_type == "INTERNAL":
+            return hash(self.text_block.as_string()) if self.text_block else None
+        path = bpy.path.abspath(self.filepath) if self.filepath else ""
+        try:
+            stat = os.stat(path)
+            return (path, stat.st_mtime_ns, stat.st_size)
+        except OSError:
+            return (path, None)
 
     def _get_script_content(self):
         """Get the script content for production embedding."""
@@ -315,3 +340,32 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
                 else:
                     return f"# File not found: {filepath}"
         return ""
+
+
+# node id -> last seen source fingerprint
+_fingerprints = {}
+
+
+def _watch_scripts():
+    """Text edits and file saves don't trigger RNA updates; poll for them."""
+    seen = set()
+    for tree in scripting_node_trees():
+        for node in tree.nodes:
+            if node.bl_idname != "SNA_Node_Script":
+                continue
+            seen.add(node.id)
+            fingerprint = node.source_fingerprint()
+            if node.id in _fingerprints and _fingerprints[node.id] != fingerprint:
+                node._generate()
+            _fingerprints[node.id] = fingerprint
+    for node_id in set(_fingerprints) - seen:
+        del _fingerprints[node_id]
+
+
+def register():
+    scheduler.add_watcher(_watch_scripts)
+
+
+def unregister():
+    scheduler.remove_watcher(_watch_scripts)
+    _fingerprints.clear()

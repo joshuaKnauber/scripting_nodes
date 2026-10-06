@@ -217,8 +217,8 @@ class SNA_Node_BoolProperty(ScriptingBaseNode, bpy.types.Node):
         has_update = update_socket and update_socket.is_linked
 
         prop_args = [
-            f'name="{self.prop_label}"',
-            f'description="{self.prop_description}"',
+            f"name={self.prop_label!r}",
+            f"description={self.prop_description!r}",
             f"default={self.prop_default}",
         ]
         prop_args.append(f"options={options_str}")

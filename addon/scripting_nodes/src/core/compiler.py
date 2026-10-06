@@ -17,6 +17,10 @@ from ..lib.trees import scripting_node_trees, sn_nodes
 
 TEMPLATES = os.path.join(os.path.dirname(__file__), "templates")
 
+# relpath -> line owners of the last live (unformatted) compile, used to show
+# load errors on the node that produced the failing line
+line_owners: dict[str, list] = {}
+
 # raw source hash -> formatted source. autopep8 is by far the slowest step of
 # compiling, and most flushes only change one tree.
 _format_cache: dict[str, str] = {}
@@ -44,8 +48,14 @@ def compile_addon(settings=None, pretty=False) -> dict[str, str]:
         "blender_manifest.toml": _render("blender_manifest.txt", values),
         "addon/__init__.py": "",
     }
+    owners = {}
     for tree in trees:
-        files[f"addon/{tree.module_name}.py"] = compile_tree(tree, pretty)
+        rel = f"addon/{tree.module_name}.py"
+        source, owners[rel] = assemble_tree(tree)
+        files[rel] = _format(source) if pretty else source
+    if not pretty:
+        line_owners.clear()
+        line_owners.update(owners)
     return files
 
 
@@ -64,23 +74,33 @@ def _render(template, values):
 
 def compile_tree(tree, pretty=True) -> str:
     """Python source of one tree module."""
-    source = _assemble_tree(tree)
+    source, _ = assemble_tree(tree)
     return _format(source) if pretty else source
 
 
-def _assemble_tree(tree) -> str:
+def assemble_tree(tree):
+    """(source, line_owners) of one tree module, unformatted.
+
+    `line_owners[i]` is the id of the node that produced line i + 1 (or None),
+    so errors pointing at a line can be shown on the node. Flow code nested
+    inside another node's block is attributed to that outer node.
+    """
     nodes = sn_nodes(tree)
+    blocks = []  # each block: list of (line, owner node id or None)
+
+    def block(text, owner=None):
+        return [(line, owner) for line in text.split("\n")]
 
     import_lines = {"import bpy"}
     for node in nodes:
         for line in normalize_indents(node.code_imports).split("\n"):
             if line.strip():
                 import_lines.add(line.strip())
-    parts = ["\n".join(sorted(import_lines)), ""]
+    blocks.append(block("\n".join(sorted(import_lines))))
 
     for node in nodes:
         if node.code_global:
-            parts.append(normalize_indents(node.code_global))
+            blocks.append(block(normalize_indents(node.code_global), node.id))
 
     # PropertyGroups first: Operator/Preferences/Panel class bodies may
     # reference them (PointerProperty(type=PG)) at class-definition time.
@@ -88,25 +108,33 @@ def _assemble_tree(tree) -> str:
     root_nodes.sort(key=lambda n: 0 if n.bl_idname == "SNA_Node_PropertyGroup" else 1)
     for node in root_nodes:
         if node.code_module:
-            parts.append(normalize_indents(node.code_module))
+            blocks.append(block(normalize_indents(node.code_module), node.id))
 
     if tree.is_group:
-        parts.append(_group_function(tree))
+        blocks.append(block(_group_function(tree)))
 
-    register = [normalize_indents(n.code_register) for n in nodes if n.code_register]
-    unregister = [
-        normalize_indents(n.code_unregister) for n in nodes if n.code_unregister
-    ]
-    parts.append(_function("register", register))
-    parts.append(_function("unregister", unregister))
-    return "\n\n".join(parts) + "\n"
+    for name, field in (
+        ("register", "code_register"),
+        ("unregister", "code_unregister"),
+    ):
+        function = [(f"def {name}():", None)]
+        for node in nodes:
+            if getattr(node, field):
+                body = normalize_indents(getattr(node, field))
+                function += [("    " + line, node.id) for line in body.split("\n")]
+        if len(function) == 1:
+            function.append(("    pass", None))
+        blocks.append(function)
 
-
-def _function(name, bodies):
-    lines = [line for body in bodies for line in body.split("\n")]
-    if not lines:
-        lines = ["pass"]
-    return f"def {name}():\n" + "\n".join(f"    {line}" for line in lines)
+    lines, owners = [], []
+    for i, current in enumerate(blocks):
+        if i:
+            lines += ["", ""]
+            owners += [None, None]
+        for line, owner in current:
+            lines.append(line)
+            owners.append(owner)
+    return "\n".join(lines) + "\n", owners
 
 
 # Names from the caller's method scope that group functions pull in so emitted

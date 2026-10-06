@@ -253,7 +253,37 @@ def _context_ready() -> bool:
     return scene is not None and hasattr(scene, "sna")
 
 
+# Callables polled every WATCH_EVERY ticks to detect changes Blender doesn't
+# report through RNA updates (e.g. edits to a Text datablock or an external
+# file used by a Script node). They call request_node()/request_tree().
+_watchers: list = []
+WATCH_EVERY = 5
+_ticks = 0
+
+
+def add_watcher(fn):
+    if fn not in _watchers:
+        _watchers.append(fn)
+
+
+def remove_watcher(fn):
+    if fn in _watchers:
+        _watchers.remove(fn)
+
+
+def _run_watchers():
+    for fn in list(_watchers):
+        try:
+            fn()
+        except Exception as exc:
+            log("ERROR", f"Watcher {getattr(fn, '__name__', fn)} failed: {exc}")
+
+
 def _tick():
+    global _ticks
+    _ticks += 1
+    if _ticks % WATCH_EVERY == 0 and _context_ready():
+        _run_watchers()
     if has_pending():
         flush()
     return TICK_SECONDS

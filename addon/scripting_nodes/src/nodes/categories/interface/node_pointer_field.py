@@ -74,7 +74,7 @@ class SNA_Node_PointerField(BlendDataModeMixin, ScriptingBaseNode, bpy.types.Nod
 
         if error:
             self.code_inline = f"""
-                {layout_code}.label(text="{error}", icon="ERROR")
+                {layout_code}.label(text={error!r}, icon="ERROR")
                 {indent(output_code, 4)}
             """
             return

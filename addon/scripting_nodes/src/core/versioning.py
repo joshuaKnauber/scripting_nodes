@@ -10,7 +10,7 @@ from ..lib.logger import log
 from ..lib.trees import sn_nodes
 from .references import find_node_by_display_name, ref_id_key
 
-DATA_VERSION = 1
+DATA_VERSION = 2
 
 
 def _v1_references_by_id(tree):
@@ -33,8 +33,18 @@ def _migrate_reference(owner, prop):
     del owner[prop]
 
 
+def _v2_single_flow_links(tree):
+    """Program/interface outputs only ever followed their first link; they
+    now allow one link, so Blender replaces instead of silently ignoring."""
+    for node in sn_nodes(tree):
+        for out in node.outputs:
+            if getattr(out, "socket_type", None) == "PROGRAM":
+                out.link_limit = 1
+
+
 STEPS = {
     1: _v1_references_by_id,
+    2: _v2_single_flow_links,
 }
 
 

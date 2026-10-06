@@ -371,8 +371,8 @@ class SNA_Node_FloatVectorProperty(ScriptingBaseNode, bpy.types.Node):
         default_str = "(" + ", ".join(default_components) + ")"
 
         prop_args = [
-            f'name="{self.prop_label}"',
-            f'description="{self.prop_description}"',
+            f"name={self.prop_label!r}",
+            f"description={self.prop_description!r}",
             f"default={default_str}",
             f"size={self.prop_size}",
         ]

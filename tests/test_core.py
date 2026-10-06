@@ -59,16 +59,16 @@ class CoreTest(unittest.TestCase):
     def test_links_propagate_into_code(self):
         tree, _, _ = trigger_print_tree("first", "second")
         source = helpers.tree_source(tree)
-        self.assertIn('"first"', source)
-        self.assertIn('"second"', source)
-        self.assertLess(source.index('"first"'), source.index('"second"'))
+        self.assertIn(repr("first"), source)
+        self.assertIn(repr("second"), source)
+        self.assertLess(source.index(repr("first")), source.index(repr("second")))
 
     def test_property_change_regenerates(self):
         tree, _, (p,) = trigger_print_tree("before")
         p.inputs[1].value = "after"
         helpers.flush()
-        self.assertIn('"after"', read(module_file(tree)))
-        self.assertNotIn('"before"', read(module_file(tree)))
+        self.assertIn(repr("after"), read(module_file(tree)))
+        self.assertNotIn(repr("before"), read(module_file(tree)))
 
     def test_generate_error_is_contained(self):
         tree, _, (p1, p2) = trigger_print_tree("a", "b")
@@ -108,7 +108,7 @@ class CoreTest(unittest.TestCase):
         p.inputs[1].value = "two"
         helpers.flush()
         self.assertIsNot(sys.modules[tree_mod], old_module)
-        self.assertIn('"two"', read(module_file(tree)))
+        self.assertIn(repr("two"), read(module_file(tree)))
 
     def test_syntax_error_keeps_previous_version(self):
         tree, _, _ = trigger_print_tree("ok")
@@ -184,7 +184,7 @@ class CoreTest(unittest.TestCase):
         helpers.sn("src.handlers.events.on_undo").on_undo_redo()
         helpers.flush()
         self.assertNotIn("garbage", p.code_inline)
-        self.assertIn('"fresh"', read(module_file(tree)))
+        self.assertIn(repr("fresh"), read(module_file(tree)))
 
     def test_duplicated_tree_gets_own_module(self):
         tree, _, _ = trigger_print_tree("x", name="Original")
@@ -246,7 +246,7 @@ class CoreTest(unittest.TestCase):
         export = helpers.sn("src.core.ops.export")
         files = export.build_files()
         source = files[f"addon/{tree.module_name}.py"]
-        self.assertIn('"shipped"', source)
+        self.assertIn(repr("shipped"), source)
         self.assertNotIn("_sn_overlay", source)
         # live code still has the dev overlay hook
         self.assertIn("_sn_overlay", p.code_inline)

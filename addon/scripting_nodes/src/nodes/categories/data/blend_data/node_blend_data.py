@@ -27,6 +27,19 @@ class SNA_Node_BlendData(ScriptingBaseNode, bpy.types.Node):
     )
 
     # Access mode for collections
+    def _update_access_mode(self, context):
+        """Swap the Index/Name input to match the access mode."""
+        wanted = {
+            "INDEX": ("ScriptingIntegerSocket", "Index"),
+            "NAME": ("ScriptingStringSocket", "Name"),
+        }.get(self.access_mode)
+        for inp in list(self.inputs):
+            if inp.name in ("Index", "Name") and (not wanted or inp.name != wanted[1]):
+                self.inputs.remove(inp)
+        if wanted and wanted[1] not in self.inputs:
+            self.add_input(*wanted)
+        self._generate()
+
     access_mode: bpy.props.EnumProperty(
         name="Access Mode",
         description="How to access items in collections",
@@ -36,6 +49,7 @@ class SNA_Node_BlendData(ScriptingBaseNode, bpy.types.Node):
             ("NAME", "By Name", "Access by name string"),
         ],
         default="NONE",
+        update=_update_access_mode,
     )
 
     # Store the output type as string for recreating socket

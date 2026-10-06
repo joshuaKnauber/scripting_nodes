@@ -20,4 +20,4 @@ class SNA_Node_String(ScriptingBaseNode, bpy.types.Node):
         self.add_output("ScriptingStringSocket")
 
     def generate(self):
-        self.outputs[0].code = f'"{self.value}"'
+        self.outputs[0].code = repr(self.value)

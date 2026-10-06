@@ -10,6 +10,8 @@ the appropriate conversion wrapper is applied to the generated code.
 # Format: (from_type, to_type) -> conversion_template
 # The template uses {value} as a placeholder for the source code
 
+from ..lib.code_format import is_simple, parenthesize
+
 CONVERSIONS = {
     # To String
     ("ScriptingBooleanSocket", "ScriptingStringSocket"): "str({value})",
@@ -182,7 +184,11 @@ def get_conversion(from_socket_type: str, to_socket_type: str, value_code: str) 
     conversion_key = (from_socket_type, to_socket_type)
     if conversion_key in CONVERSIONS:
         template = CONVERSIONS[conversion_key]
-        return template.format(value=value_code)
+        if template.count("{value}") > 1 and not is_simple(value_code):
+            # evaluate the source expression only once (it may have side
+            # effects or be expensive)
+            return f"(lambda _sn_v: {template.format(value='_sn_v')})({value_code})"
+        return template.format(value=parenthesize(value_code))
 
     # No conversion found - return as-is (may cause runtime errors if incompatible)
     return value_code

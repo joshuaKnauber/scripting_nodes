@@ -1,4 +1,5 @@
-"""Every node must produce code that compiles - alone, chained, and as data source."""
+"""Every node must produce code that compiles and loads - alone, chained, and as
+data source."""
 
 import unittest
 
@@ -24,6 +25,9 @@ class NodeCompileTest(unittest.TestCase):
         helpers.reset_file()
 
     def assertCompiles(self, tree, label):
+        # the flush already wrote and loaded the addon - it must have worked
+        error = helpers.sn("src.core.errors").addon_error
+        self.assertIsNone(error, f"{label}: generated addon failed to load:\n{error}")
         source = helpers.tree_source(tree)
         try:
             compile(source, f"<{label}>", "exec")

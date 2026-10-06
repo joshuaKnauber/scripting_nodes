@@ -195,7 +195,7 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
 
         # Add category (for sidebar panels)
         if self.panel_region_type == "UI" and self.panel_category:
-            class_attrs.append(f'bl_category = "{self.panel_category}"')
+            class_attrs.append(f"bl_category = {self.panel_category!r}")
 
         # Add order and options
         class_attrs.append(f"bl_order = {self.panel_order}")

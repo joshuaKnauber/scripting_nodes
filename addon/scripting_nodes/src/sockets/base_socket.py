@@ -4,7 +4,7 @@ from ..lib.sockets import (
     socket_index,
     to_socket,
 )
-from ..lib.code_format import normalize_indents
+from ..lib.code_format import normalize_indents, parenthesize
 from .conversions import get_conversion
 import bpy
 
@@ -49,7 +49,9 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
             if from_s:
                 # Apply type conversion if connected socket is a different type
                 value_code = from_s.eval()
-                return get_conversion(from_s.bl_idname, self.bl_idname, value_code)
+                converted = get_conversion(from_s.bl_idname, self.bl_idname, value_code)
+                # keep operator precedence when embedded in a bigger expression
+                return parenthesize(converted)
             return self._to_code()
 
     def _to_code(self):

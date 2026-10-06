@@ -28,7 +28,7 @@ class SNA_Node_BooleanMath(ScriptingBaseNode, bpy.types.Node):
         layout.prop(self, "comparison", text="")
 
     def generate(self):
-        value1 = self.inputs["Boolean"].eval()
-        value2 = self.inputs["Boolean"].eval()
-
-        self.outputs["Result"].code = f"{value1} {self.comparison.lower()} {value2}"
+        # both inputs are named "Boolean", so address them by index
+        value1 = self.inputs[0].eval()
+        value2 = self.inputs[1].eval()
+        self.outputs["Result"].code = f"({value1} {self.comparison.lower()} {value2})"

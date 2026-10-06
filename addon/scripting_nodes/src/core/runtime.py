@@ -15,6 +15,7 @@ contain a marker file), so a user's own addon with the same name is safe.
 
 import importlib
 import os
+import re
 import shutil
 import sys
 
@@ -103,8 +104,9 @@ def apply(files: dict[str, str]) -> bool:
 
     syntax_error = _check_syntax(changed)
     if syntax_error:
-        errors.set_addon_error(syntax_error)
-        log("ERROR", syntax_error)
+        message, rel, lineno = syntax_error
+        errors.set_addon_error(message, _blame([(rel, lineno)], message, files))
+        log("ERROR", message)
         return False
 
     _write_folder(path, changed, stale)
@@ -116,7 +118,9 @@ def apply(files: dict[str, str]) -> bool:
         return True
 
     log("ERROR", f"Generated addon failed to load, keeping previous version:\n{error}")
-    errors.set_addon_error(error)
+    errors.set_addon_error(
+        error, _blame(_traceback_locations(error, path), error, files)
+    )
     if was_loaded and current:
         # Back to what was running before
         _write_folder(path, current, [rel for rel in files if rel not in current])
@@ -134,10 +138,59 @@ def _check_syntax(files):
         try:
             compile(source, rel, "exec")
         except SyntaxError as e:
-            return (
+            message = (
                 f"Generated code has a syntax error in {rel}, line {e.lineno}: {e.msg}"
             )
+            return message, rel, e.lineno
     return None
+
+
+def _traceback_locations(text, path):
+    """(relpath, line) of every traceback frame inside the generated addon."""
+    locations = []
+    for file, line in re.findall(r'File "([^"]+)", line (\d+)', text or ""):
+        try:
+            rel = os.path.relpath(file, path).replace(os.sep, "/")
+        except ValueError:
+            continue
+        if not rel.startswith(".."):
+            locations.append((rel, int(line)))
+    return locations
+
+
+def _blame(locations, message, files):
+    """{node id: short message} for the nodes that produced the failing lines."""
+    from .compiler import line_owners
+
+    short = message.strip().splitlines()[-1] if message else "Error"
+    blamed = {}
+    for rel, lineno in locations:
+        owners = line_owners.get(rel, [])
+        if lineno and 0 < lineno <= len(owners) and owners[lineno - 1]:
+            source = files.get(rel, "")
+            blamed[_innermost_node(source, rel, lineno, owners[lineno - 1])] = short
+    return blamed
+
+
+def _innermost_node(source, rel, lineno, owner_id):
+    """Flow code of linked nodes is nested in the root node's block; find the
+    innermost node whose own code contains the failing line."""
+    from ..lib.trees import scripting_node_trees, sn_nodes
+
+    lines = source.split("\n")
+    if not 0 < lineno <= len(lines) or not lines[lineno - 1].strip():
+        return owner_id
+    wanted = lines[lineno - 1].strip()
+    best = None
+    for tree in scripting_node_trees():
+        if f"addon/{tree.module_name}.py" != rel:
+            continue
+        for node in sn_nodes(tree):
+            code = node.code_inline
+            if code and any(line.strip() == wanted for line in code.split("\n")):
+                if best is None or len(code) < len(best.code_inline):
+                    best = node
+    return best.id if best is not None else owner_id
 
 
 def _read_folder(path):

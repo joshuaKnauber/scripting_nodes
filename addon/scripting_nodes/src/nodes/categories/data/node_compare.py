@@ -30,8 +30,5 @@ class SNA_Node_Compare(ScriptingBaseNode, bpy.types.Node):
         layout.prop(self, "comparison_type", text="")
 
     def generate(self):
-        self.outputs[
-            0
-        ].code = (
-            f"{self.inputs[0].eval()} {self.comparison_type} {self.inputs[1].eval()}"
-        )
+        a, b = self.inputs[0].eval(), self.inputs[1].eval()
+        self.outputs[0].code = f"({a} {self.comparison_type} {b})"

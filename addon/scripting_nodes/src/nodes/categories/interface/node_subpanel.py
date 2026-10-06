@@ -19,10 +19,8 @@ class SNA_Node_Subpanel(ScriptingBaseNode, bpy.types.Node):
         class_prefix = bpy.context.scene.sna.addon.class_prefix
         panel_idname = f"{class_prefix}_PT_AddonPanel_{self.id}"
 
-        self.code_global = f"""
-            class {panel_idname}(bpy.types.Panel):
-                bl_idname = "{panel_idname}"
-        """
+        # layout.panel() only needs a unique id to remember the open state;
+        # no Panel class is registered for it
 
         self.outputs["Header"].layout = f"header_{self.id}"
         self.outputs["Panel"].layout = f"panel_{self.id}"

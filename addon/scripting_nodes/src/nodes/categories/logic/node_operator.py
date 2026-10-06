@@ -239,7 +239,7 @@ class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.No
 
         # Add description if provided
         if self.operator_description:
-            class_attrs.append(f'bl_description = "{self.operator_description}"')
+            class_attrs.append(f"bl_description = {self.operator_description!r}")
 
         # Add options
         class_attrs.append(f"bl_options = {options_str}")
