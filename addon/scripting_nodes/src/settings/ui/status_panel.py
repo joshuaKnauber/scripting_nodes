@@ -42,9 +42,9 @@ class SNA_PT_AddonStatus(bpy.types.Panel):
         row.operator("sna.copy_addon_error", text="", icon="COPYDOWN")
         col = box.column(align=True)
         col.scale_y = 0.8
-        width = max(
-            20, int(context.region.width / (7 * context.preferences.view.ui_scale))
-        )
+        # system.ui_scale includes the display DPI (retina)
+        char_px = 7 * context.preferences.system.ui_scale
+        width = max(20, int((context.region.width - 40) / char_px))
         lines = []
         for line in errors.addon_error.strip().splitlines()[-MAX_LINES:]:
             lines.extend(textwrap.wrap(line, width) or [""])

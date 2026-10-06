@@ -42,8 +42,23 @@ def main_area():
     return window, area
 
 
-def show_tree(tree):
+def split_main_area():
+    """Split the biggest area: left half becomes the node editor, right half
+    stays a 3D viewport (with its sidebar open on the Scripting Nodes tab)."""
     window, area = main_area()
+    region = next(r for r in area.regions if r.type == "WINDOW")
+    with bpy.context.temp_override(window=window, area=area, region=region):
+        bpy.ops.screen.area_split(direction="VERTICAL", factor=0.55)
+    views = [a for a in window.screen.areas if a.type == "VIEW_3D"]
+    left = min(views, key=lambda a: a.x)
+    right = max(views, key=lambda a: a.x)
+    left.spaces.active.show_region_ui = True
+    return right
+
+
+def show_tree(tree, area=None):
+    if area is None:
+        _, area = main_area()
     area.type = "NODE_EDITOR"
     space = area.spaces.active
     space.tree_type = "ScriptingNodeTree"
@@ -51,8 +66,25 @@ def show_tree(tree):
     space.show_region_ui = True
 
 
+def node_area():
+    window = bpy.context.window_manager.windows[0]
+    areas = [a for a in window.screen.areas if a.type == "NODE_EDITOR"]
+    return window, max(areas, key=lambda a: a.width * a.height)
+
+
+def set_sidebar_tabs(category):
+    window = bpy.context.window_manager.windows[0]
+    for area in window.screen.areas:
+        for region in area.regions:
+            if region.type == "UI":
+                try:
+                    region.active_panel_category = category
+                except (AttributeError, TypeError):
+                    pass
+
+
 def frame_all(zoom_out=0):
-    window, area = main_area()
+    window, area = node_area()
     region = next(r for r in area.regions if r.type == "WINDOW")
     with bpy.context.temp_override(window=window, area=area, region=region):
         bpy.ops.node.view_all()
@@ -71,13 +103,18 @@ def step():
             helpers.flush()
         elif s == 1:
             if _state["tree"] is not None:
-                show_tree(_state["tree"])
+                split = getattr(_state["scenario"], "LAYOUT", "") == "split"
+                show_tree(_state["tree"], split_main_area() if split else None)
             after = getattr(_state["scenario"], "after", None)
             if after:
                 after(bpy.context)
             helpers.flush()
         elif s in (3, 4):
             # Twice: the first pass can run before nodes have drawn dimensions
+            # (sidebar tab lists also only exist once a region has drawn)
+            set_sidebar_tabs(
+                getattr(_state["scenario"], "SIDEBAR_TAB", "Scripting Nodes")
+            )
             if _state["tree"] is not None:
                 frame_all(getattr(_state["scenario"], "ZOOM_OUT", 0))
         elif s == 5:
