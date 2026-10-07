@@ -19,7 +19,7 @@ pasted path that already contains it).
 
 import bpy
 
-from ..blend_data.path_utils import format_name
+from ..blend_data.path_utils import format_name, is_data_path, is_identifier
 from ..core.context import NodeError
 from ..sockets.spec import BlendData
 
@@ -80,6 +80,11 @@ class PropertyTargetMixin:
         if self.mode == "BLENDER":
             if not self.blend_prop_name:
                 raise NodeError("Paste a property path")
+            # pasted text ends up in the generated code
+            if not is_identifier(self.blend_prop_name):
+                raise NodeError(f"Invalid property name: {self.blend_prop_name}")
+            if self.blend_data_path and not is_data_path(self.blend_data_path):
+                raise NodeError(f"Invalid data path: {self.blend_data_path}")
             name = self.blend_prop_name
         else:
             target = self.target_node()

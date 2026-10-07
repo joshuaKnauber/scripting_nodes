@@ -390,3 +390,20 @@ def get_data_path_without_property(path: str) -> str:
     if len(parts) <= 1:
         return ""
     return ".".join(parts[:-1])
+
+
+_IDENTIFIER = r"[A-Za-z_][A-Za-z0-9_]*"
+_SUBSCRIPT = r"\[(?:-?\d+|'[^'\\\n]*'|\"[^\"\\\n]*\")\]"
+_DATA_PATH = re.compile(rf"{_IDENTIFIER}(?:\.{_IDENTIFIER}|{_SUBSCRIPT})*")
+
+
+def is_identifier(name: str) -> bool:
+    """True for a plain Python attribute name like `frame_end`."""
+    return bool(re.fullmatch(_IDENTIFIER, name or ""))
+
+
+def is_data_path(path: str) -> bool:
+    """True for attribute chains with constant subscripts, e.g.
+    `bpy.data.objects["Cube"].location`. Pasted paths end up in generated
+    code, so anything else (calls, operators, ...) is rejected."""
+    return bool(_DATA_PATH.fullmatch(path or ""))

@@ -19,5 +19,5 @@ def setup():
     helpers.flush()  # loads fine
     text.clear()
     text.write("def broken(:\n    pass\n")
-    script._generate()
+    script.mark_dirty()
     return tree
