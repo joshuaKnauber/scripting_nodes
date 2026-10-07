@@ -14,6 +14,7 @@ The `OperatorCallMixin` provides all of that. Concrete nodes declare
 `fixed_inputs`; one socket per operator property follows them.
 """
 
+import math
 from typing import List, Optional, Tuple
 
 import bpy
@@ -68,6 +69,8 @@ def _prop_spec(prop) -> Optional[Tuple[str, str, object, int, str]]:
     if ptype == "STRING":
         return ("ScriptingStringSocket", str(prop.default), 0, "")
     if ptype == "ENUM":
+        if prop.is_enum_flag:
+            return None  # takes a set of items, a single string won't do
         # String socket in enum-dropdown mode: identifier stored in `value`,
         # items list serialized into `enum_items_data` so the socket renders
         # a dropdown instead of a free text field.
@@ -181,6 +184,22 @@ def _blender_operator_prop_specs(
     return specs
 
 
+def _equals_default(socket, default) -> bool:
+    """True if the socket's own value is the operator property's default."""
+    value = getattr(socket, "value", None)
+    if value is None or default is None:
+        return False
+    if isinstance(default, (tuple, list)):
+        values = tuple(value)[: len(default)]
+        return len(values) == len(default) and all(
+            math.isclose(a, b, rel_tol=1e-6, abs_tol=1e-6)
+            for a, b in zip(values, default)
+        )
+    if isinstance(default, float):
+        return math.isclose(value, default, rel_tol=1e-6, abs_tol=1e-6)
+    return value == default
+
+
 def register():
     bpy.types.WindowManager.sna_blender_operators = bpy.props.CollectionProperty(
         type=SNA_BlenderOperatorRef
@@ -217,6 +236,9 @@ EXEC_CONTEXT_ITEMS = [
 ]
 
 ARG_PREFIX = "arg_"
+
+# pointers of nodes whose sockets are being synced right now
+_syncing: set = set()
 
 
 class OperatorCallMixin:
@@ -256,6 +278,19 @@ class OperatorCallMixin:
             return _sn_operator_prop_specs(self.resolve_reference("operator_sn"))
         return _blender_operator_prop_specs(self.operator_idname())
 
+    def sync_sockets(self):
+        # Sockets created after the node exists get their default value set,
+        # whose update callback would sync this node again in the middle of
+        # this sync (base_node._apply_spec -> update_value -> mark_dirty).
+        key = self.as_pointer()
+        if key in _syncing:
+            return False
+        _syncing.add(key)
+        try:
+            return super().sync_sockets()
+        finally:
+            _syncing.discard(key)
+
     def socket_specs(self):
         inputs = list(self.fixed_inputs)
         for name, idname, default, vector_dim, enum_data in self._target_prop_specs():
@@ -275,11 +310,27 @@ class OperatorCallMixin:
         return inputs, list(self.fixed_outputs)
 
     def operator_args(self, ctx) -> list[tuple[str, str]]:
-        """(property name, expression) for every operator property socket."""
+        """(property name, expression) for every operator property socket.
+
+        Blender operators often behave differently when a property isn't set
+        (e.g. Add Cube places the cube at the 3D cursor unless `location` is
+        given), so unconnected sockets still at the operator's default are
+        left out for them."""
+        defaults = {}
+        if self.mode == "BLENDER":
+            defaults = {spec[0]: spec[2] for spec in self._target_prop_specs()}
         args = []
         for socket in self.inputs:
-            if socket.identifier.startswith(ARG_PREFIX):
-                args.append((socket.name, ctx.input(socket.identifier)))
+            if not socket.identifier.startswith(ARG_PREFIX):
+                continue
+            name = socket.identifier[len(ARG_PREFIX) :]
+            if (
+                not socket.is_linked
+                and name in defaults
+                and _equals_default(socket, defaults[name])
+            ):
+                continue
+            args.append((name, ctx.input(socket.identifier)))
         return args
 
     def draw_operator_picker(self, layout) -> None:

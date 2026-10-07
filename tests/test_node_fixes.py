@@ -68,12 +68,17 @@ class NodeFixesTest(unittest.TestCase):
         node = helpers.add_node(tree, "SNA_Node_BlendData")
         node.setup_from_path("bpy.data.objects", is_root=True)
         node.access_mode = "INDEX"
-        self.assertIn("Index", node.inputs)
+        self.assertIsNotNone(node.socket("index"))
         node.access_mode = "NAME"
-        self.assertIn("Name", node.inputs)
-        self.assertNotIn("Index", node.inputs)
+        self.assertIsNotNone(node.socket("name"))
+        self.assertIsNone(node.socket("index"))
+        node.socket("name").value = "Cube"
+        trigger = helpers.add_node(tree, "SNA_Node_Trigger")
+        p = helpers.add_node(tree, "SNA_Node_Print")
+        helpers.link(tree, trigger.outputs[0], p.inputs[0])
+        helpers.link(tree, node.outputs[0], p.inputs[1])
         helpers.flush()
-        self.assertIn("[", node.outputs[0].code)
+        self.assertIn("bpy.data.objects['Cube']", helpers.tree_source(tree))
 
     # -- script node ------------------------------------------------------------
 
@@ -91,10 +96,10 @@ class NodeFixesTest(unittest.TestCase):
     def test_script_text_edits_regenerate(self):
         tree, _, script, text = self._script_tree("x = 1\n")
         scheduler = helpers.sn("src.core.scheduler")
-        scheduler._run_watchers()  # records the current source
+        scheduler.run_watchers()  # records the current source
         text.clear()
         text.write("x = 2\n")
-        scheduler._run_watchers()
+        scheduler.run_watchers()
         helpers.flush()
         self.assertIn("x = 2", helpers.tree_source(tree))
 
@@ -107,16 +112,19 @@ class NodeFixesTest(unittest.TestCase):
     def test_script_variable_changes_keep_links(self):
         tree, _, script, _ = self._script_tree("pass\n")
         script.add_variable("value", "ScriptingStringSocket", False)
-        string = helpers.add_node(tree, "SNA_Node_String")
-        helpers.link(tree, string.outputs[0], script.inputs["value"])
+        scene = helpers.add_node(tree, "SNA_Node_Scene")
+        helpers.link(tree, scene.outputs["Name"], script.socket("var_value"))
         script.add_variable("other", "ScriptingStringSocket", False)
-        self.assertTrue(script.inputs["value"].is_linked)
+        self.assertTrue(script.socket("var_value").is_linked)
+        script.remove_variable(1)
+        self.assertTrue(script.socket("var_value").is_linked)
+        self.assertIsNone(script.socket("var_other"))
 
     def test_load_error_is_shown_on_the_script_node(self):
         tree, trigger, script, text = self._script_tree("print('ok')\n")
         text.clear()
         text.write("def broken(:\n    pass\n")
-        script._generate()
+        script.mark_dirty()
         helpers.flush()
         self.assertIn("syntax error", errors().addon_error)
         self.assertIn(script.id, errors().load_errors)
@@ -124,7 +132,7 @@ class NodeFixesTest(unittest.TestCase):
         # fixing it clears the error
         text.clear()
         text.write("print('fixed')\n")
-        script._generate()
+        script.mark_dirty()
         helpers.flush()
         self.assertIsNone(errors().addon_error)
         self.assertEqual(errors().load_errors, {})

@@ -1,8 +1,17 @@
-"""
-Operators for pasting and clearing blend data paths on interface nodes.
-"""
+"""Operators for pasting and clearing the Blender data path of property nodes
+(PropertyTargetMixin in BLENDER mode: Checkbox, Number Field, ...)."""
 
 import bpy
+
+from ...data.blend_data.node_blend_data import create_chain, parse_clipboard
+
+
+def _node_poll(context):
+    return (
+        context.space_data
+        and context.space_data.type == "NODE_EDITOR"
+        and context.space_data.node_tree
+    )
 
 
 class SNA_OT_BlendDataPastePath(bpy.types.Operator):
@@ -17,135 +26,50 @@ class SNA_OT_BlendDataPastePath(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return (
-            context.space_data
-            and context.space_data.type == "NODE_EDITOR"
-            and context.space_data.node_tree
-        )
+        return _node_poll(context)
 
     def execute(self, context):
-        ntree = context.space_data.node_tree
-        node = ntree.nodes.get(self.node_name)
-
+        tree = context.space_data.node_tree
+        node = tree.nodes.get(self.node_name)
         if not node:
             self.report({"WARNING"}, "Node not found")
             return {"CANCELLED"}
-
-        clipboard = context.window_manager.clipboard
-
-        if not clipboard:
-            self.report({"WARNING"}, "Clipboard is empty")
+        segments = parse_clipboard(self, context)
+        if segments is None:
             return {"CANCELLED"}
 
-        if not clipboard.startswith("bpy."):
-            self.report({"WARNING"}, "Clipboard doesn't contain a valid bpy path")
-            return {"CANCELLED"}
+        # the last part of the path is the property, the rest owns it
+        last = segments[-1]
+        parts = last["path"].split(".")
+        prop_name = parts[-1]
+        owner_path = ".".join(parts[:-1])
 
-        from .....blend_data.path_utils import (
-            parse_blend_data_path,
-        )
-
-        segments = parse_blend_data_path(clipboard)
-
-        if not segments:
-            self.report({"WARNING"}, f"Could not parse path: {clipboard}")
-            return {"CANCELLED"}
-
-        # The last segment contains the property we want to display
-        last_segment = segments[-1]
-        last_path = last_segment["path"]
-
-        # Get the property name (last part of the path)
-        path_parts = last_path.split(".")
-        prop_name = path_parts[-1]
-
-        # Determine if we need preceding segments (blend data nodes)
         if len(segments) == 1:
-            # Only one segment - check if it needs splitting
-            if len(path_parts) > 1:
-                # Path like "bpy.context.scene.name" - data is everything except last part
-                data_path = ".".join(last_path.split(".")[:-1])
-                needs_input = False
-                node.setup_from_path(data_path, prop_name, needs_input)
-            else:
-                node.setup_from_path("", prop_name, False)
+            # e.g. bpy.context.scene.frame_end: the owner is a fixed path
+            node.setup_from_path(owner_path, prop_name, False)
         else:
-            # Multiple segments - create blend data nodes for all but the last
-            if len(path_parts) > 1:
-                remaining_path = ".".join(path_parts[:-1])
+            # e.g. bpy.data.objects["Cube"].hide_render: Blend Data nodes
+            # for the owner, connected to the Data input
+            if owner_path:
                 segments[-1] = {
-                    "path": remaining_path,
+                    "path": owner_path,
                     "is_root": False,
                     "access": "NONE",
                     "output_type": "ScriptingBlendDataSocket",
-                    "input_name": segments[-1].get("input_name", "Data"),
+                    "input_name": last.get("input_name", "Data"),
                 }
             else:
                 segments = segments[:-1]
-
-            # Create blend data nodes for the segments
-            created_nodes = []
-            node_spacing = 200
-
-            for i, segment in enumerate(segments):
-                x_offset = -(len(segments) - i) * node_spacing
-
-                new_node = ntree.nodes.new("SNA_Node_BlendData")
-                new_node.location = (node.location[0] + x_offset, node.location[1])
-
-                new_node.setup_from_path(
-                    path=segment["path"],
-                    is_root=segment["is_root"],
-                    access_mode=segment["access"],
-                    output_type=segment["output_type"],
-                    input_name=segment.get("input_name", "Data"),
-                )
-
-                if segment["access"] == "INDEX" and "access_value" in segment:
-                    for inp in new_node.inputs:
-                        if inp.name == "Index":
-                            inp.default_value = segment["access_value"]
-                            break
-                elif segment["access"] == "NAME" and "access_value" in segment:
-                    for inp in new_node.inputs:
-                        if inp.name == "Name":
-                            inp.default_value = str(segment["access_value"])
-                            break
-
-                created_nodes.append(new_node)
-
-            # Connect blend data nodes together
-            for i in range(len(created_nodes) - 1):
-                from_node = created_nodes[i]
-                to_node = created_nodes[i + 1]
-
-                from_socket = from_node.outputs[0] if from_node.outputs else None
-
-                to_socket = None
-                for inp in to_node.inputs:
-                    if inp.bl_idname == "ScriptingBlendDataSocket":
-                        to_socket = inp
-                        break
-
-                if from_socket and to_socket:
-                    ntree.links.new(from_socket, to_socket)
-
-            # Connect last blend data node to this node's Data input
-            if created_nodes:
-                last_blend_node = created_nodes[-1]
-                from_socket = (
-                    last_blend_node.outputs[0] if last_blend_node.outputs else None
-                )
-                to_socket = node.inputs.get("Data")
-
-                if from_socket and to_socket:
-                    ntree.links.new(from_socket, to_socket)
-
-            # Setup the node
+            x, y = node.location
+            chain = create_chain(tree, segments, (x - 200 * len(segments), y))
             node.setup_from_path("", prop_name, True)
+            data = node.socket("data")
+            if chain and data is not None:
+                tree.links.new(chain[-1].socket("value", output=True), data)
 
-        node_label = node.bl_label.lower()
-        self.report({"INFO"}, f"Configured {node_label} for property: {prop_name}")
+        self.report(
+            {"INFO"}, f"Configured {node.bl_label.lower()} for property: {prop_name}"
+        )
         return {"FINISHED"}
 
 
@@ -161,19 +85,12 @@ class SNA_OT_BlendDataClearPath(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        return (
-            context.space_data
-            and context.space_data.type == "NODE_EDITOR"
-            and context.space_data.node_tree
-        )
+        return _node_poll(context)
 
     def execute(self, context):
-        ntree = context.space_data.node_tree
-        node = ntree.nodes.get(self.node_name)
-
+        node = context.space_data.node_tree.nodes.get(self.node_name)
         if not node:
             self.report({"WARNING"}, "Node not found")
             return {"CANCELLED"}
-
         node.clear_blend_data_path()
         return {"FINISHED"}
