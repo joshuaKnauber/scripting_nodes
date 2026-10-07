@@ -18,6 +18,7 @@ from typing import Tuple
 
 import bpy
 
+from ..core.context import NodeError
 from ..core.references import find_node, make_reference_property
 from ..lib.trees import node_by_id
 
@@ -118,8 +119,15 @@ class ClassBodyContainerMixin:
         return nodes
 
     def annotations(self, ctx):
-        """`name: bpy.props.X(...)` lines of the attached properties."""
-        return [node.annotation(ctx) for node in self.attached_properties()]
+        """`name: bpy.props.X(...)` lines of the attached properties.
+        Incomplete properties are left out (their node shows why)."""
+        lines = []
+        for node in self.attached_properties():
+            try:
+                lines.append(node.annotation(ctx))
+            except NodeError:
+                continue
+        return lines
 
     def draw_class_body_properties(self, layout, label="Properties"):
         header = layout.row(align=True)

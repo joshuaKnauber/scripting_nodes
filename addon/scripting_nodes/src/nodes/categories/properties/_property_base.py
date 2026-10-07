@@ -80,7 +80,10 @@ class PropertyNode(ScriptingBaseNode):
     """Shared settings, naming and code of property nodes."""
 
     sn_root = True
-    sn_order = 20  # after property groups, before classes using them
+    # Property nodes only write functions/values at module level (update
+    # callbacks, enum items); classes that use them in annotations
+    # (property groups: 30+, operators/preferences: 50) come after.
+    sn_order = 20
 
     # bpy.props function and the socket type values of this property have
     bpy_type = ""
@@ -136,15 +139,20 @@ class PropertyNode(ScriptingBaseNode):
         node (the class this property is attached to)."""
         return []
 
-    def _options(self):
-        flags = {
+    def option_flags(self) -> dict:
+        """{option flag: enabled}. Extend for type specific flags."""
+        return {
             "HIDDEN": self.option_hidden,
             "SKIP_SAVE": self.option_skip_save,
             "ANIMATABLE": self.option_animatable,
             "LIBRARY_EDITABLE": self.option_library_editable,
         }
+
+    def _options(self):
         return {
-            flag for flag, on in flags.items() if on and flag in self.supported_options
+            flag
+            for flag, on in self.option_flags().items()
+            if on and flag in self.supported_options
         }
 
     def call(self, ctx) -> str:
