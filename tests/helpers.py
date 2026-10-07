@@ -78,8 +78,9 @@ def flush():
 
 
 def tree_source(tree):
-    """Generated Python source for a single tree module."""
-    return sn("src.core.compiler").compile_tree(tree)
+    """Generated Python source of one tree module, as written to disk
+    (unformatted, so substring checks don't depend on autopep8 wrapping)."""
+    return sn("src.core.compiler").compile_tree(tree, pretty=False)
 
 
 def addon_files():

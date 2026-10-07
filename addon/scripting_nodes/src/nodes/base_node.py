@@ -140,10 +140,19 @@ class ScriptingBaseNode:
 
     def sync_sockets(self):
         """Make the node's sockets match `socket_specs()`, keeping links."""
-        inputs, outputs = self.socket_specs()
-        changed = _sync(self, self.inputs, inputs, is_output=False)
-        changed |= _sync(self, self.outputs, outputs, is_output=True)
-        return changed
+        key = self.as_pointer()
+        # setting a new socket's default fires its update, which would sync
+        # this node again in the middle of this sync
+        if key in _syncing:
+            return False
+        _syncing.add(key)
+        try:
+            inputs, outputs = self.socket_specs()
+            changed = _sync(self, self.inputs, inputs, is_output=False)
+            changed |= _sync(self, self.outputs, outputs, is_output=True)
+            return changed
+        finally:
+            _syncing.discard(key)
 
     def add_dynamic_socket(self, identifier, is_output):
         """Turn the "+" socket `identifier` into a normal one, add a new "+"."""
@@ -218,6 +227,10 @@ class ScriptingBaseNode:
 # -----------------------------------------------------------------------------
 # Socket syncing
 # -----------------------------------------------------------------------------
+
+
+# pointers of nodes whose sockets are being synced right now
+_syncing: set[int] = set()
 
 
 def _in_group(socket, key):

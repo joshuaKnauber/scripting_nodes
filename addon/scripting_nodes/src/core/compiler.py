@@ -98,6 +98,7 @@ class ModuleBuilder:
         self.unregister: list[Line] = []
         self.helpers: set[str] = set()
         self._names: dict[str, int] = {}
+        self.module_scope = Scope()
         self._emitted: set[int] = set()
 
     # -- emission -----------------------------------------------------------
@@ -106,7 +107,7 @@ class ModuleBuilder:
         limit = sys.getrecursionlimit()
         sys.setrecursionlimit(max(limit, 20000))  # long flow chains recurse
         try:
-            module_scope = Scope()
+            module_scope = self.module_scope
             roots = [n for n in sn_nodes(self.tree) if n.sn_root]
             roots.sort(key=lambda n: n.sn_order)
             for node in roots:

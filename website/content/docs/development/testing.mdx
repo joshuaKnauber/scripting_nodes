@@ -1,0 +1,47 @@
+---
+title: Testing
+description: Headless tests, GUI tests and screenshots.
+---
+
+Everything runs Blender with a throwaway user profile, so your own preferences, extensions and generated add-ons are never touched. Blender comes from `$BLENDER` or `BLENDER_EXECUTABLE` in `config.yaml`.
+
+```bash
+python scripts/test.py              # headless suite (tests/test_*.py)
+python scripts/test.py -k core -v   # filter by test id, verbose
+python scripts/test.py --gui        # also tests/gui/*.py in a real window (undo, ...)
+python scripts/screenshot.py tests/visual/scenarios/live_panel.py out.png
+```
+
+## What is covered
+
+- `test_nodes_compile.py` adds **every** node, chains it into program and interface flows and as a data source, then checks that the generated add-on compiles **and loads**. A new node is covered without writing anything.
+- `test_core.py`: the pipeline. Hot reload, rollback on errors, renames, undo, duplicated trees, references across trees, export.
+- `test_nodes_*.py`: focused checks of generated code per node family.
+- `test_performance.py`: a 300 node chain must stay fast.
+
+## Writing a test
+
+Tests run inside Blender with `unittest`. Use `tests/helpers.py` instead of reaching into the add-on:
+
+```python
+import unittest
+
+import helpers
+
+
+class ListTest(unittest.TestCase):
+    def setUp(self):
+        helpers.reset_file()
+
+    def test_for_each(self):
+        tree = helpers.new_tree()
+        trigger = helpers.add_node(tree, "SNA_Node_Trigger")
+        loop = helpers.add_node(tree, "SNA_Node_ForEachList")
+        helpers.link(tree, trigger.outputs[0], loop.inputs[0])
+        helpers.flush()  # run the rebuild now instead of on the timer
+        self.assertIn("for index_1, item_1 in enumerate(", helpers.tree_source(tree))
+```
+
+## Screenshots
+
+`tests/visual/scenarios/*.py` and `website/screenshots/*.py` are scenarios: a `setup()` that builds a tree (and optionally `after(context)`). `scripts/screenshot.py` opens Blender on it and saves the window; `scripts/docs_screenshots.py` regenerates all docs images.

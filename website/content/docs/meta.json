@@ -1,3 +1,8 @@
 {
-  "pages": ["index", "getting-started", "concepts"]
+  "pages": [
+    "index",
+    "getting-started",
+    "concepts",
+    "development"
+  ]
 }

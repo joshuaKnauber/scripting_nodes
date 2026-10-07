@@ -17,7 +17,7 @@ python ./scripts/screenshot.py tests/visual/scenarios/basic.py out.png  # GUI sc
 uvx ruff check . && uvx ruff format .
 ```
 
-Always run `scripts/test.py` after touching the core or nodes. `tests/test_nodes_compile.py` adds and chains every node and compiles the result.
+Always run `scripts/test.py` after touching the core or nodes. `tests/test_nodes_compile.py` adds and chains every node, compiles and loads the result.
 
 Setup: `cp config.template.yaml config.yaml` and set your `BLENDER_EXECUTABLE` path.
 
@@ -38,23 +38,27 @@ Structure: `bpy/types/` (1709 files), `bpy/ops/` (78), `bpy/enum_items/` (206), 
 
 All paths below are relative to `addon/scripting_nodes/src/`.
 
+Developer docs (read before changing the core or writing nodes): `website/content/docs/development/` — `architecture.mdx`, `writing-nodes.mdx`, `context-reference.mdx`, `testing.mdx`.
+
 ### Update pipeline (`core/`)
 
-Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<module_name>/`.
+Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<module_name>/`. Nodes store **no** generated code; every rebuild compiles the graph again.
 
-1. Anything that changes code only *requests* work: `node._generate()` → `scheduler.request_node`, `NodeTree.update()` → `request_tree`, load/undo/redo/settings/renames → `request_full`. Never compile or reload inside an RNA update callback.
-2. `core/scheduler.py` flushes on a persistent timer (and in tests via `flush()`): `integrity` (init trees, unique ids, `versioning`) → `references.sync` → regenerate requested nodes in dependency order, re-queuing only nodes that read what changed → `compiler.compile_addon()` → `runtime.apply(files)`.
-3. `core/compiler.py` is pure: node code → `{relpath: source}`. Shared by the live addon and export (`core/ops/export.py`, which regenerates in build mode).
-4. `core/runtime.py` owns the generated folder: syntax check first, write, full disable/enable, roll back to the previous files if import/register fails. Only touches folders with its marker file.
-5. Errors: `core/errors.py` (per node + addon load error), shown on nodes and in the sidebar status panel. Never stored in bpy data.
+1. Changes only *request* a rebuild (`node.mark_dirty()`, `NodeTree.update()`, load/undo/settings → `scheduler.request_*`). Never compile or reload inside an RNA update callback.
+2. `core/scheduler.py` flushes on a timer (tests: `flush()`): integrity (ids, versioning) → sync sockets → references → `compiler.compile_addon()` → `runtime.apply(files)`.
+3. `core/compiler.py` + `core/context.py`: root nodes emit at module level, flow nodes when reached, value nodes when their output is used. Every line knows its node (errors, code preview).
+4. `core/runtime.py`: syntax check, write, full disable/enable, roll back on failure. Only touches folders with its marker file.
+5. Errors: `core/errors.py`; `emit()` errors, load errors and runtime errors (`core/tracebacks.py`, via `sys.excepthook`) all show on the node.
+6. Dev vs export differences only in `core/helpers.py`.
 
 ### Node System
 
-- Base class: `nodes/base_node.py` (`ScriptingBaseNode`). Implement `on_create()` (sockets) and `generate()` (fill `code_inline` / `code_module` / `code_global` / `code_imports` / `code_register` / `code_unregister`, and `output.code` for data outputs). Call `self._generate()` from update callbacks.
-- References to other nodes: declare `sn_reference_properties = {"prop": (bl_idnames...)}`; the field is stored by node id (`core/references.py`), resolve with `self.resolve_reference("prop")`.
-- Categories: `nodes/categories/<snake_case>/`, folder names become add-menu labels.
-- Sockets: `sockets/` — program/interface flow sockets pull downstream `code_inline`; data sockets' `.eval()` returns an expression string.
-- Saved-data changes (renamed props/idnames/sockets) need a step in `core/versioning.py` (bump `DATA_VERSION`).
+- `nodes/base_node.py` `ScriptingBaseNode`: declare sockets (`sn_inputs`/`sn_outputs` or `socket_specs()`, helpers in `sockets/spec.py`), implement `emit(ctx)`. Properties rebuild automatically (no `update=`).
+- Write code with templates: `ctx.code(f"""...{ctx.flow("next")}...""")`; values with `ctx.output(key, expr)`; inputs with `ctx.input(key)`; module code with `ctx.module`; `raise NodeError(...)` for incomplete setups.
+- One flow socket type (`ScriptingFlowSocket`) with `kind` PROGRAM/LOGIC/INTERFACE (color + compatibility).
+- References to other nodes: `sn_reference_properties`, stored by node id (`core/references.py`); cross-tree names via `ctx.symbol`.
+- Shared bases: `PropertyNode`, `PropertyFieldNode`, `ClassBodyContainerMixin`, `PropertyTargetMixin`, `OperatorCallMixin`, `event_node()`.
+- Saved-data changes need a step in `core/versioning.py`; socket changes don't (re-synced from declarations).
 
 ### Key Paths
 

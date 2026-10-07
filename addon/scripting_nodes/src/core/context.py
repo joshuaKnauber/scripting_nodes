@@ -100,6 +100,7 @@ class NodeContext:
         self._mode = mode  # "root", "statement" or "value"
         self._lines: list[Line] = []
         self._tokens = {}
+        self._at_module = False
         self.outputs = {}
 
     # -- build info -------------------------------------------------------
@@ -187,8 +188,13 @@ class NodeContext:
             self._lines += lines
 
     def module(self, text: str):
-        """Write a template at module level (classes, functions)."""
-        self._builder.add_block(self._expand(text))
+        """Write a template at module level (classes, functions). Flows in it
+        don't see values of the flow this node is in."""
+        self._at_module = True
+        try:
+            self._builder.add_block(self._expand(text))
+        finally:
+            self._at_module = False
 
     def flow(self, key, layout=None, outputs=None) -> str:
         """Placeholder for the code connected to flow output `key`.
@@ -203,11 +209,12 @@ class NodeContext:
 
         def resolve(column, preceding):
             names = _def_names(preceding, column)
+            base = self._builder.module_scope if self._at_module else self.scope
             scope = Scope(
-                parent=self.scope,
-                layout=layout if layout is not None else self.scope.layout,
+                parent=base,
+                layout=layout if layout is not None else base.layout,
                 values=values,
-                names=names if names is not None else self.scope.names,
+                names=names if names is not None else base.names,
             )
             return self._builder.compile_flow(socket, scope)
 

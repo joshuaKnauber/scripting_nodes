@@ -237,9 +237,6 @@ EXEC_CONTEXT_ITEMS = [
 
 ARG_PREFIX = "arg_"
 
-# pointers of nodes whose sockets are being synced right now
-_syncing: set = set()
-
 
 class OperatorCallMixin:
     """Operator picker + one input socket per operator property.
@@ -277,19 +274,6 @@ class OperatorCallMixin:
         if self.mode == "CUSTOM":
             return _sn_operator_prop_specs(self.resolve_reference("operator_sn"))
         return _blender_operator_prop_specs(self.operator_idname())
-
-    def sync_sockets(self):
-        # Sockets created after the node exists get their default value set,
-        # whose update callback would sync this node again in the middle of
-        # this sync (base_node._apply_spec -> update_value -> mark_dirty).
-        key = self.as_pointer()
-        if key in _syncing:
-            return False
-        _syncing.add(key)
-        try:
-            return super().sync_sockets()
-        finally:
-            _syncing.discard(key)
 
     def socket_specs(self):
         inputs = list(self.fixed_inputs)

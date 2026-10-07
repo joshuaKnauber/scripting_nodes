@@ -1,0 +1,192 @@
+---
+title: Writing nodes
+description: Declare sockets, write code through the context.
+---
+
+A node does two things: it **declares its sockets** and it **writes its code** in `emit(ctx)`. It never stores code and never builds sockets by hand.
+
+```python
+import bpy
+
+from ....sockets.spec import Flow, String
+from ...base_node import ScriptingBaseNode
+
+
+class SNA_Node_Print(ScriptingBaseNode, bpy.types.Node):
+    """Print a message."""
+
+    bl_idname = "SNA_Node_Print"
+    bl_label = "Print"
+    sn_inputs = [Flow(), String("text", "Text")]
+    sn_outputs = [Flow("next")]
+
+    def emit(self, ctx):
+        ctx.code(f"""
+            {ctx.helper("sn_print")}({ctx.input("text")})
+            {ctx.flow("next")}
+        """)
+```
+
+Put the file in `nodes/categories/<category>/`; the folder name becomes the add menu entry. Nodes are registered automatically.
+
+## Sockets
+
+Sockets are declared with helpers from `sockets/spec.py`. The first argument is the **key**: the stable identifier code uses (`ctx.input("text")`). The second is the **label** the user sees.
+
+| Helper | Socket |
+| --- | --- |
+| `Flow(key="flow", label, kind="PROGRAM")`, `Logic()`, `Interface()` | flow (diamond). `kind` sets the color and which flows connect: Program and Logic run code, Interface draws UI |
+| `String`, `Boolean`, `Float`, `Integer` | value with an editable default (`default=`) |
+| `Vector(dimension=3)`, `Color(alpha=False)` | vectors and colors |
+| `Data`, `BlendData`, `List` | any value, Blender data, lists |
+| `Socket(idname, key, label)` | a type chosen at runtime |
+
+Options: `default=`, `hide=True`, `enabled=False` (removes the socket from the UI), `dynamic=True` (a group the user can add sockets to; read it with `ctx.inputs(key)`).
+
+When sockets depend on properties or other nodes, override `socket_specs()` instead of the class lists:
+
+```python
+def socket_specs(self):
+    return [Flow(), Socket(self.data_type, "value", "Value")], [Flow("next")]
+```
+
+The base class creates, removes and reorders sockets to match, and keeps the links of sockets that survive (matched by key). It is re-checked on every change and rebuild.
+
+## Properties
+
+Node properties are regular `bpy.props`. Every change rebuilds the add-on automatically, so no `update=` callbacks are needed. Properties listed in `sn_header_props` are drawn on the node; for anything else implement `draw(self, context, layout)`.
+
+## Kinds of nodes
+
+### Value nodes
+
+Nodes with only data sockets produce expressions. Set every output with `ctx.output`. The compiler adds parentheses where the expression is used.
+
+```python
+def emit(self, ctx):
+    result = f"{ctx.input('a')} {OPERATORS[self.operation]} {ctx.input('b')}"
+    ctx.output("result", result)
+    ctx.output("int", f"int({result})")
+```
+
+### Flow nodes
+
+Nodes with a flow input write statements with `ctx.code`. Templates look like the generated code. `ctx.flow(key)` is a placeholder for whatever is connected to that flow output, indented to the column it sits in. Put it on its own line. An unconnected flow becomes `pass` where Python needs a statement; an `else:` with nothing in it is dropped.
+
+```python
+def emit(self, ctx):
+    ctx.code(f"""
+        if {ctx.input("condition")}:
+            {ctx.flow("then")}
+        else:
+            {ctx.flow("else")}
+        {ctx.flow("next")}
+    """)
+```
+
+Values a flow node produces are set with `ctx.output` **before** `ctx.code`; they are available to everything after the node. Values that only exist inside a branch are passed to that flow:
+
+```python
+def emit(self, ctx):
+    item, index = ctx.var("item"), ctx.var("index")
+    ctx.code(f"""
+        for {index}, {item} in enumerate({ctx.input("list")}):
+            {ctx.flow("loop", outputs={"item": item, "index": index})}
+        {ctx.flow("next")}
+    """)
+```
+
+Using **Item** after the loop gives an error on the node that uses it instead of broken code.
+
+### Interface nodes
+
+Interface flows draw UI. `ctx.layout` is the current layout; pass a new one to a sub-flow:
+
+```python
+def emit(self, ctx):
+    row = ctx.var("row")
+    ctx.code(f"""
+        {row} = {ctx.layout}.row(align={ctx.input("align")})
+        {ctx.flow("content", layout=row)}
+        {ctx.flow("next")}
+    """)
+```
+
+### Root nodes
+
+Operators, panels, events and properties exist on their own. Set `sn_root = True` and write module-level code with `ctx.module`. Classes defined at module level are registered automatically; anything else goes into `ctx.on_register` / `ctx.on_unregister`.
+
+```python
+class SNA_Node_OnSave(ScriptingBaseNode, bpy.types.Node):
+    sn_root = True
+    sn_outputs = [Logic()]
+
+    def emit(self, ctx):
+        name = ctx.function_name("on_save")
+        ctx.imports("from bpy.app.handlers import persistent")
+        ctx.module(f"""
+            @persistent
+            def {name}(*args):
+                {ctx.flow("flow")}
+        """)
+        ctx.on_register(f"bpy.app.handlers.save_post.append({name})")
+        ctx.on_unregister(f"bpy.app.handlers.save_post.remove({name})")
+```
+
+Use `ctx.join(lines)` to insert a list of (possibly multi-line, possibly placeholder-containing) code items, for example class attributes or optional methods:
+
+```python
+ctx.module(f"""
+    class {ctx.class_name("PT", "Panel")}(bpy.types.Panel):
+        {ctx.join(attributes)}
+
+        def draw(self, context):
+            {ctx.flow("body", layout="self.layout")}
+""")
+```
+
+`sn_order` sorts root nodes in the module, lower first: global variables 10, property nodes 20 (their update/items functions), property groups 30 and up (nested groups after the groups they contain), everything else 50. A root whose code uses names another root defines at definition time needs a higher order.
+
+## Referencing other nodes
+
+A field that points at another node (a variable, a property, an operator) is declared with `sn_reference_properties` and a `StringProperty` of the same name. It is stored by node id, so renaming the target never breaks it.
+
+```python
+class SNA_Node_GetVariable(ScriptingBaseNode, bpy.types.Node):
+    sn_reference_properties = {"var": VARIABLE_NODES}  # allowed bl_idnames
+    var: bpy.props.StringProperty(name="Variable")
+
+    def draw(self, context, layout):
+        self.draw_reference_prop(layout, "var")
+
+    def emit(self, ctx):
+        target = ctx.resolve("var")
+        if target is None:
+            raise NodeError("Pick a variable")
+        ctx.output("value", f"{ctx.symbol(target, target.getter_name())}()")
+```
+
+`ctx.symbol(node, name)` returns a name defined by another node and adds the import when that node lives in another tree.
+
+## Errors
+
+Raise `NodeError("message")` when the node isn't set up completely; the message is shown on the node and the node writes no code. Unexpected exceptions are caught too and shown the same way.
+
+## Shared building blocks
+
+| Base / mixin | For |
+| --- | --- |
+| `PropertyNode` (`properties/_property_base.py`) | property nodes: shared settings, registration, class annotations |
+| `ClassBodyContainerMixin` (`nodes/_class_body.py`) | classes with attached properties (Operator, Preferences, Property Group) |
+| `PropertyTargetMixin` (`nodes/_property_target.py`) | nodes that read, set or draw one property (custom or pasted Blender path) |
+| `PropertyFieldNode` (`interface/_property_field.py`) | UI fields drawing one property (Checkbox, Number Field, …) |
+| `OperatorCallMixin` (`nodes/_operator_call.py`) | nodes that call an operator, one socket per operator property |
+| `event_node()` (`events/events.py`) | app handler events in one line |
+
+## Checklist
+
+- `bl_idname` never changes after release (saved files reference it).
+- User text goes into code through `repr()` (`{value!r}`), never between quotes.
+- Multi-line code goes through `ctx.flow`, `ctx.join` or `ctx.code`, never pasted into a template line.
+- Use `ctx.var()` for local names and `ctx.class_name()` / `ctx.idname()` / `ctx.function_name()` for module-level names.
+- Run `python scripts/test.py`: it adds, chains, compiles and loads every node.

@@ -1,0 +1,66 @@
+---
+title: Context reference
+description: Everything a node can do in emit(ctx).
+---
+
+`ctx` is a `NodeContext` (`core/context.py`), created for every node each time the add-on is built.
+
+## Values
+
+| Call | Returns / does |
+| --- | --- |
+| `ctx.input(key)` | Expression of input `key`: the connected value (converted to the socket's type), else the socket's own value |
+| `ctx.input(key, default="None")` | Same, but `default` when nothing is connected |
+| `ctx.inputs(key)` | Expressions of all sockets of a dynamic group |
+| `ctx.is_linked(key)` | Whether input or output `key` is connected |
+| `ctx.output(key, expr)` | Set data output `key`. From a flow node: available to everything after it |
+| `ctx.resolve(prop)` | The node a reference property points to, or `None` |
+
+## Writing code
+
+| Call | Returns / does |
+| --- | --- |
+| `ctx.code(template)` | Write statements where this node's code goes (module level for root nodes) |
+| `ctx.module(template)` | Write at module level (classes, functions) |
+| `ctx.flow(key, layout=None, outputs=None)` | Placeholder for the code connected to flow output `key`. `layout`: layout for interface flows below; `outputs`: `{key: expr}` values only valid in there |
+| `ctx.join(items)` | Placeholder for a list of code items (may be multi-line, may contain placeholders; empty items are skipped) |
+| `ctx.layout` | Current layout expression in interface flows |
+
+Placeholders must be on their own line. They are indented to the column they sit in.
+
+## Module
+
+| Call | Returns / does |
+| --- | --- |
+| `ctx.imports("import math")` | Add an import line (deduplicated) |
+| `ctx.helper("sn_print")` | Name to call a shared helper by (`core/helpers.py`) |
+| `ctx.symbol(node_or_tree, name)` | `name`, imported if it is defined in another tree's module |
+| `ctx.on_register(line)` / `ctx.on_unregister(line)` | Lines for the module's `register()` / `unregister()` |
+| `ctx.var("row")` | Unique local name (`row_1`, `row_2`, …) |
+| `ctx.class_name("OT", "Operator")` | `<PREFIX>_OT_Operator_<ID>` |
+| `ctx.idname("operator")` | `<namespace>.operator_<id>` |
+| `ctx.function_name("update")` | `update_<id>` |
+| `ctx.dev` | `True` in the live add-on, `False` when exporting. Prefer a helper over checking this |
+
+## Errors
+
+`raise NodeError("message")` shows the message on the node; it emits no code.
+
+## Example
+
+```python
+def emit(self, ctx):
+    item = ctx.var("item")
+    ctx.code(f"""
+        for {item} in {ctx.input("list", default="[]")}:
+            {ctx.flow("loop", outputs={"item": item})}
+        {ctx.flow("next")}
+    """)
+```
+
+compiles, with a Print node in the loop, to
+
+```python
+for item_1 in context.scene.objects:
+    sn_print(item_1.name)
+```

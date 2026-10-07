@@ -1,0 +1,61 @@
+---
+title: Architecture
+description: How a node graph becomes a running add-on.
+---
+
+All paths are relative to `addon/scripting_nodes/src/`.
+
+## The pipeline
+
+```
+edit in the node editor
+  → scheduler.request_*()        nothing else happens inside update callbacks
+  → flush (timer, ~0.1 s later)
+      integrity    init new trees, unique ids, versioning (file load / undo only)
+      sockets      every node's sockets match its declaration
+      references   rebuild the picker lists on scene.sna
+      compile      graph → {path: source}            core/compiler.py
+      apply        write changed files, reload       core/runtime.py
+```
+
+Nodes **store no generated code**. Every rebuild walks the graph and asks the nodes for their code again, so there is nothing that can go stale after undo, file loads or renames: what is in the graph is what compiles. A rebuild is one linear pass per tree (a 300 node chain compiles in about 40 ms).
+
+## What gets generated
+
+The add-on is written to `<user scripts>/addons/<module name>/`:
+
+```
+__init__.py, auto_load.py, blender_manifest.toml
+_sn_helpers.py          shared helper functions (only if used)
+addon/<tree>_<id>.py    one module per node tree
+```
+
+Inside a tree module, **root nodes** (operators, panels, events, properties, …) are emitted first, sorted by `sn_order`. Every other node is emitted when a flow reaches it, or, for value nodes, when one of its outputs is used. Group trees compile to a function.
+
+## Loading
+
+`core/runtime.py` owns the generated folder:
+
+- Changed modules are syntax-checked before anything is written. On an error the previous version keeps running.
+- The add-on is fully disabled and enabled again. If the new version fails to import or register, the previous files are restored and loaded.
+- Only folders containing the `.scripting_nodes` marker file are ever written to or deleted.
+
+## Errors
+
+Errors always end up on the node that caused them:
+
+| When | How it is mapped |
+| --- | --- |
+| `emit()` raises (`NodeError` or a bug) | caught per node by the compiler |
+| syntax / import / register error of the add-on | failing line → node via the compiler's line map |
+| exception while the add-on runs (e.g. clicking a button) | `sys.excepthook` → traceback line → node (`core/tracebacks.py`) |
+
+The generated code contains nothing for this; the line map lives in Scripting Nodes.
+
+## Dev and export builds
+
+The live add-on and an exported zip come from the same compiler (`compile_addon(dev=True/False)`). The only differences are in `core/helpers.py`: for example `sn_print` also writes to the node editor overlay in dev builds and is plain `print` in exports. Nodes never check the build mode.
+
+## Saved data
+
+Trees store a data version (`core/versioning.py`). When saved data changes shape (renamed properties, idnames, socket keys, enum items), add a step there and bump `DATA_VERSION`. Changes to a node's **sockets** need no step: they are re-synced from the declaration on load.
