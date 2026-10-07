@@ -31,6 +31,10 @@ and `ruff check` with zero findings.
 
 - [ ] **Blend Data**: separate design thread ("Design: Blend Data in Serpens v4", worktree `blend-data-v4`). Includes: Blender-path mode doesn't know the property type (Set Property gets a generic Data input).
 - [ ] **Node references**: separate design thread ("Design: node references in Serpens v4"). Picker collections on `scene.sna` with hashed names, scene-level storage, linear lookups.
+- [ ] **Properties: nodes or not?** Decide how add-on properties are defined: Scene/Object properties, operator properties, preferences, Property Groups, Pointer/Collection properties and the collection nodes (add, remove, get item, length, clear).
+  - Today: one node per property, attached to Operator / Preferences / Property Group nodes through a list of references (`_class_body.py`), plus `register_on` for Blender types. Works, but properties float around the graph disconnected from what they belong to, and attaching them is indirect.
+  - Alternatives: define properties where they belong (a properties list on the Operator / Preferences / Property Group node and an add-on level list in the sidebar, like v3), with nodes only for using them (Get / Set / draw / update callback). Callbacks (update, dynamic enum items, pointer poll) still need a flow entry point - as a node, or as outputs on the owning node.
+  - Covers the data panel, the reference pickers and how Run Operator / Button get operator arguments. Ties into the node references thread.
 - [ ] Flows can't return a value outside group trees (Pointer Property poll needs a group tree). Decide on a Return node or callable flows.
 - [ ] `PropertyNode.property_args(ctx)` runs with the container's ctx and can't read its own inputs.
 - [ ] Run Operator / Button: vector/color properties of SN operators always get 3 components, no alpha.
