@@ -7,57 +7,11 @@ Every tree stores the data version it was last saved with
 """
 
 from ..lib.logger import log
-from ..lib.trees import sn_nodes
-from .references import find_node_by_display_name, ref_id_key
 
-DATA_VERSION = 3
+DATA_VERSION = 1
 
-
-def _v1_references_by_id(tree):
-    """References used to store the target's display name; now they store ids."""
-    for node in sn_nodes(tree):
-        for prop in getattr(node, "sn_reference_properties", {}):
-            _migrate_reference(node, prop)
-        for entry in getattr(node, "class_body_properties", ()):
-            _migrate_reference(entry, "prop")
-
-
-def _migrate_reference(owner, prop):
-    old_name = owner.get(prop)
-    if not isinstance(old_name, str):
-        return
-    if not owner.get(ref_id_key(prop)):
-        target = find_node_by_display_name(old_name)
-        if target is not None:
-            owner[ref_id_key(prop)] = target.id
-    del owner[prop]
-
-
-def _v2_single_flow_links(tree):
-    """Program/interface outputs only ever followed their first link; they
-    now allow one link, so Blender replaces instead of silently ignoring."""
-    for node in sn_nodes(tree):
-        for out in node.outputs:
-            if getattr(out, "socket_type", None) == "PROGRAM":
-                out.link_limit = 1
-
-
-def _v3_list_slice_defaults(tree):
-    """List Slice inputs defaulted to 1 (always an empty slice when left
-    unconnected); untouched ones now mean "whole list"."""
-    for node in sn_nodes(tree):
-        if node.bl_idname == "SNA_Node_ListSlice":
-            for name in ("Start", "End"):
-                socket = node.inputs.get(name)
-                if socket is not None and "value" not in socket.keys():
-                    socket.value = 0
-
-
-STEPS = {
-    1: _v1_references_by_id,
-    2: _v2_single_flow_links,
-    3: _v3_list_slice_defaults,
-}
+# data version -> function(tree) bringing a tree from version - 1 to it
+STEPS = {}
 
 
 def upgrade(trees):

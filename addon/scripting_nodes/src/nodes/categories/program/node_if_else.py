@@ -1,25 +1,22 @@
-from ....lib.code_format import indent
-from ...base_node import ScriptingBaseNode
 import bpy
+
+from ....sockets.spec import Boolean, Flow
+from ...base_node import ScriptingBaseNode
 
 
 class SNA_Node_IfElse(ScriptingBaseNode, bpy.types.Node):
+    """Run one of two branches depending on a condition."""
+
     bl_idname = "SNA_Node_IfElse"
     bl_label = "If/Else"
+    sn_inputs = [Flow(), Boolean("condition", "Condition")]
+    sn_outputs = [Flow("then", "Then"), Flow("else", "Else"), Flow("next", "Finally")]
 
-    def on_create(self):
-        self.add_input("ScriptingProgramSocket")
-        self.add_input("ScriptingBooleanSocket", "Condition")
-        self.add_output("ScriptingProgramSocket", "Then")
-        self.add_output("ScriptingProgramSocket", "Else")
-        self.add_output("ScriptingProgramSocket", "Finally")
-
-    def generate(self):
-        has_else = self.outputs[1].is_linked
-        self.code_inline = f"""
-            if {self.inputs[1].eval()}:
-                {indent(self.outputs[0].eval("pass"), 4)}
-            {"else:" if has_else else ""}
-                {indent(self.outputs[1].eval("pass"), 4) if has_else else ""}
-            {indent(self.outputs[2].eval(), 3)}
-        """
+    def emit(self, ctx):
+        ctx.code(f"""
+            if {ctx.input("condition")}:
+                {ctx.flow("then")}
+            else:
+                {ctx.flow("else")}
+            {ctx.flow("next")}
+        """)

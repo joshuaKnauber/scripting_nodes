@@ -1,48 +1,31 @@
-from ...base_node import ScriptingBaseNode
 import bpy
+
+from ....sockets.spec import Float, Integer
+from ...base_node import ScriptingBaseNode
+
+OPERATIONS = {
+    "ADD": ("Add", "+"),
+    "SUBTRACT": ("Subtract", "-"),
+    "MULTIPLY": ("Multiply", "*"),
+    "DIVIDE": ("Divide", "/"),
+    "POWER": ("Power", "**"),
+    "MODULO": ("Modulo", "%"),
+}
 
 
 class SNA_Node_Math(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Math"
     bl_label = "Math"
-
-    OPERATIONS = {
-        "ADD": "+",
-        "SUBTRACT": "-",
-        "MULTIPLY": "*",
-        "DIVIDE": "/",
-        "POWER": "**",
-        "MODULO": "%",
-    }
+    sn_inputs = [Float("a", "A"), Float("b", "B")]
+    sn_outputs = [Float("result", "Float Result"), Integer("int", "Integer Result")]
+    sn_header_props = ("operation",)
 
     operation: bpy.props.EnumProperty(
-        items=[
-            ("ADD", "Add", "Addition"),
-            ("SUBTRACT", "Subtract", "Subtraction"),
-            ("MULTIPLY", "Multiply", "Multiplication"),
-            ("DIVIDE", "Divide", "Division"),
-            ("POWER", "Power", "Power"),
-            ("MODULO", "Modulo", "Modulo"),
-        ],
         name="Operation",
-        default="ADD",
-        update=lambda self, context: self._generate(),
+        items=[(key, label, label) for key, (label, _) in OPERATIONS.items()],
     )
 
-    def on_create(self):
-        self.add_input("ScriptingFloatSocket", "A")
-        self.add_input("ScriptingFloatSocket", "B")
-        self.add_output("ScriptingFloatSocket", "Float Result")
-        self.add_output("ScriptingIntegerSocket", "Integer Result")
-
-    def draw(self, context, layout):
-        layout.prop(self, "operation", text="")
-
-    def generate(self):
-        a = self.inputs["A"].eval()
-        b = self.inputs["B"].eval()
-
-        result = f"({a} {self.OPERATIONS[self.operation]} {b})"
-
-        self.outputs["Float Result"].code = result
-        self.outputs["Integer Result"].code = f"int({result})"
+    def emit(self, ctx):
+        result = f"{ctx.input('a')} {OPERATIONS[self.operation][1]} {ctx.input('b')}"
+        ctx.output("result", result)
+        ctx.output("int", f"int({result})")

@@ -1,28 +1,20 @@
-"""Shared base for Group Input / Group Output nodes - both store a list of
-(name, socket_type) items as JSON, and rebuild dynamic sockets to match."""
+"""Shared base for Group Input / Group Output: a list of (name, socket type)
+items stored as JSON. Each item is one socket (parameter or return value)."""
 
 import json
+
 import bpy
 
+from ....lib.trees import scripting_node_trees, sn_nodes
+from ....sockets.spec import Socket
 from ._interface import slugify
 
 
 class GroupInterfaceMixin:
-    """Mixin: dynamic sockets driven by a JSON-stored items list.
-
-    Subclasses define:
-      items_json: bpy.props.StringProperty(default="[]")
-      socket_direction: "INPUT" or "OUTPUT"
-      reserved_count: number of fixed sockets at the start (e.g. 1 for the
-                      program-flow socket that's always present)
-      default_fallback: fallback name slug when user provides empty name
-    """
-
     items_json: bpy.props.StringProperty(default="[]")
 
-    socket_direction = "OUTPUT"  # subclasses override
-    reserved_count = 1
     default_fallback = "value"
+    ITEM_PREFIX = "item_"
 
     def get_items(self):
         try:
@@ -33,14 +25,27 @@ class GroupInterfaceMixin:
     def set_items(self, items):
         self.items_json = json.dumps(items)
 
+    def item_specs(self):
+        return [
+            Socket(item["type"], self.ITEM_PREFIX + item["name"], item["name"])
+            for item in self.get_items()
+        ]
+
+    def parameter_names(self):
+        return [item["name"] for item in self.get_items()]
+
+    def parameter_keys(self):
+        return [self.ITEM_PREFIX + item["name"] for item in self.get_items()]
+
     def add_item(self, name, socket_type):
         items = self.get_items()
-        items.append(
-            {"name": slugify(name, self.default_fallback), "type": socket_type}
-        )
+        names = {item["name"] for item in items}
+        name = slugify(name, self.default_fallback)
+        base, i = name, 2
+        while name in names:
+            name, i = f"{base}_{i}", i + 1
+        items.append({"name": name, "type": socket_type})
         self.set_items(items)
-        self._sync_sockets()
-        self._generate()
         self._notify_call_sites()
 
     def remove_item(self, index):
@@ -48,49 +53,17 @@ class GroupInterfaceMixin:
         if 0 <= index < len(items):
             items.pop(index)
             self.set_items(items)
-            self._sync_sockets()
-            self._generate()
             self._notify_call_sites()
 
     def _notify_call_sites(self):
-        """Re-sync any SNA_Node_Group instances that point at this group tree.
-
-        Cross-tree notification: when a Group Input/Output's interface changes,
-        Call Group nodes referencing this tree need their sockets rebuilt and
-        their containing trees marked dirty for regeneration.
-        """
-        if not self.node_tree:
-            return
-        # Lazy import to avoid circular dependency at module load
-        from ....lib.trees import (
-            scripting_node_trees,
-            sn_nodes,
-        )
-
-        target_tree = self.node_tree
-        for ntree in scripting_node_trees():
-            for node in sn_nodes(ntree):
+        """Group nodes calling this tree need their sockets updated."""
+        for tree in scripting_node_trees():
+            for node in sn_nodes(tree):
                 if (
-                    getattr(node, "bl_idname", "") == "SNA_Node_Group"
-                    and getattr(node, "node_tree", None) is target_tree
+                    node.bl_idname == "SNA_Node_Group"
+                    and node.node_tree == self.id_data
                 ):
-                    if node._sync_sockets():
-                        node._generate()
-
-    def _socket_collection(self):
-        return self.outputs if self.socket_direction == "OUTPUT" else self.inputs
-
-    def _sync_sockets(self):
-        """Rebuild dynamic sockets after the items list changes."""
-        sockets = self._socket_collection()
-        # Drop everything past the reserved fixed sockets at the front
-        while len(sockets) > self.reserved_count:
-            sockets.remove(sockets[len(sockets) - 1])
-        for item in self.get_items():
-            if self.socket_direction == "OUTPUT":
-                self.add_output(item["type"], item["name"])
-            else:
-                self.add_input(item["type"], item["name"])
+                    node.mark_dirty()
 
     def draw(self, context, layout):
         op = layout.operator("sna.add_group_item", text="Add", icon="ADD")
@@ -101,9 +74,9 @@ class GroupInterfaceMixin:
             for i, item in enumerate(items):
                 row = col.row(align=True)
                 row.label(text=item["name"])
-                rop = row.operator("sna.remove_group_item", text="", icon="X")
-                rop.node_id = self.id
-                rop.index = i
+                remove = row.operator("sna.remove_group_item", text="", icon="X")
+                remove.node_id = self.id
+                remove.index = i
 
 
 def _poll_group_tree(cls, ntree):

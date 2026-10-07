@@ -5,13 +5,14 @@ import unittest
 
 import helpers
 
-PROGRAM = {"ScriptingProgramSocket", "ScriptingLogicSocket"}
-INTERFACE = {"ScriptingInterfaceSocket"}
+PROGRAM = {"PROGRAM", "LOGIC"}
+INTERFACE = {"INTERFACE"}
 
 
-def first(sockets, idnames):
+def first(sockets, kinds):
+    """First enabled flow socket of one of `kinds`."""
     for s in sockets:
-        if s.bl_idname in idnames:
+        if s.bl_idname == "ScriptingFlowSocket" and s.kind in kinds and s.enabled:
             return s
     return None
 

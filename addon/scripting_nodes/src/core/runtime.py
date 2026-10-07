@@ -96,7 +96,11 @@ def apply(files: dict[str, str]) -> bool:
 
     current = _read_folder(path)
     changed = {rel: src for rel, src in files.items() if current.get(rel) != src}
-    stale = [rel for rel in current if rel.startswith("addon/") and rel not in files]
+    stale = [
+        rel
+        for rel in current
+        if rel not in files and (rel.startswith("addon/") or rel == "_sn_helpers.py")
+    ]
     was_loaded = is_loaded(module)
     if not changed and not stale and was_loaded:
         _loaded = module
@@ -115,6 +119,7 @@ def apply(files: dict[str, str]) -> bool:
     if ok:
         _loaded = module
         errors.set_addon_error(None)
+        errors.runtime_errors.clear()
         return True
 
     log("ERROR", f"Generated addon failed to load, keeping previous version:\n{error}")
@@ -159,7 +164,7 @@ def _traceback_locations(text, path):
 
 
 def _blame(locations, message, files):
-    """{node id: short message} for the nodes that produced the failing lines."""
+    """{node id: short message} for the nodes that wrote the failing lines."""
     from .compiler import line_owners
 
     short = message.strip().splitlines()[-1] if message else "Error"
@@ -167,30 +172,8 @@ def _blame(locations, message, files):
     for rel, lineno in locations:
         owners = line_owners.get(rel, [])
         if lineno and 0 < lineno <= len(owners) and owners[lineno - 1]:
-            source = files.get(rel, "")
-            blamed[_innermost_node(source, rel, lineno, owners[lineno - 1])] = short
+            blamed[owners[lineno - 1]] = short
     return blamed
-
-
-def _innermost_node(source, rel, lineno, owner_id):
-    """Flow code of linked nodes is nested in the root node's block; find the
-    innermost node whose own code contains the failing line."""
-    from ..lib.trees import scripting_node_trees, sn_nodes
-
-    lines = source.split("\n")
-    if not 0 < lineno <= len(lines) or not lines[lineno - 1].strip():
-        return owner_id
-    wanted = lines[lineno - 1].strip()
-    best = None
-    for tree in scripting_node_trees():
-        if f"addon/{tree.module_name}.py" != rel:
-            continue
-        for node in sn_nodes(tree):
-            code = node.code_inline
-            if code and any(line.strip() == wanted for line in code.split("\n")):
-                if best is None or len(code) < len(best.code_inline):
-                    best = node
-    return best.id if best is not None else owner_id
 
 
 def _read_folder(path):

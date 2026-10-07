@@ -1,31 +1,27 @@
 import bpy
+
+from ....sockets.spec import Flow
 from ...base_node import ScriptingBaseNode
 from ._base import GroupInterfaceMixin, _poll_group_tree
 
 
 class SNA_Node_GroupOutput(GroupInterfaceMixin, ScriptingBaseNode, bpy.types.Node):
-    """Function exit point: collects the function's return values as inputs.
-
-    Only appears inside group trees (is_group=True). The first input is the
-    program-flow exit; subsequent inputs are the function's return values.
-    The tree-level codegen walks these inputs to build the `return (...)`.
-    """
+    """End of a group (function): its return values."""
 
     bl_idname = "SNA_Node_GroupOutput"
     bl_label = "Group Output"
-
-    socket_direction = "INPUT"
-    reserved_count = 1  # the program-flow "Function" input
     default_fallback = "result"
 
     @classmethod
     def poll(cls, ntree):
         return _poll_group_tree(cls, ntree)
 
-    def on_create(self):
-        self.add_input("ScriptingProgramSocket", "Function")
+    def socket_specs(self):
+        return [Flow("function", "Function")] + self.item_specs(), []
 
-    def generate(self):
-        # Nothing to emit here - the tree-level group codegen reads our inputs
-        # to assemble the return statement of the generated function.
-        pass
+    def emit(self, ctx):
+        values = [ctx.input(key, default="None") for key in self.parameter_keys()]
+        if not values:
+            return
+        result = values[0] if len(values) == 1 else f"({', '.join(values)})"
+        ctx.code(f"return {result}")

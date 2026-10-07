@@ -1,107 +1,71 @@
-from typing import Literal
-from ..lib.sockets import (
-    from_socket,
-    socket_index,
-    to_socket,
-)
-from ..lib.code_format import normalize_indents, parenthesize
-from .conversions import get_conversion
 import bpy
+
+from ..lib.sockets import socket_index
 
 
 class ScriptingBaseSocket(bpy.types.NodeSocket):
-    """Base class for all scripting node sockets.
+    """Base class for all Scripting Nodes sockets (not registered itself).
 
-    Not registered as a Blender type - subclasses are registered instead.
+    Sockets hold no generated code. They describe a value (`literal()` is the
+    Python expression of the socket's own value when nothing is connected)
+    and draw themselves. Code is produced by the compiler (core/context.py).
     """
 
     # Prevent auto_load from registering this base class
     is_registered = True
 
     is_sn = True
-    socket_type: Literal["DATA", "PROGRAM"] = "DATA"
+    # Links only connect sockets of the same group: DATA, EXEC or INTERFACE
+    socket_type = "DATA"
     socket_shape = "CIRCLE"
+    color = (0.35, 0.35, 0.35, 1)
 
-    code: bpy.props.StringProperty(default="")
-
+    # The trailing "+" socket of a dynamic socket group
     is_dynamic: bpy.props.BoolProperty(default=False)
     is_removable: bpy.props.BoolProperty(default=False)
 
-    def eval(self, fallback=""):
-        if self.socket_type == "PROGRAM":
-            return self._eval_program() or fallback
-        elif self.socket_type == "DATA":
-            return self._eval_data() or fallback
+    def literal(self) -> str:
+        """Python expression of this socket's own value (when unconnected)."""
+        return "None"
 
-    def _eval_program(self):
-        if self.is_output:
-            to = to_socket(self)
-            if to:
-                return to.eval()
-            return ""
-        return normalize_indents(self.node.code_inline)
+    def draw_value(self, context, layout, text):
+        layout.label(text=text)
 
-    def _eval_data(self):
-        if self.is_output:
-            return self.code
-        else:
-            from_s = from_socket(self)
-            if from_s:
-                # Apply type conversion if connected socket is a different type
-                value_code = from_s.eval()
-                converted = get_conversion(from_s.bl_idname, self.bl_idname, value_code)
-                # keep operator precedence when embedded in a bigger expression
-                return parenthesize(converted)
-            return self._to_code()
-
-    def _to_code(self):
-        raise NotImplementedError
-
-    def draw_socket(self, context, layout, node, text):
-        raise NotImplementedError
+    def update_value(self, context):
+        self.node.mark_dirty()
 
     def draw(self, context, layout, node, text):
-        # dynamic socket UI
-        if self.is_output and (self.is_dynamic or self.is_removable):
-            if self.is_dynamic:
+        if self.is_dynamic:
+            if self.is_output:
                 layout.label(text=text)
-                op = layout.operator(
-                    "sna.add_dynamic_socket", text="", icon="ADD", emboss=False
-                )
-                op.node_id = node.id
-                op.socket_label = self.label
-                op.is_output = self.is_output
-            elif self.is_removable:
-                op = layout.operator(
-                    "sna.remove_dynamic_socket",
-                    text="",
-                    icon="REMOVE",
-                    emboss=False,
-                )
-                op.node_id = node.id
-                op.socket_index = socket_index(node, self)
-                op.is_output = self.is_output
-
-        # dynamic socket UI
-        if not self.is_output and self.is_removable:
-            if self.is_removable:
-                op = layout.operator(
-                    "sna.remove_dynamic_socket", text="", icon="REMOVE", emboss=False
-                )
-                op.node_id = node.id
-                op.socket_index = socket_index(node, self)
-                op.is_output = self.is_output
-
-        # normal socket UI
-        if not self.is_dynamic:
-            self.draw_socket(context, layout, node, text)
-
-        # dynamic socket UI
-        if not self.is_output and self.is_dynamic:
             op = layout.operator(
                 "sna.add_dynamic_socket", text="", icon="ADD", emboss=False
             )
             op.node_id = node.id
-            op.socket_label = self.label
+            op.socket_identifier = self.identifier
             op.is_output = self.is_output
+            if not self.is_output:
+                layout.label(text=text)
+            return
+        if self.is_removable and not self.is_output:
+            op = layout.operator(
+                "sna.remove_dynamic_socket", text="", icon="REMOVE", emboss=False
+            )
+            op.node_id = node.id
+            op.socket_index = socket_index(node, self)
+            op.is_output = False
+        if self.is_output or self.is_linked:
             layout.label(text=text)
+        else:
+            self.draw_value(context, layout, text)
+        if self.is_removable and self.is_output:
+            op = layout.operator(
+                "sna.remove_dynamic_socket", text="", icon="REMOVE", emboss=False
+            )
+            op.node_id = node.id
+            op.socket_index = socket_index(node, self)
+            op.is_output = True
+
+    @classmethod
+    def draw_color_simple(cls):
+        return cls.color

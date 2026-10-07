@@ -1,36 +1,43 @@
-from ....sockets.socket_types import DATA_SOCKET_ENUM_ITEMS
-from ....lib.socket_modify import update_socket_type
-from ...base_node import ScriptingBaseNode
 import bpy
+
+from ....core import naming
+from ....sockets.socket_types import DATA_SOCKET_ENUM_ITEMS
+from ....sockets.spec import Socket
+from ...base_node import ScriptingBaseNode
 
 
 class SNA_Node_GlobalVariable(ScriptingBaseNode, bpy.types.Node):
+    """A value shared by the whole addon. Read and change it with Get/Set
+    Variable nodes (also from other trees)."""
+
     bl_idname = "SNA_Node_GlobalVariable"
     bl_label = "Global Variable"
-    sn_options = {"ROOT_NODE"}
+    sn_root = True
+    sn_order = 10
+    sn_header_props = ("data_type",)
 
-    def update_data_type(self, context):
-        update_socket_type(self.inputs[0], self.data_type)
-        self._generate()
+    data_type: bpy.props.EnumProperty(items=DATA_SOCKET_ENUM_ITEMS, name="Data Type")
 
-    data_type: bpy.props.EnumProperty(
-        items=DATA_SOCKET_ENUM_ITEMS, name="Data Type", update=update_data_type
-    )
+    def socket_specs(self):
+        return [Socket(self.data_type, "value", "Initial Value")], []
 
-    def on_create(self):
-        self.add_input("ScriptingDataSocket", "Initial Value")
+    def getter_name(self):
+        return naming.function_name(self, "get_var")
 
-    def draw(self, context, layout):
-        layout.prop(self, "data_type", text="")
+    def setter_name(self):
+        return naming.function_name(self, "set_var")
 
-    def generate(self):
-        self.code_module = f"""
-            _var_{self.id} = {self.inputs[0].eval()}
+    def emit(self, ctx):
+        storage = f"_var_{self.id.lower()}"
+        ctx.module(f"""
+            {storage} = {ctx.input("value")}
 
-            def get_var_{self.id}():
-                return _var_{self.id}
 
-            def set_var_{self.id}(value):
-                global _var_{self.id}
-                _var_{self.id} = value
-        """
+            def {self.getter_name()}():
+                return {storage}
+
+
+            def {self.setter_name()}(value):
+                global {storage}
+                {storage} = value
+        """)

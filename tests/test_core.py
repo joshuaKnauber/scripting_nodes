@@ -70,26 +70,45 @@ class CoreTest(unittest.TestCase):
         self.assertIn(repr("after"), read(module_file(tree)))
         self.assertNotIn(repr("before"), read(module_file(tree)))
 
-    def test_generate_error_is_contained(self):
+    def test_emit_error_is_contained(self):
         tree, _, (p1, p2) = trigger_print_tree("a", "b")
         cls = type(p2)
-        original = cls.generate
+        original = cls.emit
 
-        def broken(self):
+        def broken(self, ctx):
             raise ValueError("boom")
 
-        cls.generate = broken
+        cls.emit = broken
         try:
             helpers.sn("src.core.scheduler").request_full()
             helpers.flush()
             errors = helpers.sn("src.core.errors").node_errors
-            self.assertIn("boom", errors.get(p2.id, ""))
+            self.assertIn("boom", errors.get(p1.id, ""))
             compile(helpers.tree_source(tree), "<tree>", "exec")
         finally:
-            cls.generate = original
+            cls.emit = original
         helpers.sn("src.core.scheduler").request_full()
         helpers.flush()
-        self.assertNotIn(p2.id, helpers.sn("src.core.errors").node_errors)
+        self.assertNotIn(p1.id, helpers.sn("src.core.errors").node_errors)
+
+    def test_runtime_error_is_shown_on_node(self):
+        tree = helpers.new_tree()
+        trigger = helpers.add_node(tree, "SNA_Node_Trigger")
+        var = helpers.add_node(tree, "SNA_Node_LocalVariable")
+        var.data_type = "ScriptingIntegerSocket"
+        p = helpers.add_node(tree, "SNA_Node_Print")
+        math = helpers.add_node(tree, "SNA_Node_Math")
+        math.operation = "DIVIDE"
+        helpers.link(tree, trigger.outputs[0], var.inputs[0])
+        helpers.link(tree, var.outputs[0], p.inputs[0])
+        helpers.link(tree, var.outputs[1], math.inputs[0])
+        helpers.link(tree, math.outputs[0], p.inputs[1])  # 0 / 0
+        helpers.flush()
+        namespace, op = trigger.operator_idname.split(".")
+        with self.assertRaises(RuntimeError):
+            getattr(getattr(bpy.ops, namespace), op)()
+        errors = helpers.sn("src.core.errors")
+        self.assertIn("ZeroDivisionError", errors.node_message(p.id) or "")
 
     # -- loading ----------------------------------------------------------------
 
@@ -178,12 +197,12 @@ class CoreTest(unittest.TestCase):
 
     # -- consistency ------------------------------------------------------------
 
-    def test_undo_rebuilds_stale_code(self):
+    def test_undo_rebuilds_from_graph(self):
         tree, _, (p,) = trigger_print_tree("fresh")
-        p.code_inline = "this is stale garbage"
+        with open(module_file(tree), "w") as f:
+            f.write("# stale\n")
         helpers.sn("src.handlers.events.on_undo").on_undo_redo()
         helpers.flush()
-        self.assertNotIn("garbage", p.code_inline)
         self.assertIn(repr("fresh"), read(module_file(tree)))
 
     def test_duplicated_tree_gets_own_module(self):
@@ -209,6 +228,10 @@ class CoreTest(unittest.TestCase):
         tree = helpers.new_tree("Vars")
         var = helpers.add_node(tree, "SNA_Node_GlobalVariable")
         get = helpers.add_node(tree, "SNA_Node_GetVariable")
+        trigger = helpers.add_node(tree, "SNA_Node_Trigger")
+        p = helpers.add_node(tree, "SNA_Node_Print")
+        helpers.link(tree, trigger.outputs[0], p.inputs[0])
+        helpers.link(tree, get.outputs[0], p.inputs[1])
         helpers.flush()
         get.var = f"{var.name} ({tree.name})"
         helpers.flush()
@@ -223,33 +246,38 @@ class CoreTest(unittest.TestCase):
         helpers.flush()
         self.assertEqual(get.resolve_reference("var"), var)
         self.assertEqual(get.var, "Renamed Variable (Renamed Tree)")
-        self.assertEqual(get.outputs[1].code, f"get_var_{var.id}()")
+        self.assertIn(f"{var.getter_name()}()", helpers.tree_source(tree))
 
-    def test_old_name_references_are_migrated(self):
-        tree, var, get = self._variable_setup()
-        # what files saved before data version 1 contain
-        get["var"] = f"{var.name} ({tree.name})"
-        get["var_ref_id"] = ""
-        tree.data_version = 0
-        helpers.sn("src.core.scheduler").request_full()
+    def test_cross_tree_reference_imports(self):
+        vars_tree = helpers.new_tree("Vars")
+        var = helpers.add_node(vars_tree, "SNA_Node_GlobalVariable")
+        tree = helpers.new_tree("Main")
+        get = helpers.add_node(tree, "SNA_Node_GetVariable")
+        trigger = helpers.add_node(tree, "SNA_Node_Trigger")
+        p = helpers.add_node(tree, "SNA_Node_Print")
+        helpers.link(tree, trigger.outputs[0], p.inputs[0])
+        helpers.link(tree, get.outputs[0], p.inputs[1])
         helpers.flush()
-        self.assertEqual(get.resolve_reference("var"), var)
-        self.assertNotIn("var", get.keys())
-        self.assertEqual(
-            tree.data_version, helpers.sn("src.core.versioning").DATA_VERSION
+        get.var = f"{var.name} ({vars_tree.name})"
+        helpers.flush()
+        source = helpers.tree_source(tree)
+        self.assertIn(
+            f"from .{vars_tree.module_name} import {var.getter_name()}", source
         )
+        self.assertIsNone(helpers.sn("src.core.errors").addon_error)
 
     # -- export -----------------------------------------------------------------
 
-    def test_export_uses_build_mode(self):
+    def test_export_build(self):
         tree, _, (p,) = trigger_print_tree("shipped")
         export = helpers.sn("src.core.ops.export")
         files = export.build_files()
         source = files[f"addon/{tree.module_name}.py"]
         self.assertIn(repr("shipped"), source)
-        self.assertNotIn("_sn_overlay", source)
-        # live code still has the dev overlay hook
-        self.assertIn("_sn_overlay", p.code_inline)
+        # dev builds route print through the overlay helper, exports don't
+        self.assertNotIn("sn_print", source)
+        self.assertNotIn("_sn_helpers.py", files)
+        self.assertIn("sn_print", read(module_file(tree)))
         for rel, src in files.items():
             if rel.endswith(".py"):
                 compile(src, rel, "exec")

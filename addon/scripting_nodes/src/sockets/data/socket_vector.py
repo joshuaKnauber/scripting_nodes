@@ -1,57 +1,30 @@
-from ..base_socket import ScriptingBaseSocket
 import bpy
 
+from ..base_socket import ScriptingBaseSocket
 
-class ScriptingVectorSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
+
+class ScriptingVectorSocket(ScriptingBaseSocket):
     bl_idname = "ScriptingVectorSocket"
     bl_label = "Vector"
-
-    def update_value(self, context):
-        self.node._generate()
+    color = (0.380, 0.341, 0.839, 1)
 
     dimension: bpy.props.EnumProperty(
         name="Dimensions",
-        description="Vector dimensions",
-        items=[
-            ("2", "Vec2", "Two-dimensional vector"),
-            ("3", "Vec3", "Three-dimensional vector"),
-            ("4", "Vec4", "Four-dimensional vector (with w component)"),
-        ],
+        items=[("2", "Vec2", ""), ("3", "Vec3", ""), ("4", "Vec4", "")],
         default="3",
-        update=update_value,
+        update=ScriptingBaseSocket.update_value,
     )
-
     value: bpy.props.FloatVectorProperty(
-        name="Value",
-        size=4,
-        default=(0.0, 0.0, 0.0, 0.0),
-        subtype="NONE",
-        update=update_value,
+        size=4, default=(0.0, 0.0, 0.0, 0.0), update=ScriptingBaseSocket.update_value
     )
 
-    def _to_code(self):
-        if self.dimension == "2":
-            return f"({self.value[0]}, {self.value[1]})"
-        elif self.dimension == "3":
-            return f"({self.value[0]}, {self.value[1]}, {self.value[2]})"
-        else:
-            return (
-                f"({self.value[0]}, {self.value[1]}, {self.value[2]}, {self.value[3]})"
-            )
+    def literal(self):
+        values = [repr(float(v)) for v in self.value[: int(self.dimension)]]
+        return f"({', '.join(values)})"
 
-    def draw_socket(self, context, layout, node, text):
-        if self.is_output or self.is_linked:
-            layout.label(text=text)
-        else:
-            col = layout.column(align=True)
-            dim = int(self.dimension)
-            col.prop(self, "value", index=0, text="")
-            col.prop(self, "value", index=1, text="")
-            if dim >= 3:
-                col.prop(self, "value", index=2, text="")
-            if dim >= 4:
-                col.prop(self, "value", index=3, text="")
-
-    @classmethod
-    def draw_color_simple(cls):
-        return (0.380, 0.341, 0.839, 1)
+    def draw_value(self, context, layout, text):
+        col = layout.column(align=True)
+        if text:
+            col.label(text=text)
+        for i in range(int(self.dimension)):
+            col.prop(self, "value", index=i, text="")

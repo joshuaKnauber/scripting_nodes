@@ -13,6 +13,10 @@ node_errors: dict[str, str] = {}
 # node id -> message, for nodes whose generated line made the addon fail to load
 load_errors: dict[str, str] = {}
 
+# node id -> message, for exceptions raised while the generated addon ran
+# (e.g. clicking a generated button), see core/tracebacks.py
+runtime_errors: dict[str, str] = {}
+
 # Error of the last attempt to load the generated addon (None when it loaded)
 addon_error: str | None = None
 
@@ -35,7 +39,11 @@ def set_addon_error(message: str | None, nodes: dict[str, str] | None = None):
 
 
 def node_message(node_id: str) -> str | None:
-    return node_errors.get(node_id) or load_errors.get(node_id)
+    return (
+        node_errors.get(node_id)
+        or load_errors.get(node_id)
+        or runtime_errors.get(node_id)
+    )
 
 
 def format_exception(exc: BaseException) -> str:
@@ -46,4 +54,5 @@ def clear():
     global addon_error
     node_errors.clear()
     load_errors.clear()
+    runtime_errors.clear()
     addon_error = None

@@ -1,35 +1,32 @@
-from ....lib.socket_modify import update_socket_type
-from ....sockets.socket_types import DATA_SOCKET_ENUM_ITEMS
-from ....lib.code_format import indent
-from ...base_node import ScriptingBaseNode
 import bpy
+
+from ....sockets.socket_types import DATA_SOCKET_ENUM_ITEMS
+from ....sockets.spec import Flow, Socket
+from ...base_node import ScriptingBaseNode
 
 
 class SNA_Node_LocalVariable(ScriptingBaseNode, bpy.types.Node):
+    """A variable that exists in the rest of this flow."""
+
     bl_idname = "SNA_Node_LocalVariable"
     bl_label = "Local Variable"
+    sn_header_props = ("data_type",)
 
-    def update_data_type(self, context):
-        update_socket_type(self.inputs[1], self.data_type)
-        update_socket_type(self.outputs[1], self.data_type)
-        self._generate()
+    data_type: bpy.props.EnumProperty(items=DATA_SOCKET_ENUM_ITEMS, name="Data Type")
 
-    data_type: bpy.props.EnumProperty(
-        items=DATA_SOCKET_ENUM_ITEMS, name="Data Type", update=update_data_type
-    )
+    def socket_specs(self):
+        return (
+            [Flow(), Socket(self.data_type, "value", "Initial Value")],
+            [Flow("next"), Socket(self.data_type, "variable", "Value")],
+        )
 
-    def on_create(self):
-        self.add_input("ScriptingProgramSocket")
-        self.add_input("ScriptingDataSocket", "Initial Value")
-        self.add_output("ScriptingProgramSocket")
-        self.add_output("ScriptingDataSocket", "Value")
+    def variable_name(self):
+        return f"var_{self.id.lower()}"
 
-    def draw(self, context, layout):
-        layout.prop(self, "data_type", text="")
-
-    def generate(self):
-        self.code_inline = f"""
-            var_{self.id} = {self.inputs[1].eval()}
-            {indent(self.outputs[0].eval(), 3)}
-        """
-        self.outputs[1].code = f"var_{self.id}"
+    def emit(self, ctx):
+        name = self.variable_name()
+        ctx.output("variable", name)
+        ctx.code(f"""
+            {name} = {ctx.input("value")}
+            {ctx.flow("next")}
+        """)

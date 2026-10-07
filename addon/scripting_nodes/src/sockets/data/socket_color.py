@@ -1,40 +1,28 @@
-from ..base_socket import ScriptingBaseSocket
 import bpy
 
+from ..base_socket import ScriptingBaseSocket
 
-class ScriptingColorSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
+
+class ScriptingColorSocket(ScriptingBaseSocket):
     bl_idname = "ScriptingColorSocket"
     bl_label = "Color"
+    color = (0.929, 0.851, 0.251, 1)
 
-    def update_value(self, context):
-        self.node._generate()
-
-    use_alpha: bpy.props.BoolProperty(default=False)
-
+    use_alpha: bpy.props.BoolProperty(
+        default=False, update=ScriptingBaseSocket.update_value
+    )
     value: bpy.props.FloatVectorProperty(
         subtype="COLOR",
         size=4,
         min=0.0,
         max=1.0,
         default=(1.0, 1.0, 1.0, 1.0),
-        update=update_value,
+        update=ScriptingBaseSocket.update_value,
     )
 
-    def _to_code(self):
-        if self.use_alpha:
-            return (
-                f"({self.value[0]}, {self.value[1]}, {self.value[2]}, {self.value[3]})"
-            )
-        else:
-            return f"({self.value[0]}, {self.value[1]}, {self.value[2]})"
+    def literal(self):
+        values = [repr(float(v)) for v in self.value[: 4 if self.use_alpha else 3]]
+        return f"({', '.join(values)})"
 
-    def draw_socket(self, context, layout, node, text):
-        if self.is_output or self.is_linked:
-            layout.label(text=text)
-        else:
-            row = layout.row()
-            row.prop(self, "value", text=text)
-
-    @classmethod
-    def draw_color_simple(cls):
-        return (0.929, 0.851, 0.251, 1)
+    def draw_value(self, context, layout, text):
+        layout.prop(self, "value", text=text)

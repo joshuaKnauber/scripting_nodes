@@ -1,205 +1,188 @@
-from textwrap import wrap
-from typing import Dict, Literal, Set, Tuple
+from typing import Dict, Set, Tuple
 
 import bpy
 
 from ..core import errors, scheduler
-from ..core.references import (
-    find_node,
-    install_reference_properties,
-    ref_id_key,
-)
+from ..core.references import find_node, install_reference_properties, ref_id_key
 from ..lib.ids import get_short_id
-from ..lib.sockets import from_nodes, socket_index, to_nodes
 from ..node_tree.node_tree import ScriptingNodeTree
-from ..sockets.socket_types import SOCKET_IDNAME_TYPE
+from ..sockets.spec import MISSING, SocketSpec
 
-CODE_FIELDS = (
-    "code_imports",
-    "code_module",
-    "code_inline",
-    "code_global",
-    "code_register",
-    "code_unregister",
-)
+# Property types whose changes regenerate code automatically
+_AUTO_UPDATE_PROPS = {
+    "BoolProperty",
+    "IntProperty",
+    "FloatProperty",
+    "StringProperty",
+    "EnumProperty",
+    "BoolVectorProperty",
+    "IntVectorProperty",
+    "FloatVectorProperty",
+    "PointerProperty",
+}
+
+
+def _auto_update(self, context):
+    self.mark_dirty()
+
+
+def _install_auto_updates(cls):
+    """Every node property regenerates code when changed - no update= needed."""
+    for base in cls.__mro__:
+        if base.__module__.startswith("bpy"):
+            continue
+        annotations = base.__dict__.get("__annotations__", {})
+        for name, prop in list(annotations.items()):
+            function = getattr(prop, "function", None)
+            keywords = getattr(prop, "keywords", None)
+            if function is None or keywords is None:
+                continue
+            if function.__name__ not in _AUTO_UPDATE_PROPS:
+                continue
+            if "update" in keywords or "get" in keywords or "set" in keywords:
+                continue
+            annotations[name] = function(**keywords, update=_auto_update)
 
 
 class ScriptingBaseNode:
     """Base class of every Scripting Nodes node.
 
-    Subclasses implement `on_create()` (add sockets) and `generate()` (fill
-    the code fields below and `output.code` of data outputs). Anything that
-    changes the generated code calls `self._generate()`, which only *requests*
-    regeneration - the scheduler runs `generate()` on its next flush.
-
-    Code fields:
-      code_imports     import lines, deduplicated per module
-      code_global      module-level code
-      code_module      module-level code of ROOT_NODE nodes (classes, ...)
-      code_inline      statement(s) inside a program flow
-      code_register    lines for the module's register()
-      code_unregister  lines for the module's unregister()
+    A node declares its sockets (`sn_inputs` / `sn_outputs`, see sockets/spec)
+    and writes code in `emit(ctx)` (see core/context.py). Nodes store no
+    generated code: the compiler calls `emit` whenever the addon is rebuilt.
     """
 
     @classmethod
     def poll(cls, ntree):
-        """Checks if the node is valid"""
         return ntree.bl_idname == ScriptingNodeTree.bl_idname
-
-    def ntree_poll(self, group):
-        """Checks if the node tree is valid"""
-        return group.bl_idname == ScriptingNodeTree.bl_idname
-
-    @property
-    def node_tree(self):
-        """Returns the node tree this node lives in (overridden by Group)."""
-        return self.id_data
-
-    ### Properties
 
     is_sn = True
 
-    sn_options: Set[Literal["ROOT_NODE"]] = set()
-    # {prop_name: tuple-of-allowed-bl_idnames}. Each entry declares a string
-    # field referencing another node. The field is stored by node id (see
-    # core/references.py); the tuple filters which nodes the picker shows.
+    # -- declaration ----------------------------------------------------------
+
+    sn_inputs: list = []
+    sn_outputs: list = []
+    # Root nodes are emitted on their own (operators, panels, events, ...).
+    # Other nodes are emitted when a flow reaches them or a value is used.
+    sn_root = False
+    # Order of root nodes in the module (lower first). Classes other roots
+    # reference at definition time (PropertyGroups) need to come first.
+    sn_order = 50
+    # Properties drawn on the node before `draw()`
+    sn_header_props: Tuple[str, ...] = ()
+    # {prop_name: allowed bl_idnames}: string fields referencing other nodes,
+    # stored by node id (core/references.py)
     sn_reference_properties: Dict[str, Tuple[str, ...]] = {}
-    # PointerProperty fields whose value is another ScriptingNodeTree.
+    # PointerProperty fields holding another ScriptingNodeTree
     sn_tree_reference_properties: Set[str] = set()
 
-    id: bpy.props.StringProperty(
-        default="", name="ID", description="Unique ID of the node"
-    )
-
-    code_imports: bpy.props.StringProperty()
-    code_module: bpy.props.StringProperty()
-    code_inline: bpy.props.StringProperty()
-    code_global: bpy.props.StringProperty()
-    code_register: bpy.props.StringProperty()
-    code_unregister: bpy.props.StringProperty()
+    id: bpy.props.StringProperty(default="", options={"HIDDEN"})
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
+        _install_auto_updates(cls)
         if cls.sn_reference_properties:
             install_reference_properties(cls, cls.sn_reference_properties)
 
-    ### Life Cycle
+    def socket_specs(self):
+        """(inputs, outputs) the node should have right now. Override when
+        sockets depend on properties or other nodes; it's re-checked on
+        every update and rebuild."""
+        return self.sn_inputs, self.sn_outputs
 
-    def init(self, context: bpy.types.Context):
-        """Called when the node is created"""
+    def emit(self, ctx):
+        """Write this node's code through `ctx` (core/context.NodeContext)."""
+
+    # -- life cycle -------------------------------------------------------------
+
+    def init(self, context):
+        # the id is set last: property updates during on_create() are ignored
+        # until the node is complete (see mark_dirty)
+        self.sync_sockets()
         self.on_create()
         self.id = get_short_id()
-        self._generate()
+        self.mark_dirty()
 
     def on_create(self):
-        pass
+        """Called once after the sockets were created."""
 
-    def copy(self, node: bpy.types.Node):
-        """Called when the node is copied"""
+    def copy(self, node):
         self.id = get_short_id()
-        self._generate()
+        self.mark_dirty()
 
     def free(self):
-        """Called when the node is deleted"""
         errors.clear_node_error(self.id)
         scheduler.request_tree(self.id_data)
 
-    ### Code Generation
-
-    def _generate(self):
-        """Request regeneration of this node (runs on the next flush)."""
+    def mark_dirty(self):
+        """Something about this node changed: re-check sockets, rebuild soon."""
+        if not self.id:
+            return  # still being created
+        self.sync_sockets()
         scheduler.request_node(self)
 
-    def generate(self):
-        raise NotImplementedError
+    # -- sockets ----------------------------------------------------------------
 
-    def _code_snapshot(self):
-        """(statement/module code, data output code, layout names)"""
-        return (
-            tuple(getattr(self, field) for field in CODE_FIELDS),
-            tuple(getattr(s, "code", "") for s in self.outputs),
-            tuple(getattr(s, "layout", "") for s in self.outputs),
+    def socket(self, key, output=False):
+        """Socket by its declared key (identifier), or None."""
+        for socket in self.outputs if output else self.inputs:
+            if socket.identifier == key:
+                return socket
+        return None
+
+    def dynamic_sockets(self, key, output=False):
+        """Sockets of a dynamic group, without the trailing "+" placeholder."""
+        return [
+            s
+            for s in (self.outputs if output else self.inputs)
+            if _in_group(s, key) and not s.is_dynamic
+        ]
+
+    def sync_sockets(self):
+        """Make the node's sockets match `socket_specs()`, keeping links."""
+        inputs, outputs = self.socket_specs()
+        changed = _sync(self, self.inputs, inputs, is_output=False)
+        changed |= _sync(self, self.outputs, outputs, is_output=True)
+        return changed
+
+    def add_dynamic_socket(self, identifier, is_output):
+        """Turn the "+" socket `identifier` into a normal one, add a new "+"."""
+        sockets = self.outputs if is_output else self.inputs
+        current = self.socket(identifier, is_output)
+        if current is None:
+            return
+        key = identifier.split("__", 1)[0]
+        new = sockets.new(
+            current.bl_idname, current.name, identifier=_next_identifier(sockets, key)
         )
+        _copy_socket_attrs(current, new)
+        new.is_dynamic = True
+        pointers = [s.as_pointer() for s in sockets]
+        sockets.move(len(sockets) - 1, pointers.index(current.as_pointer()) + 1)
+        current.is_dynamic = False
+        current.is_removable = True
+        self.mark_dirty()
 
-    def regenerate(self) -> tuple[bool, bool, bool]:
-        """Run generate() now. Only the scheduler calls this.
+    def update_dynamic_sockets(self):
+        """Linking the "+" socket of a group makes it a real one."""
+        for is_output, sockets in ((False, self.inputs), (True, self.outputs)):
+            for socket in list(sockets):
+                if getattr(socket, "is_dynamic", False) and socket.is_linked:
+                    self.add_dynamic_socket(socket.identifier, is_output)
 
-        Returns which parts changed: (code, data outputs, layouts). Errors in
-        generate() are stored per node and shown on it; the node then
-        contributes no code.
-        """
-        unchanged = (False, False, False)
-        if not self.id:
-            return unchanged
-        # Mid-edit states (e.g. a reroute being inserted) can leave non-SN
-        # sockets on the node; keep the previous code until it settles.
-        for socket in list(self.inputs) + list(self.outputs):
-            if not hasattr(socket, "eval"):
-                return unchanged
-        before = self._code_snapshot()
-        self._clear_code()
-        try:
-            self.generate()
-            errors.clear_node_error(self.id)
-        except Exception as exc:
-            errors.set_node_error(self.id, exc)
-            self._clear_code()
-        after = self._code_snapshot()
-        return tuple(a != b for a, b in zip(before, after))
-
-    def _clear_code(self):
-        for field in CODE_FIELDS:
-            setattr(self, field, "")
-        for out in self.outputs:
-            out.code = ""
-
-    def dependent_nodes(self, changes):
-        """Nodes whose generated code reads the parts of this node that changed.
-
-        - code: upstream nodes embed our `code_inline` (via program inputs)
-        - data outputs: downstream nodes read `output.code`
-        - layouts: downstream program/interface nodes read the layout name
-        """
-        code, outputs, layouts = changes
-        for out in self.outputs:
-            if getattr(out, "socket_type", None) == "DATA":
-                if outputs:
-                    yield from to_nodes(out)
-            elif layouts:
-                yield from to_nodes(out)
-        if code:
-            for inp in self.inputs:
-                if getattr(inp, "socket_type", None) == "PROGRAM":
-                    yield from from_nodes(inp)
-
-    def code_dependencies(self):
-        """Nodes whose code should be generated before this one."""
-        for inp in self.inputs:
-            if getattr(inp, "socket_type", None) == "DATA":
-                yield from from_nodes(inp)
-        for out in self.outputs:
-            if getattr(out, "socket_type", None) == "PROGRAM":
-                yield from to_nodes(out)
-
-    def on_ref_change(self, node):
-        """A node this node references changed its code."""
-        self._generate()
-
-    ### Reference helpers
+    # -- references ---------------------------------------------------------
 
     @classmethod
     def _ref_collection_attr(cls, prop_name):
-        """scene.sna attribute name of the picker collection for this field."""
         from ..settings.settings import signature_key
 
         return signature_key(cls.sn_reference_properties[prop_name])
 
     def resolve_reference(self, prop_name):
-        """Return the node a reference-property points to, or None."""
+        """The node a reference field points to, or None."""
         return find_node(self.get(ref_id_key(prop_name), ""))
 
     def draw_reference_prop(self, layout, prop_name, text=""):
-        """Standard UI for picking another SN node by reference."""
         layout.prop_search(
             self,
             prop_name,
@@ -208,69 +191,7 @@ class ScriptingBaseNode:
             text=text,
         )
 
-    def reference_is_cross_tree(self, prop_name):
-        """True iff the referenced node lives in a different tree."""
-        target = self.resolve_reference(prop_name)
-        return target is not None and target.id_data is not self.id_data
-
-    ### Sockets
-
-    def add_input(self, idname: SOCKET_IDNAME_TYPE, label="", dynamic=False):
-        socket = self.inputs.new(idname, label)
-        self._initialize_socket(socket, label, dynamic)
-        return socket
-
-    def add_output(self, idname: SOCKET_IDNAME_TYPE, label="", dynamic=False):
-        socket = self.outputs.new(idname, label)
-        self._initialize_socket(socket, label, dynamic)
-        return socket
-
-    def _initialize_socket(self, socket, label, dynamic):
-        socket.name = label or socket.bl_label
-        socket.display_shape = socket.socket_shape
-        socket.is_dynamic = dynamic
-        if socket.is_output and socket.socket_type == "PROGRAM":
-            # flow code is pulled from a single downstream node
-            socket.link_limit = 1
-
-    def update_dynamic_sockets(self):
-        """A linked dynamic socket becomes a normal (removable) one and a new
-        empty dynamic socket is added after it."""
-        for sockets, add in (
-            (self.inputs, self.add_input),
-            (self.outputs, self.add_output),
-        ):
-            for socket in list(sockets):
-                if getattr(socket, "is_dynamic", False) and socket.is_linked:
-                    index = socket_index(self, socket)
-                    add(socket.bl_idname, socket.label, dynamic=True)
-                    sockets.move(len(sockets) - 1, index + 1)
-                    socket.is_dynamic = False
-                    socket.is_removable = True
-
-    ### UI
-
-    def _shown_code_lines(self):
-        """Compact code lines for the in-node dev preview."""
-        shown = self.code_module or self.code_inline
-        if not shown:
-            return []
-
-        lines = [line.rstrip() for line in shown.strip().splitlines()]
-        lines = [line for line in lines if line.strip()]
-
-        display_lines = []
-        for line in lines:
-            indent = line[: len(line) - len(line.lstrip())]
-            chunks = wrap(
-                line,
-                width=96,
-                subsequent_indent=f"{indent}    ",
-                replace_whitespace=False,
-                drop_whitespace=False,
-            )
-            display_lines.extend(chunks or [line])
-        return display_lines
+    # -- UI -------------------------------------------------------------------
 
     def draw_buttons(self, context, layout):
         error = errors.node_message(self.id)
@@ -278,12 +199,128 @@ class ScriptingBaseNode:
             box = layout.box()
             box.alert = True
             box.label(text=error, icon="ERROR")
-        if bpy.context.scene.sna.dev.show_node_code:
-            box = layout.box()
-            col = box.column(align=True)
-            for line in self._shown_code_lines():
-                col.label(text=line)
+        if context.scene.sna.dev.show_node_code:
+            from ..core.compiler import node_lines
+
+            lines = node_lines.get(self.id)
+            if lines:
+                col = layout.box().column(align=True)
+                for line in lines[:40]:
+                    col.label(text=line)
+        for prop in self.sn_header_props:
+            layout.prop(self, prop, text="")
         self.draw(context, layout)
 
     def draw(self, context, layout):
         pass
+
+
+# -----------------------------------------------------------------------------
+# Socket syncing
+# -----------------------------------------------------------------------------
+
+
+def _in_group(socket, key):
+    return socket.identifier == key or socket.identifier.startswith(key + "__")
+
+
+def _next_identifier(sockets, key):
+    used = {s.identifier for s in sockets}
+    i = 1
+    while f"{key}__{i}" in used:
+        i += 1
+    return f"{key}__{i}"
+
+
+def _copy_socket_attrs(source, target):
+    for attr in ("dimension", "use_alpha", "enum_items_data", "kind"):
+        if hasattr(source, attr):
+            setattr(target, attr, getattr(source, attr))
+
+
+def _apply_spec(socket, spec: SocketSpec, created):
+    name = spec.display_name
+    if socket.name != name:
+        socket.name = name
+    if socket.enabled != spec.enabled:
+        socket.enabled = spec.enabled
+    if socket.hide != spec.hide:
+        socket.hide = spec.hide
+    if spec.kind and getattr(socket, "kind", spec.kind) != spec.kind:
+        socket.kind = spec.kind
+    for attr, value in spec.attrs.items():
+        if getattr(socket, attr, value) != value:
+            setattr(socket, attr, value)
+    if created:
+        socket.display_shape = socket.socket_shape
+        if socket.is_output and socket.socket_type != "DATA":
+            socket.link_limit = 1  # flow code continues in one place
+        if spec.default is not MISSING and hasattr(socket, "value"):
+            try:
+                socket.value = spec.default
+            except (TypeError, ValueError):
+                pass
+
+
+def _sync(node, sockets, specs, is_output):
+    """Create/remove/reorder `sockets` to match `specs`. Returns True if
+    anything structural changed."""
+    wanted = []  # (spec, socket or None, identifier)
+    for spec in specs:
+        if spec.dynamic:
+            group = [
+                s
+                for s in sockets
+                if _in_group(s, spec.key) and s.bl_idname == spec.idname
+            ]
+            if group:
+                wanted += [(spec, s, s.identifier) for s in group]
+            else:
+                wanted.append((spec, None, spec.key))
+            continue
+        existing = next((s for s in sockets if s.identifier == spec.key), None)
+        if existing is not None and existing.bl_idname != spec.idname:
+            existing = None
+        wanted.append((spec, existing, spec.key))
+
+    keep = {s.as_pointer() for _, s, _ in wanted if s is not None}
+    changed = False
+    saved_links = {}
+    for socket in list(sockets):
+        if socket.as_pointer() in keep:
+            continue
+        # type changed or socket gone: remember its links for a replacement
+        others = [l.to_socket if is_output else l.from_socket for l in socket.links]
+        if others:
+            saved_links[socket.identifier] = others
+        sockets.remove(socket)
+        changed = True
+
+    tree = node.id_data
+    final = []
+    for spec, socket, identifier in wanted:
+        created = socket is None
+        if created:
+            socket = sockets.new(spec.idname, spec.display_name, identifier=identifier)
+            if spec.dynamic:
+                socket.is_dynamic = True
+            changed = True
+        _apply_spec(socket, spec, created)
+        if created:
+            for other in saved_links.get(identifier, ()):
+                try:
+                    if is_output:
+                        tree.links.new(socket, other)
+                    else:
+                        tree.links.new(other, socket)
+                except RuntimeError:
+                    pass
+        final.append(socket)
+
+    for index, socket in enumerate(final):
+        pointers = [s.as_pointer() for s in sockets]
+        current = pointers.index(socket.as_pointer())
+        if current != index:
+            sockets.move(current, index)
+            changed = True
+    return changed

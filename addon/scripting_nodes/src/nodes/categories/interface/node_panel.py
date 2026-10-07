@@ -1,5 +1,6 @@
-from ....lib.code_format import indent
+from ....lib.code_format import literal_set
 from ....lib.trees import node_by_id
+from ....sockets.spec import Boolean, Interface, String
 from ...base_node import ScriptingBaseNode
 from .ops.panel_picker import (
     is_picker_active,
@@ -76,63 +77,45 @@ class SNA_OT_PanelNodeSettings(bpy.types.Operator):
 
 
 class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
+    """A panel in any editor's sidebar, properties tab, ..."""
+
     bl_idname = "SNA_Node_Panel"
     bl_label = "Panel"
-    sn_options = {"ROOT_NODE"}
-
-    # -- Properties --
-
-    def update_props(self, context):
-        self._generate()
+    sn_root = True
+    sn_inputs = [
+        String("label", "Label", default="Panel"),
+        Boolean("visible", "Is Visible", default=True),
+    ]
+    sn_outputs = [Interface("header", "Header"), Interface("body", "Interface")]
 
     panel_space_type: bpy.props.EnumProperty(
         items=get_space_type_items,
         name="Space Type",
         description="Editor type where the panel appears",
-        update=update_props,
     )
-
     panel_region_type: bpy.props.EnumProperty(
         items=get_region_type_items,
         name="Region Type",
         description="Region within the editor where the panel appears",
-        update=update_props,
     )
-
     panel_context: bpy.props.EnumProperty(
         items=get_context_type_items,
         name="Context",
-        description="Tab context for the Properties editor (only used when space is PROPERTIES)",
-        update=update_props,
+        description="Tab of the Properties editor (only used there)",
     )
-
     panel_category: bpy.props.StringProperty(
         name="Category",
-        description="Tab name for sidebar panels (e.g. 'Tool', 'Edit')",
+        description="Sidebar tab name",
         default="Scripting Nodes",
-        update=update_props,
     )
-
     panel_order: bpy.props.IntProperty(
-        name="Order",
-        description="Panel ordering index (higher values appear lower)",
-        default=0,
-        update=update_props,
+        name="Order", description="Panel ordering index (higher values appear lower)"
     )
-
-    # Panel options
     option_default_closed: bpy.props.BoolProperty(
-        name="Default Closed",
-        description="Panel starts collapsed by default",
-        default=False,
-        update=update_props,
+        name="Default Closed", description="Panel starts collapsed"
     )
-
     option_hide_header: bpy.props.BoolProperty(
-        name="Hide Header",
-        description="Hide the panel header (makes panel non-collapsible)",
-        default=False,
-        update=update_props,
+        name="Hide Header", description="Hide the panel header"
     )
 
     def on_create(self):
@@ -140,93 +123,55 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
         self.panel_region_type = "UI"
         self.panel_context = "NONE"
 
-        # Inputs
-        self.add_input("ScriptingStringSocket", "Label").value = "Panel"
-        self.add_input("ScriptingBooleanSocket", "Is Visible").value = True
-
-        # Outputs - interface hooks
-        self.add_output("ScriptingInterfaceSocket", "Header")
-        self.add_output("ScriptingInterfaceSocket", "Interface")
-
     def draw(self, context, layout):
-        # Check if picker is active for this node
         if is_picker_active() and get_active_picker_node_id() == self.id:
-            # Show cancel button when picker is active (no alert)
             layout.operator("sna.panel_picker_cancel", text="Cancel Picker", icon="X")
             layout.label(text="Click 'Pick This Location'", icon="INFO")
             layout.label(text="in any editor area")
             return
-
-        # Picker and settings buttons
         row = layout.row(align=True)
-        picker_op = row.operator("sna.panel_picker_start", text="", icon="EYEDROPPER")
-        picker_op.node_id = self.id
-        settings_op = row.operator(
+        row.operator(
+            "sna.panel_picker_start", text="", icon="EYEDROPPER"
+        ).node_id = self.id
+        op = row.operator(
             "sna.panel_node_settings", text="Settings", icon="PREFERENCES"
         )
-        settings_op.node_id = self.id
+        op.node_id = self.id
 
-    def generate(self):
-        # Safety check: ensure inputs exist before generating
-        if "Label" not in self.inputs or "Is Visible" not in self.inputs:
-            return
-
-        class_prefix = bpy.context.scene.sna.addon.class_prefix
-
-        # Build bl_options set
-        options = []
+    def emit(self, ctx):
+        options = set()
         if self.option_default_closed:
-            options.append("'DEFAULT_CLOSED'")
+            options.add("DEFAULT_CLOSED")
         if self.option_hide_header:
-            options.append("'HIDE_HEADER'")
-        options_str = "{" + ", ".join(options) + "}" if options else "set()"
-
-        # Build class attributes list
-        class_attrs = [
-            f'bl_idname = "{class_prefix}_PT_Panel_{self.id}"',
-            f"bl_label = {self.inputs['Label'].eval()}",
-            f"bl_space_type = '{self.panel_space_type}'",
-            f"bl_region_type = '{self.panel_region_type}'",
+            options.add("HIDE_HEADER")
+        attrs = [
+            f"bl_label = {ctx.input('label')}",
+            f"bl_space_type = {self.panel_space_type!r}",
+            f"bl_region_type = {self.panel_region_type!r}",
+            f"bl_order = {self.panel_order}",
+            f"bl_options = {literal_set(options)}" if options else "bl_options = set()",
         ]
-
-        # Add context (only for PROPERTIES space)
         if self.panel_space_type == "PROPERTIES" and self.panel_context != "NONE":
-            class_attrs.append(f'bl_context = "{self.panel_context}"')
-
-        # Add category (for sidebar panels)
+            attrs.append(f"bl_context = {self.panel_context!r}")
         if self.panel_region_type == "UI" and self.panel_category:
-            class_attrs.append(f"bl_category = {self.panel_category!r}")
+            attrs.append(f"bl_category = {self.panel_category!r}")
+        header = ""
+        if ctx.is_linked("header"):
+            header = f"""
+                def draw_header(self, context):
+                    {ctx.flow("header", layout="self.layout")}
+            """
 
-        # Add order and options
-        class_attrs.append(f"bl_order = {self.panel_order}")
-        class_attrs.append(f"bl_options = {options_str}")
+        ctx.module(f"""
+            class {ctx.class_name("PT", "Panel")}(bpy.types.Panel):
+                {ctx.join(attrs)}
 
-        # Format class attributes
-        attrs_code = "\n    ".join(class_attrs)
+                @classmethod
+                def poll(cls, context):
+                    return {ctx.input("visible")}
 
-        # Set up header layout variable
-        self.outputs["Header"].layout = f"header_{self.id}"
+                {ctx.join([header])}
 
-        # Build poll method
-        poll_code = self.inputs["Is Visible"].eval("True")
-        poll_method = f"""
-    @classmethod
-    def poll(cls, context):
-        return {poll_code}
-"""
-
-        # Build draw_header method
-        header_code = self.outputs["Header"].eval("pass")
-        draw_header_method = f"""
-    def draw_header(self, context):
-        header_{self.id} = self.layout
-        {indent(header_code, 2)}
-"""
-
-        self.code_module = f"""
-class {class_prefix}_PT_Panel_{self.id}(bpy.types.Panel):
-    {attrs_code}
-{poll_method}{draw_header_method}
-    def draw(self, context):
-        {indent(self.outputs["Interface"].eval("pass"), 2)}
-        """
+                def draw(self, context):
+                    {ctx.flow("body", layout="self.layout")}
+        """)

@@ -1,19 +1,17 @@
-from ....lib.code_format import indent
-from ...base_node import ScriptingBaseNode
 import bpy
+
+from ....sockets.spec import Interface, String
+from ...base_node import ScriptingBaseNode
 
 
 class SNA_Node_Label(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Label"
     bl_label = "Label"
+    sn_inputs = [Interface(), String("text", "Label")]
+    sn_outputs = [Interface("next")]
 
-    def on_create(self):
-        self.add_input("ScriptingInterfaceSocket")
-        self.add_input("ScriptingStringSocket", "Label")
-        self.add_output("ScriptingInterfaceSocket")
-
-    def generate(self):
-        self.code_inline = f"""
-            {self.inputs[0].get_layout()}.label(text={self.inputs["Label"].eval()})
-            {indent(self.outputs[0].eval(), 3)}
-        """
+    def emit(self, ctx):
+        ctx.code(f"""
+            {ctx.layout}.label(text={ctx.input("text")})
+            {ctx.flow("next")}
+        """)

@@ -23,17 +23,8 @@ from ..core import compiler, scheduler
 _READ_MAX_LINES = 300
 _READ_DEFAULT_LINES = 100
 
-# code/id fields on ScriptingBaseNode — the `code` block of get_node already
-# exposes them, so they're noise inside `props`.
-_INTERNAL_PROPS = {
-    "id",
-    "code_imports",
-    "code_module",
-    "code_inline",
-    "code_global",
-    "code_register",
-    "code_unregister",
-}
+# internal fields on ScriptingBaseNode, noise inside `props`
+_INTERNAL_PROPS = {"id"}
 
 # bl_rna identifier -> bpy.data collection name.
 _BPY_DATA_COLLECTIONS = {
@@ -266,14 +257,8 @@ def _node_summary(node):
 
 def _node_detail(node):
     detail = _node_summary(node)
-    detail["code"] = {
-        "imports": node.code_imports,
-        "module": node.code_module,
-        "inline": node.code_inline,
-        "global": node.code_global,
-        "register": node.code_register,
-        "unregister": node.code_unregister,
-    }
+    # lines this node wrote in the last build (nodes store no code)
+    detail["code"] = "\n".join(compiler.node_lines.get(node.id, []))
     return detail
 
 
@@ -423,8 +408,8 @@ def _drive_tree_update(ntree):
 
 def _force_regen(*nodes):
     for n in nodes:
-        if n is not None and hasattr(n, "_generate"):
-            n._generate()
+        if n is not None and hasattr(n, "mark_dirty"):
+            n.mark_dirty()
 
 
 # --- read tools -------------------------------------------------------------
@@ -750,7 +735,7 @@ def _regenerate_dependents(target_kind, text_block, abs_filepath):
                 if p:
                     matches = os.path.normpath(bpy.path.abspath(p)) == norm_target
             if matches:
-                sn._generate()
+                sn.mark_dirty()
                 touched.append(
                     {
                         "tree_name": ntree.name,

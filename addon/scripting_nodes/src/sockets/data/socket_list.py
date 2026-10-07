@@ -1,19 +1,11 @@
 from ..base_socket import ScriptingBaseSocket
-import bpy
 
 
-class ScriptingListSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
+class ScriptingListSocket(ScriptingBaseSocket):
     bl_idname = "ScriptingListSocket"
     bl_label = "List"
-
     socket_shape = "SQUARE"
+    color = (0.8, 0.5, 0.2, 1)
 
-    def _to_code(self):
+    def literal(self):
         return "[]"
-
-    def draw_socket(self, context, layout, node, text):
-        layout.label(text=text)
-
-    @classmethod
-    def draw_color_simple(cls):
-        return (0.8, 0.5, 0.2, 1)

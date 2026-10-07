@@ -104,3 +104,11 @@ def flatten_multiline_strings(code: str) -> str:
         after = lines[erow - 1][ecol:]
         lines[srow - 1 : erow] = [before + repr(value) + after]
     return "\n".join(lines)
+
+
+def literal_set(items) -> str:
+    """Python source of a set of strings with a stable order."""
+    items = sorted(items)
+    if not items:
+        return "set()"
+    return "{" + ", ".join(repr(item) for item in items) + "}"

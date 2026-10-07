@@ -1,16 +1,33 @@
+"""The data socket types, in one table. Icons, enum items and id lists used
+across the addon are all derived from it."""
+
 from typing import Literal
 
+# (bl_idname, label, icon, description)
+DATA_SOCKETS = [
+    ("ScriptingDataSocket", "Data", "MOD_DATA_TRANSFER", "Any value"),
+    ("ScriptingBlendDataSocket", "Blend Data", "BLENDER", "Blend data (Scene, Object, ...)"),
+    ("ScriptingStringSocket", "String", "SYNTAX_OFF", "Text"),
+    ("ScriptingBooleanSocket", "Boolean", "CHECKBOX_HLT", "True or False"),
+    ("ScriptingFloatSocket", "Float", "CON_TRANSLIKE", "Decimal number"),
+    ("ScriptingIntegerSocket", "Integer", "CON_TRANSFORM", "Whole number"),
+    ("ScriptingVectorSocket", "Vector", "EMPTY_AXIS", "2 to 4 numbers"),
+    ("ScriptingColorSocket", "Color", "COLOR", "RGB(A) color"),
+    ("ScriptingListSocket", "List", "OUTLINER_OB_GROUP_INSTANCE", "List of values"),
+]  # fmt: skip
 
-# icon -> (1, .56, .46, 1)
-# blend -> (0, .85, .53, 1)
-# list -> ()
-# dict -> ()
+FLOW_SOCKET = "ScriptingFlowSocket"
 
+DATA_SOCKET_IDNAMES = [idname for idname, *_ in DATA_SOCKETS]
+DATA_SOCKET_ICONS = {idname: icon for idname, _, icon, _ in DATA_SOCKETS}
+DATA_SOCKET_LABELS = {idname: label for idname, label, *_ in DATA_SOCKETS}
+DATA_SOCKET_ENUM_ITEMS = [
+    (idname, label, description, icon, i)
+    for i, (idname, label, icon, description) in enumerate(DATA_SOCKETS)
+]
 
 SOCKET_IDNAME_TYPE = Literal[
-    "ScriptingInterfaceSocket",
-    "ScriptingLogicSocket",
-    "ScriptingProgramSocket",
+    "ScriptingFlowSocket",
     "ScriptingDataSocket",
     "ScriptingBlendDataSocket",
     "ScriptingStringSocket",
@@ -20,94 +37,4 @@ SOCKET_IDNAME_TYPE = Literal[
     "ScriptingVectorSocket",
     "ScriptingColorSocket",
     "ScriptingListSocket",
-]
-
-DATA_SOCKET_ICONS = {
-    "ScriptingDataSocket": "MOD_DATA_TRANSFER",
-    "ScriptingBlendDataSocket": "BLENDER",
-    "ScriptingStringSocket": "SYNTAX_OFF",
-    "ScriptingBooleanSocket": "CHECKBOX_HLT",
-    "ScriptingFloatSocket": "CON_TRANSLIKE",
-    "ScriptingIntegerSocket": "CON_TRANSFORM",
-    "ScriptingVectorSocket": "EMPTY_AXIS",
-    "ScriptingColorSocket": "COLOR",
-    "ScriptingListSocket": "OUTLINER_OB_GROUP_INSTANCE",
-}
-
-DATA_SOCKET_IDNAMES = [
-    "ScriptingDataSocket",
-    "ScriptingBlendDataSocket",
-    "ScriptingStringSocket",
-    "ScriptingBooleanSocket",
-    "ScriptingFloatSocket",
-    "ScriptingIntegerSocket",
-    "ScriptingVectorSocket",
-    "ScriptingColorSocket",
-    "ScriptingListSocket",
-]
-
-DATA_SOCKET_ENUM_ITEMS = [
-    (
-        "ScriptingDataSocket",
-        "Data",
-        "Data",
-        DATA_SOCKET_ICONS["ScriptingDataSocket"],
-        0,
-    ),
-    (
-        "ScriptingBlendDataSocket",
-        "Blend Data",
-        "Blend Data (Scene, Object, etc.)",
-        DATA_SOCKET_ICONS["ScriptingBlendDataSocket"],
-        1,
-    ),
-    (
-        "ScriptingStringSocket",
-        "String",
-        "String",
-        DATA_SOCKET_ICONS["ScriptingStringSocket"],
-        2,
-    ),
-    (
-        "ScriptingBooleanSocket",
-        "Boolean",
-        "Boolean",
-        DATA_SOCKET_ICONS["ScriptingBooleanSocket"],
-        3,
-    ),
-    (
-        "ScriptingFloatSocket",
-        "Float",
-        "Float",
-        DATA_SOCKET_ICONS["ScriptingFloatSocket"],
-        4,
-    ),
-    (
-        "ScriptingIntegerSocket",
-        "Integer",
-        "Integer",
-        DATA_SOCKET_ICONS["ScriptingIntegerSocket"],
-        5,
-    ),
-    (
-        "ScriptingVectorSocket",
-        "Vector",
-        "Vector",
-        DATA_SOCKET_ICONS["ScriptingVectorSocket"],
-        6,
-    ),
-    (
-        "ScriptingColorSocket",
-        "Color",
-        "Color",
-        DATA_SOCKET_ICONS["ScriptingColorSocket"],
-        7,
-    ),
-    (
-        "ScriptingListSocket",
-        "List",
-        "List (Array)",
-        DATA_SOCKET_ICONS["ScriptingListSocket"],
-        8,
-    ),
 ]

@@ -8,17 +8,19 @@ Both nodes need the same three things:
      Each socket name = property name; type chosen from the prop's Blender
      type. Reconciliation preserves links across operator changes when the
      same-named socket survives.
-  3. Code emission for the kwargs, so each node's `generate()` just splices
-     the args string into its own call template.
+  3. The arguments as (name, expression) pairs for the node's own template.
 
 The `OperatorCallMixin` provides all of that. Concrete nodes declare
-`operator_arg_offset` so the mixin knows where its dynamic sockets start.
+`fixed_inputs`; one socket per operator property follows them.
 """
 
 from typing import List, Optional, Tuple
-from ._reference_signatures import VARIABLE_NODES  # noqa: F401 (kept for parity)
-from ..sockets.data.socket_string import encode_enum_items
+
 import bpy
+
+from ..core import naming
+from ..sockets.data.socket_string import encode_enum_items
+from ..sockets.spec import Socket
 
 
 # Tuple used by Run Operator and Button to filter the SN operator picker.
@@ -75,37 +77,6 @@ def _prop_spec(prop) -> Optional[Tuple[str, str, object, int, str]]:
         return ("ScriptingStringSocket", str(prop.default), 0, encode_enum_items(items))
     # POINTER / COLLECTION fall through.
     return None
-
-
-def _apply_default(
-    socket, idname: str, default, vector_dim: int, enum_data: str = ""
-) -> None:
-    """Set the socket's `value` to the operator-provided default. For enum
-    props on a StringSocket, also seed `enum_items_data` so the socket
-    renders as a dropdown."""
-    if not hasattr(socket, "value"):
-        return
-    try:
-        if idname == "ScriptingVectorSocket":
-            # The vector socket stores a size-4 array; we tell it which
-            # dimension to actually emit.
-            socket.dimension = str(vector_dim)
-            padded = tuple(default) + (0.0,) * (4 - len(default))
-            socket.value = padded
-        elif idname == "ScriptingColorSocket":
-            socket.use_alpha = vector_dim == 4
-            padded = tuple(default) + (1.0,) * (4 - len(default))
-            socket.value = padded
-        elif idname == "ScriptingStringSocket":
-            # Set items_data first so the dropdown is wired before value lands.
-            socket.enum_items_data = enum_data
-            socket.value = default
-        else:
-            socket.value = default
-    except (TypeError, ValueError):
-        # Defaults can occasionally be out of range for the socket; ignoring
-        # leaves the socket at its own default, which is safe.
-        pass
 
 
 # -----------------------------------------------------------------------------
@@ -173,61 +144,16 @@ def _resolve_blender_op_name(picker_value: str) -> str:
 
 
 def _sn_operator_prop_specs(op_node) -> List[Tuple[str, str, object, int, str]]:
-    """Specs derived from an SN Operator node's attached class-body properties.
-
-    Each attached entry whose register_on=="Operator" contributes one socket.
-    SN enum-property items can be sourced dynamically (List input / Variable),
-    so we don't try to introspect them - the socket stays a plain string.
-    """
+    """Specs from the properties attached to an SN Operator node."""
     specs = []
     if op_node is None:
         return specs
-    for _entry, prop_node in op_node.iter_attached_property_nodes():
-        if getattr(prop_node, "register_on", "") != "Operator":
-            continue
-        name = getattr(prop_node, "prop_name", "")
-        if not name:
-            continue
-        idname = _socket_for_sn_property(prop_node)
-        if idname is None:
-            continue
-        default = _default_for_sn_property(prop_node, idname)
-        vector_dim = (
-            3 if idname in {"ScriptingVectorSocket", "ScriptingColorSocket"} else 0
-        )
-        specs.append((name, idname, default, vector_dim, ""))
+    for prop_node in op_node.attached_properties():
+        idname = getattr(prop_node, "data_type", "ScriptingDataSocket")
+        default = getattr(prop_node, "prop_default", None)
+        dim = 3 if idname in {"ScriptingVectorSocket", "ScriptingColorSocket"} else 0
+        specs.append((prop_node.prop_name, idname, default, dim, ""))
     return specs
-
-
-_SN_PROP_TO_SOCKET = {
-    "SNA_Node_BoolProperty": "ScriptingBooleanSocket",
-    "SNA_Node_IntProperty": "ScriptingIntegerSocket",
-    "SNA_Node_FloatProperty": "ScriptingFloatSocket",
-    "SNA_Node_StringProperty": "ScriptingStringSocket",
-    "SNA_Node_FloatVectorProperty": "ScriptingVectorSocket",
-    "SNA_Node_EnumProperty": "ScriptingStringSocket",
-}
-
-
-def _socket_for_sn_property(prop_node) -> Optional[str]:
-    return _SN_PROP_TO_SOCKET.get(prop_node.bl_idname)
-
-
-def _default_for_sn_property(prop_node, idname: str):
-    """Best-effort default — falls back to the socket's own default."""
-    val = getattr(prop_node, "prop_default", None)
-    if val is None:
-        if idname == "ScriptingBooleanSocket":
-            return False
-        if idname == "ScriptingIntegerSocket":
-            return 0
-        if idname == "ScriptingFloatSocket":
-            return 0.0
-        if idname == "ScriptingStringSocket":
-            return ""
-        if idname == "ScriptingVectorSocket":
-            return (0.0, 0.0, 0.0)
-    return val
 
 
 def _blender_operator_prop_specs(
@@ -290,27 +216,18 @@ EXEC_CONTEXT_ITEMS = [
     ("INVOKE_SCREEN", "Invoke Screen", "Run invoke() in screen context"),
 ]
 
+ARG_PREFIX = "arg_"
+
 
 class OperatorCallMixin:
-    """Shared picker + socket reconciler + kwargs emitter.
+    """Operator picker + one input socket per operator property.
 
-    Subclasses must define:
-      - `operator_arg_offset`: the count of fixed input sockets that appear
-        before the dynamic per-arg sockets.
-
-    Subclasses should call `reconcile_operator_sockets()` in their update
-    callbacks and `iter_operator_arg_sockets()` from `generate()`.
-    """
+    Subclasses define `fixed_inputs` / `fixed_outputs` (socket specs) and use
+    `operator_idname()` and `operator_args(ctx)` in emit()."""
 
     sn_reference_properties = {"operator_sn": OPERATOR_NODES}
-
-    operator_arg_offset: int = 0
-
-    # ---- mode + target -----------------------------------------------------
-
-    def update_operator_target(self, context):
-        self.reconcile_operator_sockets()
-        self._generate()
+    fixed_inputs: list = []
+    fixed_outputs: list = []
 
     mode: bpy.props.EnumProperty(
         name="Mode",
@@ -319,112 +236,51 @@ class OperatorCallMixin:
             ("BLENDER", "Blender", "Call a built-in Blender operator"),
         ],
         default="CUSTOM",
-        update=update_operator_target,
     )
-
     operator_sn: bpy.props.StringProperty(
-        name="Operator",
-        description="An Operator node in this addon",
-        update=update_operator_target,
+        name="Operator", description="An Operator node"
     )
-
     operator_blender: bpy.props.StringProperty(
-        name="Blender Operator",
-        description="A built-in Blender operator",
-        update=update_operator_target,
+        name="Blender Operator", description="A built-in Blender operator"
     )
 
-    # ---- introspection -----------------------------------------------------
-
-    def _resolved_bl_idname(self) -> str:
-        """The dotted bl_idname of the currently chosen operator, or ""."""
+    def operator_idname(self) -> str:
+        """Dotted bl_idname of the chosen operator, or ""."""
         if self.mode == "CUSTOM":
             target = self.resolve_reference("operator_sn")
-            if target is None:
-                return ""
-            namespace = bpy.context.scene.sna.addon.idname_namespace
-            return f"{namespace}.operator_{target.id.lower()}"
+            return naming.idname(target, "operator") if target else ""
         return _resolve_blender_op_name(self.operator_blender)
 
-    def _target_prop_specs(self) -> List[Tuple[str, str, object, int, str]]:
+    def _target_prop_specs(self):
         if self.mode == "CUSTOM":
             return _sn_operator_prop_specs(self.resolve_reference("operator_sn"))
-        return _blender_operator_prop_specs(self._resolved_bl_idname())
+        return _blender_operator_prop_specs(self.operator_idname())
 
-    # ---- socket reconciliation --------------------------------------------
+    def socket_specs(self):
+        inputs = list(self.fixed_inputs)
+        for name, idname, default, vector_dim, enum_data in self._target_prop_specs():
+            spec = Socket(idname, ARG_PREFIX + name, name)
+            if default is not None:
+                if idname in {"ScriptingVectorSocket", "ScriptingColorSocket"}:
+                    filler = 1.0 if idname == "ScriptingColorSocket" else 0.0
+                    default = tuple(default) + (filler,) * (4 - len(default))
+                spec.default = default
+            if idname == "ScriptingVectorSocket" and vector_dim:
+                spec.attrs["dimension"] = str(vector_dim)
+            if idname == "ScriptingColorSocket":
+                spec.attrs["use_alpha"] = vector_dim == 4
+            if enum_data:
+                spec.attrs["enum_items_data"] = enum_data
+            inputs.append(spec)
+        return inputs, list(self.fixed_outputs)
 
-    def reconcile_operator_sockets(self) -> None:
-        """Sync the dynamic op-arg input sockets with the chosen operator.
-
-        Sockets after `operator_arg_offset` are treated as op-args. Existing
-        sockets that match a target prop by name AND idname are preserved
-        (with their links). Others are removed; missing ones are added.
-        """
-        target = self._target_prop_specs()
-        offset = self.operator_arg_offset
-        target_by_name = {spec[0]: spec for spec in target}
-
-        # Phase 1: prune sockets that don't survive.
-        i = offset
-        while i < len(self.inputs):
-            socket = self.inputs[i]
-            keep_spec = target_by_name.get(socket.name)
-            if keep_spec is None or keep_spec[1] != socket.bl_idname:
-                self.inputs.remove(socket)
-                continue
-            i += 1
-
-        # Phase 2: add missing ones in target order, then enforce order.
-        # Survivors also get enum_items_data refreshed - if the chosen
-        # operator changed but a same-typed socket survived (e.g. another
-        # operator with an `align` enum), the dropdown options need to
-        # match the new operator's items.
-        for target_idx, (name, idname, default, vector_dim, enum_data) in enumerate(
-            target
-        ):
-            existing = self.inputs.get(name)
-            desired_idx = offset + target_idx
-            if existing is None:
-                socket = self.add_input(idname, name)
-                _apply_default(socket, idname, default, vector_dim, enum_data)
-                self.inputs.move(len(self.inputs) - 1, desired_idx)
-            else:
-                if (
-                    idname == "ScriptingStringSocket"
-                    and existing.enum_items_data != enum_data
-                ):
-                    existing.enum_items_data = enum_data
-                current_idx = list(self.inputs).index(existing)
-                if current_idx != desired_idx:
-                    self.inputs.move(current_idx, desired_idx)
-
-    def iter_operator_arg_sockets(self):
-        """Yield the dynamic op-arg sockets in declaration order."""
-        for socket in list(self.inputs)[self.operator_arg_offset :]:
-            yield socket
-
-    def on_ref_change(self, node):
-        # SN operator's class body changed - re-derive sockets.
-        self.reconcile_operator_sockets()
-        self._generate()
-
-    # ---- code emission helpers --------------------------------------------
-
-    def emit_kwargs_inline(self) -> str:
-        """Format `k1=v1, k2=v2, ...` for bpy.ops style calls."""
-        parts = []
-        for socket in self.iter_operator_arg_sockets():
-            parts.append(f"{socket.name}={socket.eval()}")
-        return ", ".join(parts)
-
-    def emit_op_property_lines(self, op_var: str) -> str:
-        """Format `op_var.k1 = v1\\nop_var.k2 = v2\\n...` for layout.operator style."""
-        lines = []
-        for socket in self.iter_operator_arg_sockets():
-            lines.append(f"{op_var}.{socket.name} = {socket.eval()}")
-        return "\n".join(lines)
-
-    # ---- shared picker UI -------------------------------------------------
+    def operator_args(self, ctx) -> list[tuple[str, str]]:
+        """(property name, expression) for every operator property socket."""
+        args = []
+        for socket in self.inputs:
+            if socket.identifier.startswith(ARG_PREFIX):
+                args.append((socket.name, ctx.input(socket.identifier)))
+        return args
 
     def draw_operator_picker(self, layout) -> None:
         row = layout.row(align=True)
@@ -434,15 +290,10 @@ class OperatorCallMixin:
         else:
             wm = bpy.context.window_manager
             coll = getattr(wm, "sna_blender_operators", None)
-            # Lazy populate on first draw - register-time timing is fragile
-            # across hot-reload and session restore.
+            # filled on first draw: register-time timing is fragile
             if coll is not None and len(coll) == 0:
                 _populate_blender_operator_collection(coll)
             row.prop_search(
-                self,
-                "operator_blender",
-                wm,
-                "sna_blender_operators",
-                text="",
+                self, "operator_blender", wm, "sna_blender_operators", text=""
             )
             row.prop(self, "mode", icon="BLENDER", icon_only=True, text="")

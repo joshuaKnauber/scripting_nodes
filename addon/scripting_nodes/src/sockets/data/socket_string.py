@@ -1,5 +1,6 @@
-from ..base_socket import ScriptingBaseSocket
 import bpy
+
+from ..base_socket import ScriptingBaseSocket
 
 
 # Item-list encoding: records separated by \x1e, fields by \x1f.
@@ -62,19 +63,17 @@ def enum_value_get(self):
 def enum_value_set(self, idx):
     items = _enum_items_callback(self, bpy.context)
     if 0 <= idx < len(items):
-        # Writing `value` triggers its own update_value -> _generate().
+        # Writing `value` triggers its own update_value -> mark_dirty().
         self.value = items[idx][0]
 
 
-class ScriptingStringSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
+class ScriptingStringSocket(ScriptingBaseSocket):
     bl_idname = "ScriptingStringSocket"
     bl_label = "String"
-
-    def update_value(self, context):
-        self.node._generate()
+    color = (0.4, 0.6, 1, 1)
 
     value: bpy.props.StringProperty(
-        default="", update=update_value, options={"TEXTEDIT_UPDATE"}
+        default="", update=ScriptingBaseSocket.update_value, options={"TEXTEDIT_UPDATE"}
     )
 
     # Non-empty enables enum-dropdown mode. Encode/decode with the
@@ -83,24 +82,18 @@ class ScriptingStringSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
 
     # UI projection of `value` as a dropdown. Items are derived per-socket
     # from `enum_items_data`; the get/set callbacks keep `value` as the
-    # canonical store so code emission is unchanged.
+    # canonical store.
     enum_value: bpy.props.EnumProperty(
         items=_enum_items_callback,
         get=enum_value_get,
         set=enum_value_set,
     )
 
-    def _to_code(self):
+    def literal(self):
         return repr(self.value)
 
-    def draw_socket(self, context, layout, node, text):
-        if self.is_output or self.is_linked:
-            layout.label(text=text)
-        elif self.enum_items_data:
-            layout.prop(self, "enum_value", text=self.name)
+    def draw_value(self, context, layout, text):
+        if self.enum_items_data:
+            layout.prop(self, "enum_value", text=text)
         else:
-            layout.prop(self, "value", text=self.name)
-
-    @classmethod
-    def draw_color_simple(cls):
-        return (0.4, 0.6, 1, 1)
+            layout.prop(self, "value", text=text)

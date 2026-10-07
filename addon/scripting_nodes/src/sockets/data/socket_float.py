@@ -1,25 +1,17 @@
-from ..base_socket import ScriptingBaseSocket
 import bpy
 
+from ..base_socket import ScriptingBaseSocket
 
-class ScriptingFloatSocket(ScriptingBaseSocket, bpy.types.NodeSocket):
+
+class ScriptingFloatSocket(ScriptingBaseSocket):
     bl_idname = "ScriptingFloatSocket"
     bl_label = "Float"
+    color = (0.65, 0.65, 0.65, 1)
 
-    def update_value(self, context):
-        self.node._generate()
+    value: bpy.props.FloatProperty(default=0.0, update=ScriptingBaseSocket.update_value)
 
-    value: bpy.props.FloatProperty(default=1, update=update_value)
+    def literal(self):
+        return repr(float(self.value))
 
-    def _to_code(self):
-        return f"{self.value}"
-
-    def draw_socket(self, context, layout, node, text):
-        if self.is_output or self.is_linked:
-            layout.label(text=text)
-        else:
-            layout.prop(self, "value", text=self.name)
-
-    @classmethod
-    def draw_color_simple(cls):
-        return (0.65, 0.65, 0.65, 1)
+    def draw_value(self, context, layout, text):
+        layout.prop(self, "value", text=text)

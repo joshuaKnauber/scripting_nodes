@@ -1,22 +1,21 @@
-from ....lib.code_format import indent
-from ...base_node import ScriptingBaseNode
 import bpy
+
+from ....core import naming
+from ....sockets.spec import Logic
+from ...base_node import ScriptingBaseNode
 
 
 class SNA_Node_Trigger(ScriptingBaseNode, bpy.types.Node):
+    """Run a flow with a button on the node (for testing while building)."""
+
     bl_idname = "SNA_Node_Trigger"
     bl_label = "Trigger"
-    sn_options = {"ROOT_NODE"}
+    sn_root = True
+    sn_outputs = [Logic()]
 
     @property
     def operator_idname(self):
-        namespace = bpy.context.scene.sna.addon.idname_namespace
-        return f"{namespace}.trigger_{self.id.lower()}"
-
-    @property
-    def operator_class_name(self):
-        class_prefix = bpy.context.scene.sna.addon.class_prefix
-        return f"{class_prefix}_OT_Trigger_{self.id}"
+        return naming.idname(self, "trigger")
 
     def draw(self, context, layout):
         row = layout.row()
@@ -26,18 +25,14 @@ class SNA_Node_Trigger(ScriptingBaseNode, bpy.types.Node):
         except (RuntimeError, AttributeError):
             row.label(text="Trigger (addon not loaded)", icon="ERROR")
 
-    def on_create(self):
-        self.add_output("ScriptingLogicSocket")
+    def emit(self, ctx):
+        ctx.module(f"""
+            class {ctx.class_name("OT", "Trigger")}(bpy.types.Operator):
+                bl_idname = {self.operator_idname!r}
+                bl_label = "Trigger"
+                bl_options = {{"REGISTER", "UNDO"}}
 
-    def generate(self):
-        body = self.outputs[0].eval("pass")
-        self.code_module = f"""
-class {self.operator_class_name}(bpy.types.Operator):
-    bl_idname = "{self.operator_idname}"
-    bl_label = "Trigger"
-    bl_options = {{"REGISTER", "UNDO"}}
-
-    def execute(self, context):
-        {indent(body, 2)}
-        return {{"FINISHED"}}
-"""
+                def execute(self, context):
+                    {ctx.flow("flow")}
+                    return {{"FINISHED"}}
+        """)

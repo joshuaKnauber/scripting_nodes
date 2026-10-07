@@ -3,19 +3,12 @@ import zipfile
 import bpy
 
 from .. import compiler, scheduler
-from ..build_context import building
 
 
 def build_files():
-    """Files of the addon as shipped: every node regenerated in build mode."""
-    scheduler.flush()
-    try:
-        with building():
-            scheduler.regenerate_all()
-            return compiler.compile_addon(pretty=True)
-    finally:
-        # Put the dev-mode code back (nodes cache their generated code)
-        scheduler.regenerate_all()
+    """Files of the addon as shipped (export build, formatted)."""
+    scheduler.flush()  # sockets / references up to date
+    return compiler.compile_addon(dev=False, pretty=True)
 
 
 def write_zip(path, files):

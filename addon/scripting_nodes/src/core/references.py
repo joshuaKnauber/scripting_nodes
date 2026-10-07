@@ -10,8 +10,6 @@ The per-signature collections on scene.sna only exist to feed `prop_search`
 pickers; they're rebuilt from the graph by `sync()` on every flush.
 """
 
-from collections import defaultdict
-
 import bpy
 
 from ..lib.trees import scripting_node_trees, sn_nodes
@@ -94,28 +92,6 @@ def install_reference_properties(cls, props):
 # ---------------------------------------------------------------------------
 # Graph queries
 # ---------------------------------------------------------------------------
-
-
-def iter_reference_ids(node):
-    """Yield ids of every node `node` references."""
-    for prop in getattr(node, "sn_reference_properties", {}):
-        target_id = node.get(ref_id_key(prop), "")
-        if target_id:
-            yield target_id
-    for entry in getattr(node, "class_body_properties", ()):
-        target_id = entry.get(ref_id_key("prop"), "")
-        if target_id:
-            yield target_id
-
-
-def dependents_index(trees=None):
-    """{target node id: [nodes referencing it]} for the whole file."""
-    index = defaultdict(list)
-    for tree in trees if trees is not None else scripting_node_trees():
-        for node in sn_nodes(tree):
-            for target_id in iter_reference_ids(node):
-                index[target_id].append(node)
-    return index
 
 
 def sync(trees=None):
