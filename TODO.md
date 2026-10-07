@@ -47,6 +47,16 @@ and `ruff check` with zero findings.
 - [ ] GUI tests (`scripts/test.py --gui`) under `xvfb` in CI.
 - [ ] Cache the Blender download; upload the generated fixture add-on and screenshots as artifacts on failure.
 - [ ] Code-quality job for generated add-ons (see 1).
+- [ ] **Add-on lifecycle coverage.** Already tested: hot reload, rollback on syntax/import errors, rename removes the old add-on, foreign folders untouched, deleting all trees unloads, save → open other → reopen, real undo/redo (GUI), export build. Missing:
+  - [ ] *Persist* across file switches: persisted add-on stays loaded after opening another file, non-persisted one unloads, persisted add-ons are re-enabled after a Blender restart (`generated_addons.json` in the extension user dir).
+  - [ ] Rename across sessions: rename the add-on, restart, the folder of the old name is removed (persistence `module_for`).
+  - [ ] Stale files: removing or renaming a tree removes its module; `_sn_helpers.py` disappears when no node uses a helper.
+  - [ ] Folders from older versions: a generated folder without the marker but with the legacy signature is taken over; a user's own add-on with the same name never is.
+  - [ ] Disabling: the addon `enabled` toggle unloads/reloads; disabling and re-enabling Serpens while a generated add-on is loaded (no stale classes, timers, handlers, excepthook).
+  - [ ] Module name / class prefix / idname namespace overrides: changing them reloads cleanly under the new names.
+  - [ ] Two .blend files with the same add-on name; "Save As" copies (shared uid).
+  - [ ] Export: the zip installs into a clean Blender (`extension install-file`), enables, registers and unregisters without errors and without Serpens installed.
+  - [ ] Upgrading Serpens itself between versions with a generated add-on on disk.
 
 ## 6. Building and releasing
 
