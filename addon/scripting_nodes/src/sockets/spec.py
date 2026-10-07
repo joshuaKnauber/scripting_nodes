@@ -69,8 +69,14 @@ def Data(key, label="", **kwargs):
     return _spec("ScriptingDataSocket", key, label, **kwargs)
 
 
-def BlendData(key, label="", **kwargs):
-    return _spec("ScriptingBlendDataSocket", key, label, **kwargs)
+def BlendData(key, label="", blend_type="", collection=False, description="", **kwargs):
+    """Blender data. `blend_type` is the struct type ("Object", "" = any),
+    `collection` a collection of it. See blend_data/rna.blend_data_spec."""
+    spec = _spec("ScriptingBlendDataSocket", key, label, **kwargs)
+    spec.attrs.update(
+        blend_type=blend_type, is_collection=collection, description=description
+    )
+    return spec
 
 
 def String(key, label="", default=MISSING, enum_items=None, **kwargs):

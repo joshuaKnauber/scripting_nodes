@@ -10,7 +10,7 @@ class SNA_Node_CollectionClear(ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SNA_Node_CollectionClear"
     bl_label = "Collection Clear"
-    sn_inputs = [Flow(), BlendData("collection", "Collection")]
+    sn_inputs = [Flow(), BlendData("collection", "Collection", collection=True)]
     sn_outputs = [Flow("next")]
 
     def emit(self, ctx):

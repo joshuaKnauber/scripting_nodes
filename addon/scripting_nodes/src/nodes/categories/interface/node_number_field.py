@@ -10,6 +10,7 @@ class SNA_Node_NumberField(PropertyFieldNode, bpy.types.Node):
     bl_idname = "SNA_Node_NumberField"
     bl_label = "Number Field"
     sn_reference_properties = {"prop": NUMBER_PROPERTY_NODES}
+    blender_prop_types = {"INT", "FLOAT"}
     field_options = (("slider", False),)
 
     slider: bpy.props.BoolProperty(

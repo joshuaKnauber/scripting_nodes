@@ -83,10 +83,11 @@ def _flush():
         integrity.ensure(trees)
     for tree in trees:
         tree.update_reroutes()
-    # sockets can depend on other nodes (e.g. a Get Variable's type), so a
-    # change may ripple once or twice
+    # sockets can depend on other nodes (a Get Variable's type, the type of
+    # connected Blender data): sync upstream nodes first so types travel
+    # along a chain in one pass; references to other nodes may need another
     for _ in range(3):
-        if not any([node.sync_sockets() for t in trees for node in sn_nodes(t)]):
+        if not any([node.sync_sockets() for t in trees for node in _upstream_first(t)]):
             break
     references.sync(trees)
 
@@ -165,3 +166,39 @@ def register():
 def unregister():
     if bpy.app.timers.is_registered(_tick):
         bpy.app.timers.unregister(_tick)
+
+
+def _upstream_first(tree):
+    """Nodes of `tree`, every node after the nodes linked into it."""
+    nodes = list(sn_nodes(tree))
+    upstream = {node.as_pointer(): [] for node in nodes}
+    for link in tree.links:
+        if link.to_node.as_pointer() in upstream:
+            upstream[link.to_node.as_pointer()].append(link.from_node)
+    ordered, seen = [], set()
+
+    def visit(node):
+        stack = [(node, iter(upstream.get(node.as_pointer(), ())))]
+        seen.add(node.as_pointer())
+        while stack:
+            current, parents = stack[-1]
+            parent = next(parents, None)
+            if parent is None:
+                stack.pop()
+                if current.as_pointer() in upstream:
+                    ordered.append(current)
+            elif parent.as_pointer() not in seen:
+                seen.add(parent.as_pointer())
+                # reroutes aren't SN nodes but pass types through
+                stack.append((parent, iter(_parents(tree, parent, upstream))))
+
+    for node in nodes:
+        if node.as_pointer() not in seen:
+            visit(node)
+    return ordered
+
+
+def _parents(tree, node, upstream):
+    if node.as_pointer() in upstream:
+        return upstream[node.as_pointer()]
+    return [link.from_node for link in node.inputs[0].links] if node.inputs else []

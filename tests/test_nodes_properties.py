@@ -126,7 +126,8 @@ class PropertyNodesTest(unittest.TestCase):
         group_output.add_item("allowed", "ScriptingBooleanSocket")
         hidden = helpers.add_node(function, "SNA_Node_GetProperty")
         hidden.mode = "BLENDER"
-        hidden.setup_from_path("", "hide_viewport", True)
+        hidden.path_root = "INPUT"
+        hidden.path = "hide_viewport"
         helpers.flush()
         helpers.link(function, group_input.outputs["item_item"], hidden.inputs["Data"])
         helpers.link(function, hidden.outputs["Value"], group_output.inputs[1])
@@ -245,10 +246,10 @@ class PropertyNodesTest(unittest.TestCase):
         tree = helpers.new_tree()
         value = helpers.add_node(tree, "SNA_Node_IntProperty")
         trigger = helpers.add_node(tree, "SNA_Node_Trigger")
-        # Blender mode: a pasted path, the owner is part of it
+        # Blender mode: a data path, the owner is part of it
         scene = helpers.add_node(tree, "SNA_Node_GetProperty")
         scene.mode = "BLENDER"
-        scene.setup_from_path("bpy.context", "scene", False)
+        scene.path = "scene"
         # Custom mode: a property of this addon, owner from the Data input
         setter = helpers.add_node(tree, "SNA_Node_SetProperty")
         pick(setter, "prop", value)
@@ -265,8 +266,9 @@ class PropertyNodesTest(unittest.TestCase):
         helpers.link(tree, getter.outputs["Value"], printer.inputs[1])
         helpers.flush()
         source = source_of(tree)
-        self.assertIn(f"bpy.context.scene.{value.prop_name} = 42", source)
-        self.assertIn(f"str(bpy.context.scene.{value.prop_name})", source)
+        # operators get the context as an argument
+        self.assertIn(f"context.scene.{value.prop_name} = 42", source)
+        self.assertIn(f"str(context.scene.{value.prop_name})", source)
         self.assertLoaded()
         self.assertEqual(run_trigger(trigger), {"FINISHED"})
         self.assertEqual(getattr(bpy.context.scene, value.prop_name), 42)
@@ -312,7 +314,7 @@ class PropertyNodesTest(unittest.TestCase):
         trigger = helpers.add_node(tree, "SNA_Node_Trigger")
         get = helpers.add_node(tree, "SNA_Node_GetProperty")
         get.mode = "BLENDER"
-        get.setup_from_path("bpy.context.scene", items.prop_name, False)
+        get.path = f"scene.{items.prop_name}"
         add = helpers.add_node(tree, "SNA_Node_CollectionAdd")
         remove = helpers.add_node(tree, "SNA_Node_CollectionRemove")
         length = helpers.add_node(tree, "SNA_Node_CollectionLength")
@@ -327,9 +329,9 @@ class PropertyNodesTest(unittest.TestCase):
         helpers.link(tree, length.outputs[0], printer.inputs[1])
         helpers.flush()
         source = source_of(tree)
-        self.assertIn(f"= bpy.context.scene.{items.prop_name}.add()", source)
-        self.assertIn(f"bpy.context.scene.{items.prop_name}.remove(0)", source)
-        self.assertIn(f"len(bpy.context.scene.{items.prop_name})", source)
+        self.assertIn(f"= context.scene.{items.prop_name}.add()", source)
+        self.assertIn(f"context.scene.{items.prop_name}.remove(0)", source)
+        self.assertIn(f"len(context.scene.{items.prop_name})", source)
         self.assertLoaded()
         getattr(bpy.context.scene, items.prop_name).add()
         self.assertEqual(run_trigger(trigger), {"FINISHED"})

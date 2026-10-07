@@ -62,7 +62,7 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 - `node_tree/` — tree type, tree ops/UI
 - `nodes/`, `sockets/` — node + socket types
 - `settings/` — scene settings (`bpy.context.scene.sna`), preferences, sidebar panels
-- `blend_data/` — RNA property indexing, fuzzy search
+- `blend_data/` — Blender data from RNA types: paths, typed sockets, search (`rna.py`); paste/copy path ops
 - `mcp_server/` — local MCP server (loopback, rejects browser requests)
 - `handlers/` — load/save/undo/depsgraph handlers, msgbus, keymaps, log overlay
 - `lib/` — shared utilities; must not import from other packages of the addon

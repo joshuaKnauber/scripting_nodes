@@ -10,6 +10,7 @@ class SNA_Node_Checkbox(PropertyFieldNode, bpy.types.Node):
     bl_idname = "SNA_Node_Checkbox"
     bl_label = "Checkbox"
     sn_reference_properties = {"prop": BOOL_PROPERTY_NODES}
+    blender_prop_types = {"BOOLEAN"}
     field_options = (("toggle", False), ("invert_checkbox", False))
 
     toggle: bpy.props.BoolProperty(name="Toggle", description="Draw as a toggle button")

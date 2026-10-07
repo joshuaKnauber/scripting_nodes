@@ -12,7 +12,7 @@ class SNA_Node_CollectionRemove(ScriptingBaseNode, bpy.types.Node):
     bl_label = "Collection Remove"
     sn_inputs = [
         Flow(),
-        BlendData("collection", "Collection"),
+        BlendData("collection", "Collection", collection=True),
         Integer("index", "Index"),
     ]
     sn_outputs = [Flow("next")]

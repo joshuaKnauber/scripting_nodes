@@ -1,104 +1,102 @@
-"""
-Operator for indexing blend data properties.
-"""
+"""Getting Blender data paths into the node editor: paste a copied path, and
+"Copy Data Path for Scripting Nodes" in the right-click menu of every
+property in Blender."""
 
 import bpy
 
-from . import (
-    build_blend_data_index,
-    AREA_NAMES,
-)
+from ..core.references import find_node
+from ..node_tree.node_tree import ScriptingNodeTree
+from . import rna
 
 
-class SNA_OT_IndexBlendData(bpy.types.Operator):
-    bl_idname = "sna.index_blend_data"
-    bl_label = "Index Blend Data"
-    bl_description = "Scan and index all blend data properties for searching"
-    bl_options = {"REGISTER"}
+class SNA_OT_PasteBlenderPath(bpy.types.Operator):
+    """Set the path from a copied data path (right-click a property > Copy Data Path for Scripting Nodes, or Copy Full Data Path)"""
 
-    max_depth: bpy.props.IntProperty(
-        name="Max Depth",
-        description="Maximum depth to recurse into nested properties",
-        default=4,
-        min=1,
-        max=10,
-    )
+    bl_idname = "sna.paste_blender_path"
+    bl_label = "Paste Data Path"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
-    def get_context_items(self, context):
-        items = [("CURRENT", "Current Context", "Use the current context")]
+    # the node to set up; empty adds a new Blender Data node
+    node_id: bpy.props.StringProperty(options={"SKIP_SAVE"})
 
-        if context is None or context.window is None:
-            return items
-
-        seen_types = set()
-        for i, area in enumerate(context.window.screen.areas):
-            area_type = area.type
-            if area_type in seen_types:
-                continue
-            seen_types.add(area_type)
-
-            name = AREA_NAMES.get(area_type, area_type.replace("_", " ").title())
-            items.append((f"AREA_{i}", name, f"Index from {name} context"))
-
-        return items
-
-    context_source: bpy.props.EnumProperty(
-        name="Context Source",
-        description="Which area context to index from",
-        items=get_context_items,
-    )
-
-    def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self, width=250)
-
-    def draw(self, context):
-        layout = self.layout
-        layout.prop(self, "context_source", text="Context")
+    @classmethod
+    def poll(cls, context):
+        space = context.space_data
+        return (
+            space is not None
+            and space.type == "NODE_EDITOR"
+            and space.edit_tree is not None
+            and space.edit_tree.bl_idname == ScriptingNodeTree.bl_idname
+        )
 
     def execute(self, context):
-        import time
+        text = context.window_manager.clipboard
+        try:
+            rna.parse(text)
+        except ValueError as error:
+            self.report({"WARNING"}, str(error))
+            return {"CANCELLED"}
 
-        start = time.time()
-
-        context_override = None
-        context_description = "Current Context"
-
-        if self.context_source.startswith("AREA_"):
-            try:
-                area_index = int(self.context_source.replace("AREA_", ""))
-                area = context.screen.areas[area_index]
-                region = None
-                for r in area.regions:
-                    if r.type == "WINDOW":
-                        region = r
-                        break
-                if region is None:
-                    region = area.regions[0]
-
-                context_override = {
-                    "window": context.window,
-                    "screen": context.screen,
-                    "area": area,
-                    "region": region,
-                }
-
-                context_description = AREA_NAMES.get(area.type, area.type)
-            except (ValueError, IndexError):
-                pass
-
-        index = build_blend_data_index(
-            self.max_depth, context_override, context_description
-        )
-
-        elapsed = time.time() - start
-        self.report(
-            {"INFO"},
-            f"Indexed {len(index.properties)} properties from {context_description} in {elapsed:.2f}s",
-        )
-
-        # Force panel redraw
-        for area in context.screen.areas:
-            if area.type == "NODE_EDITOR":
-                area.tag_redraw()
-
+        node = find_node(self.node_id)
+        added = node is None
+        if added:
+            tree = context.space_data.edit_tree
+            node = tree.nodes.new("SNA_Node_BlendData")
+            node.location = context.space_data.cursor_location
+            for other in tree.nodes:
+                other.select = other == node
+            tree.nodes.active = node
+        node.paste_path(text, context)
+        if added:
+            bpy.ops.transform.translate("INVOKE_DEFAULT")
         return {"FINISHED"}
+
+
+class SNA_OT_CopyBlenderPath(bpy.types.Operator):
+    """Copy the path of this property to paste it into Scripting Nodes"""
+
+    bl_idname = "sna.copy_blender_path"
+    bl_label = "Copy Data Path for Scripting Nodes"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        pointer = getattr(context, "button_pointer", None)
+        prop = getattr(context, "button_prop", None)
+        if pointer is None or prop is None:
+            self.report({"WARNING"}, "This isn't a property")
+            return {"CANCELLED"}
+        wm = context.window_manager
+        path = ""
+        if bpy.ops.ui.copy_data_path_button.poll():
+            bpy.ops.ui.copy_data_path_button(full_path=True)
+            path = wm.clipboard
+        try:
+            parsed = rna.parse(path)
+            # a vector property copies the component that was clicked
+            if parsed.keys and parsed.segments[-2:] == [prop.identifier, rna.SUBSCRIPT]:
+                path = path[: path.rindex("[")]
+        except ValueError:
+            # no full path (tool settings, editor settings, ...): start at
+            # data of the owner's type, connected in the node editor
+            path = f"bpy.types.{pointer.bl_rna.identifier}.{prop.identifier}"
+        wm.clipboard = path
+        self.report({"INFO"}, f"Copied {path}")
+        return {"FINISHED"}
+
+
+def _button_context_menu(self, context):
+    if getattr(context, "button_prop", None) is None:
+        return
+    if getattr(context, "button_pointer", None) is None:
+        return
+    layout = self.layout
+    layout.separator()
+    layout.operator(SNA_OT_CopyBlenderPath.bl_idname, icon="NODETREE")
+
+
+def register():
+    bpy.types.UI_MT_button_context_menu.append(_button_context_menu)
+
+
+def unregister():
+    bpy.types.UI_MT_button_context_menu.remove(_button_context_menu)

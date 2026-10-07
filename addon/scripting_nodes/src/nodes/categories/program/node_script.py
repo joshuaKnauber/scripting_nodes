@@ -9,7 +9,7 @@ import os
 
 import bpy
 
-from ....blend_data.path_utils import is_identifier
+from ....blend_data.rna import is_identifier
 from ....core import scheduler
 from ....core.context import NodeError
 from ....core.naming import identifier

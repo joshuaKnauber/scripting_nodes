@@ -22,7 +22,7 @@ from typing import NamedTuple
 
 from ..lib.code_format import parenthesize
 from ..lib.sockets import from_socket
-from ..sockets.conversions import get_conversion
+from ..sockets.conversions import ConversionError, get_conversion
 from ..sockets.spec import MISSING
 from . import naming
 
@@ -114,6 +114,12 @@ class NodeContext:
         """Expression of the current UI layout (inside interface flows)."""
         return self.scope.layout or "self.layout"
 
+    @property
+    def context(self) -> str:
+        """Expression of Blender's context: the `context` argument of the
+        enclosing function (operators, panels, ...), else `bpy.context`."""
+        return "context" if "context" in self.scope.names else "bpy.context"
+
     # -- values -------------------------------------------------------------
 
     def input(self, key, default=MISSING) -> str:
@@ -170,7 +176,15 @@ class NodeContext:
                     f"'{source.name}' of '{producer.name}' isn't available here "
                     "(it only exists inside that node's flow)"
                 )
-        converted = get_conversion(source.bl_idname, socket.bl_idname, expression)
+        if getattr(source, "is_collection", False) and socket.bl_idname in (
+            "ScriptingListSocket",
+            "ScriptingDataSocket",
+        ):
+            return parenthesize(expression)  # Blender collections work as lists
+        try:
+            converted = get_conversion(source.bl_idname, socket.bl_idname, expression)
+        except ConversionError as error:
+            raise NodeError(f"{socket.name}: {error}") from None
         return parenthesize(converted)
 
     # -- code ---------------------------------------------------------------

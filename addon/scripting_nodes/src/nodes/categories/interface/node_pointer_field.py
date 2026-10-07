@@ -10,3 +10,4 @@ class SNA_Node_PointerField(PropertyFieldNode, bpy.types.Node):
     bl_idname = "SNA_Node_PointerField"
     bl_label = "Pointer Field"
     sn_reference_properties = {"prop": POINTER_PROPERTY_NODES}
+    blender_prop_types = {"POINTER"}

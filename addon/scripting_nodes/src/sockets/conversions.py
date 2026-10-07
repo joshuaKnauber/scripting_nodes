@@ -8,7 +8,8 @@ the appropriate conversion wrapper is applied to the generated code.
 
 # Conversion functions for each target type
 # Format: (from_type, to_type) -> conversion_template
-# The template uses {value} as a placeholder for the source code
+# The template uses {value} as a placeholder for the source code. None marks
+# types that can't be converted (ConversionError, shown on the node).
 
 from ..lib.code_format import is_simple, parenthesize
 
@@ -48,7 +49,7 @@ CONVERSIONS = {
         "ScriptingDataSocket",
         "ScriptingFloatSocket",
     ): "(float({value}) if isinstance({value}, (int, float)) else 0.0)",
-    ("ScriptingBlendDataSocket", "ScriptingFloatSocket"): "0.0",
+    ("ScriptingBlendDataSocket", "ScriptingFloatSocket"): None,
     # To Integer
     (
         "ScriptingStringSocket",
@@ -68,7 +69,7 @@ CONVERSIONS = {
         "ScriptingDataSocket",
         "ScriptingIntegerSocket",
     ): "(int({value}) if isinstance({value}, (int, float, bool)) else 0)",
-    ("ScriptingBlendDataSocket", "ScriptingIntegerSocket"): "0",
+    ("ScriptingBlendDataSocket", "ScriptingIntegerSocket"): None,
     # To Vector
     ("ScriptingStringSocket", "ScriptingVectorSocket"): "(0.0, 0.0, 0.0)",
     (
@@ -88,7 +89,7 @@ CONVERSIONS = {
         "ScriptingDataSocket",
         "ScriptingVectorSocket",
     ): "({value} if hasattr({value}, '__getitem__') and len({value}) >= 3 else (0.0, 0.0, 0.0))",
-    ("ScriptingBlendDataSocket", "ScriptingVectorSocket"): "(0.0, 0.0, 0.0)",
+    ("ScriptingBlendDataSocket", "ScriptingVectorSocket"): None,
     # To Color
     ("ScriptingStringSocket", "ScriptingColorSocket"): "(1.0, 1.0, 1.0, 1.0)",
     (
@@ -111,7 +112,7 @@ CONVERSIONS = {
         "ScriptingDataSocket",
         "ScriptingColorSocket",
     ): "({value} if hasattr({value}, '__getitem__') and len({value}) >= 4 else (0.0, 0.0, 0.0, 1.0))",
-    ("ScriptingBlendDataSocket", "ScriptingColorSocket"): "(0.0, 0.0, 0.0, 1.0)",
+    ("ScriptingBlendDataSocket", "ScriptingColorSocket"): None,
     # To Data (generic - no conversion needed, just pass through)
     ("ScriptingStringSocket", "ScriptingDataSocket"): "{value}",
     ("ScriptingBooleanSocket", "ScriptingDataSocket"): "{value}",
@@ -120,15 +121,15 @@ CONVERSIONS = {
     ("ScriptingVectorSocket", "ScriptingDataSocket"): "{value}",
     ("ScriptingColorSocket", "ScriptingDataSocket"): "{value}",
     ("ScriptingBlendDataSocket", "ScriptingDataSocket"): "{value}",
-    # To BlendData (pass through from data types, others become None)
+    # To BlendData (pass through from data, plain values can't be data)
     ("ScriptingDataSocket", "ScriptingBlendDataSocket"): "{value}",
-    ("ScriptingStringSocket", "ScriptingBlendDataSocket"): "None",
-    ("ScriptingBooleanSocket", "ScriptingBlendDataSocket"): "None",
-    ("ScriptingFloatSocket", "ScriptingBlendDataSocket"): "None",
-    ("ScriptingIntegerSocket", "ScriptingBlendDataSocket"): "None",
-    ("ScriptingVectorSocket", "ScriptingBlendDataSocket"): "None",
-    ("ScriptingColorSocket", "ScriptingBlendDataSocket"): "None",
-    ("ScriptingListSocket", "ScriptingBlendDataSocket"): "None",
+    ("ScriptingStringSocket", "ScriptingBlendDataSocket"): None,
+    ("ScriptingBooleanSocket", "ScriptingBlendDataSocket"): None,
+    ("ScriptingFloatSocket", "ScriptingBlendDataSocket"): None,
+    ("ScriptingIntegerSocket", "ScriptingBlendDataSocket"): None,
+    ("ScriptingVectorSocket", "ScriptingBlendDataSocket"): None,
+    ("ScriptingColorSocket", "ScriptingBlendDataSocket"): None,
+    ("ScriptingListSocket", "ScriptingBlendDataSocket"): None,
     # To List
     ("ScriptingStringSocket", "ScriptingListSocket"): "list({value})",
     ("ScriptingBooleanSocket", "ScriptingListSocket"): "[{value}]",
@@ -164,6 +165,17 @@ CONVERSIONS = {
 }
 
 
+class ConversionError(ValueError):
+    """A value of one socket type can't be used as another."""
+
+    def __init__(self, from_socket_type, to_socket_type):
+        from .socket_types import DATA_SOCKET_LABELS
+
+        self.from_label = DATA_SOCKET_LABELS.get(from_socket_type, from_socket_type)
+        self.to_label = DATA_SOCKET_LABELS.get(to_socket_type, to_socket_type)
+        super().__init__(f"{self.from_label} can't be used as {self.to_label}")
+
+
 def get_conversion(from_socket_type: str, to_socket_type: str, value_code: str) -> str:
     """
     Get the converted code for a value going from one socket type to another.
@@ -184,6 +196,8 @@ def get_conversion(from_socket_type: str, to_socket_type: str, value_code: str) 
     conversion_key = (from_socket_type, to_socket_type)
     if conversion_key in CONVERSIONS:
         template = CONVERSIONS[conversion_key]
+        if template is None:
+            raise ConversionError(from_socket_type, to_socket_type)
         if template.count("{value}") > 1 and not is_simple(value_code):
             # evaluate the source expression only once (it may have side
             # effects or be expensive)

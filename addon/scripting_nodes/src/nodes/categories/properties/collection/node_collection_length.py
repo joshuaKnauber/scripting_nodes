@@ -10,7 +10,7 @@ class SNA_Node_CollectionLength(ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SNA_Node_CollectionLength"
     bl_label = "Collection Length"
-    sn_inputs = [BlendData("collection", "Collection")]
+    sn_inputs = [BlendData("collection", "Collection", collection=True)]
     sn_outputs = [Integer("length", "Length")]
 
     def emit(self, ctx):

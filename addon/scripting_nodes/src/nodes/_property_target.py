@@ -2,15 +2,16 @@
 UI fields (Checkbox, Number Field, ...).
 
 The property is either
-  - CUSTOM: a property node of this addon (reference field `prop`), or
-  - BLENDER: a pasted Blender data path, e.g. `bpy.context.scene.frame_end`.
-
-The node gets a "Data" input for the object that owns the property, unless
-the owner is implicit (class properties of operators/preferences, or a
-pasted path that already contains it).
+  - CUSTOM: a property node of this addon (reference field `prop`), with a
+    "Data" input for the object that owns it unless the owner is implicit
+    (class properties of operators/preferences), or
+  - BLENDER: a Blender data path ending at the property, e.g. Scene › Render
+    › FPS (nodes/_blend_path.py). The owner is the path without its last
+    segment.
 
     class SNA_Node_Checkbox(PropertyTargetMixin, ScriptingBaseNode, bpy.types.Node):
         sn_reference_properties = {"prop": BOOL_PROPERTY_NODES}
+        blender_prop_types = {"BOOLEAN"}
 
         def emit(self, ctx):
             data, name = self.property_target(ctx)
@@ -19,28 +20,28 @@ pasted path that already contains it).
 
 import bpy
 
-from ..blend_data.path_utils import format_name, is_data_path, is_identifier
+from ..blend_data import rna
 from ..core.context import NodeError
-from ..sockets.spec import BlendData
+from ..sockets.spec import BlendData, Socket
+from ._blend_path import BlendPathMixin
 
 PREFERENCES_DATA = (
     'bpy.context.preferences.addons[__package__.rsplit(".", 1)[0]].preferences'
 )
 
 
-class PropertyTargetMixin:
+class PropertyTargetMixin(BlendPathMixin):
+    # RNA property types the Blender path search offers (None: all)
+    blender_prop_types = None
+
     mode: bpy.props.EnumProperty(
         name="Mode",
         items=[
             ("CUSTOM", "Custom", "A property of this addon"),
-            ("BLENDER", "Blender", "A Blender property (paste a data path)"),
+            ("BLENDER", "Blender", "A Blender property (search or paste a data path)"),
         ],
         default="CUSTOM",
     )
-    blend_data_path: bpy.props.StringProperty(name="Blend Data Path")
-    blend_prop_name: bpy.props.StringProperty(name="Property Name")
-    needs_data_input: bpy.props.BoolProperty(name="Needs Data Input")
-
     prop: bpy.props.StringProperty(name="Property")
 
     # -- resolution -------------------------------------------------------------
@@ -49,11 +50,8 @@ class PropertyTargetMixin:
         return self.resolve_reference("prop") if self.mode == "CUSTOM" else None
 
     def implicit_data(self):
-        """Owner expression when it doesn't come from the Data input."""
-        if self.mode == "BLENDER":
-            if self.blend_prop_name and not self.needs_data_input:
-                return self.blend_data_path or None
-            return None
+        """Owner expression of a custom property when it doesn't come from
+        the Data input."""
         target = self.target_node()
         register_on = getattr(target, "register_on", "")
         if register_on == "Operator":
@@ -62,70 +60,66 @@ class PropertyTargetMixin:
             return PREFERENCES_DATA
         return None
 
-    def target_data_type(self, fallback="ScriptingDataSocket"):
-        """Socket type of the targeted property's values."""
-        target = self.target_node()
-        return getattr(target, "data_type", fallback) if target else fallback
+    def path_accepts(self, step):
+        if step.is_subscript or step.prop is None:
+            return False
+        return (
+            self.blender_prop_types is None or step.prop.type in self.blender_prop_types
+        )
 
-    def data_input_spec(self):
-        """The Data input, hidden when the owner is implicit."""
+    def target_input_specs(self):
+        """Inputs for the owner: the Data input, plus the path's keys."""
         if self.mode == "BLENDER":
-            hidden = bool(self.blend_prop_name) and not self.needs_data_input
-        else:
-            hidden = self.implicit_data() is not None
-        return BlendData("data", "Data", hide=hidden)
+            return self.path_input_specs()
+        return [BlendData("data", "Data", hide=self.implicit_data() is not None)]
+
+    def target_value_spec(self, key, label):
+        """Socket for values of the targeted property."""
+        if self.mode == "BLENDER":
+            return rna.value_spec(self.path_final(), key, label)
+        target = self.target_node()
+        idname = getattr(target, "data_type", "ScriptingDataSocket")
+        spec = Socket(idname, key, label)
+        size = getattr(target, "prop_size", None)
+        if size and idname == "ScriptingVectorSocket" and 2 <= size <= 4:
+            spec.attrs["dimension"] = str(size)
+        elif idname == "ScriptingColorSocket":
+            spec.attrs["use_alpha"] = size == 4
+        return spec
 
     def property_target(self, ctx):
         """(owner expression, property name). Raises NodeError if incomplete."""
         if self.mode == "BLENDER":
-            if not self.blend_prop_name:
-                raise NodeError("Paste a property path")
-            # pasted text ends up in the generated code
-            if not is_identifier(self.blend_prop_name):
-                raise NodeError(f"Invalid property name: {self.blend_prop_name}")
-            if self.blend_data_path and not is_data_path(self.blend_data_path):
-                raise NodeError(f"Invalid data path: {self.blend_data_path}")
-            name = self.blend_prop_name
-        else:
-            target = self.target_node()
-            if target is None:
-                raise NodeError("Pick a property")
-            name = target.prop_name
+            parts = self.path_parts()
+            if parts is None:
+                raise NodeError(f"Invalid data path: {self.path}")
+            if not parts:
+                raise NodeError("Search or paste a property")
+            if parts[-1] == rna.SUBSCRIPT:
+                raise NodeError("The path has to end at a property")
+            return self.path_expression(ctx, len(parts) - 1), parts[-1]
+
+        target = self.target_node()
+        if target is None:
+            raise NodeError("Pick a property")
         data = self.implicit_data()
         if data is None:
             if not ctx.is_linked("data"):
                 raise NodeError("Connect the data that owns the property")
             data = ctx.input("data")
-        return data, name
-
-    # -- blend data path operators (interface/ops/blend_data_path.py) -------
-
-    def setup_from_path(self, path: str, prop_name: str, needs_input: bool):
-        self.blend_data_path = path
-        self.blend_prop_name = prop_name
-        self.needs_data_input = needs_input
-        self.label = format_name(prop_name) if prop_name else ""
-
-    def clear_blend_data_path(self):
-        self.blend_data_path = ""
-        self.blend_prop_name = ""
-        self.needs_data_input = False
-        self.label = ""
+        return data, target.prop_name
 
     # -- UI -----------------------------------------------------------------
 
     def draw_target(self, layout):
-        row = layout.row(align=True)
         if self.mode == "CUSTOM":
+            row = layout.row(align=True)
             self.draw_reference_prop(row, "prop")
             row.prop(self, "mode", icon="USER", icon_only=True, text="")
         else:
-            if self.blend_prop_name:
-                row.label(text=format_name(self.blend_prop_name))
-                op = row.operator("sna.blend_data_clear_path", text="", icon="X")
-            else:
-                op = row.operator(
-                    "sna.blend_data_paste_path", text="Paste Path", icon="PASTEDOWN"
-                )
-            op.node_name = self.name
-            row.prop(self, "mode", icon="BLENDER", icon_only=True, text="")
+            self.draw_path(
+                layout,
+                header=lambda row: row.prop(
+                    self, "mode", icon="BLENDER", icon_only=True, text=""
+                ),
+            )

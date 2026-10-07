@@ -18,6 +18,8 @@ from ...base_node import ScriptingBaseNode
 
 
 class PropertyFieldNode(PropertyTargetMixin, ScriptingBaseNode):
+    bl_width_default = 200
+
     # (bool node property, Blender's default for it): the property becomes a
     # `name=value` argument of layout.prop() when it differs from the default
     field_options: tuple = ()
@@ -27,7 +29,7 @@ class PropertyFieldNode(PropertyTargetMixin, ScriptingBaseNode):
     )
 
     def socket_specs(self):
-        inputs = [Interface(), self.data_input_spec(), String("text", "Text")]
+        inputs = [Interface(), *self.target_input_specs(), String("text", "Text")]
         return inputs, [Interface("next")]
 
     def prop_arguments(self, ctx):

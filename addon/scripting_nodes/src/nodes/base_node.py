@@ -233,7 +233,15 @@ def _next_identifier(sockets, key):
 
 
 def _copy_socket_attrs(source, target):
-    for attr in ("dimension", "use_alpha", "enum_items_data", "kind"):
+    for attr in (
+        "dimension",
+        "use_alpha",
+        "enum_items_data",
+        "kind",
+        "blend_type",
+        "is_collection",
+        "description",
+    ):
         if hasattr(source, attr):
             setattr(target, attr, getattr(source, attr))
 
@@ -251,8 +259,9 @@ def _apply_spec(socket, spec: SocketSpec, created):
     for attr, value in spec.attrs.items():
         if getattr(socket, attr, value) != value:
             setattr(socket, attr, value)
-    if created:
+    if socket.display_shape != socket.socket_shape:
         socket.display_shape = socket.socket_shape
+    if created:
         if socket.is_output and socket.socket_type != "DATA":
             socket.link_limit = 1  # flow code continues in one place
         if spec.default is not MISSING and hasattr(socket, "value"):

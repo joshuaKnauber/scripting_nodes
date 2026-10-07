@@ -136,6 +136,27 @@ def draw_submenu(self, context):
             op = layout.operator("node.add_node", text=node.bl_label)
             op.type = node.bl_idname
             op.use_transform = True
+            draw_presets(layout, node)
+
+
+def draw_presets(layout, node):
+    """Entries that add `node` already set up (`sn_presets`), and operators
+    that add it in other ways (`sn_menu_operators`)."""
+    presets = getattr(node, "sn_presets", ())
+    extra = getattr(node, "sn_menu_operators", ())
+    if not presets and not extra:
+        return
+    for label, settings in presets:
+        op = layout.operator("node.add_node", text=label)
+        op.type = node.bl_idname
+        op.use_transform = True
+        for name, value in settings.items():
+            setting = op.settings.add()
+            setting.name = name
+            setting.value = repr(value)
+    for idname, label, icon in extra:
+        layout.operator(idname, text=label, icon=icon)
+    layout.separator()
 
 
 def draw_node_menu(self, context):
