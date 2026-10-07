@@ -20,18 +20,6 @@ def normalize_indents(code):
     return "\n".join(line[cut:] if line.strip() else "" for line in lines)
 
 
-def indent(code, level=1, keep_first=True):
-    """Indent every line by `level` * 4 spaces (except the first one if
-    `keep_first`, which is meant to sit right where the placeholder is)."""
-    lines = _trim_blank_edges(code.split("\n"))
-    if not lines:
-        return ""
-    prefix = "    " * level
-    out = [lines[0] if keep_first else prefix + lines[0]]
-    out += [prefix + line if line.strip() else "" for line in lines[1:]]
-    return "\n".join(out)
-
-
 _ATOMIC = (
     ast.Name,
     ast.Constant,

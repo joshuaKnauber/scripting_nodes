@@ -35,12 +35,17 @@ class NodeFixesTest(unittest.TestCase):
 
     def test_boolean_math_uses_both_inputs(self):
         tree = helpers.new_tree()
+        trigger = helpers.add_node(tree, "SNA_Node_Trigger")
+        p = helpers.add_node(tree, "SNA_Node_Print")
         node = helpers.add_node(tree, "SNA_BooleanMath")
         node.comparison = "OR"
         node.inputs[0].value = True
         node.inputs[1].value = False
+        helpers.link(tree, trigger.outputs[0], p.inputs[0])
+        helpers.link(tree, node.outputs[0], p.inputs[1])
         helpers.flush()
-        self.assertEqual(node.outputs[0].code, "(True or False)")
+        # Boolean -> String conversion wraps the value: str((True or False))
+        self.assertIn("(True or False)", helpers.tree_source(tree))
 
     def test_precedence_is_kept(self):
         code_format = helpers.sn("src.lib.code_format")
