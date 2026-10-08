@@ -81,6 +81,7 @@ def set_sidebar_tabs(category):
                     region.active_panel_category = category
                 except (AttributeError, TypeError):
                     pass
+                region.tag_redraw()  # switching tabs alone doesn't redraw
 
 
 def frame_all(zoom_out=0):

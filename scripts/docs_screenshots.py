@@ -3,7 +3,8 @@
     python scripts/docs_screenshots.py            # all of them
     python scripts/docs_screenshots.py first-addon  # only matching names
 
-Every `website/screenshots/<name>.py` scenario (same format as
+Every `website/screenshots/<name>.py` scenario (files starting with `_` are
+shared helpers) (same format as
 tests/visual/scenarios) is rendered to `website/public/screenshots/<name>.png`,
 which docs pages reference as `![...](/screenshots/<name>.png)`.
 A scenario can set `WINDOW_SIZE = (w, h)` to control the shot's size.
@@ -36,7 +37,11 @@ OUTPUT = os.path.join(REPO_ROOT, "website", "public", "screenshots")
 
 def main():
     filters = sys.argv[1:]
-    scenarios = sorted(glob.glob(os.path.join(SCENARIOS, "*.py")))
+    scenarios = sorted(
+        path
+        for path in glob.glob(os.path.join(SCENARIOS, "*.py"))
+        if not os.path.basename(path).startswith("_")  # shared helpers
+    )
     if filters:
         scenarios = [
             s for s in scenarios if any(f in os.path.basename(s) for f in filters)
