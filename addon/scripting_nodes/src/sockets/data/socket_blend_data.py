@@ -25,15 +25,48 @@ class ScriptingBlendDataSocket(ScriptingBaseSocket):
         return "SQUARE" if self.is_collection else "CIRCLE"
 
     def draw(self, context, layout, node, text):
-        super().draw(context, layout, node, text)
-        if not self.blend_type:
-            return
-        name = display_name(self.blend_type)
+        name = display_name(self.blend_type) if self.blend_type else ""
         # "Active Object" already says it's an Object, "Camera" doesn't
-        if name.lower() not in text.lower():
-            sub = layout.row()
-            sub.active = False
-            sub.label(text=name)
+        if not name or name.lower() in text.lower():
+            super().draw(context, layout, node, text)
+        elif self.is_output or self.is_linked:
+            custom = getattr(node, "draw_socket", None)
+            if custom is None or not custom(context, self, layout, text):
+                draw_type_row(layout, text, name, node.width, right=self.is_output)
+        else:
+            super().draw(context, layout, node, text)
+
+
+def _text_width(text):
+    import blf
+
+    blf.size(0, 11)  # the node font at zoom 1, relative to node.width
+    return blf.dimensions(0, text)[0]
+
+
+def draw_type_row(layout, text, type_label, node_width, right=False, picker=None):
+    """ "Camera  Object": a socket label with its type, dimmed (no type if
+    it's ""). `picker(row)` adds a button to change the type."""
+    if right:
+        # socket rows ignore alignment: push the row right with a spacer
+        needed = _text_width(text) + 12
+        if type_label:
+            needed += _text_width(type_label) + 8
+        if picker is not None:
+            needed += 22
+        factor = 1 - needed / max(node_width - 20, 1)
+        if factor > 0.02:
+            split = layout.split(factor=factor)
+            split.label(text="")
+            layout = split
+    row = layout.row(align=True)
+    row.label(text=text)
+    sub = row.row(align=True)
+    sub.active = False
+    if type_label:
+        sub.label(text=type_label)
+    if picker is not None:
+        picker(sub)
 
 
 def linked_rna_type(socket):

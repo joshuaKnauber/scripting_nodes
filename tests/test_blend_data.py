@@ -219,7 +219,8 @@ class BlendDataNodeTest(unittest.TestCase):
     def test_active_item(self):
         node = self.add("active_object.modifiers[]")
         node.path_keys[0].mode = "ACTIVE"
-        self.assertIsNone(node.socket("key_0"))
+        # the row stays, so the mode can be switched back
+        self.assertIsNotNone(node.socket("key_0"))
         self.printed(node.outputs[0])
         self.assertIn("context.active_object.modifiers.active", source(self.tree))
         # bpy.data.objects has no active item

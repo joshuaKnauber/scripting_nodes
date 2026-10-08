@@ -22,7 +22,7 @@ import bpy
 
 from ..blend_data import rna
 from ..core.context import NodeError
-from ..sockets.data.socket_blend_data import linked_rna_type
+from ..sockets.data.socket_blend_data import draw_type_row, linked_rna_type
 from ..sockets.spec import Integer, String
 
 ROOT_ITEMS = [
@@ -47,9 +47,21 @@ class SNA_BlendPathKey(bpy.types.PropertyGroup):
     mode: bpy.props.EnumProperty(
         name="Item",
         items=[
-            ("INDEX", "Index", "Item at a position (0 is the first, -1 the last)"),
-            ("NAME", "Name", "Item with a name"),
-            ("ACTIVE", "Active", "The collection's active item"),
+            (
+                "INDEX",
+                "Index",
+                "Item at a position (0 is the first, -1 the last)",
+                "LINENUMBERS_ON",
+                0,
+            ),
+            ("NAME", "Name", "Item with a name", "SORTALPHA", 1),
+            (
+                "ACTIVE",
+                "Active",
+                "The collection's active item",
+                "RESTRICT_SELECT_OFF",
+                2,
+            ),
         ],
         update=_key_update,
     )
@@ -60,17 +72,6 @@ def _search_path(self, context, edit_text):
     return [(entry.path, f"{entry.text}   {entry.type_label}") for entry in results]
 
 
-def _search_input_type(self, context, edit_text):
-    text = edit_text.lower()
-    return [name for name in rna.all_types() if text in name.lower()][:200]
-
-
-def _search_cast(self, context, edit_text):
-    final = self.path_final(cast=False)
-    text = edit_text.lower()
-    return [name for name in rna.subtypes(final.rna_type) if text in name.lower()]
-
-
 class BlendPathMixin:
     path_root: bpy.props.EnumProperty(name="Start", items=ROOT_ITEMS, default="CONTEXT")
     path: bpy.props.StringProperty(
@@ -78,16 +79,11 @@ class BlendPathMixin:
         description="Search the data, or paste a copied data path",
         search=_search_path,
     )
-    path_input_type: bpy.props.StringProperty(
-        name="Input Type",
-        description="Type of the data the path starts at, when the input doesn't tell",
-        search=_search_input_type,
-    )
-    path_cast: bpy.props.StringProperty(
-        name="As",
-        description="Use the result as a more specific type (an object's data as Mesh, ...)",
-        search=_search_cast,
-    )
+    # type of the data the path starts at when the input doesn't tell, and
+    # a more specific type for the result (an object's data as Mesh): picked
+    # on the sockets (sna.blend_path_type)
+    path_input_type: bpy.props.StringProperty(name="Input Type")
+    path_cast: bpy.props.StringProperty(name="As")
     path_keys: bpy.props.CollectionProperty(type=SNA_BlendPathKey)
 
     def path_accepts(self, step) -> bool:
@@ -185,11 +181,9 @@ class BlendPathMixin:
             if part != rna.SUBSCRIPT:
                 continue
             mode = self.path_keys[key].mode if key < len(self.path_keys) else "INDEX"
-            label = rna.label(step)
-            if mode == "INDEX":
-                specs.append(Integer(f"key_{key}", label))
-            elif mode == "NAME":
-                specs.append(String(f"key_{key}", label))
+            # Active keeps its row (unused), so the mode can be switched back
+            spec = Integer if mode == "INDEX" else String
+            specs.append(spec(f"key_{key}", rna.label(step)))
             key += 1
         return specs
 
@@ -237,25 +231,62 @@ class BlendPathMixin:
         if header is not None:
             header(row)
 
-        if self.path_root == "INPUT" and not linked_rna_type(self.socket("data"))[0]:
-            col.prop(self, "path_input_type", text="", icon="RNA")
-
         parts = self.path_parts()
         if parts is None:
             col.label(text="Invalid path", icon="ERROR")
             return
         owner = self.path_root_step()
-        key = 0
         for part, step in zip(parts, rna.resolve(owner, parts)):
-            if part == rna.SUBSCRIPT and key < len(self.path_keys):
-                row = col.row(align=True)
-                row.label(text=rna.label(owner))
-                row.prop(self.path_keys[key], "mode", expand=True)
-                key += 1
-            elif owner.known and owner.rna_type and not step.known:
+            if (
+                not step.is_subscript
+                and owner.known
+                and owner.rna_type
+                and not step.known
+            ):
                 col.label(text=f"{rna.label(owner)} has no '{part}'", icon="QUESTION")
             owner = step
 
-        final = self.path_final(cast=False)
-        if final.rna_type and rna.subtypes(final.rna_type):
-            col.prop(self, "path_cast", icon="RNA")
+    def draw_socket(self, context, socket, layout, text):
+        """Key inputs carry their Index/Name/Active choice; the Data input
+        and the Blender data output let you pick a type where it's open."""
+        key = socket.identifier
+        if not socket.is_output and key.startswith("key_"):
+            index = int(key[4:])
+            if index >= len(self.path_keys):
+                return False
+            mode = self.path_keys[index]
+            row = layout.row(align=True)
+            row.prop(mode, "mode", text="", icon_only=True)
+            if mode.mode == "ACTIVE":
+                row.label(text=f"{text}: Active")
+            elif socket.is_linked:
+                row.label(text=text)
+            else:
+                socket.draw_value(context, row, text)
+            return True
+        if not socket.is_output and key == "data" and self.path_root == "INPUT":
+            if linked_rna_type(socket)[0]:
+                return False
+            self._draw_type_picker(layout, text, "INPUT", self.path_input_type, "Any")
+            return True
+        if socket.is_output and socket.bl_idname == "ScriptingBlendDataSocket":
+            base = self.path_final(cast=False)
+            if not base.rna_type or not rna.subtypes(base.rna_type):
+                return False
+            current = socket.blend_type or base.rna_type
+            self._draw_type_picker(layout, text, "CAST", current, current, right=True)
+            return True
+        return False
+
+    def _draw_type_picker(self, layout, text, target, type_name, fallback, right=False):
+        def picker(row):
+            op = row.operator(
+                "sna.blend_path_type", text="", icon="DOWNARROW_HLT", emboss=False
+            )
+            op.node_id = self.id
+            op.target = target
+
+        label = rna.display_name(type_name) if type_name else fallback
+        if label.lower() in text.lower():
+            label = ""  # "Modifier ⌄", not "Modifier Modifier ⌄"
+        draw_type_row(layout, text, label, self.width, right=right, picker=picker)

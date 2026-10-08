@@ -52,6 +52,61 @@ class SNA_OT_PasteBlenderPath(bpy.types.Operator):
         return {"FINISHED"}
 
 
+NO_TYPE = "__NONE__"
+# enum items must stay alive while Blender shows them
+_type_items_cache = {}
+
+
+def _type_items(self, context):
+    node = find_node(self.node_id)
+    if node is None:
+        names = ()
+        none_label = ""
+    elif self.target == "CAST":
+        base = node.path_final(cast=False).rna_type
+        names = rna.subtypes(base)
+        none_label = rna.display_name(base)
+    else:
+        names = tuple(rna.all_types())
+        none_label = "Any"
+    key = (none_label, names)
+    if key not in _type_items_cache:
+        items = [(NO_TYPE, none_label or "None", "")]
+        items += [(name, rna.display_name(name), name) for name in names]
+        _type_items_cache[key] = items
+    return _type_items_cache[key]
+
+
+class SNA_OT_BlendPathType(bpy.types.Operator):
+    """Pick the type of this Blender data"""
+
+    bl_idname = "sna.blend_path_type"
+    bl_label = "Data Type"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+    bl_property = "type_name"
+
+    node_id: bpy.props.StringProperty(options={"SKIP_SAVE"})
+    # CAST: a more specific type of the result, INPUT: the type of the input
+    target: bpy.props.EnumProperty(
+        items=[("CAST", "Cast", ""), ("INPUT", "Input", "")], options={"SKIP_SAVE"}
+    )
+    type_name: bpy.props.EnumProperty(items=_type_items)
+
+    def invoke(self, context, event):
+        context.window_manager.invoke_search_popup(self)
+        return {"RUNNING_MODAL"}
+
+    def execute(self, context):
+        node = find_node(self.node_id)
+        if node is None:
+            return {"CANCELLED"}
+        value = "" if self.type_name == NO_TYPE else self.type_name
+        setattr(
+            node, "path_cast" if self.target == "CAST" else "path_input_type", value
+        )
+        return {"FINISHED"}
+
+
 class SNA_OT_CopyBlenderPath(bpy.types.Operator):
     """Copy the path of this property to paste it into Scripting Nodes"""
 
