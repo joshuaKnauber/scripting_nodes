@@ -3,12 +3,13 @@ from collections import defaultdict
 
 import bpy
 
-from ..core import scheduler
+from ..core import functions, scheduler
 from ..core.versioning import DATA_VERSION
 from ..lib.ids import get_short_id
 from ..lib.logger import log
 from ..lib.sockets import from_socket
 from ..lib.trees import sn_nodes
+from ..sockets.interface import SOCKET_IDNAMES
 
 
 # False until every class is registered and again during unregister. Blender
@@ -31,22 +32,24 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     # Version of the saved data layout, see core/versioning.py
     data_version: bpy.props.IntProperty(default=0)
     pause_updates: bpy.props.BoolProperty(default=False)
-    is_group: bpy.props.BoolProperty(
-        default=False,
-        description=(
-            "If true, this tree is a function (node group) - it compiles to a "
-            "Python function rather than addon-level code, and is callable from "
-            "Group nodes in other trees"
-        ),
-    )
+
+    @classmethod
+    def valid_socket_type(cls, idname):
+        """Socket types offered in the group interface (sidebar "Group" tab)."""
+        return idname in SOCKET_IDNAMES
+
+    @property
+    def is_function(self):
+        """Has a group interface: compiles to a function, see core/functions."""
+        return functions.is_function(self)
 
     @property
     def module_name(self):
         """Python module name of this tree, e.g. `main_tree_3fa2c1d9e0`.
 
         Suffixed with the tree's unique id, so trees with the same display
-        name never collide. Also used as the function name of group trees,
-        so it must be a valid identifier."""
+        name never collide. Also the name of the function a tree with a
+        group interface defines, so it must be a valid identifier."""
         name = re.sub(r"[^a-zA-Z0-9\s]", "", self.name).strip()
         name = re.sub(r"\s+", "_", name).lower()
         if not name or name[0].isdigit():

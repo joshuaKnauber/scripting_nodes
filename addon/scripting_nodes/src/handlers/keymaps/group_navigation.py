@@ -1,4 +1,5 @@
-"""Tab / Ctrl+Tab to enter/exit node groups in SN editors.
+"""Group keys in SN editors: Tab / Ctrl+Tab enter/exit node groups, Ctrl+G
+makes a group, Ctrl+Alt+G ungroups (nodes/categories/groups/_operators.py).
 
 Blender's default keymap binds Tab to `node.group_edit`, but that operator
 has built-in poll logic that doesn't always accept custom NodeCustomGroup
@@ -90,6 +91,12 @@ def register():
 
     # Ctrl+Tab: exit to the parent tree
     kmi = km.keymap_items.new("sna.group_exit", "TAB", "PRESS", ctrl=True)
+    _addon_keymaps.append((km, kmi))
+
+    # Blender's own group operators don't run in custom trees
+    kmi = km.keymap_items.new("sna.make_group", "G", "PRESS", ctrl=True)
+    _addon_keymaps.append((km, kmi))
+    kmi = km.keymap_items.new("sna.ungroup", "G", "PRESS", ctrl=True, alt=True)
     _addon_keymaps.append((km, kmi))
 
 

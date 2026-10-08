@@ -30,7 +30,7 @@ _sn_helpers.py          shared helper functions (only if used)
 addon/<tree>_<id>.py    one module per node tree
 ```
 
-Inside a tree module, **root nodes** (operators, panels, events, properties, …) are emitted first, sorted by `sn_order`. Every other node is emitted when a flow reaches it, or, for value nodes, when one of its outputs is used. Group trees compile to a function.
+Inside a tree module, **root nodes** (operators, panels, events, properties, …) are emitted first, sorted by `sn_order`. Every other node is emitted when a flow reaches it, or, for value nodes, when one of its outputs is used. A tree with a group interface also defines a function (see `core/functions.py`): Group Input values are its parameters, Group Output is `return`, and its flow sockets decide whether a Group node calls it as a value, a statement or UI. Group Input / Output are Blender's own nodes, so the compiler handles them itself.
 
 ## Loading
 

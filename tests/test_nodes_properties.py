@@ -118,18 +118,17 @@ class PropertyNodesTest(unittest.TestCase):
         self.assertEqual(getattr(bpy.context.scene, count.prop_name), 7)
 
     def test_pointer_poll_function(self):
-        function = helpers.new_tree("Visible")
-        function.is_group = True
-        group_input = helpers.add_node(function, "SNA_Node_GroupInput")
-        group_input.add_item("item", "ScriptingBlendDataSocket")
-        group_output = helpers.add_node(function, "SNA_Node_GroupOutput")
-        group_output.add_item("allowed", "ScriptingBooleanSocket")
+        function, group_input, group_output = helpers.new_function(
+            "Visible",
+            inputs=[("Item", "ScriptingBlendDataSocket")],
+            outputs=[("Allowed", "ScriptingBooleanSocket")],
+        )
         hidden = helpers.add_node(function, "SNA_Node_GetProperty")
         hidden.mode = "BLENDER"
         hidden.setup_from_path("", "hide_viewport", True)
         helpers.flush()
-        helpers.link(function, group_input.outputs["item_item"], hidden.inputs["Data"])
-        helpers.link(function, hidden.outputs["Value"], group_output.inputs[1])
+        helpers.link(function, group_input.outputs[0], hidden.inputs["Data"])
+        helpers.link(function, hidden.outputs["Value"], group_output.inputs[0])
 
         tree = helpers.new_tree("Main")
         pointer = helpers.add_node(tree, "SNA_Node_PointerProperty")

@@ -26,7 +26,7 @@ import bpy
 from ..lib.logger import fmt_duration, log, log_if
 from ..lib.screen import redraw_all
 from ..lib.trees import scripting_node_trees, sn_nodes
-from . import compiler, errors, integrity, references, runtime
+from . import compiler, errors, functions, integrity, references, runtime
 
 TICK_SECONDS = 0.1
 
@@ -83,6 +83,8 @@ def _flush():
         integrity.ensure(trees)
     for tree in trees:
         tree.update_reroutes()
+        if functions.sync_io_sockets(tree):
+            tree.update()  # links may connect (or not) now
     # sockets can depend on other nodes (e.g. a Get Variable's type), so a
     # change may ripple once or twice
     for _ in range(3):

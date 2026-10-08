@@ -162,6 +162,11 @@ class NodeContext:
         producer = source.node
         expression = self.scope.lookup((producer.as_pointer(), source.identifier))
         if expression is None:
+            if producer.bl_idname == "NodeGroupInput":
+                raise NodeError(
+                    f"'{source.name}' of the Group Input is only available in "
+                    "the function's flow"
+                )
             if _is_value_node(producer):
                 expression = self._builder.evaluate(
                     producer, source.identifier, self.scope

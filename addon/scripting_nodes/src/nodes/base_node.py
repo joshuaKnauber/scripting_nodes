@@ -1,4 +1,4 @@
-from typing import Dict, Set, Tuple
+from typing import Dict, Tuple
 
 import bpy
 
@@ -73,8 +73,6 @@ class ScriptingBaseNode:
     # {prop_name: allowed bl_idnames}: string fields referencing other nodes,
     # stored by node id (core/references.py)
     sn_reference_properties: Dict[str, Tuple[str, ...]] = {}
-    # PointerProperty fields holding another ScriptingNodeTree
-    sn_tree_reference_properties: Set[str] = set()
 
     id: bpy.props.StringProperty(default="", options={"HIDDEN"})
 

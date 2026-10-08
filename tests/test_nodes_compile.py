@@ -42,7 +42,7 @@ class NodeCompileTest(unittest.TestCase):
         for cls in helpers.node_classes():
             with self.subTest(node=cls.bl_idname):
                 helpers.reset_file()
-                tree = helpers.new_tree_for(cls)
+                tree = helpers.new_tree()
                 helpers.add_node(tree, cls.bl_idname)
                 helpers.flush()
                 self.assertCompiles(tree, cls.bl_idname)
@@ -51,7 +51,7 @@ class NodeCompileTest(unittest.TestCase):
         """Trigger -> Node -> Print -> Print: catches broken indentation of `next`."""
         for cls in helpers.node_classes():
             helpers.reset_file()
-            tree = helpers.new_tree_for(cls)
+            tree = helpers.new_tree()
             node = helpers.add_node(tree, cls.bl_idname)
             inp = first(node.inputs, PROGRAM)
             out = first(node.outputs, PROGRAM)
@@ -71,7 +71,7 @@ class NodeCompileTest(unittest.TestCase):
         """Panel -> Node -> Label -> Label."""
         for cls in helpers.node_classes():
             helpers.reset_file()
-            tree = helpers.new_tree_for(cls)
+            tree = helpers.new_tree()
             node = helpers.add_node(tree, cls.bl_idname)
             inp = first(node.inputs, INTERFACE)
             out = first(node.outputs, INTERFACE)
@@ -91,7 +91,7 @@ class NodeCompileTest(unittest.TestCase):
         """Every data output can feed a Print node."""
         for cls in helpers.node_classes():
             helpers.reset_file()
-            tree = helpers.new_tree_for(cls)
+            tree = helpers.new_tree()
             node = helpers.add_node(tree, cls.bl_idname)
             outs = data_outputs(node)
             if not outs:

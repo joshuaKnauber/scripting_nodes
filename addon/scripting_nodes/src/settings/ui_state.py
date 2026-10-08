@@ -45,7 +45,7 @@ class SNA_UISettings(bpy.types.PropertyGroup):
             return
         if 0 <= self.active_function_index < len(bpy.data.node_groups):
             tree = bpy.data.node_groups[self.active_function_index]
-            if getattr(tree, "is_sn", False) and getattr(tree, "is_group", False):
+            if getattr(tree, "is_sn", False) and tree.is_function:
                 context.space_data.node_tree = tree
 
     active_property_index: bpy.props.IntProperty(

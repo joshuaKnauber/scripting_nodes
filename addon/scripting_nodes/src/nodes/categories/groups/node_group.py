@@ -1,141 +1,113 @@
-"""Call Group node: invokes a function (group tree) from another tree.
+"""Group node: calls a function (a tree with a group interface).
 
-Subclasses bpy.types.NodeCustomGroup to inherit Tab-to-enter group navigation
-and the `contains_tree` recursion check. Sockets are managed manually because
-SN uses its own custom socket types instead of NodeTreeInterface.
+Subclasses NodeCustomGroup for `node_tree` and Tab-to-enter. Blender doesn't
+create sockets for custom group nodes, so they're declared from the tree's
+interface like any other node's (keys are the interface item identifiers).
+How the function is called depends on its interface, see core/functions.py.
 """
 
 import bpy
 
+from ....core import functions
 from ....core.context import NodeError
-from ....sockets.spec import Flow
+from ....sockets.interface import SETTINGS
+from ....sockets.spec import Socket
 from ...base_node import ScriptingBaseNode
 
 
-PROGRAM_INPUT_LABEL = "Run"
-PROGRAM_OUTPUT_LABEL = "After"
+def _poll_function(self, tree):
+    """Trees offered in the picker: functions that don't contain this one."""
+    return (
+        tree.bl_idname == "ScriptingNodeTree"
+        and tree != self.id_data
+        and functions.is_function(tree)
+        and not functions.calls(tree, self.id_data)
+    )
 
 
-def _poll_group_tree_target(self, tree):
-    """Filter for the node_tree dropdown - only SN group trees.
-
-    Blender's data picker uses PointerProperty.poll (not poll_instance) to
-    decide which items appear in the list. poll_instance only validates
-    explicit assignments, so without this filter the dropdown shows every
-    ScriptingNodeTree (addon trees and groups alike).
-    """
-    return tree.bl_idname == "ScriptingNodeTree" and getattr(tree, "is_group", False)
+def _spec(item):
+    attrs = {name: getattr(item, name) for name in SETTINGS if hasattr(item, name)}
+    kind = attrs.pop("kind", None)
+    default = getattr(item, "default_value", None)
+    if default is not None and not isinstance(default, (str, bool, int, float)):
+        default = tuple(default)
+    spec = Socket(item.bl_socket_idname, item.identifier, item.name)
+    if kind:
+        spec.kind = kind
+    if default is not None:
+        spec.default = default
+    spec.attrs.update(attrs)
+    return spec
 
 
 class SNA_Node_Group(bpy.types.NodeCustomGroup, ScriptingBaseNode):
     bl_idname = "SNA_Node_Group"
     bl_label = "Group"
+    bl_width_default = 180
 
-    # Override the inherited NodeCustomGroup.node_tree to add a dropdown
-    # filter. Without poll, Blender's picker shows every NodeTree of the
-    # matching type (incl. our addon trees) since it has no notion of our
-    # custom is_group flag.
+    # replaces NodeCustomGroup.node_tree to filter the picker
     node_tree: bpy.props.PointerProperty(
-        type=bpy.types.NodeTree,
-        poll=_poll_group_tree_target,
-    )
-
-    # the generated call imports the group's function from that tree
-    sn_tree_reference_properties = {"node_tree"}
-
-    data_only: bpy.props.BoolProperty(
-        name="Data Only",
-        description=(
-            "Call as a data expression returning the group's outputs, with no "
-            "program-flow sockets. Unchecked: the group runs as a statement "
-            "inside a program-flow chain"
-        ),
-        default=False,
+        type=bpy.types.NodeTree, name="Function", poll=_poll_function
     )
 
     @classmethod
     def poll(cls, ntree):
-        # Callable from any ScriptingNodeTree (addon trees and other groups)
         return ntree.bl_idname == "ScriptingNodeTree"
 
-    def poll_instance(self, group_tree):
-        """Validate node_tree assignment - only group trees, no recursion."""
-        if not group_tree or group_tree.bl_idname != "ScriptingNodeTree":
-            return False
-        if not getattr(group_tree, "is_group", False):
-            return False
-        # Built-in recursion check from Blender: prevents the assigned tree
-        # from (transitively) containing this node's tree
-        if hasattr(group_tree, "contains_tree") and group_tree.contains_tree(
-            self.id_data
-        ):
-            return False
-        return True
-
-    def _find_interface_nodes(self):
-        """(group input, group output) inside the referenced tree."""
-        group_input = group_output = None
-        if self.node_tree:
-            for node in self.node_tree.nodes:
-                if node.bl_idname == "SNA_Node_GroupInput" and group_input is None:
-                    group_input = node
-                elif node.bl_idname == "SNA_Node_GroupOutput" and group_output is None:
-                    group_output = node
-        return group_input, group_output
+    def poll_instance(self, tree):
+        return tree is not None and _poll_function(self, tree)
 
     def socket_specs(self):
-        group_input, group_output = self._find_interface_nodes()
-        inputs = [] if self.data_only else [Flow("flow", PROGRAM_INPUT_LABEL)]
-        outputs = [] if self.data_only else [Flow("next", PROGRAM_OUTPUT_LABEL)]
-        if group_input:
-            inputs += group_input.item_specs()
-        if group_output:
-            outputs += group_output.item_specs()
-        return inputs, outputs
+        tree = self.node_tree
+        if tree is None:
+            return [], []
+        return (
+            [_spec(item) for item in functions.sockets(tree, "INPUT")],
+            [_spec(item) for item in functions.sockets(tree, "OUTPUT")],
+        )
 
     def update(self):
-        """Blender calls this when node_tree is reassigned from the UI."""
+        """Blender calls this when node_tree is set from the UI."""
         self.mark_dirty()
+
+    def draw_label(self):
+        return self.node_tree.name if self.node_tree else self.bl_label
 
     def draw(self, context, layout):
         layout.template_ID(self, "node_tree", new="sna.new_group")
-        layout.prop(self, "data_only")
-        if self.node_tree and not getattr(self.node_tree, "is_group", False):
-            box = layout.box()
-            box.alert = True
-            box.label(text="Target is not a group tree", icon="ERROR")
 
     def emit(self, ctx):
         tree = self.node_tree
-        if tree is None or not getattr(tree, "is_group", False):
-            raise NodeError("Pick a group")
-        group_input, group_output = self._find_interface_nodes()
-        function = ctx.symbol(tree, tree.module_name)
-        args = [
-            ctx.input(key)
-            for key in (group_input.parameter_keys() if group_input else [])
-        ]
-        # pass what the group body may use from the caller's scope
+        if tree is None or not functions.is_function(tree):
+            raise NodeError("Pick a function")
+        problem = functions.problem(tree)
+        if problem:
+            raise NodeError(problem)
+
+        args = [ctx.input(item.identifier) for item, _ in functions.parameters(tree)]
+        # pass what the function body may use from the caller's scope
         for name in ("self", "context", "event"):
             if name in ctx.scope.names:
                 args.append(f"{name}={name}")
-        if ctx.scope.layout:
+        flow_input = functions.flow_input(tree)
+        if flow_input is not None and flow_input.kind == "INTERFACE":
             args.append(f"layout={ctx.layout}")
-        call = f"{function}({', '.join(args)})"
+        call = f"{ctx.symbol(tree, tree.module_name)}({', '.join(args)})"
+        returns = [item.identifier for item in functions.returns(tree)]
 
-        returns = group_output.parameter_keys() if group_output else []
-        if self.data_only:
+        if flow_input is None:
+            # pure function: an expression
             for i, key in enumerate(returns):
                 ctx.output(key, call if len(returns) == 1 else f"{call}[{i}]")
             return
-        if not returns:
-            statement = call
-        else:
+
+        if returns:
             names = [ctx.var("result") for _ in returns]
             for key, name in zip(returns, names):
                 ctx.output(key, name)
-            statement = f"{', '.join(names)} = {call}"
+            call = f"{', '.join(names)} = {call}"
+        flow_output = functions.flow_output(tree)
         ctx.code(f"""
-            {statement}
-            {ctx.flow("next")}
+            {call}
+            {ctx.flow(flow_output.identifier) if flow_output else ""}
         """)

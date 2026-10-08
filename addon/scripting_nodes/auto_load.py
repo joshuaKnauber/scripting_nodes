@@ -193,6 +193,7 @@ def get_register_base_types():
             "Menu",
             "Node",
             "NodeSocket",
+            "NodeTreeInterfaceSocket",
             "NodeTree",
             "UIList",
             "RenderEngine",
@@ -210,6 +211,7 @@ _BASE_PRIORITY = (
     "PropertyGroup",
     "NodeTree",
     "NodeSocket",
+    "NodeTreeInterfaceSocket",
     "Node",
 )
 

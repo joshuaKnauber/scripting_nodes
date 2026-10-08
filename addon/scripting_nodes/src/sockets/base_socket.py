@@ -32,7 +32,13 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
         layout.label(text=text)
 
     def update_value(self, context):
-        self.node.mark_dirty()
+        node = self.node
+        if hasattr(node, "mark_dirty"):
+            node.mark_dirty()
+        else:  # Group Input / Output
+            from ..core import scheduler
+
+            scheduler.request_tree(node.id_data)
 
     def draw(self, context, layout, node, text):
         if self.is_dynamic:

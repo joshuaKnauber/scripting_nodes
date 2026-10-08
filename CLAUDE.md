@@ -57,6 +57,7 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 - Write code with templates: `ctx.code(f"""...{ctx.flow("next")}...""")`; values with `ctx.output(key, expr)`; inputs with `ctx.input(key)`; module code with `ctx.module`; `raise NodeError(...)` for incomplete setups.
 - One flow socket type (`ScriptingFlowSocket`) with `kind` PROGRAM/LOGIC/INTERFACE (color + compatibility).
 - References to other nodes: `sn_reference_properties`, stored by node id (`core/references.py`); cross-tree names via `ctx.symbol`.
+- Functions (node groups): the tree interface (`tree.interface`, sidebar Group tab) is the source of truth; Blender's Group Input / Output nodes, interface socket classes in `sockets/interface.py`, compiled in `core/functions.py` + `compiler._group_function`. Make Group / Ungroup are our own operators (Blender's only run in built-in trees).
 - Shared bases: `PropertyNode`, `PropertyFieldNode`, `ClassBodyContainerMixin`, `PropertyTargetMixin`, `OperatorCallMixin`, `event_node()`.
 - Saved-data changes need a step in `core/versioning.py`; socket changes don't (re-synced from declarations).
 

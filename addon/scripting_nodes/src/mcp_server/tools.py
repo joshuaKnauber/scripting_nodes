@@ -422,7 +422,7 @@ def list_node_trees():
                 "name": ntree.name,
                 "id": ntree.id,
                 "module_name": ntree.module_name,
-                "is_group": bool(ntree.is_group),
+                "is_function": ntree.is_function,
                 "has_pending_changes": scheduler.has_pending(),
                 "node_count": sum(1 for _ in sn_nodes(ntree)),
                 "link_count": len(ntree.links),
@@ -438,7 +438,7 @@ def get_node_tree(tree_name: str):
         "name": ntree.name,
         "id": ntree.id,
         "module_name": ntree.module_name,
-        "is_group": bool(ntree.is_group),
+        "is_function": ntree.is_function,
         "has_pending_changes": scheduler.has_pending(),
         "nodes": [_node_summary(n) for n in sn_nodes(ntree)],
         "links": [_serialize_link(l) for l in ntree.links],
@@ -462,7 +462,7 @@ def get_tree_code(tree_name: str):
     return {
         "name": ntree.name,
         "module_name": ntree.module_name,
-        "is_group": bool(ntree.is_group),
+        "is_function": ntree.is_function,
         "code": compiler.compile_tree(ntree),
     }
 
@@ -473,7 +473,7 @@ def get_addon_code():
             {
                 "name": ntree.name,
                 "module_name": ntree.module_name,
-                "is_group": bool(ntree.is_group),
+                "is_function": ntree.is_function,
                 "code": compiler.compile_tree(ntree),
             }
             for ntree in scripting_node_trees()

@@ -50,12 +50,25 @@ def new_tree(name="Tree"):
     return tree
 
 
-def new_tree_for(cls):
-    """A tree the node class can be added to (group-only nodes get a group tree)."""
-    tree = new_tree()
-    if not cls.poll(tree):
-        tree.is_group = True
-    return tree
+def new_function(name="Function", inputs=(), outputs=()):
+    """A tree with a group interface. `inputs` / `outputs`: (name, socket
+    idname) pairs, flow sockets included. Returns (tree, group input, group
+    output)."""
+    tree = new_tree(name)
+    for in_out, items in (("INPUT", inputs), ("OUTPUT", outputs)):
+        for item_name, idname in items:
+            tree.interface.new_socket(item_name, in_out=in_out, socket_type=idname)
+    group_input = add_node(tree, "NodeGroupInput", (-300, 0))
+    group_output = add_node(tree, "NodeGroupOutput", (300, 0))
+    flush()
+    return tree, group_input, group_output
+
+
+def call_function(tree, function, location=(0, 0)):
+    node = add_node(tree, "SNA_Node_Group", location)
+    node.node_tree = function
+    flush()
+    return node
 
 
 def add_node(tree, idname, location=(0, 0)):

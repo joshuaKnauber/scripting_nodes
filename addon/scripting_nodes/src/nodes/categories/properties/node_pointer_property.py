@@ -1,5 +1,6 @@
 import bpy
 
+from ....core import functions
 from ....core.context import NodeError
 from ....core.naming import function_name
 from ..._reference_signatures import PROPERTY_GROUP_NODES
@@ -41,16 +42,8 @@ POINTER_SOURCES = [
 ]
 
 
-def _is_group_tree(self, tree):
-    return tree.bl_idname == "ScriptingNodeTree" and getattr(tree, "is_group", False)
-
-
-def _parameters(tree):
-    """Parameter names of a group tree's function."""
-    for node in tree.nodes:
-        if node.bl_idname == "SNA_Node_GroupInput":
-            return node.parameter_names()
-    return []
+def _is_function(self, tree):
+    return tree.bl_idname == "ScriptingNodeTree" and functions.is_function(tree)
 
 
 class GroupTypeMixin:
@@ -95,10 +88,8 @@ class SNA_Node_PointerProperty(GroupTypeMixin, PropertyNode, bpy.types.Node):
             "Function (group) deciding which items can be picked: gets the "
             "item as first input (and self), returns True to allow it"
         ),
-        poll=_is_group_tree,
+        poll=_is_function,
     )
-
-    sn_tree_reference_properties = {"poll_function"}
 
     def uses_group(self):
         return self.pointer_source == "PROPERTY_GROUP"
@@ -125,7 +116,7 @@ class SNA_Node_PointerProperty(GroupTypeMixin, PropertyNode, bpy.types.Node):
         if self.uses_poll():
             tree = self.poll_function
             function = ctx.symbol(tree, tree.module_name)
-            args = "object, self=self" if _parameters(tree) else "self=self"
+            args = "object, self=self" if functions.parameters(tree) else "self=self"
             ctx.module(f"""
                 def {self.poll_function_name()}(self, object):
                     return bool({function}({args}))

@@ -17,7 +17,7 @@ import bpy
 from ..lib.logger import log
 from ..lib.sockets import to_socket
 from ..lib.trees import scripting_node_trees, sn_nodes
-from . import errors, helpers
+from . import errors, functions, helpers
 from .context import Line, NodeContext, NodeError, Scope
 
 TEMPLATES = os.path.join(os.path.dirname(__file__), "templates")
@@ -112,7 +112,7 @@ class ModuleBuilder:
             roots.sort(key=lambda n: n.sn_order)
             for node in roots:
                 self._emit(node, module_scope, "root")
-            if self.tree.is_group:
+            if functions.is_function(self.tree):
                 self.add_block(self._group_function(module_scope))
         finally:
             sys.setrecursionlimit(limit)
@@ -141,6 +141,8 @@ class ModuleBuilder:
         target = to_socket(output_socket)
         if target is None:
             return []
+        if target.node.bl_idname == functions.GROUP_OUTPUT:
+            return self._group_return(target.node, scope)
         ctx = self._emit(target.node, scope, "statement")
         return ctx.lines() if ctx else []
 
@@ -176,37 +178,59 @@ class ModuleBuilder:
             self.imports.add(f"from .{tree.module_name} import {name}")
         return name
 
-    # -- groups -------------------------------------------------------------
+    # -- functions (node groups) ---------------------------------------------
 
     def _group_function(self, module_scope) -> list[Line]:
-        """A group tree compiles to `def <module_name>(params, *, self=None,
-        context=None, layout=None, event=None)`."""
-        group_input = group_output = None
-        for node in sn_nodes(self.tree):
-            if node.bl_idname == "SNA_Node_GroupInput" and group_input is None:
-                group_input = node
-            elif node.bl_idname == "SNA_Node_GroupOutput" and group_output is None:
-                group_output = node
-
-        params = group_input.parameter_names() if group_input else []
-        implicit = ["self", "context", "layout", "event"]
-        signature = ", ".join(params + ["*"] + [f"{n}=None" for n in implicit])
+        """A tree with a group interface compiles to `def <module_name>(params,
+        *, self=None, context=None, layout=None, event=None)`, see
+        core/functions.py."""
+        tree = self.tree
+        params = functions.parameters(tree)
+        names = [name for _, name in params]
+        implicit = list(functions.IMPLICIT)
+        signature = ", ".join(names + ["*"] + [f"{n}=None" for n in implicit])
         values = {}
-        if group_input:
-            for key, name in zip(group_input.parameter_keys(), params):
-                values[(group_input.as_pointer(), key)] = name
-        scope = Scope(module_scope, "layout", values, frozenset(params + implicit))
+        for node in functions.group_inputs(tree):
+            for item, name in params:
+                values[(node.as_pointer(), item.identifier)] = name
+        scope = Scope(module_scope, "layout", values, frozenset(names + implicit))
 
-        lines = [Line(0, f"def {self.tree.module_name}({signature}):", None)]
-        lines.append(Line(4, "context = context or bpy.context", None))
         body = []
-        if group_input:
-            body = self.compile_flow(group_input.socket("function", output=True), scope)
-        if group_output and group_output.as_pointer() not in self._emitted:
-            ctx = self._emit(group_output, scope, "statement")
-            body += ctx.lines() if ctx else []
+        flow = functions.flow_input(tree)
+        if flow is not None:
+            for node in functions.group_inputs(tree):
+                socket = next(
+                    (s for s in node.outputs if s.identifier == flow.identifier), None
+                )
+                if socket is not None and socket.is_linked:
+                    body = self.compile_flow(socket, scope)
+                    break
+        output = functions.active_output(tree)
+        if output is not None and output.as_pointer() not in self._emitted:
+            ret = self._group_return(output, scope)
+            body += ret
+        while body and not body[-1].text:
+            body.pop()
+        if body and body[-1].indent == 0 and body[-1].text == "return":
+            body.pop()  # a bare return at the end does nothing
+
+        lines = [Line(0, f"def {tree.module_name}({signature}):", None)]
+        lines.append(Line(4, "context = context or bpy.context", None))
         lines += [Line(4 + line.indent, line.text, line.owner) for line in body]
         return lines
+
+    def _group_return(self, node, scope) -> list[Line]:
+        """`return ...` with the values connected to a Group Output."""
+        self._emitted.add(node.as_pointer())
+        ctx = NodeContext(self, _InterfaceNode(node), scope, "statement")
+        values = []
+        for item in functions.returns(self.tree):
+            try:
+                values.append(ctx.input(item.identifier))
+            except NodeError as exc:
+                log("WARNING", f"'{self.tree.name}' return value '{item.name}': {exc}")
+                values.append("None")
+        return [Line(0, " ".join(["return", ", ".join(values)]).strip(), None)]
 
     # -- assembly -------------------------------------------------------------
 
@@ -229,6 +253,22 @@ class ModuleBuilder:
         lines = _finalize(lines)
         source = "\n".join(" " * l.indent + l.text if l.text else "" for l in lines)
         return source + "\n", [l.owner for l in lines]
+
+
+class _InterfaceNode:
+    """Group Input / Output seen as a node NodeContext can read inputs of."""
+
+    id = None
+
+    def __init__(self, node):
+        self._node = node
+
+    def __getattr__(self, name):
+        return getattr(self._node, name)
+
+    def socket(self, key, output=False):
+        sockets = self._node.outputs if output else self._node.inputs
+        return next((s for s in sockets if s.identifier == key), None)
 
 
 def _finalize(lines: list[Line]) -> list[Line]:

@@ -127,6 +127,10 @@ def draw_submenu(self, context):
     if "nodes" in category and len(category["nodes"]) and len(category.keys()) > 1:
         layout.separator()
 
+    if self.path == "groups":
+        draw_groups_menu(layout, context)
+        return
+
     if "nodes" in category:
         for node in sorted(category["nodes"], key=lambda n: n.bl_label):
             # Check if node's poll method allows it in this tree
@@ -136,6 +140,33 @@ def draw_submenu(self, context):
             op = layout.operator("node.add_node", text=node.bl_label)
             op.type = node.bl_idname
             op.use_transform = True
+
+
+def draw_groups_menu(layout, context):
+    """Group Input / Output, an empty Group node and one entry per function."""
+    for idname, text in (
+        ("NodeGroupInput", "Group Input"),
+        ("NodeGroupOutput", "Group Output"),
+        ("SNA_Node_Group", "Group"),
+    ):
+        op = layout.operator("node.add_node", text=text)
+        op.type = idname
+        op.use_transform = True
+    tree = context.space_data.edit_tree
+    trees = [
+        t
+        for t in bpy.data.node_groups
+        if getattr(t, "is_sn", False) and t != tree and t.is_function
+    ]
+    if trees:
+        layout.separator()
+    for function in sorted(trees, key=lambda t: t.name):
+        op = layout.operator("node.add_node", text=function.name, icon="NODETREE")
+        op.type = "SNA_Node_Group"
+        op.use_transform = True
+        setting = op.settings.add()
+        setting.name = "node_tree"
+        setting.value = f"bpy.data.node_groups[{function.name!r}]"
 
 
 def draw_node_menu(self, context):

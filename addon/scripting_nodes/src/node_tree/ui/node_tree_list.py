@@ -3,8 +3,8 @@ import bpy
 
 
 class SNA_UL_NodeTreesList(bpy.types.UIList):
-    """Lists addon-level node trees. Group/function trees are hidden -
-    they're shown in the Functions sub-panel instead."""
+    """Lists addon-level node trees. Functions (trees with a group interface)
+    are shown in the Functions sub-panel instead."""
 
     bl_idname = "SNA_UL_NodeTreesList"
 
@@ -32,7 +32,7 @@ class SNA_UL_NodeTreesList(bpy.types.UIList):
 
         # Hide non-SN trees and group/function trees
         for i, ntree in enumerate(groups):
-            if not is_sn(ntree) or getattr(ntree, "is_group", False):
+            if not is_sn(ntree) or ntree.is_function:
                 flt_flags[i] = 0
 
         return flt_flags, flt_neworder

@@ -39,11 +39,17 @@ and `ruff check` with zero findings.
 - [ ] `PropertyNode.property_args(ctx)` runs with the container's ctx and can't read its own inputs.
 - [ ] Run Operator / Button: vector/color properties of SN operators always get 3 components, no alpha.
 
-## 4. Node groups
+## 4. Node groups (functions)
 
-- [ ] Review the UX: creating a group from selected nodes, Tab in/out (keymaps exist), editing parameters (currently a JSON list with add/remove buttons; no reordering, renaming or types after creation).
-- [ ] Groups compile to `def group(params, *, self=None, context=None, layout=None, event=None)`; check that interface groups (drawing UI) and data-only calls are covered by tests.
-- [ ] Recursion / nested groups, groups shared across files (v3 snippets), a group library.
+Native since 2026-10: the tree interface (sidebar Group tab) + Blender's Group Input / Output, our Group node, Ctrl+G / Ctrl+Alt+G, see `website/content/docs/concepts/functions.mdx`.
+
+- [ ] Pure functions with several outputs are called once per used output (`f(x)[0]`, `f(x)[1]`); value nodes in general are re-evaluated per use (Greet computes its string twice). Decide on hoisting into a variable.
+- [ ] Several flow outputs as branches ("Found" / "Not Found"), returned as an index the caller branches on.
+- [ ] Interface panels (`new_panel`) are flattened on the Group node.
+- [ ] Flow sockets all show one color in the interface list (one socket class); kind is only visible on the nodes.
+- [ ] Make Group / Ungroup overwrite the node clipboard.
+- [ ] Recursion is blocked (a function can't call itself); decide if recursive functions are wanted.
+- [ ] Function library: groups shared across files (v3 snippets). Link/Append works; asset browser drag & drop doesn't for custom trees (Blender's group asset operators are built-in-tree only).
 
 ## 5. Testing in CI
 
