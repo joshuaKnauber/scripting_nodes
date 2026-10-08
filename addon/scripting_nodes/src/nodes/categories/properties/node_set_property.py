@@ -15,8 +15,8 @@ class SNA_Node_SetProperty(PropertyTargetMixin, ScriptingBaseNode, bpy.types.Nod
     sn_reference_properties = {"prop": PROPERTY_NODES}
 
     def socket_specs(self):
-        inputs = [Flow(), *self.target_input_specs()]
-        inputs.append(self.target_value_spec("value", "Value"))
+        inputs = [Flow(), self.target_value_spec("value", "Value")]
+        inputs += self.target_input_specs()  # owner and path keys last
         return inputs, [Flow("next")]
 
     def draw(self, context, layout):

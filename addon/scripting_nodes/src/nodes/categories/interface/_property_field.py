@@ -29,7 +29,8 @@ class PropertyFieldNode(PropertyTargetMixin, ScriptingBaseNode):
     )
 
     def socket_specs(self):
-        inputs = [Interface(), *self.target_input_specs(), String("text", "Text")]
+        # the property's owner and path keys last, as one group
+        inputs = [Interface(), String("text", "Text"), *self.target_input_specs()]
         return inputs, [Interface("next")]
 
     def prop_arguments(self, ctx):
