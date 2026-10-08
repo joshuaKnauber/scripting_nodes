@@ -95,10 +95,11 @@ def _all_structs():
     return tuple(names)
 
 
-def subtypes(type_name: str) -> list[str]:
+@lru_cache(maxsize=None)
+def subtypes(type_name: str) -> tuple:
     """Types derived from `type_name` (Mesh, Curve, ... for ID)."""
     if not type_name:
-        return []
+        return ()
     found = []
     for name in _all_structs():
         base = struct(name).base
@@ -107,7 +108,7 @@ def subtypes(type_name: str) -> list[str]:
                 found.append(name)
                 break
             base = base.base
-    return sorted(found)
+    return tuple(sorted(found))
 
 
 def all_types() -> list[str]:
@@ -186,6 +187,13 @@ def member(owner: Step, name: str) -> Step:
     if owner.rna_type == "Context" and name in CONTEXT_MEMBERS:
         type_name, collection = CONTEXT_MEMBERS[name]
         return Step(name, rna_type=type_name, collection=collection)
+    if not owner.collection:
+        # a property of a more specific type: `width` of a modifier is
+        # BevelModifier.width
+        for subtype in subtypes(type_name):
+            prop = struct(subtype).properties.get(name)
+            if prop is not None:
+                return _step_for_prop(prop)
     return Step(name, known=False)
 
 

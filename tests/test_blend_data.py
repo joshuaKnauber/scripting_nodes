@@ -34,6 +34,11 @@ class RnaTest(unittest.TestCase):
         self.assertEqual((steps[1].rna_type, steps[1].collection), ("Modifier", True))
         self.assertEqual((steps[2].rna_type, steps[2].collection), ("Modifier", False))
 
+    def test_members_of_subtypes(self):
+        steps = rna().resolve(rna().root_step("Object"), ["modifiers", "[]", "width"])
+        self.assertTrue(steps[-1].known)
+        self.assertEqual(steps[-1].prop.type, "FLOAT")
+
     def test_unknown_members_are_untyped(self):
         steps = rna().resolve(rna().root_step("Object"), ["not_a_prop", "x"])
         self.assertFalse(steps[0].known)
