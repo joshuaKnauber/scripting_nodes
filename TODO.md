@@ -17,6 +17,7 @@ and `ruff check` with zero findings.
 - [ ] **`context` over `bpy.context`**: `ctx.context` resolves to the function's `context` where available (Scene node and friends).
 - [ ] **Node polish**: For Each without unused index, Print takes any value (no `str()`), variables as module globals with compiler-inserted `global` (instead of getter/setter pairs - decide).
 - [ ] **Trigger nodes are dev only**: left out of export builds.
+- [ ] **Function signatures**: functions always declare `*, self=None, context=None, layout=None, event=None` and `context = context or bpy.context`; only declare and pass what the body uses.
 - [ ] **Export check**: before writing the zip, list guideline issues on the nodes (hard-coded data-block names, `bpy.data.objects`, unescaped data paths, missing permissions, unused/undefined names).
 - [ ] **Regression test**: export a fixture add-on using every node; require zero ruff findings plus a snapshot of the output.
 
@@ -35,13 +36,13 @@ and `ruff check` with zero findings.
   - Today: one node per property, attached to Operator / Preferences / Property Group nodes through a list of references (`_class_body.py`), plus `register_on` for Blender types. Works, but properties float around the graph disconnected from what they belong to, and attaching them is indirect.
   - Alternatives: define properties where they belong (a properties list on the Operator / Preferences / Property Group node and an add-on level list in the sidebar, like v3), with nodes only for using them (Get / Set / draw / update callback). Callbacks (update, dynamic enum items, pointer poll) still need a flow entry point - as a node, or as outputs on the owning node.
   - Covers the data panel, the reference pickers and how Run Operator / Button get operator arguments. Ties into the node references thread.
-- [ ] Flows can't return a value outside group trees (Pointer Property poll needs a group tree). Decide on a Return node or callable flows.
+- [ ] Callbacks that return a value (Pointer Property poll, enum items, ...) need a function tree today. Decide on a Return node / callable flows, or keep functions as the answer (ties into "Properties: nodes or not?").
 - [ ] `PropertyNode.property_args(ctx)` runs with the container's ctx and can't read its own inputs.
 - [ ] Run Operator / Button: vector/color properties of SN operators always get 3 components, no alpha.
 
 ## 4. Node groups (functions)
 
-Native since 2026-10: the tree interface (sidebar Group tab) + Blender's Group Input / Output, our Group node, Ctrl+G / Ctrl+Alt+G, see `website/content/docs/concepts/functions.mdx`.
+Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender's Group Input / Output, our Group node, Ctrl+G / Ctrl+Alt+G / Tab, Add > Groups, docs with screenshots (`website/content/docs/concepts/functions.mdx`), demo scenario `tests/visual/scenarios/_functions_demo.py`. Verified by hand in a real file.
 
 - [ ] Pure functions with several outputs are called once per used output (`f(x)[0]`, `f(x)[1]`); value nodes in general are re-evaluated per use (Greet computes its string twice). Decide on hoisting into a variable.
 - [ ] Several flow outputs as branches ("Found" / "Not Found"), returned as an index the caller branches on.
@@ -49,6 +50,7 @@ Native since 2026-10: the tree interface (sidebar Group tab) + Blender's Group I
 - [ ] Flow sockets all show one color in the interface list (one socket class); kind is only visible on the nodes.
 - [ ] Make Group / Ungroup overwrite the node clipboard.
 - [ ] Recursion is blocked (a function can't call itself); decide if recursive functions are wanted.
+- [ ] The `ScriptingNodeTree` header picker shows the root tree while editing a group (Blender behavior); the Functions list in the sidebar could open the function in place (path) instead of switching the tree.
 - [ ] Function library: groups shared across files (v3 snippets). Link/Append works; asset browser drag & drop doesn't for custom trees (Blender's group asset operators are built-in-tree only).
 
 ## 5. Testing in CI
@@ -57,6 +59,7 @@ Native since 2026-10: the tree interface (sidebar Group tab) + Blender's Group I
 - [ ] GUI tests (`scripts/test.py --gui`) under `xvfb` in CI.
 - [ ] Cache the Blender download; upload the generated fixture add-on and screenshots as artifacts on failure.
 - [ ] Code-quality job for generated add-ons (see 1).
+- [ ] Functions: Tab / Ctrl+Tab and the Add > Groups menu in a GUI test (Make Group / Ungroup are covered by `tests/gui/groups.py`); save and reopen a file with functions called across trees.
 - [ ] **Add-on lifecycle coverage.** Already tested: hot reload, rollback on syntax/import errors, rename removes the old add-on, foreign folders untouched, deleting all trees unloads, save → open other → reopen, real undo/redo (GUI), export build. Missing:
   - [ ] *Persist* across file switches: persisted add-on stays loaded after opening another file, non-persisted one unloads, persisted add-ons are re-enabled after a Blender restart (`generated_addons.json` in the extension user dir).
   - [ ] Rename across sessions: rename the add-on, restart, the folder of the old name is removed (persistence `module_for`).
@@ -78,6 +81,7 @@ Native since 2026-10: the tree interface (sidebar Group tab) + Blender's Group I
 ## 7. MCP server
 
 - [ ] Update the tools to the new node API: socket keys instead of indices/names, flow socket `kind`, references by id, node code from the last build (`compiler.node_lines`), `mark_dirty()`.
+- [ ] Tools for functions: create a function, add/rename/move interface items (`tree.interface`), set a Group node's `node_tree`, make group from nodes. `is_group` is now `is_function` in the tree tools.
 - [ ] Tests for the tools (create nodes, link, set properties, read code) - currently only the security checks are tested.
 - [ ] Optional bearer token, a timeout that doesn't run queued calls after the client gave up, split `tools.py` (1400 lines) into read/write modules.
 - [ ] Docs page for using it with Claude Code / Codex.
