@@ -8,7 +8,7 @@ export const docsContentRoute = '/llms.mdx/docs';
 export const gitConfig = {
   user: 'joshuaknauber',
   repo: 'scripting_nodes',
-  branch: 'v4',
+  branch: 'main',
 };
 
 export const githubUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}`;

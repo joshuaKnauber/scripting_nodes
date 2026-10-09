@@ -173,3 +173,57 @@ body {
   top: var(--fd-docs-row-2);
   height: calc(var(--fd-docs-height) - var(--fd-docs-row-2));
 }
+
+/* Homepage node demo (components/home/node-demo.tsx) */
+.sn-grid {
+  background-color: #1d1d1d;
+  background-image: radial-gradient(#2e2e2e 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.sn-node {
+  animation: sn-node-in 220ms ease-out both;
+}
+
+/* longer than any link, so the dash covers it while it draws in */
+.sn-link {
+  stroke-dasharray: 1000;
+  animation: sn-link-in 320ms ease-out both;
+}
+
+.sn-caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 1em;
+  margin-left: 1px;
+  vertical-align: -0.15em;
+  background: #f2a60d;
+  animation: sn-blink 1s steps(1) infinite;
+}
+
+@keyframes sn-node-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+}
+
+@keyframes sn-link-in {
+  from {
+    stroke-dashoffset: 1000;
+  }
+}
+
+@keyframes sn-blink {
+  50% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sn-node,
+  .sn-link,
+  .sn-caret {
+    animation: none;
+  }
+}
