@@ -8,7 +8,7 @@
     "start": "wrangler dev",
     "types:check": "next typegen && tsc --noEmit",
     "screenshots": "python3 ../scripts/docs_screenshots.py",
-    "deploy": "next build && wrangler deploy"
+    "deploy": "wrangler deploy"
   },
   "dependencies": {
     "cn": "^0.4.0",

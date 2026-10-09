@@ -3,6 +3,10 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "scripting-nodes",
   "compatibility_date": "2026-10-01",
+  // `wrangler deploy` builds the site first (CI only runs the deploy command)
+  "build": {
+    "command": "npm run build"
+  },
   "assets": {
     "directory": "./out",
     "not_found_handling": "404-page"

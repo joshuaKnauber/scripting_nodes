@@ -4,7 +4,7 @@
 
 Scripting Nodes — a Blender add-on for building Blender add-ons visually through node graphs. Node graphs compile to Python modules that register as Blender add-ons.
 
-Blender 5.0+ | GPL-3.0-or-later | `v4` branch = active dev, `main` = release
+Blender 5.0+ | GPL-3.0-or-later | `main` = v4 (active dev), `legacy_v3` = the old v3
 
 ## Dev Commands
 
