@@ -59,7 +59,8 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 - Names in the generated code: declared in `sn_names()` (`core/naming.py`: `Class`, `Idname`, `Symbol`), read with `ctx.name(key)` / `node.sn_name(key)`; readable, from labels, suffix only on collision. Locals via `ctx.var()`.
 - References to other nodes: `sn_reference_properties`, stored by node id (`core/references.py`); cross-tree names via `ctx.symbol`.
 - Functions (node groups): the tree interface (`tree.interface`, sidebar Group tab) is the source of truth; Blender's Group Input / Output nodes, interface socket classes in `sockets/interface.py`, compiled in `core/functions.py` + `compiler._group_function`. Make Group / Ungroup are our own operators (Blender's only run in built-in trees).
-- Shared bases: `PropertyNode`, `PropertyFieldNode`, `ClassBodyContainerMixin`, `PropertyTargetMixin`, `OperatorCallMixin`, `event_node()`.
+- Properties are lists, not nodes (`settings/properties.py`: add-on list on `scene.sna.addon.properties`, groups, Operator / Preferences node lists); nodes pick them by id (`sn_property_references`), code in `core/properties.py` (add-on properties → `addon/properties.py`). Adding to a CollectionProperty can move its items: don't keep Python references across adds.
+- Shared bases: `PropertyListMixin`, `PropertyFieldNode`, `PropertyTargetMixin`, `OperatorCallMixin`, `event_node()`.
 - Saved-data changes need a step in `core/versioning.py`; socket changes don't (re-synced from declarations).
 
 ### Key Paths

@@ -17,6 +17,9 @@ load_errors: dict[str, str] = {}
 # (e.g. clicking a generated button), see core/tracebacks.py
 runtime_errors: dict[str, str] = {}
 
+# property id -> message, for property definitions that can't be generated
+property_errors: dict[str, str] = {}
+
 # Error of the last attempt to load the generated addon (None when it loaded)
 addon_error: str | None = None
 
@@ -55,4 +58,5 @@ def clear():
     node_errors.clear()
     load_errors.clear()
     runtime_errors.clear()
+    property_errors.clear()
     addon_error = None

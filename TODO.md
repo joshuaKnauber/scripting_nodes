@@ -11,12 +11,12 @@ exported add-on reads like hand-written code and passes the
 and `ruff check` with zero findings.
 
 - [x] **Readable names** (2026-10): modules, classes, operator idnames and functions come from labels (`main.py`, `MESH_HELPER_OT_duplicate`, `mesh_helper.duplicate`, `greet`), suffix only on collision, claimed in one pass in a fixed order (`core/naming.py`, nodes declare `sn_names()`). Locals `row`, `row_2`.
-  - [ ] Property names still carry the node id (`my_value_1a2b3c4d5e`): they come from the property lists (section 3), with a pinned Python name so renaming the label keeps saved values.
+  - [x] Property names come from the property lists (unique per list, optional pinned Python name).
   - [ ] Renaming an operator's label renames its idname (and breaks keymaps / buttons in other add-ons that call it). Consider pinning idnames once exported, or a separate "Python name" field.
 - [ ] **No default arguments**: `ctx.args(...)` helper drops defaults; skip `poll()` returning `True`, empty `bl_description`, `bl_order = 0`, `options={'ANIMATABLE'}`, ...
 - [ ] **Conventional layout**: `__init__.py` imports the tree modules and registers an explicit `classes = (...)` tuple in dependency order. Drop `auto_load.py`, `bl_info`, the `sys.modules` alias (violates "sys is read-only"), the `addon/` subpackage and empty `register()`.
 - [ ] **Export clean-up pass**: `ast.unparse` (redundant parens, quotes) + blank lines + unused import removal.
-- [ ] **`context` over `bpy.context`**: `ctx.context` resolves to the function's `context` where available (Scene node and friends).
+- [ ] **`context` over `bpy.context`**: `ctx.context` exists (`context` inside functions that have it, else `bpy.context`) and property nodes use it; move the Scene node and friends to it.
 - [ ] **Node polish**: For Each without unused index, Print takes any value (no `str()`), variables as module globals with compiler-inserted `global` (instead of getter/setter pairs - decide).
 - [ ] **Trigger nodes are dev only**: left out of export builds.
 - [ ] **Function signatures**: functions always declare `*, self=None, context=None, layout=None, event=None` and `context = context or bpy.context`; only declare and pass what the body uses.
@@ -34,20 +34,17 @@ and `ruff check` with zero findings.
 
 - [ ] **Blend Data**: separate design thread ("Design: Blend Data in Serpens v4", worktree `blend-data-v4`). Includes: Blender-path mode doesn't know the property type (Set Property gets a generic Data input).
 - [ ] **Node references**: separate design thread ("Design: node references in Serpens v4"). Picker collections on `scene.sna` with hashed names, scene-level storage, linear lookups.
-- [ ] **Properties as lists** (decided 2026-10): properties are declarations, so they're declared in lists, and nodes only use them.
-  - Add-on properties: a Properties list in the Addon Data sidebar (name, type, settings below the list; changing the type keeps the nodes using it). Grouped into one PropertyGroup by default (`scene.my_addon.count`), attaching directly to a type stays possible. Stored with the addon settings (follows the scene vs. file decision in 10).
-  - Property Groups: list entries of type Group with a nested list; Pointer / Collection entries pick a group as their type.
-  - Operator / Preferences properties: a list on the owning node (sidebar Node tab); each property is also a data output of the Operator node (`self.count`). Button / Run Operator take their argument sockets from that list. Copying the node copies its properties.
-  - Using them: Get / Set Property and the UI fields pick a property by id; for type-attached properties the owner defaults to `context.scene` etc. Collection nodes (add, remove, get item, length, clear, move) stay as they are.
-  - Callbacks: events are nodes, callbacks with a return value are functions. Update = an On Property Update node (flow, value, owner); dynamic enum items, pointer poll (later get/set) = a function picked in the property's settings. No separate Return node.
-  - Code: `properties.py` with the PropertyGroups and registration, names from the list (unique, no id suffix).
-  - Removes: the property node types, the Property Group node, `register_on`, `_class_body.py`, the settings popup. Old files don't need to load.
-  - Order: after CI, before readable names (names come from these lists).
-- [ ] Run Operator / Button: vector/color properties of SN operators always get 3 components, no alpha (fix as part of the property lists).
+- [x] **Properties as lists** (done 2026-10, `website/content/docs/nodes/properties.mdx`): add-on list in Addon Data (one PropertyGroup per attach type, `scene.my_addon.count`), groups with their own list, Operator / Preferences node lists (operator properties are also its outputs), Get / Set / fields / On Property Update pick by id, enum items and pointer poll from functions, `addon/properties.py`. Follow-ups:
+  - [ ] The Python name follows the label until it's pinned, so renaming a property in use loses saved values. Pin automatically once the add-on was exported?
+  - [ ] Enum flag properties (sets) have no matching socket type (Data); Enum Menu / Get Property work, Set Property needs a set value.
+  - [ ] Integer limits are edited as floats in the settings.
+  - [ ] Preferences node: its properties aren't outputs in the Draw flow yet (operators have them).
+  - [ ] Get/Set for Object properties default to `context.object`, which can be None; no warning.
+  - [ ] Displaying collections (UI list node) - see v3 parity.
 
 ## 4. Node groups (functions)
 
-Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender's Group Input / Output, our Group node, Ctrl+G / Ctrl+Alt+G / Tab, Add > Groups, docs with screenshots (`website/content/docs/concepts/functions.mdx`), demo scenario `tests/visual/scenarios/_functions_demo.py`. Verified by hand in a real file.
+Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender's Group Input / Output, our Group node, Ctrl+G / Ctrl+Alt+G / Tab, Add > Groups, docs with screenshots (`website/content/docs/nodes/functions.mdx`), demo scenario `tests/visual/scenarios/_functions_demo.py`. Verified by hand in a real file.
 
 - [ ] Pure functions with several outputs are called once per used output (`f(x)[0]`, `f(x)[1]`); value nodes in general are re-evaluated per use (Greet computes its string twice). Decide on hoisting into a variable.
 - [ ] Several flow outputs as branches ("Found" / "Not Found"), returned as an index the caller branches on.
@@ -86,6 +83,7 @@ Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender
 ## 7. MCP server
 
 - [ ] Update the tools to the new node API: socket keys instead of indices/names, flow socket `kind`, references by id, node code from the last build (`compiler.node_lines`), `mark_dirty()`.
+- [ ] Tools for property lists (add / edit / pick properties).
 - [ ] Tools for functions: create a function, add/rename/move interface items (`tree.interface`), set a Group node's `node_tree`, make group from nodes. `is_group` is now `is_function` in the tree tools.
 - [ ] Tests for the tools (create nodes, link, set properties, read code) - currently only the security checks are tested.
 - [ ] Optional bearer token, a timeout that doesn't run queued calls after the client gave up, split `tools.py` (1400 lines) into read/write modules.

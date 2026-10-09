@@ -5,37 +5,11 @@ from ...lib.trees import (
     scripting_node_trees,
     sn_nodes,
 )
-from ...sockets.socket_types import DATA_SOCKET_ICONS
-
-# Node type identifiers for properties and variables
-PROPERTY_NODE_TYPES = {
-    "SNA_Node_BoolProperty",
-    "SNA_Node_IntProperty",
-    "SNA_Node_FloatProperty",
-    "SNA_Node_StringProperty",
-    "SNA_Node_FloatVectorProperty",
-    "SNA_Node_EnumProperty",
-    "SNA_Node_PointerProperty",
-    "SNA_Node_CollectionProperty",
-    "SNA_Node_PropertyGroup",
-}
+from ...settings.properties import draw_list, draw_settings
 
 VARIABLE_NODE_TYPES = {
     "SNA_Node_GlobalVariable",
     "SNA_Node_LocalVariable",
-}
-
-# Icons for property types (mapped from socket icons)
-PROPERTY_ICONS = {
-    "SNA_Node_BoolProperty": DATA_SOCKET_ICONS["ScriptingBooleanSocket"],
-    "SNA_Node_IntProperty": DATA_SOCKET_ICONS["ScriptingIntegerSocket"],
-    "SNA_Node_FloatProperty": DATA_SOCKET_ICONS["ScriptingFloatSocket"],
-    "SNA_Node_StringProperty": DATA_SOCKET_ICONS["ScriptingStringSocket"],
-    "SNA_Node_FloatVectorProperty": "ORIENTATION_GLOBAL",
-    "SNA_Node_EnumProperty": "PRESET",
-    "SNA_Node_PointerProperty": "OBJECT_DATAMODE",
-    "SNA_Node_CollectionProperty": "OUTLINER_COLLECTION",
-    "SNA_Node_PropertyGroup": "OUTLINER_DATA_POINTCLOUD",
 }
 
 # Icons for variable types
@@ -96,49 +70,6 @@ def draw_referencing_nodes(layout, ref_name):
         op.node_id = node.id
 
 
-class SNA_UL_PropertyNodesList(bpy.types.UIList):
-    bl_idname = "SNA_UL_PropertyNodesList"
-
-    def draw_item(
-        self, context, layout, data, item, icon, active_data, active_propname
-    ):
-        node = item.node
-        if not node:
-            layout.label(text="(Missing)", icon="ERROR")
-            return
-
-        # Get property label (prop_label) and type icon
-        label = getattr(node, "prop_label", "") or node.bl_label
-        type_icon = PROPERTY_ICONS.get(node.bl_idname, "NODE")
-        tree_name = node.id_data.name
-        ref_count = get_reference_count(item.name)
-
-        if self.layout_type in {"DEFAULT", "COMPACT"}:
-            row = layout.row(align=True)
-            row.label(text=label, icon=type_icon)
-            sub = row.row()
-            sub.alignment = "RIGHT"
-            sub.label(text=f"({ref_count})")
-            sub.label(text=f"[{tree_name}]")
-        elif self.layout_type == "GRID":
-            layout.alignment = "CENTER"
-            layout.label(text=label, icon=type_icon)
-
-    def filter_items(self, context, data, propname):
-        references = getattr(data, propname)
-
-        flt_flags = [self.bitflag_filter_item] * len(references)
-        flt_neworder = []
-
-        # Filter to only show property nodes
-        for i, ref in enumerate(references):
-            node = ref.node
-            if not node or node.bl_idname not in PROPERTY_NODE_TYPES:
-                flt_flags[i] = 0
-
-        return flt_flags, flt_neworder
-
-
 class SNA_UL_VariableNodesList(bpy.types.UIList):
     bl_idname = "SNA_UL_VariableNodesList"
 
@@ -187,7 +118,6 @@ class SNA_PT_Data(bpy.types.Panel):
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
     bl_category = "Scripting Nodes"
-    bl_options = {"DEFAULT_CLOSED"}
     bl_order = 2
 
     @classmethod
@@ -200,6 +130,7 @@ class SNA_PT_Data(bpy.types.Panel):
 
 class SNA_PT_DataProperties(bpy.types.Panel):
     bl_idname = "SNA_PT_DataProperties"
+    bl_order = 0
     bl_label = "Properties"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
@@ -211,35 +142,31 @@ class SNA_PT_DataProperties(bpy.types.Panel):
         return in_sn_tree(context)
 
     def draw(self, context):
-        from ...settings.settings import DATA_PANEL_PROPERTIES_ATTR
-
         layout = self.layout
-        sna = context.scene.sna
-
-        row = layout.row()
-        row.template_list(
-            "SNA_UL_PropertyNodesList",
-            "",
-            sna,
-            DATA_PANEL_PROPERTIES_ATTR,
-            sna.ui,
-            "active_property_index",
-            rows=4,
-        )
-
-        # Show referencing nodes for selected property
-        ref = get_selected_reference(
-            sna,
-            DATA_PANEL_PROPERTIES_ATTR,
-            PROPERTY_NODE_TYPES,
-            sna.ui.active_property_index,
-        )
-        if ref and ref.node:
-            draw_referencing_nodes(layout, ref.name)
+        prop = draw_list(layout, "ADDON")
+        if prop is None:
+            return
+        draw_settings(layout.column(), prop, top_level=True)
+        users = [
+            node
+            for tree in scripting_node_trees()
+            for node in sn_nodes(tree)
+            if prop.id and getattr(node, "prop_id", "") == prop.id
+        ]
+        if users:
+            box = layout.box()
+            col = box.column(align=True)
+            for node in users:
+                row = col.row(align=True)
+                row.label(text=node.bl_label, icon="NODE")
+                row.label(text=f"[{node.id_data.name}]")
+                op = row.operator("sna.go_to_node", text="", icon="VIEWZOOM")
+                op.node_id = node.id
 
 
 class SNA_PT_DataVariables(bpy.types.Panel):
     bl_idname = "SNA_PT_DataVariables"
+    bl_order = 1
     bl_label = "Variables"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
@@ -326,6 +253,7 @@ class SNA_UL_FunctionsList(bpy.types.UIList):
 
 class SNA_PT_DataFunctions(bpy.types.Panel):
     bl_idname = "SNA_PT_DataFunctions"
+    bl_order = 2
     bl_label = "Functions"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"

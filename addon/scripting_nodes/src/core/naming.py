@@ -27,7 +27,7 @@ RESERVED_SYMBOLS = (
     | {"bpy", "register", "unregister", "persistent", "atexit", "math"}
     | {"self", "context", "layout", "event"}
 )
-RESERVED_MODULES = set(keyword.kwlist) | {"auto_load", "addon"}
+RESERVED_MODULES = set(keyword.kwlist) | {"auto_load", "addon", "properties"}
 
 
 def addon_settings():
@@ -131,7 +131,7 @@ def unique(base, used: set) -> str:
 def build(trees=None, settings=None) -> Names:
     """Claim every name of the add-on, in a fixed order."""
     from ..lib.trees import scripting_node_trees, sn_nodes
-    from . import functions
+    from . import functions, properties
 
     trees = sorted(
         trees if trees is not None else scripting_node_trees(), key=lambda t: t.name
@@ -142,6 +142,7 @@ def build(trees=None, settings=None) -> Names:
         names.claim(tree.id, Name("module", "module", snake(tree.name, "tree")))
         if functions.is_function(tree):
             names.claim(tree.id, Symbol("function", snake(tree.name, "function")))
+    properties.claim_names(names)
     for tree in trees:
         for node in sorted(sn_nodes(tree), key=lambda n: n.name):
             for name in node.sn_names():

@@ -101,6 +101,9 @@ def sync(trees=None):
         return
     from ..settings.settings import iter_reference_collections
 
+    from . import properties
+
+    properties.sync_pickers(scene.sna)
     trees = trees if trees is not None else scripting_node_trees()
     nodes = [node for tree in trees for node in sn_nodes(tree)]
     for _key, signature, coll in iter_reference_collections(scene.sna):

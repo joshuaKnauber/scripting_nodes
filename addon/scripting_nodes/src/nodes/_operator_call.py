@@ -146,15 +146,27 @@ def _resolve_blender_op_name(picker_value: str) -> str:
 
 
 def _sn_operator_prop_specs(op_node) -> List[Tuple[str, str, object, int, str]]:
-    """Specs from the properties attached to an SN Operator node."""
+    """Specs from the properties of an SN Operator node."""
+    from ..core import properties
+
     specs = []
     if op_node is None:
         return specs
-    for prop_node in op_node.attached_properties():
-        idname = getattr(prop_node, "data_type", "ScriptingDataSocket")
-        default = getattr(prop_node, "prop_default", None)
-        dim = 3 if idname in {"ScriptingVectorSocket", "ScriptingColorSocket"} else 0
-        specs.append((prop_node.prop_name, idname, default, dim, ""))
+    names = properties.python_names(op_node.properties)
+    for prop in op_node.properties:
+        if prop.property_type in {"GROUP", "COLLECTION"}:
+            continue
+        idname = properties.socket_type(prop)
+        dim = prop.vector_size if prop.property_type == "VECTOR" else 0
+        enum_data = ""
+        if prop.property_type == "ENUM" and prop.items_function is None:
+            enum_data = encode_enum_items(
+                [(item.value, item.name) for item in prop.enum_items]
+            )
+        default = properties.default_value(prop)
+        if prop.property_type == "VECTOR":
+            default = default[:dim]
+        specs.append((names[prop.id], idname, default, dim, enum_data))
     return specs
 
 
@@ -295,13 +307,11 @@ class OperatorCallMixin:
     def operator_args(self, ctx) -> list[tuple[str, str]]:
         """(property name, expression) for every operator property socket.
 
-        Blender operators often behave differently when a property isn't set
-        (e.g. Add Cube places the cube at the 3D cursor unless `location` is
-        given), so unconnected sockets still at the operator's default are
-        left out for them."""
-        defaults = {}
-        if self.mode == "BLENDER":
-            defaults = {spec[0]: spec[2] for spec in self._target_prop_specs()}
+        Unconnected sockets still at the operator's default are left out:
+        that's less code, and Blender operators often behave differently when
+        a property isn't set (Add Cube places the cube at the 3D cursor
+        unless `location` is given)."""
+        defaults = {spec[0]: spec[2] for spec in self._target_prop_specs()}
         args = []
         for socket in self.inputs:
             if not socket.identifier.startswith(ARG_PREFIX):

@@ -26,15 +26,6 @@ def run(node):
     return getattr(getattr(bpy.ops, namespace), name)()
 
 
-def bool_property(tree):
-    # Checkbox only cares about the property's name and owner, the Integer
-    # Property stands in while Boolean Property isn't available
-    idname = "SNA_Node_BoolProperty"
-    if not hasattr(bpy.types, idname):
-        idname = "SNA_Node_IntProperty"
-    return helpers.add_node(tree, idname)
-
-
 class InterfaceNodesTest(unittest.TestCase):
     def setUp(self):
         helpers.reset_file()
@@ -43,6 +34,7 @@ class InterfaceNodesTest(unittest.TestCase):
     def tearDown(self):
         for tree in list(bpy.data.node_groups):
             bpy.data.node_groups.remove(tree)
+        bpy.context.scene.sna.addon.properties.clear()
         helpers.sn("src.core.scheduler").request_full()
         helpers.flush()
 
@@ -53,47 +45,35 @@ class InterfaceNodesTest(unittest.TestCase):
 
     def test_checkbox_on_scene_property(self):
         tree = helpers.new_tree()
-        prop = bool_property(tree)
-        prop.register_on = "Scene"
+        prop = helpers.add_property("Enabled", "BOOLEAN", in_addon_group=False)
         panel = helpers.add_node(tree, "SNA_Node_Panel")
         checkbox = helpers.add_node(tree, "SNA_Node_Checkbox")
-        scene = helpers.add_node(tree, "SNA_Node_Scene")
         helpers.link(tree, panel.outputs["Interface"], checkbox.inputs[0])
-        helpers.flush()
-        checkbox.prop = ref(prop)
-        helpers.flush()
-        # no owner connected yet
-        self.assertIn("Connect", errors().node_message(checkbox.id) or "")
-
-        helpers.link(tree, scene.outputs["Scene"], checkbox.socket("data"))
+        helpers.pick_property(checkbox, prop)
         checkbox.toggle = True
         helpers.flush()
-        code = source(tree)
-        self.assertIn(
-            f"self.layout.prop(bpy.context.scene, {prop.prop_name!r}, toggle=True)",
-            code,
-        )
+        # the owner defaults to the scene, connecting one is optional
         self.assertFalse(checkbox.socket("data").hide)
+        self.assertIn(
+            "self.layout.prop(context.scene, 'enabled', toggle=True)", source(tree)
+        )
+        scene = helpers.add_node(tree, "SNA_Node_Scene")
+        helpers.link(tree, scene.outputs["Scene"], checkbox.socket("data"))
+        helpers.flush()
+        self.assertIn("self.layout.prop(bpy.context.scene, 'enabled'", source(tree))
         self.assertLoaded()
 
     def test_checkbox_on_operator_property_uses_self(self):
         tree = helpers.new_tree()
-        prop = bool_property(tree)
-        prop.register_on = "Operator"
         op = helpers.add_node(tree, "SNA_Node_Operator")
         op.invoke_type = "PROPS_DIALOG"
-        helpers.flush()
-        op.class_body_properties.add().prop = ref(prop)
+        prop = helpers.add_property("Enabled", "BOOLEAN", owner=op)
         checkbox = helpers.add_node(tree, "SNA_Node_Checkbox")
-        checkbox.socket("text").value = "Enabled"
+        checkbox.socket("text").value = "On"
         helpers.link(tree, op.outputs["Draw"], checkbox.inputs[0])
-        checkbox.prop = ref(prop)
-        helpers.flush()
+        helpers.pick_property(checkbox, prop)
         self.assertTrue(checkbox.socket("data").hide)
-        code = source(tree)
-        self.assertIn(
-            f"self.layout.prop(self, {prop.prop_name!r}, text='Enabled')", code
-        )
+        self.assertIn("self.layout.prop(self, 'enabled', text='On')", source(tree))
         self.assertLoaded()
 
     def test_blender_property_path(self):
@@ -115,26 +95,21 @@ class InterfaceNodesTest(unittest.TestCase):
 
     def test_button_calls_sn_operator_with_arguments(self):
         tree = helpers.new_tree()
-        prop = helpers.add_node(tree, "SNA_Node_IntProperty")
-        prop.register_on = "Operator"
         op = helpers.add_node(tree, "SNA_Node_Operator")
-        helpers.flush()
-        op.class_body_properties.add().prop = ref(prop)
+        helpers.add_property("Count", "INTEGER", owner=op)
         panel = helpers.add_node(tree, "SNA_Node_Panel")
         button = helpers.add_node(tree, "SNA_Node_Button")
         helpers.link(tree, panel.outputs["Interface"], button.inputs[0])
         button.operator_sn = ref(op)
         helpers.flush()
-        arg = button.socket("arg_" + prop.prop_name)
-        self.assertIsNotNone(arg)
-        arg.value = 5
+        button.socket("arg_count").value = 5
         button.socket("label").value = "Go"
         helpers.flush()
         code = source(tree)
         self.assertIn(
             f"op = self.layout.operator({op.operator_idname!r}, text='Go')", code
         )
-        self.assertIn(f"op.{prop.prop_name} = 5", code)
+        self.assertIn("op.count = 5", code)
         self.assertLoaded()
 
     def test_run_blender_operator(self):

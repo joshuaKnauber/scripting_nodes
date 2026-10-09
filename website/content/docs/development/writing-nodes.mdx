@@ -160,7 +160,7 @@ def sn_names(self):
 
 `Class("class", "OT", "Say Hello")` becomes `MY_ADDON_OT_say_hello` and `Idname` becomes `my_addon.say_hello`; `Symbol(key, base)` is a function or variable name. All names of the add-on are claimed in one pass (trees by name, nodes by name) and only a collision adds a suffix (`say_hello_2`). Local variables come from `ctx.var("row")`: `row`, then `row_2`, never shadowing a module-level name or a parameter.
 
-`sn_order` sorts root nodes in the module, lower first: global variables 10, property nodes 20 (their update/items functions), property groups 30 and up (nested groups after the groups they contain), everything else 50. A root whose code uses names another root defines at definition time needs a higher order.
+`sn_order` sorts root nodes in the module, lower first: global variables 10, everything else 50. A root whose code uses names another root defines at definition time needs a higher order.
 
 ## Referencing other nodes
 
@@ -183,6 +183,10 @@ class SNA_Node_GetVariable(ScriptingBaseNode, bpy.types.Node):
 
 `ctx.symbol(node, name)` returns a name defined by another node and adds the import when that node lives in another tree.
 
+## Using properties
+
+Property definitions live in lists, not nodes (`settings/properties.py`): the add-on's list, groups' lists and the lists of Operator / Preferences nodes. A node picks one with `sn_property_references = {"prop": "BOOLEAN"}`; the value is a picker category from `core/properties.CATEGORIES` (which types it offers) and the property's id is stored in `prop_id`. `core/properties.find(id)` returns where it lives; `PropertyTargetMixin` turns that into `(data, name)` for code. Properties of a node class are written with `PropertyListMixin.annotations(ctx)`; add-on properties go to `addon/properties.py`.
+
 ## Errors
 
 Raise `NodeError("message")` when the node isn't set up completely; the message is shown on the node and the node writes no code. Unexpected exceptions are caught too and shown the same way.
@@ -191,8 +195,7 @@ Raise `NodeError("message")` when the node isn't set up completely; the message 
 
 | Base / mixin | For |
 | --- | --- |
-| `PropertyNode` (`properties/_property_base.py`) | property nodes: shared settings, registration, class annotations |
-| `ClassBodyContainerMixin` (`nodes/_class_body.py`) | classes with attached properties (Operator, Preferences, Property Group) |
+| `PropertyListMixin` (`nodes/_property_list.py`) | nodes with their own properties (Operator, Preferences): list, annotations, outputs |
 | `PropertyTargetMixin` (`nodes/_property_target.py`) | nodes that read, set or draw one property (custom or pasted Blender path) |
 | `PropertyFieldNode` (`interface/_property_field.py`) | UI fields drawing one property (Checkbox, Number Field, …) |
 | `OperatorCallMixin` (`nodes/_operator_call.py`) | nodes that call an operator, one socket per operator property |

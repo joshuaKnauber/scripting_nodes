@@ -110,6 +110,11 @@ class NodeContext:
         return self._builder.dev
 
     @property
+    def context(self) -> str:
+        """`context` where the enclosing function has it, else `bpy.context`."""
+        return "context" if "context" in self.scope.names else "bpy.context"
+
+    @property
     def layout(self) -> str:
         """Expression of the current UI layout (inside interface flows)."""
         return self.scope.layout or "self.layout"

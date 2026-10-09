@@ -71,6 +71,39 @@ def call_function(tree, function, location=(0, 0)):
     return node
 
 
+def add_property(name, property_type="FLOAT", owner=None, **settings):
+    """A property definition: an add-on property, or one of `owner` (a group
+    property or an Operator / Preferences node). Flushes."""
+    if owner is None:
+        items = bpy.context.scene.sna.addon.properties
+    elif hasattr(owner, "members"):
+        items = owner.members
+    else:
+        items = owner.properties
+    prop = items.add()
+    prop.init(name, property_type)
+    for key, value in settings.items():
+        setattr(prop, key, value)
+    sn("src.core.scheduler").request_full()
+    flush()
+    return prop
+
+
+def prop(prop_id):
+    """A property definition by id. Adding to a list can move its items in
+    memory, so earlier Python references to them go stale: look them up."""
+    return sn("src.core.properties").find(prop_id).prop
+
+
+def pick_property(node, prop, attr="prop"):
+    """Point the property field `attr` of `node` at `prop`."""
+    setattr(node, attr + "_id", prop.id)
+    if hasattr(node, "mark_dirty"):
+        node.mark_dirty()
+    sn("src.core.scheduler").request_full()
+    flush()
+
+
 def add_node(tree, idname, location=(0, 0)):
     node = tree.nodes.new(idname)
     node.location = location

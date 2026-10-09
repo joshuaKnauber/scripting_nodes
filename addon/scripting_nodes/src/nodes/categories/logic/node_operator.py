@@ -4,8 +4,7 @@ from ....core import naming
 from ....lib.code_format import literal_set
 from ....lib.trees import node_by_id
 from ....sockets.spec import Boolean, Interface, Logic, String
-from ..._class_body import ClassBodyContainerMixin
-from ..._reference_signatures import PROPERTY_NODES
+from ..._property_list import PropertyListMixin
 from ...base_node import ScriptingBaseNode
 
 
@@ -76,15 +75,14 @@ class SNA_OT_OperatorNodeSettings(bpy.types.Operator):
         return context.window_manager.invoke_popup(self, width=220)
 
 
-class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.Node):
-    """An operator (button action) of the addon. Attached properties become
-    its inputs, shown in dialogs and settable from Run Operator / Button."""
+class SNA_Node_Operator(PropertyListMixin, ScriptingBaseNode, bpy.types.Node):
+    """An operator (button action) of the addon. Its properties (sidebar)
+    are its inputs: shown in dialogs, set by Run Operator / Button, and
+    available as outputs in its flows."""
 
     bl_idname = "SNA_Node_Operator"
     bl_label = "Operator"
     sn_root = True
-    sn_class_body_signature = PROPERTY_NODES
-    sn_class_body_target = "Operator"
 
     operator_description: bpy.props.StringProperty(
         name="Description", description="Tooltip of the operator"
@@ -139,7 +137,7 @@ class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.No
                 "Draw",
                 enabled=self.invoke_type in {"PROPS_DIALOG", "PROPS_POPUP"},
             ),
-        ]
+        ] + self.property_outputs()
         return inputs, outputs
 
     def draw(self, context, layout):
@@ -152,7 +150,7 @@ class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.No
             row.operator(self.operator_idname, text="", icon="PLAY")
         except (RuntimeError, AttributeError):
             pass
-        self.draw_class_body_properties(layout, label="Properties")
+        self.draw_property_names(layout)
 
     def emit(self, ctx):
         flags = {
@@ -164,12 +162,13 @@ class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.No
             "PRESET": self.option_preset,
         }
         options = {flag for flag, on in flags.items() if on}
+        values = self.property_values()
         methods = [INVOKE_METHODS.get(self.invoke_type, "")]
         if self.invoke_type == "INVOKE":
             methods = [
                 f"""
                 def invoke(self, context, event):
-                    {ctx.flow("invoke")}
+                    {ctx.flow("invoke", outputs=values)}
                     return self.execute(context)
             """
             ]
@@ -178,7 +177,7 @@ class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.No
         ):
             methods.append(f"""
                 def draw(self, context):
-                    {ctx.flow("draw", layout="self.layout")}
+                    {ctx.flow("draw", layout="self.layout", outputs=values)}
             """)
 
         ctx.module(f"""
@@ -196,7 +195,7 @@ class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.No
                 {ctx.join(methods)}
 
                 def execute(self, context):
-                    {ctx.flow("execute")}
+                    {ctx.flow("execute", outputs=values)}
                     return {{"FINISHED"}}
         """)
 

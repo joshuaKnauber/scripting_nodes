@@ -1,6 +1,5 @@
 import bpy
 
-from ..._reference_signatures import STRING_PROPERTY_NODES
 from ._property_field import PropertyFieldNode
 
 
@@ -9,4 +8,4 @@ class SNA_Node_TextField(PropertyFieldNode, bpy.types.Node):
 
     bl_idname = "SNA_Node_TextField"
     bl_label = "Text Field"
-    sn_reference_properties = {"prop": STRING_PROPERTY_NODES}
+    sn_property_references = {"prop": "STRING"}

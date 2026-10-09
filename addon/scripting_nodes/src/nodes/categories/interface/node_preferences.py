@@ -1,6 +1,6 @@
 """Addon Preferences: the `bpy.types.AddonPreferences` class of the generated
-addon. Properties with register_on = Preferences that are attached to it
-become its settings, the Draw flow lays out the preferences UI.
+addon. Its properties (sidebar) are the add-on's settings, the Draw flow lays
+out the preferences UI.
 
 Only one per addon makes sense (Blender allows one preferences class per
 addon); extra ones fail to register.
@@ -10,26 +10,23 @@ import bpy
 
 from ....core import naming
 from ....sockets.spec import Interface
-from ..._class_body import ClassBodyContainerMixin
-from ..._reference_signatures import PROPERTY_NODES
+from ..._property_list import PropertyListMixin
 from ...base_node import ScriptingBaseNode
 
 
-class SNA_Node_Preferences(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.Node):
+class SNA_Node_Preferences(PropertyListMixin, ScriptingBaseNode, bpy.types.Node):
     """The preferences of the addon (shown in Preferences > Add-ons)."""
 
     bl_idname = "SNA_Node_Preferences"
     bl_label = "Preferences"
     sn_root = True
-    sn_class_body_signature = PROPERTY_NODES
-    sn_class_body_target = "Preferences"
     sn_outputs = [Interface("draw", "Draw")]
 
     def sn_names(self):
         return [naming.Class("class", "AP", "preferences")]
 
     def draw(self, context, layout):
-        self.draw_class_body_properties(layout, label="Properties")
+        self.draw_property_names(layout)
 
     def emit(self, ctx):
         # bl_idname must be the addon's package: tree modules live in

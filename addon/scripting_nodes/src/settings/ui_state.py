@@ -21,15 +21,6 @@ class SNA_UISettings(bpy.types.PropertyGroup):
     )
 
     # Data panel - active indices for filtered lists
-    def update_active_property_index(self, context):
-        from .settings import DATA_PANEL_PROPERTIES_ATTR
-
-        coll = getattr(context.scene.sna, DATA_PANEL_PROPERTIES_ATTR)
-        if 0 <= self.active_property_index < len(coll):
-            ref = coll[self.active_property_index]
-            if ref.node:
-                bpy.ops.sna.go_to_node(node_id=ref.node.id)
-
     def update_active_variable_index(self, context):
         from .settings import DATA_PANEL_VARIABLES_ATTR
 
@@ -48,9 +39,6 @@ class SNA_UISettings(bpy.types.PropertyGroup):
             if getattr(tree, "is_sn", False) and tree.is_function:
                 context.space_data.node_tree = tree
 
-    active_property_index: bpy.props.IntProperty(
-        default=0, update=update_active_property_index
-    )
     active_variable_index: bpy.props.IntProperty(
         default=0, update=update_active_variable_index
     )

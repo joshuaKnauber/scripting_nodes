@@ -4,7 +4,7 @@ They all draw one property with `layout.prop(data, "name", ...)`; they only
 differ in which property nodes they accept and in their display toggles.
 
     class SNA_Node_Checkbox(PropertyFieldNode, bpy.types.Node):
-        sn_reference_properties = {"prop": BOOL_PROPERTY_NODES}
+        sn_property_references = {"prop": "BOOLEAN"}
         field_options = (("toggle", False), ("invert_checkbox", False))
         toggle: bpy.props.BoolProperty(name="Toggle")
         ...

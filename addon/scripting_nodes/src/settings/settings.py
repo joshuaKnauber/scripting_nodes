@@ -3,13 +3,11 @@ from ..nodes.references import (
     SNA_NodeReference,
 )
 from ..nodes.base_node import ScriptingBaseNode
-from ..nodes._reference_signatures import (
-    DATA_PANEL_PROPERTY_NODES,
-    VARIABLE_NODES,
-)
+from ..nodes._reference_signatures import VARIABLE_NODES
 from .ui_state import SNA_UISettings
 from .dev import SNA_DevSettings
 from .addon import SNA_AddonSettings
+from ..core.properties import CATEGORIES, SNA_PropertyRef, picker_attr
 import bpy
 
 
@@ -24,8 +22,6 @@ def signature_key(bl_idnames):
 
 
 _EXTRA_SIGNATURES = (
-    # Data panel Properties UIList (property nodes + property groups).
-    DATA_PANEL_PROPERTY_NODES,
     # Data panel Variables UIList. Also covered by Get/Set Variable, but
     # listing here keeps the collection alive even if no consumer exists.
     VARIABLE_NODES,
@@ -35,12 +31,8 @@ _EXTRA_SIGNATURES = (
 def _collect_signatures():
     """Walk every SN node class and gather each declared reference signature.
 
-    Two sources contribute:
-      - sn_reference_properties: {prop_name: tuple-of-allowed-bl_idnames} on
-        any consumer node.
-      - sn_class_body_signature: tuple-of-allowed-bl_idnames on container
-        nodes (Operator / Preferences / PropertyGroup) that hold a list of
-        attached property refs.
+    Source: sn_reference_properties ({prop_name: tuple-of-allowed-bl_idnames})
+    on any consumer node.
 
     A small set of `_EXTRA_SIGNATURES` is added on top for UI lists that
     aren't tied to any consumer node (data panel templates).
@@ -58,9 +50,6 @@ def _collect_signatures():
             if not tup:
                 continue
             sigs[signature_key(tup)] = frozenset(tup)
-        cb_sig = getattr(cls, "sn_class_body_signature", ())
-        if cb_sig:
-            sigs[signature_key(cb_sig)] = frozenset(cb_sig)
     for tup in _EXTRA_SIGNATURES:
         sigs[signature_key(tup)] = frozenset(tup)
     return sigs
@@ -89,9 +78,15 @@ for _key in SIGNATURE_INDEX:
     )
 
 
+# Property pickers, one per value type (core/properties.py)
+for _category in CATEGORIES:
+    SNA_Settings.__annotations__[picker_attr(_category)] = bpy.props.CollectionProperty(
+        type=SNA_PropertyRef
+    )
+
+
 # Convenience attribute names for the data-panel collections, computed at
 # import time so UI code can reach them without recomputing the hash.
-DATA_PANEL_PROPERTIES_ATTR = signature_key(DATA_PANEL_PROPERTY_NODES)
 DATA_PANEL_VARIABLES_ATTR = signature_key(VARIABLE_NODES)
 
 

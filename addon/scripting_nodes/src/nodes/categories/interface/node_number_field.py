@@ -1,6 +1,5 @@
 import bpy
 
-from ..._reference_signatures import NUMBER_PROPERTY_NODES
 from ._property_field import PropertyFieldNode
 
 
@@ -9,7 +8,7 @@ class SNA_Node_NumberField(PropertyFieldNode, bpy.types.Node):
 
     bl_idname = "SNA_Node_NumberField"
     bl_label = "Number Field"
-    sn_reference_properties = {"prop": NUMBER_PROPERTY_NODES}
+    sn_property_references = {"prop": "NUMBER"}
     field_options = (("slider", False),)
 
     slider: bpy.props.BoolProperty(

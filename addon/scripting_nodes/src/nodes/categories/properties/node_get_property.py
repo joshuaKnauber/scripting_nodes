@@ -1,20 +1,17 @@
 import bpy
 
 from ....sockets.spec import Socket
+from ....core import properties
 from ..._property_target import PropertyTargetMixin
-from ..._reference_signatures import PROPERTY_NODES
 from ...base_node import ScriptingBaseNode
 
 
 def value_spec(node, key, label):
     """Socket for the values of the property `node` targets."""
-    idname = node.target_data_type()
-    spec = Socket(idname, key, label)
-    size = getattr(node.target_node(), "prop_size", None)
-    if size and idname == "ScriptingVectorSocket" and 2 <= size <= 4:
-        spec.attrs["dimension"] = str(size)
-    elif idname == "ScriptingColorSocket":
-        spec.attrs["use_alpha"] = size == 4
+    spec = Socket(node.target_data_type(), key, label)
+    prop = node.target_prop()
+    if prop is not None:
+        spec.attrs.update(properties.socket_attrs(prop))
     return spec
 
 
@@ -23,7 +20,6 @@ class SNA_Node_GetProperty(PropertyTargetMixin, ScriptingBaseNode, bpy.types.Nod
 
     bl_idname = "SNA_Node_GetProperty"
     bl_label = "Get Property"
-    sn_reference_properties = {"prop": PROPERTY_NODES}
 
     def socket_specs(self):
         return [self.data_input_spec()], [value_spec(self, "value", "Value")]

@@ -17,7 +17,7 @@ import bpy
 from ..lib.logger import log
 from ..lib.sockets import to_socket
 from ..lib.trees import scripting_node_trees, sn_nodes
-from . import errors, functions, helpers, naming
+from . import errors, functions, helpers, naming, properties
 from .context import Line, NodeContext, NodeError, Scope
 
 TEMPLATES = os.path.join(os.path.dirname(__file__), "templates")
@@ -48,6 +48,7 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     if settings is None:
         settings = bpy.context.scene.sna.addon
     errors.node_errors.clear()
+    errors.property_errors.clear()
     names = naming.build(trees, settings)
     naming.use(names)
     values = {"$ADDON_NAME": settings.addon_name, "$MODULE_NAME": settings.module_name}
@@ -66,6 +67,9 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
         owners[rel] = line_map
         previews.update(_previews(source, line_map))
         used_helpers |= builder.helpers
+    source = properties.module_source(names)
+    if source is not None:
+        files[f"addon/{properties.PROPERTIES_MODULE}.py"] = source
     exported = {name for name in used_helpers if helpers.needs_import(name, dev)}
     if exported:
         files[f"{HELPERS_MODULE}.py"] = helpers.source(exported, dev)

@@ -73,6 +73,9 @@ class ScriptingBaseNode:
     # {prop_name: allowed bl_idnames}: string fields referencing other nodes,
     # stored by node id (core/references.py)
     sn_reference_properties: Dict[str, Tuple[str, ...]] = {}
+    # {prop_name: picker category}: string fields picking a property
+    # definition, stored by its id in `<prop_name>_id` (core/properties.py)
+    sn_property_references: Dict[str, str] = {}
 
     id: bpy.props.StringProperty(default="", options={"HIDDEN"})
 
@@ -81,6 +84,10 @@ class ScriptingBaseNode:
         _install_auto_updates(cls)
         if cls.sn_reference_properties:
             install_reference_properties(cls, cls.sn_reference_properties)
+        if cls.sn_property_references:
+            from ..core.properties import install_references
+
+            install_references(cls, cls.sn_property_references)
 
     def socket_specs(self):
         """(inputs, outputs) the node should have right now. Override when

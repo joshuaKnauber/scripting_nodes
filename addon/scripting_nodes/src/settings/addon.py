@@ -5,6 +5,7 @@ import bpy
 
 from ..core import scheduler
 from ..lib.ids import get_short_id
+from .properties import SNA_Property
 
 # Module names that would shadow something Blender or Python needs
 _RESERVED_MODULES = {"bpy", "bmesh", "mathutils", "gpu", "gpu_extras", "blf", "aud"}
@@ -114,6 +115,11 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
         if not self.addon_uid:
             self.addon_uid = get_short_id()
         return self.addon_uid
+
+    ### Properties (settings/properties.py)
+
+    properties: bpy.props.CollectionProperty(type=SNA_Property)
+    active_property: bpy.props.IntProperty()
 
     ### Calculated Values
 

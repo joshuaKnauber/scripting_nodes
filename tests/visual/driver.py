@@ -110,15 +110,16 @@ def step():
             if after:
                 after(bpy.context)
             helpers.flush()
-        elif s in (3, 4):
-            # Twice: the first pass can run before nodes have drawn dimensions
-            # (sidebar tab lists also only exist once a region has drawn)
+        elif s in (3, 4, 5, 6):
+            # Repeated: the first passes can run before nodes have drawn
+            # dimensions (sidebar tab lists also only exist once a region has
+            # drawn); bigger scenes need a few more redraws
             set_sidebar_tabs(
                 getattr(_state["scenario"], "SIDEBAR_TAB", "Scripting Nodes")
             )
             if _state["tree"] is not None:
                 frame_all(getattr(_state["scenario"], "ZOOM_OUT", 0))
-        elif s == 5:
+        elif s == 8:
             window, area = main_area()
             if getattr(_state["scenario"], "AREA_ONLY", False):
                 with bpy.context.temp_override(window=window, area=area):
@@ -127,7 +128,7 @@ def step():
                 with bpy.context.temp_override(window=window):
                     bpy.ops.screen.screenshot(filepath=OUTPUT)
             print(f"SCREENSHOT {OUTPUT}")
-        elif s == 6:
+        elif s == 9:
             bpy.ops.wm.quit_blender()
             return None
         return 0.4

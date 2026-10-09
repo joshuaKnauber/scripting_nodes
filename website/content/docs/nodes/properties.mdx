@@ -1,0 +1,63 @@
+---
+title: Properties
+description: Settings your add-on stores, defined in lists and used with nodes.
+---
+
+Properties are the values your add-on keeps: a checkbox in a panel, a count, a list of entries. You **define** them in lists and **use** them with nodes.
+
+![The add-on's properties in the Addon Data panel, next to the nodes using them](/screenshots/properties-list.png)
+
+![The panel drawn from these properties](/screenshots/properties-panel.png)
+
+## Add-on properties
+
+The **Addon Data › Properties** list in the sidebar (Scripting Nodes tab) holds the add-on's properties. Select one to edit it below the list:
+
+- **Type**: Boolean, Integer, Float, Vector, String, Enum, Pointer, Collection or Group. Changing the type keeps the nodes using the property.
+- **Attach To**: the data each value is stored on, e.g. one value per **Scene** (the default) or per **Object**.
+- **In Add-on Group**: stores it in the add-on's own group, `scene.my_addon.count`, instead of directly on the data, `scene.count`. The group keeps your add-on's settings together and apart from other add-ons'.
+- **Python Name**: the name in code, by default made from the name. Saved values are stored under it, so set it before renaming a property that's already in use.
+
+Below the settings you see the nodes that use the property.
+
+## Groups, pointers and collections
+
+A **Group** is a set of properties used as a type. Its own list appears when you select it. A **Pointer** points to one item of a group (or to Blender data such as an object), a **Collection** is a list of items of a group. Change collections with the **Collection** nodes (Add, Remove, Get Item, Length, Clear).
+
+## Operator and preferences properties
+
+Operator and Preferences nodes have their own list, in the sidebar's **Node** tab while the node is selected. Operator properties show up in its dialog, can be set from **Button** and **Run Operator**, and are outputs of the Operator node inside its flows.
+
+![An Operator node's own Weight property in the sidebar's Node tab](/screenshots/properties-operator.png)
+
+## Using properties
+
+| Node | Does |
+| --- | --- |
+| **Get Property** / **Set Property** | Read or change a property |
+| **Checkbox**, **Number Field**, **Text Field**, **Vector Field**, **Enum Menu**, **Pointer Field** | Draw it in a panel, menu or dialog |
+| **On Property Update** | Runs when it changes. **Owner** is the data it changed on |
+
+The **Data** input is the data the property belongs to. Leave it empty for the obvious one: the current scene for Scene properties, the active object for Object properties, the operator itself for its own properties. Group properties need the item connected.
+
+All these nodes can also use a Blender property instead: switch the picker to Blender and paste a data path (right-click a field in Blender › Copy Data Path).
+
+## Callbacks
+
+- **Enum** items come from the list, or from a [function](/docs/nodes/functions) that returns a list of names (or of `(identifier, name, description)` tuples) when the dropdown opens.
+- **Pointer** properties can use a function to decide which data-blocks can be picked: it gets the data-block as its first input and returns True to allow it.
+
+## Generated code
+
+Add-on properties are written to `properties.py`:
+
+```python
+class MY_ADDON_PG_scene_properties(bpy.types.PropertyGroup):
+    count: bpy.props.IntProperty(name='Count', default=3, soft_min=0, soft_max=10)
+
+
+def register():
+    bpy.types.Scene.my_addon = bpy.props.PointerProperty(type=MY_ADDON_PG_scene_properties)
+```
+
+Only settings that differ from Blender's defaults are written.
