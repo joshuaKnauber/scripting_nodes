@@ -1,11 +1,20 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from 'react';
 
 /*
- * A tiny node editor in Blender's colors: pick a request, the graph builds
- * itself, the result shows the panel (or console) it makes and the Python it
- * generates. Fields in the nodes are editable and update both live.
+ * A small Blender window: a node editor next to a 3D viewport (or text
+ * editor). Pick a request, the graph builds itself and the viewport's
+ * sidebar shows the panel it makes. Nodes can be dragged, the editor
+ * panned, and the text fields in the nodes edited live.
  */
 
 type Kind = 'flow' | 'logic' | 'interface' | 'string' | 'number' | 'data';
@@ -41,25 +50,33 @@ interface NodeDef {
 
 type Link = [from: string, out: string, to: string, input: string];
 type Values = Record<string, string>;
+type Point = { x: number; y: number };
 
 interface Scenario {
   /** tab label */
   label: string;
   prompt: string;
+  /** what the right area shows: the 3D viewport sidebar or the Info log */
+  result: 'panel' | 'log';
   nodes: NodeDef[];
   links: Link[];
   defaults: Values;
-  result: (v: Values, extra: ResultExtras) => ReactNode;
+  panel?: (v: Values, actions: Actions) => ReactNode;
   code: (v: Values) => string;
 }
 
-interface ResultExtras {
-  saves: number;
-  save: () => void;
+interface Actions {
+  /** the Add Cube operator */
+  addCube: () => void;
+  /** objects in the scene: the cubes plus the default camera and light */
+  objects: number;
 }
 
 const snake = (text: string, fallback: string) =>
-  text.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || fallback;
+  text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '') || fallback;
 
 const py = (text: string) => `'${text.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'`;
 
@@ -67,6 +84,7 @@ const SCENARIOS: Scenario[] = [
   {
     label: 'A button',
     prompt: 'Add a button to the sidebar that adds a cube',
+    result: 'panel',
     nodes: [
       {
         id: 'panel',
@@ -95,12 +113,15 @@ const SCENARIOS: Scenario[] = [
     ],
     links: [['panel', 'body', 'button', 'in']],
     defaults: { panel: 'My Tools', button: 'Add Cube' },
-    result: (v) => (
+    panel: (v, { addCube }) => (
       <BlenderPanel title={v.panel}>
-        <BlenderButton>{v.button || 'Add Cube'}</BlenderButton>
+        <BlenderButton onClick={addCube}>{v.button || 'Add Cube'}</BlenderButton>
       </BlenderPanel>
     ),
-    code: (v) => `class MY_ADDON_PT_${snake(v.panel, 'panel')}(bpy.types.Panel):
+    code: (v) => `import bpy
+
+
+class MY_ADDON_PT_${snake(v.panel, 'panel')}(bpy.types.Panel):
     bl_label = ${py(v.panel)}
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
@@ -110,24 +131,38 @@ const SCENARIOS: Scenario[] = [
   },
   {
     label: 'A live label',
-    prompt: 'Show how many objects are selected',
+    prompt: 'Show how many objects are in the scene, with a button to add cubes',
+    result: 'panel',
     nodes: [
       {
         id: 'panel',
         title: 'Panel',
-        x: 15,
+        x: 10,
         y: 30,
-        w: 155,
+        w: 150,
         rows: [
           { id: 'body', label: 'Interface', kind: 'interface', side: 'out' },
           { id: 'label', label: 'Label', kind: 'string', side: 'in', field: 'panel' },
         ],
       },
       {
-        id: 'selected',
-        title: 'Selected Objects',
+        id: 'button',
+        title: 'Button',
+        x: 210,
+        y: 14,
+        w: 175,
+        rows: [
+          { id: 'next', label: 'Interface', kind: 'interface', side: 'out' },
+          { id: 'in', label: 'Interface', kind: 'interface', side: 'in' },
+          { id: 'op', label: 'Operator', kind: 'data', side: 'in', fixed: 'Add Cube' },
+          { id: 'label', label: 'Label', kind: 'string', side: 'in', field: 'button' },
+        ],
+      },
+      {
+        id: 'objects',
+        title: 'Scene Objects',
         x: 10,
-        y: 205,
+        y: 215,
         w: 130,
         rows: [{ id: 'objects', label: 'Objects', kind: 'data', side: 'out' }],
       },
@@ -135,7 +170,7 @@ const SCENARIOS: Scenario[] = [
         id: 'length',
         title: 'Length',
         x: 175,
-        y: 215,
+        y: 225,
         w: 105,
         rows: [
           { id: 'length', label: 'Length', kind: 'number', side: 'out' },
@@ -146,7 +181,7 @@ const SCENARIOS: Scenario[] = [
         id: 'join',
         title: 'Combine Strings',
         x: 315,
-        y: 190,
+        y: 200,
         w: 150,
         rows: [
           { id: 'text', label: 'Combined', kind: 'string', side: 'out' },
@@ -158,7 +193,7 @@ const SCENARIOS: Scenario[] = [
         id: 'label',
         title: 'Label',
         x: 475,
-        y: 34,
+        y: 60,
         w: 140,
         rows: [
           { id: 'next', label: 'Interface', kind: 'interface', side: 'out' },
@@ -168,29 +203,39 @@ const SCENARIOS: Scenario[] = [
       },
     ],
     links: [
-      ['panel', 'body', 'label', 'in'],
-      ['selected', 'objects', 'length', 'list'],
+      ['panel', 'body', 'button', 'in'],
+      ['button', 'next', 'label', 'in'],
+      ['objects', 'objects', 'length', 'list'],
       ['length', 'length', 'join', 'b'],
       ['join', 'text', 'label', 'text'],
     ],
-    defaults: { panel: 'Selection', prefix: 'Selected: ' },
-    result: (v) => (
+    defaults: { panel: 'Scene', button: 'Add Cube', prefix: 'Objects: ' },
+    panel: (v, { addCube, objects }) => (
       <BlenderPanel title={v.panel}>
-        <p className="px-1 py-1.5">{v.prefix}3</p>
+        <BlenderButton onClick={addCube}>{v.button || 'Add Cube'}</BlenderButton>
+        <p className="px-1 pt-1.5 pb-0.5">
+          {v.prefix}
+          {objects}
+        </p>
       </BlenderPanel>
     ),
-    code: (v) => `class MY_ADDON_PT_${snake(v.panel, 'panel')}(bpy.types.Panel):
+    code: (v) => `import bpy
+
+
+class MY_ADDON_PT_${snake(v.panel, 'panel')}(bpy.types.Panel):
     bl_label = ${py(v.panel)}
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
 
     def draw(self, context):
-        count = len(context.selected_objects)
+        self.layout.operator('mesh.primitive_cube_add', text=${py(v.button)})
+        count = len(context.scene.objects)
         self.layout.label(text=${py(v.prefix)} + str(count))`,
   },
   {
     label: 'An event',
     prompt: 'Print a message every time the file is saved',
+    result: 'log',
     nodes: [
       {
         id: 'save',
@@ -215,28 +260,8 @@ const SCENARIOS: Scenario[] = [
     ],
     links: [['save', 'flow', 'print', 'in']],
     defaults: { message: 'Saved!' },
-    result: (v, { saves, save }) => (
-      <div className="flex h-full flex-col gap-3">
-        <button
-          type="button"
-          onClick={save}
-          className="self-start rounded-[5px] bg-[#545454] px-3 py-1 text-[#e6e6e6] hover:bg-[#656565] focus-visible:outline-2 focus-visible:outline-[#f2a60d]"
-        >
-          Save file
-        </button>
-        <div
-          className="min-h-24 flex-1 rounded-[5px] bg-[#181818] p-2.5 font-[family-name:var(--font-code)] text-[12px] leading-5 text-[#cfcfcf]"
-          aria-live="polite"
-        >
-          {saves === 0 ? (
-            <span className="text-[#7a7a7a]">Click Save file to run it.</span>
-          ) : (
-            Array.from({ length: Math.min(saves, 5) }, (_, i) => <div key={i}>{v.message}</div>)
-          )}
-        </div>
-      </div>
-    ),
-    code: (v) => `from bpy.app.handlers import persistent
+    code: (v) => `import bpy
+from bpy.app.handlers import persistent
 
 
 @persistent
@@ -251,20 +276,21 @@ def register():
 
 // -- geometry ----------------------------------------------------------------
 
+/** design size of the graph; the canvas fits it, then the user can pan */
 const WIDTH = 620;
 const HEIGHT = 330;
 const HEADER = 26;
 const ROW = 24;
 
-function socketPoint(node: NodeDef, rowId: string, side: 'in' | 'out') {
+function socketPoint(node: NodeDef, at: Point, rowId: string, side: 'in' | 'out') {
   const index = node.rows.findIndex((r) => r.id === rowId && r.side === side);
   return {
-    x: side === 'out' ? node.x + node.w : node.x,
-    y: node.y + HEADER + 4 + index * ROW + ROW / 2,
+    x: side === 'out' ? at.x + node.w : at.x,
+    y: at.y + HEADER + 4 + index * ROW + ROW / 2,
   };
 }
 
-function linkPath(a: { x: number; y: number }, b: { x: number; y: number }) {
+function linkPath(a: Point, b: Point) {
   const dx = Math.max(40, Math.abs(b.x - a.x) / 2);
   return `M ${a.x} ${a.y} C ${a.x + dx} ${a.y}, ${b.x - dx} ${b.y}, ${b.x} ${b.y}`;
 }
@@ -273,11 +299,9 @@ function linkPath(a: { x: number; y: number }, b: { x: number; y: number }) {
 
 function BlenderPanel({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="rounded-[6px] bg-[#303030] p-2 text-[13px] text-[#e6e6e6]">
-      <div className="flex items-center gap-1.5 px-1 pb-2">
-        <span aria-hidden className="text-[10px] text-[#9a9a9a]">
-          ▼
-        </span>
+    <div className="rounded-[5px] bg-[var(--sn-panel)] p-1.5 text-[12px] text-[var(--sn-strong)]">
+      <div className="flex items-center gap-1.5 px-1 pb-1.5">
+        <Chevron />
         {title || 'Panel'}
       </div>
       {children}
@@ -285,9 +309,23 @@ function BlenderPanel({ title, children }: { title: string; children: ReactNode 
   );
 }
 
-function BlenderButton({ children }: { children: ReactNode }) {
+function BlenderButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
   return (
-    <div className="rounded-[5px] bg-[#545454] py-1 text-center text-[#e6e6e6]">{children}</div>
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full rounded-[4px] bg-[var(--sn-button)] py-[3px] text-center text-[var(--sn-strong)] shadow-[0_1px_0_rgba(0,0,0,0.3)] ring-1 ring-black/10 dark:ring-0 hover:bg-[var(--sn-button-hover)] focus-visible:outline-1 focus-visible:outline-[#f2a60d] active:brightness-90"
+    >
+      {children}
+    </button>
+  );
+}
+
+function Chevron() {
+  return (
+    <svg viewBox="0 0 10 10" className="size-2.5 shrink-0 text-[var(--sn-dim)]" aria-hidden>
+      <path d="M2 3.5 5 6.5 8 3.5" fill="none" stroke="currentColor" strokeWidth="1.4" />
+    </svg>
   );
 }
 
@@ -296,7 +334,7 @@ function SocketDot({ kind, side }: { kind: Kind; side: 'in' | 'out' }) {
   return (
     <span
       aria-hidden
-      className="absolute top-1/2 size-[10px] -translate-y-1/2 border border-black/60"
+      className="absolute top-1/2 size-[10px] border border-black/60"
       style={{
         background: SOCKET[kind],
         [side === 'in' ? 'left' : 'right']: -5,
@@ -307,6 +345,50 @@ function SocketDot({ kind, side }: { kind: Kind; side: 'in' | 'out' }) {
   );
 }
 
+/** Header row of a Blender area: editor type, menus, extras */
+function AreaHeader({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex h-[30px] shrink-0 items-center gap-0.5 bg-[var(--sn-header)] px-1.5 text-[12px] text-[var(--sn-text)]">
+      {children}
+    </div>
+  );
+}
+
+function Menus({ items }: { items: string[] }) {
+  return (
+    <>
+      {items.map((item) => (
+        <span key={item} className="rounded-[4px] px-2 py-0.5" aria-hidden>
+          {item}
+        </span>
+      ))}
+    </>
+  );
+}
+
+function EditorIcon({ kind }: { kind: 'node' | 'view3d' | 'text' | 'info' }) {
+  const paths = {
+    node: 'M2 3h4v3H2zM10 9h4v3h-4zM6 4.5c3 0 1 6 4 6',
+    view3d: 'M8 2 13.5 5v6L8 14 2.5 11V5zM8 8v6M8 8l5.5-3M8 8 2.5 5',
+    text: 'M3 3h10M3 6h7M3 9h10M3 12h6',
+    info: 'M8 2.5a5.5 5.5 0 1 0 0 11 5.5 5.5 0 0 0 0-11zM8 7v4M8 5v.5',
+  };
+  return (
+    <svg viewBox="0 0 16 16" className="size-[15px]" aria-hidden>
+      <path d={paths[kind]} fill="none" stroke="currentColor" strokeWidth="1.3" />
+    </svg>
+  );
+}
+
+function MouseIcon() {
+  return (
+    <svg viewBox="0 0 12 16" className="h-3.5 w-2.5" aria-hidden>
+      <rect x="1" y="1" width="10" height="14" rx="5" fill="none" stroke="currentColor" />
+      <path d="M1.5 7V6a4.5 4.5 0 0 1 4.5-4.5V7z" fill="currentColor" />
+    </svg>
+  );
+}
+
 function Highlight({ code }: { code: string }) {
   // strings and a few keywords, enough to read it at a glance
   const parts = code.split(/('(?:[^'\\]|\\.)*')/g);
@@ -314,13 +396,13 @@ function Highlight({ code }: { code: string }) {
     <>
       {parts.map((part, i) =>
         part.startsWith("'") ? (
-          <span key={i} className="text-[#9ecbff]">
+          <span key={i} className="text-[var(--sn-code-string)]">
             {part}
           </span>
         ) : (
           part.split(/\b(class|def|from|import|return)\b/g).map((word, j) =>
             ['class', 'def', 'from', 'import', 'return'].includes(word) ? (
-              <span key={`${i}-${j}`} className="text-[#f2a60d]">
+              <span key={`${i}-${j}`} className="text-[var(--sn-code-keyword)]">
                 {word}
               </span>
             ) : (
@@ -330,6 +412,126 @@ function Highlight({ code }: { code: string }) {
         ),
       )}
     </>
+  );
+}
+
+/*
+ * The viewport: an isometric floor grid with the red X and green Y axes, and
+ * the cubes the Add Cube button adds. Drawn at a fixed size from the center.
+ */
+const ISO = { w: 21, d: 12, h: 24 };
+const SCENE = 640;
+/** where Add Cube puts the next cubes (grid cells, the first is the default cube) */
+const CUBE_SPOTS: Point[] = [
+  { x: 0, y: 0 },
+  { x: 2, y: 0 },
+  { x: 0, y: 2 },
+  { x: -2, y: 0 },
+  { x: 0, y: -2 },
+  { x: 2, y: -2 },
+  { x: -2, y: 2 },
+];
+const MAX_CUBES = CUBE_SPOTS.length;
+
+function cellCenter({ x, y }: Point): Point {
+  // cell vectors a = (w, d) along X, b = (w, -d) along Y
+  return {
+    x: SCENE / 2 + (x + y) * ISO.w,
+    y: SCENE / 2 + 20 + (x - y) * ISO.d,
+  };
+}
+
+function SceneCube({ at, selected }: { at: Point; selected: boolean }) {
+  const { w, d, h } = ISO;
+  const { x, y } = cellCenter(at);
+  const pts = (list: number[][]) => list.map(([px, py]) => `${px},${py}`).join(' ');
+  return (
+    <g className="sn-cube">
+      <polygon
+        points={pts([
+          [x - w, y - h],
+          [x, y + d - h],
+          [x, y + d],
+          [x - w, y],
+        ])}
+        style={{ fill: 'var(--sn-cube-left)' }}
+      />
+      <polygon
+        points={pts([
+          [x, y + d - h],
+          [x + w, y - h],
+          [x + w, y],
+          [x, y + d],
+        ])}
+        style={{ fill: 'var(--sn-cube-right)' }}
+      />
+      <polygon
+        points={pts([
+          [x - w, y - h],
+          [x, y - d - h],
+          [x + w, y - h],
+          [x, y + d - h],
+        ])}
+        style={{ fill: 'var(--sn-cube-top)' }}
+      />
+      <polygon
+        points={pts([
+          [x - w, y - h],
+          [x, y - d - h],
+          [x + w, y - h],
+          [x + w, y],
+          [x, y + d],
+          [x - w, y],
+        ])}
+        fill="none"
+        stroke={selected ? '#f2a60d' : 'rgba(0,0,0,0.35)'}
+        strokeWidth={selected ? 1.6 : 0.8}
+        strokeLinejoin="round"
+      />
+    </g>
+  );
+}
+
+function Viewport({ cubes }: { cubes: number }) {
+  const { w, d } = ISO;
+  const o = { x: SCENE / 2, y: SCENE / 2 + 20 };
+  const lines: string[] = [];
+  const reach = 14;
+  for (let i = -reach; i <= reach; i++) {
+    // lines along X (direction a) and along Y (direction b), between cells
+    const k = i + 0.5;
+    lines.push(
+      `M${o.x + k * w - reach * w} ${o.y - k * d - reach * d}L${o.x + k * w + reach * w} ${o.y - k * d + reach * d}`,
+      `M${o.x + k * w - reach * w} ${o.y + k * d + reach * d}L${o.x + k * w + reach * w} ${o.y + k * d - reach * d}`,
+    );
+  }
+  const spots = CUBE_SPOTS.slice(0, cubes).map((spot, i) => ({ spot, i }));
+  // back to front
+  spots.sort((p, q) => cellCenter(p.spot).y - cellCenter(q.spot).y);
+  return (
+    <svg
+      viewBox={`0 0 ${SCENE} ${SCENE}`}
+      width={SCENE}
+      height={SCENE}
+      className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+      aria-label={`3D viewport with ${cubes} ${cubes === 1 ? 'cube' : 'cubes'}`}
+      role="img"
+    >
+      <path d={lines.join('')} style={{ stroke: 'var(--sn-floor)' }} strokeWidth="1" />
+      <path
+        d={`M${o.x - reach * w} ${o.y - reach * d}L${o.x + reach * w} ${o.y + reach * d}`}
+        stroke="#b4555b"
+        strokeWidth="1.4"
+      />
+      <path
+        d={`M${o.x - reach * w} ${o.y + reach * d}L${o.x + reach * w} ${o.y - reach * d}`}
+        stroke="#6f9440"
+        strokeWidth="1.4"
+      />
+      {spots.map(({ spot, i }) => (
+        <SceneCube key={i} at={spot} selected={i === cubes - 1} />
+      ))}
+    </svg>
   );
 }
 
@@ -343,12 +545,18 @@ export function NodeDemo() {
   const [typed, setTyped] = useState('');
   const [built, setBuilt] = useState(0);
   const [phase, setPhase] = useState<Phase>('typing');
-  const [view, setView] = useState<'blender' | 'python'>('blender');
+  const [view, setView] = useState<'result' | 'python'>('result');
   const [saves, setSaves] = useState(0);
-  const [scale, setScale] = useState(1);
-  const [offset, setOffset] = useState(0);
-  const frame = useRef<HTMLDivElement>(null);
+  const [cubes, setCubes] = useState(1);
+  const [info, setInfo] = useState('');
+  const [fit, setFit] = useState({ scale: 1, x: 0, y: 0 });
+  const [pan, setPan] = useState<Point>({ x: 0, y: 0 });
+  const [moved, setMoved] = useState<Record<string, Point>>({});
+  const canvas = useRef<HTMLDivElement>(null);
   const timers = useRef<number[]>([]);
+  const drag = useRef<{ kind: 'pan' | 'node'; id?: string; start: Point; from: Point } | null>(
+    null,
+  );
 
   const scenario = SCENARIOS[index];
   const v = values[index];
@@ -359,6 +567,10 @@ export function NodeDemo() {
     const target = SCENARIOS[next];
     setIndex(next);
     setSaves(0);
+    setCubes(1);
+    setInfo('');
+    setPan({ x: 0, y: 0 });
+    setMoved({});
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (reduced) {
       setTyped(target.prompt);
@@ -387,44 +599,93 @@ export function NodeDemo() {
   }, [run]);
 
   useLayoutEffect(() => {
-    const el = frame.current;
+    const el = canvas.current;
     if (!el) return;
-    // fit the graph's width, up to a bit larger than 1:1, centered
-    const fit = (width: number) => {
-      const next = Math.min(1.2, width / WIDTH);
-      setScale(next);
-      setOffset(Math.max(0, (width - WIDTH * next) / 2));
+    // fit the graph into the canvas, at most a bit larger than 1:1, centered
+    const measure = (width: number, height: number) => {
+      const scale = Math.min(1.15, width / WIDTH, height / HEIGHT);
+      setFit({ scale, x: (width - WIDTH * scale) / 2, y: (height - HEIGHT * scale) / 2 });
     };
-    fit(el.getBoundingClientRect().width);
-    const observer = new ResizeObserver(([entry]) => fit(entry.contentRect.width));
+    const rect = el.getBoundingClientRect();
+    measure(rect.width, rect.height);
+    const observer = new ResizeObserver(([entry]) =>
+      measure(entry.contentRect.width, entry.contentRect.height),
+    );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
+  // -- dragging: nodes by their header, the view by the background ----------
+
+  const startDrag = (e: ReactPointerEvent, kind: 'pan' | 'node', id?: string) => {
+    if (e.button !== 0 && !(kind === 'pan' && e.button === 1)) return;
+    // touch only moves nodes, so the page still scrolls
+    if (kind === 'pan' && e.pointerType === 'touch') return;
+    e.stopPropagation();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    const node = id ? scenario.nodes.find((n) => n.id === id) : undefined;
+    drag.current = {
+      kind,
+      id,
+      start: { x: e.clientX, y: e.clientY },
+      from: kind === 'pan' ? pan : (moved[id!] ?? { x: node!.x, y: node!.y }),
+    };
+  };
+
+  const moveDrag = (e: ReactPointerEvent) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = e.clientX - d.start.x;
+    const dy = e.clientY - d.start.y;
+    if (d.kind === 'pan') {
+      setPan({ x: d.from.x + dx, y: d.from.y + dy });
+    } else {
+      setMoved((all) => ({
+        ...all,
+        [d.id!]: { x: d.from.x + dx / fit.scale, y: d.from.y + dy / fit.scale },
+      }));
+    }
+  };
+
+  const endDrag = () => {
+    drag.current = null;
+  };
+
+  const dragHandlers = { onPointerMove: moveDrag, onPointerUp: endDrag, onPointerCancel: endDrag };
+
   const visible = new Set(scenario.nodes.slice(0, built).map((n) => n.id));
   const linkedInputs = new Set(scenario.links.map(([, , to, input]) => `${to}:${input}`));
   const byId = Object.fromEntries(scenario.nodes.map((n) => [n.id, n]));
+  const at = (node: NodeDef) => moved[node.id] ?? { x: node.x, y: node.y };
   const setValue = (key: string, value: string) =>
     setValues((all) => all.map((vals, i) => (i === index ? { ...vals, [key]: value } : vals)));
 
+  const addCube = () => {
+    setCubes((n) => Math.min(MAX_CUBES, n + 1));
+    setInfo(cubes >= MAX_CUBES ? 'No room for more cubes' : 'Added Cube');
+  };
+
   const status =
-    phase === 'typing'
-      ? ''
+    info ||
+    (phase === 'done'
+      ? `Added ${scenario.nodes.length} nodes and ${scenario.links.length} ${scenario.links.length === 1 ? 'link' : 'links'}`
       : phase === 'building'
         ? 'Adding nodes…'
-        : `Added ${scenario.nodes.length} nodes and ${scenario.links.length} ${scenario.links.length === 1 ? 'link' : 'links'}`;
+        : 'Thinking…');
+  const code = scenario.code(v);
+  const resultName = scenario.result === 'log' ? 'Info' : '3D Viewport';
 
   return (
     <div className="not-prose">
       <div className="mb-6 flex justify-center">
-        <div className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-fd-muted p-1 text-[13px]">
+        <div className="inline-flex max-w-full gap-1 overflow-x-auto rounded-full bg-black/[0.05] p-1 text-[13px] dark:bg-white/[0.06]">
           {SCENARIOS.map((s, i) => (
             <button
               key={s.prompt}
               type="button"
               onClick={() => run(i)}
               aria-pressed={i === index}
-              className="shrink-0 rounded-full px-3.5 py-1.5 text-fd-muted-foreground transition-colors hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-fd-ring aria-pressed:bg-fd-background aria-pressed:text-fd-foreground aria-pressed:shadow-sm"
+              className="shrink-0 rounded-full px-3.5 py-1.5 text-fd-muted-foreground transition-colors hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-fd-ring aria-pressed:bg-white aria-pressed:text-fd-foreground aria-pressed:shadow-sm dark:aria-pressed:bg-white/[0.12]"
             >
               {s.label}
             </button>
@@ -432,139 +693,246 @@ export function NodeDemo() {
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-[#2c2c2c] bg-[#1d1d1d] text-[13px] text-[#d6d6d6] shadow-[0_40px_100px_-40px_rgba(0,0,0,0.45),0_12px_30px_-20px_rgba(0,0,0,0.3)]">
-        <div className="flex items-center gap-3 border-b border-[#2c2c2c] bg-[#242424] px-4 py-2.5">
-          <span aria-hidden className="text-[#f2a60d]">
-            ✦
-          </span>
-          <p className="min-w-0 flex-1 truncate" aria-live="polite">
-            {typed}
-            {phase === 'typing' && <span className="sn-caret" aria-hidden />}
-          </p>
-          <span className="hidden shrink-0 text-[12px] text-[#8a8a8a] sm:block">{status}</span>
-        </div>
-
-        <div className="grid md:grid-cols-[minmax(0,1fr)_300px]">
-          <div
-            ref={frame}
-            className="sn-grid relative border-b border-[#2c2c2c] md:border-r md:border-b-0"
-            style={{ height: HEIGHT * scale }}
-          >
+      {/* the Blender window */}
+      <div className="sn-window overflow-hidden rounded-[9px] bg-[var(--sn-gap)] text-[12px] text-[var(--sn-text)] shadow-[0_0_0_1px_rgba(0,0,0,0.08)] select-none dark:shadow-[0_0_0_1px_rgba(255,255,255,0.08)]">
+        <div className="grid gap-[3px] px-[3px] pt-[3px] md:grid-cols-[minmax(0,1.65fr)_minmax(0,1fr)]">
+          {/* node editor */}
+          <div className="flex h-[400px] flex-col overflow-hidden rounded-[6px] md:h-[540px]">
+            <AreaHeader>
+              <span
+                className="grid h-[20px] w-[26px] place-items-center text-[var(--sn-text)]"
+                aria-hidden
+              >
+                <EditorIcon kind="node" />
+              </span>
+              <Menus items={['View', 'Select', 'Add', 'Node']} />
+              <span className="ml-auto rounded-[4px] bg-[var(--sn-widget)] px-2.5 py-0.5 text-[var(--sn-strong)]">
+                Main
+              </span>
+            </AreaHeader>
             <div
-              className="absolute top-0 left-0 origin-top-left"
-              style={{
-                width: WIDTH,
-                height: HEIGHT,
-                transform: `translateX(${offset}px) scale(${scale})`,
-              }}
+              ref={canvas}
+              className="sn-grid relative flex-1 cursor-grab overflow-hidden active:cursor-grabbing"
+              style={{ backgroundPosition: `${pan.x}px ${pan.y}px` }}
+              onPointerDown={(e) => startDrag(e, 'pan')}
+              {...dragHandlers}
             >
-              <svg className="absolute inset-0" width={WIDTH} height={HEIGHT} aria-hidden>
-                {scenario.links.map(([from, out, to, input]) => {
-                  if (!visible.has(from) || !visible.has(to)) return null;
-                  const a = socketPoint(byId[from], out, 'out');
-                  const b = socketPoint(byId[to], input, 'in');
-                  const color = SOCKET[byId[from].rows.find((r) => r.id === out)!.kind];
+              <div
+                className="absolute top-0 left-0 origin-top-left"
+                style={{
+                  width: WIDTH,
+                  height: HEIGHT,
+                  transform: `translate(${fit.x + pan.x}px, ${fit.y + pan.y}px) scale(${fit.scale})`,
+                }}
+              >
+                <svg
+                  className="absolute inset-0 overflow-visible"
+                  width={WIDTH}
+                  height={HEIGHT}
+                  aria-hidden
+                >
+                  {scenario.links.map(([from, out, to, input]) => {
+                    if (!visible.has(from) || !visible.has(to)) return null;
+                    const a = socketPoint(byId[from], at(byId[from]), out, 'out');
+                    const b = socketPoint(byId[to], at(byId[to]), input, 'in');
+                    const color = SOCKET[byId[from].rows.find((r) => r.id === out)!.kind];
+                    const d = linkPath(a, b);
+                    // a dark outline under the colored link, like Blender draws them
+                    return (
+                      <g key={`${index}-${from}-${out}-${to}-${input}`} className="sn-link">
+                        <path d={d} fill="none" style={{ stroke: 'var(--sn-link-outline)' }} strokeWidth={4} />
+                        <path d={d} fill="none" stroke={color} strokeWidth={2} />
+                      </g>
+                    );
+                  })}
+                </svg>
+                {scenario.nodes.map((node) => {
+                  if (!visible.has(node.id)) return null;
+                  const pos = at(node);
                   return (
-                    <path
-                      key={`${index}-${from}-${out}-${to}-${input}`}
-                      d={linkPath(a, b)}
-                      fill="none"
-                      stroke={color}
-                      strokeWidth={2}
-                      className="sn-link"
-                    />
+                    <div
+                      key={`${index}-${node.id}`}
+                      className="sn-node absolute rounded-[6px] bg-[var(--sn-node)] shadow-[0_4px_14px_rgba(0,0,0,0.18)] ring-1 ring-black/5 dark:shadow-[0_6px_16px_rgba(0,0,0,0.35)] dark:ring-0"
+                      style={{ left: pos.x, top: pos.y, width: node.w }}
+                    >
+                      <div
+                        className="flex cursor-move touch-none items-center gap-1.5 rounded-t-[6px] px-2 text-[12px] text-white"
+                        style={{ height: HEADER, background: 'var(--sn-node-header)' }}
+                        onPointerDown={(e) => startDrag(e, 'node', node.id)}
+                        {...dragHandlers}
+                      >
+                        <Chevron />
+                        {node.title}
+                      </div>
+                      <div
+                        className="cursor-default py-1"
+                        onPointerDown={(e) => e.stopPropagation()}
+                      >
+                        {node.rows.map((row) => {
+                          const linked =
+                            row.side === 'in' && linkedInputs.has(`${node.id}:${row.id}`);
+                          return (
+                            <div
+                              key={`${row.side}-${row.id}`}
+                              className={`relative flex items-center gap-2 px-2.5 text-[12px] ${row.side === 'out' ? 'justify-end' : ''}`}
+                              style={{ height: ROW }}
+                            >
+                              <SocketDot kind={row.kind} side={row.side} />
+                              {row.field && !linked ? (
+                                <label className="flex min-w-0 flex-1 items-center gap-1.5">
+                                  <span className="shrink-0 text-[var(--sn-dim)]">{row.label}</span>
+                                  <input
+                                    value={v[row.field]}
+                                    onChange={(e) => setValue(row.field!, e.target.value)}
+                                    spellCheck={false}
+                                    className="h-[19px] min-w-0 flex-1 rounded-[4px] bg-[var(--sn-field)] px-1.5 ring-1 ring-black/10 dark:ring-0 text-[var(--sn-strong)] outline-none select-text focus-visible:ring-1 focus-visible:ring-[#f2a60d]"
+                                  />
+                                </label>
+                              ) : row.fixed ? (
+                                <span className="flex min-w-0 flex-1 items-center gap-1.5">
+                                  <span className="shrink-0 text-[var(--sn-dim)]">{row.label}</span>
+                                  <span className="h-[19px] min-w-0 flex-1 truncate rounded-[4px] bg-[var(--sn-field)] px-1.5 ring-1 ring-black/10 dark:ring-0 leading-[19px] text-[var(--sn-strong)]">
+                                    {row.fixed}
+                                  </span>
+                                </span>
+                              ) : (
+                                <span className="text-[var(--sn-dim)]">{row.label}</span>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
                   );
                 })}
-              </svg>
-              {scenario.nodes.map((node) =>
-                visible.has(node.id) ? (
-                  <div
-                    key={`${index}-${node.id}`}
-                    className="sn-node absolute rounded-[6px] bg-[#303030] shadow-[0_6px_16px_rgba(0,0,0,0.35)]"
-                    style={{ left: node.x, top: node.y, width: node.w }}
-                  >
-                    <div
-                      className="flex items-center gap-1.5 rounded-t-[6px] px-2 text-[12px] text-[#f0f0f0]"
-                      style={{ height: HEADER, background: '#7a3542' }}
-                    >
-                      <span aria-hidden className="text-[9px] text-[#d9b3ba]">
-                        ▼
-                      </span>
-                      {node.title}
-                    </div>
-                    <div className="py-1">
-                      {node.rows.map((row) => {
-                        const linked = row.side === 'in' && linkedInputs.has(`${node.id}:${row.id}`);
-                        return (
-                          <div
-                            key={`${row.side}-${row.id}`}
-                            className={`relative flex items-center gap-2 px-2.5 text-[12px] ${row.side === 'out' ? 'justify-end' : ''}`}
-                            style={{ height: ROW }}
-                          >
-                            <SocketDot kind={row.kind} side={row.side} />
-                            {row.field && !linked ? (
-                              <label className="flex min-w-0 flex-1 items-center gap-1.5">
-                                <span className="shrink-0 text-[#b8b8b8]">{row.label}</span>
-                                <input
-                                  value={v[row.field]}
-                                  onChange={(e) => setValue(row.field!, e.target.value)}
-                                  spellCheck={false}
-                                  className="h-[19px] min-w-0 flex-1 rounded-[4px] bg-[#1d1d1d] px-1.5 text-[#ececec] outline-none focus-visible:ring-1 focus-visible:ring-[#f2a60d]"
-                                />
-                              </label>
-                            ) : row.fixed ? (
-                              <span className="flex min-w-0 flex-1 items-center gap-1.5">
-                                <span className="shrink-0 text-[#b8b8b8]">{row.label}</span>
-                                <span className="h-[19px] min-w-0 flex-1 truncate rounded-[4px] bg-[#1d1d1d] px-1.5 leading-[19px] text-[#ececec]">
-                                  {row.fixed}
-                                </span>
-                              </span>
-                            ) : (
-                              <span className="text-[#b8b8b8]">{row.label}</span>
-                            )}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                ) : null,
-              )}
+              </div>
+
+              {/* the request to the assistant, floating in the editor */}
+              <div
+                className="pointer-events-none absolute top-3 left-1/2 flex w-max max-w-[calc(100%-24px)] -translate-x-1/2 items-center gap-2 rounded-full border border-[var(--sn-border)] bg-[var(--sn-pill)] px-3.5 py-1.5 text-[12px] text-[var(--sn-strong)] shadow-[0_8px_24px_rgba(0,0,0,0.35)]"
+                aria-live="polite"
+              >
+                <span aria-hidden className="text-[#f2a60d]">
+                  ✦
+                </span>
+                <span className="truncate">
+                  {typed}
+                  {phase === 'typing' && <span className="sn-caret" aria-hidden />}
+                </span>
+              </div>
             </div>
           </div>
 
-          <div className="flex min-h-[180px] flex-col md:min-h-[260px]">
-            <div className="flex gap-1 border-b border-[#2c2c2c] px-3 pt-2" role="tablist">
-              {(['blender', 'python'] as const).map((tab) => (
+          {/* 3D viewport / Info log, or the Text Editor with the Python */}
+          <div className="flex h-[320px] flex-col overflow-hidden rounded-[6px] md:h-[540px]">
+            <AreaHeader>
+              <div className="flex rounded-[4px] bg-[var(--sn-widget)] p-0.5" role="tablist">
+                {(['result', 'python'] as const).map((tab) => (
+                  <button
+                    key={tab}
+                    type="button"
+                    role="tab"
+                    aria-selected={view === tab}
+                    aria-label={
+                      tab === 'python' ? 'Text Editor with the generated Python' : resultName
+                    }
+                    title={tab === 'python' ? 'Text Editor' : resultName}
+                    onClick={() => setView(tab)}
+                    className="grid h-[20px] w-[26px] place-items-center rounded-[3px] text-[var(--sn-dim)] hover:text-[var(--sn-strong)] focus-visible:outline-1 focus-visible:outline-[#f2a60d] aria-selected:bg-[var(--sn-widget-active)] aria-selected:text-[var(--sn-strong)]"
+                  >
+                    <EditorIcon
+                      kind={
+                        tab === 'python' ? 'text' : scenario.result === 'log' ? 'info' : 'view3d'
+                      }
+                    />
+                  </button>
+                ))}
+              </div>
+              {view === 'python' ? (
+                <span className="ml-2 text-[var(--sn-dim)]">main.py</span>
+              ) : scenario.result === 'log' ? (
                 <button
-                  key={tab}
                   type="button"
-                  role="tab"
-                  aria-selected={view === tab}
-                  onClick={() => setView(tab)}
-                  className="-mb-px border-b-2 border-transparent px-2 pb-2 text-[12px] text-[#8a8a8a] hover:text-[#d6d6d6] focus-visible:outline-2 focus-visible:outline-[#f2a60d] aria-selected:border-[#f2a60d] aria-selected:text-[#ececec]"
+                  onClick={() => setSaves((n) => n + 1)}
+                  className="ml-auto rounded-[4px] bg-[var(--sn-button)] px-2.5 py-0.5 ring-1 ring-black/10 dark:ring-0 text-[var(--sn-strong)] hover:bg-[var(--sn-button-hover)] focus-visible:outline-1 focus-visible:outline-[#f2a60d]"
                 >
-                  {tab === 'blender' ? 'In Blender' : 'Generated Python'}
+                  Save file
                 </button>
-              ))}
-            </div>
+              ) : (
+                <Menus items={['View', 'Object']} />
+              )}
+            </AreaHeader>
+
             <div
-              className={`flex-1 p-3 transition-opacity duration-300 ${phase === 'done' ? 'opacity-100' : 'opacity-0'}`}
+              className={`relative flex min-h-0 flex-1 transition-opacity duration-300 ${phase === 'done' ? 'opacity-100' : 'opacity-40'}`}
               role="tabpanel"
             >
-              {view === 'blender' ? (
-                scenario.result(v, { saves, save: () => setSaves((n) => n + 1) })
-              ) : (
-                <pre className="overflow-x-auto font-[family-name:var(--font-code)] text-[11.5px] leading-[18px] text-[#d4d4d4]">
-                  <Highlight code={scenario.code(v)} />
+              {view === 'python' ? (
+                <pre className="flex min-w-0 flex-1 overflow-auto bg-[var(--sn-field)] py-2 font-[family-name:var(--font-code)] text-[11.5px] leading-[18px] text-[var(--sn-text)] select-text">
+                  <span aria-hidden className="shrink-0 px-2.5 text-right text-[var(--sn-faint)]">
+                    {code.split('\n').map((_, i) => (
+                      <span key={i} className="block">
+                        {i + 1}
+                      </span>
+                    ))}
+                  </span>
+                  <code className="pr-3">
+                    <Highlight code={code} />
+                  </code>
                 </pre>
+              ) : scenario.result === 'log' ? (
+                <div
+                  className="flex-1 overflow-auto bg-[var(--sn-field)] p-2.5 font-[family-name:var(--font-code)] text-[11.5px] leading-5 text-[var(--sn-text)]"
+                  aria-live="polite"
+                >
+                  {saves === 0 ? (
+                    <span className="text-[var(--sn-faint)]">
+                      Click Save file to run the event.
+                    </span>
+                  ) : (
+                    Array.from({ length: Math.min(saves, 12) }, (_, i) => (
+                      <div key={i}>{v.message}</div>
+                    ))
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-1 bg-[var(--sn-viewport)]">
+                  <div className="relative flex-1 overflow-hidden">
+                    <Viewport cubes={cubes} />
+                  </div>
+                  <div className="flex w-[clamp(150px,52%,210px)] shrink-0 bg-[var(--sn-region)]">
+                    <div className="flex-1 p-1.5">{scenario.panel?.(v, { addCube, objects: cubes + 2 })}</div>
+                    <div
+                      className="flex w-[20px] flex-col items-center gap-[2px] pt-1.5"
+                      aria-hidden
+                    >
+                      {['Item', 'Tool', 'Scripting Nodes'].map((tab) => (
+                        <span
+                          key={tab}
+                          className={`rounded-l-[4px] px-[3px] py-2 text-[10px] [writing-mode:vertical-rl] ${tab === 'Scripting Nodes' ? 'bg-[var(--sn-panel)] text-[var(--sn-strong)]' : 'text-[var(--sn-dim)]'}`}
+                        >
+                          {tab}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           </div>
         </div>
+
+        {/* status bar */}
+        <div className="flex h-[26px] items-center gap-4 px-3 text-[11px] text-[var(--sn-dim)]">
+          <span className="hidden items-center gap-1.5 sm:flex">
+            <MouseIcon /> Move node
+          </span>
+          <span className="hidden items-center gap-1.5 sm:flex">
+            <MouseIcon /> Pan view
+          </span>
+          <span className="ml-auto truncate">{status}</span>
+        </div>
       </div>
-      <p className="mt-4 text-center text-[13px] text-fd-muted-foreground">
-        Type in the nodes' text fields. The panel and the code update as you type.
-      </p>
     </div>
   );
 }

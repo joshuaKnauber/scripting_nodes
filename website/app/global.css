@@ -2,6 +2,28 @@
 @import 'fumadocs-ui/css/neutral.css';
 @import 'fumadocs-ui/css/preset.css';
 
+/*
+ * Light theme: a white page with raised surfaces one small step darker (the
+ * default puts cards below the page), and muted text that's readable on it.
+ * Dark mode keeps Fumadocs' neutral theme.
+ */
+:root:not(.dark) {
+  --color-fd-background: #ffffff;
+  --color-fd-card: #fafafa;
+  --color-fd-popover: #ffffff;
+  --color-fd-muted: #f4f4f5;
+  --color-fd-secondary: #f4f4f5;
+  --color-fd-muted-foreground: #5f5f66;
+  --color-fd-border: rgba(0, 0, 0, 0.09);
+  --color-fd-accent: rgba(0, 0, 0, 0.05);
+  /* tint of the homepage node headers */
+  --sn-tint: 9%;
+}
+
+.dark {
+  --sn-tint: 14%;
+}
+
 html {
   scrollbar-gutter: stable;
 }
@@ -176,8 +198,8 @@ body {
 
 /* Homepage node demo (components/home/node-demo.tsx) */
 .sn-grid {
-  background-color: #1d1d1d;
-  background-image: radial-gradient(#2e2e2e 1px, transparent 1px);
+  background-color: var(--sn-canvas);
+  background-image: radial-gradient(var(--sn-dots) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
@@ -186,7 +208,7 @@ body {
 }
 
 /* longer than any link, so the dash covers it while it draws in */
-.sn-link {
+.sn-link path {
   stroke-dasharray: 1000;
   animation: sn-link-in 320ms ease-out both;
 }
@@ -222,8 +244,94 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .sn-node,
-  .sn-link,
+  .sn-link path,
   .sn-caret {
+    animation: none;
+  }
+}
+
+/* The demo window follows the site theme: Blender's Light theme in light
+   mode, its default dark theme in dark mode */
+.sn-window {
+  --sn-gap: #e2e2e5;
+  --sn-header: #f1f1f2;
+  --sn-canvas: #e6e6e8;
+  --sn-dots: #cdcdd1;
+  --sn-node-header: #c85a6c;
+  --sn-panel: #fafafa;
+  --sn-region: #ececee;
+  --sn-viewport: #dcdcdf;
+  --sn-floor: #c6c6ca;
+  --sn-field: #ffffff;
+  --sn-widget: #e0e0e3;
+  --sn-widget-active: #ffffff;
+  --sn-button: #ffffff;
+  --sn-button-hover: #f4f4f5;
+  --sn-pill: rgba(255, 255, 255, 0.95);
+  --sn-border: rgba(0, 0, 0, 0.08);
+  --sn-node: #fafafa;
+  --sn-link-outline: rgba(0, 0, 0, 0.18);
+  --sn-cube-top: #d2d2d6;
+  --sn-cube-left: #b9b9be;
+  --sn-cube-right: #a3a3a8;
+  --sn-text: #2a2a2d;
+  --sn-strong: #111113;
+  --sn-dim: #5c5c62;
+  --sn-faint: #9a9aa0;
+  --sn-code-string: #1d5fbf;
+  --sn-code-keyword: #b45f06;
+}
+
+.dark .sn-window {
+  --sn-gap: #161616;
+  --sn-header: #303030;
+  --sn-canvas: #1d1d1d;
+  --sn-dots: #2e2e2e;
+  --sn-node-header: #7a3542;
+  --sn-panel: #3d3d3d;
+  --sn-region: rgba(43, 43, 43, 0.95);
+  --sn-viewport: #3a3a3a;
+  --sn-floor: #4a4a4a;
+  --sn-field: #1d1d1d;
+  --sn-widget: #232323;
+  --sn-widget-active: #4a4a4a;
+  --sn-button: #545454;
+  --sn-button-hover: #656565;
+  --sn-pill: rgba(38, 38, 38, 0.95);
+  --sn-border: rgba(255, 255, 255, 0.1);
+  --sn-node: #303030;
+  --sn-link-outline: rgba(0, 0, 0, 0.45);
+  --sn-cube-top: #b0b0b0;
+  --sn-cube-left: #8b8b8b;
+  --sn-cube-right: #757575;
+  --sn-text: #d4d4d4;
+  --sn-strong: #e6e6e6;
+  --sn-dim: #9d9d9d;
+  --sn-faint: #6e6e6e;
+  --sn-code-string: #9ecbff;
+  --sn-code-keyword: #f2a60d;
+}
+
+.sn-cube {
+  animation: sn-node-in 180ms ease-out both;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sn-cube {
+    animation: none;
+  }
+}
+
+/* a link drawing itself in (components/home/assistant-demo.tsx) */
+.sn-link-draw {
+  stroke-dasharray: 1000;
+  animation: sn-link-in 500ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sn-link-draw {
     animation: none;
   }
 }
