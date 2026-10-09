@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
-import { getPageImageUrl } from '@/lib/shared';
+import { appName, getPageImageUrl } from '@/lib/shared';
 import { PageTOC } from '@/components/toc';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
@@ -52,7 +52,9 @@ export async function generateMetadata(props: PageProps<'/docs/[[...slug]]'>): P
   return {
     title: page.data.title,
     description: page.data.description,
+    // Replaces the root openGraph object, so repeat the site name
     openGraph: {
+      siteName: appName,
       images: getPageImageUrl(page).url,
     },
   };

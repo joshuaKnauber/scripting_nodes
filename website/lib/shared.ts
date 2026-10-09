@@ -1,6 +1,9 @@
 import { createGetUrl } from 'fumadocs-core/source';
 
 export const appName = 'Scripting Nodes';
+export const siteUrl = 'https://scriptingnodes.com';
+export const siteDescription =
+  'Build Blender add-ons with nodes. Connect nodes and Scripting Nodes writes the Python, or ask an AI assistant to build the graph for you.';
 export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
 export const docsContentRoute = '/llms.mdx/docs';
