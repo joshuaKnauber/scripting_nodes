@@ -32,13 +32,16 @@ and `ruff check` with zero findings.
 
 - [ ] **Blend Data**: separate design thread ("Design: Blend Data in Serpens v4", worktree `blend-data-v4`). Includes: Blender-path mode doesn't know the property type (Set Property gets a generic Data input).
 - [ ] **Node references**: separate design thread ("Design: node references in Serpens v4"). Picker collections on `scene.sna` with hashed names, scene-level storage, linear lookups.
-- [ ] **Properties: nodes or not?** Decide how add-on properties are defined: Scene/Object properties, operator properties, preferences, Property Groups, Pointer/Collection properties and the collection nodes (add, remove, get item, length, clear).
-  - Today: one node per property, attached to Operator / Preferences / Property Group nodes through a list of references (`_class_body.py`), plus `register_on` for Blender types. Works, but properties float around the graph disconnected from what they belong to, and attaching them is indirect.
-  - Alternatives: define properties where they belong (a properties list on the Operator / Preferences / Property Group node and an add-on level list in the sidebar, like v3), with nodes only for using them (Get / Set / draw / update callback). Callbacks (update, dynamic enum items, pointer poll) still need a flow entry point - as a node, or as outputs on the owning node.
-  - Covers the data panel, the reference pickers and how Run Operator / Button get operator arguments. Ties into the node references thread.
-- [ ] Callbacks that return a value (Pointer Property poll, enum items, ...) need a function tree today. Decide on a Return node / callable flows, or keep functions as the answer (ties into "Properties: nodes or not?").
-- [ ] `PropertyNode.property_args(ctx)` runs with the container's ctx and can't read its own inputs.
-- [ ] Run Operator / Button: vector/color properties of SN operators always get 3 components, no alpha.
+- [ ] **Properties as lists** (decided 2026-10): properties are declarations, so they're declared in lists, and nodes only use them.
+  - Add-on properties: a Properties list in the Addon Data sidebar (name, type, settings below the list; changing the type keeps the nodes using it). Grouped into one PropertyGroup by default (`scene.my_addon.count`), attaching directly to a type stays possible. Stored with the addon settings (follows the scene vs. file decision in 10).
+  - Property Groups: list entries of type Group with a nested list; Pointer / Collection entries pick a group as their type.
+  - Operator / Preferences properties: a list on the owning node (sidebar Node tab); each property is also a data output of the Operator node (`self.count`). Button / Run Operator take their argument sockets from that list. Copying the node copies its properties.
+  - Using them: Get / Set Property and the UI fields pick a property by id; for type-attached properties the owner defaults to `context.scene` etc. Collection nodes (add, remove, get item, length, clear, move) stay as they are.
+  - Callbacks: events are nodes, callbacks with a return value are functions. Update = an On Property Update node (flow, value, owner); dynamic enum items, pointer poll (later get/set) = a function picked in the property's settings. No separate Return node.
+  - Code: `properties.py` with the PropertyGroups and registration, names from the list (unique, no id suffix).
+  - Removes: the property node types, the Property Group node, `register_on`, `_class_body.py`, the settings popup. Old files don't need to load.
+  - Order: after CI, before readable names (names come from these lists).
+- [ ] Run Operator / Button: vector/color properties of SN operators always get 3 components, no alpha (fix as part of the property lists).
 
 ## 4. Node groups (functions)
 
