@@ -1,3 +1,4 @@
+from ....core import naming
 from ....lib.code_format import literal_set
 from ....lib.trees import node_by_id
 from ....sockets.spec import Boolean, Interface, String
@@ -118,6 +119,9 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
         name="Hide Header", description="Hide the panel header"
     )
 
+    def sn_names(self):
+        return [naming.Class("class", "PT", naming.label(self))]
+
     def on_create(self):
         self.panel_space_type = "VIEW_3D"
         self.panel_region_type = "UI"
@@ -163,7 +167,7 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
             """
 
         ctx.module(f"""
-            class {ctx.class_name("PT", "Panel")}(bpy.types.Panel):
+            class {ctx.name("class")}(bpy.types.Panel):
                 {ctx.join(attrs)}
 
                 @classmethod

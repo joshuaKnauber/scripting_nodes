@@ -137,9 +137,11 @@ class PropertyNodesTest(unittest.TestCase):
         source = source_of(tree)
         poll = pointer.poll_function_name()
         self.assertIn(
-            f"from .{function.module_name} import {function.module_name}", source
+            f"from .{function.module_name} import {function.function_name}", source
         )
-        self.assertIn(f"return bool({function.module_name}(object, self=self))", source)
+        self.assertIn(
+            f"return bool({function.function_name}(object, self=self))", source
+        )
         self.assertIn(f"poll={poll}", source)
         self.assertLoaded()
 

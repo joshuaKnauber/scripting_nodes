@@ -91,6 +91,17 @@ class ScriptingBaseNode:
     def emit(self, ctx):
         """Write this node's code through `ctx` (core/context.NodeContext)."""
 
+    def sn_names(self):
+        """Module level names this node defines (classes, operator idnames,
+        functions), see core/naming.py. Read them with `ctx.name(key)`."""
+        return []
+
+    def sn_name(self, key):
+        """A name this node declared in `sn_names()`."""
+        from ..core import naming
+
+        return naming.name(self, key)
+
     # -- life cycle -------------------------------------------------------------
 
     def init(self, context):

@@ -2,6 +2,7 @@
 
 import bpy
 
+from ....core import naming
 from ...base_node import ScriptingBaseNode
 from ....sockets.spec import Logic
 
@@ -16,7 +17,7 @@ class EventNode(ScriptingBaseNode):
 
     def emit(self, ctx):
         handler = self.handler
-        name = ctx.function_name(f"on_{handler}")
+        name = ctx.name("function")
         ctx.imports("from bpy.app.handlers import persistent")
         ctx.module(f"""
             @persistent
@@ -25,6 +26,9 @@ class EventNode(ScriptingBaseNode):
         """)
         ctx.on_register(f"bpy.app.handlers.{handler}.append({name})")
         ctx.on_unregister(f"bpy.app.handlers.{handler}.remove({name})")
+
+    def sn_names(self):
+        return [naming.Symbol("function", f"on_{self.handler}")]
 
     @property
     def handler(self):
@@ -89,8 +93,11 @@ class SNA_Node_OnBlenderClose(ScriptingBaseNode, bpy.types.Node):
     sn_root = True
     sn_outputs = [Logic()]
 
+    def sn_names(self):
+        return [naming.Symbol("function", "on_blender_close")]
+
     def emit(self, ctx):
-        name = ctx.function_name("on_blender_close")
+        name = ctx.name("function")
         ctx.imports("import atexit")
         ctx.module(f"""
             def {name}():

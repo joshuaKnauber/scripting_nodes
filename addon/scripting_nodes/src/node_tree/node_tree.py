@@ -1,9 +1,8 @@
-import re
 from collections import defaultdict
 
 import bpy
 
-from ..core import functions, scheduler
+from ..core import functions, naming, scheduler
 from ..core.versioning import DATA_VERSION
 from ..lib.ids import get_short_id
 from ..lib.logger import log
@@ -45,16 +44,13 @@ class ScriptingNodeTree(bpy.types.NodeTree):
 
     @property
     def module_name(self):
-        """Python module name of this tree, e.g. `main_tree_3fa2c1d9e0`.
+        """Python module of this tree, e.g. `main` (core/naming.py)."""
+        return naming.name(self, "module")
 
-        Suffixed with the tree's unique id, so trees with the same display
-        name never collide. Also the name of the function a tree with a
-        group interface defines, so it must be a valid identifier."""
-        name = re.sub(r"[^a-zA-Z0-9\s]", "", self.name).strip()
-        name = re.sub(r"\s+", "_", name).lower()
-        if not name or name[0].isdigit():
-            name = "tree_" + name
-        return f"{name.rstrip('_')}_{self.id.lower()}"
+    @property
+    def function_name(self):
+        """Function a tree with a group interface defines, e.g. `greet`."""
+        return naming.name(self, "function")
 
     def init(self):
         self.id = get_short_id()

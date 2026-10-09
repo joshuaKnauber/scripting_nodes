@@ -24,7 +24,6 @@ from ..lib.code_format import parenthesize
 from ..lib.sockets import from_socket
 from ..sockets.conversions import get_conversion
 from ..sockets.spec import MISSING
-from . import naming
 
 
 class NodeError(Exception):
@@ -286,17 +285,18 @@ class NodeContext:
         self._builder.unregister.append(Line(0, line, self.node.id))
 
     def var(self, name) -> str:
-        """A unique local variable name, e.g. ctx.var("row") -> "row_1"."""
-        return self._builder.unique_name(name)
+        """A local variable name not used yet: "row", then "row_2", ..."""
+        return self._builder.unique_name(name, self.scope)
 
-    def class_name(self, kind, label="") -> str:
-        return naming.class_name(self.node, kind, label)
+    def name(self, key) -> str:
+        """A module level name this node declared in `sn_names()`."""
+        return self._builder.names.claim(self.node.id, self.node_name(key))
 
-    def idname(self, name) -> str:
-        return naming.idname(self.node, name)
-
-    def function_name(self, name) -> str:
-        return naming.function_name(self.node, name)
+    def node_name(self, key):
+        for name in self.node.sn_names():
+            if name.key == key:
+                return name
+        raise NodeError(f"'{self.node.name}' declares no name '{key}'")
 
     # -- used by the compiler -------------------------------------------------
 

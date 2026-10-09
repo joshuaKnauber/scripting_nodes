@@ -92,7 +92,7 @@ class SNA_Node_Group(bpy.types.NodeCustomGroup, ScriptingBaseNode):
         flow_input = functions.flow_input(tree)
         if flow_input is not None and flow_input.kind == "INTERFACE":
             args.append(f"layout={ctx.layout}")
-        call = f"{ctx.symbol(tree, tree.module_name)}({', '.join(args)})"
+        call = f"{ctx.symbol(tree, tree.function_name)}({', '.join(args)})"
         returns = [item.identifier for item in functions.returns(tree)]
 
         if flow_input is None:

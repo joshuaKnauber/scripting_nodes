@@ -132,9 +132,9 @@ class InterfaceNodesTest(unittest.TestCase):
         helpers.flush()
         code = source(tree)
         self.assertIn(
-            f"op_1 = self.layout.operator({op.operator_idname!r}, text='Go')", code
+            f"op = self.layout.operator({op.operator_idname!r}, text='Go')", code
         )
-        self.assertIn(f"op_1.{prop.prop_name} = 5", code)
+        self.assertIn(f"op.{prop.prop_name} = 5", code)
         self.assertLoaded()
 
     def test_run_blender_operator(self):
@@ -192,20 +192,20 @@ class InterfaceNodesTest(unittest.TestCase):
         helpers.flush()
         code = source(tree)
         expected = [
-            "header_1, panel_1 = self.layout.panel(",
-            "header_1.label(text='head')",
-            "if panel_1:",
-            "box_1 = panel_1.box()",
-            "col_1 = box_1.column(align=False, heading='')",
-            "col_1.label(text='inner')",
+            "header, panel = self.layout.panel(",
+            "header.label(text='head')",
+            "if panel:",
+            "box = panel.box()",
+            "col = box.column(align=False, heading='')",
+            "col.label(text='inner')",
             "self.layout.label(text='after')",
         ]
         positions = [code.index(line) for line in expected]
         self.assertEqual(positions, sorted(positions))
         # the body is inside the `if`, the label after the subpanel isn't
         lines = {line.strip(): line for line in code.splitlines()}
-        indent = len(lines["if panel_1:"]) - len(lines["if panel_1:"].lstrip())
-        box_line = lines["box_1 = panel_1.box()"]
+        indent = len(lines["if panel:"]) - len(lines["if panel:"].lstrip())
+        box_line = lines["box = panel.box()"]
         self.assertEqual(len(box_line) - len(box_line.lstrip()), indent + 4)
         after_line = lines["self.layout.label(text='after')"]
         self.assertEqual(len(after_line) - len(after_line.lstrip()), indent)
@@ -235,7 +235,7 @@ class InterfaceNodesTest(unittest.TestCase):
         item.inputs[1].value = "in menu"
         helpers.flush()
         code = source(tree)
-        name = f"{bpy.context.scene.sna.addon.class_prefix}_MT_Menu_{menu.id}"
+        name = f"{bpy.context.scene.sna.addon.class_prefix}_MT_more"
         self.assertIn(f"class {name}(bpy.types.Menu):", code)
         self.assertIn(f"self.layout.menu({name!r}, text='More')", code)
         draw = code.index("def draw", code.index(f"class {name}"))

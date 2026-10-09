@@ -19,7 +19,6 @@ from typing import List, Optional, Tuple
 
 import bpy
 
-from ..core import naming
 from ..sockets.data.socket_string import encode_enum_items
 from ..sockets.spec import Socket
 
@@ -267,7 +266,7 @@ class OperatorCallMixin:
         """Dotted bl_idname of the chosen operator, or ""."""
         if self.mode == "CUSTOM":
             target = self.resolve_reference("operator_sn")
-            return naming.idname(target, "operator") if target else ""
+            return target.operator_idname if target else ""
         return _resolve_blender_op_name(self.operator_blender)
 
     def _target_prop_specs(self):

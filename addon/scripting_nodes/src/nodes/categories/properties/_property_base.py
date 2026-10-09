@@ -23,7 +23,8 @@ implement `property_args(ctx)` and `draw_settings(layout)`:
 import bpy
 
 from ....core.context import NodeError
-from ....core.naming import function_name, identifier
+from ....core import naming
+from ....core.naming import identifier
 from ....lib.code_format import literal_set
 from ....lib.trees import node_by_id
 from ....sockets.spec import BlendData, Logic
@@ -125,8 +126,11 @@ class PropertyNode(ScriptingBaseNode):
     def is_class_body_target(self):
         return self.register_on in CLASS_BODY_TARGETS
 
+    def sn_names(self):
+        return [naming.Symbol("update", f"update_{self.prop_name}")]
+
     def update_function_name(self):
-        return function_name(self, f"update_{self.prop_name}")
+        return self.sn_name("update")
 
     def uses_update(self):
         socket = self.socket("on_update", output=True)

@@ -22,7 +22,7 @@ def generated(tree):
     module = next(
         m for name, m in sys.modules.items() if name.endswith("." + tree.module_name)
     )
-    return getattr(module, tree.module_name)
+    return getattr(module, tree.function_name)
 
 
 def item(tree, name):
@@ -77,7 +77,7 @@ class GroupsTest(unittest.TestCase):
         function = self.double()
         source = helpers.tree_source(function)
         self.assertIn(
-            f"def {function.module_name}(value, *, self=None, context=None, "
+            f"def {function.function_name}(value, *, self=None, context=None, "
             "layout=None, event=None):",
             source,
         )
@@ -88,7 +88,7 @@ class GroupsTest(unittest.TestCase):
     def test_flow_function_returns_where_the_flow_ends(self):
         function = self.greet()
         source = helpers.tree_source(function)
-        self.assertIn(f"def {function.module_name}(name, *,", source)
+        self.assertIn(f"def {function.function_name}(name, *,", source)
         self.assertIn("return name", source)
         self.assertLoaded()
         self.assertEqual(generated(function)("Bob"), "Bob")
@@ -136,8 +136,8 @@ class GroupsTest(unittest.TestCase):
         helpers.link(tree, call.outputs[0], p.inputs["text"])
         helpers.flush()
         source = helpers.tree_source(tree)
-        name = function.module_name
-        self.assertIn(f"from .{name} import {name}", source)
+        module, name = function.module_name, function.function_name
+        self.assertIn(f"from .{module} import {name}", source)
         self.assertIn(f"{name}(4.0, self=self, context=context)", source)
         self.assertLoaded()
 
@@ -155,9 +155,7 @@ class GroupsTest(unittest.TestCase):
         helpers.link(tree, call.outputs[1], p.inputs["text"])
         helpers.flush()
         source = helpers.tree_source(tree)
-        self.assertRegex(
-            source, rf"(result_\d+) = {function.module_name}\('Ann'.*\n.*\1"
-        )
+        self.assertRegex(source, rf"(result) = {function.function_name}\('Ann'.*\n.*\1")
         self.assertLoaded()
         namespace, op = trigger.operator_idname.split(".")
         self.assertEqual(getattr(getattr(bpy.ops, namespace), op)(), {"FINISHED"})

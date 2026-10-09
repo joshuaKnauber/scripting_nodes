@@ -97,7 +97,7 @@ def step():
             check(linked(call.outputs[0], last.inputs[0]), "group -> print")
             check(helpers.sn("src.core.errors").addon_error is None, "addon error")
             source = helpers.tree_source(tree)
-            check(f"{group.module_name}(" in source, "group not called")
+            check(f"{group.function_name}(" in source, "group not called")
             check("'grouped'" in helpers.tree_source(group), "group body missing")
             for node in tree.nodes:
                 node.select = node == call

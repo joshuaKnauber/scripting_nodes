@@ -1,5 +1,6 @@
 import bpy
 
+from ....core import naming
 from ....sockets.spec import Interface, String
 from ...base_node import ScriptingBaseNode
 
@@ -12,8 +13,11 @@ class SNA_Node_Menu(ScriptingBaseNode, bpy.types.Node):
     sn_inputs = [Interface(), String("label", "Label", default="Menu")]
     sn_outputs = [Interface("content", "Menu"), Interface("next", "After")]
 
+    def sn_names(self):
+        return [naming.Class("class", "MT", naming.label(self))]
+
     def emit(self, ctx):
-        menu = ctx.class_name("MT", "Menu")
+        menu = ctx.name("class")
         label = ctx.input("label")
         ctx.module(f"""
             class {menu}(bpy.types.Menu):

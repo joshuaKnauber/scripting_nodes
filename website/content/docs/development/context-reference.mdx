@@ -36,10 +36,8 @@ Placeholders must be on their own line. They are indented to the column they sit
 | `ctx.helper("sn_print")` | Name to call a shared helper by (`core/helpers.py`) |
 | `ctx.symbol(node_or_tree, name)` | `name`, imported if it is defined in another tree's module |
 | `ctx.on_register(line)` / `ctx.on_unregister(line)` | Lines for the module's `register()` / `unregister()` |
-| `ctx.var("row")` | Unique local name (`row_1`, `row_2`, …) |
-| `ctx.class_name("OT", "Operator")` | `<PREFIX>_OT_Operator_<ID>` |
-| `ctx.idname("operator")` | `<namespace>.operator_<id>` |
-| `ctx.function_name("update")` | `update_<id>` |
+| `ctx.var("row")` | Unused local name (`row`, then `row_2`, …) |
+| `ctx.name("class")` | A name the node declared in `sn_names()` (`MY_ADDON_OT_say_hello`, `my_addon.say_hello`, `on_save_post`, …), see `core/naming.py` |
 | `ctx.dev` | `True` in the live add-on, `False` when exporting. Prefer a helper over checking this |
 
 ## Errors

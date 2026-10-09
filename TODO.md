@@ -10,7 +10,9 @@ exported add-on reads like hand-written code and passes the
 [moderation guidelines](https://developer.blender.org/docs/features/extensions/moderation/guidelines/)
 and `ruff check` with zero findings.
 
-- [ ] **Readable names**: derived from labels instead of ids (`copies`, `MESH_HELPER_OT_duplicate`, `mesh_helper.duplicate`, `main.py`), suffix only on collision, assigned in a fixed order so builds are stable. Locals `row`, `row_2`. Property nodes keep an optional "Python name" to pin a name (renaming would lose saved values).
+- [x] **Readable names** (2026-10): modules, classes, operator idnames and functions come from labels (`main.py`, `MESH_HELPER_OT_duplicate`, `mesh_helper.duplicate`, `greet`), suffix only on collision, claimed in one pass in a fixed order (`core/naming.py`, nodes declare `sn_names()`). Locals `row`, `row_2`.
+  - [ ] Property names still carry the node id (`my_value_1a2b3c4d5e`): they come from the property lists (section 3), with a pinned Python name so renaming the label keeps saved values.
+  - [ ] Renaming an operator's label renames its idname (and breaks keymaps / buttons in other add-ons that call it). Consider pinning idnames once exported, or a separate "Python name" field.
 - [ ] **No default arguments**: `ctx.args(...)` helper drops defaults; skip `poll()` returning `True`, empty `bl_description`, `bl_order = 0`, `options={'ANIMATABLE'}`, ...
 - [ ] **Conventional layout**: `__init__.py` imports the tree modules and registers an explicit `classes = (...)` tuple in dependency order. Drop `auto_load.py`, `bl_info`, the `sys.modules` alias (violates "sys is read-only"), the `addon/` subpackage and empty `register()`.
 - [ ] **Export clean-up pass**: `ast.unparse` (redundant parens, quotes) + blank lines + unused import removal.

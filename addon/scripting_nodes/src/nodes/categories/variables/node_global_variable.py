@@ -21,14 +21,22 @@ class SNA_Node_GlobalVariable(ScriptingBaseNode, bpy.types.Node):
     def socket_specs(self):
         return [Socket(self.data_type, "value", "Initial Value")], []
 
+    def sn_names(self):
+        name = naming.snake(naming.label(self, socket=None, fallback=self.name), "var")
+        return [
+            naming.Symbol("storage", f"_{name}"),
+            naming.Symbol("getter", f"get_{name}"),
+            naming.Symbol("setter", f"set_{name}"),
+        ]
+
     def getter_name(self):
-        return naming.function_name(self, "get_var")
+        return self.sn_name("getter")
 
     def setter_name(self):
-        return naming.function_name(self, "set_var")
+        return self.sn_name("setter")
 
     def emit(self, ctx):
-        storage = f"_var_{self.id.lower()}"
+        storage = ctx.name("storage")
         ctx.module(f"""
             {storage} = {ctx.input("value")}
 

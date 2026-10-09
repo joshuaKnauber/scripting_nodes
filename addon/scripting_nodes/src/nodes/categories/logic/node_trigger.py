@@ -15,7 +15,11 @@ class SNA_Node_Trigger(ScriptingBaseNode, bpy.types.Node):
 
     @property
     def operator_idname(self):
-        return naming.idname(self, "trigger")
+        return self.sn_name("idname")
+
+    def sn_names(self):
+        label = naming.label(self, socket=None)
+        return [naming.Class("class", "OT", label), naming.Idname("idname", label)]
 
     def draw(self, context, layout):
         row = layout.row()
@@ -27,7 +31,7 @@ class SNA_Node_Trigger(ScriptingBaseNode, bpy.types.Node):
 
     def emit(self, ctx):
         ctx.module(f"""
-            class {ctx.class_name("OT", "Trigger")}(bpy.types.Operator):
+            class {ctx.name("class")}(bpy.types.Operator):
                 bl_idname = {self.operator_idname!r}
                 bl_label = "Trigger"
                 bl_options = {{"REGISTER", "UNDO"}}

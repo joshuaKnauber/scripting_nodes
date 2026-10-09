@@ -120,7 +120,11 @@ class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.No
 
     @property
     def operator_idname(self):
-        return naming.idname(self, "operator")
+        return self.sn_name("idname")
+
+    def sn_names(self):
+        label = naming.label(self)
+        return [naming.Class("class", "OT", label), naming.Idname("idname", label)]
 
     def socket_specs(self):
         inputs = [
@@ -178,7 +182,7 @@ class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.No
             """)
 
         ctx.module(f"""
-            class {ctx.class_name("OT", "Operator")}(bpy.types.Operator):
+            class {ctx.name("class")}(bpy.types.Operator):
                 bl_idname = {self.operator_idname!r}
                 bl_label = {ctx.input("label")}
                 bl_description = {self.operator_description!r}

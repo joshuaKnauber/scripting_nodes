@@ -8,6 +8,7 @@ addon); extra ones fail to register.
 
 import bpy
 
+from ....core import naming
 from ....sockets.spec import Interface
 from ..._class_body import ClassBodyContainerMixin
 from ..._reference_signatures import PROPERTY_NODES
@@ -24,6 +25,9 @@ class SNA_Node_Preferences(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types
     sn_class_body_target = "Preferences"
     sn_outputs = [Interface("draw", "Draw")]
 
+    def sn_names(self):
+        return [naming.Class("class", "AP", "preferences")]
+
     def draw(self, context, layout):
         self.draw_class_body_properties(layout, label="Properties")
 
@@ -31,7 +35,7 @@ class SNA_Node_Preferences(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types
         # bl_idname must be the addon's package: tree modules live in
         # <addon>/addon/<tree>.py, so drop the last part of __package__
         ctx.module(f"""
-            class {ctx.class_name("AP", "Preferences")}(bpy.types.AddonPreferences):
+            class {ctx.name("class")}(bpy.types.AddonPreferences):
                 bl_idname = __package__.rsplit(".", 1)[0]
                 {ctx.join(self.annotations(ctx))}
 

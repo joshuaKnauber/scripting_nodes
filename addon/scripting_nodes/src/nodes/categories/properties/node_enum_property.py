@@ -11,7 +11,7 @@ Items are either
 import bpy
 
 from ....core.context import NodeError
-from ....core.naming import function_name
+from ....core import naming
 from ....lib.trees import node_by_id
 from ....sockets.spec import BlendData, List, Logic
 from ._property_base import PropertyNode
@@ -121,11 +121,17 @@ class SNA_Node_EnumProperty(PropertyNode, bpy.types.Node):
 
     # -- code -----------------------------------------------------------------
 
+    def sn_names(self):
+        return super().sn_names() + [
+            naming.Symbol("items", f"{self.prop_name}_items"),
+            naming.Symbol("get_items", f"get_{self.prop_name}_items"),
+        ]
+
     def items_name(self):
-        return function_name(self, "enum_items")
+        return self.sn_name("items")
 
     def get_items_name(self):
-        return function_name(self, "get_items")
+        return self.sn_name("get_items")
 
     def option_flags(self):
         return {**super().option_flags(), "ENUM_FLAG": self.option_enum_flag}

@@ -37,7 +37,10 @@ class SNA_Node_PropertyGroup(
 
     @property
     def class_name(self):
-        return naming.class_name(self, "PG", self.prop_label)
+        return self.sn_name("class")
+
+    def sn_names(self):
+        return [naming.Class("class", "PG", self.prop_label)]
 
     @property
     def sn_order(self):

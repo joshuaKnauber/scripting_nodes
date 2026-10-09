@@ -1,5 +1,6 @@
 import bpy
 
+from ....core import naming
 from ....sockets.socket_types import DATA_SOCKET_ENUM_ITEMS
 from ....sockets.spec import Flow, Socket
 from ...base_node import ScriptingBaseNode
@@ -20,11 +21,15 @@ class SNA_Node_LocalVariable(ScriptingBaseNode, bpy.types.Node):
             [Flow("next"), Socket(self.data_type, "variable", "Value")],
         )
 
+    def sn_names(self):
+        label = naming.label(self, socket=None, fallback=self.name)
+        return [naming.Symbol("variable", naming.snake(label, "var"))]
+
     def variable_name(self):
-        return f"var_{self.id.lower()}"
+        return self.sn_name("variable")
 
     def emit(self, ctx):
-        name = self.variable_name()
+        name = ctx.name("variable")
         ctx.output("variable", name)
         ctx.code(f"""
             {name} = {ctx.input("value")}

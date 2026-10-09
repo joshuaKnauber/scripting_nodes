@@ -121,8 +121,11 @@ class SNA_Node_OnSave(ScriptingBaseNode, bpy.types.Node):
     sn_root = True
     sn_outputs = [Logic()]
 
+    def sn_names(self):
+        return [naming.Symbol("function", "on_save")]
+
     def emit(self, ctx):
-        name = ctx.function_name("on_save")
+        name = ctx.name("function")
         ctx.imports("from bpy.app.handlers import persistent")
         ctx.module(f"""
             @persistent
@@ -137,13 +140,25 @@ Use `ctx.join(lines)` to insert a list of (possibly multi-line, possibly placeho
 
 ```python
 ctx.module(f"""
-    class {ctx.class_name("PT", "Panel")}(bpy.types.Panel):
+    class {ctx.name("class")}(bpy.types.Panel):
         {ctx.join(attributes)}
 
         def draw(self, context):
             {ctx.flow("body", layout="self.layout")}
 """)
 ```
+
+### Names
+
+Names other code can refer to (classes, operator idnames, module-level functions and variables) are declared in `sn_names()` with the helpers in `core/naming.py`, and read with `ctx.name(key)`. Other nodes and the UI read them with `node.sn_name(key)`, e.g. a Button gets the operator's idname.
+
+```python
+def sn_names(self):
+    label = naming.label(self)  # custom node label, else the Label input
+    return [naming.Class("class", "OT", label), naming.Idname("idname", label)]
+```
+
+`Class("class", "OT", "Say Hello")` becomes `MY_ADDON_OT_say_hello` and `Idname` becomes `my_addon.say_hello`; `Symbol(key, base)` is a function or variable name. All names of the add-on are claimed in one pass (trees by name, nodes by name) and only a collision adds a suffix (`say_hello_2`). Local variables come from `ctx.var("row")`: `row`, then `row_2`, never shadowing a module-level name or a parameter.
 
 `sn_order` sorts root nodes in the module, lower first: global variables 10, property nodes 20 (their update/items functions), property groups 30 and up (nested groups after the groups they contain), everything else 50. A root whose code uses names another root defines at definition time needs a higher order.
 
@@ -188,5 +203,5 @@ Raise `NodeError("message")` when the node isn't set up completely; the message 
 - `bl_idname` never changes after release (saved files reference it).
 - User text goes into code through `repr()` (`{value!r}`), never between quotes.
 - Multi-line code goes through `ctx.flow`, `ctx.join` or `ctx.code`, never pasted into a template line.
-- Use `ctx.var()` for local names and `ctx.class_name()` / `ctx.idname()` / `ctx.function_name()` for module-level names.
+- Use `ctx.var()` for local names; declare module-level names in `sn_names()` and read them with `ctx.name()`.
 - Run `python scripts/test.py`: it adds, chains, compiles and loads every node.

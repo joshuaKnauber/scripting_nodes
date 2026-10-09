@@ -136,7 +136,7 @@ class DataNodesTest(unittest.TestCase):
         outside = self.print_value(loop.outputs["item"], after=loop.outputs["next"])
         source = self.source()
 
-        match = re.search(r"( *)for (index_\d+), (item_\d+) in enumerate\(", source)
+        match = re.search(r"( *)for (index), (item) in enumerate\(", source)
         self.assertIsNotNone(match, source)
         indent, index_var, item_var = match.groups()
         body = indent + "    "
@@ -159,9 +159,7 @@ class DataNodesTest(unittest.TestCase):
         self.link(create.outputs["list"], pop.inputs["list"])
         self.print_value(pop.outputs["item"], after=pop.outputs["next"])
         source = self.source()
-        self.assertRegex(
-            source, r"popped_\d+ = \[1, 2\]\.pop\(-1\) if \[1, 2\] else None"
-        )
+        self.assertRegex(source, r"popped = \[1, 2\]\.pop\(-1\) if \[1, 2\] else None")
         self.assertEqual(self.run_trigger(), {"FINISHED"})
 
 

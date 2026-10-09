@@ -56,6 +56,7 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 - `nodes/base_node.py` `ScriptingBaseNode`: declare sockets (`sn_inputs`/`sn_outputs` or `socket_specs()`, helpers in `sockets/spec.py`), implement `emit(ctx)`. Properties rebuild automatically (no `update=`).
 - Write code with templates: `ctx.code(f"""...{ctx.flow("next")}...""")`; values with `ctx.output(key, expr)`; inputs with `ctx.input(key)`; module code with `ctx.module`; `raise NodeError(...)` for incomplete setups.
 - One flow socket type (`ScriptingFlowSocket`) with `kind` PROGRAM/LOGIC/INTERFACE (color + compatibility).
+- Names in the generated code: declared in `sn_names()` (`core/naming.py`: `Class`, `Idname`, `Symbol`), read with `ctx.name(key)` / `node.sn_name(key)`; readable, from labels, suffix only on collision. Locals via `ctx.var()`.
 - References to other nodes: `sn_reference_properties`, stored by node id (`core/references.py`); cross-tree names via `ctx.symbol`.
 - Functions (node groups): the tree interface (`tree.interface`, sidebar Group tab) is the source of truth; Blender's Group Input / Output nodes, interface socket classes in `sockets/interface.py`, compiled in `core/functions.py` + `compiler._group_function`. Make Group / Ungroup are our own operators (Blender's only run in built-in trees).
 - Shared bases: `PropertyNode`, `PropertyFieldNode`, `ClassBodyContainerMixin`, `PropertyTargetMixin`, `OperatorCallMixin`, `event_node()`.

@@ -2,7 +2,7 @@ import bpy
 
 from ....core import functions
 from ....core.context import NodeError
-from ....core.naming import function_name
+from ....core import naming
 from ..._reference_signatures import PROPERTY_GROUP_NODES
 from ._property_base import PropertyNode
 
@@ -98,8 +98,11 @@ class SNA_Node_PointerProperty(GroupTypeMixin, PropertyNode, bpy.types.Node):
         # Blender only filters ID pointers
         return self.poll_function is not None and not self.uses_group()
 
+    def sn_names(self):
+        return super().sn_names() + [naming.Symbol("poll", f"poll_{self.prop_name}")]
+
     def poll_function_name(self):
-        return function_name(self, "poll")
+        return self.sn_name("poll")
 
     def property_args(self, ctx):
         if self.uses_group():
@@ -115,7 +118,7 @@ class SNA_Node_PointerProperty(GroupTypeMixin, PropertyNode, bpy.types.Node):
             self.group_type(ctx)  # show a missing group on this node
         if self.uses_poll():
             tree = self.poll_function
-            function = ctx.symbol(tree, tree.module_name)
+            function = ctx.symbol(tree, tree.function_name)
             args = "object, self=self" if functions.parameters(tree) else "self=self"
             ctx.module(f"""
                 def {self.poll_function_name()}(self, object):

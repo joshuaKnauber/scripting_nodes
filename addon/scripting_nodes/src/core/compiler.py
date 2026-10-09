@@ -17,7 +17,7 @@ import bpy
 from ..lib.logger import log
 from ..lib.sockets import to_socket
 from ..lib.trees import scripting_node_trees, sn_nodes
-from . import errors, functions, helpers
+from . import errors, functions, helpers, naming
 from .context import Line, NodeContext, NodeError, Scope
 
 TEMPLATES = os.path.join(os.path.dirname(__file__), "templates")
@@ -48,6 +48,8 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     if settings is None:
         settings = bpy.context.scene.sna.addon
     errors.node_errors.clear()
+    names = naming.build(trees, settings)
+    naming.use(names)
     values = {"$ADDON_NAME": settings.addon_name, "$MODULE_NAME": settings.module_name}
     files = {
         "__init__.py": _render("init.txt", values),
@@ -57,7 +59,7 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     }
     owners, previews, used_helpers = {}, {}, set()
     for tree in trees:
-        builder = ModuleBuilder(tree, dev)
+        builder = ModuleBuilder(tree, dev, names)
         source, line_map = builder.build()
         rel = f"addon/{tree.module_name}.py"
         files[rel] = _format(source) if pretty else source
@@ -77,7 +79,9 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
 
 def compile_tree(tree, dev=True, pretty=True) -> str:
     """Python source of one tree module."""
-    source, _ = ModuleBuilder(tree, dev).build()
+    names = naming.build()
+    naming.use(names)
+    source, _ = ModuleBuilder(tree, dev, names).build()
     return _format(source) if pretty else source
 
 
@@ -89,15 +93,16 @@ def compile_tree(tree, dev=True, pretty=True) -> str:
 class ModuleBuilder:
     """Collects the code of one tree module while its nodes emit."""
 
-    def __init__(self, tree, dev):
+    def __init__(self, tree, dev, names):
         self.tree = tree
         self.dev = dev
+        self.names = names
         self.imports = {"import bpy"}
         self.blocks: list[list[Line]] = []
         self.register: list[Line] = []
         self.unregister: list[Line] = []
         self.helpers: set[str] = set()
-        self._names: dict[str, int] = {}
+        self._locals: set[str] = set()
         self.module_scope = Scope()
         self._emitted: set[int] = set()
 
@@ -159,10 +164,16 @@ class ModuleBuilder:
 
     # -- module services ------------------------------------------------------
 
-    def unique_name(self, name):
-        count = self._names.get(name, 0) + 1
-        self._names[name] = count
-        return f"{name}_{count}"
+    def unique_name(self, base, scope=None):
+        """A local name not used in this module (nor as module level name or
+        parameter in `scope`)."""
+        taken = self._locals | self.names.used["symbol"]
+        while scope is not None:
+            taken |= scope.names
+            scope = scope.parent
+        name = naming.unique(base, taken)
+        self._locals.add(name)
+        return name
 
     def use_helper(self, name):
         if name not in helpers.HELPERS:
@@ -214,7 +225,7 @@ class ModuleBuilder:
         if body and body[-1].indent == 0 and body[-1].text == "return":
             body.pop()  # a bare return at the end does nothing
 
-        lines = [Line(0, f"def {tree.module_name}({signature}):", None)]
+        lines = [Line(0, f"def {tree.function_name}({signature}):", None)]
         lines.append(Line(4, "context = context or bpy.context", None))
         lines += [Line(4 + line.indent, line.text, line.owner) for line in body]
         return lines

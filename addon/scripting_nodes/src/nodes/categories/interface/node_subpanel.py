@@ -1,5 +1,6 @@
 import bpy
 
+from ....core import naming
 from ....sockets.spec import Boolean, Interface
 from ...base_node import ScriptingBaseNode
 
@@ -16,10 +17,13 @@ class SNA_Node_Subpanel(ScriptingBaseNode, bpy.types.Node):
         Interface("next", "After"),
     ]
 
+    def sn_names(self):
+        return [naming.Class("panel_id", "PT", naming.label(self, socket=None))]
+
     def emit(self, ctx):
         # layout.panel() only needs a unique id to remember the open state,
         # no Panel class is registered for it
-        panel_id = ctx.class_name("PT", "Subpanel")
+        panel_id = ctx.name("panel_id")
         header = ctx.var("header")
         body = ctx.var("panel")
         ctx.code(f"""
