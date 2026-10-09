@@ -96,6 +96,8 @@ Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender
 
 Add To Panel / Menu, modal operators, timers (run with delay / intervals), keymaps/shortcuts, Report, loops (repeat, break), UI lists, popovers/pie menus, inline Python line, file and string utility nodes. See the v3 comparison in the session notes.
 
+- [ ] **Migrating v3 files** (maybe): a one-time import of a v3 .blend into v4 trees. v4 doesn't have to load v3 files, but users have years of graphs. Map what has an equivalent (operators, panels, properties, layouts, run operator, ...), leave a note node for the rest, report what wasn't converted. Decide after the property design and parity work, since both define what v3 maps onto. Could start with properties and the sidebar data (simplest, most reused).
+
 ## 10. Smaller things
 
 - [ ] Addon settings live on `scene.sna`: multi-scene files have one addon per scene. Decide whether settings move to the window manager / a file-level ID.
