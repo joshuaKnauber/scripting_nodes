@@ -5,6 +5,7 @@ import { getMDXComponents } from '@/components/mdx';
 import type { Metadata } from 'next';
 import { createRelativeLink } from 'fumadocs-ui/mdx';
 import { getPageImageUrl } from '@/lib/shared';
+import { PageTOC } from '@/components/toc';
 
 export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
   const params = await props.params;
@@ -19,7 +20,9 @@ export default async function Page(props: PageProps<'/docs/[[...slug]]'>) {
       toc={page.data.toc}
       full={page.data.full}
       breadcrumb={{ enabled: false }}
-      className="md:pt-10 xl:pt-12"
+      tableOfContent={{ component: <PageTOC /> }}
+      // 650px text column, as on linear.app/docs
+      className="max-w-[714px] md:pt-10 xl:pt-12"
     >
       <DocsTitle className="text-[32px] leading-9 tracking-[-0.022em]">{page.data.title}</DocsTitle>
       <DocsDescription className="mt-2 mb-0 text-[15px] leading-6 text-fd-foreground">

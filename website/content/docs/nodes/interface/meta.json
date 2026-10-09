@@ -1,0 +1,10 @@
+{
+  "title": "Interface",
+  "icon": "PanelsTopLeft",
+  "pages": [
+    "panels",
+    "menus",
+    "layouts",
+    "fields-and-buttons"
+  ]
+}

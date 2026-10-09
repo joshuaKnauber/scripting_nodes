@@ -1,0 +1,9 @@
+{
+  "title": "Getting started",
+  "defaultOpen": true,
+  "pages": [
+    "index",
+    "concepts",
+    "download"
+  ]
+}

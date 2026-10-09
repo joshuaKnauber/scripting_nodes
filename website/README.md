@@ -11,12 +11,15 @@ npm run build    # static site in out/
 ## Adding a docs page
 
 Pages are MDX files in `content/docs/`. The file path is the URL:
-`content/docs/concepts/sockets.mdx` → `/docs/concepts/sockets`.
+`content/docs/nodes/events.mdx` → `/docs/nodes/events`. A folder in parentheses
+groups pages in the sidebar without adding to the URL:
+`content/docs/(getting-started)/concepts.mdx` → `/docs/concepts`.
 
 ```mdx
 ---
-title: Sockets
+title: Events
 description: One line shown under the title and in search.
+icon: Zap  # sidebar icon, any lucide-react icon name
 ---
 
 Content goes here.
@@ -26,8 +29,10 @@ Sidebar order and folder titles come from `meta.json` in each folder. Pages not
 listed in `pages` are appended alphabetically, so listing them is only needed to
 control order. `"---Label---"` adds a separator.
 
-Available components without imports: `Callout`, `Cards`/`Card`, `Steps`/`Step`,
-`Tabs`/`Tab`. See `components/mdx.tsx` to add more.
+Available components without imports: `Callout` (`type`: info, tip, warn,
+error, success; optional `title`), `Cards`/`Card`, `Steps`/`Step`, `Tabs`/`Tab`,
+`Video` (`title`, `src`; a placeholder without `src`) and `DownloadButton`. See
+`components/mdx.tsx` to add more.
 
 ## Screenshots
 

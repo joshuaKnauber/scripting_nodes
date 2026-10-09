@@ -1,4 +1,9 @@
 {
   "title": "Development",
-  "pages": ["architecture", "writing-nodes", "context-reference", "testing"]
+  "pages": [
+    "architecture",
+    "writing-nodes",
+    "context-reference",
+    "testing"
+  ]
 }

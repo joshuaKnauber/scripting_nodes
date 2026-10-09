@@ -1,0 +1,9 @@
+{
+  "title": "Functions",
+  "icon": "SquareFunction",
+  "pages": [
+    "creating-functions",
+    "inputs-and-outputs",
+    "calling-functions"
+  ]
+}

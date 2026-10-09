@@ -1,0 +1,36 @@
+---
+title: Concepts
+description: The few ideas everything else builds on.
+icon: Lightbulb
+---
+
+## Add-on
+
+Each Blender file holds one add-on. Its name and build settings are in the node editor's sidebar, in the **Scripting Nodes** tab. While you work, the add-on is installed and enabled in Blender like any other, so you can use it right away.
+
+## Node trees
+
+An add-on is made of one or more node trees. Each tree becomes one Python module of the add-on. Split them however you like, for example one tree per tool.
+
+## Nodes
+
+Nodes come in three kinds:
+
+- **Root nodes** exist on their own: operators, panels, menus, events, properties. They become the classes and handlers Blender registers.
+- **Flow nodes** do something when the flow reaches them: print, set a property, run an operator, branch.
+- **Value nodes** compute something: math, strings, Blender data. They run when another node uses their output.
+
+## Sockets
+
+- **Flow sockets** (diamonds) set the order things run in. They come in three colors: **Program** runs code, **Logic** starts a flow (a Trigger, an operator's execute), **Interface** draws UI.
+- **Data sockets** (circles) pass values such as text, numbers or objects between nodes.
+
+## Functions
+
+A node tree with inputs and outputs is a [function](/docs/nodes/functions/creating-functions), like a node group in Geometry Nodes. Use it from other trees to reuse parts of a graph.
+
+## From graph to code
+
+Every node contributes a piece of Python. When you change the graph, Scripting Nodes rebuilds the add-on and reloads it a moment later. If something is wrong, the error is shown on the node that caused it, and the previous version of your add-on keeps running.
+
+When you're done, [export](/docs/publishing/export) the add-on as a zip that works without Scripting Nodes.

@@ -1,0 +1,9 @@
+{
+  "title": "Events",
+  "icon": "Zap",
+  "pages": [
+    "handlers",
+    "property-updates",
+    "timers"
+  ]
+}

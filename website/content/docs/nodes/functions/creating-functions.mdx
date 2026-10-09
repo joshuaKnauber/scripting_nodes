@@ -1,0 +1,20 @@
+---
+title: Creating functions
+description: Reuse parts of a graph as node groups.
+icon: SquareFunction
+---
+
+A function is a node tree with inputs and outputs, like a node group in Geometry Nodes. It becomes a Python function in your add-on, and **Group** nodes call it from other trees.
+
+![A tree calling three functions: Greet from an operator, Header and Double inside a panel](/screenshots/functions-call.png)
+
+![The panel this tree draws in the 3D viewport sidebar](/screenshots/functions-panel.png)
+
+## Creating a function
+
+- **Ctrl+G** turns the selected nodes into a function. Links that crossed the selection become its inputs and outputs, and the selection is replaced by a Group node calling it.
+- **Ctrl+Alt+G** puts the nodes of the selected Group nodes back.
+- **Tab** enters the selected Group node, **Ctrl+Tab** goes back up.
+- **Add > Groups** has Group Input, Group Output, an empty Group node (its **New** button creates a function) and one entry per function.
+
+![After Ctrl+G on Combine Strings and Print: the new function, with Group Input / Output for the links that crossed the selection](/screenshots/functions-make-group.png)

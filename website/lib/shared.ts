@@ -13,6 +13,7 @@ export const gitConfig = {
 
 export const githubUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}`;
 export const releasesUrl = `${githubUrl}/releases`;
+export const discordUrl = 'https://discord.com/invite/NK6kyae';
 
 const getContentUrl = createGetUrl(docsContentRoute);
 

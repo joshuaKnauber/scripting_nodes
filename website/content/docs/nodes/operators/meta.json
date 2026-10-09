@@ -1,0 +1,10 @@
+{
+  "title": "Operators",
+  "icon": "MousePointerClick",
+  "pages": [
+    "creating-operators",
+    "running-operators",
+    "popups",
+    "shortcuts"
+  ]
+}

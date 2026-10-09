@@ -1,0 +1,54 @@
+---
+title: Start Guide
+description: Scripting Nodes builds Blender add-ons from node graphs. This guide takes you from installing it to a running add-on.
+icon: GraduationCap
+---
+
+import { Download, Lightbulb, Package, Workflow } from 'lucide-react';
+
+<Video title="Intro to Scripting Nodes" />
+
+## Overview
+
+You connect nodes in a node editor, and Scripting Nodes turns the graph into Python that registers as a regular add-on, with operators, panels, properties and everything else. The add-on runs while you build it, and you export it as a zip when it's done.
+
+<Cards>
+  <Card icon={<Lightbulb />} title="Concepts" href="/docs/concepts" description="Node trees, nodes, sockets and how they become code." />
+  <Card icon={<Download />} title="Download" href="/docs/download" description="Install Scripting Nodes in Blender." />
+  <Card icon={<Workflow />} title="Nodes" href="/docs/nodes/operators/creating-operators" description="Operators, interface, events, logic and functions." />
+  <Card icon={<Package />} title="Publishing" href="/docs/publishing/export" description="Export your add-on and share it." />
+</Cards>
+
+## Build your first add-on
+
+The smallest useful graph: a button that prints a message to the console.
+
+<Steps>
+<Step>
+
+### Create a node tree
+
+[Install Scripting Nodes](/docs/download), switch an area to the **Scripting Node Editor** and click **New**.
+
+</Step>
+<Step>
+
+### Add the nodes
+
+Add a **Trigger** node (Logic) and a **Print** node (Program), then connect the Trigger's **Logic** output to the Print's **Program** input. Type a message into the **Text** field.
+
+![A Trigger node connected to a Print node](/screenshots/first-addon.png)
+
+</Step>
+<Step>
+
+### Run it
+
+Click **Trigger** on the node. The message shows up in Blender's system console.
+
+</Step>
+</Steps>
+
+<Callout>
+  The graph recompiles as you edit it, so changes take effect without reloading anything.
+</Callout>

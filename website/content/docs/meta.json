@@ -1,8 +1,12 @@
 {
   "pages": [
-    "index",
-    "getting-started",
-    "concepts",
+    "(getting-started)",
+    "nodes",
+    "properties",
+    "blend-data",
+    "variables",
+    "publishing",
+    "ai",
     "development"
   ]
 }

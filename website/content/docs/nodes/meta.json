@@ -1,0 +1,11 @@
+{
+  "title": "Nodes",
+  "pages": [
+    "operators",
+    "interface",
+    "events",
+    "logic",
+    "functions",
+    "python"
+  ]
+}

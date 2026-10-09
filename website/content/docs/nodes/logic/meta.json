@@ -1,0 +1,10 @@
+{
+  "title": "Logic",
+  "icon": "GitBranch",
+  "pages": [
+    "conditions",
+    "loops",
+    "math",
+    "text"
+  ]
+}

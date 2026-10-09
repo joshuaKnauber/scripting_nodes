@@ -1,0 +1,26 @@
+---
+title: Calling functions
+description: How the flow sockets decide where a function can be used, and the code it becomes.
+icon: Workflow
+---
+
+The flow sockets of a function decide how it is called:
+
+| Inputs / outputs | Called as |
+| --- | --- |
+| No flow sockets | A value. Use its outputs anywhere, like a Math node. |
+| A **Program** flow input (and output) | A step in a flow. The function runs from Group Input's flow, and the caller continues at the flow output. |
+| An **Interface** flow input (and output) | UI drawn into the panel, menu or popup the Group node is in. |
+
+The return values are whatever is connected to Group Output when the flow reaches it, so connecting a branch (e.g. If/Else **Then**) to Group Output returns early. A function has at most one flow input and one flow output.
+
+## Generated code
+
+```python
+def greet(name, *, self=None, context=None, layout=None, event=None):
+    context = context or bpy.context
+    sn_print(''.join(['Hello, ', name]))
+    return ''.join(['Hello, ', name])
+```
+
+The caller passes on `self`, `context` and `event` where they exist (inside an operator, a panel, …), and `layout` to interface functions.

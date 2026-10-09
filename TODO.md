@@ -34,7 +34,7 @@ and `ruff check` with zero findings.
 
 - [ ] **Blend Data**: separate design thread ("Design: Blend Data in Serpens v4", worktree `blend-data-v4`). Includes: Blender-path mode doesn't know the property type (Set Property gets a generic Data input).
 - [ ] **Node references**: separate design thread ("Design: node references in Serpens v4"). Picker collections on `scene.sna` with hashed names, scene-level storage, linear lookups.
-- [x] **Properties as lists** (done 2026-10, `website/content/docs/nodes/properties.mdx`): add-on list in Addon Data (one PropertyGroup per attach type, `scene.my_addon.count`), groups with their own list, Operator / Preferences node lists (operator properties are also its outputs), Get / Set / fields / On Property Update pick by id, enum items and pointer poll from functions, `addon/properties.py`. Follow-ups:
+- [x] **Properties as lists** (done 2026-10, `website/content/docs/properties/properties.mdx`): add-on list in Addon Data (one PropertyGroup per attach type, `scene.my_addon.count`), groups with their own list, Operator / Preferences node lists (operator properties are also its outputs), Get / Set / fields / On Property Update pick by id, enum items and pointer poll from functions, `addon/properties.py`. Follow-ups:
   - [ ] The Python name follows the label until it's pinned, so renaming a property in use loses saved values. Pin automatically once the add-on was exported?
   - [ ] Enum flag properties (sets) have no matching socket type (Data); Enum Menu / Get Property work, Set Property needs a set value.
   - [ ] Integer limits are edited as floats in the settings.
@@ -44,7 +44,7 @@ and `ruff check` with zero findings.
 
 ## 4. Node groups (functions)
 
-Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender's Group Input / Output, our Group node, Ctrl+G / Ctrl+Alt+G / Tab, Add > Groups, docs with screenshots (`website/content/docs/nodes/functions.mdx`), demo scenario `tests/visual/scenarios/_functions_demo.py`. Verified by hand in a real file.
+Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender's Group Input / Output, our Group node, Ctrl+G / Ctrl+Alt+G / Tab, Add > Groups, docs with screenshots (`website/content/docs/nodes/functions/`), demo scenario `tests/visual/scenarios/_functions_demo.py`. Verified by hand in a real file.
 
 - [ ] Pure functions with several outputs are called once per used output (`f(x)[0]`, `f(x)[1]`); value nodes in general are re-evaluated per use (Greet computes its string twice). Decide on hoisting into a variable.
 - [ ] Several flow outputs as branches ("Found" / "Not Found"), returned as an index the caller branches on.

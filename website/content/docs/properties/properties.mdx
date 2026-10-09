@@ -1,6 +1,7 @@
 ---
 title: Properties
 description: Settings your add-on stores, defined in lists and used with nodes.
+icon: SlidersHorizontal
 ---
 
 Properties are the values your add-on keeps: a checkbox in a panel, a count, a list of entries. You **define** them in lists and **use** them with nodes.
@@ -44,7 +45,7 @@ All these nodes can also use a Blender property instead: switch the picker to Bl
 
 ## Callbacks
 
-- **Enum** items come from the list, or from a [function](/docs/nodes/functions) that returns a list of names (or of `(identifier, name, description)` tuples) when the dropdown opens.
+- **Enum** items come from the list, or from a [function](/docs/nodes/functions/creating-functions) that returns a list of names (or of `(identifier, name, description)` tuples) when the dropdown opens.
 - **Pointer** properties can use a function to decide which data-blocks can be picked: it gets the data-block as its first input and returns True to allow it.
 
 ## Generated code

@@ -2,6 +2,7 @@ import { llms, loader } from 'fumadocs-core/source';
 import { docsContentRoute, docsImageRoute, docsRoute } from './shared';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
+import { lucideIconsPlugin } from 'fumadocs-core/source/plugins/lucide-icons';
 
 const docs = defineDocs({
   dir: 'content/docs',
@@ -20,7 +21,8 @@ const docs = defineDocs({
 export const source = loader({
   baseUrl: docsRoute,
   source: docs.toFumadocsSource(),
-  plugins: [],
+  // `icon: Name` in frontmatter / meta.json is a lucide-react icon
+  plugins: [lucideIconsPlugin()],
 });
 
 export const docsLlms = llms(source, {
