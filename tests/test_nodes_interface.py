@@ -1,4 +1,4 @@
-"""Interface nodes, operator calls and the Script node: the code they write."""
+"""Interface nodes and operator calls: the code they write."""
 
 import unittest
 
@@ -217,34 +217,3 @@ class InterfaceNodesTest(unittest.TestCase):
         self.assertLess(draw, code.index("self.layout.label(text='in menu')"))
         self.assertLoaded()
         self.assertTrue(hasattr(bpy.types, name))
-
-    # -- script -----------------------------------------------------------------
-
-    def test_script_with_variables(self):
-        tree = helpers.new_tree()
-        trigger = helpers.add_node(tree, "SNA_Node_Trigger")
-        script = helpers.add_node(tree, "SNA_Node_Script")
-        scene = helpers.add_node(tree, "SNA_Node_Scene")
-        p = helpers.add_node(tree, "SNA_Node_Print")
-        text = bpy.data.texts.new("double.py")
-        text.write("if True:\n    result = start * 2\n")
-        script.text_block = text
-        script.add_variable("start", "ScriptingIntegerSocket", False)
-        script.add_variable("result", "ScriptingIntegerSocket", True)
-        helpers.link(tree, trigger.outputs[0], script.inputs[0])
-        helpers.link(tree, scene.outputs["Frame Start"], script.socket("var_start"))
-        helpers.link(tree, script.outputs[0], p.inputs[0])
-        helpers.link(tree, script.socket("var_result", output=True), p.inputs[1])
-        helpers.flush()
-        code = source(tree)
-        self.assertIn("start = bpy.context.scene.frame_start", code)
-        self.assertIn("        result = start * 2", code)
-        self.assertIn("sn_print(str(result))", code)
-        self.assertLoaded()
-        self.assertEqual(run(trigger), {"FINISHED"})
-
-        # names stay valid identifiers and unique per side
-        script.add_variable("start", "ScriptingStringSocket", False)
-        script.add_variable("my var", "ScriptingStringSocket", False)
-        names = [v["name"] for v in script.get_variables()]
-        self.assertEqual(names, ["start", "result", "start_2", "my_var"])

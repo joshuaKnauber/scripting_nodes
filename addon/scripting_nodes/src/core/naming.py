@@ -27,7 +27,7 @@ RESERVED_SYMBOLS = (
     | {"bpy", "register", "unregister", "persistent", "atexit", "math"}
     | {"self", "context", "layout", "event"}
 )
-RESERVED_MODULES = set(keyword.kwlist) | {"auto_load", "addon", "properties"}
+RESERVED_MODULES = set(keyword.kwlist) | {"auto_load", "addon", "properties", "scripts"}
 
 
 def addon_settings():
@@ -66,9 +66,12 @@ def label(node, socket="label", fallback=None) -> str:
 
 class Name(NamedTuple):
     key: str
-    space: str  # "symbol", "idname" or "module"
+    space: str  # "symbol", "idname", "module" or "script"
     base: str
     kind: str = ""  # class names: OT, PT, MT, PG, AP
+    # nodes declaring a name with the same owner share it (e.g. Script nodes
+    # using the same text share its module); default: the declaring node
+    owner: str = ""
 
 
 def Class(key, kind, text):
@@ -81,11 +84,16 @@ def Idname(key, text):
     return Name(key, "idname", snake(text))
 
 
-def Symbol(key, base):
+def Symbol(key, base, owner=""):
     """A module level function or variable name (used as is if valid)."""
     private = base.startswith("_")
     name = identifier(base, "value")
-    return Name(key, "symbol", "_" + name if private else name)
+    return Name(key, "symbol", "_" + name if private else name, owner=owner)
+
+
+def Script(key, base, owner):
+    """A module of a script, `scripts/<name>.py`, shared by `owner`."""
+    return Name(key, "script", snake(base, "script"), owner=owner)
 
 
 # -- the registry -----------------------------------------------------------------
@@ -99,11 +107,12 @@ class Names:
         self.used = {
             "symbol": set(RESERVED_SYMBOLS),
             "module": set(RESERVED_MODULES),
+            "script": set(RESERVED_MODULES),
             "idname": set(),
         }
 
     def claim(self, owner_id, name: Name) -> str:
-        key = (owner_id, name.key)
+        key = (name.owner or owner_id, name.key)
         if key in self._names:
             return self._names[key]
         base = name.base
@@ -162,9 +171,14 @@ def use(names: Names):
 def name(owner, key) -> str:
     """The name `owner` (node or tree) declared as `key`."""
     global _current
-    if _current is None or _current.get(owner.id, key) is None:
+    owner_id = owner.id
+    if hasattr(owner, "sn_names"):
+        declared = next((n for n in owner.sn_names() if n.key == key), None)
+        if declared is not None and declared.owner:
+            owner_id = declared.owner
+    if _current is None or _current.get(owner_id, key) is None:
         _current = build()  # changed since the last build (UI, tests)
-    result = _current.get(owner.id, key)
+    result = _current.get(owner_id, key)
     if result is None:
         raise KeyError(f"'{owner.name}' declares no name '{key}'")
     return result

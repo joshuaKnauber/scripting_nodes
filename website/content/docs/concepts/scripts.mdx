@@ -1,0 +1,70 @@
+---
+title: Scripts
+description: Add Python to your add-on and run it from nodes.
+---
+
+Nodes build the structure of an add-on: operators, panels, properties. When a step is easier to write in Python, put it in a script. The **Script** node adds a text block (or a `.py` file) to your add-on and runs its `run()` function. The node's inputs and outputs come from that function.
+
+![An operator running arrange.py and a panel drawing with selection_info.py](/screenshots/scripts.png)
+
+## run()
+
+```python
+def run(context, spacing: float = 2.5, axis: int = 0) -> int:
+    objects = sorted(context.selected_objects, key=lambda o: o.name)
+    for i, obj in enumerate(objects):
+        obj.location[axis] = i * spacing
+    count = len(objects)
+    return count
+```
+
+gives a node with the inputs **Spacing** (Float, 2.5) and **Axis** (Integer) and the output **Count**. **New** on the node creates a script to start from.
+
+| In the signature | On the node |
+| --- | --- |
+| `bool`, `int`, `float`, `str` | Boolean, Integer, Float, String with the default value |
+| `Vector`, `Color` | Vector (size from the default), Color |
+| `list`, `tuple[...]`, ... | List |
+| Blender types (`Object`, `bpy.types.Mesh`, ...) | Blend Data |
+| no annotation, anything else | Data |
+| `-> tuple[int, str]` with `return count, name` | two outputs, **Count** and **Name** |
+
+Parameters named `context`, `layout`, `self` and `event` aren't inputs: the node passes what the flow it's in has (an operator's `context`, a panel's `layout`, ...). A `run()` taking `layout` draws UI and connects to interface flows.
+
+Edits to the script update the node and reload the add-on, like any other change. Errors show on the Script node.
+
+## The script is part of the add-on
+
+The whole script is copied into the add-on unchanged, as `scripts/<name>.py`. Everything in it works as in any add-on file: imports, helper functions, classes, handlers.
+
+- Classes (operators, panels, ...) are registered for you.
+- If the script defines `register()` and `unregister()`, they are called when the add-on is enabled and disabled instead. Register your classes there yourself, as in a regular add-on.
+
+```python
+def on_save(*args):
+    print("Saved", bpy.data.filepath)
+
+
+def register():
+    bpy.app.handlers.save_post.append(on_save)
+
+
+def unregister():
+    bpy.app.handlers.save_post.remove(on_save)
+```
+
+A script without `run()` is only added to the add-on, the node has no sockets. Several Script nodes using the same text share one module.
+
+## Generated code
+
+```python
+from ..scripts import arrange
+
+
+class OBJECT_TOOLS_OT_arrange_objects(bpy.types.Operator):
+    ...
+    def execute(self, context):
+        count = arrange.run(context=context, spacing=3.0, axis=0)
+        sn_print(str(count))
+        return {"FINISHED"}
+```

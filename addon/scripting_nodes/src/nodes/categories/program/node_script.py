@@ -1,142 +1,93 @@
-"""Script node - embeds Python from a Text block or an external file.
+"""Script node - Python from a Text block or a file, as a module of the add-on.
 
-Input variables are assigned before the script runs, output variables are
-read after it (they are available to the nodes following in the flow).
+The script is added unchanged as `scripts/<name>.py`: its imports, classes
+and its own `register()` / `unregister()` are part of the add-on. If it has a
+`run()` function, the node calls it; the signature declares the sockets (see
+nodes/_script_run.py):
+
+    def run(context, obj: Object, factor: float = 2.0) -> int:
 """
 
-import json
 import os
 
 import bpy
 
-from ....blend_data.path_utils import is_identifier
-from ....core import scheduler
+from ....core import naming, scheduler
 from ....core.context import NodeError
-from ....core.naming import identifier
-from ....lib.code_format import flatten_multiline_strings
 from ....lib.trees import node_by_id, scripting_node_trees
-from ....sockets.socket_types import (
-    DATA_SOCKET_ENUM_ITEMS,
-    DATA_SOCKET_ICONS,
-    DATA_SOCKET_IDNAMES,
-)
 from ....sockets.spec import Flow, Socket
+from ... import _script_run
 from ...base_node import ScriptingBaseNode
 
-VAR_PREFIX = "var_"
+TEMPLATE = '''import bpy
 
 
-class SNA_OT_ScriptVariablesSettings(bpy.types.Operator):
-    """Configure script input/output variables"""
+def run(context, name: str = "World") -> str:
+    """Parameters are the node's inputs, return values its outputs.
+    `context` (also `layout`, `self`, `event`) is passed in."""
+    message = f"Hello {name} from {context.scene.name}!"
+    return message
 
-    bl_idname = "sna.script_variables_settings"
-    bl_label = "Script Variables"
-    bl_description = "Configure input and output variables for the script"
+
+# Optional: called when the add-on is enabled / disabled
+# def register():
+#     ...
+#
+# def unregister():
+#     ...
+'''
+
+
+class SNA_OT_NewScript(bpy.types.Operator):
+    """Create a script from a template"""
+
+    bl_idname = "sna.new_script"
+    bl_label = "New Script"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    def execute(self, context):
+        node = getattr(context, "node", None)
+        if node is None:
+            return {"CANCELLED"}
+        text = bpy.data.texts.new("script.py")
+        text.write(TEMPLATE)
+        node.text_block = text
+        return {"FINISHED"}
+
+
+class SNA_OT_EditScript(bpy.types.Operator):
+    """Show the script in a Text Editor (a new window if there is none)"""
+
+    bl_idname = "sna.edit_script"
+    bl_label = "Edit Script"
     bl_options = {"REGISTER", "INTERNAL"}
 
-    node_id: bpy.props.StringProperty()
-
-    def draw(self, context):
-        layout = self.layout
-        node = node_by_id(self.node_id)
-        if not node:
-            layout.label(text="Node not found")
-            return
-        variables = node.get_variables()
-        for is_output, title, icon in (
-            (False, "Inputs", "IMPORT"),
-            (True, "Outputs", "EXPORT"),
-        ):
-            box = layout.box()
-            row = box.row()
-            row.label(text=title, icon=icon)
-            op = row.operator(
-                "sna.script_add_variable", text="", icon="ADD", emboss=False
-            )
-            op.node_id = self.node_id
-            op.is_output = is_output
-            found = False
-            for index, var in enumerate(variables):
-                if var["is_output"] != is_output:
-                    continue
-                found = True
-                row = box.row(align=True)
-                row.label(
-                    text="", icon=DATA_SOCKET_ICONS.get(var["socket_type"], "DOT")
-                )
-                row.label(text=var["name"])
-                op = row.operator(
-                    "sna.script_remove_variable", text="", icon="X", emboss=False
-                )
-                op.node_id = self.node_id
-                op.var_index = index
-            if not found:
-                box.label(text=f"No {title.lower()}", icon="INFO")
-
-    def execute(self, context):
-        return {"FINISHED"}
-
-    def invoke(self, context, event):
-        return context.window_manager.invoke_popup(self, width=250)
-
-
-class SNA_OT_ScriptAddVariable(bpy.types.Operator):
-    """Add a variable to the script node"""
-
-    bl_idname = "sna.script_add_variable"
-    bl_label = "Add Variable"
-    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
-
-    node_id: bpy.props.StringProperty()
-    var_name: bpy.props.StringProperty(name="Name", default="variable")
-    var_type: bpy.props.EnumProperty(
-        items=DATA_SOCKET_ENUM_ITEMS, name="Type", default="ScriptingDataSocket"
-    )
-    is_output: bpy.props.BoolProperty()
-
-    def draw(self, context):
-        self.layout.prop(self, "var_name")
-        self.layout.prop(self, "var_type")
+    node_id: bpy.props.StringProperty(options={"HIDDEN"})
 
     def execute(self, context):
         node = node_by_id(self.node_id)
-        if not node:
+        if node is None or node.text_block is None:
             return {"CANCELLED"}
-        node.add_variable(self.var_name, self.var_type, self.is_output)
-        return {"FINISHED"}
-
-    def invoke(self, context, event):
-        return context.window_manager.invoke_props_dialog(self, width=200)
-
-
-class SNA_OT_ScriptRemoveVariable(bpy.types.Operator):
-    """Remove a variable from the script node"""
-
-    bl_idname = "sna.script_remove_variable"
-    bl_label = "Remove Variable"
-    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
-
-    node_id: bpy.props.StringProperty()
-    var_index: bpy.props.IntProperty()
-
-    def execute(self, context):
-        node = node_by_id(self.node_id)
-        if not node:
-            return {"CANCELLED"}
-        node.remove_variable(self.var_index)
+        editors = [a for a in context.screen.areas if a.type == "TEXT_EDITOR"]
+        if not editors:
+            bpy.ops.wm.window_new()
+            editors = context.window_manager.windows[-1].screen.areas[:1]
+            editors[0].type = "TEXT_EDITOR"
+        editors[0].spaces.active.text = node.text_block
         return {"FINISHED"}
 
 
 class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
-    """Run Python code from a text block or a file."""
+    """Add a Python script to the add-on and call its run() function."""
 
     bl_idname = "SNA_Node_Script"
     bl_label = "Script"
+    bl_width_default = 200
 
     source_type: bpy.props.EnumProperty(
         items=[
-            ("INTERNAL", "Internal", "Use a text block from the blend file"),
-            ("EXTERNAL", "External", "Use an external Python file"),
+            ("INTERNAL", "Text", "Use a text block from the blend file"),
+            ("EXTERNAL", "File", "Use an external Python file"),
         ],
         name="Source",
         description="Where to load the script from",
@@ -148,52 +99,21 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
     filepath: bpy.props.StringProperty(
         name="File", description="Path to a Python file", subtype="FILE_PATH"
     )
-    # [{"name": str, "socket_type": str, "is_output": bool}, ...]
-    variables_json: bpy.props.StringProperty(default="[]")
 
-    # -- variables ------------------------------------------------------------
+    # -- source ---------------------------------------------------------------
 
-    def get_variables(self):
-        try:
-            variables = json.loads(self.variables_json)
-        except json.JSONDecodeError:
-            return []
-        return [v for v in variables if isinstance(v, dict) and "name" in v]
-
-    def set_variables(self, variables):
-        self.variables_json = json.dumps(variables)  # updates the sockets
-
-    def add_variable(self, name, socket_type, is_output):
-        """Add a variable; its name is made a unique Python identifier."""
-        variables = self.get_variables()
-        name = identifier(name.strip(), "variable")
-        taken = {v["name"] for v in variables if v["is_output"] == is_output}
-        unique, i = name, 1
-        while unique in taken:
-            i += 1
-            unique = f"{name}_{i}"
-        variables.append(
-            {"name": unique, "socket_type": socket_type, "is_output": is_output}
-        )
-        self.set_variables(variables)
-
-    def remove_variable(self, index):
-        variables = self.get_variables()
-        if 0 <= index < len(variables):
-            variables.pop(index)
-            self.set_variables(variables)
-
-    def socket_specs(self):
-        inputs, outputs = [Flow()], [Flow("next")]
-        for var in self.get_variables():
-            idname = var.get("socket_type")
-            if idname not in DATA_SOCKET_IDNAMES:
-                idname = "ScriptingDataSocket"
-            spec = Socket(idname, VAR_PREFIX + var["name"], var["name"])
-            (outputs if var.get("is_output") else inputs).append(spec)
-        return inputs, outputs
-
-    # -- source -----------------------------------------------------------------
+    def source_name(self):
+        """(owner, base name) of the script's module, or None. Nodes using
+        the same text or file share the module."""
+        if self.source_type == "INTERNAL":
+            if self.text_block is None:
+                return None
+            name = self.text_block.name
+            return "text:" + name, os.path.splitext(name)[0]
+        if not self.filepath:
+            return None
+        path = os.path.normpath(bpy.path.abspath(self.filepath))
+        return "file:" + path, os.path.splitext(os.path.basename(path))[0]
 
     def source_fingerprint(self):
         """Changes whenever the script source changes (see _watch_scripts)."""
@@ -220,43 +140,97 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
         except OSError as exc:
             raise NodeError(f"Can't read {path}: {exc.strerror or exc}")
 
+    def script_run(self):
+        """`run()` of the script (nodes/_script_run.Run) or None."""
+        try:
+            return _script_run.read(self.script_source())
+        except _script_run.ScriptError as exc:
+            raise NodeError(f"Script: {exc}")
+
+    # -- sockets ----------------------------------------------------------------
+
+    def socket_specs(self):
+        try:
+            run = self.script_run()
+        except NodeError:
+            return self._current_specs()  # keep the links while it's broken
+        if run is None:
+            return [], []
+        kind = "INTERFACE" if run.draws else "PROGRAM"
+        return (
+            [Flow(kind=kind), *run.inputs],
+            [Flow("next", kind=kind), *run.outputs],
+        )
+
+    def _current_specs(self):
+        def spec(socket):
+            result = Socket(socket.bl_idname, socket.identifier, socket.name)
+            if hasattr(socket, "kind"):
+                result.kind = socket.kind
+            for attr in ("dimension", "use_alpha"):
+                if hasattr(socket, attr):
+                    result.attrs[attr] = getattr(socket, attr)
+            return result
+
+        return [spec(s) for s in self.inputs], [spec(s) for s in self.outputs]
+
     # -- code -------------------------------------------------------------------
 
-    def emit(self, ctx):
-        variables = self.get_variables()
-        for var in variables:
-            if not is_identifier(var["name"]):
-                raise NodeError(f"Invalid variable name: {var['name']}")
-        assignments = [
-            f"{var['name']} = {ctx.input(VAR_PREFIX + var['name'])}"
-            for var in variables
-            if not var["is_output"]
+    def sn_names(self):
+        source = self.source_name()
+        if source is None:
+            return []
+        owner, base = source
+        return [
+            naming.Script("module", base, owner),
+            naming.Symbol("alias", naming.snake(base, "script"), owner=owner),
         ]
-        # multi-line strings become single-line literals, so the script can
-        # be indented without changing their values
-        script = flatten_multiline_strings(self.script_source())
-        # before ctx.code(): the nodes after this one are emitted in there
-        for var in variables:
-            if var["is_output"]:
-                ctx.output(VAR_PREFIX + var["name"], var["name"])
+
+    def emit_module(self, ctx):
+        """The script as a module of the add-on, wherever the node is."""
+        source = self.script_source()
+        self.script_run()  # a syntax error shows on the node
+        ctx.script("module", "alias", source)
+
+    def emit(self, ctx):
+        run = self.script_run()
+        names = ctx.scope.names
+        implicit = {
+            "context": "context" if "context" in names else "bpy.context",
+            "layout": ctx.layout,
+            "self": "self" if "self" in names else "None",
+            "event": "event" if "event" in names else "None",
+        }
+        args = [
+            f"{name}={implicit[name] if name in implicit else ctx.input(name)}"
+            for name in run.params
+        ]
+        call = f"{ctx.name('alias')}.run({', '.join(args)})"
+        if run.outputs:
+            results = [ctx.var(naming.snake(s.label, "result")) for s in run.outputs]
+            for spec, result in zip(run.outputs, results):
+                ctx.output(spec.key, result)
+            call = f"{', '.join(results)} = {call}"
         ctx.code(f"""
-            {ctx.join(assignments)}
-            {ctx.join([script])}
+            {call}
             {ctx.flow("next")}
         """)
 
     # -- UI -------------------------------------------------------------------
 
+    def draw_label(self):
+        source = self.source_name()
+        return naming.snake(source[1]).replace("_", " ").title() if source else "Script"
+
     def draw(self, context, layout):
-        op = layout.operator(
-            "sna.script_variables_settings", text="Variables", icon="PROPERTIES"
-        )
-        op.node_id = self.id
-        layout.prop(self, "source_type", text="")
-        if self.source_type == "INTERNAL":
-            layout.template_ID(self, "text_block", new="text.new", open="text.open")
-        else:
+        layout.prop(self, "source_type", expand=True)
+        if self.source_type == "EXTERNAL":
             layout.prop(self, "filepath", text="")
+            return
+        row = layout.row(align=True)
+        row.template_ID(self, "text_block", new="sna.new_script", open="text.open")
+        if self.text_block is not None:
+            row.operator("sna.edit_script", text="", icon="TEXT").node_id = self.id
 
 
 # node id -> last seen source fingerprint
