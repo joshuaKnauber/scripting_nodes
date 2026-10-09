@@ -1,11 +1,42 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowRight, Heart } from 'lucide-react';
 import { JetBrains_Mono } from 'next/font/google';
 import { AssistantDemo } from '@/components/home/assistant-demo';
 import { FeatureGraph } from '@/components/home/feature-graph';
 import { NodeDemo } from '@/components/home/node-demo';
+import { JsonLd } from '@/components/json-ld';
 import { Logo } from '@/components/logo';
-import { githubUrl, supportFormUrl } from '@/lib/shared';
+import {
+  appName,
+  githubUrl,
+  releasesUrl,
+  siteDescription,
+  siteUrl,
+  supportFormUrl,
+} from '@/lib/shared';
+
+export const metadata: Metadata = {
+  title: { absolute: `${appName} | Build Blender add-ons with nodes` },
+  alternates: { canonical: '/' },
+};
+
+const softwareJsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'SoftwareApplication',
+  name: appName,
+  description: siteDescription,
+  url: siteUrl,
+  applicationCategory: 'DeveloperApplication',
+  applicationSubCategory: 'Blender add-on',
+  operatingSystem: 'Windows, macOS, Linux',
+  downloadUrl: `${releasesUrl}/latest`,
+  license: 'https://www.gnu.org/licenses/gpl-3.0.html',
+  isAccessibleForFree: true,
+  offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD' },
+  softwareRequirements: 'Blender 5.0 or later',
+  codeRepository: githubUrl,
+};
 
 const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-code' });
 
@@ -27,6 +58,7 @@ const secondary = `${button} text-fd-muted-foreground hover:text-fd-foreground f
 export default function HomePage() {
   return (
     <div className={`${mono.variable} overflow-x-clip pb-40`}>
+      <JsonLd data={softwareJsonLd} />
       <section className={`${container} pt-24 text-center sm:pt-32`}>
         <a
           href={supportFormUrl}
