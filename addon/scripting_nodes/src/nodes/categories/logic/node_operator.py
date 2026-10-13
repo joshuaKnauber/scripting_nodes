@@ -124,6 +124,12 @@ class SNA_Node_Operator(PropertyListMixin, ScriptingBaseNode, bpy.types.Node):
         label = naming.label(self)
         return [naming.Class("class", "OT", label), naming.Idname("idname", label)]
 
+    def reference_label(self):
+        label = self.socket("label")
+        if label is not None and not label.is_linked and label.value:
+            return label.value
+        return self.label or self.name
+
     def socket_specs(self):
         inputs = [
             String("label", "Label", default="Operator"),

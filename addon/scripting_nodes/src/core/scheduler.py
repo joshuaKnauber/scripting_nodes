@@ -9,11 +9,12 @@ Everything that can change the generated code only *requests* a rebuild:
 Nothing compiles or reloads inside RNA update callbacks. A persistent timer
 calls `flush()`, which runs the pipeline once:
 
-    1. integrity  - init new trees, unique tree/node ids, versioning (full only)
-    2. sockets    - every node's sockets match its declaration
-    3. references - rebuild the picker collections on scene.sna
-    4. compile    - graph -> files (core/compiler.py, pure)
-    5. apply      - write changed files, reload the addon (core/runtime.py)
+    1. integrity  - init new trees, unique tree/node ids, references of
+                    copies, versioning (full only)
+    2. sockets    - every node's sockets match its declaration; property
+                    pickers on scene.sna
+    3. compile    - graph -> files (core/compiler.py, pure)
+    4. apply      - write changed files, reload the addon (core/runtime.py)
 
 Nodes store no generated code, so there's nothing that can go stale: what's
 in the graph is what compiles. `flush()` never raises.
@@ -25,8 +26,8 @@ import bpy
 
 from ..lib.logger import fmt_duration, log, log_if
 from ..lib.screen import redraw_all
-from ..lib.trees import scripting_node_trees, sn_nodes
-from . import compiler, errors, functions, integrity, references, runtime
+from ..lib.trees import forget_missing, scripting_node_trees, sn_nodes
+from . import compiler, errors, functions, integrity, properties, references, runtime
 
 TICK_SECONDS = 0.1
 
@@ -78,6 +79,8 @@ def _flush():
     _dirty = _full = False
     dev = bpy.context.scene.sna.dev
     trees = scripting_node_trees()
+    # nodes may have been added, deleted or restored by undo
+    forget_missing()
 
     if full:
         integrity.ensure(trees)
@@ -91,7 +94,7 @@ def _flush():
     for _ in range(3):
         if not any([node.sync_sockets() for t in trees for node in _upstream_first(t)]):
             break
-    references.sync(trees)
+    properties.sync_pickers()
 
     t0 = time.perf_counter()
     files = compiler.compile_addon(dev=True)
@@ -100,6 +103,7 @@ def _flush():
     t2 = time.perf_counter()
     # changes made above (socket syncing) request another flush; ignore them
     _dirty = False
+    references.invalidate()
 
     log_if(dev.log_tree_rebuilds, "INFO", f"compiled in {fmt_duration(t1 - t0)}")
     log_if(

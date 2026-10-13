@@ -1,8 +1,9 @@
 import bpy
 
 from ....core.context import NodeError
+from ....core.references import Reference
 from ....sockets.spec import Flow, Socket
-from ..._reference_signatures import VARIABLE_NODES
+from ..._reference_types import VARIABLE_NODES, usable_variable
 from ...base_node import ScriptingBaseNode
 
 
@@ -11,9 +12,8 @@ class SNA_Node_SetVariable(ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SNA_Node_SetVariable"
     bl_label = "Set Variable"
-    sn_reference_properties = {"var": VARIABLE_NODES}
 
-    var: bpy.props.StringProperty(name="Variable")
+    var: Reference(VARIABLE_NODES, name="Variable", filter=usable_variable)
 
     def socket_specs(self):
         target = self.resolve_reference("var")
@@ -21,12 +21,14 @@ class SNA_Node_SetVariable(ScriptingBaseNode, bpy.types.Node):
         return [Flow(), Socket(data_type, "value", "Value")], [Flow("next")]
 
     def draw(self, context, layout):
-        self.draw_reference_prop(layout, "var")
+        self.draw_reference(layout, "var")
 
     def emit(self, ctx):
         target = ctx.resolve("var")
         if target is None:
             raise NodeError("Pick a variable")
+        if not usable_variable(self, target):
+            raise NodeError("Local variables can only be used in their own tree")
         value = ctx.input("value")
         if target.bl_idname == "SNA_Node_LocalVariable":
             statement = f"{target.variable_name()} = {value}"

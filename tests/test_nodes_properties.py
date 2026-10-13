@@ -382,7 +382,7 @@ class PropertiesTest(unittest.TestCase):
         panel = self.add("SNA_Node_Panel")
         button = self.add("SNA_Node_Button")
         helpers.link(self.tree, panel.outputs["Interface"], button.inputs[0])
-        button.operator_sn = helpers.sn("src.core.references").display_name(op)
+        helpers.point(button, "operator_sn", op)
         helpers.flush()
         button.socket("arg_amount").value = 5
         self.assertEqual(button.socket("arg_offset").dimension, "2")

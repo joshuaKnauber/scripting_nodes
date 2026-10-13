@@ -63,7 +63,7 @@ def build():
         fields.append(field)
     fields[2].expand = True
     button = helpers.add_node(tree, "SNA_Node_Button", (100, -200))
-    button.operator_sn = helpers.sn("src.core.references").display_name(op)
+    helpers.point(button, "operator_sn", op)
     length = helpers.add_node(tree, "SNA_Node_CollectionLength", (100, -450))
     text = helpers.add_node(tree, "SNA_Node_CombineStrings", (350, -450))
     text.inputs["first"].value = "Entries: "

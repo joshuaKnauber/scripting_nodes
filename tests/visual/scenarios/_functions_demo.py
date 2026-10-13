@@ -18,10 +18,6 @@ FLOAT = "ScriptingFloatSocket"
 STRING = "ScriptingStringSocket"
 
 
-def ref(node):
-    return helpers.sn("src.core.references").display_name(node)
-
-
 def build():
     bpy.context.scene.sna.addon.addon_name = "Functions Demo"
 
@@ -86,7 +82,7 @@ def build():
     helpers.link(tree, text.outputs[0], label.inputs["text"])
     helpers.link(tree, label.outputs[0], button.inputs[0])
     helpers.flush()
-    button.operator_sn = ref(operator)
+    helpers.point(button, "operator_sn", operator)
     button.inputs["label"].value = "Say Hello"
     helpers.flush()
     return tree, {"Double": double, "Greet": greet, "Header": header}

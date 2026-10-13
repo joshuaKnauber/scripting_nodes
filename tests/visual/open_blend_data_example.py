@@ -20,10 +20,6 @@ import helpers  # noqa: E402
 OUTPUT = sys.argv[sys.argv.index("--") + 1]
 
 
-def ref(node):
-    return helpers.sn("src.core.references").display_name(node)
-
-
 def blend_data(tree, location, path, root="CONTEXT"):
     node = helpers.add_node(tree, "SNA_Node_BlendData", location)
     node.path_root = root
@@ -80,7 +76,7 @@ def build():
     # what "Copy Data Path for Scripting Nodes" puts on the clipboard
     bevel.paste_path('bpy.data.objects["Cube"].modifiers["Bevel"].width')
     button = helpers.add_node(tree, "SNA_Node_Button", (200, -400))
-    button.operator_sn = ref(op)
+    helpers.point(button, "operator_sn", op)
     link(panel.outputs["Interface"], simplify.inputs[0])
     link(simplify.socket("next", output=True), frame_end.inputs[0])
     link(frame_end.socket("next", output=True), bevel.inputs[0])

@@ -3,7 +3,7 @@ from typing import Dict, Tuple
 import bpy
 
 from ..core import errors, scheduler
-from ..core.references import find_node, install_reference_properties, ref_id_key
+from ..core import references
 from ..lib.ids import get_short_id
 from ..node_tree.node_tree import ScriptingNodeTree
 from ..sockets.spec import MISSING, SocketSpec
@@ -70,9 +70,11 @@ class ScriptingBaseNode:
     sn_order = 50
     # Properties drawn on the node before `draw()`
     sn_header_props: Tuple[str, ...] = ()
-    # {prop_name: allowed bl_idnames}: string fields referencing other nodes,
-    # stored by node id (core/references.py)
-    sn_reference_properties: Dict[str, Tuple[str, ...]] = {}
+    # Fields referencing other nodes are declared as `Reference(...)`
+    # annotations (core/references.py) and listed here: {attr: Reference}
+    sn_references: dict = {}
+    # CollectionProperties whose items have reference fields of their own
+    sn_reference_collections: Tuple[str, ...] = ()
     # {prop_name: picker category}: string fields picking a property
     # definition, stored by its id in `<prop_name>_id` (core/properties.py)
     sn_property_references: Dict[str, str] = {}
@@ -81,9 +83,8 @@ class ScriptingBaseNode:
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
+        references.install(cls)
         _install_auto_updates(cls)
-        if cls.sn_reference_properties:
-            install_reference_properties(cls, cls.sn_reference_properties)
         if cls.sn_property_references:
             from ..core.properties import install_references
 
@@ -123,7 +124,11 @@ class ScriptingBaseNode:
         """Called once after the sockets were created."""
 
     def copy(self, node):
+        # references of nodes copied together are redirected to the copies
+        # (core/integrity.py)
+        self["sn_copied_from"] = node.id
         self.id = get_short_id()
+        scheduler.request_full()
         self.mark_dirty()
 
     def free(self):
@@ -197,24 +202,12 @@ class ScriptingBaseNode:
 
     # -- references ---------------------------------------------------------
 
-    @classmethod
-    def _ref_collection_attr(cls, prop_name):
-        from ..settings.settings import signature_key
+    def resolve_reference(self, attr):
+        """The node reference field `attr` points to, or None."""
+        return references.resolve(self, attr)
 
-        return signature_key(cls.sn_reference_properties[prop_name])
-
-    def resolve_reference(self, prop_name):
-        """The node a reference field points to, or None."""
-        return find_node(self.get(ref_id_key(prop_name), ""))
-
-    def draw_reference_prop(self, layout, prop_name, text=""):
-        layout.prop_search(
-            self,
-            prop_name,
-            bpy.context.scene.sna,
-            self._ref_collection_attr(prop_name),
-            text=text,
-        )
+    def draw_reference(self, layout, attr, text=""):
+        draw_reference(layout, self, attr, text)
 
     # -- UI -------------------------------------------------------------------
 
@@ -238,6 +231,38 @@ class ScriptingBaseNode:
 
     def draw(self, context, layout):
         pass
+
+    def draw_buttons_ext(self, context, layout):
+        """Sidebar: the node's settings, then the nodes referencing it."""
+        self.draw_buttons(context, layout)
+        draw_users(layout, self)
+
+
+def draw_reference(layout, owner, attr, text=""):
+    """A reference field: search field, a jump button to the target, or a
+    red field if the target was deleted."""
+    row = layout.row(align=True)
+    if references.is_missing(owner, attr):
+        row.alert = True
+        row.prop(owner, attr, text=text, icon="ERROR")
+        return
+    row.prop(owner, attr, text=text)
+    target = references.resolve(owner, attr)
+    if target is not None:
+        row.operator("sna.go_to_node", text="", icon="VIEWZOOM").node_id = target.id
+
+
+def draw_users(layout, target):
+    """List the nodes referencing `target` (a node or a tree) with jump buttons."""
+    users = references.users(target)
+    if not users:
+        return
+    col = layout.column(align=True)
+    col.label(text=f"Used by {len(users)}", icon="LINKED")
+    for node, _attr in users:
+        row = col.row(align=True)
+        row.label(text=f"{node.label or node.name} ({node.id_data.name})")
+        row.operator("sna.go_to_node", text="", icon="VIEWZOOM").node_id = node.id
 
 
 # -----------------------------------------------------------------------------

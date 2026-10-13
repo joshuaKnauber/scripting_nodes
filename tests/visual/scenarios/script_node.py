@@ -49,10 +49,6 @@ def text(name, body):
     return text
 
 
-def ref(node):
-    return helpers.sn("src.core.references").display_name(node)
-
-
 def setup():
     bpy.context.scene.sna.addon.addon_name = "Object Tools"
     scene = bpy.context.scene
@@ -85,7 +81,7 @@ def setup():
     helpers.link(tree, panel.outputs["Interface"], info.inputs[0])
     helpers.link(tree, info.outputs[0], button.inputs[0])
     helpers.flush()
-    button.operator_sn = ref(op)
+    helpers.point(button, "operator_sn", op)
     button.socket("label").value = "Arrange Objects"
     helpers.flush()
     return tree

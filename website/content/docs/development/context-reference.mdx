@@ -15,7 +15,7 @@ icon: BookOpen
 | `ctx.inputs(key)` | Expressions of all sockets of a dynamic group |
 | `ctx.is_linked(key)` | Whether input or output `key` is connected |
 | `ctx.output(key, expr)` | Set data output `key`. From a flow node: available to everything after it |
-| `ctx.resolve(prop)` | The node a reference property points to, or `None` |
+| `ctx.resolve(field)` | The node a `Reference` field points to, or `None` |
 
 ## Writing code
 
@@ -35,7 +35,7 @@ Placeholders must be on their own line. They are indented to the column they sit
 | --- | --- |
 | `ctx.imports("import math")` | Add an import line (deduplicated) |
 | `ctx.helper("sn_print")` | Name to call a shared helper by (`core/helpers.py`) |
-| `ctx.symbol(node_or_tree, name)` | `name`, imported if it is defined in another tree's module |
+| `ctx.symbol(node_or_tree, name)` | Expression for `name`: the name itself in the same tree, `_<module>.name` with the module imported for other trees |
 | `ctx.script(module_key, alias_key, source)` | Add `source` unchanged as `scripts/<name>.py` and import it here; returns the name to use it by. Both names are declared in `sn_names()` (`naming.Script`, `naming.Symbol`) with a shared `owner` |
 | `ctx.on_register(line)` / `ctx.on_unregister(line)` | Lines for the module's `register()` / `unregister()` |
 | `ctx.var("row")` | Unused local name (`row`, then `row_2`, …) |

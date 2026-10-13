@@ -4,7 +4,7 @@ property in Blender."""
 
 import bpy
 
-from ..core.references import find_node
+from ..lib.trees import node_by_id
 from ..node_tree.node_tree import ScriptingNodeTree
 from . import rna
 
@@ -37,7 +37,7 @@ class SNA_OT_PasteBlenderPath(bpy.types.Operator):
             self.report({"WARNING"}, str(error))
             return {"CANCELLED"}
 
-        node = find_node(self.node_id)
+        node = node_by_id(self.node_id)
         added = node is None
         if added:
             tree = context.space_data.edit_tree
@@ -58,7 +58,7 @@ _type_items_cache = {}
 
 
 def _type_items(self, context):
-    node = find_node(self.node_id)
+    node = node_by_id(self.node_id)
     if node is None:
         names = ()
         none_label = ""
@@ -97,7 +97,7 @@ class SNA_OT_BlendPathType(bpy.types.Operator):
         return {"RUNNING_MODAL"}
 
     def execute(self, context):
-        node = find_node(self.node_id)
+        node = node_by_id(self.node_id)
         if node is None:
             return {"CANCELLED"}
         value = "" if self.type_name == NO_TYPE else self.type_name

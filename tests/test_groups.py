@@ -137,7 +137,7 @@ class GroupsTest(unittest.TestCase):
         helpers.flush()
         source = helpers.tree_source(tree)
         module, name = function.module_name, function.function_name
-        self.assertIn(f"from .{module} import {name}", source)
+        self.assertIn(f"from . import {module} as _{module}", source)
         self.assertIn(f"{name}(4.0, self=self, context=context)", source)
         self.assertLoaded()
 
@@ -155,7 +155,9 @@ class GroupsTest(unittest.TestCase):
         helpers.link(tree, call.outputs[1], p.inputs["text"])
         helpers.flush()
         source = helpers.tree_source(tree)
-        self.assertRegex(source, rf"(result) = {function.function_name}\('Ann'.*\n.*\1")
+        self.assertRegex(
+            source, rf"(result) = _\w+\.{function.function_name}\('Ann'.*\n.*\1"
+        )
         self.assertLoaded()
         namespace, op = trigger.operator_idname.split(".")
         self.assertEqual(getattr(getattr(bpy.ops, namespace), op)(), {"FINISHED"})

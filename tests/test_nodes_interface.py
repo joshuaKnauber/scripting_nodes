@@ -11,11 +11,6 @@ def source(tree):
     return helpers.sn("src.core.compiler").compile_tree(tree, pretty=False)
 
 
-def ref(node):
-    """Value to assign to a reference field pointing at `node`."""
-    return helpers.sn("src.core.references").display_name(node)
-
-
 def errors():
     return helpers.sn("src.core.errors")
 
@@ -103,7 +98,7 @@ class InterfaceNodesTest(unittest.TestCase):
         panel = helpers.add_node(tree, "SNA_Node_Panel")
         button = helpers.add_node(tree, "SNA_Node_Button")
         helpers.link(tree, panel.outputs["Interface"], button.inputs[0])
-        button.operator_sn = ref(op)
+        helpers.point(button, "operator_sn", op)
         helpers.flush()
         button.socket("arg_count").value = 5
         button.socket("label").value = "Go"
@@ -117,16 +112,18 @@ class InterfaceNodesTest(unittest.TestCase):
 
     def test_run_blender_operator(self):
         operator_call = helpers.sn("src.nodes._operator_call")
-        operator_call.refresh_blender_operator_collection()
-        entries = bpy.context.window_manager.sna_blender_operators
-        entry = next(e for e in entries if e.bl_idname == "mesh.primitive_cube_add")
+        choice = next(
+            display
+            for display, idname in operator_call.blender_operator_choices()
+            if idname == "mesh.primitive_cube_add"
+        )
 
         tree = helpers.new_tree()
         trigger = helpers.add_node(tree, "SNA_Node_Trigger")
         node = helpers.add_node(tree, "SNA_Node_RunOperator")
         helpers.link(tree, trigger.outputs[0], node.inputs[0])
         node.mode = "BLENDER"
-        node.operator_blender = entry.name
+        node.operator_blender = choice
         helpers.flush()
         node.socket("arg_size").value = 3.0
         helpers.flush()
