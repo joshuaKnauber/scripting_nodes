@@ -1,6 +1,8 @@
-"""Open GUI Blender with this checkout's addon on the Blend Data example.
+"""Open GUI Blender with this checkout's addon on an example.
 
-    python scripts/open_example.py [out.blend]
+    python scripts/open_example.py [example.py] [out.blend]
+
+`example.py` builds the file (default: tests/visual/open_blend_data_example.py).
 
 Uses a separate user profile (kept in a temp folder, path printed), so your
 own Blender setup and installed Scripting Nodes are never touched. Blender
@@ -20,10 +22,13 @@ SCRIPT = os.path.join(REPO_ROOT, "tests", "visual", "open_blend_data_example.py"
 
 
 def main():
+    args = sys.argv[1:]
+    script = (
+        os.path.abspath(args.pop(0)) if args and args[0].endswith(".py") else SCRIPT
+    )
+    name = os.path.splitext(os.path.basename(script))[0].removeprefix("open_")
     output = os.path.abspath(
-        sys.argv[1]
-        if len(sys.argv) > 1
-        else os.path.join(tempfile.gettempdir(), "blend_data_example.blend")
+        args[0] if args else os.path.join(tempfile.gettempdir(), f"{name}.blend")
     )
     user_resources = make_user_resources()
     env = dict(os.environ, BLENDER_USER_RESOURCES=user_resources)
@@ -35,7 +40,7 @@ def main():
     log = os.path.join(user_resources, "blender.log")
     with open(log, "w") as out:
         subprocess.Popen(
-            [find_blender(), "--python", SCRIPT, "--", output],
+            [find_blender(), "--python", script, "--", output],
             env=env,
             stdout=out,
             stderr=subprocess.STDOUT,

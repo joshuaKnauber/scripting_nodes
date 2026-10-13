@@ -1,5 +1,5 @@
 """Reference fields: a variable used in its tree and from another tree, a
-deleted target, an operator with an attached property, the sidebar showing
+deleted target, a button picking an operator, the sidebar showing
 the users of the selected variable."""
 
 import helpers
@@ -22,11 +22,9 @@ def setup():
     remote = helpers.add_node(other, "SNA_Node_GetVariable")
     helpers.point(remote, "var", var)
 
-    prop = helpers.add_node(tree, "SNA_Node_IntProperty", (200, 250))
-    prop.register_on = "Operator"
-    prop.prop_label = "Amount"
-    op = helpers.add_node(tree, "SNA_Node_Operator", (200, -50))
-    helpers.point(op.class_body_properties.add(), "prop", prop)
+    op = helpers.add_node(tree, "SNA_Node_Operator", (200, 250))
+    button = helpers.add_node(tree, "SNA_Node_Button", (200, -50))
+    helpers.point(button, "operator_sn", op)
 
     for node in tree.nodes:
         node.select = False
