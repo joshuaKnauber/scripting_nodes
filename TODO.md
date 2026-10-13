@@ -33,7 +33,9 @@ and `ruff check` with zero findings.
 ## 3. Node design open questions
 
 - [x] **Blend Data** (done 2026-10, `website/content/docs/blend-data/`): one Blender Data node following a path (Context / Blend File / Input), add-menu presets, typed sockets from RNA with a type picker for open types, `[]` keys by Index / Name / Active, paste + "Copy Data Path for Scripting Nodes", property nodes in Blender mode use the same paths. Follow-ups:
-  - [ ] Data explorer: browse the data of the open file and add nodes from it (users liked v3's data browser).
+  - [x] Data explorer v1 (sidebar Blend Data tab): one level of live data, follows the active Blender Data node (clicking changes its path), + adds nodes, editable values, types-only fallback.
+  - [ ] Explorer: Blender's functions (`objects.new()`, `modifiers.remove()`), needs a node that calls them.
+  - [ ] Explorer: drag entries into the node editor; remember recent places.
 - [x] **Node references** (done 2026-10): `Reference(...)` fields with a search callback, stored by node id, "Used by" in the sidebar, copies point at copied targets, deleted targets drawn red.
 - [x] **Properties as lists** (done 2026-10, `website/content/docs/properties/properties.mdx`): add-on list in Addon Data (one PropertyGroup per attach type, `scene.my_addon.count`), groups with their own list, Operator / Preferences node lists (operator properties are also its outputs), Get / Set / fields / On Property Update pick by id, enum items and pointer poll from functions, `addon/properties.py`. Follow-ups:
   - [ ] The Python name follows the label until it's pinned, so renaming a property in use loses saved values. Pin automatically once the add-on was exported?

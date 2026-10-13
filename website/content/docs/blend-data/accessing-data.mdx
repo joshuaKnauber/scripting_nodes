@@ -36,6 +36,19 @@ Lists (collections, drawn with a square socket) work with the **Collection** nod
 - **Name**: by name, e.g. the modifier called "Bevel".
 - **Active**: the list's active item, where the list has one (e.g. `material_slots`).
 
+## Exploring the open file
+
+The **Blend Data** tab in the node editor's sidebar shows the data of the open file, one level at a time: the real objects, modifiers and values, not just what could be there.
+
+![The data explorer showing the Bevel modifier the selected node points at](/screenshots/blend-data-explorer.png)
+
+- With a Blender Data node selected, it shows where the node's path ends. Click an entry to go into it: the node's path follows, so you build the path by clicking. **←** goes back a step, the home button to the start.
+- **+** next to an entry adds a new node for it, connected to the selected node.
+- Without a selected node (or with the arrow in the panel header turned off) it browses on its own, starting at **Context** or **Blend File**, and **+** adds a node with the whole path.
+- Values can be changed right there. The search field filters the entries; long lists show the first 50 items.
+
+When the data isn't there right now (no active object, a key that comes from a link), the explorer lists what the type has instead, without values.
+
 ## Generated code
 
 The node becomes the path itself, written with the `context` the surrounding function gets (or `bpy.context` where there is none):

@@ -25,3 +25,20 @@ class SNA_UISettings(bpy.types.PropertyGroup):
     active_function_index: bpy.props.IntProperty(
         default=0, update=update_active_function_index
     )
+
+    # Data explorer (blend_data/ui/explorer_panel.py)
+    explorer_path: bpy.props.StringProperty(
+        name="Explorer Path",
+        description="Where the data explorer is when it doesn't follow a node",
+    )
+    explorer_filter: bpy.props.StringProperty(
+        name="Filter",
+        description="Only show entries containing this text",
+        options={"TEXTEDIT_UPDATE"},
+    )
+    explorer_follow: bpy.props.BoolProperty(
+        name="Follow Active Node",
+        description="Show the data where the active Blender Data node's path "
+        "ends; clicking an entry changes its path",
+        default=True,
+    )

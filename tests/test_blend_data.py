@@ -283,5 +283,137 @@ class BlendDataNodeTest(unittest.TestCase):
         self.assertIn("MESH", node.outputs[0].enum_items_data)
 
 
+class ExplorerTest(unittest.TestCase):
+    """blend_data/explorer.py: locations and live data."""
+
+    def setUp(self):
+        helpers.reset_file()
+        self.cube = bpy.data.objects.new("Cube", bpy.data.meshes.new("Cube"))
+        bpy.context.scene.collection.objects.link(self.cube)
+        bpy.context.view_layer.objects.active = self.cube
+        self.cube.modifiers.new("Bevel", "BEVEL")
+        self.tree = helpers.new_tree()
+
+    def tearDown(self):
+        for tree in list(bpy.data.node_groups):
+            bpy.data.node_groups.remove(tree)
+
+    def explorer(self):
+        return helpers.sn("src.blend_data.explorer")
+
+    def add(self, path, root="CONTEXT"):
+        node = helpers.add_node(self.tree, "SNA_Node_BlendData")
+        node.path_root = root
+        node.path = path
+        return node
+
+    def test_node_location_is_live(self):
+        ex = self.explorer()
+        node = self.add("active_object.modifiers[]")
+        node.path_keys[0].mode = "NAME"
+        node.socket("key_0").value = "Bevel"
+        location = ex.node_location(node, bpy.context)
+        self.assertEqual(location.keys, [ex.Key("NAME", "Bevel")])
+        self.assertEqual(
+            ex.evaluate(location, bpy.context), self.cube.modifiers["Bevel"]
+        )
+        self.assertEqual(
+            [text for text, _ in location.crumbs()],
+            ["Context", "Active Object", "Modifiers", "Bevel"],
+        )
+        # by index, and the active item
+        node.path_keys[0].mode = "INDEX"
+        node.socket("key_0").value = 0
+        location = ex.node_location(node, bpy.context)
+        self.assertEqual(ex.evaluate(location, bpy.context), self.cube.modifiers[0])
+        node.path_keys[0].mode = "ACTIVE"
+        location = ex.node_location(node, bpy.context)
+        self.assertEqual(ex.evaluate(location, bpy.context), self.cube.modifiers.active)
+
+    def test_unavailable(self):
+        ex = self.explorer()
+        node = self.add("active_object.modifiers[]")
+        node.path_keys[0].mode = "NAME"
+        node.socket("key_0").value = "Nothing"
+        with self.assertRaises(ex.Unavailable):
+            ex.evaluate(ex.node_location(node, bpy.context), bpy.context)
+        # a key from a link isn't known: types only
+        number = helpers.add_node(self.tree, "SNA_Node_Integer")
+        node.path_keys[0].mode = "INDEX"
+        helpers.link(self.tree, number.outputs[0], node.socket("key_0"))
+        location = ex.node_location(node, bpy.context)
+        self.assertEqual(location.keys, [ex.Key("INDEX")])
+        with self.assertRaises(ex.Unavailable):
+            ex.evaluate(location, bpy.context)
+        self.assertEqual(location.final_step().rna_type, "Modifier")
+
+    def test_input_follows_the_chain(self):
+        ex = self.explorer()
+        active = self.add("active_object")
+        modifiers = self.add("modifiers", root="INPUT")
+        helpers.link(self.tree, active.outputs[0], modifiers.socket("data"))
+        helpers.flush()
+        location = ex.node_location(modifiers, bpy.context)
+        self.assertEqual(location.start, self.cube)
+        self.assertEqual(ex.evaluate(location, bpy.context), self.cube.modifiers)
+        self.assertEqual(location.crumbs()[0][0], "Object")
+
+    def test_set_node_location(self):
+        ex = self.explorer()
+        node = self.add("active_object")
+        location = ex.node_location(node, bpy.context)
+        target = location.extended("modifiers").extended(key=ex.Key("NAME", "Bevel"))
+        ex.set_node_location(node, target.extended("width"))
+        self.assertEqual(node.path, "active_object.modifiers[].width")
+        self.assertEqual(node.path_keys[0].mode, "NAME")
+        self.assertEqual(node.socket("key_0").value, "Bevel")
+        self.assertEqual(node.outputs[0].bl_idname, "ScriptingFloatSocket")
+        # back to the first segment
+        ex.set_node_location(node, ex.node_location(node, bpy.context).truncated(1))
+        self.assertEqual(node.path, "active_object")
+        self.assertEqual(len(node.path_keys), 0)
+
+    def test_free_location_round_trip(self):
+        ex = self.explorer()
+        for text in (
+            "bpy.context",
+            "bpy.data",
+            "bpy.context.active_object.modifiers['Bevel']",
+            "bpy.data.objects['Cube'].modifiers[0]",
+            "bpy.context.active_object.modifiers.active",
+        ):
+            location = ex.free_location(text)
+            self.assertEqual(location.python(), text)
+            self.assertIsNotNone(ex.evaluate(location, bpy.context))
+        self.assertEqual(ex.free_location("").root, "")
+        self.assertEqual(ex.free_location("not a path").root, "")
+
+    def test_item_keys(self):
+        ex = self.explorer()
+        objects = bpy.data.objects
+        self.assertEqual(
+            ex.item_key(objects, 0, objects[0]), ex.Key("NAME", objects[0].name)
+        )
+        slots = self.cube.material_slots
+        if len(slots):
+            # material slots are named after their material, but not found by it
+            self.assertEqual(ex.item_key(slots, 0, slots[0]).mode, "INDEX")
+
+    def test_followed_nodes(self):
+        ex = self.explorer()
+        self.assertTrue(ex.follows(self.add("scene")))
+        getter = helpers.add_node(self.tree, "SNA_Node_GetProperty")
+        self.assertFalse(ex.follows(getter))  # Custom mode
+        getter.mode = "BLENDER"
+        self.assertTrue(ex.follows(getter))
+        self.assertFalse(ex.follows(helpers.add_node(self.tree, "SNA_Node_Print")))
+
+    def test_context_members(self):
+        members = self.explorer().struct_members(bpy.context, bpy.context)
+        names = [identifier for identifier, _, _ in members]
+        self.assertIn("scene", names)  # an RNA property of Context
+        self.assertIn("active_object", names)  # a context member
+
+
 if __name__ == "__main__":
     unittest.main()
