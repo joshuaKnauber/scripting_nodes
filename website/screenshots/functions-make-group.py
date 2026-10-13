@@ -31,7 +31,5 @@ def after(context):
     area = next(a for a in context.window.screen.areas if a.type == "NODE_EDITOR")
     area.spaces.active.show_region_ui = False
     region = next(r for r in area.regions if r.type == "WINDOW")
-    with context.temp_override(
-        area=area, region=region, space_data=area.spaces.active
-    ):
+    with context.temp_override(area=area, region=region, space_data=area.spaces.active):
         bpy.ops.sna.make_group()
