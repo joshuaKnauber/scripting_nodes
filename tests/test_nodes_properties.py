@@ -350,8 +350,25 @@ class PropertiesTest(unittest.TestCase):
         checkbox.prop = "Flag"
         self.assertEqual(checkbox.prop_id, flag)
         self.assertEqual(checkbox.prop, "Flag")
-        names = [e.name for e in bpy.context.scene.sna.refs_props_boolean]
-        self.assertEqual(names, ["Flag"])  # a checkbox only offers booleans
+        choices = helpers.sn("src.core.properties").choices
+        # a checkbox only offers booleans
+        self.assertEqual([text for text, _ in choices("BOOLEAN")], ["Flag"])
+        # text that isn't a choice keeps the current one, "" clears it
+        checkbox.prop = "Nothing"
+        self.assertEqual(checkbox.prop_id, flag)
+        checkbox.prop = ""
+        self.assertEqual(checkbox.prop_id, "")
+
+    def test_deleted_property_is_missing(self):
+        prop = helpers.add_property("Flag", "BOOLEAN")
+        checkbox = self.add("SNA_Node_Checkbox")
+        helpers.pick_property(checkbox, prop)
+        properties = helpers.sn("src.core.properties")
+        self.assertFalse(properties.is_missing(checkbox, "prop"))
+        bpy.context.scene.sna.addon.properties.remove(0)
+        helpers.flush()
+        self.assertTrue(properties.is_missing(checkbox, "prop"))
+        self.assertEqual(checkbox.prop, "")
 
     def test_on_property_update(self):
         count = helpers.add_property("Count", "INTEGER").id

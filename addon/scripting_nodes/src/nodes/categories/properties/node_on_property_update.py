@@ -35,13 +35,7 @@ class SNA_Node_OnPropertyUpdate(ScriptingBaseNode, bpy.types.Node):
         return [naming.Symbol("function", f"on_{name}_update")]
 
     def draw(self, context, layout):
-        layout.prop_search(
-            self,
-            "prop",
-            context.scene.sna,
-            properties.picker_attr("UPDATE"),
-            text="",
-        )
+        properties.draw_reference(layout, self, "prop")
 
     def emit(self, ctx):
         found = self.target()

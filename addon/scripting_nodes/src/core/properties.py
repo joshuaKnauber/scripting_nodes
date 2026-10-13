@@ -10,8 +10,8 @@ compile to their own module, `addon/properties.py`:
         bpy.types.Scene.my_addon = bpy.props.PointerProperty(type=MY_ADDON_PG_scene_properties)
 
 Operator / Preferences properties are annotations in that node's class
-(`annotations(node, ctx)`). Nodes reference a property by id; a picker
-collection per value type on scene.sna feeds `prop_search`.
+(`annotations(node, ctx)`). Nodes reference a property by id and pick it in
+a search field (`reference()`).
 """
 
 from typing import NamedTuple
@@ -46,10 +46,6 @@ CONTEXT_OWNERS = {
 }
 
 PREFERENCES = "{context}.preferences.addons[__package__.rsplit('.', 1)[0]].preferences"
-
-
-def picker_attr(category):
-    return f"refs_props_{category.lower()}"
 
 
 # -----------------------------------------------------------------------------
@@ -146,15 +142,22 @@ def label(found: Found) -> str:
 # -----------------------------------------------------------------------------
 
 
-class SNA_PropertyRef(bpy.types.PropertyGroup):
-    """One picker entry: `name` is shown and searched."""
-
-    prop_id: bpy.props.StringProperty()
+def choices(category):
+    """(label, property) of every property of `category`, labels unique."""
+    types = CATEGORIES[category]
+    result, seen = [], set()
+    for kind, owner, items in lists():
+        for prop in items:
+            if prop.property_type in types:
+                text = naming.unique(label(Found(prop, kind, owner, items)), seen)
+                result.append((text, prop))
+    return result
 
 
 def reference(attr, category, **kwargs):
     """A StringProperty showing the picked property's name, storing its id in
-    `<attr>_id`. Setting it rebuilds the add-on."""
+    `<attr>_id`. Its search field offers the properties of `category`.
+    Setting it rebuilds the add-on."""
     key = attr + "_id"
 
     # the declared `<attr>_id` property, not self[key]: Blender keeps
@@ -164,9 +167,13 @@ def reference(attr, category, **kwargs):
         return label(found) if found else ""
 
     def set(self, value):
-        coll = getattr(bpy.context.scene.sna, picker_attr(category), ())
-        entry = next((e for e in coll if e.name == value), None)
-        setattr(self, key, entry.prop_id if entry else "")
+        if value:
+            prop = next((p for text, p in choices(category) if text == value), None)
+            if prop is None:
+                return  # text that isn't a choice keeps the current one
+            setattr(self, key, prop.id)
+        else:
+            setattr(self, key, "")
         mark = getattr(self, "mark_dirty", None)
         if mark:
             mark()
@@ -175,7 +182,27 @@ def reference(attr, category, **kwargs):
 
             scheduler.request_full()
 
-    return bpy.props.StringProperty(get=get, set=set, **kwargs)
+    def search(self, context, edit_text):
+        return [(text, p.property_type.title()) for text, p in choices(category)]
+
+    return bpy.props.StringProperty(get=get, set=set, search=search, **kwargs)
+
+
+def is_missing(owner, attr) -> bool:
+    """True if field `attr` points at a property that doesn't exist (anymore)."""
+    prop_id = getattr(owner, attr + "_id")
+    return bool(prop_id) and find(prop_id) is None
+
+
+def draw_reference(layout, owner, attr, text=""):
+    """A property field: search field, red if its property was deleted."""
+    row = layout.row(align=True)
+    if is_missing(owner, attr):
+        row.alert = True
+        row.prop(owner, attr, text=text, icon="ERROR")
+    else:
+        row.prop(owner, attr, text=text)
+    return row
 
 
 def install_references(cls, refs):
@@ -186,28 +213,6 @@ def install_references(cls, refs):
     for attr, category in refs.items():
         annotations[attr] = reference(attr, category, name="Property")
         annotations[attr + "_id"] = bpy.props.StringProperty(options={"HIDDEN"})
-
-
-def sync_pickers(sna=None):
-    """Rebuild the picker collections on scene.sna from the lists."""
-    sna = sna or bpy.context.scene.sna
-    entries = []
-    for kind, owner, items in lists():
-        for prop in items:
-            entries.append((prop, label(Found(prop, kind, owner, items))))
-    for category, types in CATEGORIES.items():
-        coll = getattr(sna, picker_attr(category))
-        wanted, seen = [], set()
-        for prop, text in entries:
-            if prop.property_type in types:
-                wanted.append((prop.id, naming.unique(text, seen)))
-        if [(e.prop_id, e.name) for e in coll] == wanted:
-            continue
-        coll.clear()
-        for prop_id, text in wanted:
-            entry = coll.add()
-            entry.prop_id = prop_id
-            entry.name = text
 
 
 # -----------------------------------------------------------------------------

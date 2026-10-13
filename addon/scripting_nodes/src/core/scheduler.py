@@ -11,8 +11,7 @@ calls `flush()`, which runs the pipeline once:
 
     1. integrity  - init new trees, unique tree/node ids, references of
                     copies, versioning (full only)
-    2. sockets    - every node's sockets match its declaration; property
-                    pickers on scene.sna
+    2. sockets    - every node's sockets match its declaration
     3. compile    - graph -> files (core/compiler.py, pure)
     4. apply      - write changed files, reload the addon (core/runtime.py)
 
@@ -27,7 +26,7 @@ import bpy
 from ..lib.logger import fmt_duration, log, log_if
 from ..lib.screen import redraw_all
 from ..lib.trees import forget_missing, scripting_node_trees, sn_nodes
-from . import compiler, errors, functions, integrity, properties, references, runtime
+from . import compiler, errors, functions, integrity, references, runtime
 
 TICK_SECONDS = 0.1
 
@@ -94,7 +93,6 @@ def _flush():
     for _ in range(3):
         if not any([node.sync_sockets() for t in trees for node in _upstream_first(t)]):
             break
-    properties.sync_pickers()
 
     t0 = time.perf_counter()
     files = compiler.compile_addon(dev=True)

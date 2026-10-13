@@ -12,7 +12,7 @@ picking them by `id`. Code is generated in core/properties.py.
 import bpy
 
 from ..core import scheduler
-from ..core.properties import picker_attr, reference
+from ..core.properties import draw_reference, reference
 from ..lib.ids import get_short_id
 
 PROPERTY_TYPES = [
@@ -534,7 +534,7 @@ def draw_settings(layout, prop, top_level=False):
         if kind == "POINTER":
             col.prop(prop, "pointer_source")
         if prop.uses_group:
-            col.prop_search(prop, "group", bpy.context.scene.sna, picker_attr("GROUP"))
+            draw_reference(col, prop, "group", text="Group")
         else:
             col.prop(prop, "pointer_type")
             col.prop(prop, "poll_function")

@@ -118,15 +118,7 @@ class PropertyTargetMixin(BlendPathMixin):
 
     def draw_target(self, layout):
         if self.mode == "CUSTOM":
-            row = layout.row(align=True)
-            category = self.sn_property_references["prop"]
-            row.prop_search(
-                self,
-                "prop",
-                bpy.context.scene.sna,
-                properties.picker_attr(category),
-                text="",
-            )
+            row = properties.draw_reference(layout, self, "prop")
             row.prop(self, "mode", icon="USER", icon_only=True, text="")
         else:
             self.draw_path(
