@@ -14,7 +14,7 @@ description: Everything a node can do in emit(ctx).
 | `ctx.inputs(key)` | Expressions of all sockets of a dynamic group |
 | `ctx.is_linked(key)` | Whether input or output `key` is connected |
 | `ctx.output(key, expr)` | Set data output `key`. From a flow node: available to everything after it |
-| `ctx.resolve(prop)` | The node a reference property points to, or `None` |
+| `ctx.resolve(field)` | The node a `Reference` field points to, or `None` |
 
 ## Writing code
 
@@ -34,7 +34,7 @@ Placeholders must be on their own line. They are indented to the column they sit
 | --- | --- |
 | `ctx.imports("import math")` | Add an import line (deduplicated) |
 | `ctx.helper("sn_print")` | Name to call a shared helper by (`core/helpers.py`) |
-| `ctx.symbol(node_or_tree, name)` | `name`, imported if it is defined in another tree's module |
+| `ctx.symbol(node_or_tree, name)` | Expression for `name`: the name itself in the same tree, `_<module>.name` with the module imported for other trees |
 | `ctx.on_register(line)` / `ctx.on_unregister(line)` | Lines for the module's `register()` / `unregister()` |
 | `ctx.var("row")` | Unique local name (`row_1`, `row_2`, …) |
 | `ctx.class_name("OT", "Operator")` | `<PREFIX>_OT_Operator_<ID>` |

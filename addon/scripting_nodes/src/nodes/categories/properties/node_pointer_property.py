@@ -2,7 +2,8 @@ import bpy
 
 from ....core.context import NodeError
 from ....core.naming import function_name
-from ..._reference_signatures import PROPERTY_GROUP_NODES
+from ....core.references import Reference
+from ..._reference_types import PROPERTY_GROUP_NODES
 from ._property_base import PropertyNode
 
 POINTER_TYPES = [
@@ -56,9 +57,7 @@ def _parameters(tree):
 class GroupTypeMixin:
     """`group`: the Property Group node used as type (Pointer/Collection)."""
 
-    sn_reference_properties = {"group": PROPERTY_GROUP_NODES}
-
-    group: bpy.props.StringProperty(name="Property Group")
+    group: Reference(PROPERTY_GROUP_NODES, name="Property Group")
 
     def uses_group(self):
         return True
@@ -135,7 +134,7 @@ class SNA_Node_PointerProperty(GroupTypeMixin, PropertyNode, bpy.types.Node):
     def draw_node(self, context, layout):
         layout.prop(self, "pointer_source", text="")
         if self.uses_group():
-            self.draw_reference_prop(layout, "group", text="Group")
+            self.draw_reference(layout, "group", text="Group")
         else:
             layout.prop(self, "prop_type", text="")
 

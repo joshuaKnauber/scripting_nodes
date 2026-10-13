@@ -11,9 +11,9 @@ All paths are relative to `addon/scripting_nodes/src/`.
 edit in the node editor
   → scheduler.request_*()        nothing else happens inside update callbacks
   → flush (timer, ~0.1 s later)
-      integrity    init new trees, unique ids, versioning (file load / undo only)
+      integrity    init new trees, unique ids, references of copied nodes,
+                   versioning (file load / undo / copies only)
       sockets      every node's sockets match its declaration
-      references   rebuild the picker lists on scene.sna
       compile      graph → {path: source}            core/compiler.py
       apply        write changed files, reload       core/runtime.py
 ```

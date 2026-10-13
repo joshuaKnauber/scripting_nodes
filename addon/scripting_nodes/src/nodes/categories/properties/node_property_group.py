@@ -7,7 +7,6 @@ import bpy
 
 from ....core import naming
 from ..._class_body import ClassBodyContainerMixin
-from ..._reference_signatures import PROPERTY_NODES
 from ...base_node import ScriptingBaseNode
 
 # Property groups come after property nodes (their update callbacks and enum
@@ -26,7 +25,6 @@ class SNA_Node_PropertyGroup(
     bl_idname = "SNA_Node_PropertyGroup"
     bl_label = "Property Group"
     sn_root = True
-    sn_class_body_signature = PROPERTY_NODES
     sn_class_body_target = "PropertyGroup"
 
     prop_label: bpy.props.StringProperty(
@@ -38,6 +36,9 @@ class SNA_Node_PropertyGroup(
     @property
     def class_name(self):
         return naming.class_name(self, "PG", self.prop_label)
+
+    def reference_label(self):
+        return self.prop_label
 
     @property
     def sn_order(self):

@@ -25,4 +25,4 @@ class SNA_Node_CollectionProperty(GroupTypeMixin, PropertyNode, bpy.types.Node):
         super().emit(ctx)
 
     def draw_node(self, context, layout):
-        self.draw_reference_prop(layout, "group", text="Group")
+        self.draw_reference(layout, "group", text="Group")

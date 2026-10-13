@@ -12,6 +12,10 @@ def runtime():
     return helpers.sn("src.core.runtime")
 
 
+def references():
+    return helpers.sn("src.core.references")
+
+
 def addon_settings():
     return bpy.context.scene.sna.addon
 
@@ -233,7 +237,8 @@ class CoreTest(unittest.TestCase):
         helpers.link(tree, trigger.outputs[0], p.inputs[0])
         helpers.link(tree, get.outputs[0], p.inputs[1])
         helpers.flush()
-        get.var = f"{var.name} ({tree.name})"
+        # what the search field writes: the label (tree only for other trees)
+        get.var = var.name
         helpers.flush()
         return tree, var, get
 
@@ -245,7 +250,7 @@ class CoreTest(unittest.TestCase):
         helpers.sn("src.core.scheduler").request_full()
         helpers.flush()
         self.assertEqual(get.resolve_reference("var"), var)
-        self.assertEqual(get.var, "Renamed Variable (Renamed Tree)")
+        self.assertEqual(get.var, "Renamed Variable")
         self.assertIn(f"{var.getter_name()}()", helpers.tree_source(tree))
 
     def test_cross_tree_reference_imports(self):
@@ -261,10 +266,144 @@ class CoreTest(unittest.TestCase):
         get.var = f"{var.name} ({vars_tree.name})"
         helpers.flush()
         source = helpers.tree_source(tree)
-        self.assertIn(
-            f"from .{vars_tree.module_name} import {var.getter_name()}", source
-        )
+        module = vars_tree.module_name
+        self.assertIn(f"from . import {module} as _{module}", source)
+        self.assertIn(f"_{module}.{var.getter_name()}()", source)
         self.assertIsNone(helpers.sn("src.core.errors").addon_error)
+
+    def test_trees_can_use_each_other(self):
+        # A prints B's variable, B prints A's: a `from x import y` cycle
+        trees, variables = [], []
+        for name in ("A", "B"):
+            tree = helpers.new_tree(name)
+            var = helpers.add_node(tree, "SNA_Node_GlobalVariable")
+            var.data_type = "ScriptingStringSocket"
+            var.socket("value").value = f"value of {name}"
+            trees.append(tree)
+            variables.append(var)
+        triggers = []
+        for tree, var in zip(trees, reversed(variables)):
+            get = helpers.add_node(tree, "SNA_Node_GetVariable")
+            helpers.point(get, "var", var)
+            trigger = helpers.add_node(tree, "SNA_Node_Trigger")
+            p = helpers.add_node(tree, "SNA_Node_Print")
+            helpers.link(tree, trigger.outputs[0], p.inputs[0])
+            helpers.link(tree, get.outputs[0], p.inputs[1])
+            triggers.append(trigger)
+        helpers.flush()
+        self.assertIsNone(helpers.sn("src.core.errors").addon_error)
+        self.assertTrue(runtime().is_loaded(addon_settings().module_name))
+        for trigger in triggers:
+            namespace, op = trigger.operator_idname.split(".")
+            self.assertEqual(getattr(getattr(bpy.ops, namespace), op)(), {"FINISHED"})
+
+    def test_cross_tree_label_names_the_tree(self):
+        vars_tree = helpers.new_tree("Vars")
+        var = helpers.add_node(vars_tree, "SNA_Node_GlobalVariable")
+        tree = helpers.new_tree("Main")
+        get = helpers.add_node(tree, "SNA_Node_GetVariable")
+        same = helpers.add_node(vars_tree, "SNA_Node_GetVariable")
+        helpers.point(get, "var", var)
+        helpers.point(same, "var", var)
+        self.assertEqual(get.var, f"{var.name} (Vars)")
+        self.assertEqual(same.var, var.name)
+
+    def test_equal_labels_are_told_apart(self):
+        tree = helpers.new_tree()
+        a = helpers.add_node(tree, "SNA_Node_IntProperty")
+        b = helpers.add_node(tree, "SNA_Node_IntProperty")
+        get = helpers.add_node(tree, "SNA_Node_GetProperty")
+        helpers.flush()
+        labels = [label for label, _ in references().fields(get)["prop"].choices(get)]
+        self.assertEqual(len(set(labels)), 2)
+        get.prop = labels[1]
+        self.assertEqual(get.resolve_reference("prop"), b)
+        # text that isn't a candidate keeps the current target
+        get.prop = "Nothing"
+        self.assertEqual(get.resolve_reference("prop"), b)
+        get.prop = ""
+        self.assertIsNone(get.resolve_reference("prop"))
+        self.assertIsNotNone(a)
+
+    def test_pickers_only_offer_valid_targets(self):
+        tree = helpers.new_tree("A")
+        other = helpers.new_tree("B")
+        local = helpers.add_node(other, "SNA_Node_LocalVariable")
+        global_var = helpers.add_node(other, "SNA_Node_GlobalVariable")
+        get = helpers.add_node(tree, "SNA_Node_GetVariable")
+        bool_prop = helpers.add_node(tree, "SNA_Node_BoolProperty")
+        int_prop = helpers.add_node(tree, "SNA_Node_IntProperty")
+        int_prop.register_on = "Operator"
+        checkbox = helpers.add_node(tree, "SNA_Node_Checkbox")
+        op = helpers.add_node(tree, "SNA_Node_Operator")
+        entry = op.class_body_properties.add()
+        helpers.flush()
+
+        def candidates(owner, attr):
+            return references().fields(owner)[attr].candidates(owner)
+
+        # local variables only exist in their own tree
+        self.assertEqual(candidates(get, "var"), [global_var])
+        self.assertEqual(candidates(checkbox, "prop"), [bool_prop])
+        # attached properties must be registered on the operator
+        self.assertEqual(candidates(entry, "prop"), [int_prop])
+        with self.assertRaises(ValueError):
+            helpers.point(get, "var", local)
+
+    def test_deleted_target_keeps_reference(self):
+        tree, var, get = self._variable_setup()
+        var_id = var.id
+        tree.nodes.remove(var)
+        helpers.flush()
+        self.assertIsNone(get.resolve_reference("var"))
+        self.assertTrue(references().is_missing(get, "var"))
+        self.assertEqual(get.var, "")
+        self.assertIn(get.id, helpers.sn("src.core.errors").node_errors)
+        # a node with that id again (undo) restores the reference
+        restored = helpers.add_node(tree, "SNA_Node_GlobalVariable")
+        restored.id = var_id
+        helpers.flush()
+        self.assertEqual(get.resolve_reference("var"), restored)
+
+    def test_duplicated_tree_references_its_own_nodes(self):
+        tree, var, get = self._variable_setup()
+        other = helpers.new_tree("Other")
+        outside = helpers.add_node(other, "SNA_Node_GlobalVariable")
+        get_outside = helpers.add_node(tree, "SNA_Node_GetVariable")
+        helpers.point(get_outside, "var", outside)
+        helpers.flush()
+        copy = tree.copy()
+        helpers.sn("src.core.scheduler").request_full()
+        helpers.flush()
+        copy_var = next(n for n in copy.nodes if n.bl_idname == var.bl_idname)
+        copy_get = next(n for n in copy.nodes if n.name == get.name)
+        copy_get_outside = next(n for n in copy.nodes if n.name == get_outside.name)
+        self.assertEqual(copy_get.resolve_reference("var"), copy_var)
+        self.assertEqual(get.resolve_reference("var"), var)
+        # nodes outside the copied tree stay referenced
+        self.assertEqual(copy_get_outside.resolve_reference("var"), outside)
+        self.assertNotIn("sn_copied_from", copy_get.keys())
+
+    def test_usages(self):
+        tree, var, get = self._variable_setup()
+        set_var = helpers.add_node(tree, "SNA_Node_SetVariable")
+        helpers.point(set_var, "var", var)
+        prop = helpers.add_node(tree, "SNA_Node_IntProperty")
+        prop.register_on = "Operator"
+        op = helpers.add_node(tree, "SNA_Node_Operator")
+        helpers.point(op.class_body_properties.add(), "prop", prop)
+        group = helpers.new_tree("Group")
+        group.is_group = True
+        call = helpers.add_node(tree, "SNA_Node_Group")
+        call.node_tree = group
+        helpers.flush()
+        refs = references()
+        self.assertEqual({n for n, _ in refs.users(var)}, {get, set_var})
+        self.assertEqual(refs.users(prop), [(op, "prop")])
+        self.assertEqual(refs.users(group), [(call, "node_tree")])
+        tools = helpers.sn("src.mcp_server.tools")
+        usages = tools.find_usages(node_id=var.id)["usages"]
+        self.assertEqual({u["sn_id"] for u in usages}, {get.id, set_var.id})
 
     # -- export -----------------------------------------------------------------
 

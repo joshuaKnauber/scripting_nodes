@@ -121,6 +121,9 @@ class PropertyNode(ScriptingBaseNode):
             return identifier(self.prop_name_override)
         return f"{identifier(self.prop_label.lower(), 'prop')}_{self.id.lower()}"
 
+    def reference_label(self):
+        return self.prop_label
+
     @property
     def is_class_body_target(self):
         return self.register_on in CLASS_BODY_TARGETS

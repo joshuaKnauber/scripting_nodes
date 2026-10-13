@@ -2,7 +2,6 @@ import bpy
 
 from ....sockets.spec import Flow
 from ..._property_target import PropertyTargetMixin
-from ..._reference_signatures import PROPERTY_NODES
 from ...base_node import ScriptingBaseNode
 from .node_get_property import value_spec
 
@@ -12,7 +11,6 @@ class SNA_Node_SetProperty(PropertyTargetMixin, ScriptingBaseNode, bpy.types.Nod
 
     bl_idname = "SNA_Node_SetProperty"
     bl_label = "Set Property"
-    sn_reference_properties = {"prop": PROPERTY_NODES}
 
     def socket_specs(self):
         inputs = [Flow(), self.data_input_spec(), value_spec(self, "value", "Value")]

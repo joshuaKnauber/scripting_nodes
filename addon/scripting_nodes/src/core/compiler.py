@@ -171,10 +171,15 @@ class ModuleBuilder:
         return helpers.call_name(name, self.dev)
 
     def import_symbol(self, owner, name):
+        """`name` from the module of `owner`'s tree. Other trees' modules are
+        imported as modules and their names looked up when the code runs, so
+        trees can use each other (a `from x import name` cycle fails)."""
         tree = owner if hasattr(owner, "nodes") else owner.id_data
-        if tree != self.tree:
-            self.imports.add(f"from .{tree.module_name} import {name}")
-        return name
+        if tree == self.tree:
+            return name
+        alias = f"_{tree.module_name}"
+        self.imports.add(f"from . import {tree.module_name} as {alias}")
+        return f"{alias}.{name}"
 
     # -- groups -------------------------------------------------------------
 

@@ -10,7 +10,7 @@ the owner is implicit (class properties of operators/preferences, or a
 pasted path that already contains it).
 
     class SNA_Node_Checkbox(PropertyTargetMixin, ScriptingBaseNode, bpy.types.Node):
-        sn_reference_properties = {"prop": BOOL_PROPERTY_NODES}
+        prop: Reference(BOOL_PROPERTY_NODES, name="Property")
 
         def emit(self, ctx):
             data, name = self.property_target(ctx)
@@ -21,7 +21,9 @@ import bpy
 
 from ..blend_data.path_utils import format_name, is_data_path, is_identifier
 from ..core.context import NodeError
+from ..core.references import Reference
 from ..sockets.spec import BlendData
+from ._reference_types import PROPERTY_NODES
 
 PREFERENCES_DATA = (
     'bpy.context.preferences.addons[__package__.rsplit(".", 1)[0]].preferences'
@@ -41,7 +43,7 @@ class PropertyTargetMixin:
     blend_prop_name: bpy.props.StringProperty(name="Property Name")
     needs_data_input: bpy.props.BoolProperty(name="Needs Data Input")
 
-    prop: bpy.props.StringProperty(name="Property")
+    prop: Reference(PROPERTY_NODES, name="Property")
 
     # -- resolution -------------------------------------------------------------
 
@@ -117,7 +119,7 @@ class PropertyTargetMixin:
     def draw_target(self, layout):
         row = layout.row(align=True)
         if self.mode == "CUSTOM":
-            self.draw_reference_prop(row, "prop")
+            self.draw_reference(row, "prop")
             row.prop(self, "mode", icon="USER", icon_only=True, text="")
         else:
             if self.blend_prop_name:

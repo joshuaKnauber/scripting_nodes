@@ -5,7 +5,6 @@ from ....lib.code_format import literal_set
 from ....lib.trees import node_by_id
 from ....sockets.spec import Boolean, Interface, Logic, String
 from ..._class_body import ClassBodyContainerMixin
-from ..._reference_signatures import PROPERTY_NODES
 from ...base_node import ScriptingBaseNode
 
 
@@ -83,7 +82,6 @@ class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.No
     bl_idname = "SNA_Node_Operator"
     bl_label = "Operator"
     sn_root = True
-    sn_class_body_signature = PROPERTY_NODES
     sn_class_body_target = "Operator"
 
     operator_description: bpy.props.StringProperty(
@@ -121,6 +119,12 @@ class SNA_Node_Operator(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types.No
     @property
     def operator_idname(self):
         return naming.idname(self, "operator")
+
+    def reference_label(self):
+        label = self.socket("label")
+        if label is not None and not label.is_linked and label.value:
+            return label.value
+        return self.label or self.name
 
     def socket_specs(self):
         inputs = [

@@ -270,8 +270,8 @@ class NodeContext:
         return self._builder.use_helper(name)
 
     def symbol(self, owner, name) -> str:
-        """`name` defined by another node or tree; imported if it lives in
-        another tree's module."""
+        """Expression for `name` defined by another node or tree: the name
+        itself in this tree, `_<module>.name` (module imported) for others."""
         return self._builder.import_symbol(owner, name)
 
     def on_register(self, line):

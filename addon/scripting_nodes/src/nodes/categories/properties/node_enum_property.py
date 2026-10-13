@@ -12,11 +12,11 @@ import bpy
 
 from ....core.context import NodeError
 from ....core.naming import function_name
+from ....core.references import Reference
 from ....lib.trees import node_by_id
 from ....sockets.spec import BlendData, List, Logic
+from ..._reference_types import GLOBAL_VARIABLE_NODES
 from ._property_base import PropertyNode
-
-GLOBAL_VARIABLE_NODES = ("SNA_Node_GlobalVariable",)
 
 
 def _item_changed(self, context):
@@ -83,7 +83,6 @@ class SNA_Node_EnumProperty(PropertyNode, bpy.types.Node):
     bpy_type = "EnumProperty"
     data_type = "ScriptingStringSocket"
     supported_options = PropertyNode.supported_options + ("ENUM_FLAG",)
-    sn_reference_properties = {"items_variable": GLOBAL_VARIABLE_NODES}
 
     prop_label: bpy.props.StringProperty(name="Label", default="My Enum")
     prop_default: bpy.props.StringProperty(
@@ -98,8 +97,10 @@ class SNA_Node_EnumProperty(PropertyNode, bpy.types.Node):
         default="STATIC",
     )
     enum_items: bpy.props.CollectionProperty(type=SNA_EnumPropertyItem)
-    items_variable: bpy.props.StringProperty(
-        name="Items Variable", description="Global variable holding the items list"
+    items_variable: Reference(
+        GLOBAL_VARIABLE_NODES,
+        name="Items Variable",
+        description="Global variable holding the items list",
     )
     option_enum_flag: bpy.props.BoolProperty(
         name="Enum Flag", description="Allow selecting several items (a set)"
@@ -180,7 +181,7 @@ class SNA_Node_EnumProperty(PropertyNode, bpy.types.Node):
     def draw_node(self, context, layout):
         layout.prop(self, "items_mode", text="")
         if self.items_mode == "DYNAMIC":
-            self.draw_reference_prop(layout, "items_variable", text="Items")
+            self.draw_reference(layout, "items_variable", text="Items")
             return
         if self.socket("items") and self.socket("items").is_linked:
             return

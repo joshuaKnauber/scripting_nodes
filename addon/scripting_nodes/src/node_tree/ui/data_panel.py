@@ -1,28 +1,17 @@
 import bpy
 from ..editor import in_sn_tree
+from ...core.references import target_label, users
 from ...lib.trees import (
     scripting_node_trees,
     sn_nodes,
 )
+from ...nodes._reference_types import (
+    PROPERTY_GROUP_NODES,
+    PROPERTY_NODES,
+    VARIABLE_NODES,
+)
+from ...nodes.base_node import draw_users
 from ...sockets.socket_types import DATA_SOCKET_ICONS
-
-# Node type identifiers for properties and variables
-PROPERTY_NODE_TYPES = {
-    "SNA_Node_BoolProperty",
-    "SNA_Node_IntProperty",
-    "SNA_Node_FloatProperty",
-    "SNA_Node_StringProperty",
-    "SNA_Node_FloatVectorProperty",
-    "SNA_Node_EnumProperty",
-    "SNA_Node_PointerProperty",
-    "SNA_Node_CollectionProperty",
-    "SNA_Node_PropertyGroup",
-}
-
-VARIABLE_NODE_TYPES = {
-    "SNA_Node_GlobalVariable",
-    "SNA_Node_LocalVariable",
-}
 
 # Icons for property types (mapped from socket icons)
 PROPERTY_ICONS = {
@@ -44,140 +33,38 @@ VARIABLE_ICONS = {
 }
 
 
-def get_nodes_referencing(ref_name):
-    """Find all nodes that reference a given property/variable by name"""
-    referencing_nodes = []
-    for ntree in scripting_node_trees():
-        for node in sn_nodes(ntree):
-            # Check if node has reference properties
-            ref_props = getattr(node, "sn_reference_properties", None)
-            if ref_props:
-                for prop_name in ref_props:
-                    if (
-                        hasattr(node, prop_name)
-                        and getattr(node, prop_name) == ref_name
-                    ):
-                        referencing_nodes.append(node)
-                        break
-    return referencing_nodes
-
-
-def get_reference_count(ref_name):
-    """Count how many nodes reference a given property/variable"""
-    return len(get_nodes_referencing(ref_name))
-
-
-def get_selected_reference(sna, collection_attr, node_types, index):
-    """Return the selected reference from a per-signature collection by index."""
-    coll = getattr(sna, collection_attr)
-    if 0 <= index < len(coll):
-        ref = coll[index]
-        if ref.node and ref.node.bl_idname in node_types:
-            return ref
-    return None
-
-
-def draw_referencing_nodes(layout, ref_name):
-    """Draw the list of nodes that reference a property/variable"""
-    referencing_nodes = get_nodes_referencing(ref_name)
-
-    if not referencing_nodes:
-        return
-
-    box = layout.box()
-    col = box.column(align=True)
-
-    for node in referencing_nodes:
+def _draw_node_list(layout, context, types, icons):
+    """One row per node of `types` in any tree: jump button, tree, use count."""
+    search = context.scene.sna.ui.data_filter.lower()
+    nodes = [
+        node
+        for tree in scripting_node_trees()
+        for node in sn_nodes(tree)
+        if node.bl_idname in types
+    ]
+    several_trees = len({node.id_data.name for node in nodes}) > 1
+    col = layout.column(align=True)
+    shown = 0
+    for node in sorted(nodes, key=lambda n: (n.id_data.name, target_label(n).lower())):
+        label = target_label(node)
+        if search and search not in label.lower():
+            continue
+        shown += 1
         row = col.row(align=True)
-        row.label(text=node.bl_label, icon="NODE")
-        row.label(text=f"[{node.id_data.name}]")
-        op = row.operator("sna.go_to_node", text="", icon="VIEWZOOM")
+        op = row.operator(
+            "sna.go_to_node",
+            text=label,
+            icon=icons.get(node.bl_idname, "NODE"),
+            emboss=False,
+        )
         op.node_id = node.id
-
-
-class SNA_UL_PropertyNodesList(bpy.types.UIList):
-    bl_idname = "SNA_UL_PropertyNodesList"
-
-    def draw_item(
-        self, context, layout, data, item, icon, active_data, active_propname
-    ):
-        node = item.node
-        if not node:
-            layout.label(text="(Missing)", icon="ERROR")
-            return
-
-        # Get property label (prop_label) and type icon
-        label = getattr(node, "prop_label", "") or node.bl_label
-        type_icon = PROPERTY_ICONS.get(node.bl_idname, "NODE")
-        tree_name = node.id_data.name
-        ref_count = get_reference_count(item.name)
-
-        if self.layout_type in {"DEFAULT", "COMPACT"}:
-            row = layout.row(align=True)
-            row.label(text=label, icon=type_icon)
-            sub = row.row()
-            sub.alignment = "RIGHT"
-            sub.label(text=f"({ref_count})")
-            sub.label(text=f"[{tree_name}]")
-        elif self.layout_type == "GRID":
-            layout.alignment = "CENTER"
-            layout.label(text=label, icon=type_icon)
-
-    def filter_items(self, context, data, propname):
-        references = getattr(data, propname)
-
-        flt_flags = [self.bitflag_filter_item] * len(references)
-        flt_neworder = []
-
-        # Filter to only show property nodes
-        for i, ref in enumerate(references):
-            node = ref.node
-            if not node or node.bl_idname not in PROPERTY_NODE_TYPES:
-                flt_flags[i] = 0
-
-        return flt_flags, flt_neworder
-
-
-class SNA_UL_VariableNodesList(bpy.types.UIList):
-    bl_idname = "SNA_UL_VariableNodesList"
-
-    def draw_item(
-        self, context, layout, data, item, icon, active_data, active_propname
-    ):
-        node = item.node
-        if not node:
-            layout.label(text="(Missing)", icon="ERROR")
-            return
-
-        # Get node name and type icon
-        type_icon = VARIABLE_ICONS.get(node.bl_idname, "NODE")
-        tree_name = node.id_data.name
-        ref_count = get_reference_count(item.name)
-
-        if self.layout_type in {"DEFAULT", "COMPACT"}:
-            row = layout.row(align=True)
-            row.label(text=node.name, icon=type_icon)
-            sub = row.row()
-            sub.alignment = "RIGHT"
-            sub.label(text=f"({ref_count})")
-            sub.label(text=f"[{tree_name}]")
-        elif self.layout_type == "GRID":
-            layout.alignment = "CENTER"
-            layout.label(text=node.name, icon=type_icon)
-
-    def filter_items(self, context, data, propname):
-        references = getattr(data, propname)
-
-        flt_flags = [self.bitflag_filter_item] * len(references)
-        flt_neworder = []
-
-        # Filter to only show variable nodes
-        for i, ref in enumerate(references):
-            node = ref.node
-            if not node or node.bl_idname not in VARIABLE_NODE_TYPES:
-                flt_flags[i] = 0
-
-        return flt_flags, flt_neworder
+        sub = row.row(align=True)
+        sub.alignment = "RIGHT"
+        if several_trees:
+            sub.label(text=node.id_data.name)
+        sub.label(text=f"({len(users(node))})")
+    if not shown:
+        col.label(text="None")
 
 
 class SNA_PT_Data(bpy.types.Panel):
@@ -194,7 +81,7 @@ class SNA_PT_Data(bpy.types.Panel):
         return in_sn_tree(context)
 
     def draw(self, context):
-        pass
+        self.layout.prop(context.scene.sna.ui, "data_filter", text="", icon="VIEWZOOM")
 
 
 class SNA_PT_DataProperties(bpy.types.Panel):
@@ -210,31 +97,8 @@ class SNA_PT_DataProperties(bpy.types.Panel):
         return in_sn_tree(context)
 
     def draw(self, context):
-        from ...settings.settings import DATA_PANEL_PROPERTIES_ATTR
-
-        layout = self.layout
-        sna = context.scene.sna
-
-        row = layout.row()
-        row.template_list(
-            "SNA_UL_PropertyNodesList",
-            "",
-            sna,
-            DATA_PANEL_PROPERTIES_ATTR,
-            sna.ui,
-            "active_property_index",
-            rows=4,
-        )
-
-        # Show referencing nodes for selected property
-        ref = get_selected_reference(
-            sna,
-            DATA_PANEL_PROPERTIES_ATTR,
-            PROPERTY_NODE_TYPES,
-            sna.ui.active_property_index,
-        )
-        if ref and ref.node:
-            draw_referencing_nodes(layout, ref.name)
+        types = PROPERTY_NODES + PROPERTY_GROUP_NODES
+        _draw_node_list(self.layout, context, types, PROPERTY_ICONS)
 
 
 class SNA_PT_DataVariables(bpy.types.Panel):
@@ -250,31 +114,7 @@ class SNA_PT_DataVariables(bpy.types.Panel):
         return in_sn_tree(context)
 
     def draw(self, context):
-        from ...settings.settings import DATA_PANEL_VARIABLES_ATTR
-
-        layout = self.layout
-        sna = context.scene.sna
-
-        row = layout.row()
-        row.template_list(
-            "SNA_UL_VariableNodesList",
-            "",
-            sna,
-            DATA_PANEL_VARIABLES_ATTR,
-            sna.ui,
-            "active_variable_index",
-            rows=4,
-        )
-
-        # Show referencing nodes for selected variable
-        ref = get_selected_reference(
-            sna,
-            DATA_PANEL_VARIABLES_ATTR,
-            VARIABLE_NODE_TYPES,
-            sna.ui.active_variable_index,
-        )
-        if ref and ref.node:
-            draw_referencing_nodes(layout, ref.name)
+        _draw_node_list(self.layout, context, VARIABLE_NODES, VARIABLE_ICONS)
 
 
 def _count_group_interface(tree):
@@ -289,41 +129,6 @@ def _count_group_interface(tree):
     return in_count, out_count
 
 
-def _count_group_callers(group_tree):
-    """How many SNA_Node_Group instances reference this group tree."""
-    count = 0
-    for ntree in scripting_node_trees():
-        for node in sn_nodes(ntree):
-            if (
-                getattr(node, "bl_idname", "") == "SNA_Node_Group"
-                and getattr(node, "node_tree", None) is group_tree
-            ):
-                count += 1
-    return count
-
-
-def _draw_group_callers(layout, group_tree):
-    """List the Call Group nodes that reference this group tree."""
-    callers = []
-    for ntree in scripting_node_trees():
-        for node in sn_nodes(ntree):
-            if (
-                getattr(node, "bl_idname", "") == "SNA_Node_Group"
-                and getattr(node, "node_tree", None) is group_tree
-            ):
-                callers.append(node)
-    if not callers:
-        return
-    box = layout.box()
-    col = box.column(align=True)
-    for node in callers:
-        row = col.row(align=True)
-        row.label(text=node.bl_label, icon="NODE")
-        row.label(text=f"[{node.id_data.name}]")
-        op = row.operator("sna.go_to_node", text="", icon="VIEWZOOM")
-        op.node_id = node.id
-
-
 class SNA_UL_FunctionsList(bpy.types.UIList):
     bl_idname = "SNA_UL_FunctionsList"
 
@@ -332,7 +137,7 @@ class SNA_UL_FunctionsList(bpy.types.UIList):
     ):
         # item is a NodeTree from bpy.data.node_groups
         in_count, out_count = _count_group_interface(item)
-        ref_count = _count_group_callers(item)
+        ref_count = len(users(item))
 
         if self.layout_type in {"DEFAULT", "COMPACT"}:
             row = layout.row(align=True)
@@ -381,8 +186,8 @@ class SNA_PT_DataFunctions(bpy.types.Panel):
             rows=4,
         )
 
-        # Show the Call Group nodes that reference the active function
+        # Show the nodes that call the active function
         if 0 <= sna.ui.active_function_index < len(bpy.data.node_groups):
             tree = bpy.data.node_groups[sna.ui.active_function_index]
             if getattr(tree, "is_sn", False) and getattr(tree, "is_group", False):
-                _draw_group_callers(layout, tree)
+                draw_users(layout, tree)

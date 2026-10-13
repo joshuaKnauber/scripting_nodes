@@ -11,11 +11,6 @@ def source(tree):
     return helpers.sn("src.core.compiler").compile_tree(tree, pretty=False)
 
 
-def ref(node):
-    """Value to assign to a reference field pointing at `node`."""
-    return helpers.sn("src.core.references").display_name(node)
-
-
 def errors():
     return helpers.sn("src.core.errors")
 
@@ -27,12 +22,7 @@ def run(node):
 
 
 def bool_property(tree):
-    # Checkbox only cares about the property's name and owner, the Integer
-    # Property stands in while Boolean Property isn't available
-    idname = "SNA_Node_BoolProperty"
-    if not hasattr(bpy.types, idname):
-        idname = "SNA_Node_IntProperty"
-    return helpers.add_node(tree, idname)
+    return helpers.add_node(tree, "SNA_Node_BoolProperty")
 
 
 class InterfaceNodesTest(unittest.TestCase):
@@ -60,7 +50,7 @@ class InterfaceNodesTest(unittest.TestCase):
         scene = helpers.add_node(tree, "SNA_Node_Scene")
         helpers.link(tree, panel.outputs["Interface"], checkbox.inputs[0])
         helpers.flush()
-        checkbox.prop = ref(prop)
+        helpers.point(checkbox, "prop", prop)
         helpers.flush()
         # no owner connected yet
         self.assertIn("Connect", errors().node_message(checkbox.id) or "")
@@ -83,11 +73,11 @@ class InterfaceNodesTest(unittest.TestCase):
         op = helpers.add_node(tree, "SNA_Node_Operator")
         op.invoke_type = "PROPS_DIALOG"
         helpers.flush()
-        op.class_body_properties.add().prop = ref(prop)
+        helpers.point(op.class_body_properties.add(), "prop", prop)
         checkbox = helpers.add_node(tree, "SNA_Node_Checkbox")
         checkbox.socket("text").value = "Enabled"
         helpers.link(tree, op.outputs["Draw"], checkbox.inputs[0])
-        checkbox.prop = ref(prop)
+        helpers.point(checkbox, "prop", prop)
         helpers.flush()
         self.assertTrue(checkbox.socket("data").hide)
         code = source(tree)
@@ -119,11 +109,11 @@ class InterfaceNodesTest(unittest.TestCase):
         prop.register_on = "Operator"
         op = helpers.add_node(tree, "SNA_Node_Operator")
         helpers.flush()
-        op.class_body_properties.add().prop = ref(prop)
+        helpers.point(op.class_body_properties.add(), "prop", prop)
         panel = helpers.add_node(tree, "SNA_Node_Panel")
         button = helpers.add_node(tree, "SNA_Node_Button")
         helpers.link(tree, panel.outputs["Interface"], button.inputs[0])
-        button.operator_sn = ref(op)
+        helpers.point(button, "operator_sn", op)
         helpers.flush()
         arg = button.socket("arg_" + prop.prop_name)
         self.assertIsNotNone(arg)
@@ -139,16 +129,18 @@ class InterfaceNodesTest(unittest.TestCase):
 
     def test_run_blender_operator(self):
         operator_call = helpers.sn("src.nodes._operator_call")
-        operator_call.refresh_blender_operator_collection()
-        entries = bpy.context.window_manager.sna_blender_operators
-        entry = next(e for e in entries if e.bl_idname == "mesh.primitive_cube_add")
+        choice = next(
+            display
+            for display, idname in operator_call.blender_operator_choices()
+            if idname == "mesh.primitive_cube_add"
+        )
 
         tree = helpers.new_tree()
         trigger = helpers.add_node(tree, "SNA_Node_Trigger")
         node = helpers.add_node(tree, "SNA_Node_RunOperator")
         helpers.link(tree, trigger.outputs[0], node.inputs[0])
         node.mode = "BLENDER"
-        node.operator_blender = entry.name
+        node.operator_blender = choice
         helpers.flush()
         node.socket("arg_size").value = 3.0
         helpers.flush()

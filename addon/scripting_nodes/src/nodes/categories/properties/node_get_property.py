@@ -2,7 +2,6 @@ import bpy
 
 from ....sockets.spec import Socket
 from ..._property_target import PropertyTargetMixin
-from ..._reference_signatures import PROPERTY_NODES
 from ...base_node import ScriptingBaseNode
 
 
@@ -23,7 +22,6 @@ class SNA_Node_GetProperty(PropertyTargetMixin, ScriptingBaseNode, bpy.types.Nod
 
     bl_idname = "SNA_Node_GetProperty"
     bl_label = "Get Property"
-    sn_reference_properties = {"prop": PROPERTY_NODES}
 
     def socket_specs(self):
         return [self.data_input_spec()], [value_spec(self, "value", "Value")]

@@ -72,6 +72,12 @@ def link(tree, from_socket, to_socket):
     return new
 
 
+def point(owner, attr, target):
+    """Point reference field `attr` of `owner` (a node or an attached
+    property entry) at `target`."""
+    sn("src.core.references").point(owner, attr, target)
+
+
 def flush():
     """Run all pending regeneration / compile / reload work synchronously."""
     sn("src.core.scheduler").flush()

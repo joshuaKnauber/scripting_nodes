@@ -1,6 +1,7 @@
 import bpy
 
-from ..._reference_signatures import FLOAT_VECTOR_PROPERTY_NODES
+from ....core.references import Reference
+from ..._reference_types import FLOAT_VECTOR_PROPERTY_NODES
 from ._property_field import PropertyFieldNode
 
 
@@ -9,7 +10,7 @@ class SNA_Node_VectorField(PropertyFieldNode, bpy.types.Node):
 
     bl_idname = "SNA_Node_VectorField"
     bl_label = "Vector Field"
-    sn_reference_properties = {"prop": FLOAT_VECTOR_PROPERTY_NODES}
+    prop: Reference(FLOAT_VECTOR_PROPERTY_NODES, name="Property")
     field_options = (("expand", False), ("slider", False))
 
     expand: bpy.props.BoolProperty(

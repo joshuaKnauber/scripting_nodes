@@ -3,7 +3,7 @@
 Both nodes need the same three things:
 
   1. A picker that toggles between an SN operator (referenced by node) and a
-     built-in Blender operator (picked from a searchable enum).
+     built-in Blender operator (picked in a search field).
   2. Dynamic input sockets that mirror the chosen operator's properties.
      Each socket name = property name; type chosen from the prop's Blender
      type. Reconciliation preserves links across operator changes when the
@@ -20,12 +20,10 @@ from typing import List, Optional, Tuple
 import bpy
 
 from ..core import naming
+from ..core.references import Reference
 from ..sockets.data.socket_string import encode_enum_items
 from ..sockets.spec import Socket
-
-
-# Tuple used by Run Operator and Button to filter the SN operator picker.
-OPERATOR_NODES = ("SNA_Node_Operator",)
+from ._reference_types import OPERATOR_NODES
 
 
 # -----------------------------------------------------------------------------
@@ -83,62 +81,65 @@ def _prop_spec(prop) -> Optional[Tuple[str, str, object, int, str]]:
 
 
 # -----------------------------------------------------------------------------
-# Blender operator collection (session-local, backs the picker's prop_search)
+# Blender operators (search field of the picker)
 # -----------------------------------------------------------------------------
 
-
-class SNA_BlenderOperatorRef(bpy.types.PropertyGroup):
-    """One entry per Blender operator. Mirrors the SNA_NodeReference shape:
-    `name` is searched/stored by prop_search, `bl_idname` is the canonical
-    dotted id used in generated code."""
-
-    # Format: "Add Cube  [mesh.primitive_cube_add]" so fuzzy search matches
-    # either the human label or the bl_idname.
-    name: bpy.props.StringProperty()
-    bl_idname: bpy.props.StringProperty()
+_operator_choices = None
 
 
-def _populate_blender_operator_collection(coll) -> None:
-    coll.clear()
-    entries = []
-    for cat_name in dir(bpy.ops):
-        if cat_name.startswith("_"):
-            continue
-        cat = getattr(bpy.ops, cat_name)
-        for op_name in dir(cat):
-            if op_name.startswith("_"):
+def blender_operator_choices():
+    """(display, bl_idname) of every Blender operator. Display is
+    "Add Cube  [mesh.primitive_cube_add]", so search finds the label and the
+    bl_idname. Cached, the operator list rarely changes."""
+    global _operator_choices
+    if _operator_choices is None:
+        entries = []
+        for cat_name in dir(bpy.ops):
+            if cat_name.startswith("_"):
                 continue
-            try:
-                op = getattr(cat, op_name)
-                rna = op.get_rna_type()
-            except (AttributeError, RuntimeError):
-                continue
-            bl_idname = f"{cat_name}.{op_name}"
-            label = rna.name or bl_idname
-            entries.append((f"{label}  [{bl_idname}]", bl_idname))
-    entries.sort(key=lambda e: e[0].lower())
-    for display, bl_idname in entries:
-        entry = coll.add()
-        entry.name = display
-        entry.bl_idname = bl_idname
+            cat = getattr(bpy.ops, cat_name)
+            for op_name in dir(cat):
+                if op_name.startswith("_"):
+                    continue
+                rna = _operator_rna(f"{cat_name}.{op_name}")
+                if rna is None:
+                    continue
+                bl_idname = f"{cat_name}.{op_name}"
+                entries.append((blender_operator_display(bl_idname, rna), bl_idname))
+        entries.sort(key=lambda e: e[0].lower())
+        _operator_choices = entries
+    return _operator_choices
 
 
-def refresh_blender_operator_collection() -> None:
-    wm = bpy.context.window_manager
-    if hasattr(wm, "sna_blender_operators"):
-        _populate_blender_operator_collection(wm.sna_blender_operators)
+def _operator_rna(bl_idname):
+    if not bl_idname or bl_idname.count(".") != 1:
+        return None
+    cat_name, op_name = bl_idname.split(".")
+    if not (cat_name.isidentifier() and op_name.isidentifier()):
+        return None
+    try:
+        return getattr(getattr(bpy.ops, cat_name), op_name).get_rna_type()
+    except (AttributeError, KeyError, RuntimeError):
+        return None
 
 
-def _resolve_blender_op_name(picker_value: str) -> str:
-    """Map the picker's stored display string back to a dotted bl_idname."""
-    if not picker_value:
+def blender_operator_display(bl_idname, rna=None):
+    """Text the picker shows (and stores) for an operator, "" if unknown."""
+    rna = rna or _operator_rna(bl_idname)
+    if rna is None:
         return ""
-    wm = bpy.context.window_manager
-    coll = getattr(wm, "sna_blender_operators", None)
-    if coll is None:
-        return ""
-    entry = coll.get(picker_value)
-    return entry.bl_idname if entry else ""
+    return f"{rna.name or bl_idname}  [{bl_idname}]"
+
+
+def _blender_operator_idname(value: str) -> str:
+    """bl_idname of the picker value, "" unless it's an existing operator."""
+    if value.endswith("]") and "  [" in value:
+        value = value[value.rindex("  [") + 3 : -1]
+    return value if _operator_rna(value) is not None else ""
+
+
+def _search_blender_operators(self, context, edit_text):
+    return [display for display, _ in blender_operator_choices()]
 
 
 # -----------------------------------------------------------------------------
@@ -163,13 +164,8 @@ def _blender_operator_prop_specs(
     bl_idname: str,
 ) -> List[Tuple[str, str, object, int, str]]:
     """Specs derived from a Blender operator's RNA properties."""
-    if not bl_idname or "." not in bl_idname:
-        return []
-    cat_name, op_name = bl_idname.split(".", 1)
-    try:
-        op = getattr(getattr(bpy.ops, cat_name), op_name)
-        rna = op.get_rna_type()
-    except (AttributeError, RuntimeError):
+    rna = _operator_rna(bl_idname)
+    if rna is None:
         return []
 
     specs = []
@@ -198,19 +194,6 @@ def _equals_default(socket, default) -> bool:
     if isinstance(default, float):
         return math.isclose(value, default, rel_tol=1e-6, abs_tol=1e-6)
     return value == default
-
-
-def register():
-    bpy.types.WindowManager.sna_blender_operators = bpy.props.CollectionProperty(
-        type=SNA_BlenderOperatorRef
-    )
-
-
-def unregister():
-    try:
-        del bpy.types.WindowManager.sna_blender_operators
-    except AttributeError:
-        pass
 
 
 # -----------------------------------------------------------------------------
@@ -244,7 +227,6 @@ class OperatorCallMixin:
     Subclasses define `fixed_inputs` / `fixed_outputs` (socket specs) and use
     `operator_idname()` and `operator_args(ctx)` in emit()."""
 
-    sn_reference_properties = {"operator_sn": OPERATOR_NODES}
     fixed_inputs: list = []
     fixed_outputs: list = []
 
@@ -256,11 +238,13 @@ class OperatorCallMixin:
         ],
         default="CUSTOM",
     )
-    operator_sn: bpy.props.StringProperty(
-        name="Operator", description="An Operator node"
+    operator_sn: Reference(
+        OPERATOR_NODES, name="Operator", description="An Operator node"
     )
     operator_blender: bpy.props.StringProperty(
-        name="Blender Operator", description="A built-in Blender operator"
+        name="Blender Operator",
+        description="A built-in Blender operator",
+        search=_search_blender_operators,
     )
 
     def operator_idname(self) -> str:
@@ -268,7 +252,7 @@ class OperatorCallMixin:
         if self.mode == "CUSTOM":
             target = self.resolve_reference("operator_sn")
             return naming.idname(target, "operator") if target else ""
-        return _resolve_blender_op_name(self.operator_blender)
+        return _blender_operator_idname(self.operator_blender)
 
     def _target_prop_specs(self):
         if self.mode == "CUSTOM":
@@ -320,15 +304,10 @@ class OperatorCallMixin:
     def draw_operator_picker(self, layout) -> None:
         row = layout.row(align=True)
         if self.mode == "CUSTOM":
-            self.draw_reference_prop(row, "operator_sn")
+            self.draw_reference(row, "operator_sn")
             row.prop(self, "mode", icon="USER", icon_only=True, text="")
         else:
-            wm = bpy.context.window_manager
-            coll = getattr(wm, "sna_blender_operators", None)
-            # filled on first draw: register-time timing is fragile
-            if coll is not None and len(coll) == 0:
-                _populate_blender_operator_collection(coll)
-            row.prop_search(
-                self, "operator_blender", wm, "sna_blender_operators", text=""
-            )
+            sub = row.row(align=True)
+            sub.alert = bool(self.operator_blender) and not self.operator_idname()
+            sub.prop(self, "operator_blender", text="")
             row.prop(self, "mode", icon="BLENDER", icon_only=True, text="")

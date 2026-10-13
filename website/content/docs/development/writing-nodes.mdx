@@ -149,15 +149,18 @@ ctx.module(f"""
 
 ## Referencing other nodes
 
-A field that points at another node (a variable, a property, an operator) is declared with `sn_reference_properties` and a `StringProperty` of the same name. It is stored by node id, so renaming the target never breaks it.
+A field that points at another node (a variable, a property, an operator) is a `Reference(...)` annotation (`core/references.py`). It stores the target's node id in a hidden `<field>_id` property, so renaming the target or its tree never breaks it. The visible field is a search field listing the allowed nodes by label (the tree is added for nodes in other trees).
 
 ```python
 class SNA_Node_GetVariable(ScriptingBaseNode, bpy.types.Node):
-    sn_reference_properties = {"var": VARIABLE_NODES}  # allowed bl_idnames
-    var: bpy.props.StringProperty(name="Variable")
+    var: Reference(VARIABLE_NODES, name="Variable", filter=usable_variable)
+
+    def socket_specs(self):
+        target = self.resolve_reference("var")
+        ...
 
     def draw(self, context, layout):
-        self.draw_reference_prop(layout, "var")
+        self.draw_reference(layout, "var")  # search field + jump button
 
     def emit(self, ctx):
         target = ctx.resolve("var")
@@ -166,7 +169,15 @@ class SNA_Node_GetVariable(ScriptingBaseNode, bpy.types.Node):
         ctx.output("value", f"{ctx.symbol(target, target.getter_name())}()")
 ```
 
-`ctx.symbol(node, name)` returns a name defined by another node and adds the import when that node lives in another tree.
+- The first argument lists the allowed `bl_idname`s (`nodes/_reference_types.py`). `filter(owner_node, target)` narrows the choices further, e.g. local variables only in their own tree, attached properties only with a matching `register_on`.
+- Targets show their `reference_label()` if they define one (property nodes: their label), else the node's label or name.
+- Reference fields also work on PropertyGroups inside a node: call `install(MyGroup)` after the class and list the CollectionProperty in the node's `sn_reference_collections` (see `nodes/_class_body.py`).
+- A deleted target keeps its id (undo brings the reference back); the field is drawn red and `resolve` returns `None`.
+- Nodes copied together (pasted into another tree, duplicated with their tree) reference each other's copies. A node duplicated next to its target keeps pointing at the original.
+- `references.users(target)` lists the nodes referencing a node or a tree. The sidebar shows them for the active node, the Data panel counts them.
+- Trees are referenced with a `PointerProperty` listed in `sn_tree_reference_properties` (Group node).
+
+`ctx.symbol(node, name)` returns an expression for a name defined by another node. For a node in another tree it imports that tree's module and returns `_<module>.name`; the name is looked up when the code runs, so trees can use each other. Names used while a module is imported (e.g. a Property Group class as a property type) still need the other tree to import first, so they can't go both ways.
 
 ## Errors
 

@@ -10,7 +10,6 @@ import bpy
 
 from ....sockets.spec import Interface
 from ..._class_body import ClassBodyContainerMixin
-from ..._reference_signatures import PROPERTY_NODES
 from ...base_node import ScriptingBaseNode
 
 
@@ -20,7 +19,6 @@ class SNA_Node_Preferences(ClassBodyContainerMixin, ScriptingBaseNode, bpy.types
     bl_idname = "SNA_Node_Preferences"
     bl_label = "Preferences"
     sn_root = True
-    sn_class_body_signature = PROPERTY_NODES
     sn_class_body_target = "Preferences"
     sn_outputs = [Interface("draw", "Draw")]
 

@@ -1,6 +1,7 @@
 import bpy
 
-from ..._reference_signatures import ENUM_PROPERTY_NODES
+from ....core.references import Reference
+from ..._reference_types import ENUM_PROPERTY_NODES
 from ._property_field import PropertyFieldNode
 
 
@@ -9,7 +10,7 @@ class SNA_Node_EnumMenu(PropertyFieldNode, bpy.types.Node):
 
     bl_idname = "SNA_Node_EnumMenu"
     bl_label = "Enum Menu"
-    sn_reference_properties = {"prop": ENUM_PROPERTY_NODES}
+    prop: Reference(ENUM_PROPERTY_NODES, name="Property")
     field_options = (("expand", False), ("icon_only", False))
 
     expand: bpy.props.BoolProperty(

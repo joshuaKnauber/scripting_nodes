@@ -6,22 +6,17 @@ import bpy
 import helpers
 
 
-def refs():
-    return helpers.sn("src.core.references")
-
-
 def node_errors():
     return helpers.sn("src.core.errors").node_errors
 
 
 def pick(node, prop, target):
     """Point reference field `prop` of `node` at `target`."""
-    setattr(node, prop, refs().display_name(target))
+    helpers.point(node, prop, target)
 
 
 def attach(container, prop_node):
-    entry = container.class_body_properties.add()
-    entry.prop = refs().display_name(prop_node)
+    helpers.point(container.class_body_properties.add(), "prop", prop_node)
 
 
 def source_of(tree):
@@ -137,10 +132,9 @@ class PropertyNodesTest(unittest.TestCase):
         helpers.flush()
         source = source_of(tree)
         poll = pointer.poll_function_name()
-        self.assertIn(
-            f"from .{function.module_name} import {function.module_name}", source
-        )
-        self.assertIn(f"return bool({function.module_name}(object, self=self))", source)
+        module = function.module_name
+        self.assertIn(f"from . import {module} as _{module}", source)
+        self.assertIn(f"return bool(_{module}.{module}(object, self=self))", source)
         self.assertIn(f"poll={poll}", source)
         self.assertLoaded()
 
@@ -163,8 +157,9 @@ class PropertyNodesTest(unittest.TestCase):
         helpers.flush()
 
         source = source_of(tree)
-        self.assertIn(f"from .{groups.module_name} import {group.class_name}", source)
-        self.assertIn(f"type={group.class_name}", source)
+        module = groups.module_name
+        self.assertIn(f"from . import {module} as _{module}", source)
+        self.assertIn(f"type=_{module}.{group.class_name}", source)
         group_source = source_of(groups)
         self.assertIn(
             f"class {group.class_name}(bpy.types.PropertyGroup):", group_source

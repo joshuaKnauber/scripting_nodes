@@ -14,39 +14,32 @@ operator's inputs visible on one node, and one property can be reused by
 several operators.
 """
 
-from typing import Tuple
-
 import bpy
 
 from ..core.context import NodeError
-from ..core.references import find_node, make_reference_property
+from ..core.references import Reference, install, resolve
 from ..lib.trees import node_by_id
+from ._reference_types import PROPERTY_NODES
+from .base_node import draw_reference
 
 
-def _entry_changed(self, context):
-    """Rebuild when the user picks another property for an entry."""
-    tree = self.id_data
-    pointer = self.as_pointer()
-    for node in getattr(tree, "nodes", ()):
-        for entry in getattr(node, "class_body_properties", ()):
-            if entry.as_pointer() == pointer:
-                node.mark_dirty()
-                return
+def _attachable(container, prop_node):
+    """Only properties registered on this kind of class."""
+    return getattr(prop_node, "register_on", "") == container.sn_class_body_target
 
 
 class SNA_ClassBodyPropertyEntry(bpy.types.PropertyGroup):
-    """One attached property. `prop` shows the property node's display name
-    but stores its id in `prop_ref_id` (see core/references.py)."""
+    """One attached property (a reference field, see core/references.py)."""
 
-    prop: make_reference_property(
-        "prop",
-        bpy.props.StringProperty(
-            name="Property",
-            description="Property node attached to this class",
-            update=_entry_changed,
-        ),
+    prop: Reference(
+        PROPERTY_NODES,
+        name="Property",
+        description="Property node attached to this class",
+        filter=_attachable,
     )
-    prop_ref_id: bpy.props.StringProperty(options={"HIDDEN"})
+
+
+install(SNA_ClassBodyPropertyEntry)
 
 
 class SNA_OT_AddClassBodyProperty(bpy.types.Operator):
@@ -94,27 +87,17 @@ class ClassBodyContainerMixin:
     ("Operator", "Preferences" or "PropertyGroup"). In emit(), put
     `ctx.join(self.annotations(ctx))` into the class body."""
 
-    # allowed property node types for the picker
-    sn_class_body_signature: Tuple[str, ...] = ()
     sn_class_body_target = ""
+    sn_reference_collections = ("class_body_properties",)
 
     class_body_properties: bpy.props.CollectionProperty(type=SNA_ClassBodyPropertyEntry)
-
-    @classmethod
-    def _class_body_collection_attr(cls):
-        from ..settings.settings import signature_key
-
-        return signature_key(cls.sn_class_body_signature)
 
     def attached_properties(self):
         """Property nodes attached to this class (matching register_on)."""
         nodes = []
         for entry in self.class_body_properties:
-            node = find_node(entry.prop_ref_id)
-            if (
-                node is not None
-                and getattr(node, "register_on", "") == self.sn_class_body_target
-            ):
+            node = resolve(entry, "prop")
+            if node is not None and _attachable(self, node):
                 nodes.append(node)
         return nodes
 
@@ -137,18 +120,13 @@ class ClassBodyContainerMixin:
         ).node_id = self.id
         if not len(self.class_body_properties):
             return
-        coll_attr = self._class_body_collection_attr()
         col = layout.column(align=True)
         for i, entry in enumerate(self.class_body_properties):
             row = col.row(align=True)
-            row.prop_search(
-                entry, "prop", bpy.context.scene.sna, coll_attr, text="", icon="DOT"
-            )
-            target = find_node(entry.prop_ref_id)
-            if (
-                target is not None
-                and getattr(target, "register_on", "") != self.sn_class_body_target
-            ):
+            draw_reference(row, entry, "prop")
+            target = resolve(entry, "prop")
+            if target is not None and not _attachable(self, target):
+                # register_on changed after it was attached
                 row.alert = True
                 row.label(text="", icon="ERROR")
             op = row.operator("sna.remove_class_body_property", text="", icon="X")

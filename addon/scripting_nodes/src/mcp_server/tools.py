@@ -17,7 +17,8 @@ from ..lib.trees import (
 )
 from ..nodes.base_node import ScriptingBaseNode
 from ..nodes.categories.categories import category_label
-from ..core import compiler, scheduler
+from ..core import compiler, references, scheduler
+from ..nodes._operator_call import blender_operator_display
 
 
 _READ_MAX_LINES = 300
@@ -200,30 +201,18 @@ def _serialize_link(link):
 
 
 def _serialize_references(node):
-    ref_props = getattr(node, "sn_reference_properties", {}) or {}
-    if not ref_props:
-        return {}
-    settings = getattr(bpy.context.scene, "sna", None)
     out = {}
-    for prop_name, allowed in ref_props.items():
-        key = getattr(node, prop_name, "") or ""
-        target = node.resolve_reference(prop_name) if key else None
-        candidates = []
-        if settings is not None:
-            try:
-                coll = getattr(settings, node._ref_collection_attr(prop_name))
-            except (AttributeError, KeyError):
-                coll = None
-            if coll is not None:
-                for entry in coll:
-                    t = node_by_id(entry.node_id)
-                    if t is not None:
-                        candidates.append({"key": entry.name, **_node_ref(t)})
+    for prop_name, field in references.fields(node).items():
+        target = references.resolve(node, prop_name)
         out[prop_name] = {
-            "current_key": key,
+            "current_key": getattr(node, prop_name, "") or "",
             "current_target": _node_ref(target) if target else None,
-            "allowed_bl_idnames": list(allowed),
-            "candidates": candidates,
+            "missing": references.is_missing(node, prop_name),
+            "allowed_bl_idnames": sorted(field.types),
+            "candidates": [
+                {"key": key, **_node_ref(candidate)}
+                for key, candidate in field.choices(node)
+            ],
         }
     return out
 
@@ -334,34 +323,29 @@ def _coerce_prop_value(prop_def, value):
 
 
 def _coerce_blender_operator_value(value):
-    # Picker stores "<label>  [<bl_idname>]"; accept bare bl_idnames and
-    # translate so a direct "mesh.primitive_cube_add" doesn't silently become "".
+    # The picker stores "<label>  [<bl_idname>]"; accept bare bl_idnames too.
     if not isinstance(value, str):
         raise ValueError("operator_blender expects a string")
     if not value:
         return ""
+    bl_idname = value
     if value.endswith("]") and "  [" in value:
-        return value
-    coll = getattr(bpy.context.window_manager, "sna_blender_operators", None)
-    if coll is None:
-        raise ValueError("Blender operator picker collection not populated yet")
-    for entry in coll:
-        if entry.bl_idname == value:
-            return entry.name
-    raise ValueError(
-        f"No Blender operator with bl_idname {value!r}. Pass a known bl_idname "
-        "or the full picker key '<label>  [<bl_idname>]'."
-    )
+        bl_idname = value[value.rindex("  [") + 3 : -1]
+    display = blender_operator_display(bl_idname)
+    if not display:
+        raise ValueError(
+            f"No Blender operator with bl_idname {bl_idname!r}. Pass a known "
+            "bl_idname or the picker key '<label>  [<bl_idname>]'."
+        )
+    return display
 
 
-def _coerce_reference_value(node, prop_name, value):
-    settings = getattr(bpy.context.scene, "sna", None)
-    coll = None
-    if settings is not None:
-        try:
-            coll = getattr(settings, node._ref_collection_attr(prop_name))
-        except (AttributeError, KeyError):
-            coll = None
+def _set_reference(node, prop_name, value):
+    """Point a reference field at a node given as {sn_id} or candidate key."""
+    field = references.fields(node)[prop_name]
+    if value is None or value == "":
+        references.point(node, prop_name, None)
+        return
     if isinstance(value, dict):
         sn_id = value.get("sn_id")
         if not sn_id:
@@ -369,30 +353,24 @@ def _coerce_reference_value(node, prop_name, value):
                 f"Reference property {prop_name!r} dict-form requires "
                 "{'sn_id': '<target node id>'}"
             )
-        if coll is None:
-            raise ValueError(f"Signature collection for {prop_name!r} is unavailable")
-        for entry in coll:
-            if entry.node_id == sn_id:
-                return entry.name
         target = node_by_id(sn_id)
         if target is None:
             raise ValueError(f"No node with sn_id {sn_id!r}")
-        raise ValueError(
-            f"Target {target.bl_idname} ({sn_id}) is not a valid candidate "
-            f"for {prop_name!r} on {node.bl_idname}"
-        )
-    if value == "" or value is None:
-        return ""
+        references.point(node, prop_name, target)
+        return
     if not isinstance(value, str):
         raise ValueError(
             f"Reference property {prop_name!r} expects a string key or {{sn_id: '...'}} dict"
         )
-    if coll is not None and not any(e.name == value for e in coll):
-        raise ValueError(
-            f"{value!r} is not a valid key for {prop_name!r}. "
-            f"Available: {[e.name for e in coll]}"
-        )
-    return value
+    choices = field.choices(node)
+    for key, target in choices:
+        if key == value:
+            references.point(node, prop_name, target)
+            return
+    raise ValueError(
+        f"{value!r} is not a valid key for {prop_name!r}. "
+        f"Available: {[key for key, _ in choices]}"
+    )
 
 
 # --- tree update plumbing ---------------------------------------------------
@@ -545,8 +523,7 @@ def get_recent_logs(limit: int = 50):
 
 def resolve_node_reference(node_id: str, prop_name: str = None):
     node = _require_node(node_id)
-    ref_props = getattr(node, "sn_reference_properties", {}) or {}
-    keys = [prop_name] if prop_name is not None else list(ref_props.keys())
+    keys = [prop_name] if prop_name is not None else list(references.fields(node))
     return {
         "node": {
             "sn_id": node.id,
@@ -558,20 +535,28 @@ def resolve_node_reference(node_id: str, prop_name: str = None):
 
 
 def _resolve_one(node, prop_name):
-    if prop_name not in node.sn_reference_properties:
+    if prop_name not in references.fields(node):
         raise ValueError(f"{node.bl_idname} has no reference property {prop_name!r}")
     key = getattr(node, prop_name, "")
-    if not key:
-        return {"prop_name": prop_name, "key": "", "target": None}
-    target = node.resolve_reference(prop_name)
+    target = references.resolve(node, prop_name)
     if target is None:
-        return {
-            "prop_name": prop_name,
-            "key": key,
-            "target": None,
-            "note": "reference does not resolve to any node",
-        }
+        result = {"prop_name": prop_name, "key": key, "target": None}
+        if references.is_missing(node, prop_name):
+            result["note"] = "the referenced node was deleted"
+        return result
     return {"prop_name": prop_name, "key": key, "target": _node_ref(target)}
+
+
+def find_usages(node_id: str = None, tree_name: str = None):
+    if bool(node_id) == bool(tree_name):
+        raise ValueError("Pass either node_id or tree_name")
+    target = _require_node(node_id) if node_id else _find_tree(tree_name)
+    return {
+        "usages": [
+            {**_node_ref(user), "prop_name": prop_name}
+            for user, prop_name in references.users(target)
+        ]
+    }
 
 
 # --- script content read / write -------------------------------------------
@@ -892,10 +877,15 @@ def set_node_prop(node_id: str, prop_name: str, value):
     prop_def = node.bl_rna.properties[prop_name]
     if prop_def.is_readonly:
         raise ValueError(f"Property {prop_name!r} is read-only")
-    ref_props = getattr(node, "sn_reference_properties", {}) or {}
-    if prop_name in ref_props:
-        coerced = _coerce_reference_value(node, prop_name, value)
-    elif prop_name == "operator_blender":
+    if prop_name in references.fields(node):
+        _set_reference(node, prop_name, value)
+        return {
+            "sn_id": node_id,
+            "tree_name": node.id_data.name,
+            "prop_name": prop_name,
+            "value": getattr(node, prop_name),
+        }
+    if prop_name == "operator_blender":
         coerced = _coerce_blender_operator_value(value)
     else:
         coerced = _coerce_prop_value(prop_def, value)
@@ -1094,7 +1084,7 @@ TOOLS = {
     "resolve_node_reference": {
         "fn": resolve_node_reference,
         "description": (
-            "Resolve a node's `sn_reference_properties` (e.g. Get/Set Variable "
+            "Resolve a node's reference properties (e.g. Get/Set Variable "
             "pointing at a Variable node) to the target node — works "
             "cross-tree. Omit prop_name to resolve every reference on the node."
         ),
@@ -1114,6 +1104,29 @@ TOOLS = {
                 },
             },
             "required": ["node_id"],
+            "additionalProperties": False,
+        },
+    },
+    "find_usages": {
+        "fn": find_usages,
+        "description": (
+            "List the nodes that reference a node (e.g. the Get/Set Variable "
+            "nodes of a variable, the Checkboxes and Get Property nodes of a "
+            "property, the Buttons of an Operator) or a group tree (its Group "
+            "nodes), across all trees. Pass node_id or tree_name."
+        ),
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "node_id": {
+                    "type": "string",
+                    "description": "Scripting Nodes UUID of the referenced node.",
+                },
+                "tree_name": {
+                    "type": "string",
+                    "description": "Name of a referenced group tree.",
+                },
+            },
             "additionalProperties": False,
         },
     },

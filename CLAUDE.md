@@ -45,7 +45,7 @@ Developer docs (read before changing the core or writing nodes): `website/conten
 Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<module_name>/`. Nodes store **no** generated code; every rebuild compiles the graph again.
 
 1. Changes only *request* a rebuild (`node.mark_dirty()`, `NodeTree.update()`, load/undo/settings → `scheduler.request_*`). Never compile or reload inside an RNA update callback.
-2. `core/scheduler.py` flushes on a timer (tests: `flush()`): integrity (ids, versioning) → sync sockets → references → `compiler.compile_addon()` → `runtime.apply(files)`.
+2. `core/scheduler.py` flushes on a timer (tests: `flush()`): integrity (ids, references of copies, versioning) → sync sockets → `compiler.compile_addon()` → `runtime.apply(files)`.
 3. `core/compiler.py` + `core/context.py`: root nodes emit at module level, flow nodes when reached, value nodes when their output is used. Every line knows its node (errors, code preview).
 4. `core/runtime.py`: syntax check, write, full disable/enable, roll back on failure. Only touches folders with its marker file.
 5. Errors: `core/errors.py`; `emit()` errors, load errors and runtime errors (`core/tracebacks.py`, via `sys.excepthook`) all show on the node.
@@ -56,7 +56,7 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 - `nodes/base_node.py` `ScriptingBaseNode`: declare sockets (`sn_inputs`/`sn_outputs` or `socket_specs()`, helpers in `sockets/spec.py`), implement `emit(ctx)`. Properties rebuild automatically (no `update=`).
 - Write code with templates: `ctx.code(f"""...{ctx.flow("next")}...""")`; values with `ctx.output(key, expr)`; inputs with `ctx.input(key)`; module code with `ctx.module`; `raise NodeError(...)` for incomplete setups.
 - One flow socket type (`ScriptingFlowSocket`) with `kind` PROGRAM/LOGIC/INTERFACE (color + compatibility).
-- References to other nodes: `sn_reference_properties`, stored by node id (`core/references.py`); cross-tree names via `ctx.symbol`.
+- References to other nodes: `Reference(types, filter=...)` annotations, stored by node id, picked in a search field (`core/references.py`); usages via `references.users()`; cross-tree names via `ctx.symbol`.
 - Shared bases: `PropertyNode`, `PropertyFieldNode`, `ClassBodyContainerMixin`, `PropertyTargetMixin`, `OperatorCallMixin`, `event_node()`.
 - Saved-data changes need a step in `core/versioning.py`; socket changes don't (re-synced from declarations).
 
