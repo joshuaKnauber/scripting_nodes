@@ -4,4 +4,46 @@ description: Read and change objects, materials, scenes and anything else in Ble
 icon: Database
 ---
 
-<Callout>This page isn't written yet.</Callout>
+Everything in a Blender file can be reached by following a path: the active object, its modifiers, the width of its Bevel modifier. The **Blender Data** node follows one such path and outputs what it finds.
+
+![Blender Data nodes reading the active object's Bevel width and its mesh's vertex count](/screenshots/blend-data.png)
+
+## The Blender Data node
+
+Add it from **Add › Data › Blend Data**. The menu has ready-made entries for common starting points (Active Object, Selected Objects, Scene, View Layer, All Objects, Blend File, ...), which add the node already set up.
+
+A path has a **start** and the steps after it:
+
+- **Context**: what's current where your code runs, e.g. `active_object`, `scene`, `selected_objects`.
+- **Blend File**: everything in the file, e.g. `objects`, `materials`, `scenes`.
+- **Input**: the data connected to the node's **Data** input. Use it to continue from another node, e.g. the `modifiers` of an object.
+
+Type in the path field to search: it only offers what exists at that point, so after `active_object.` you get the properties of an object. The header shows where the path ends, e.g. **Modifiers[] › Width**.
+
+## Typed outputs
+
+The output has the type of what the path ends at: **Width** is a Float, **Use Simplify** a Boolean, **Active Object** an Object. Connected nodes know the type too, so a second Blender Data node set to start at its Input only offers the properties of an Object.
+
+Some paths can hold different types: `active_object.data` is a mesh for a mesh object but a camera for a camera. Pick the type with the arrow next to the output (**Data ⌄ Mesh**) to continue with mesh properties like `vertices`.
+
+Lists (collections, drawn with a square socket) work with the **Collection** nodes (Length, Get Item, For Each, ...).
+
+## Items of a list
+
+`[]` in a path picks one item of a list. Each `[]` adds an input, and the icon next to it chooses how the item is picked:
+
+- **Index**: by position, `0` is the first, `-1` the last.
+- **Name**: by name, e.g. the modifier called "Bevel".
+- **Active**: the list's active item, where the list has one (e.g. `material_slots`).
+
+## Generated code
+
+The node becomes the path itself, written with the `context` the surrounding function gets (or `bpy.context` where there is none):
+
+```python
+def execute(self, context):
+    sn_print(str(context.active_object.modifiers['Bevel'].width))
+    sn_print(str(len(context.active_object.data.vertices)))
+```
+
+To change a value instead of reading it, use **Set Property** with a path, see [Data paths](/docs/blend-data/data-paths).

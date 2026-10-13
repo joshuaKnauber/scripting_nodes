@@ -32,8 +32,9 @@ and `ruff check` with zero findings.
 
 ## 3. Node design open questions
 
-- [ ] **Blend Data**: separate design thread ("Design: Blend Data in Serpens v4", worktree `blend-data-v4`). Includes: Blender-path mode doesn't know the property type (Set Property gets a generic Data input).
-- [ ] **Node references**: separate design thread ("Design: node references in Serpens v4"). Picker collections on `scene.sna` with hashed names, scene-level storage, linear lookups.
+- [x] **Blend Data** (done 2026-10, `website/content/docs/blend-data/`): one Blender Data node following a path (Context / Blend File / Input), add-menu presets, typed sockets from RNA with a type picker for open types, `[]` keys by Index / Name / Active, paste + "Copy Data Path for Scripting Nodes", property nodes in Blender mode use the same paths. Follow-ups:
+  - [ ] Data explorer: browse the data of the open file and add nodes from it (users liked v3's data browser).
+- [x] **Node references** (done 2026-10): `Reference(...)` fields with a search callback, stored by node id, "Used by" in the sidebar, copies point at copied targets, deleted targets drawn red.
 - [x] **Properties as lists** (done 2026-10, `website/content/docs/properties/properties.mdx`): add-on list in Addon Data (one PropertyGroup per attach type, `scene.my_addon.count`), groups with their own list, Operator / Preferences node lists (operator properties are also its outputs), Get / Set / fields / On Property Update pick by id, enum items and pointer poll from functions, `addon/properties.py`. Follow-ups:
   - [ ] The Python name follows the label until it's pinned, so renaming a property in use loses saved values. Pin automatically once the add-on was exported?
   - [ ] Enum flag properties (sets) have no matching socket type (Data); Enum Menu / Get Property work, Set Property needs a set value.

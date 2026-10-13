@@ -73,8 +73,6 @@ class ScriptingBaseNode:
     # Fields referencing other nodes are declared as `Reference(...)`
     # annotations (core/references.py) and listed here: {attr: Reference}
     sn_references: dict = {}
-    # CollectionProperties whose items have reference fields of their own
-    sn_reference_collections: Tuple[str, ...] = ()
     # {prop_name: picker category}: string fields picking a property
     # definition, stored by its id in `<prop_name>_id` (core/properties.py)
     sn_property_references: Dict[str, str] = {}

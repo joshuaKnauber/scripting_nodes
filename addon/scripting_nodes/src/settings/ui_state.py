@@ -13,13 +13,6 @@ class SNA_UISettings(bpy.types.PropertyGroup):
         default=0, update=update_active_ntree_index
     )
 
-    # Blend Data browser properties
-    blend_data_search: bpy.props.StringProperty(
-        name="Search",
-        description="Search for properties in Blender data",
-        default="",
-    )
-
     def update_active_function_index(self, context):
         # Functions are indexed into bpy.data.node_groups directly, not refs
         if not hasattr(context.space_data, "node_tree"):

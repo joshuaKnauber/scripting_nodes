@@ -11,7 +11,6 @@ A field that points at another node is declared as an annotation:
   - `var` shows the target's label; writing a label picks that node. Its
     `search` callback lists the candidates in Blender's search field.
 
-The same works on PropertyGroups inside nodes (attached class properties).
 A deleted target leaves its id in place: undo brings the reference back, the
 field draws as missing until then.
 """
@@ -27,10 +26,8 @@ class Reference:
     """Declaration of a reference field.
 
     types: allowed bl_idnames of the target.
-    filter: optional `filter(owner_node, target) -> bool` to narrow the
-        candidates further (e.g. only bool properties, only local variables
-        of the same tree). `owner_node` is the node holding the field, also
-        for fields on a PropertyGroup inside that node.
+    filter: optional `filter(owner, target) -> bool` to narrow the
+        candidates further (e.g. only local variables of the owner's tree).
     """
 
     def __init__(self, types, *, name="", description="", filter=None):
@@ -39,19 +36,18 @@ class Reference:
         self.description = description
         self.filter = filter
 
-    def allows(self, owner_node, target) -> bool:
+    def allows(self, owner, target) -> bool:
         if target is None or target.bl_idname not in self.types:
             return False
-        return self.filter is None or bool(self.filter(owner_node, target))
+        return self.filter is None or bool(self.filter(owner, target))
 
     def candidates(self, owner):
         """Nodes this field may point at, in tree order."""
-        owner_node = node_of(owner)
         return [
             node
             for tree in scripting_node_trees()
             for node in sn_nodes(tree)
-            if self.allows(owner_node, node)
+            if self.allows(owner, node)
         ]
 
     def choices(self, owner):
@@ -120,24 +116,7 @@ def target_label(node) -> str:
 
 
 def _changed(owner, context):
-    node = node_of(owner)
-    if node is not None:
-        node.mark_dirty()
-
-
-def node_of(owner):
-    """The node holding `owner` (the node itself or a PropertyGroup in one of
-    its `sn_reference_collections`)."""
-    if isinstance(owner, bpy.types.Node):
-        return owner
-    # Blender can't build data paths for PropertyGroups inside custom nodes
-    pointer = owner.as_pointer()
-    for node in getattr(owner.id_data, "nodes", ()):
-        for collection in getattr(node, "sn_reference_collections", ()):
-            for item in getattr(node, collection):
-                if item.as_pointer() == pointer:
-                    return node
-    return None
+    owner.mark_dirty()
 
 
 # ---------------------------------------------------------------------------
@@ -194,22 +173,12 @@ def point(owner, attr, target):
     """Point field `attr` of `owner` at `target` (None clears it).
     Raises ValueError if `target` isn't a valid choice."""
     field = fields(owner)[attr]
-    if target is not None and not field.allows(node_of(owner), target):
+    if target is not None and not field.allows(owner, target):
         raise ValueError(
             f"{target.bl_idname} '{target.name}' can't be used for {attr!r}"
         )
     owner[attr + ID_SUFFIX] = target.id if target is not None else ""
     _changed(owner, None)
-
-
-def owners(node):
-    """(owner, attr) of every reference field of `node`: its own fields and
-    those of PropertyGroups in its `sn_reference_collections`."""
-    result = [(node, attr) for attr in fields(node)]
-    for collection in getattr(node, "sn_reference_collections", ()):
-        for item in getattr(node, collection):
-            result += [(item, attr) for attr in fields(item)]
-    return result
 
 
 # ---------------------------------------------------------------------------
@@ -230,8 +199,8 @@ def _collect_users():
     users = {}
     for tree in scripting_node_trees():
         for node in sn_nodes(tree):
-            for owner, attr in owners(node):
-                target = target_id(owner, attr)
+            for attr in fields(node):
+                target = target_id(node, attr)
                 if target:
                     users.setdefault(target, []).append((node.id, attr))
     return users
@@ -267,11 +236,11 @@ def remap_copies(tree, copies):
     for node in sn_nodes(tree):
         if node.id not in copied:
             continue
-        for owner, attr in owners(node):
-            old = target_id(owner, attr)
+        for attr in fields(node):
+            old = target_id(node, attr)
             new = copies.get(old)
             if new is None:
                 continue
             original = node_by_id(old)
             if original is None or original.id_data != tree:
-                owner[attr + ID_SUFFIX] = new
+                node[attr + ID_SUFFIX] = new

@@ -189,13 +189,11 @@ class SNA_Node_GetVariable(ScriptingBaseNode, bpy.types.Node):
         ctx.output("value", f"{ctx.symbol(target, target.getter_name())}()")
 ```
 
-- The first argument lists the allowed `bl_idname`s (`nodes/_reference_types.py`). `filter(owner_node, target)` narrows the choices further, e.g. local variables only in their own tree, attached properties only with a matching `register_on`.
-- Targets show their `reference_label()` if they define one (property nodes: their label), else the node's label or name.
-- Reference fields also work on PropertyGroups inside a node: call `install(MyGroup)` after the class and list the CollectionProperty in the node's `sn_reference_collections` (see `nodes/_class_body.py`).
+- The first argument lists the allowed `bl_idname`s (`nodes/_reference_types.py`). `filter(owner_node, target)` narrows the choices further, e.g. local variables only in their own tree.
+- Targets show their `reference_label()` if they define one (Operator: its Label input), else the node's label or name.
 - A deleted target keeps its id (undo brings the reference back); the field is drawn red and `resolve` returns `None`.
 - Nodes copied together (pasted into another tree, duplicated with their tree) reference each other's copies. A node duplicated next to its target keeps pointing at the original.
-- `references.users(target)` lists the nodes referencing a node or a tree. The sidebar shows them for the active node, the Data panel counts them.
-- Trees are referenced with a `PointerProperty` listed in `sn_tree_reference_properties` (Group node).
+- `references.users(target)` lists the nodes referencing a node. The sidebar shows them for the active node, the Data panel counts them.
 
 `ctx.symbol(node, name)` returns an expression for a name defined by another node. For a node in another tree it imports that tree's module and returns `_<module>.name`; the name is looked up when the code runs, so trees can use each other. Names used while a module is imported (e.g. a Property Group class as a property type) still need the other tree to import first, so they can't go both ways.
 
