@@ -35,7 +35,7 @@ Placeholders must be on their own line. They are indented to the column they sit
 | --- | --- |
 | `ctx.imports("import math")` | Add an import line (deduplicated) |
 | `ctx.helper("sn_print")` | Name to call a shared helper by (`core/helpers.py`) |
-| `ctx.symbol(node_or_tree, name)` | Expression for `name`: the name itself in the same tree, `_<module>.name` with the module imported for other trees |
+| `ctx.symbol(node_or_tree, name)` | Expression for `name`: the name itself, imported with `from .<module> import name` from another tree; `_<module>.name` if the two trees import each other |
 | `ctx.script(module_key, alias_key, source)` | Add `source` unchanged as `scripts/<name>.py` and import it here; returns the name to use it by. Both names are declared in `sn_names()` (`naming.Script`, `naming.Symbol`) with a shared `owner` |
 | `ctx.on_register(line)` / `ctx.on_unregister(line)` | Lines for the module's `register()` / `unregister()` |
 | `ctx.var("row")` | Unused local name (`row`, then `row_2`, …) |

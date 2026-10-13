@@ -30,6 +30,10 @@ line_owners: dict[str, list] = {}
 # node id -> its own generated lines, of the last live compile (code preview)
 node_lines: dict[str, list[str]] = {}
 
+# module name -> modules of trees it is in an import cycle with, of the last
+# compile (compile_tree imports those as modules too)
+_cycles: dict[str, set[str]] = {}
+
 _format_cache: dict[str, str] = {}
 _FORMAT_CACHE_SIZE = 256
 
@@ -62,9 +66,22 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     }
     owners, previews, used_helpers = {}, {}, set()
     scripts = {}
+    builders = {
+        tree.module_name: ModuleBuilder(tree, dev, names, scripts) for tree in trees
+    }
+    results = {module: builder.build() for module, builder in builders.items()}
+    # `from .other import name` both ways fails: trees in a cycle import each
+    # other as modules and look names up when the code runs
+    _cycles.clear()
+    _cycles.update(import_cycles({m: b.uses for m, b in builders.items()}))
+    for module, peers in _cycles.items():
+        builders[module] = ModuleBuilder(
+            builders[module].tree, dev, names, scripts, peers
+        )
+        results[module] = builders[module].build()
     for tree in trees:
-        builder = ModuleBuilder(tree, dev, names, scripts)
-        source, line_map = builder.build()
+        builder = builders[tree.module_name]
+        source, line_map = results[tree.module_name]
         rel = f"addon/{tree.module_name}.py"
         files[rel] = _format(source) if pretty else source
         owners[rel] = line_map
@@ -93,8 +110,42 @@ def compile_tree(tree, dev=True, pretty=True) -> str:
     """Python source of one tree module."""
     names = naming.build()
     naming.use(names)
-    source, _ = ModuleBuilder(tree, dev, names).build()
+    cycle = _cycles.get(tree.module_name, set())
+    source, _ = ModuleBuilder(tree, dev, names, module_imports=cycle).build()
     return _format(source) if pretty else source
+
+
+def import_cycles(uses: dict[str, set[str]]) -> dict[str, set[str]]:
+    """{module: other modules of its cycle} for modules that import each
+    other, directly or through others (strongly connected components)."""
+    index, low, stack, on_stack, result = {}, {}, [], set(), {}
+
+    def visit(module):
+        index[module] = low[module] = len(index)
+        stack.append(module)
+        on_stack.add(module)
+        for other in uses.get(module, ()):
+            if other not in index:
+                visit(other)
+                low[module] = min(low[module], low[other])
+            elif other in on_stack:
+                low[module] = min(low[module], index[other])
+        if low[module] == index[module]:
+            component = set()
+            while True:
+                member = stack.pop()
+                on_stack.discard(member)
+                component.add(member)
+                if member == module:
+                    break
+            if len(component) > 1:
+                for member in component:
+                    result[member] = component - {member}
+
+    for module in uses:
+        if module not in index:
+            visit(module)
+    return result
 
 
 # -----------------------------------------------------------------------------
@@ -105,8 +156,12 @@ def compile_tree(tree, dev=True, pretty=True) -> str:
 class ModuleBuilder:
     """Collects the code of one tree module while its nodes emit."""
 
-    def __init__(self, tree, dev, names, scripts=None):
+    def __init__(self, tree, dev, names, scripts=None, module_imports=()):
         self.tree = tree
+        # other trees' modules imported as modules (import cycles), and the
+        # modules this one imports from
+        self.module_imports = set(module_imports)
+        self.uses: set[str] = set()
         self.dev = dev
         self.names = names
         # {relpath: (source, owner node id)} of script modules, add-on wide
@@ -210,14 +265,18 @@ class ModuleBuilder:
         return alias
 
     def import_symbol(self, owner, name):
-        """`name` from the module of `owner`'s tree. Other trees' modules are
-        imported as modules and their names looked up when the code runs, so
-        trees can use each other (a `from x import name` cycle fails)."""
+        """`name` from the module of `owner`'s tree: imported by name, or used
+        through the module if the two trees import each other."""
         tree = owner if hasattr(owner, "nodes") else owner.id_data
         if tree == self.tree:
             return name
-        alias = f"_{tree.module_name}"
-        self.imports.add(f"from . import {tree.module_name} as {alias}")
+        module = tree.module_name
+        self.uses.add(module)
+        if module not in self.module_imports:
+            self.imports.add(f"from .{module} import {name}")
+            return name
+        alias = f"_{module}"
+        self.imports.add(f"from . import {module} as {alias}")
         return f"{alias}.{name}"
 
     # -- functions (node groups) ---------------------------------------------

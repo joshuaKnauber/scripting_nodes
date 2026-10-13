@@ -267,9 +267,18 @@ class CoreTest(unittest.TestCase):
         helpers.flush()
         source = helpers.tree_source(tree)
         module = vars_tree.module_name
-        self.assertIn(f"from . import {module} as _{module}", source)
-        self.assertIn(f"_{module}.{var.getter_name()}()", source)
+        getter = var.getter_name()
+        self.assertIn(f"from .{module} import {getter}", source)
+        self.assertIn(f"sn_print(str({getter}()))", source)
         self.assertIsNone(helpers.sn("src.core.errors").addon_error)
+
+    def test_import_cycles(self):
+        cycles = helpers.sn("src.core.compiler").import_cycles
+        uses = {"a": {"b"}, "b": {"c"}, "c": {"a"}, "d": {"a"}, "e": set()}
+        self.assertEqual(
+            cycles(uses), {"a": {"b", "c"}, "b": {"a", "c"}, "c": {"a", "b"}}
+        )
+        self.assertEqual(cycles({"a": {"b"}, "b": set()}), {})
 
     def test_trees_can_use_each_other(self):
         # A prints B's variable, B prints A's: a `from x import y` cycle
@@ -293,6 +302,9 @@ class CoreTest(unittest.TestCase):
         helpers.flush()
         self.assertIsNone(helpers.sn("src.core.errors").addon_error)
         self.assertTrue(runtime().is_loaded(addon_settings().module_name))
+        a, b = (tree.module_name for tree in trees)
+        self.assertIn(f"from . import {b} as _{b}", helpers.tree_source(trees[0]))
+        self.assertIn(f"from . import {a} as _{a}", helpers.tree_source(trees[1]))
         for trigger in triggers:
             namespace, op = trigger.operator_idname.split(".")
             self.assertEqual(getattr(getattr(bpy.ops, namespace), op)(), {"FINISHED"})

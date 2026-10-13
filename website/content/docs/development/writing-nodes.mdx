@@ -195,7 +195,7 @@ class SNA_Node_GetVariable(ScriptingBaseNode, bpy.types.Node):
 - Nodes copied together (pasted into another tree, duplicated with their tree) reference each other's copies. A node duplicated next to its target keeps pointing at the original.
 - `references.users(target)` lists the nodes referencing a node. The sidebar shows them for the active node, the Data panel counts them.
 
-`ctx.symbol(node, name)` returns an expression for a name defined by another node. For a node in another tree it imports that tree's module and returns `_<module>.name`; the name is looked up when the code runs, so trees can use each other. Names used while a module is imported (e.g. a Property Group class as a property type) still need the other tree to import first, so they can't go both ways.
+`ctx.symbol(node, name)` returns an expression for a name defined by another node. For a node in another tree it adds `from .<module> import name` and returns `name`. Trees that import each other (directly or through others) would fail with that, so the compiler compiles them again importing each other as modules: `from . import <module> as _<module>`, used as `_<module>.name` and looked up when the code runs. Names used while a module is imported still can't go both ways.
 
 ## Using properties
 
