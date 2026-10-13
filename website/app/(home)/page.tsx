@@ -1,10 +1,10 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowRight, Heart } from 'lucide-react';
 import { JetBrains_Mono } from 'next/font/google';
 import { AssistantDemo } from '@/components/home/assistant-demo';
 import { FeatureGraph } from '@/components/home/feature-graph';
 import { NodeDemo } from '@/components/home/node-demo';
+import { SupportCard, SupportSticker } from '@/components/home/support-sticker';
 import { JsonLd } from '@/components/json-ld';
 import { Logo } from '@/components/logo';
 import {
@@ -13,7 +13,6 @@ import {
   releasesUrl,
   siteDescription,
   siteUrl,
-  supportFormUrl,
 } from '@/lib/shared';
 
 export const metadata: Metadata = {
@@ -60,18 +59,13 @@ export default function HomePage() {
     <div className={`${mono.variable} overflow-x-clip pb-40`}>
       <JsonLd data={softwareJsonLd} />
       <section className={`${container} pt-24 text-center sm:pt-32`}>
-        <a
-          href={supportFormUrl}
-          className="mb-6 inline-flex h-8 items-center gap-2 rounded-full border bg-fd-card px-3.5 text-[13px] text-fd-muted-foreground transition-colors hover:text-fd-foreground focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-fd-ring [&_svg]:size-3.5"
-        >
-          <Heart aria-hidden className="text-fd-primary" />
-          Wanna support? Tell me how you work
-          <ArrowRight aria-hidden />
-        </a>
-        {/* non-breaking hyphen: "add-" / "ons" never splits */}
-        <h1 className="mx-auto text-[40px] leading-[1.05] font-normal tracking-[-0.04em] text-balance sm:text-[56px]">
-          Build Blender add‑ons with nodes
-        </h1>
+        <div className="relative mx-auto w-fit max-w-full">
+          {/* non-breaking hyphen: "add-" / "ons" never splits */}
+          <h1 className="text-[40px] leading-[1.05] font-normal tracking-[-0.04em] text-balance sm:text-[56px]">
+            Build Blender add‑ons with nodes
+          </h1>
+          <SupportSticker />
+        </div>
         <p className={`${lead} mx-auto mt-5 max-w-[640px] text-fd-muted-foreground`}>
           Connect nodes and Scripting Nodes writes the Python. Or ask an AI assistant to build the
           graph for you.
@@ -136,24 +130,7 @@ export default function HomePage() {
       </section>
 
       <section className={section}>
-        <div className="mx-auto flex max-w-[720px] flex-col items-center gap-6 rounded-2xl border bg-fd-card p-8 text-center sm:flex-row sm:p-10 sm:text-left">
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-fd-primary/10 text-fd-primary [&_svg]:size-6">
-            <Heart aria-hidden />
-          </div>
-          <div className="flex-1">
-            <h2 className="text-[22px] leading-tight font-medium tracking-[-0.02em]">
-              Wanna support Scripting Nodes?
-            </h2>
-            <p className="mt-2 text-[15px] leading-6 text-fd-muted-foreground">
-              Tell me how you work in Blender and what you'd build with it. It only takes a few
-              minutes and helps me understand who uses Scripting Nodes.
-            </p>
-          </div>
-          <a href={supportFormUrl} className={`${primary} shrink-0 gap-2 [&_svg]:size-4`}>
-            Fill out the form
-            <ArrowRight aria-hidden />
-          </a>
-        </div>
+        <SupportCard />
       </section>
     </div>
   );

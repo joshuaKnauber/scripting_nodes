@@ -196,6 +196,14 @@ body {
   height: calc(var(--fd-docs-height) - var(--fd-docs-row-2));
 }
 
+/* peeled corner of the support sticker (components/home/support-sticker.tsx),
+   registered so it can animate */
+@property --sn-peel {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
 /* Homepage node demo (components/home/node-demo.tsx) */
 .sn-grid {
   background-color: var(--sn-canvas);
