@@ -5,6 +5,9 @@ It's a browser: clicking only moves the explorer. Nodes change through +
 (add a node) and the buttons for the selected node under the path.
 """
 
+import math
+import re
+
 import bpy
 
 from ...node_tree.editor import in_sn_tree
@@ -13,7 +16,7 @@ from ..ops.explorer import location as explorer_location
 from ..ops.explorer import selected_node
 
 MAX_ITEMS = 50
-# vectors up to this length are drawn as fields, longer arrays as a label
+# arrays up to this length show their values, longer ones their size
 MAX_ARRAY = 4
 
 
@@ -32,7 +35,7 @@ class SNA_PT_DataExplorer(bpy.types.Panel):
         layout = self.layout
         ui = context.scene.sna.ui
         location = explorer_location(context)
-        _draw_header(layout, location)
+        _draw_header(layout, context, location)
         _draw_selected_node(layout, context, location)
         if not location.root:
             _draw_roots(layout)
@@ -41,11 +44,14 @@ class SNA_PT_DataExplorer(bpy.types.Panel):
             _draw_location(layout, context, location)
 
 
-def _draw_header(layout, location):
-    """Where the explorer is: the path as code, back and home."""
+def _draw_header(layout, context, location):
+    """Where the explorer is: the path as code (wrapped, not cut off), back
+    and home."""
     box = layout.box()
     path = location.python().replace("bpy.context", "context")
-    box.label(text=path or "Context or Blend File")
+    col = box.column(align=True)
+    for line in _wrap(path, _chars_per_line(context)) or ["Context or Blend File"]:
+        col.label(text=line)
     row = box.row(align=True)
     row.enabled = bool(location.root)
     back = row.operator("sna.explorer_back", text="Back", icon="BACK")
@@ -114,30 +120,21 @@ def _draw_members(layout, context, value, search, show_all, highlight):
                 continue
             values.append((identifier, text, prop, current))
 
-    if data:
-        header, body = layout.panel("sna_explorer_data")
-        header.label(text=f"Data ({len(data)})")
-        if body is not None:
-            col = body.column(align=True)
-            for identifier, text, current in data:
-                row = _row(col, identifier == highlight)
-                row.active = current is not None
-                _target(_entry(row, text, _summary(current)), identifier)
-                _add(row, identifier)
-    if values:
-        header, body = layout.panel("sna_explorer_values")
-        header.label(text=f"Values ({len(values)})")
-        if body is not None:
-            col = body.column(align=True)
-            for identifier, text, prop, current in values:
-                row = _row(col, identifier == highlight)
-                if prop is None:
-                    row.label(text=f"{text}: {current!s}")
-                elif _array_size(prop) > MAX_ARRAY:
-                    row.label(text=f"{text} ({_array_size(prop)} values)")
-                else:
-                    row.prop(value, identifier, text=text)
-                _add(row, identifier)
+    col = layout.column(align=True)
+    for identifier, text, current in data:
+        row = _row(col, identifier == highlight)
+        row.active = current is not None
+        summary = _summary(current)
+        if summary.replace(" ", "").lower() == text.replace(" ", "").lower():
+            summary = ""  # "Field Settings: Field Settings"
+        _target(_entry(row, text, summary), identifier)
+        _add(row, identifier)
+    if data and values:
+        col.separator()
+    for identifier, text, prop, current in values:
+        row = _row(col, identifier == highlight)
+        _value_entry(row, text, _value_text(prop, current))
+        _add(row, identifier)
     if not data and not values:
         layout.label(text="Nothing found" if search else "Nothing to show")
     if hidden or show_all:
@@ -216,6 +213,75 @@ def _entry(row, text, summary="", opens=True, icon=None):
     right.alignment = "RIGHT"
     right.label(text=summary)
     return op
+
+
+def _value_entry(row, text, value):
+    """A value: its name on the left, the value as text on the right."""
+    left = row.row(align=True)
+    left.alignment = "LEFT"
+    left.label(text=text, icon="BLANK1")
+    right = row.row(align=True)
+    right.alignment = "RIGHT"
+    right.label(text=value or "—")
+
+
+def _value_text(prop, value) -> str:
+    """A value as short text: `0.1 m`, `30°`, `Edges`, `On`, `(0, 0, 1)`."""
+    if prop is None:
+        return str(value)
+    if prop.type == "ENUM":
+        if prop.is_enum_flag:
+            return ", ".join(_enum_name(prop, v) for v in sorted(value)) or "None"
+        return _enum_name(prop, value)
+    if prop.type == "STRING":
+        return value if len(value) <= 40 else value[:39] + "…"
+    if _array_size(prop):
+        if _array_size(prop) > MAX_ARRAY:
+            return f"{_array_size(prop)} values"
+        return "(" + ", ".join(_number(prop, v) for v in value) + ")"
+    return _number(prop, value)
+
+
+def _number(prop, value) -> str:
+    if isinstance(value, bool):
+        return "On" if value else "Off"
+    if isinstance(value, float):
+        if prop.unit == "ROTATION":
+            return f"{math.degrees(value):.4g}°"
+        if prop.unit not in {"NONE", ""}:
+            try:
+                return bpy.utils.units.to_string(
+                    bpy.context.scene.unit_settings.system,
+                    prop.unit,
+                    value,
+                    precision=3,
+                )
+            except (ValueError, TypeError):
+                pass
+        return f"{value:.4g}"
+    return str(value)
+
+
+def _enum_name(prop, identifier) -> str:
+    item = prop.enum_items.get(identifier)
+    return item.name if item is not None else str(identifier)
+
+
+def _wrap(text, width) -> list[str]:
+    """`text` in lines of about `width` characters, broken before `.` and `[`."""
+    lines, line = [], ""
+    for token in re.findall(r"[.\[]?[^.\[]+", text):
+        if line and len(line) + len(token) > width:
+            lines.append(line)
+            line = token
+        else:
+            line += token
+    return lines + [line] if line else lines
+
+
+def _chars_per_line(context) -> int:
+    scale = context.preferences.system.ui_scale
+    return max(16, int(context.region.width / scale / 7.5) - 4)
 
 
 def _add(row, member):
