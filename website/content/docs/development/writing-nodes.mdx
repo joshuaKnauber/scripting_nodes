@@ -149,6 +149,10 @@ ctx.module(f"""
 """)
 ```
 
+### Nodes that are both
+
+A node in a flow can also write module-level code that must exist even when the flow doesn't reach it. Implement `emit_module(ctx)` next to `emit(ctx)`: the compiler calls it once per build, before the root nodes. The Script node adds its script as a module there (`ctx.script(...)`) and calls a function of it in `emit`.
+
 ### Names
 
 Names other code can refer to (classes, operator idnames, module-level functions and variables) are declared in `sn_names()` with the helpers in `core/naming.py`, and read with `ctx.name(key)`. Other nodes and the UI read them with `node.sn_name(key)`, e.g. a Button gets the operator's idname.

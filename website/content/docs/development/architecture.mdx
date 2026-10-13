@@ -28,10 +28,13 @@ The add-on is written to `<user scripts>/addons/<module name>/`:
 ```
 __init__.py, auto_load.py, blender_manifest.toml
 _sn_helpers.py          shared helper functions (only if used)
-addon/<tree>_<id>.py    one module per node tree
+addon/<tree>.py         one module per node tree
+scripts/<name>.py       scripts of Script nodes, unchanged (only if used)
 ```
 
-Inside a tree module, **root nodes** (operators, panels, events, properties, …) are emitted first, sorted by `sn_order`. Every other node is emitted when a flow reaches it, or, for value nodes, when one of its outputs is used. A tree with a group interface also defines a function (see `core/functions.py`): Group Input values are its parameters, Group Output is `return`, and its flow sockets decide whether a Group node calls it as a value, a statement or UI. Group Input / Output are Blender's own nodes, so the compiler handles them itself.
+Inside a tree module, **root nodes** (operators, panels, events, properties, …) are emitted first, sorted by `sn_order`. Every other node is emitted when a flow reaches it, or, for value nodes, when one of its outputs is used. Nodes with an `emit_module(ctx)` method (Script nodes) are emitted at module level too, wherever they are in a flow. A tree with a group interface also defines a function (see `core/functions.py`): Group Input values are its parameters, Group Output is `return`, and its flow sockets decide whether a Group node calls it as a value, a statement or UI. Group Input / Output are Blender's own nodes, so the compiler handles them itself.
+
+Scripts are the user's code and stay as written. `auto_load` registers their classes like any other, unless the script defines `register()`: then it registers itself, before everything else.
 
 ## Loading
 

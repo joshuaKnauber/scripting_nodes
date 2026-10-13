@@ -5,6 +5,7 @@
 Each tree becomes one module. Root nodes (operators, panels, events, ...) are
 emitted first; everything else is emitted when a flow reaches it or when a
 value it outputs is used. Nodes write through core/context.NodeContext.
+Scripts (Script nodes) become modules of their own in `scripts/`.
 """
 
 import hashlib
@@ -22,6 +23,7 @@ from .context import Line, NodeContext, NodeError, Scope
 
 TEMPLATES = os.path.join(os.path.dirname(__file__), "templates")
 HELPERS_MODULE = "_sn_helpers"
+SCRIPTS_PACKAGE = "scripts"
 
 # relpath -> owner node id per line, of the last live compile (error blame)
 line_owners: dict[str, list] = {}
@@ -59,8 +61,9 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
         "addon/__init__.py": "",
     }
     owners, previews, used_helpers = {}, {}, set()
+    scripts = {}
     for tree in trees:
-        builder = ModuleBuilder(tree, dev, names)
+        builder = ModuleBuilder(tree, dev, names, scripts)
         source, line_map = builder.build()
         rel = f"addon/{tree.module_name}.py"
         files[rel] = _format(source) if pretty else source
@@ -70,6 +73,11 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     source = properties.module_source(names)
     if source is not None:
         files[f"addon/{properties.PROPERTIES_MODULE}.py"] = source
+    if scripts:
+        files[f"{SCRIPTS_PACKAGE}/__init__.py"] = ""
+    for rel, (source, owner) in scripts.items():
+        files[rel] = source  # the user's code, as written
+        owners[rel] = [owner] * (source.count("\n") + 1)
     exported = {name for name in used_helpers if helpers.needs_import(name, dev)}
     if exported:
         files[f"{HELPERS_MODULE}.py"] = helpers.source(exported, dev)
@@ -97,10 +105,12 @@ def compile_tree(tree, dev=True, pretty=True) -> str:
 class ModuleBuilder:
     """Collects the code of one tree module while its nodes emit."""
 
-    def __init__(self, tree, dev, names):
+    def __init__(self, tree, dev, names, scripts=None):
         self.tree = tree
         self.dev = dev
         self.names = names
+        # {relpath: (source, owner node id)} of script modules, add-on wide
+        self.scripts = scripts if scripts is not None else {}
         self.imports = {"import bpy"}
         self.blocks: list[list[Line]] = []
         self.register: list[Line] = []
@@ -117,6 +127,9 @@ class ModuleBuilder:
         sys.setrecursionlimit(max(limit, 20000))  # long flow chains recurse
         try:
             module_scope = self.module_scope
+            for node in sn_nodes(self.tree):
+                if hasattr(node, "emit_module"):
+                    self._emit(node, module_scope, "root", node.emit_module)
             roots = [n for n in sn_nodes(self.tree) if n.sn_root]
             roots.sort(key=lambda n: n.sn_order)
             for node in roots:
@@ -127,11 +140,11 @@ class ModuleBuilder:
             sys.setrecursionlimit(limit)
         return self._assemble()
 
-    def _emit(self, node, scope, mode) -> NodeContext | None:
+    def _emit(self, node, scope, mode, emit=None) -> NodeContext | None:
         ctx = NodeContext(self, node, scope, mode)
         self._emitted.add(node.as_pointer())
         try:
-            node.emit(ctx)
+            (emit or node.emit)(ctx)
         except NodeError as exc:
             errors.node_errors[node.id] = str(exc)
             return None
@@ -186,6 +199,15 @@ class ModuleBuilder:
         if helpers.needs_import(name, self.dev):
             self.imports.add(f"from ..{HELPERS_MODULE} import {name}")
         return helpers.call_name(name, self.dev)
+
+    def add_script(self, module, alias, source, owner):
+        """Add `source` as `scripts/<module>.py` (once for the add-on) and
+        import it into this module as `alias`."""
+        rel = f"{SCRIPTS_PACKAGE}/{module}.py"
+        self.scripts.setdefault(rel, (source, owner))
+        line = f"from ..{SCRIPTS_PACKAGE} import {module}"
+        self.imports.add(line if alias == module else f"{line} as {alias}")
+        return alias
 
     def import_symbol(self, owner, name):
         tree = owner if hasattr(owner, "nodes") else owner.id_data

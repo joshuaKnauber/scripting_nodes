@@ -99,7 +99,8 @@ def apply(files: dict[str, str]) -> bool:
     stale = [
         rel
         for rel in current
-        if rel not in files and (rel.startswith("addon/") or rel == "_sn_helpers.py")
+        if rel not in files
+        and (rel.startswith(("addon/", "scripts/")) or rel == "_sn_helpers.py")
     ]
     was_loaded = is_loaded(module)
     if not changed and not stale and was_loaded:

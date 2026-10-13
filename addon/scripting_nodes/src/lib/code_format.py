@@ -67,33 +67,6 @@ def is_simple(expr: str) -> bool:
     return isinstance(node, (ast.Name, ast.Constant))
 
 
-def flatten_multiline_strings(code: str) -> str:
-    """Rewrite string literals spanning several lines as single-line literals
-    with the same value, so the code can be re-indented safely (indenting the
-    continuation lines of a multi-line string would change its value)."""
-    import io
-    import tokenize
-
-    try:
-        tokens = list(tokenize.generate_tokens(io.StringIO(code).readline))
-    except (tokenize.TokenError, SyntaxError):
-        return code
-    lines = code.split("\n")
-    # replace from the end so earlier positions stay valid
-    for tok in reversed(tokens):
-        if tok.type != tokenize.STRING or tok.start[0] == tok.end[0]:
-            continue
-        try:
-            value = ast.literal_eval(tok.string)
-        except (ValueError, SyntaxError):
-            continue  # e.g. f-strings, leave as is
-        (srow, scol), (erow, ecol) = tok.start, tok.end
-        before = lines[srow - 1][:scol]
-        after = lines[erow - 1][ecol:]
-        lines[srow - 1 : erow] = [before + repr(value) + after]
-    return "\n".join(lines)
-
-
 def literal_set(items) -> str:
     """Python source of a set of strings with a stable order."""
     items = sorted(items)

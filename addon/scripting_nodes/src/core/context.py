@@ -283,6 +283,15 @@ class NodeContext:
         another tree's module."""
         return self._builder.import_symbol(owner, name)
 
+    def script(self, module_key, alias_key, source) -> str:
+        """Add `source` (the user's code, unchanged) as a module of its own,
+        `scripts/<name>.py`. `module_key` / `alias_key`: names declared in
+        `sn_names()` (`naming.Script` and `naming.Symbol`). Returns the name
+        this module uses it by."""
+        return self._builder.add_script(
+            self.name(module_key), self.name(alias_key), source, self.node.id
+        )
+
     def on_register(self, line):
         self._builder.register.append(Line(0, line, self.node.id))
 
