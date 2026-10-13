@@ -51,6 +51,7 @@ def build():
     for node in tree.nodes:
         node.select = node == active
     tree.nodes.active = active
+    bpy.context.scene.sna.ui.explorer_path = ""
     helpers.flush()
     return tree
 

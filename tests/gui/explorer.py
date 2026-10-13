@@ -1,5 +1,5 @@
-"""The data explorer's operators in a real node editor: following a node
-(open, back, add a chained node) and browsing on its own.
+"""The data explorer's operators in a real node editor: browsing leaves nodes
+alone, Use This Path / Go to Its Path, + adds a node.
 
 Runs inside GUI Blender via `python scripts/test.py --gui`. Prints
 "GUI TEST PASSED" or "GUI TEST FAILED: <reason>" and quits.
@@ -53,38 +53,37 @@ def step():
             tree.nodes.active = node
             helpers.flush()
             ui = bpy.context.scene.sna.ui
+            ui.explorer_path = ""
             with editor(tree):
-                # following the active node changes its path
-                check(
-                    bpy.ops.sna.explorer_open(member="modifiers") == {"FINISHED"},
-                    "open",
-                )
-                check(node.path == "active_object.modifiers", node.path)
+                # browsing never changes the selected node
+                bpy.ops.sna.explorer_open(root="CONTEXT")
+                bpy.ops.sna.explorer_open(member="active_object")
+                bpy.ops.sna.explorer_open(member="modifiers")
                 bpy.ops.sna.explorer_open(item_mode="NAME", item_name="Bevel")
+                path = "bpy.context.active_object.modifiers['Bevel']"
+                check(ui.explorer_path == path, ui.explorer_path)
+                check(node.path == "active_object", f"node changed: {node.path}")
+                # ... until Use This Path
+                check(bpy.ops.sna.explorer_use_for_node() == {"FINISHED"}, "use")
                 check(node.path == "active_object.modifiers[]", node.path)
-                check(node.path_keys[0].mode == "NAME", "key mode")
                 check(node.socket("key_0").value == "Bevel", "key value")
-                bpy.ops.sna.explorer_back(count=1)
-                check(node.path == "active_object", f"back: {node.path}")
-                # + continues from the node
-                bpy.ops.sna.explorer_add(member="modifiers")
-                added = tree.nodes.active
-                check(added != node and added.path_root == "INPUT", "chained node")
-                check(added.path == "modifiers", added.path)
-                check(added.socket("data").links[0].from_node == node, "not linked")
-                # browsing on its own
-                ui.explorer_follow = False
-                bpy.ops.sna.explorer_open(root="DATA")
-                bpy.ops.sna.explorer_open(member="objects")
-                bpy.ops.sna.explorer_open(item_mode="NAME", item_name="Cube")
-                check(ui.explorer_path == "bpy.data.objects['Cube']", ui.explorer_path)
-                bpy.ops.sna.explorer_add(member="location")
-                free = tree.nodes.active
-                check(free.path_root == "DATA", "free node root")
-                check(free.path == "objects[].location", free.path)
-                check(free.socket("key_0").value == "Cube", "free node key")
+                # back, home, go to the node's path
+                bpy.ops.sna.explorer_back(count=2)
+                check(
+                    ui.explorer_path == "bpy.context.active_object.modifiers",
+                    ui.explorer_path,
+                )
                 bpy.ops.sna.explorer_back(count=-1)
-                check(ui.explorer_path == "", "back to the roots")
+                check(ui.explorer_path == "", "home")
+                check(bpy.ops.sna.explorer_go_to_node() == {"FINISHED"}, "go to")
+                check(ui.explorer_path == path, f"go to: {ui.explorer_path}")
+                # + adds a node with the whole path
+                bpy.ops.sna.explorer_add(member="width")
+                added = tree.nodes.active
+                check(added != node, "no node added")
+                check(added.path_root == "CONTEXT", added.path_root)
+                check(added.path == "active_object.modifiers[].width", added.path)
+                check(added.socket("key_0").value == "Bevel", "added key")
         elif s == 1:
             helpers.flush()
             tree = bpy.data.node_groups["Explorer"]

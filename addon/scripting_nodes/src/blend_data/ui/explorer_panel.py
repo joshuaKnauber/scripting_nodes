@@ -1,16 +1,16 @@
 """The data explorer in the node editor's sidebar (Blend Data tab): the data
 of the open file, one level at a time (blend_data/explorer.py).
 
-With a Blender Data node active it shows where the node's path ends and
-clicking an entry changes the path; otherwise it browses on its own and +
-adds nodes.
+It's a browser: clicking only moves the explorer. Nodes change through +
+(add a node) and the buttons for the selected node under the path.
 """
 
 import bpy
 
 from ...node_tree.editor import in_sn_tree
 from .. import explorer, rna
-from ..ops import explorer_location
+from ..ops.explorer import location as explorer_location
+from ..ops.explorer import selected_node
 
 MAX_ITEMS = 50
 # vectors up to this length are drawn as fields, longer arrays as a label
@@ -28,65 +28,47 @@ class SNA_PT_DataExplorer(bpy.types.Panel):
     def poll(cls, context):
         return in_sn_tree(context)
 
-    def draw_header_preset(self, context):
-        self.layout.prop(
-            context.scene.sna.ui, "explorer_follow", text="", icon="RESTRICT_SELECT_OFF"
-        )
-
     def draw(self, context):
         layout = self.layout
         ui = context.scene.sna.ui
-        node, location = explorer_location(context)
-        if node is not None:
-            row = layout.row()
-            row.label(text=node.draw_label() or node.bl_label, icon="NODE")
-        _draw_crumbs(layout, location, free=node is None)
+        location = explorer_location(context)
+        _draw_header(layout, location)
+        _draw_selected_node(layout, context, location)
         if not location.root:
             _draw_roots(layout)
-            return
-        layout.prop(ui, "explorer_filter", text="", icon="VIEWZOOM")
-        _draw_location(layout.column(), context, location, node is not None)
+        else:
+            layout.prop(ui, "explorer_filter", text="", icon="VIEWZOOM")
+            _draw_location(layout, context, location)
 
 
-def _draw_crumbs(layout, location, free):
-    """Home, a back button named after the parent, and where you are (a full
-    breadcrumb doesn't fit the sidebar)."""
-    crumbs = location.crumbs()
-    if free:
-        crumbs.insert(0, ("Data", -1))
-    row = layout.row(align=True)
+def _draw_header(layout, location):
+    """Where the explorer is: the path as code, back and home."""
+    box = layout.box()
+    path = location.python().replace("bpy.context", "context")
+    box.label(text=path or "Context or Blend File")
+    row = box.row(align=True)
+    row.enabled = bool(location.root)
+    back = row.operator("sna.explorer_back", text="Back", icon="BACK")
+    back.count = len(location.parts) - 1 if location.parts else -1
     home = row.operator("sna.explorer_back", text="", icon="HOME")
-    home.count = crumbs[0][1]
-    if len(crumbs) > 1:
-        parent, count = crumbs[-2]
-        op = row.operator("sna.explorer_back", text=parent, icon="BACK")
-        op.count = count
-    row.label(text=crumbs[-1][0])
-
-
-def _back(layout, text, count):
-    op = layout.operator("sna.explorer_back", text=text, emboss=False)
-    op.count = count
+    home.count = -1
 
 
 def _draw_roots(layout):
     col = layout.column(align=True)
-    for root, text, icon in (
-        ("CONTEXT", "Context", "WINDOW"),
-        ("DATA", "Blend File", "FILE_BLEND"),
+    for root, text, icon, description in (
+        ("CONTEXT", "Context", "WINDOW", "active object, scene, ..."),
+        ("DATA", "Blend File", "FILE_BLEND", "all objects, materials, ..."),
     ):
-        row = col.row(align=True)
-        op = row.operator("sna.explorer_open", text=text, icon=icon, emboss=False)
-        op.root = root
-        _target(row.operator("sna.explorer_add", text="", icon="ADD"), root=root)
+        _target(_entry(col.row(align=True), text, description, icon=icon), root=root)
 
 
-def _draw_location(layout, context, location, following):
+def _draw_location(layout, context, location):
     """The entries at `location`; a plain value is shown in its owner's list."""
     try:
         value = explorer.evaluate(location, context)
     except explorer.Unavailable as error:
-        layout.label(text=str(error), icon="INFO")
+        layout.label(text=f"{error}, showing what could be there", icon="INFO")
         _draw_static(layout, location)
         return
     highlight = None
@@ -94,66 +76,82 @@ def _draw_location(layout, context, location, following):
         if not location.parts:
             return
         highlight = location.parts[-1]
-        location = location.truncated(len(location.parts) - 1)
+        owner = location.truncated(len(location.parts) - 1)
         try:
-            value = explorer.evaluate(location, context)
+            value = explorer.evaluate(owner, context)
         except explorer.Unavailable:
             return
-    search = context.scene.sna.ui.explorer_filter.lower()
+    ui = context.scene.sna.ui
+    search = ui.explorer_filter.lower()
     if explorer.is_collection(value):
         _draw_items(layout, value, location, search)
-    elif explorer.is_struct(value):
-        _draw_members(layout, context, value, search, following, highlight)
+    else:
+        _draw_members(layout, context, value, search, ui.explorer_show_all, highlight)
 
 
-def _draw_members(layout, context, value, search, following, highlight):
-    data, values = [], []
+def _draw_members(layout, context, value, search, show_all, highlight):
+    data, values, hidden = [], [], 0
     for identifier, text, prop in explorer.struct_members(value, context):
         if search and search not in text.lower() and search not in identifier:
             continue
         kind = prop.type if prop is not None else _kind(value, identifier)
-        (data if kind in {"POINTER", "COLLECTION"} else values).append(
-            (identifier, text, prop, kind)
-        )
-    col = layout.column(align=True)
-    for identifier, text, prop, kind in data:
-        row = _row(col, identifier == highlight)
         try:
             current = getattr(value, identifier)
         except AttributeError:
             current = None
-        row.active = current is not None
-        op = _entry(row, text, _summary(current))
-        op.member = identifier
-        _target(row.operator("sna.explorer_add", text="", icon="ADD"), identifier)
-    if data and values:
-        layout.separator()
-    col = layout.column(align=True)
-    for identifier, text, prop, _kind_ in values:
-        row = _row(col, identifier == highlight)
-        if prop is None:
-            row.label(text=f"{text}: {getattr(value, identifier, '')!s}")
-        elif _array_size(prop) > MAX_ARRAY:
-            row.label(text=f"{text} ({_array_size(prop)} values)")
+        if kind in {"POINTER", "COLLECTION"}:
+            empty = current is None or (
+                explorer.is_collection(current) and not len(current)
+            )
+            if empty and not show_all and identifier != highlight:
+                hidden += 1
+                continue
+            data.append((identifier, text, current))
         else:
-            row.prop(value, identifier, text=text)
-        if following:
-            op = row.operator("sna.explorer_open", text="", icon="FORWARD")
-            op.member = identifier
-        _target(row.operator("sna.explorer_add", text="", icon="ADD"), identifier)
+            internal = prop is None or prop.is_readonly
+            if internal and not show_all and identifier != highlight:
+                hidden += 1
+                continue
+            values.append((identifier, text, prop, current))
+
+    if data:
+        header, body = layout.panel("sna_explorer_data")
+        header.label(text=f"Data ({len(data)})")
+        if body is not None:
+            col = body.column(align=True)
+            for identifier, text, current in data:
+                row = _row(col, identifier == highlight)
+                row.active = current is not None
+                _target(_entry(row, text, _summary(current)), identifier)
+                _add(row, identifier)
+    if values:
+        header, body = layout.panel("sna_explorer_values")
+        header.label(text=f"Values ({len(values)})")
+        if body is not None:
+            col = body.column(align=True)
+            for identifier, text, prop, current in values:
+                row = _row(col, identifier == highlight)
+                if prop is None:
+                    row.label(text=f"{text}: {current!s}")
+                elif _array_size(prop) > MAX_ARRAY:
+                    row.label(text=f"{text} ({_array_size(prop)} values)")
+                else:
+                    row.prop(value, identifier, text=text)
+                _add(row, identifier)
     if not data and not values:
-        layout.label(text="Nothing found" if search else "No properties")
+        layout.label(text="Nothing found" if search else "Nothing to show")
+    if hidden or show_all:
+        text = "Show Empty and Internal" + (f" ({hidden})" if hidden else "")
+        layout.prop(context.scene.sna.ui, "explorer_show_all", text=text)
 
 
 def _draw_items(layout, value, location, search):
     col = layout.column(align=True)
     active = getattr(value, "active", None)
-    step = location.final_step()
-    if active is not None and rna.member(step, "active").known:
+    if active is not None and rna.member(location.final_step(), "active").known:
         row = col.row(align=True)
-        op = _entry(row, "Active", _summary(active))
-        op.item_mode = "ACTIVE"
-        _target(row.operator("sna.explorer_add", text="", icon="ADD"), mode="ACTIVE")
+        _target(_entry(row, "Active", _summary(active)), "active")
+        _add(row, "active")
         col.separator()
     shown = hidden = 0
     for index, item in enumerate(value):
@@ -177,19 +175,29 @@ def _draw_items(layout, value, location, search):
 def _draw_static(layout, location):
     """Without live data: the members of the type, no values."""
     step = location.final_step()
-    if not step.known or not (step.rna_type or step.collection):
+    if not step.known or step.collection or not step.rna_type:
         return
     col = layout.column(align=True)
-    if step.collection:
-        _target(_entry(col.row(align=True), "First Item"), key=explorer.Key("INDEX", 0))
-        return
     for member in rna.members(step):
         row = col.row(align=True)
-        op = _entry(
-            row, rna.label(member), rna.type_label(member), bool(member.rna_type)
+        opens = bool(member.rna_type)
+        _target(
+            _entry(row, rna.label(member), rna.type_label(member), opens), member.name
         )
-        op.member = member.name
-        _target(row.operator("sna.explorer_add", text="", icon="ADD"), member.name)
+        _add(row, member.name)
+
+
+def _draw_selected_node(layout, context, location):
+    node = selected_node(context)
+    if node is None:
+        return
+    box = layout.box()
+    box.label(text=f"Selected: {node.draw_label() or node.bl_label}", icon="NODE")
+    row = box.row(align=True)
+    row.operator("sna.explorer_go_to_node", icon="ZOOM_SELECTED")
+    sub = row.row(align=True)
+    sub.enabled = bool(location.root)
+    sub.operator("sna.explorer_use_for_node", icon="CHECKMARK")
 
 
 # -----------------------------------------------------------------------------
@@ -197,17 +205,22 @@ def _draw_static(layout, location):
 # -----------------------------------------------------------------------------
 
 
-def _entry(row, text, summary="", opens=True):
+def _entry(row, text, summary="", opens=True, icon=None):
     """An entry: its name on the left (click to open), `summary` on the right.
     Returns the open operator."""
     left = row.row(align=True)
     left.alignment = "LEFT"
-    icon = "RIGHTARROW_THIN" if opens else "DOT"
+    icon = icon or ("RIGHTARROW_THIN" if opens else "DOT")
     op = left.operator("sna.explorer_open", text=text, icon=icon, emboss=False)
     right = row.row(align=True)
     right.alignment = "RIGHT"
     right.label(text=summary)
     return op
+
+
+def _add(row, member):
+    op = row.operator("sna.explorer_add", text="", icon="ADD")
+    op.member = member
 
 
 def _row(layout, highlight):
@@ -216,17 +229,15 @@ def _row(layout, highlight):
     return layout.row(align=True)
 
 
-def _target(op, member="", key=None, mode="", root=""):
+def _target(op, member="", key=None, root=""):
     if root:
         op.root = root
     elif key is not None:
         op.item_mode = key.mode
         if key.mode == "NAME":
             op.item_name = key.value
-        elif key.mode == "INDEX":
+        else:
             op.item_index = key.value
-    elif mode:
-        op.item_mode = mode
     else:
         op.member = member
 
@@ -246,7 +257,7 @@ def _summary(value) -> str:
     if value is None:
         return "None"
     if explorer.is_collection(value) or isinstance(value, list):
-        return str(len(value))
+        return f"{len(value)} items"
     name = getattr(value, "name", None)
     if isinstance(name, str) and name:
         return name

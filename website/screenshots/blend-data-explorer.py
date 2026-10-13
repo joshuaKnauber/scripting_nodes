@@ -1,5 +1,5 @@
-"""The data explorer following a Blender Data node: the active object's
-Bevel modifier with its live values."""
+"""The data explorer at the active object's Bevel modifier, with a Blender
+Data node selected."""
 
 import bpy
 import helpers
@@ -25,5 +25,8 @@ def setup():
     for other in tree.nodes:
         other.select = other == node
     tree.nodes.active = node
+    bpy.context.scene.sna.ui.explorer_path = (
+        "bpy.context.active_object.modifiers['Bevel']"
+    )
     helpers.flush()
     return tree

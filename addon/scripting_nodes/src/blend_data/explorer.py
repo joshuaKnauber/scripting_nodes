@@ -5,13 +5,14 @@ A Location is a path with concrete keys, like a Blender Data node's path:
 
     Location("CONTEXT", ["active_object", "modifiers", "[]"], [Key("NAME", "Bevel")])
 
-It either follows the active Blender Data node (`node_location`, moving it
-changes the node's path) or is the explorer's own place, stored as a Python
-path in `scene.sna.ui.explorer_path` (`free_location`).
+The explorer's location is stored as a Python path in
+`scene.sna.ui.explorer_path` (`free_location`). It only changes when you
+click in the explorer; nodes change only through the explicit "Go to its
+path" (`absolute_location`) and "Use this path" (`apply_to_node`).
 
 `evaluate()` walks the path through the live data. Where that isn't possible
-(nothing active, a key from a link) the explorer falls back to the types
-(rna.py), without values.
+(nothing active right now) the explorer falls back to the types (rna.py),
+without values.
 """
 
 from dataclasses import dataclass, field
@@ -43,8 +44,6 @@ class Location:
     parts: list = field(default_factory=list)
     keys: list = field(default_factory=list)  # one Key per "[]"
     input_type: str = ""  # INPUT: type of the data the path starts at
-    # INPUT: live data the path starts at, or None if it isn't known
-    start: object = None
 
     def root_step(self):
         if self.root == "INPUT":
@@ -62,18 +61,20 @@ class Location:
         """This location plus attribute `name`, or plus an item (`key`)."""
         if key is not None:
             return Location(
-                self.root, self.parts + [rna.SUBSCRIPT], self.keys + [key],
-                self.input_type, self.start,
-            )  # fmt: skip
+                self.root,
+                self.parts + [rna.SUBSCRIPT],
+                self.keys + [key],
+                self.input_type,
+            )
         return Location(
-            self.root, self.parts + [name], list(self.keys), self.input_type, self.start
+            self.root, self.parts + [name], list(self.keys), self.input_type
         )
 
     def truncated(self, count) -> "Location":
         """The first `count` segments of this location."""
         parts = self.parts[:count]
         keys = self.keys[: parts.count(rna.SUBSCRIPT)]
-        return Location(self.root, parts, keys, self.input_type, self.start)
+        return Location(self.root, parts, keys, self.input_type)
 
     def python(self) -> str:
         """`bpy.context.active_object.modifiers["Bevel"]` (free locations)."""
@@ -122,8 +123,6 @@ def evaluate(location: Location, context, count=None):
         value = context
     elif location.root == "DATA":
         value = bpy.data
-    elif location.start is not None:
-        value = location.start
     else:
         raise Unavailable("The data comes from a link")
     keys = iter(location.keys)
@@ -189,65 +188,12 @@ def struct_members(value, context):
 
 
 # -----------------------------------------------------------------------------
-# Locations of nodes and of the explorer itself
+# The explorer's location, and nodes' paths
 # -----------------------------------------------------------------------------
 
 
-def follows(node) -> bool:
-    """Nodes the explorer follows: Blender Data nodes, and property nodes in
-    Blender mode."""
-    from ..nodes._blend_path import BlendPathMixin
-
-    return (
-        isinstance(node, BlendPathMixin)
-        and getattr(node, "mode", "BLENDER") == "BLENDER"
-    )
-
-
-def node_location(node, context) -> Location:
-    """Where `node`'s path ends, with the keys it uses."""
-    parts = node.path_parts() or []
-    keys = []
-    for index in range(parts.count(rna.SUBSCRIPT)):
-        mode = node.path_keys[index].mode if index < len(node.path_keys) else "INDEX"
-        socket = node.socket(f"key_{index}")
-        if mode == "ACTIVE":
-            keys.append(Key("ACTIVE"))
-        elif socket is None or socket.is_linked:
-            keys.append(Key(mode))
-        else:
-            keys.append(Key(mode, socket.value))
-    input_type, start = "", None
-    if node.path_root == "INPUT":
-        input_type = node.path_root_step().rna_type
-        start = _input_value(node, context)
-    return Location(node.path_root, parts, keys, input_type, start)
-
-
-def _input_value(node, context, depth=0):
-    """Live data at the node's Data input, if it comes from a Blender Data
-    node the explorer can evaluate."""
-    socket = node.socket("data")
-    if socket is None or not socket.is_linked or depth > 32:
-        return None
-    upstream = socket.links[0].from_node
-    while upstream.bl_idname == "NodeReroute":
-        if not upstream.inputs[0].is_linked:
-            return None
-        upstream = upstream.inputs[0].links[0].from_node
-    if upstream.bl_idname != "SNA_Node_BlendData":
-        return None
-    location = node_location(upstream, context)
-    if upstream.path_root == "INPUT":
-        location.start = _input_value(upstream, context, depth + 1)
-    try:
-        return evaluate(location, context)
-    except Unavailable:
-        return None
-
-
 def free_location(text) -> Location:
-    """The explorer's own location from its stored Python path."""
+    """The explorer's location from its stored Python path ("" = the roots)."""
     if not text:
         return Location("")
     if text in {"bpy.context", "bpy.data"}:
@@ -260,8 +206,95 @@ def free_location(text) -> Location:
     return Location(parsed.root, parsed.segments, keys)
 
 
+def uses_paths(node) -> bool:
+    """Nodes with a Blender data path: Blender Data nodes, and property nodes
+    in Blender mode."""
+    from ..nodes._blend_path import BlendPathMixin
+
+    return (
+        isinstance(node, BlendPathMixin)
+        and getattr(node, "mode", "BLENDER") == "BLENDER"
+    )
+
+
+def node_location(node) -> Location:
+    """`node`'s own path with the keys it uses (root INPUT: relative to
+    its Data input)."""
+    parts = node.path_parts() or []
+    keys = []
+    for index in range(parts.count(rna.SUBSCRIPT)):
+        mode = node.path_keys[index].mode if index < len(node.path_keys) else "INDEX"
+        socket = node.socket(f"key_{index}")
+        if mode == "ACTIVE":
+            keys.append(Key("ACTIVE"))
+        elif socket is None or socket.is_linked:
+            keys.append(Key(mode))
+        else:
+            keys.append(Key(mode, socket.value))
+    input_type = node.path_root_step().rna_type if node.path_root == "INPUT" else ""
+    return Location(node.path_root, parts, keys, input_type)
+
+
+def _upstream(node):
+    """The Blender Data node connected to `node`'s Data input, or None."""
+    socket = node.socket("data")
+    if socket is None or not socket.is_linked:
+        return None
+    upstream = socket.links[0].from_node
+    while upstream.bl_idname == "NodeReroute":
+        if not upstream.inputs[0].is_linked:
+            return None
+        upstream = upstream.inputs[0].links[0].from_node
+    return upstream if upstream.bl_idname == "SNA_Node_BlendData" else None
+
+
+def absolute_location(node, depth=0) -> Location:
+    """Where `node`'s path ends, from Context or Blend File (following
+    Blender Data nodes connected to its Data input). Raises Unavailable."""
+    location = node_location(node)
+    if any(key.mode != "ACTIVE" and key.value is None for key in location.keys):
+        raise Unavailable("A key of its path comes from a link")
+    if location.root != "INPUT":
+        return location
+    upstream = _upstream(node)
+    if upstream is None or depth > 32:
+        raise Unavailable("Its path starts at data from a link")
+    base = absolute_location(upstream, depth + 1)
+    return Location(base.root, base.parts + location.parts, base.keys + location.keys)
+
+
+def apply_to_node(node, location: Location):
+    """Point `node`'s path at `location`. A node starting at its Data input
+    keeps that start if `location` continues from there."""
+    if node.path_root == "INPUT":
+        upstream = _upstream(node)
+        try:
+            base = absolute_location(upstream) if upstream is not None else None
+        except Unavailable:
+            base = None
+        if base is not None and _continues(location, base):
+            tail = Location(
+                "INPUT", location.parts[len(base.parts):], location.keys[len(base.keys):]
+            )  # fmt: skip
+            set_node_location(node, tail)
+            return
+        socket = node.socket("data")
+        for link in list(socket.links) if socket is not None else ():
+            node.id_data.links.remove(link)
+    node.path_root = location.root
+    set_node_location(node, location)
+
+
+def _continues(location, base) -> bool:
+    return (
+        location.root == base.root
+        and location.parts[: len(base.parts)] == base.parts
+        and location.keys[: len(base.keys)] == base.keys
+    )
+
+
 def set_node_location(node, location: Location):
-    """Point `node`'s path at `location` (same root)."""
+    """Set `node`'s path and keys from `location` (root unchanged)."""
     node.path = rna.join(location.parts)
     node.sync_sockets()
     for index, key in enumerate(location.keys):

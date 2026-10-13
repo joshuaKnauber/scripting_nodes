@@ -29,16 +29,14 @@ class SNA_UISettings(bpy.types.PropertyGroup):
     # Data explorer (blend_data/ui/explorer_panel.py)
     explorer_path: bpy.props.StringProperty(
         name="Explorer Path",
-        description="Where the data explorer is when it doesn't follow a node",
+        description="Where the data explorer is (a Python path)",
     )
     explorer_filter: bpy.props.StringProperty(
         name="Filter",
         description="Only show entries containing this text",
         options={"TEXTEDIT_UPDATE"},
     )
-    explorer_follow: bpy.props.BoolProperty(
-        name="Follow Active Node",
-        description="Show the data where the active Blender Data node's path "
-        "ends; clicking an entry changes its path",
-        default=True,
+    explorer_show_all: bpy.props.BoolProperty(
+        name="Show Empty and Internal",
+        description="Also show empty pointers and lists, and read-only values",
     )

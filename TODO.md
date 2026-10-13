@@ -33,7 +33,7 @@ and `ruff check` with zero findings.
 ## 3. Node design open questions
 
 - [x] **Blend Data** (done 2026-10, `website/content/docs/blend-data/`): one Blender Data node following a path (Context / Blend File / Input), add-menu presets, typed sockets from RNA with a type picker for open types, `[]` keys by Index / Name / Active, paste + "Copy Data Path for Scripting Nodes", property nodes in Blender mode use the same paths. Follow-ups:
-  - [x] Data explorer v1 (sidebar Blend Data tab): one level of live data, follows the active Blender Data node (clicking changes its path), + adds nodes, editable values, types-only fallback.
+  - [x] Data explorer v1 (sidebar Blend Data tab): a browser of live data, one level at a time, path shown as code, + adds nodes, editable values, Go to Its Path / Use This Path for the selected node, types-only fallback.
   - [ ] Explorer: Blender's functions (`objects.new()`, `modifiers.remove()`), needs a node that calls them.
   - [ ] Explorer: drag entries into the node editor; remember recent places.
 - [x] **Node references** (done 2026-10): `Reference(...)` fields with a search callback, stored by node id, "Used by" in the sidebar, copies point at copied targets, deleted targets drawn red.
