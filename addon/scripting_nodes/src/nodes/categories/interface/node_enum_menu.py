@@ -9,6 +9,7 @@ class SNA_Node_EnumMenu(PropertyFieldNode, bpy.types.Node):
     bl_idname = "SNA_Node_EnumMenu"
     bl_label = "Enum Menu"
     sn_property_references = {"prop": "ENUM"}
+    blender_prop_types = {"ENUM"}
     field_options = (("expand", False), ("icon_only", False))
 
     expand: bpy.props.BoolProperty(

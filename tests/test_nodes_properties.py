@@ -230,7 +230,8 @@ class PropertiesTest(unittest.TestCase):
         )
         hidden = helpers.add_node(function, "SNA_Node_GetProperty")
         hidden.mode = "BLENDER"
-        hidden.setup_from_path("", "hide_viewport", True)
+        hidden.path_root = "INPUT"
+        hidden.path = "hide_viewport"
         helpers.flush()
         helpers.link(function, group_input.outputs[0], hidden.inputs["Data"])
         helpers.link(function, hidden.outputs["Value"], group_output.inputs[0])
@@ -316,14 +317,14 @@ class PropertiesTest(unittest.TestCase):
         trigger = self.add("SNA_Node_Trigger")
         objects = self.add("SNA_Node_GetProperty")
         objects.mode = "BLENDER"
-        objects.setup_from_path("bpy.context", "active_object", False)
+        objects.path = "active_object"
         setter = self.add("SNA_Node_SetProperty")
         helpers.pick_property(setter, tag)
         helpers.link(self.tree, trigger.outputs[0], setter.inputs[0])
         helpers.link(self.tree, objects.outputs["Value"], setter.socket("data"))
         helpers.flush()
         self.assertIn(
-            "bpy.context.active_object.prop_test.tag = ''",
+            "context.active_object.prop_test.tag = ''",
             helpers.tree_source(self.tree),
         )
         self.assertLoaded()

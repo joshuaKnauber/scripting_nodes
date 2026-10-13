@@ -9,3 +9,4 @@ class SNA_Node_TextField(PropertyFieldNode, bpy.types.Node):
     bl_idname = "SNA_Node_TextField"
     bl_label = "Text Field"
     sn_property_references = {"prop": "STRING"}
+    blender_prop_types = {"STRING"}

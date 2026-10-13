@@ -22,7 +22,7 @@ from typing import NamedTuple
 
 from ..lib.code_format import parenthesize
 from ..lib.sockets import from_socket
-from ..sockets.conversions import get_conversion
+from ..sockets.conversions import ConversionError, get_conversion
 from ..sockets.spec import MISSING
 
 
@@ -180,7 +180,15 @@ class NodeContext:
                     f"'{source.name}' of '{producer.name}' isn't available here "
                     "(it only exists inside that node's flow)"
                 )
-        converted = get_conversion(source.bl_idname, socket.bl_idname, expression)
+        if getattr(source, "is_collection", False) and socket.bl_idname in (
+            "ScriptingListSocket",
+            "ScriptingDataSocket",
+        ):
+            return parenthesize(expression)  # Blender collections work as lists
+        try:
+            converted = get_conversion(source.bl_idname, socket.bl_idname, expression)
+        except ConversionError as error:
+            raise NodeError(f"{socket.name}: {error}") from None
         return parenthesize(converted)
 
     # -- code ---------------------------------------------------------------

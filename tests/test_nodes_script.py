@@ -105,9 +105,7 @@ class ScriptNodeTest(unittest.TestCase):
     def test_run_is_called(self):
         tree, trigger, script = self.triggered(SCALE)
         data = helpers.add_node(tree, "SNA_Node_BlendData")
-        data.setup_from_path("bpy.data.objects", is_root=True)
-        data.access_mode = "NAME"
-        data.socket("name").value = "Thing"
+        data.paste_path("bpy.data.objects['Thing']")
         p = helpers.add_node(tree, "SNA_Node_Print")
         cube = bpy.data.objects.new("Thing", None)
         bpy.context.scene.collection.objects.link(cube)

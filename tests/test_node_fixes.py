@@ -68,16 +68,15 @@ class NodeFixesTest(unittest.TestCase):
         trigger = helpers.add_node(tree, "SNA_Node_Trigger")
         self.assertEqual(trigger.outputs[0].link_limit, 1)
 
-    def test_blend_data_access_mode_updates_sockets(self):
+    def test_blend_data_key_mode_updates_sockets(self):
         tree = helpers.new_tree()
         node = helpers.add_node(tree, "SNA_Node_BlendData")
-        node.setup_from_path("bpy.data.objects", is_root=True)
-        node.access_mode = "INDEX"
-        self.assertIsNotNone(node.socket("index"))
-        node.access_mode = "NAME"
-        self.assertIsNotNone(node.socket("name"))
-        self.assertIsNone(node.socket("index"))
-        node.socket("name").value = "Cube"
+        node.path_root = "DATA"
+        node.path = "objects[]"
+        self.assertEqual(node.socket("key_0").bl_idname, "ScriptingIntegerSocket")
+        node.path_keys[0].mode = "NAME"
+        self.assertEqual(node.socket("key_0").bl_idname, "ScriptingStringSocket")
+        node.socket("key_0").value = "Cube"
         trigger = helpers.add_node(tree, "SNA_Node_Trigger")
         p = helpers.add_node(tree, "SNA_Node_Print")
         helpers.link(tree, trigger.outputs[0], p.inputs[0])

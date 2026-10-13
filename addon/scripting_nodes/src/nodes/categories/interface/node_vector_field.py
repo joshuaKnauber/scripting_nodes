@@ -9,6 +9,7 @@ class SNA_Node_VectorField(PropertyFieldNode, bpy.types.Node):
     bl_idname = "SNA_Node_VectorField"
     bl_label = "Vector Field"
     sn_property_references = {"prop": "VECTOR"}
+    blender_prop_types = {"INT", "FLOAT", "BOOLEAN"}
     field_options = (("expand", False), ("slider", False))
 
     expand: bpy.props.BoolProperty(

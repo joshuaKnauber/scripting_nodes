@@ -41,6 +41,10 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
             scheduler.request_tree(node.id_data)
 
     def draw(self, context, layout, node, text):
+        """Returns True if the node drew the row itself (`draw_socket`)."""
+        custom = getattr(node, "draw_socket", None)
+        if custom is not None and custom(context, self, layout, text):
+            return True
         if self.is_dynamic:
             if self.is_output:
                 layout.label(text=text)

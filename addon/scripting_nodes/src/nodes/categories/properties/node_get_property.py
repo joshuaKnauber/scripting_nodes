@@ -1,18 +1,7 @@
 import bpy
 
-from ....sockets.spec import Socket
-from ....core import properties
 from ..._property_target import PropertyTargetMixin
 from ...base_node import ScriptingBaseNode
-
-
-def value_spec(node, key, label):
-    """Socket for the values of the property `node` targets."""
-    spec = Socket(node.target_data_type(), key, label)
-    prop = node.target_prop()
-    if prop is not None:
-        spec.attrs.update(properties.socket_attrs(prop))
-    return spec
 
 
 class SNA_Node_GetProperty(PropertyTargetMixin, ScriptingBaseNode, bpy.types.Node):
@@ -20,9 +9,10 @@ class SNA_Node_GetProperty(PropertyTargetMixin, ScriptingBaseNode, bpy.types.Nod
 
     bl_idname = "SNA_Node_GetProperty"
     bl_label = "Get Property"
+    bl_width_default = 200
 
     def socket_specs(self):
-        return [self.data_input_spec()], [value_spec(self, "value", "Value")]
+        return self.target_input_specs(), [self.target_value_spec("value", "Value")]
 
     def draw(self, context, layout):
         self.draw_target(layout)

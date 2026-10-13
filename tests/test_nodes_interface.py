@@ -57,10 +57,12 @@ class InterfaceNodesTest(unittest.TestCase):
         self.assertIn(
             "self.layout.prop(context.scene, 'enabled', toggle=True)", source(tree)
         )
-        scene = helpers.add_node(tree, "SNA_Node_Scene")
-        helpers.link(tree, scene.outputs["Scene"], checkbox.socket("data"))
+        scene = helpers.add_node(tree, "SNA_Node_BlendData")
+        scene.path_root = "DATA"
+        scene.path = "scenes[]"
+        helpers.link(tree, scene.outputs[0], checkbox.socket("data"))
         helpers.flush()
-        self.assertIn("self.layout.prop(bpy.context.scene, 'enabled'", source(tree))
+        self.assertIn("self.layout.prop(bpy.data.scenes[0], 'enabled'", source(tree))
         self.assertLoaded()
 
     def test_checkbox_on_operator_property_uses_self(self):
@@ -82,11 +84,12 @@ class InterfaceNodesTest(unittest.TestCase):
         field = helpers.add_node(tree, "SNA_Node_NumberField")
         helpers.link(tree, panel.outputs["Interface"], field.inputs[0])
         field.mode = "BLENDER"
-        field.setup_from_path("bpy.context.scene", "frame_end", False)
+        field.path = "scene.frame_end"
         helpers.flush()
-        self.assertIn("self.layout.prop(bpy.context.scene, 'frame_end')", source(tree))
-        # pasted text is never trusted as code
-        field.setup_from_path("bpy.context.scene; import os", "frame_end", False)
+        self.assertEqual(field.socket("text").bl_idname, "ScriptingStringSocket")
+        self.assertIn("self.layout.prop(context.scene, 'frame_end')", source(tree))
+        # the path is never trusted as code
+        field.path = "scene; import os"
         helpers.flush()
         self.assertIn("Invalid data path", errors().node_message(field.id) or "")
         self.assertNotIn("import os", source(tree))
