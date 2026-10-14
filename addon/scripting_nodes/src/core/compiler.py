@@ -18,7 +18,7 @@ import bpy
 from ..lib.logger import log
 from ..lib.sockets import to_socket
 from ..lib.trees import scripting_node_trees, sn_nodes
-from . import errors, functions, helpers, naming, properties
+from . import errors, functions, helpers, metadata, naming, properties
 from .context import Line, NodeContext, NodeError, Scope
 
 TEMPLATES = os.path.join(os.path.dirname(__file__), "templates")
@@ -57,11 +57,15 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     errors.property_errors.clear()
     names = naming.build(trees, settings)
     naming.use(names)
-    values = {"$ADDON_NAME": settings.addon_name, "$MODULE_NAME": settings.module_name}
+    values = {
+        "$MODULE_NAME": settings.module_name,
+        "$LICENSE_HEADER": metadata.license_header(settings),
+        "$BL_INFO": metadata.bl_info(settings),
+    }
     files = {
         "__init__.py": _render("init.txt", values),
         "auto_load.py": _render("auto_load.txt", values),
-        "blender_manifest.toml": _render("blender_manifest.txt", values),
+        "blender_manifest.toml": metadata.manifest(settings),
         "addon/__init__.py": "",
     }
     owners, previews, used_helpers = {}, {}, set()
@@ -255,6 +259,8 @@ class ModuleBuilder:
         if name not in helpers.HELPERS:
             raise NodeError(f"Unknown helper '{name}'")
         self.helpers.add(name)
+        for required in helpers.HELPERS[name].requires:
+            self.use_helper(required)
         if helpers.needs_import(name, self.dev):
             self.imports.add(f"from ..{HELPERS_MODULE} import {name}")
         return helpers.call_name(name, self.dev)

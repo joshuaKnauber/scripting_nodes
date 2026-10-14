@@ -12,9 +12,9 @@ import os
 
 import bpy
 
-from ....core import naming, scheduler
+from ....core import naming
 from ....core.context import NodeError
-from ....lib.trees import node_by_id, scripting_node_trees
+from ....lib.trees import node_by_id
 from ....sockets.spec import Flow, Socket
 from ... import _script_run
 from ...base_node import ScriptingBaseNode
@@ -116,7 +116,7 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
         return "file:" + path, os.path.splitext(os.path.basename(path))[0]
 
     def source_fingerprint(self):
-        """Changes whenever the script source changes (see _watch_scripts)."""
+        """Changes whenever the script source changes (watched in nodes/_text_source.py)."""
         if self.source_type == "INTERNAL":
             return hash(self.text_block.as_string()) if self.text_block else None
         path = bpy.path.abspath(self.filepath) if self.filepath else ""
@@ -231,32 +231,3 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
         row.template_ID(self, "text_block", new="sna.new_script", open="text.open")
         if self.text_block is not None:
             row.operator("sna.edit_script", text="", icon="TEXT").node_id = self.id
-
-
-# node id -> last seen source fingerprint
-_fingerprints = {}
-
-
-def _watch_scripts():
-    """Text edits and file saves don't trigger RNA updates; poll for them."""
-    seen = set()
-    for tree in scripting_node_trees():
-        for node in tree.nodes:
-            if node.bl_idname != SNA_Node_Script.bl_idname:
-                continue
-            seen.add(node.id)
-            fingerprint = node.source_fingerprint()
-            if node.id in _fingerprints and _fingerprints[node.id] != fingerprint:
-                node.mark_dirty()
-            _fingerprints[node.id] = fingerprint
-    for node_id in set(_fingerprints) - seen:
-        del _fingerprints[node_id]
-
-
-def register():
-    scheduler.add_watcher(_watch_scripts)
-
-
-def unregister():
-    scheduler.remove_watcher(_watch_scripts)
-    _fingerprints.clear()

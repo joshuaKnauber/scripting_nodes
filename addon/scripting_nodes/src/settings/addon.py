@@ -3,7 +3,7 @@ import sys
 
 import bpy
 
-from ..core import scheduler
+from ..core import metadata, scheduler
 from ..lib.ids import get_short_id
 from .properties import SNA_Property
 
@@ -60,6 +60,89 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
         default="My Addon",
         update=_rebuild,
     )
+
+    ### Metadata (core/metadata.py: blender_manifest.toml and bl_info)
+
+    tagline: bpy.props.StringProperty(
+        name="Description",
+        description="One line about the add-on (at most 64 characters)",
+        update=_rebuild,
+    )
+    author: bpy.props.StringProperty(
+        name="Author", description="Your name", update=_rebuild
+    )
+    email: bpy.props.StringProperty(
+        name="Email", description="Shown with your name (optional)", update=_rebuild
+    )
+    version: bpy.props.IntVectorProperty(
+        name="Version",
+        description="Version of the add-on (major, minor, patch)",
+        size=3,
+        min=0,
+        default=(1, 0, 0),
+        update=_rebuild,
+    )
+    website: bpy.props.StringProperty(
+        name="Website",
+        description="Documentation or project page",
+        subtype="NONE",
+        update=_rebuild,
+    )
+    location: bpy.props.StringProperty(
+        name="Location",
+        description="Where to find the add-on in Blender, e.g. 'View3D > Sidebar'",
+        update=_rebuild,
+    )
+    tags: bpy.props.EnumProperty(
+        name="Tags",
+        description="Categories of the add-on (the first is its category)",
+        items=[(tag, tag, "") for tag in metadata.TAGS],
+        options={"ENUM_FLAG"},
+        update=_rebuild,
+    )
+    license: bpy.props.EnumProperty(
+        name="License",
+        description="License of the add-on (code using bpy must be GPL compatible)",
+        items=metadata.LICENSES,
+        update=_rebuild,
+    )
+    copyright: bpy.props.StringProperty(
+        name="Copyright",
+        description="'Year Name', e.g. '2026 Jane Doe'",
+        update=_rebuild,
+    )
+    blender_version_min: bpy.props.IntVectorProperty(
+        name="Blender Minimum",
+        description="Oldest Blender version the add-on works in",
+        size=3,
+        min=0,
+        default=(4, 2, 0),
+        update=_rebuild,
+    )
+    use_blender_version_max: bpy.props.BoolProperty(
+        name="Maximum",
+        description="Limit the Blender versions the add-on can be installed in",
+        update=_rebuild,
+    )
+    blender_version_max: bpy.props.IntVectorProperty(
+        name="Blender Maximum",
+        description="First Blender version the add-on doesn't work in",
+        size=3,
+        min=0,
+        default=(6, 0, 0),
+        update=_rebuild,
+    )
+    # what the add-on does that Blender asks the user's permission for
+    permission_files: bpy.props.BoolProperty(name="Files", update=_rebuild)
+    files_reason: bpy.props.StringProperty(name="Reason", update=_rebuild)
+    permission_network: bpy.props.BoolProperty(name="Network", update=_rebuild)
+    network_reason: bpy.props.StringProperty(name="Reason", update=_rebuild)
+    permission_clipboard: bpy.props.BoolProperty(name="Clipboard", update=_rebuild)
+    clipboard_reason: bpy.props.StringProperty(name="Reason", update=_rebuild)
+    permission_camera: bpy.props.BoolProperty(name="Camera", update=_rebuild)
+    camera_reason: bpy.props.StringProperty(name="Reason", update=_rebuild)
+    permission_microphone: bpy.props.BoolProperty(name="Microphone", update=_rebuild)
+    microphone_reason: bpy.props.StringProperty(name="Reason", update=_rebuild)
 
     ### Build Settings
 

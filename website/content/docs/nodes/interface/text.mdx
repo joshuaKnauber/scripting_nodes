@@ -1,0 +1,19 @@
+---
+title: Text and links
+description: Text over several lines, markdown and links in your interface.
+icon: Text
+---
+
+Besides **Label**, three nodes draw text:
+
+- **Multiline Label** wraps long text to the width of the panel. **Max Lines** cuts it off after that many lines (0 shows all), the buttons on the node align it.
+- **Markdown** formats text: headers, lists, **bold**, *italic*, `code`, links, quotes and rules.
+- **Link** is a link that opens a web page. Without a **Text** it shows the URL.
+
+![A panel with wrapped text, markdown from a text data-block and a link](/screenshots/interface-text.png)
+
+A text socket only takes one line. For text over several lines, pick a text data-block on the node (**New** or **Open**) and write it in the Text Editor; the add-on is rebuilt while you type.
+
+## Older Blender versions
+
+Blender added these to its interface recently: links in 5.2, multiline labels and markdown after that. On a Blender without them, your add-on draws a simpler version: a button for a link, one label per line for multiline text (wrapped by an estimate of the panel width) and plain labels for markdown, without bold, italic or clickable links.

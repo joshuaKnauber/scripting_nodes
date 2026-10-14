@@ -2,6 +2,7 @@
 shipped with the add-on, and icons of enum items."""
 
 import os
+import importlib
 import sys
 import tempfile
 import unittest
@@ -15,9 +16,10 @@ def errors():
 
 
 def generated_helpers():
-    return next(
-        module for name, module in sys.modules.items() if name.endswith("._sn_helpers")
-    )
+    """`_sn_helpers` of the loaded add-on (through its package: names in
+    sys.modules can be left over from earlier loads)."""
+    package = sys.modules[bpy.context.scene.sna.addon.module_name]
+    return importlib.import_module(package.__name__ + "._sn_helpers")
 
 
 def builtin_value(name):

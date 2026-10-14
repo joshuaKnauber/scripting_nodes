@@ -19,6 +19,8 @@ class Helper:
     export_name: str | None = None
     # statements run when the add-on is disabled (both builds)
     unregister: str | None = None
+    # other helpers this one calls
+    requires: tuple = ()
 
 
 ICON_HELPER = '''
@@ -53,6 +55,78 @@ def sn_custom_icon(name):
     return _sn_previews[name].icon_id
 '''
 
+# UILayout.link is new in Blender 5.2, label_multiline / label_markdown after:
+# older versions get a simpler version drawn with labels and buttons
+TEXT_HELPERS = '''
+def sn_label_multiline(layout, text, max_lines=0, alignment="LEFT", **icon):
+    """layout.label_multiline(): text over several lines, wrapped."""
+    if hasattr(layout, "label_multiline"):
+        layout.label_multiline(
+            text=text, max_lines=max_lines, alignment=alignment, **icon
+        )
+        return
+    import textwrap
+
+    import bpy
+
+    region = bpy.context.region
+    width = region.width if region else 300
+    scale = bpy.context.preferences.system.ui_scale or 1.0
+    chars = max(10, int(width / (7 * scale)))
+    lines = []
+    for paragraph in str(text).splitlines() or [""]:
+        lines += textwrap.wrap(paragraph, chars) or [""]
+    if max_lines:
+        lines = lines[:max_lines]
+    has_icon = any(value not in ("NONE", 0) for value in icon.values())
+    column = layout.column(align=True)
+    column.alignment = alignment
+    for i, line in enumerate(lines):
+        if i == 0 or not has_icon:
+            column.label(text=line, **(icon if i == 0 else {}))
+        else:
+            column.label(text=line, icon="BLANK1")
+
+
+def sn_label_markdown(layout, text):
+    """layout.label_markdown(): headers, lists, quotes, links, rules."""
+    if hasattr(layout, "label_markdown"):
+        layout.label_markdown(text=text)
+        return
+    import re
+
+    column = layout.column()
+    for line in str(text).splitlines():
+        line = line.strip()
+        if re.fullmatch(r"(-{3,}|\\*{3,}|_{3,})", line):
+            column.separator(type="LINE")
+            continue
+        line = re.sub(r"^[-+*]\\s+", "\\u2022 ", line)
+        line = re.sub(r"^#{1,6}\\s+", "", line)
+        line = re.sub(r"^>\\s?", "    ", line)
+        line = re.sub(r"!?\\[([^\\]]*)\\]\\([^)]*\\)", r"\\1", line)
+        line = re.sub(r"\\*\\*|\\*|`", "", line)
+        if line:
+            sn_label_multiline(column, line)
+        else:
+            column.separator()
+
+
+def sn_link(layout, url, text="", **icon):
+    """layout.link(): a button opening `url`."""
+    if hasattr(layout, "link"):
+        layout.link(url=url, text=text, **icon)
+        return
+    layout.operator("wm.url_open", text=text or url, **icon).url = url
+'''
+
+
+def _function(source, name):
+    """The definition of `name` in `source` (up to the next one)."""
+    start = source.index(f"def {name}(")
+    end = source.find("\ndef ", start + 1)
+    return source[start:] if end == -1 else source[start:end]
+
 
 HELPERS = {
     "sn_print": Helper(
@@ -70,6 +144,14 @@ def sn_print(*args):
         export_name="print",
     ),
     "sn_icon": Helper(dev=ICON_HELPER, export=ICON_HELPER),
+    **{
+        name: Helper(
+            dev=_function(TEXT_HELPERS, name),
+            export=_function(TEXT_HELPERS, name),
+            requires=("sn_label_multiline",) if name == "sn_label_markdown" else (),
+        )
+        for name in ("sn_label_multiline", "sn_label_markdown", "sn_link")
+    },
     "sn_custom_icon": Helper(
         dev=CUSTOM_ICON_HELPER,
         export=CUSTOM_ICON_HELPER,
