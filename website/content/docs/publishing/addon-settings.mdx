@@ -4,4 +4,22 @@ description: Name, version, author and the other information Blender shows about
 icon: IdCard
 ---
 
-<Callout>This page isn't written yet.</Callout>
+The **Addon** panel in the node editor's sidebar (**Scripting Nodes** tab) names the add-on. Its **Metadata** section fills in what Blender shows in the Preferences and what the [Extensions platform](/docs/publishing/extensions-platform) needs:
+
+| Setting | |
+| --- | --- |
+| **Description** | One line about the add-on: at most 64 characters, ending in a letter or digit |
+| **Author**, **Email** | Shown as the maintainer, `Jane Doe <jane@example.com>` |
+| **Version** | Major, minor and patch: raise it with every release |
+| **Website** | A documentation or project page |
+| **Location** | Where to find the add-on, e.g. *View3D > Sidebar* |
+| **Tags** | Categories on the Extensions platform. The first one is the add-on's category in the Preferences |
+| **Copyright** | Who holds the copyright. Type a name and the current year is added (*2026 Jane Doe*); a range like *2024-2026* is kept |
+| **Blender**, **Up To** | The oldest Blender version the add-on works in, and optionally the first one it doesn't |
+| **Permissions** | What the add-on does that Blender asks users to allow: files, network, clipboard, camera, microphone. Give a short reason for each |
+
+Add-ons are licensed under the GPL 3.0 or later, like Blender itself: code using Blender's Python API has to be, and the Extensions platform only accepts it.
+
+Blender rejects add-ons whose description or reasons are too long or end in punctuation; Scripting Nodes shortens them when it writes the add-on. Settings it can't fix show a warning under the section and are left out until they're fixed.
+
+The settings are written to `blender_manifest.toml` (the extension you [export](/docs/publishing/export)) and to `bl_info` in `__init__.py` (the add-on running while you work).

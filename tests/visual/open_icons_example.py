@@ -224,7 +224,10 @@ def finish(window, area, viewport):
         bpy.ops.node.view_all()
     for region in viewport.regions:
         if region.type == "UI":
-            region.active_panel_category = "Icons"
+            try:  # read-only in Blender 5.2
+                region.active_panel_category = "Icons"
+            except AttributeError:
+                pass
             region.tag_redraw()
 
 

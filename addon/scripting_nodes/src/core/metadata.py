@@ -45,12 +45,9 @@ TAGS = (
     "UV",
 )
 
-LICENSES = (
-    ("SPDX:GPL-3.0-or-later", "GPL 3.0 or later", "GNU General Public License v3.0 or later"),
-    ("SPDX:GPL-2.0-or-later", "GPL 2.0 or later", "GNU General Public License v2.0 or later"),
-    ("SPDX:MIT", "MIT", "MIT License"),
-    ("SPDX:BSD-3-Clause", "BSD 3-Clause", "BSD 3-Clause License"),
-)  # fmt: skip
+# add-ons use bpy, so they're GPL like Blender; the Extensions platform only
+# takes GPL 3 or later
+LICENSE = "GPL-3.0-or-later"
 
 # (name, what it allows, reason used when none is given)
 PERMISSIONS = (
@@ -66,9 +63,11 @@ _COPYRIGHT = re.compile(r"\d{4}(-\d{4})? \S.*")
 
 
 def short_text(text, fallback):
-    """Text Blender accepts as tagline / reason: at most 64 characters, no
-    punctuation at the end."""
-    text = " ".join(text.split())[:64].rstrip(" .,;:!?")
+    """Text Blender accepts as tagline / reason: at most 64 characters,
+    ending in a letter or digit."""
+    text = " ".join(text.split())[:64]
+    while text and not text[-1].isalnum():
+        text = text[:-1]
     return text or fallback
 
 
@@ -95,11 +94,11 @@ def problems(settings) -> list[str]:
     """What's wrong with the metadata (fixed or left out when written)."""
     found = []
     if settings.copyright.strip() and copyright(settings) is None:
-        found.append("Copyright must be 'Year Name' or 'Year-Year Name'")
+        found.append("Copyright needs a year and a name: '2026 Jane Doe'")
     if settings.tagline and short_text(settings.tagline, "") != settings.tagline:
-        found.append("Description: at most 64 characters, no punctuation at the end")
+        found.append("Description: 64 characters, end with a letter")
     if settings.use_blender_version_max and version_max(settings) is None:
-        found.append("Blender maximum must be higher than the minimum")
+        found.append("Blender: Up To must be above the minimum")
     return found
 
 
@@ -134,7 +133,7 @@ def manifest(settings) -> str:
     ]
     if version_max(settings):
         lines.append(f"blender_version_max = {_toml(version_max(settings))}")
-    lines += ["", f"license = [\n  {_toml(settings.license)},\n]"]
+    lines += ["", f"license = [\n  {_toml('SPDX:' + LICENSE)},\n]"]
     if copyright(settings):
         lines.append(f"copyright = [\n  {_toml(copyright(settings))},\n]")
     permissions = [
@@ -172,7 +171,7 @@ def bl_info(settings) -> str:
 
 
 def license_header(settings) -> str:
-    lines = [f"# SPDX-License-Identifier: {settings.license.removeprefix('SPDX:')}"]
+    lines = [f"# SPDX-License-Identifier: {LICENSE}"]
     if copyright(settings):
         lines.insert(0, f"# SPDX-FileCopyrightText: {copyright(settings)}")
     return "\n".join(lines)

@@ -1,3 +1,4 @@
+import datetime
 import re
 import sys
 
@@ -51,6 +52,29 @@ def _normalized(prop, transform):
     return update
 
 
+def _copyright_update(self, context):
+    # the manifest wants "Year Name": add this year to a name typed alone
+    text = self.copyright.strip()
+    if text and not text[0].isdigit():
+        self.copyright = f"{datetime.date.today().year} {text}"  # runs again
+    else:
+        scheduler.request_full()
+
+
+def _permission(name, description):
+    return bpy.props.BoolProperty(
+        name=name, description=f"The add-on {description.lower()}", update=_rebuild
+    )
+
+
+def _reason():
+    return bpy.props.StringProperty(
+        name="Reason",
+        description="Why the add-on needs it (at most 64 characters)",
+        update=_rebuild,
+    )
+
+
 class SNA_AddonSettings(bpy.types.PropertyGroup):
     ### General Settings
 
@@ -100,16 +124,10 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
         options={"ENUM_FLAG"},
         update=_rebuild,
     )
-    license: bpy.props.EnumProperty(
-        name="License",
-        description="License of the add-on (code using bpy must be GPL compatible)",
-        items=metadata.LICENSES,
-        update=_rebuild,
-    )
     copyright: bpy.props.StringProperty(
         name="Copyright",
-        description="'Year Name', e.g. '2026 Jane Doe'",
-        update=_rebuild,
+        description="Who holds the copyright; the current year is added in front",
+        update=_copyright_update,
     )
     blender_version_min: bpy.props.IntVectorProperty(
         name="Blender Minimum",
@@ -132,17 +150,18 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
         default=(6, 0, 0),
         update=_rebuild,
     )
-    # what the add-on does that Blender asks the user's permission for
-    permission_files: bpy.props.BoolProperty(name="Files", update=_rebuild)
-    files_reason: bpy.props.StringProperty(name="Reason", update=_rebuild)
-    permission_network: bpy.props.BoolProperty(name="Network", update=_rebuild)
-    network_reason: bpy.props.StringProperty(name="Reason", update=_rebuild)
-    permission_clipboard: bpy.props.BoolProperty(name="Clipboard", update=_rebuild)
-    clipboard_reason: bpy.props.StringProperty(name="Reason", update=_rebuild)
-    permission_camera: bpy.props.BoolProperty(name="Camera", update=_rebuild)
-    camera_reason: bpy.props.StringProperty(name="Reason", update=_rebuild)
-    permission_microphone: bpy.props.BoolProperty(name="Microphone", update=_rebuild)
-    microphone_reason: bpy.props.StringProperty(name="Reason", update=_rebuild)
+    # what the add-on does that Blender asks the user's permission for, and
+    # why (metadata.PERMISSIONS)
+    permission_files: _permission("Files", "Reads or writes files")
+    files_reason: _reason()
+    permission_network: _permission("Network", "Connects to the internet")
+    network_reason: _reason()
+    permission_clipboard: _permission("Clipboard", "Uses the clipboard")
+    clipboard_reason: _reason()
+    permission_camera: _permission("Camera", "Records with the camera")
+    camera_reason: _reason()
+    permission_microphone: _permission("Microphone", "Records with the microphone")
+    microphone_reason: _reason()
 
     ### Build Settings
 
