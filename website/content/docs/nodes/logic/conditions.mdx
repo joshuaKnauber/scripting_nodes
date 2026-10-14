@@ -4,4 +4,21 @@ description: Branch with If/Else and compare values.
 icon: GitBranch
 ---
 
-<Callout>This page isn't written yet.</Callout>
+## Branches
+
+- **If/Else** runs **Then** when its **Condition** is true and **Else** otherwise; **Finally** continues after either.
+- **Switch** runs the flow of the case matching its **Value**, **Default** when none matches. Add, rename and remove cases on the node. Values are compared as text, so an enum property's item (`'MESH'`) or a number (`2`) both work.
+- **Switch Data** picks one of two values depending on a condition, without a flow.
+
+## Conditions
+
+| Node | |
+| --- | --- |
+| **Compare** | Equal, not equal, less or greater than |
+| **Boolean Math** | And / Or of two booleans |
+| **Invert Boolean** | Not |
+| **Substring In String** | Whether a text contains, starts or ends with another |
+| **Is in Mode** | Whether Blender is in a mode (Object Mode, a mesh's Edit Mode, Sculpt Mode, ...), and the current mode |
+| **Is Object Type** | Whether an object is a mesh, a curve, a light, ... (False without an object) |
+
+Connect conditions to a panel's **Is Visible** or an operator's **Is Available** to show and allow things only when they make sense, e.g. a mesh tool only for meshes in Edit Mode.

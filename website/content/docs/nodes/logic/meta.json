@@ -5,6 +5,7 @@
     "conditions",
     "loops",
     "math",
-    "text"
+    "text",
+    "files"
   ]
 }

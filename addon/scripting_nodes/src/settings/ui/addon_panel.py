@@ -1,4 +1,4 @@
-from ...core import metadata
+from ...core import compiler, metadata
 from ...node_tree.editor import in_sn_tree
 import bpy
 
@@ -112,7 +112,13 @@ class SNA_PT_Metadata_Settings(bpy.types.Panel):
         col = layout.column(heading="Permissions")
         col.use_property_split = True
         col.use_property_decorate = False
-        for name, _, reason in metadata.PERMISSIONS:
+        for name, label, reason in metadata.PERMISSIONS:
+            if name in compiler.used_permissions:
+                # needed by nodes (File nodes, ...): always asked for
+                row = _labeled(col, label)
+                row.label(text="Used by nodes", icon="CHECKBOX_HLT")
+                col.prop(addon, f"{name}_reason", placeholder=reason)
+                continue
             col.prop(addon, f"permission_{name}")
             if getattr(addon, f"permission_{name}"):
                 col.prop(addon, f"{name}_reason", placeholder=reason)

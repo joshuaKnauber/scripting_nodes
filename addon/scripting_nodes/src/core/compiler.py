@@ -29,6 +29,8 @@ SCRIPTS_PACKAGE = "scripts"
 line_owners: dict[str, list] = {}
 # node id -> its own generated lines, of the last live compile (code preview)
 node_lines: dict[str, list[str]] = {}
+# permissions the nodes of the last live build need (shown in the sidebar)
+used_permissions: set[str] = set()
 
 # module name -> modules of trees it is in an import cycle with, of the last
 # compile (compile_tree imports those as modules too)
@@ -65,10 +67,9 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     files = {
         "__init__.py": _render("init.txt", values),
         "auto_load.py": _render("auto_load.txt", values),
-        "blender_manifest.toml": metadata.manifest(settings),
         "addon/__init__.py": "",
     }
-    owners, previews, used_helpers = {}, {}, set()
+    owners, previews, used_helpers, permissions = {}, {}, set(), set()
     scripts, assets = {}, {}
     builders = {
         tree.module_name: ModuleBuilder(tree, dev, names, scripts, assets=assets)
@@ -92,6 +93,7 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
         owners[rel] = line_map
         previews.update(_previews(source, line_map))
         used_helpers |= builder.helpers
+        permissions |= builder.permissions
     source = properties.module_source(names)
     if source is not None:
         files[f"addon/{properties.PROPERTIES_MODULE}.py"] = source
@@ -101,6 +103,7 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
         files[rel] = source  # the user's code, as written
         owners[rel] = [owner] * (source.count("\n") + 1)
     files.update(assets)
+    files["blender_manifest.toml"] = metadata.manifest(settings, permissions)
     exported = {name for name in used_helpers if helpers.needs_import(name, dev)}
     if exported:
         files[f"{HELPERS_MODULE}.py"] = helpers.source(exported, dev)
@@ -109,6 +112,8 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
         line_owners.update(owners)
         node_lines.clear()
         node_lines.update(previews)
+        used_permissions.clear()
+        used_permissions.update(permissions)
     return files
 
 
@@ -179,6 +184,8 @@ class ModuleBuilder:
         self.register: list[Line] = []
         self.unregister: list[Line] = []
         self.helpers: set[str] = set()
+        # what the add-on does that Blender asks permission for (manifest)
+        self.permissions: set[str] = set()
         self._locals: set[str] = set()
         self.module_scope = Scope()
         self._emitted: set[int] = set()
@@ -208,6 +215,7 @@ class ModuleBuilder:
         self._emitted.add(node.as_pointer())
         try:
             (emit or node.emit)(ctx)
+            self.permissions.update(getattr(node, "sn_permissions", ()))
         except NodeError as exc:
             errors.node_errors[node.id] = str(exc)
             return None

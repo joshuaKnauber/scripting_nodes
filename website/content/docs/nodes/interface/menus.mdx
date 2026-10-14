@@ -8,7 +8,19 @@ icon: Menu
 
 A **Menu** node draws a dropdown button where it's connected (in a panel, another menu, a header). Its **Menu** flow is the menu's contents: buttons, labels, fields, other menus. **After** continues the layout after the button.
 
-A [Shortcut](/docs/nodes/operators/shortcuts) can open a menu at the mouse.
+The menu exists even when no layout draws its button, so it can only be opened by a shortcut too.
+
+## Pie menus
+
+A **Pie Menu** is a menu around the mouse, opened with a shortcut. It has one output per direction (**Left**, **Right**, **Top**, ...): connect a button to one, or a **Column** with several. Directions without anything stay empty.
+
+![A pie menu with three buttons, opened with Shift Q in the 3D Viewport](/screenshots/interface-pie-menu.png)
+
+## Opening menus
+
+- A [Shortcut](/docs/nodes/operators/shortcuts) set to **Open Menu** opens a menu, pie menu or panel at the mouse.
+- **Open Menu** does the same from a flow, e.g. at the end of an operator.
+- **Popover** is a button opening a panel as a popup, like Blender's shading options in the 3D Viewport header. The panel still shows where its Panel node places it; to only use it as a popover, set its region to **Header**.
 
 ## Adding to Blender's menus, panels and headers
 

@@ -204,6 +204,108 @@ def sn_add_shortcut(keymap, space_type, idname, key, value="PRESS", properties=N
 '''
 
 
+REDRAW_HELPER = '''
+def sn_redraw(area_type=""):
+    """Redraw the editors of a type ("VIEW_3D"), all with ""."""
+    import bpy
+
+    for window in bpy.context.window_manager.windows:
+        for area in window.screen.areas:
+            if not area_type or area.type == area_type:
+                area.tag_redraw()
+'''
+
+
+# paths starting with // are relative to the .blend file (bpy.path.abspath)
+FILE_HELPERS = '''
+def sn_read_text(path):
+    """The text of a file, "" if it doesn't exist."""
+    import os
+
+    import bpy
+
+    path = bpy.path.abspath(path)
+    if not os.path.isfile(path):
+        return ""
+    with open(path, encoding="utf-8") as file:
+        return file.read()
+
+
+def sn_write_text(path, text, append=False):
+    """Write text to a file, creating its folder."""
+    import os
+
+    import bpy
+
+    path = bpy.path.abspath(path)
+    folder = os.path.dirname(path)
+    if folder:
+        os.makedirs(folder, exist_ok=True)
+    with open(path, "a" if append else "w", encoding="utf-8") as file:
+        file.write(str(text))
+
+
+def sn_list_folder(folder, extension="", kind="FILES", full_paths=True):
+    """Files and/or folders in a folder (sorted), [] if it doesn't exist.
+    `extension` filters files (".png", case doesn't matter)."""
+    import os
+
+    import bpy
+
+    folder = bpy.path.abspath(folder)
+    if not os.path.isdir(folder):
+        return []
+    found = []
+    for name in sorted(os.listdir(folder)):
+        path = os.path.join(folder, name)
+        if os.path.isdir(path):
+            if kind == "FILES":
+                continue
+        elif kind == "FOLDERS" or not name.lower().endswith(extension.lower()):
+            continue
+        found.append(path if full_paths else name)
+    return found
+
+
+def sn_blend_contents(path, data_type):
+    """Names of the data of a type ("materials") in a .blend file, sorted."""
+    import os
+
+    import bpy
+
+    path = bpy.path.abspath(path)
+    if not os.path.isfile(path):
+        return []
+    with bpy.data.libraries.load(path) as (data_from, _data_to):
+        return sorted(getattr(data_from, data_type))
+
+
+def sn_load_blend(path, data_type, names=None, link=False, add_to_scene=False):
+    """Append (or link) data from a .blend file: the given names (a name or
+    a list), all with none. Returns the loaded data."""
+    import bpy
+
+    if isinstance(names, str):
+        names = [names] if names else None
+    with bpy.data.libraries.load(bpy.path.abspath(path), link=link) as (
+        data_from,
+        data_to,
+    ):
+        available = getattr(data_from, data_type)
+        wanted = available if names is None else [n for n in names if n in available]
+        setattr(data_to, data_type, list(wanted))
+    loaded = [data for data in getattr(data_to, data_type) if data is not None]
+    if add_to_scene and data_type in ("objects", "collections"):
+        collection = bpy.context.scene.collection
+        for data in loaded:
+            if data_type == "objects":
+                collection.objects.link(data)
+            else:
+                collection.children.link(data)
+    return loaded
+'''
+
+
 def _function(source, name):
     """The definition of `name` in `source` (up to the next one)."""
     start = source.index(f"def {name}(")
@@ -263,6 +365,19 @@ for keymap, item in _sn_keymaps:
 _sn_keymaps.clear()
 """,
     ),
+    "sn_redraw": Helper(dev=REDRAW_HELPER, export=REDRAW_HELPER),
+    **{
+        name: Helper(
+            dev=_function(FILE_HELPERS, name), export=_function(FILE_HELPERS, name)
+        )
+        for name in (
+            "sn_read_text",
+            "sn_write_text",
+            "sn_list_folder",
+            "sn_blend_contents",
+            "sn_load_blend",
+        )
+    },
     "sn_custom_icon": Helper(
         dev=CUSTOM_ICON_HELPER,
         export=CUSTOM_ICON_HELPER,

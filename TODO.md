@@ -110,12 +110,12 @@ Agreed 2026-10-14, in this order. Viewport drawing, tools, asset shelves, CLI co
 - [x] String nodes: Split, Join List, Replace, Trim, Pad, Length, Slice, Change Case, Find, Format, Starts / Ends With (Substring In String). Encode / Decode skipped (bytes don't fit any socket).
 
 **2.**
-- [ ] Get / Set / Has Custom Property (`id["key"]`; 5.0 split bpy.props storage from custom properties).
-- [ ] Get / Set / Has Attribute by name.
-- [ ] Python Expression: one inline line.
-- [ ] File nodes: read / write text, create folder, list directory, join path, path info, absolute path, append / link from .blend, list .blend contents. They mark the `files` permission.
-- [ ] Pie Menu, Popover, Open Menu / Open Pie Menu / Open Panel (call_menu, call_menu_pie, call_panel).
-- [ ] Combine / Separate Vector, Radians / Degrees, Random Number / Color, Time, Is in Mode, Is Object Type, Edit Select Mode, Area by Type, Addon Info; variables: Change by, Toggle, Reset; Icon from Data; Repeat loop and Break; Refresh View; Enum Map.
+- [x] Get / Set Custom Property (set or remove; `Exists` output).
+- [x] Get / Set Attribute by name.
+- [x] Python Expression / Python Statement: unknown names become inputs, modules auto-imported.
+- [x] File nodes (read / write text, create folder, list folder, join path, path info, load from / list .blend). Nodes declare `sn_permissions`; the manifest and sidebar pick them up. Other permissions (network, clipboard) once nodes need them.
+- [x] Pie Menu, Popover, Open Menu (menus, pies, panels); Shortcut opens all three. Menu classes exist without a button (`emit_module`).
+- [x] Combine / Separate Vector, Convert Angle, Random Value, Current Time, Is in Mode, Is Object Type, Area by Type, Add-on Info, Set Variable Change By / Toggle, Icon from Data, Repeat, Break / Continue, Switch (instead of Enum Map), Redraw. Not done: Reset Variable (set it to its value), Edit Select Mode (Blender Data: `tool_settings.mesh_select_mode`).
 
 **3.**
 - [ ] On Blender Property Change (`bpy.msgbus.subscribe_rna`).

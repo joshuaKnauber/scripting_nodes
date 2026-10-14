@@ -2,71 +2,16 @@
 Menu / Panel / Header and Shortcut: generated code, run where Blender allows
 it in background mode (keymaps: tests/gui/shortcuts.py)."""
 
-import contextlib
-import importlib
 import io
-import sys
-import unittest
+import contextlib
 
 import bpy
 import helpers
+from flow_case import FlowTestCase, errors, generated_helpers
 
 
-def errors():
-    return helpers.sn("src.core.errors")
-
-
-def generated_helpers():
-    package = sys.modules[bpy.context.scene.sna.addon.module_name]
-    return importlib.import_module(package.__name__ + "._sn_helpers")
-
-
-class UtilityNodesTest(unittest.TestCase):
-    def setUp(self):
-        helpers.reset_file()
-        bpy.context.scene.sna.addon.addon_name = "Utility Test"
-        self.tree = helpers.new_tree("Main")
-        self.trigger = helpers.add_node(self.tree, "SNA_Node_Trigger")
-        self.last = self.trigger.outputs[0]
-
-    def tearDown(self):
-        for tree in list(bpy.data.node_groups):
-            bpy.data.node_groups.remove(tree)
-        helpers.sn("src.core.scheduler").request_full()
-        helpers.flush()
-
-    def add(self, idname):
-        return helpers.add_node(self.tree, idname)
-
-    def link(self, from_socket, to_socket):
-        helpers.link(self.tree, from_socket, to_socket)
-
-    def then(self, idname):
-        """A flow node after the last one."""
-        node = self.add(idname)
-        self.link(self.last, node.inputs[0])
-        self.last = next(s for s in node.outputs if s.identifier == "next")
-        return node
-
-    def print_value(self, socket):
-        printer = self.then("SNA_Node_Print")
-        self.link(socket, printer.inputs["text"])
-
-    def run_trigger(self):
-        """Run the trigger, return what it printed (one line per print)."""
-        helpers.flush()
-        self.assertIsNone(errors().addon_error)
-        self.assertEqual(dict(errors().node_errors), {})
-        namespace, op = self.trigger.operator_idname.split(".")
-        out = io.StringIO()
-        with contextlib.redirect_stdout(out):
-            getattr(getattr(bpy.ops, namespace), op)()
-        return out.getvalue().splitlines()
-
-    def string(self, text):
-        node = self.add("SNA_Node_String")
-        node.value = text
-        return node.outputs["value"]
+class UtilityNodesTest(FlowTestCase):
+    addon_name = "Utility Test"
 
     # -- strings ------------------------------------------------------------
 
@@ -335,7 +280,3 @@ class UtilityNodesTest(unittest.TestCase):
         self.assertEqual(keymaps["Object Mode"], "EMPTY")
         self.assertEqual(keymaps["Node Editor"], "NODE_EDITOR")
         self.assertFalse(any("Modal" in name for name in keymaps))
-
-
-if __name__ == "__main__":
-    unittest.main()

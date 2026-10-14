@@ -1,0 +1,24 @@
+---
+title: Files
+description: Read and write files, list folders, load from other .blend files.
+icon: FolderOpen
+---
+
+The file nodes are in **Add › Files**. Paths starting with `//` are relative to the open .blend file, like Blender's own paths.
+
+| Node | |
+| --- | --- |
+| **Read Text File** | The text of a file and its lines. A file that doesn't exist reads as empty text |
+| **Write Text File** | Writes text to a file, replacing it or with **Add to End**. Missing folders are created |
+| **Create Folder** | Creates a folder and the folders above it |
+| **List Folder** | The files and/or folders in a folder, sorted by name. **Extension** (`.png`) filters files |
+| **Join Path** | Joins folder and file names with the right separator for the system |
+| **Path Info** | The full path, folder, file name, name without extension and extension of a path, and whether it exists |
+| **Load from Blend File** | Appends (or links) data from another .blend file: the **Names** given, or everything of the type. Objects and collections can be added to the scene |
+| **Blend File Contents** | The names of the data of a type in a .blend file, without loading anything |
+
+To load files shipped with your add-on, join **Add-on Info**'s **Folder** with the file name. **Load from Blend File** with that path loads assets from a .blend inside your add-on.
+
+## Permissions
+
+Add-ons on the Extensions platform list what they do outside of Blender. File nodes add the **files** permission to the add-on's manifest on their own: the [add-on settings](/docs/publishing/addon-settings) show it as used by nodes, with a reason you can change.

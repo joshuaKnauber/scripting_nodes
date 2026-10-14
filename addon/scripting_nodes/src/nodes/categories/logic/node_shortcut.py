@@ -6,7 +6,7 @@ import bpy
 from ....core.context import NodeError
 from ....core.references import Reference
 from ..._operator_call import OperatorCallMixin
-from ..._reference_types import MENU_NODES
+from ..._reference_types import OPENABLE_NODES, open_call
 from ...base_node import ScriptingBaseNode
 
 # keymaps that hold the shortcuts of an editor or mode (no tools, modal maps)
@@ -72,10 +72,18 @@ class SNA_Node_Shortcut(OperatorCallMixin, ScriptingBaseNode, bpy.types.Node):
         name="Action",
         items=[
             ("OPERATOR", "Run Operator", "Run an operator", "PLAY", 0),
-            ("MENU", "Open Menu", "Open a menu of this add-on", "MENU_PANEL", 1),
+            (
+                "MENU",
+                "Open Menu",
+                "Open a menu, pie menu or panel of this add-on",
+                "MENU_PANEL",
+                1,
+            ),
         ],
     )
-    menu: Reference(MENU_NODES, name="Menu", description="A Menu node")
+    menu: Reference(
+        OPENABLE_NODES, name="Menu", description="A Menu, Pie Menu or Panel node"
+    )
     key: bpy.props.EnumProperty(name="Key", items=KEYS, default="A")
     ctrl: bpy.props.BoolProperty(name="Ctrl")
     shift: bpy.props.BoolProperty(name="Shift")
@@ -123,8 +131,8 @@ class SNA_Node_Shortcut(OperatorCallMixin, ScriptingBaseNode, bpy.types.Node):
             target = self.resolve_reference("menu")
             if target is None:
                 raise NodeError("Pick a menu")
-            idname = "wm.call_menu"
-            properties["name"] = repr(target.sn_name("class"))
+            idname, call = open_call(target)
+            properties.update(call)
         else:
             idname = self.operator_idname()
             if not idname:

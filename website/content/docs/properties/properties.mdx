@@ -48,6 +48,12 @@ All these nodes can also use a Blender property instead: switch the picker to Bl
 - **Enum** items come from the list, or from a [function](/docs/nodes/functions/creating-functions) that returns a list of names (or of `(identifier, name, description)` tuples) when the dropdown opens.
 - **Pointer** properties can use a function to decide which data-blocks can be picked: it gets the data-block as its first input and returns True to allow it.
 
+## Custom properties
+
+Custom properties are values stored on data without defining them, like the ones in Blender's **Custom Properties** panels or those other add-ons and scripts set (`object["notes"]`). **Get Custom Property** reads one (**Default** if it doesn't exist, **Exists** whether it does), **Set Custom Property** sets or removes one (**Add › Properties › Custom Properties**).
+
+They're useful to tag data (mark objects your add-on made) or to read values others store. For your add-on's own settings, define properties: they have a type, limits and a tooltip. Since Blender 5.0 the two are separate, so `object["count"]` doesn't reach a defined property `count`.
+
 ## Generated code
 
 Add-on properties are written to `properties.py`:

@@ -4,4 +4,40 @@ description: Find the Python for what you want to do in Blender.
 icon: BookOpen
 ---
 
-<Callout>This page isn't written yet.</Callout>
+Most of Blender is reachable with nodes: [Blender Data](/docs/blend-data/accessing-data) for data, **Run Operator** for operators, the property nodes for settings. For the rest, a line of Python on a node is often enough.
+
+## Python Expression
+
+**Python Expression** (**Add › Program › Python**) is a value from one line of Python: `round(value * 100)`, `obj.name.upper()`, `len(context.selected_objects)`.
+
+Names the line uses that Python doesn't know become inputs: `obj.location.z * factor` gets the inputs **obj** and **factor**. Connect values to them like to any other input.
+
+![A Python Expression with the inputs obj and factor, and a Python Statement hiding the object](/screenshots/python-expression.png)
+
+- `context` is Blender's context where the code runs. Inside operators and panels `self`, `layout` and `event` work too.
+- `bpy`, `math`, `mathutils`, `random`, `os`, `re`, `time`, `datetime`, `json`, `pathlib` and `bmesh` are imported when the line uses them.
+- The result is a Data value; connect it to the input it's meant for.
+
+**Python Statement** runs a line in a flow: `obj.hide_set(True)`, several separated with `;`. Names it assigns stay inside it.
+
+In the generated add-on, the line is written with the connected values in place of the names, so it reads like code written by hand.
+
+## Attributes by name
+
+**Get Attribute** and **Set Attribute** read and set an attribute whose name is only known when the add-on runs, e.g. from an enum: `getattr(data, name)`. **Exists** is whether the data has it. For names you know, a Blender Data path is simpler.
+
+## Helpers for common tasks
+
+| Node | |
+| --- | --- |
+| **Area by Type** | The first editor of a type (a 3D Viewport, ...) and its main region. Connect them to **Temp Override** to run an operator that needs that editor from somewhere else |
+| **Redraw** | Redraws editors, so panels show values changed by a timer, a handler or data Blender doesn't watch |
+| **Add-on Info** | Your add-on's name, version, Python module and the folder it's installed in |
+| **Current Time** | The date and time as text (with a format like `%Y-%m-%d`) and as seconds |
+
+## Finding the Python
+
+- Turn on **Preferences › Interface › Python Tooltips**: hovering a button or setting shows its Python, e.g. `bpy.ops.mesh.primitive_cube_add()` or `Object.location`.
+- Right-click a setting › **Copy Data Path for Scripting Nodes** and paste it into a Blender Data node.
+- The **Info** editor lists the operators Blender ran, with their Python.
+- The [Blender Python API docs](https://docs.blender.org/api/current/) describe every type, property and operator.

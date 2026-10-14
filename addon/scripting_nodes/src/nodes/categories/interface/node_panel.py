@@ -119,6 +119,9 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
     def sn_names(self):
         return [naming.Class("class", "PT", naming.label(self))]
 
+    def reference_label(self):
+        return naming.label(self)
+
     def socket_specs(self):
         inputs = [
             String("label", "Label", default="Panel"),

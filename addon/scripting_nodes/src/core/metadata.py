@@ -112,7 +112,18 @@ def maintainer(settings) -> str:
     return f"{name} <{email}>" if email else name
 
 
-def manifest(settings) -> str:
+def permissions(settings, required=()) -> list[tuple[str, str]]:
+    """(name, reason) of the permissions the add-on asks for: the ones
+    turned on in the settings and the ones its nodes need (`required`)."""
+    return [
+        (name, short_text(getattr(settings, f"{name}_reason"), default))
+        for name, _, default in PERMISSIONS
+        if getattr(settings, f"permission_{name}") or name in required
+    ]
+
+
+def manifest(settings, required=()) -> str:
+    """blender_manifest.toml; `required`: permissions the nodes need."""
     lines = [
         'schema_version = "1.0.0"',
         "",
@@ -136,14 +147,10 @@ def manifest(settings) -> str:
     lines += ["", f"license = [\n  {_toml('SPDX:' + LICENSE)},\n]"]
     if copyright(settings):
         lines.append(f"copyright = [\n  {_toml(copyright(settings))},\n]")
-    permissions = [
-        (name, short_text(getattr(settings, f"{name}_reason"), default))
-        for name, _, default in PERMISSIONS
-        if getattr(settings, f"permission_{name}")
-    ]
-    if permissions:
+    asked = permissions(settings, required)
+    if asked:
         lines += ["", "[permissions]"]
-        lines += [f"{name} = {_toml(reason)}" for name, reason in permissions]
+        lines += [f"{name} = {_toml(reason)}" for name, reason in asked]
     lines += [
         "",
         "[build]",
