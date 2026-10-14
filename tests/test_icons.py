@@ -169,11 +169,33 @@ class IconsTest(unittest.TestCase):
             "SNA_Node_EnumMenu",
             "SNA_Node_PointerField",
             "SNA_Node_EnumItem",
+            "SNA_Node_Panel",
         ):
             node = self.add(idname)
             self.assertEqual(
                 node.socket("icon").bl_idname, "ScriptingIconSocket", idname
             )
+
+    def test_panel_tab_icon(self):
+        self.panel.socket("icon").value = "MESH_MONKEY"
+        helpers.flush()
+        self.assertIn("bl_icon = 'MESH_MONKEY'", helpers.tree_source(self.tree))
+        self.assertLoaded()
+        custom = self.add("SNA_Node_CustomIcon")
+        custom.image = self.image(packed=True)
+        helpers.link(self.tree, custom.outputs[0], self.panel.socket("icon"))
+        helpers.flush()
+        self.assertIn(
+            "bl_icon_value = sn_custom_icon('Logo.png')",
+            helpers.tree_source(self.tree),
+        )
+        self.assertLoaded()
+        # only sidebars have tabs
+        self.panel.panel_space_type = "PROPERTIES"
+        self.panel.panel_region_type = "WINDOW"
+        helpers.flush()
+        self.assertFalse(self.panel.socket("icon").enabled)
+        self.assertNotIn("bl_icon", helpers.tree_source(self.tree))
 
     def test_static_enum_items_with_icons(self):
         mode = helpers.add_property("Mode", "ENUM", enum_flag=True)

@@ -20,4 +20,4 @@ Connected icons are icon ids, the numbers Blender's `icon_value` arguments take.
 - The image is shipped as it is. Blender scales it down for the icon, so use a small square image (32 or 64 pixels).
 - Built-in icons are stored by name. An icon Blender doesn't have (renamed or removed in another version) shows as **?** and is an error on the node.
 - Enum items listed with a property (sidebar **Properties**) only take built-in icons. For custom icons in a dropdown, use an **Items Function** with **Enum Item** nodes. There, an item with an icon is `(identifier, name, description, icon)` and the property numbers the items itself.
-- Panels have no icon of their own: draw a **Label** with an icon in the panel's **Header**.
+- A **Panel** in a sidebar has an icon for its tab, shown instead of the tab's name with *Compact Tabs* (right-click the tabs). Panels elsewhere have no tab, so no icon. Blender 5.2 added it; older versions ignore it. When several panels share a tab, give them the same icon. For an icon in the panel header, draw a **Label** with an icon in the **Header**.

@@ -1,7 +1,8 @@
 from ....core import naming
 from ....lib.code_format import literal_set
 from ....lib.trees import node_by_id
-from ....sockets.spec import Boolean, Interface, String
+from ....sockets.spec import Boolean, Icon, Interface, String
+from ..._icon import icon_argument
 from ...base_node import ScriptingBaseNode
 from .ops.panel_picker import (
     is_picker_active,
@@ -83,10 +84,6 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Panel"
     bl_label = "Panel"
     sn_root = True
-    sn_inputs = [
-        String("label", "Label", default="Panel"),
-        Boolean("visible", "Is Visible", default=True),
-    ]
     sn_outputs = [Interface("header", "Header"), Interface("body", "Interface")]
 
     panel_space_type: bpy.props.EnumProperty(
@@ -121,6 +118,15 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
 
     def sn_names(self):
         return [naming.Class("class", "PT", naming.label(self))]
+
+    def socket_specs(self):
+        inputs = [
+            String("label", "Label", default="Panel"),
+            Boolean("visible", "Is Visible", default=True),
+            # the icon of the sidebar tab: only sidebars have tabs
+            Icon(enabled=self.panel_region_type == "UI"),
+        ]
+        return inputs, self.sn_outputs
 
     def on_create(self):
         self.panel_space_type = "VIEW_3D"
@@ -159,6 +165,12 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
             attrs.append(f"bl_context = {self.panel_context!r}")
         if self.panel_region_type == "UI" and self.panel_category:
             attrs.append(f"bl_category = {self.panel_category!r}")
+        # the icon of the panel's tab with compact tabs (Blender 5.2, older
+        # versions ignore it)
+        icon = icon_argument(ctx) if self.panel_region_type == "UI" else None
+        if icon:
+            name, value = icon.split("=", 1)
+            attrs.append(f"bl_{name} = {value}")
         header = ""
         if ctx.is_linked("header"):
             header = f"""
