@@ -112,6 +112,16 @@ def sn_label_markdown(layout, text):
             column.separator()
 
 
+def sn_textbox(layout, data, prop, lines=3, placeholder=""):
+    """layout.textbox(): a multi-line text field (a normal one before)."""
+    if hasattr(layout, "textbox"):
+        layout.textbox(
+            data, prop, initial_visible_lines=lines, placeholder=placeholder
+        )
+        return
+    layout.prop(data, prop, text="", placeholder=placeholder)
+
+
 def sn_link(layout, url, text="", **icon):
     """layout.link(): a button opening `url`."""
     if hasattr(layout, "link"):
@@ -306,6 +316,54 @@ def sn_load_blend(path, data_type, names=None, link=False, add_to_scene=False):
 '''
 
 
+MSGBUS_HELPER = '''
+from bpy.app.handlers import persistent
+
+_sn_subscriptions = []
+_sn_owner = object()
+
+
+def _sn_subscribe_rna(key, notify):
+    import bpy
+
+    bpy.msgbus.subscribe_rna(
+        key=key, owner=_sn_owner, args=(), notify=lambda *args: notify()
+    )
+
+
+@persistent
+def _sn_resubscribe(*args):
+    """Loading a file clears subscriptions."""
+    for key, notify in _sn_subscriptions:
+        _sn_subscribe_rna(key, notify)
+
+
+def sn_subscribe(struct, prop, notify):
+    """Call `notify()` when `prop` of any `struct` ("Object", "location")
+    changes (bpy.msgbus), also after loading another file."""
+    import bpy
+
+    key = (getattr(bpy.types, struct), prop)
+    _sn_subscriptions.append((key, notify))
+    _sn_subscribe_rna(key, notify)
+    if _sn_resubscribe not in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.append(_sn_resubscribe)
+'''
+
+
+TEXT_HELPER = '''
+def sn_text(value):
+    """A value as text: Blender data (objects, materials, ...) by its name."""
+    import bpy
+
+    if isinstance(value, bpy.types.bpy_struct):
+        name = getattr(value, "name", None)
+        if isinstance(name, str):
+            return name
+    return str(value)
+'''
+
+
 def _function(source, name):
     """The definition of `name` in `source` (up to the next one)."""
     start = source.index(f"def {name}(")
@@ -329,6 +387,7 @@ def sn_print(*args):
         export_name="print",
     ),
     "sn_icon": Helper(dev=ICON_HELPER, export=ICON_HELPER),
+    "sn_text": Helper(dev=TEXT_HELPER, export=TEXT_HELPER),
     "sn_report": Helper(
         dev=REPORT_HELPER,
         # sn_print is print() in exported add-ons
@@ -341,7 +400,7 @@ def sn_print(*args):
             export=_function(TEXT_HELPERS, name),
             requires=("sn_label_multiline",) if name == "sn_label_markdown" else (),
         )
-        for name in ("sn_label_multiline", "sn_label_markdown", "sn_link")
+        for name in ("sn_label_multiline", "sn_label_markdown", "sn_link", "sn_textbox")
     },
     "sn_run_later": Helper(
         dev=TIMER_HELPERS[: TIMER_HELPERS.index("def sn_run_in_intervals(")],
@@ -363,6 +422,18 @@ for keymap, item in _sn_keymaps:
     except (ReferenceError, RuntimeError):
         pass  # removed with its keymap
 _sn_keymaps.clear()
+""",
+    ),
+    "sn_subscribe": Helper(
+        dev=MSGBUS_HELPER,
+        export=MSGBUS_HELPER,
+        unregister="""
+import bpy
+
+bpy.msgbus.clear_by_owner(_sn_owner)
+if _sn_resubscribe in bpy.app.handlers.load_post:
+    bpy.app.handlers.load_post.remove(_sn_resubscribe)
+_sn_subscriptions.clear()
 """,
     ),
     "sn_redraw": Helper(dev=REDRAW_HELPER, export=REDRAW_HELPER),

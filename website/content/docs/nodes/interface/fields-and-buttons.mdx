@@ -1,7 +1,26 @@
 ---
 title: Fields and buttons
-description: Show properties and buttons in your interface.
-icon: TextCursorInput
+description: Draw properties as fields and operators as buttons.
+icon: SquareMousePointer
 ---
 
-<Callout>This page isn't written yet.</Callout>
+## Fields
+
+Field nodes draw one property: one of your [properties](/docs/properties/properties) or, with the Blender button next to the field, any of Blender's (search or paste its path). **Text** replaces the property's name, **Icon** adds an icon.
+
+| Node | Properties | Styles and options |
+| --- | --- | --- |
+| **Checkbox** | Booleans | **Toggle** draws a button, **Invert** a checkbox that's on for False |
+| **Number Field** | Integers and floats | **Slider** |
+| **Vector Field** | Vectors and colors | **Expand** draws each value, **Slider** |
+| **Text Field** | Strings | **Field**; **Text Box** over several **Lines**; **Search**, suggesting the names of a collection's items (connect e.g. all objects to **Search In**). **Placeholder** is the gray text in an empty field |
+| **Enum Menu** | Enums | **Dropdown** (or a row with **Expand**); **Icon View** with large previews of the items' icons |
+| **Pointer Field** | Pointers | **Field**; **Data-block Selector**, Blender's selector with an optional **New** and **Open** operator (`material.new`) |
+
+Blender versions without a text box draw a normal text field instead.
+
+## Buttons
+
+- **Button** runs an operator: one of yours or Blender's. Its properties are inputs, so one operator can do different things from different buttons.
+- **Operator Menu** draws one button per item of an operator's enum property, as a **Dropdown** or a row of **Buttons**. Blender's **Object › Mode** menu is `object.mode_set` with its `mode` property.
+- **Link** opens a website, **Menu** a menu and **Popover** a panel (see [Menus](/docs/nodes/interface/menus)).

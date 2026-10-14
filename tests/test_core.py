@@ -269,7 +269,7 @@ class CoreTest(unittest.TestCase):
         module = vars_tree.module_name
         getter = var.getter_name()
         self.assertIn(f"from .{module} import {getter}", source)
-        self.assertIn(f"sn_print(str({getter}()))", source)
+        self.assertIn(f"sn_print(sn_text({getter}()))", source)
         self.assertIsNone(helpers.sn("src.core.errors").addon_error)
 
     def test_import_cycles(self):

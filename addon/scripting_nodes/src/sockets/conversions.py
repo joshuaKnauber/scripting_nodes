@@ -20,8 +20,9 @@ CONVERSIONS = {
     ("ScriptingIntegerSocket", "ScriptingStringSocket"): "str({value})",
     ("ScriptingVectorSocket", "ScriptingStringSocket"): "str({value})",
     ("ScriptingColorSocket", "ScriptingStringSocket"): "str({value})",
-    ("ScriptingDataSocket", "ScriptingStringSocket"): "str({value})",
-    ("ScriptingBlendDataSocket", "ScriptingStringSocket"): "str({value})",
+    # Blender data as text is its name, not "<bpy_struct, Object(...)>"
+    ("ScriptingDataSocket", "ScriptingStringSocket"): "{sn_text}({value})",
+    ("ScriptingBlendDataSocket", "ScriptingStringSocket"): "{sn_text}({value})",
     # To Boolean
     ("ScriptingStringSocket", "ScriptingBooleanSocket"): "bool({value})",
     ("ScriptingFloatSocket", "ScriptingBooleanSocket"): "bool({value})",
@@ -195,7 +196,7 @@ CONVERSIONS = {
 }
 
 # helpers (core/helpers.py) conversion templates call, by placeholder
-HELPERS = ("sn_icon",)
+HELPERS = ("sn_icon", "sn_text")
 
 
 class ConversionError(ValueError):

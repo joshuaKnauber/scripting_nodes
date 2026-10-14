@@ -48,6 +48,13 @@ All these nodes can also use a Blender property instead: switch the picker to Bl
 - **Enum** items come from the list, or from a [function](/docs/nodes/functions/creating-functions) that returns a list of names (or of `(identifier, name, description)` tuples) when the dropdown opens.
 - **Pointer** properties can use a function to decide which data-blocks can be picked: it gets the data-block as its first input and returns True to allow it.
 
+## Options
+
+- **Vector** properties hold **Float**, **Integer** or **Boolean** values (2 to 4 of them).
+- **String** properties can have a **Search Function**: a [function](/docs/nodes/functions/creating-functions) returning a list of suggestions shown while typing. With an input, it gets the typed text.
+- **Get Function** and **Set Function** change a value when it's read or written. They get the value as their first input and return the value to use, e.g. a Set Function rounding to even numbers. They run very often and maybe not on the main thread: keep them simple, and don't set other properties in them. Blender 5.0 added them.
+- **Attach To** offers bones, pose bones, nodes, sequencer strips, view layers, workspaces and more data-block types. Where Blender has an active one (`context.active_pose_bone`, `context.active_node`, ...), nodes use it when nothing is connected.
+
 ## Custom properties
 
 Custom properties are values stored on data without defining them, like the ones in Blender's **Custom Properties** panels or those other add-ons and scripts set (`object["notes"]`). **Get Custom Property** reads one (**Default** if it doesn't exist, **Exists** whether it does), **Set Custom Property** sets or removes one (**Add › Properties › Custom Properties**).

@@ -1,7 +1,16 @@
 ---
 title: Property updates
-description: Run nodes when a property changes.
+description: Run nodes when a property of your add-on changes.
 icon: RefreshCw
 ---
 
-<Callout>This page isn't written yet.</Callout>
+**On Property Update** (**Add › Properties**) runs when one of your add-on's [properties](/docs/properties/properties) changes: in a panel, from a Set Property node or from Python. Pick the property on the node.
+
+Inside its flow:
+
+- **Value** is the new value.
+- **Owner** is the data the property is on: the scene, the object, the group item, the operator.
+
+Several On Property Update nodes can watch the same property; they run one after another.
+
+To react to Blender's own settings changing, use [On Blender Change](/docs/nodes/events/handlers#on-blender-change).

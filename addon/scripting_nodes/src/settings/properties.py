@@ -28,6 +28,8 @@ PROPERTY_TYPES = [
     ("GROUP", "Group", "Properties used together as the type of Pointer and Collection properties", "OUTLINER_DATA_POINTCLOUD", 8),
 ]  # fmt: skip
 TYPE_ICONS = {item[0]: item[3] for item in PROPERTY_TYPES}
+# types whose values Get / Set Functions can change (get_transform, ...)
+TRANSFORMABLE = {"BOOLEAN", "INTEGER", "FLOAT", "VECTOR", "STRING"}
 
 ATTACH_TYPES = [
     ("Scene", "Scene", "One value per scene (context.scene)", "SCENE_DATA", 0),
@@ -43,6 +45,17 @@ ATTACH_TYPES = [
     ("Image", "Image", "One value per image", "IMAGE_DATA", 10),
     ("NodeTree", "Node Tree", "One value per node tree", "NODETREE", 11),
     ("Text", "Text", "One value per text", "TEXT", 12),
+    ("Bone", "Bone", "One value per bone (context.active_bone)", "BONE_DATA", 13),
+    ("PoseBone", "Pose Bone", "One value per pose bone (context.active_pose_bone)", "POSE_HLT", 14),
+    ("Node", "Node", "One value per node (context.active_node)", "NODE", 15),
+    ("Strip", "Strip", "One value per sequencer strip (context.active_strip)", "SEQ_SEQUENCER", 16),
+    ("ViewLayer", "View Layer", "One value per view layer (context.view_layer)", "RENDERLAYERS", 17),
+    ("WorkSpace", "Workspace", "One value per workspace (context.workspace)", "WORKSPACE", 18),
+    ("Curve", "Curve", "One value per curve or text object's data", "CURVE_DATA", 19),
+    ("GreasePencil", "Grease Pencil", "One value per Grease Pencil data", "OUTLINER_DATA_GREASEPENCIL", 20),
+    ("Brush", "Brush", "One value per brush", "BRUSH_DATA", 21),
+    ("Action", "Action", "One value per action", "ACTION", 22),
+    ("Texture", "Texture", "One value per texture", "TEXTURE", 23),
 ]  # fmt: skip
 
 POINTER_TYPES = [
@@ -150,6 +163,15 @@ class PropertySettings:
     # FLOAT / VECTOR
     default_float: _p(bpy.props.FloatProperty, name="Default")
     default_vector: _p(bpy.props.FloatVectorProperty, name="Default", size=4)
+    vector_type: _p(
+        bpy.props.EnumProperty,
+        name="Values",
+        items=[
+            ("FLOAT", "Float", "Decimal numbers: a location, a color, ..."),
+            ("INTEGER", "Integer", "Whole numbers"),
+            ("BOOLEAN", "Boolean", "Checkboxes"),
+        ],
+    )
     vector_size: _p(bpy.props.IntProperty, name="Size", default=3, min=2, max=4)
     subtype_float: _p(bpy.props.EnumProperty, items=FLOAT_SUBTYPES, name="Subtype")
     subtype_vector: _p(bpy.props.EnumProperty, items=VECTOR_SUBTYPES, name="Subtype")
@@ -167,6 +189,37 @@ class PropertySettings:
     default_string: _p(bpy.props.StringProperty, name="Default")
     subtype_string: _p(bpy.props.EnumProperty, items=STRING_SUBTYPES, name="Subtype")
     maxlen: _p(bpy.props.IntProperty, name="Max Length", min=0)
+    search_function: _p(
+        bpy.props.PointerProperty,
+        type=bpy.types.NodeTree,
+        name="Search Function",
+        description=(
+            "Function returning a list of suggestions, shown while typing. "
+            "With an input, it gets the typed text"
+        ),
+        poll=_function_poll,
+    )
+    # transform the value when it's read / written (Blender 5.0+)
+    get_function: _p(
+        bpy.props.PointerProperty,
+        type=bpy.types.NodeTree,
+        name="Get Function",
+        description=(
+            "Function changing the value when it's read: gets the stored "
+            "value as its first input, returns the value to use"
+        ),
+        poll=_function_poll,
+    )
+    set_function: _p(
+        bpy.props.PointerProperty,
+        type=bpy.types.NodeTree,
+        name="Set Function",
+        description=(
+            "Function changing a new value before it's stored: gets the new "
+            "value as its first input, returns the value to store"
+        ),
+        poll=_function_poll,
+    )
     # ENUM
     enum_items: bpy.props.CollectionProperty(type=SNA_EnumItem)
     active_enum_item: bpy.props.IntProperty()
@@ -494,17 +547,21 @@ def draw_settings(layout, prop, top_level=False):
         col.prop(prop, "subtype_float")
         col.prop(prop, "unit")
     elif kind == "VECTOR":
+        col.prop(prop, "vector_type")
         col.prop(prop, "vector_size")
         sub = col.column(align=True)
         for i in range(prop.vector_size):
             sub.prop(prop, "default_vector", index=i, text="Default" if i == 0 else " ")
-        _draw_limits(col, prop)
-        col.prop(prop, "precision")
-        col.prop(prop, "subtype_vector")
+        if prop.vector_type != "BOOLEAN":
+            _draw_limits(col, prop)
+        if prop.vector_type == "FLOAT":
+            col.prop(prop, "precision")
+            col.prop(prop, "subtype_vector")
     elif kind == "STRING":
         col.prop(prop, "default_string")
         col.prop(prop, "subtype_string")
         col.prop(prop, "maxlen")
+        col.prop(prop, "search_function")
     elif kind == "ENUM":
         col.prop(prop, "items_function")
         if prop.items_function is None:
@@ -541,6 +598,11 @@ def draw_settings(layout, prop, top_level=False):
         else:
             col.prop(prop, "pointer_type")
             col.prop(prop, "poll_function")
+
+    if kind in TRANSFORMABLE:
+        col = layout.column()
+        col.prop(prop, "get_function")
+        col.prop(prop, "set_function")
 
     col = layout.column(heading="Options")
     col.prop(prop, "option_hidden")

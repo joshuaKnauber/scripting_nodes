@@ -118,10 +118,10 @@ Agreed 2026-10-14, in this order. Viewport drawing, tools, asset shelves, CLI co
 - [x] Combine / Separate Vector, Convert Angle, Random Value, Current Time, Is in Mode, Is Object Type, Area by Type, Add-on Info, Set Variable Change By / Toggle, Icon from Data, Repeat, Break / Continue, Switch (instead of Enum Map), Redraw. Not done: Reset Variable (set it to its value), Edit Select Mode (Blender Data: `tool_settings.mesh_select_mode`).
 
 **3.**
-- [ ] On Blender Property Change (`bpy.msgbus.subscribe_rna`).
-- [ ] Missing handlers: render init / cancel / write / stats, animation playback, blend import, load / save fail, bake, composite, factory startup.
-- [ ] Multi-line text box (`layout.textbox`), separator type (line), operator enum / menu buttons (`operator_menu_enum`, `operator_enum`, `props_enum`), `template_ID`, `context_pointer_set`, `operator_context`, Split / Grid layouts, prop_search, prop_enum / prop_tabs_enum, progress, icon views, layout loops, menu_contents.
-- [ ] Properties: integer / boolean vectors, string search, custom get / set (+ `get_transform` / `set_transform`), more attach types (Bone, PoseBone, Node, ...).
+- [x] On Blender Change (`bpy.msgbus`, by type; re-subscribed after loading a file; `tests/gui/layouts.py`).
+- [x] Handlers: render init / cancel / write, playback, append / link, load / save fail, bake, composite. Skipped: render_stats, factory startup, translation, xr.
+- [x] Text Field (text box, search, placeholder), Enum Menu (icon view), Pointer Field (template_ID), Operator Menu, Set Context Data, operator context on Set Layout State, Split, Grid, Draw For Each, Progress, Menu Contents. Dropped: prop_tabs_enum (draws garbled in panels), props_enum / prop_enum (Enum Menu Expand covers them).
+- [x] Properties: integer / boolean vectors, string Search Function, Get / Set Functions (`get_transform` / `set_transform`), attach types Bone, PoseBone, Node, Strip, ViewLayer, WorkSpace, Curve, GreasePencil, Brush, Action, Texture. Not done: full custom get / set (own storage).
 
 **4.**
 - [ ] UI List (`template_list`, filter / sort) with `panel_prop` per item.

@@ -36,7 +36,7 @@ class EventNode(ScriptingBaseNode):
 
     def draw(self, context, layout):
         if len(self.handlers) > 1:
-            layout.prop(self, "when", expand=True)
+            layout.prop(self, "when", expand=len(self.handlers) <= 3)
 
 
 def event_node(idname, label, handlers, description=""):
@@ -67,8 +67,13 @@ def _pair(name):
     return dict(zip(BEFORE_AFTER, (f"{name}_pre", f"{name}_post")))
 
 
-SNA_Node_OnLoad = event_node("SNA_Node_OnLoad", "On Load", _pair("load"))
-SNA_Node_OnSave = event_node("SNA_Node_OnSave", "On Save", _pair("save"))
+# new choices go at the end: saved nodes store the choice's position
+SNA_Node_OnLoad = event_node(
+    "SNA_Node_OnLoad", "On Load", {**_pair("load"), "Failed": "load_post_fail"}
+)
+SNA_Node_OnSave = event_node(
+    "SNA_Node_OnSave", "On Save", {**_pair("save"), "Failed": "save_post_fail"}
+)
 SNA_Node_OnUndo = event_node("SNA_Node_OnUndo", "On Undo", _pair("undo"))
 SNA_Node_OnRedo = event_node("SNA_Node_OnRedo", "On Redo", _pair("redo"))
 SNA_Node_OnFrameChange = event_node(
@@ -78,11 +83,51 @@ SNA_Node_OnDepsgraphUpdate = event_node(
     "SNA_Node_OnDepsgraphUpdate", "On Depsgraph Update", _pair("depsgraph_update")
 )
 SNA_Node_OnRenderStart = event_node(
-    "SNA_Node_OnRenderStart", "On Render Start", {"Before": "render_pre"}
+    "SNA_Node_OnRenderStart",
+    "On Render Start",
+    {"Each Frame": "render_pre", "Once": "render_init"},
+    "Before a frame renders, or once when a render (or animation) starts",
 )
 SNA_Node_OnRenderFinish = event_node(
-    "SNA_Node_OnRenderFinish", "On Render Finish", {"After": "render_post", "Complete": "render_complete"}
-)  # fmt: skip
+    "SNA_Node_OnRenderFinish",
+    "On Render Finish",
+    {
+        "Each Frame": "render_post",
+        "Complete": "render_complete",
+        "Cancel": "render_cancel",
+        "Frame Saved": "render_write",
+    },
+    "After a frame rendered, when the render is done or cancelled, or after "
+    "an animation frame was saved",
+)
+SNA_Node_OnPlayback = event_node(
+    "SNA_Node_OnPlayback",
+    "On Playback",
+    {"Start": "animation_playback_pre", "Stop": "animation_playback_post"},
+    "When animation playback starts or stops",
+)
+SNA_Node_OnBake = event_node(
+    "SNA_Node_OnBake",
+    "On Bake",
+    {
+        "Start": "object_bake_pre",
+        "Complete": "object_bake_complete",
+        "Cancel": "object_bake_cancel",
+    },
+    "When baking (Cycles' Bake button) starts, finishes or is cancelled",
+)
+SNA_Node_OnComposite = event_node(
+    "SNA_Node_OnComposite",
+    "On Composite",
+    {**_pair("composite"), "Cancel": "composite_cancel"},
+    "Around the compositor running",
+)
+SNA_Node_OnImport = event_node(
+    "SNA_Node_OnImport",
+    "On Append or Link",
+    _pair("blend_import"),
+    "Before or after data is appended or linked from another .blend file",
+)
 
 
 class SNA_Node_OnBlenderClose(ScriptingBaseNode, bpy.types.Node):

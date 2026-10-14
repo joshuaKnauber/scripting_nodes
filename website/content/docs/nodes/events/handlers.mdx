@@ -4,4 +4,29 @@ description: Run nodes when Blender loads a file, saves, renders or changes a fr
 icon: Zap
 ---
 
-<Callout>This page isn't written yet.</Callout>
+Event nodes (**Add › Events**) run their flow when something happens in Blender. Most have a choice for when exactly, e.g. **Before** or **After** saving.
+
+| Node | Runs |
+| --- | --- |
+| **On Load** | Before or after a file is opened, or when opening it failed |
+| **On Save** | Before or after the file is saved, or when saving failed |
+| **On Undo** / **On Redo** | Before or after an undo or redo step |
+| **On Frame Change** | Before or after the current frame changes (also while playing) |
+| **On Playback** | When animation playback starts or stops |
+| **On Depsgraph Update** | Before or after Blender updates the scene after a change. It runs very often: keep it fast |
+| **On Render Start** | Before each frame renders, or once when a render starts |
+| **On Render Finish** | After each frame rendered, when the render is complete or cancelled, or after an animation frame was saved |
+| **On Bake** | When a bake starts, completes or is cancelled |
+| **On Composite** | Before or after the compositor runs, or when it's cancelled |
+| **On Append or Link** | Before or after data is appended or linked from another file |
+| **On Blender Close** | When Blender quits |
+
+## On Blender Change
+
+**On Blender Change** runs when a Blender setting changes in the interface: the active object (`view_layer.objects.active`), an object's location, the render engine. Search or paste the property's path like on a Blender Data node.
+
+- It watches the property on all data of its type: a path to the active object's `location` runs for any object's location. The node shows what it watches, e.g. *Any Object › location*.
+- Changes in the interface (fields, menus) and from Python run it. Moving objects in the 3D Viewport and changes by animation don't: use **On Depsgraph Update** or **On Frame Change** for those.
+- It keeps working after another file is opened.
+
+For your own properties use [On Property Update](/docs/nodes/events/property-updates).

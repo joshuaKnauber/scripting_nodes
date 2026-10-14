@@ -44,6 +44,12 @@ CONTEXT_OWNERS = {
     "WindowManager": "window_manager",
     "Material": "material",
     "Collection": "collection",
+    "Bone": "active_bone",
+    "PoseBone": "active_pose_bone",
+    "Node": "active_node",
+    "Strip": "active_strip",
+    "ViewLayer": "view_layer",
+    "WorkSpace": "workspace",
 }
 
 PREFERENCES = "{context}.preferences.addons[__package__.rsplit('.', 1)[0]].preferences"
@@ -233,6 +239,8 @@ SOCKETS = {
 
 def socket_type(prop) -> str:
     """Socket type of the property's values."""
+    if prop.property_type == "VECTOR" and prop.vector_type == "BOOLEAN":
+        return "ScriptingListSocket"
     if prop.property_type == "VECTOR":
         if prop.subtype_vector in {"COLOR", "COLOR_GAMMA"}:
             return "ScriptingColorSocket"
@@ -243,7 +251,7 @@ def socket_type(prop) -> str:
 
 
 def socket_attrs(prop) -> dict:
-    if prop.property_type != "VECTOR":
+    if prop.property_type != "VECTOR" or prop.vector_type == "BOOLEAN":
         return {}
     if socket_type(prop) == "ScriptingColorSocket":
         return {"use_alpha": prop.vector_size == 4}
@@ -260,6 +268,8 @@ def default_value(prop):
     if kind == "FLOAT":
         return prop.default_float
     if kind == "VECTOR":
+        if prop.vector_type == "BOOLEAN":
+            return None
         return tuple(prop.default_vector)
     if kind == "STRING":
         return prop.default_string
@@ -297,6 +307,10 @@ class DefinitionError(Exception):
     pass
 
 
+# types whose values Get / Set Functions can change (get_transform, ...)
+TRANSFORMABLE = {"BOOLEAN", "INTEGER", "FLOAT", "VECTOR", "STRING"}
+
+
 def update_nodes(prop_id):
     """The On Property Update nodes of a property."""
     from ..lib.trees import scripting_node_trees, sn_nodes
@@ -326,6 +340,13 @@ def callback_names(prop, py) -> list:
         and prop.poll_function is not None
     ):
         names.append(naming.Symbol("poll", f"poll_{py}"))
+    if prop.property_type == "STRING" and prop.search_function is not None:
+        names.append(naming.Symbol("search", f"search_{py}"))
+    if prop.property_type in TRANSFORMABLE:
+        if prop.get_function is not None:
+            names.append(naming.Symbol("get", f"get_{py}"))
+        if prop.set_function is not None:
+            names.append(naming.Symbol("set", f"set_{py}"))
     return names
 
 
@@ -379,6 +400,11 @@ class Definition:
         update = self._update()
         if update:
             args.append(f"update={update}")
+        if kind in TRANSFORMABLE:
+            if prop.get_function is not None:
+                args.append(f"get_transform={self._get_function()}")
+            if prop.set_function is not None:
+                args.append(f"set_transform={self._set_function()}")
         return f"bpy.props.{function}({', '.join(args)})"
 
     # -- per type -----------------------------------------------------------
@@ -422,11 +448,18 @@ class Definition:
     def _vector(self):
         prop, args = self.prop, []
         size = prop.vector_size
-        values = tuple(round(v, 6) for v in prop.default_vector[:size])
+        cast = {"FLOAT": lambda v: round(v, 6), "INTEGER": int, "BOOLEAN": bool}[
+            prop.vector_type
+        ]
+        values = tuple(cast(v) for v in prop.default_vector[:size])
         if size != 3:
             args.append(f"size={size}")
         if any(values):
             args.append(f"default={values!r}")
+        if prop.vector_type == "BOOLEAN":
+            return "BoolVectorProperty", args
+        if prop.vector_type == "INTEGER":
+            return "IntVectorProperty", args + self._limits(int)
         args += self._limits(float)
         if prop.precision != 3:
             args.append(f"precision={prop.precision}")
@@ -442,6 +475,8 @@ class Definition:
             args.append(f"maxlen={prop.maxlen}")
         if prop.subtype_string != "NONE":
             args.append(f"subtype={prop.subtype_string!r}")
+        if prop.search_function is not None:
+            args.append(f"search={self._search_function()}")
         return "StringProperty", args
 
     def _enum(self):
@@ -546,6 +581,48 @@ class Definition:
             f"def {name}(self, object):\n" + "".join(f"    {line}\n" for line in body)
         )
         return name
+
+    def _search_function(self):
+        from . import functions
+
+        tree = self.prop.search_function
+        name = self.name("search")
+        function, imports = _call(self.module, tree)
+        args = "edit_text, self=self, context=context"
+        if not functions.parameters(tree):
+            args = "self=self, context=context"
+        body = imports + [f"return [str(item) for item in {function}({args}) or ()]"]
+        self.functions.append(
+            f"def {name}(self, context, edit_text):\n"
+            + "".join(f"    {line}\n" for line in body)
+        )
+        return name
+
+    def _transform(self, key, signature, value):
+        """A get_transform / set_transform callback calling a function with
+        the value."""
+        from . import functions
+
+        tree = getattr(self.prop, f"{key}_function")
+        if not functions.parameters(tree):
+            raise DefinitionError(
+                f"The {key.title()} Function needs an input for the value"
+            )
+        name = self.name(key)
+        function, imports = _call(self.module, tree)
+        body = imports + [f"return {function}({value}, self=self)"]
+        self.functions.append(
+            f"def {name}({signature}):\n" + "".join(f"    {line}\n" for line in body)
+        )
+        return name
+
+    def _get_function(self):
+        return self._transform("get", "self, value, is_set", "value")
+
+    def _set_function(self):
+        return self._transform(
+            "set", "self, new_value, current_value, is_set", "new_value"
+        )
 
 
 def naming_set(values) -> str:

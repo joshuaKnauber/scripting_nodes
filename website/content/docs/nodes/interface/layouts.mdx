@@ -1,7 +1,38 @@
 ---
 title: Layouts
-description: Arrange rows, columns, boxes and subpanels.
+description: Arrange buttons and fields in rows, columns, boxes and grids.
 icon: LayoutGrid
 ---
 
-<Callout>This page isn't written yet.</Callout>
+Interface flows draw from top to bottom. Layout nodes change where the nodes after them draw: inside a **Row**, everything sits side by side until the row's flow ends, and **After** continues below it.
+
+![A sidebar panel with a split, a grid of objects, a row of buttons, a text box and a progress ring](/screenshots/interface-layouts.png)
+
+## Containers
+
+| Node | |
+| --- | --- |
+| **Row** / **Column** | Side by side or below each other. **Align** joins the items, **Heading** is a label in front |
+| **Box** | A framed column |
+| **Split** | Two columns, **First** and **Second**. **Factor** is the share of the first, 0.3 makes it narrower |
+| **Grid** | Fills the items into a grid. **Columns** 0 fits as many as there's room for |
+| **Subpanel** | A collapsible section in a panel. It only works directly in a panel, not inside rows or boxes |
+| **Draw For Each** | Draws **Item** once per item of a list or collection, e.g. a row per object |
+
+## Changing the layout
+
+| Node | |
+| --- | --- |
+| **Set Layout State** | Grays out (**Enabled**, **Active**) or highlights (**Alert**) what follows. **Buttons Run** sets whether buttons after it show their operator's dialog (**Invoke**) or run right away (**Execute**) |
+| **Set Layout Scale** | Makes what follows bigger, or gives it a fixed size |
+| **Set Property Layout** | Labels next to fields (**Split**) and the keyframe dots (**Decorated**), like Blender's own panels |
+| **Reset Layout** | Continues in the panel's own layout, outside of rows and boxes |
+| **Separator** | Space, or a line |
+
+## Drawing other things
+
+| Node | |
+| --- | --- |
+| **Progress** | A progress bar or ring, **Factor** from 0 to 1 |
+| **Menu Contents** | The entries of a menu drawn in place, instead of a button opening it: one of yours or Blender's |
+| **Set Context Data** | Gives buttons after it data their operator reads as `context.<name>`, e.g. the object of the row a button is in. Read it in the operator with a **Python Expression** `context.item` |
