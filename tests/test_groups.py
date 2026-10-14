@@ -225,6 +225,31 @@ class GroupsTest(unittest.TestCase):
         self.assertEqual(new.bl_socket_idname, INTEGER)
         self.assertEqual(new.in_out, "OUTPUT")
 
+    def test_blend_data_keeps_its_type(self):
+        function, group_input, group_output = helpers.new_function("Typed")
+        active = helpers.add_node(function, "SNA_Node_BlendData")
+        active.path = "active_object"
+        helpers.flush()
+        function.links.new(
+            active.outputs[0], group_output.inputs[-1], handle_dynamic_sockets=True
+        )
+        helpers.flush()
+        result = function.interface.items_tree[0]
+        self.assertEqual(result.blend_type, "Object")
+        tree = helpers.new_tree("Main")
+        call = helpers.call_function(tree, function)
+        self.assertEqual(call.outputs[0].blend_type, "Object")
+        # typed by hand in the sidebar: the same on Group Input and the call
+        scene = function.interface.new_socket(
+            "Scenes", in_out="INPUT", socket_type="ScriptingBlendDataSocket"
+        )
+        scene.blend_type = "Scene"
+        scene.is_collection = True
+        helpers.flush()
+        self.assertEqual(group_input.outputs[0].blend_type, "Scene")
+        self.assertTrue(group_input.outputs[0].is_collection)
+        self.assertEqual(call.inputs[0].blend_type, "Scene")
+
     def test_interface_problems_show_on_the_call(self):
         function, _, _ = helpers.new_function(
             "Two Flows", inputs=[("A", FLOW), ("B", FLOW)]

@@ -116,6 +116,18 @@ def calls(tree, target, seen=None) -> bool:
     return False
 
 
+def _adopt_blend_type(item, socket):
+    """An untyped Blend Data item takes the type of the first typed socket
+    it's linked to (Blender makes items from links without telling us the
+    linked socket)."""
+    for link in socket.links:
+        other = link.to_socket if socket.is_output else link.from_socket
+        if getattr(other, "blend_type", ""):
+            item.blend_type = other.blend_type
+            item.is_collection = other.is_collection
+            return
+
+
 def sync_io_sockets(tree):
     """Blender sets up Group Input / Output sockets from their interface
     item only once; keep their settings (flow kind, vector size) and shape
@@ -132,7 +144,10 @@ def sync_io_sockets(tree):
             if shape and socket.display_shape != shape:
                 socket.display_shape = shape  # Blender resets it
                 changed = True
-            for name in getattr(item, "settings", ()):
+            settings = getattr(item, "settings", ())
+            if "blend_type" in settings and not item.blend_type:
+                _adopt_blend_type(item, socket)
+            for name in settings:
                 value = getattr(item, name)
                 if getattr(socket, name) != value:
                     setattr(socket, name, value)

@@ -10,6 +10,7 @@ flow kind) are copied to every socket made from the item.
 
 import bpy
 
+from ..blend_data import rna
 from .data.socket_blend_data import ScriptingBlendDataSocket
 from .data.socket_boolean import ScriptingBooleanSocket
 from .data.socket_color import ScriptingColorSocket
@@ -34,8 +35,21 @@ SOCKET_CLASSES = (
     ScriptingListSocket,
 )
 
+
+def _search_types(self, context, edit_text):
+    text = edit_text.lower()
+    return [name for name in rna.all_types() if text in name.lower()]
+
+
 # socket settings an interface item carries over to its sockets
-SETTINGS = ("kind", "dimension", "use_alpha")
+SETTINGS = ("kind", "dimension", "use_alpha", "blend_type", "is_collection")
+# how they show on the item (sidebar Group tab)
+SETTING_OVERRIDES = {
+    "blend_type": dict(
+        name="Type", description="Type of the data (empty: any)", search=_search_types
+    ),
+    "is_collection": dict(name="Collection", description="A collection of the type"),
+}
 
 
 def _changed(self, context):
@@ -91,7 +105,8 @@ def _interface_class(socket_cls):
     annotations = {}
     settings = tuple(name for name in SETTINGS if name in hints)
     for name in settings:
-        annotations[name] = _item_prop(hints[name])
+        overrides = SETTING_OVERRIDES.get(name, {})
+        annotations[name] = _item_prop(hints[name], **overrides)
     has_default = "value" in hints
     if has_default:
         annotations["default_value"] = _item_prop(hints["value"], name="Default")

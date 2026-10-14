@@ -69,7 +69,12 @@ class SNA_BlendPathKey(bpy.types.PropertyGroup):
 
 def _search_path(self, context, edit_text):
     results = rna.search(self.path_root_step(), edit_text, accept=self.path_accepts)
-    return [(entry.path, f"{entry.text}   {entry.type_label}") for entry in results]
+    items = []
+    for entry in results:
+        # data that only leads to what the node takes: pick it, type "."
+        more = "" if self.path_accepts(entry.final) else " ›"
+        items.append((entry.path, f"{entry.text}   {entry.type_label}{more}"))
+    return items
 
 
 class BlendPathMixin:

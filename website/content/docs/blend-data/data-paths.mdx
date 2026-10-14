@@ -10,6 +10,8 @@ Nodes that work with one property (**Get Property**, **Set Property** and the fi
 
 The path works like the one of the [Blender Data](/docs/blend-data/accessing-data) node, but must end at a property. The fields only offer properties they can draw: a Checkbox searches booleans, a Number Field numbers. Set Property gets a **Value** input of the property's type.
 
+The search follows what you type: `active_object.active_material.` lists everything on the material. Data that only leads to a property (like *Active Material* in a Number Field) is marked with **›**; pick it and type a dot to continue.
+
 ## Copying paths from Blender
 
 You don't have to know the path. Right-click any field in Blender and choose **Copy Data Path for Scripting Nodes**, then use the paste button next to the path field (or **Add › Data › Blend Data › Paste Data Path** for a new node).

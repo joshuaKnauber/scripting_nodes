@@ -126,6 +126,31 @@ class RnaTest(unittest.TestCase):
         self.assertIn("scene.render.use_simplify", [e.path for e in booleans])
         self.assertTrue(all(e.final.prop.type == "BOOLEAN" for e in booleans))
 
+    def test_search_through_a_path(self):
+        context = rna().root_step("Context")
+
+        def numbers(step):
+            return step.prop is not None and step.prop.type in {"FLOAT", "INT"}
+
+        # Material is expanded at `material`, still found through any path
+        found = rna().search(context, "active_object.active_material.diffuse")
+        self.assertIn(
+            "active_object.active_material.diffuse_color", [e.path for e in found]
+        )
+        # data leading further is offered even when only numbers are taken
+        found = rna().search(context, "active_object.active_mater", accept=numbers)
+        paths = [e.path for e in found]
+        self.assertEqual(paths[0], "active_object.active_material_index")
+        self.assertIn("active_object.active_material", paths)
+        self.assertIn("active_object.active_material.diffuse_color", paths)
+        self.assertNotIn("active_object.material_slots", paths)
+        found = rna().search(context, "selected_objects[0].loc")
+        self.assertEqual(found[0].path, "selected_objects[].location")
+        self.assertEqual(found[0].text, "Selected Objects[] › Location")
+        # paths that don't lead anywhere: a plain search
+        found = rna().search(context, "render.fps")
+        self.assertIn("scene.render.fps", [e.path for e in found])
+
     def test_subtypes(self):
         self.assertIn("Mesh", rna().subtypes("ID"))
         self.assertIn("SpaceView3D", rna().subtypes("Space"))

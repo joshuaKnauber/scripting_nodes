@@ -384,30 +384,87 @@ def _entries(type_name: str, collection: bool, depth: int) -> tuple:
     return tuple(entries)
 
 
+def _scope(root: Step, query: str):
+    """`active_object.active_mat` -> the part before the last dot (as parts
+    and steps from `root`) and the rest. Searching from where that part
+    leads finds every path through it, not only the ones `_entries` keeps.
+    ((), (), query) when there's no dot or the part doesn't lead to data."""
+    head, dot, rest = query.rpartition(".")
+    if not dot:
+        return (), (), query
+    try:
+        parts = segments(re.sub(r"\[[^\]]*\]", SUBSCRIPT, head.strip()))
+    except ValueError:
+        return (), (), query
+    steps = resolve(root, parts)
+    last = steps[-1] if steps else UNKNOWN
+    if not last.known or not (last.rna_type or last.collection):
+        return (), (), query
+    return tuple(parts), tuple(steps), rest
+
+
+def _with_prefix(entry: Entry, parts, steps) -> Entry:
+    """`entry` (found from where `parts` lead) as a path from the root."""
+    labels = []
+    for step in steps:  # "Modifiers[]" like in _entries
+        if step.is_subscript and labels:
+            labels[-1] += SUBSCRIPT
+        else:
+            labels.append(label(step))
+    rest = entry.text.split(" › ")
+    path = join(parts)
+    if entry.path.startswith(SUBSCRIPT):  # items of a collection: no "Item[]"
+        labels[-1] += SUBSCRIPT
+        rest = rest[1:]
+        path += entry.path
+    else:
+        path += "." + entry.path
+    return Entry(
+        path, " › ".join(labels + rest), entry.type_label, entry.final, entry.haystack
+    )
+
+
 def search(root: Step, query: str, accept=None, depth=3, limit=200) -> list[Entry]:
     """Paths from `root` matching all words of `query`, best first.
-    `accept(step)` filters the final steps (e.g. only booleans)."""
+    `accept(step)` filters the final steps (e.g. only booleans); data that
+    leads further is still offered when its name matches the last word, so
+    it can be picked and searched on (`active_object.active_material.`).
+    A query with dots searches from where the part before the last dot
+    leads."""
     if not root.known:
         return []
-    entries = _entries(root.rna_type, root.collection, depth)
-    words = query.lower().replace("_", " ").replace(".", " ").split()
+    parts, steps, rest = _scope(root, query)
+    start = steps[-1] if steps else root
+    entries = _entries(start.rna_type, start.collection, depth)
+    words = rest.lower().replace("_", " ").replace(".", " ").split()
+    last_word = rest.rsplit(".", 1)[-1].lower()
     scored = []
     for entry in entries:
-        if accept is not None and not accept(entry.final):
-            continue
         if not all(word in entry.haystack for word in words):
             continue
-        last = entry.text.rsplit(" › ", 1)[-1].lower().rstrip("[]")
         score = entry.path.count(".")
+        if accept is not None and not accept(entry.final):
+            name = entry.path.rsplit(".", 1)[-1]
+            if not (last_word and entry.final.rna_type and name.startswith(last_word)):
+                continue
+            score += 0.5  # after values named the same
+        last = entry.text.rsplit(" › ", 1)[-1].lower().rstrip("[]")
         if words and last.startswith(words[-1]):
             score -= 2
         if words and last == " ".join(words):
             score -= 3
-        if root.rna_type == "Context" and entry.path.split(".")[0] in COMMON_CONTEXT:
+        if (
+            not steps
+            and root.rna_type == "Context"
+            and entry.path.split(".")[0] in COMMON_CONTEXT
+        ):
             score -= 0.5
         scored.append((score, entry.path, entry))
     scored.sort(key=lambda s: (s[0], s[1]))
-    return [entry for _, _, entry in scored[:limit]]
+    found = [entry for _, _, entry in scored[:limit]]
+    if steps:
+        found = [_with_prefix(entry, parts, steps) for entry in found]
+    return found
 
 
 # -----------------------------------------------------------------------------
