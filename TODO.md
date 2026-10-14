@@ -25,10 +25,10 @@ and `ruff check` with zero findings.
 
 ## 2. Add-on metadata
 
-- [ ] Fields on the addon settings: version, maintainer/author, tagline, description, website, tags, license, minimum Blender version. Written to `blender_manifest.toml` (and the GPL header), no `"Unknown"` placeholders.
+- [x] Fields on the addon settings: version, maintainer/author, tagline, description, website, tags, license, minimum Blender version. Written to `blender_manifest.toml` (and the GPL header), no `"Unknown"` placeholders.
 - [ ] Permissions derived from the nodes used (`files`, `network`, `clipboard`, ...) with a reason text the user can edit.
-- [ ] Validate on export (`blender --command extension validate`) and show problems in the sidebar.
-- [ ] Assets/icons bundled with the add-on (v3 had this).
+- [x] Problems shown in the sidebar; `extension validate` runs in the tests.
+- [x] Icons bundled with the add-on (`icons/`).
 
 ## 3. Node design open questions
 
@@ -98,11 +98,38 @@ Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender
 - [ ] Show load and runtime errors (core/errors) with a "go to node" action; clear entries per rebuild.
 - [ ] Settings (font size, on/off) per user preference instead of per scene.
 
-## 9. v3 parity (after the code quality work)
+## 9. Missing nodes (v3 parity + Blender API)
 
-Add To Panel / Menu, modal operators, timers (run with delay / intervals), keymaps/shortcuts, Report, loops (repeat, break), UI lists, popovers/pie menus, inline Python line, file and string utility nodes. See the v3 comparison in the session notes.
+Agreed 2026-10-14, in this order. Viewport drawing, tools, asset shelves, CLI commands and gizmos are skipped for now.
 
-- [ ] **Migrating v3 files** (maybe): a one-time import of a v3 .blend into v4 trees. v4 doesn't have to load v3 files, but users have years of graphs. Map what has an equivalent (operators, panels, properties, layouts, run operator, ...), leave a note node for the rest, report what wasn't converted. Decide after the property design and parity work, since both define what v3 maps onto. Could start with properties and the sidebar data (simplest, most reused).
+**1. Small, needed by everyone (and empty docs pages)**
+- [x] Add to Menu / Panel / Header: append or prepend to Blender's own classes (Python-defined ones; C panels like the sidebar's Transform can't be extended). A click-to-pick location (like the Panel node's) could follow.
+- [x] Timers: Run with Delay, Run in Intervals (`bpy.app.timers`, stopped when the add-on is disabled).
+- [x] Shortcuts: keymap entries running an operator or opening a menu (addon keyconfig, `tests/gui/shortcuts.py`). Pie menus once they exist.
+- [x] Report (info / warning / error from an operator, printed elsewhere).
+- [x] String nodes: Split, Join List, Replace, Trim, Pad, Length, Slice, Change Case, Find, Format, Starts / Ends With (Substring In String). Encode / Decode skipped (bytes don't fit any socket).
+
+**2.**
+- [ ] Get / Set / Has Custom Property (`id["key"]`; 5.0 split bpy.props storage from custom properties).
+- [ ] Get / Set / Has Attribute by name.
+- [ ] Python Expression: one inline line.
+- [ ] File nodes: read / write text, create folder, list directory, join path, path info, absolute path, append / link from .blend, list .blend contents. They mark the `files` permission.
+- [ ] Pie Menu, Popover, Open Menu / Open Pie Menu / Open Panel (call_menu, call_menu_pie, call_panel).
+- [ ] Combine / Separate Vector, Radians / Degrees, Random Number / Color, Time, Is in Mode, Is Object Type, Edit Select Mode, Area by Type, Addon Info; variables: Change by, Toggle, Reset; Icon from Data; Repeat loop and Break; Refresh View; Enum Map.
+
+**3.**
+- [ ] On Blender Property Change (`bpy.msgbus.subscribe_rna`).
+- [ ] Missing handlers: render init / cancel / write / stats, animation playback, blend import, load / save fail, bake, composite, factory startup.
+- [ ] Multi-line text box (`layout.textbox`), separator type (line), operator enum / menu buttons (`operator_menu_enum`, `operator_enum`, `props_enum`), `template_ID`, `context_pointer_set`, `operator_context`, Split / Grid layouts, prop_search, prop_enum / prop_tabs_enum, progress, icon views, layout loops, menu_contents.
+- [ ] Properties: integer / boolean vectors, string search, custom get / set (+ `get_transform` / `set_transform`), more attach types (Bone, PoseBone, Node, ...).
+
+**4.**
+- [ ] UI List (`template_list`, filter / sort) with `panel_prop` per item.
+- [ ] Operators: file browser (`fileselect_add`, filter), custom dialog layout + title / confirm text / width, dynamic description, depends on cursor.
+- [ ] File Handler (drag and drop import).
+- [ ] Modal operators: modal flow, event, return state, cursor, header / status text.
+
+- [ ] **Migrating v3 files** (maybe): a one-time import of a v3 .blend into v4 trees. Map what has an equivalent, leave a note node for the rest, report what wasn't converted.
 
 ## 10. Smaller things
 

@@ -4,4 +4,14 @@ description: Run operators from keyboard shortcuts.
 icon: Keyboard
 ---
 
-<Callout>This page isn't written yet.</Callout>
+A **Shortcut** node (**Add › Logic**) adds a keyboard shortcut that runs an operator or opens a menu. Users can change or turn it off in **Preferences › Keymap**, like Blender's own shortcuts.
+
+![Ctrl Shift G runs the Greet operator in the 3D Viewport, Alt Q opens a menu](/screenshots/operators-shortcuts.png)
+
+- **Run Operator** runs one of your operators or, with the Blender button next to the field, any of Blender's. Its properties are inputs, as on [Run Operator](/docs/nodes/operators/running-operators).
+- **Open Menu** opens one of your **Menu** nodes at the mouse.
+- Click the key button and press the shortcut to set it, modifiers included (Esc cancels). The dropdown next to it lists every key, mouse buttons too.
+- **Where** decides where the shortcut works: **Window** everywhere, an editor (**3D View**, **Node Editor**, ...) or a mode (**Object Mode**, **Mesh** for Edit Mode, **Sculpt**, ...).
+- **Press** is when it runs: on press, release, click, double click or click drag.
+
+A shortcut can hide one of Blender's with the same keys in the same place. Check **Preferences › Keymap** (search by key) for conflicts.

@@ -6,6 +6,7 @@ GLOBAL_VARIABLE_NODES = ("SNA_Node_GlobalVariable",)
 VARIABLE_NODES = GLOBAL_VARIABLE_NODES + ("SNA_Node_LocalVariable",)
 
 OPERATOR_NODES = ("SNA_Node_Operator",)
+MENU_NODES = ("SNA_Node_Menu",)
 
 
 def usable_variable(owner, target):

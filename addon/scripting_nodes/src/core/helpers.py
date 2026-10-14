@@ -121,6 +121,89 @@ def sn_link(layout, url, text="", **icon):
 '''
 
 
+REPORT_HELPER = '''
+def sn_report(owner, kind, message):
+    """Report a message from an operator (`owner`, shown in the status bar
+    and the Info editor), printed where there is none."""
+    message = str(message)
+    if hasattr(owner, "report"):
+        owner.report({kind}, message)
+    else:
+        sn_print(f"{kind.title()}: {message}")
+'''
+
+
+TIMER_HELPERS = '''
+_sn_timers = []
+
+
+def sn_run_later(function, delay=0.0, persistent=False):
+    """Call `function` once after `delay` seconds. Timers stop when the
+    add-on is disabled (and when a file is loaded unless `persistent`)."""
+    import bpy
+
+    def timer():
+        if timer in _sn_timers:
+            _sn_timers.remove(timer)
+        function()
+
+    _sn_timers.append(timer)
+    bpy.app.timers.register(
+        timer, first_interval=max(0.0, delay), persistent=persistent
+    )
+
+
+def sn_run_in_intervals(function, interval, times=0, persistent=False):
+    """Call `function(index)` every `interval` seconds: `times` times (0: no
+    limit) or until it returns False."""
+    import bpy
+
+    index = 0
+
+    def timer():
+        nonlocal index
+        keep_running = function(index)
+        index += 1
+        if keep_running is False or (times > 0 and index >= times):
+            if timer in _sn_timers:
+                _sn_timers.remove(timer)
+            return None
+        return max(0.01, interval)
+
+    _sn_timers.append(timer)
+    bpy.app.timers.register(timer, first_interval=0.0, persistent=persistent)
+'''
+
+TIMERS_UNREGISTER = """
+import bpy
+
+for timer in _sn_timers:
+    if bpy.app.timers.is_registered(timer):
+        bpy.app.timers.unregister(timer)
+_sn_timers.clear()
+"""
+
+
+SHORTCUT_HELPER = '''
+_sn_keymaps = []
+
+
+def sn_add_shortcut(keymap, space_type, idname, key, value="PRESS", properties=None, **modifiers):
+    """Add a keymap item to Blender's add-on keyconfig (removed when the
+    add-on is disabled)."""
+    import bpy
+
+    keyconfig = bpy.context.window_manager.keyconfigs.addon
+    if keyconfig is None:  # background mode
+        return
+    keymap = keyconfig.keymaps.new(name=keymap, space_type=space_type)
+    item = keymap.keymap_items.new(idname, key, value, **modifiers)
+    for name, prop_value in (properties or {}).items():
+        setattr(item.properties, name, prop_value)
+    _sn_keymaps.append((keymap, item))
+'''
+
+
 def _function(source, name):
     """The definition of `name` in `source` (up to the next one)."""
     start = source.index(f"def {name}(")
@@ -144,6 +227,12 @@ def sn_print(*args):
         export_name="print",
     ),
     "sn_icon": Helper(dev=ICON_HELPER, export=ICON_HELPER),
+    "sn_report": Helper(
+        dev=REPORT_HELPER,
+        # sn_print is print() in exported add-ons
+        export=REPORT_HELPER.replace("sn_print(", "print("),
+        requires=("sn_print",),
+    ),
     **{
         name: Helper(
             dev=_function(TEXT_HELPERS, name),
@@ -152,6 +241,28 @@ def sn_print(*args):
         )
         for name in ("sn_label_multiline", "sn_label_markdown", "sn_link")
     },
+    "sn_run_later": Helper(
+        dev=TIMER_HELPERS[: TIMER_HELPERS.index("def sn_run_in_intervals(")],
+        export=TIMER_HELPERS[: TIMER_HELPERS.index("def sn_run_in_intervals(")],
+        unregister=TIMERS_UNREGISTER,
+    ),
+    "sn_run_in_intervals": Helper(
+        dev=_function(TIMER_HELPERS, "sn_run_in_intervals"),
+        export=_function(TIMER_HELPERS, "sn_run_in_intervals"),
+        requires=("sn_run_later",),  # _sn_timers
+    ),
+    "sn_add_shortcut": Helper(
+        dev=SHORTCUT_HELPER,
+        export=SHORTCUT_HELPER,
+        unregister="""
+for keymap, item in _sn_keymaps:
+    try:
+        keymap.keymap_items.remove(item)
+    except (ReferenceError, RuntimeError):
+        pass  # removed with its keymap
+_sn_keymaps.clear()
+""",
+    ),
     "sn_custom_icon": Helper(
         dev=CUSTOM_ICON_HELPER,
         export=CUSTOM_ICON_HELPER,

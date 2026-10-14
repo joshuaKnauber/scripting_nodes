@@ -4,4 +4,23 @@ description: Combine, format and split strings.
 icon: Type
 ---
 
-<Callout>This page isn't written yet.</Callout>
+The string nodes are in **Add › Data › String**. Their outputs connect to anything that takes text: labels, Print, property values.
+
+![Format String with a padded number, and Split String joined again with Join List](/screenshots/logic-text.png)
+
+| Node | |
+| --- | --- |
+| **Format String** | Puts values into a text: each `{}` is replaced by the next **Value**. `{:.2f}` rounds a number to two decimals, `{:03}` pads it with zeros, `{{` is a literal brace |
+| **Combine Strings** | Joins its inputs with a **Separator** between them |
+| **Join List** | Joins the items of a list into one text (items that aren't text are converted) |
+| **Split String** | Splits a text into a list at a **Separator**; without one at spaces and line breaks. **Max Splits** limits the number of splits (-1: no limit) |
+| **Replace String** | Replaces every occurrence of **Find** |
+| **Slice String** | **Length** characters from **Start** (0: to the end). Negative positions count from the end: Start -3 is the last three characters |
+| **String Length** | The number of characters |
+| **Find in String** | Where a text first appears (-1 if it doesn't) and how often |
+| **Substring In String** | Whether a text **Contains**, **Starts With** or **Ends With** another, optionally ignoring case |
+| **Change Case** | UPPER, lower, Title Case, Capitalize (first letter) or sWAP cASE |
+| **Trim String** | Removes spaces and line breaks at the start and end, or the **Characters** given |
+| **Pad String** | Fills a text up to a **Length**, e.g. `7` to `007`. **Left**, **Center** or **Right** sets where the text goes |
+
+Numbers and other values connected to a text input are converted with `str()`. For a number with a fixed count of decimals, use **Format String** with `{:.2f}`.

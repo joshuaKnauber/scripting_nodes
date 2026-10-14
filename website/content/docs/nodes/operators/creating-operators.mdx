@@ -4,4 +4,20 @@ description: Add your own operators, the actions behind buttons, menus and short
 icon: MousePointerClick
 ---
 
-<Callout>This page isn't written yet.</Callout>
+An **Operator** node (**Add › Logic**) is an action of your add-on: what a [Button](/docs/nodes/interface/fields-and-buttons), a [Shortcut](/docs/nodes/operators/shortcuts) or [Run Operator](/docs/nodes/operators/running-operators) runs. Its **Execute** flow is what it does. The play button on the node runs it.
+
+- **Label** is the operator's name in the interface and in the operator search (F3). Its Python name (`my_addon.label`) comes from it.
+- **Is Available** turns the operator off: buttons running it are grayed out, shortcuts do nothing. Connect a condition, e.g. whether an object is selected.
+- Its [properties](/docs/properties/properties#operator-and-preferences-properties) are listed in the sidebar's **Node** tab and are outputs of the node in its flows.
+
+## Settings
+
+**Settings** on the node opens the rest:
+
+- **Description**: the tooltip.
+- **Invoke Type**: what happens when it's started from the interface. **Execute** runs right away. **Properties Dialog** and **Properties Popup** show its properties first (the **Draw** flow replaces the default layout), **Confirm** asks first. **Invoke** gives an **Invoke** flow that runs before **Execute**.
+- **Register** shows it in the operator search and the **Adjust Last Operation** panel, **Undo** adds an undo step. The other options are Blender's `bl_options`.
+
+## Reports
+
+A **Report** node shows a message in the status bar and the Info editor: **Info**, **Warning** or **Error** (errors also show a popup). Use it in an operator's flows, or in a function called from one. Elsewhere (a panel, a handler, a timer) there's nothing to report to, and the message is printed instead.

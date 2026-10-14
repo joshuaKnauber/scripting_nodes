@@ -4,4 +4,17 @@ description: Run nodes after a delay or at an interval.
 icon: Timer
 ---
 
-<Callout>This page isn't written yet.</Callout>
+**Run with Delay** and **Run in Intervals** (**Add › Program**) start a timer from any flow: an operator, a handler, a function. The flow continues right away through **Continue**; the timer's flow runs later.
+
+![An operator printing after two seconds and three times in intervals](/screenshots/events-timers.png)
+
+- **Run with Delay** runs **Delayed** once, after **Seconds**.
+- **Run in Intervals** runs **Repeat** every **Seconds**, starting right away. **Index** counts the runs from 0. It stops after **Times** runs (0: no limit), when **Keep Running** is off after a run, or when the add-on is disabled.
+
+Timers stop when another file is opened, unless **Keep on File Load** is on. All timers of an add-on stop when it's disabled, so a rebuild while you work never leaves an old timer running.
+
+## Things to know
+
+- Timers run outside of the operator or panel that started them. **Report** in a timer prints instead (there is no operator to report from), and the context is Blender's at that time: the active object may have changed.
+- Values from nodes before the timer are the values when it was started. Read a property or variable in the timer's flow to get the current one.
+- Blender doesn't run timers while it renders from the command line or runs in the background.

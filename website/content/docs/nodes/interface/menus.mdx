@@ -4,4 +4,22 @@ description: Add menus and entries to Blender's menus.
 icon: Menu
 ---
 
-<Callout>This page isn't written yet.</Callout>
+## Your own menus
+
+A **Menu** node draws a dropdown button where it's connected (in a panel, another menu, a header). Its **Menu** flow is the menu's contents: buttons, labels, fields, other menus. **After** continues the layout after the button.
+
+A [Shortcut](/docs/nodes/operators/shortcuts) can open a menu at the mouse.
+
+## Adding to Blender's menus, panels and headers
+
+**Add to Menu**, **Add to Panel** and **Add to Header** (**Add › Interface**) draw into Blender's own interface: a button in the 3D Viewport's **Object** menu, a section in a panel of the Properties editor, a button in an editor's header.
+
+![A label and a button added to the Object properties' Transform panel](/screenshots/interface-add-to.png)
+
+- Search the field for the menu, panel or header by its name. With **Preferences › Interface › Python Tooltips** on, hovering a menu shows its class name (`VIEW3D_MT_object`), which can be typed too.
+- **End** draws after the existing contents, **Start** before them.
+- **Is Visible** turns the contents off, e.g. only for meshes.
+
+Menus, panels and headers of other add-ons can be extended the same way while they're enabled.
+
+Only menus, panels and headers defined in Python can be extended; the search lists those. A few of Blender's are built in C (the 3D Viewport sidebar's Transform panel, for example) and can't be.
