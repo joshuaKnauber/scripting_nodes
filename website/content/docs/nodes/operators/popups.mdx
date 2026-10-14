@@ -4,4 +4,14 @@ description: Ask for input or confirmation before an operator runs.
 icon: MessageSquare
 ---
 
-<Callout>This page isn't written yet.</Callout>
+An operator's **Invoke Type** (**Settings** on the Operator node) decides what happens before it runs when it's started from the interface:
+
+| Invoke Type | |
+| --- | --- |
+| **Properties Dialog** | A dialog with the operator's properties and an OK button. **Title**, **Confirm Button** text and **Width** can be set |
+| **Properties Popup** | The properties in a popup; the operator runs again each time one changes |
+| **Confirm** | A question with a confirm button: **Title**, **Message** and **Confirm Button** text |
+
+The properties are the operator's own, listed in the sidebar's **Node** tab. To lay out the dialog yourself, connect the Operator node's **Draw** flow: it's drawn instead of the list of properties, with any of the interface nodes.
+
+Run from Python or a **Run Operator** node with the default context, operators skip their dialog and run with the properties they're given.

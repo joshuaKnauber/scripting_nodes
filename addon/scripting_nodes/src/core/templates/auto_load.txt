@@ -236,6 +236,8 @@ def get_register_base_types():
             "RenderEngine",
             "Gizmo",
             "GizmoGroup",
+            "FileHandler",
+            "AssetShelf",
         ]
     )
 

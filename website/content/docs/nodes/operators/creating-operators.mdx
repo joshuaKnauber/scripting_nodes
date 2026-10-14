@@ -15,8 +15,27 @@ An **Operator** node (**Add › Logic**) is an action of your add-on: what a [Bu
 **Settings** on the node opens the rest:
 
 - **Description**: the tooltip.
-- **Invoke Type**: what happens when it's started from the interface. **Execute** runs right away. **Properties Dialog** and **Properties Popup** show its properties first (the **Draw** flow replaces the default layout), **Confirm** asks first. **Invoke** gives an **Invoke** flow that runs before **Execute**.
-- **Register** shows it in the operator search and the **Adjust Last Operation** panel, **Undo** adds an undo step. The other options are Blender's `bl_options`.
+- **Invoke Type**: what happens when it's started from the interface (a button, a menu, a shortcut):
+  - **Execute** runs right away.
+  - **Properties Dialog**, **Properties Popup** and **Confirm** ask first, see [Popups and dialogs](/docs/nodes/operators/popups).
+  - **Invoke** gives an **Invoke** flow (with the **Event** that started it) that runs before **Execute**.
+  - **File Browser** opens Blender's file browser first, see below.
+  - **Modal** keeps the operator running, see [Modal operators](/docs/nodes/operators/modal-operators).
+- **Register** shows it in the operator search and the **Adjust Last Operation** panel, **Undo** adds an undo step. **Depends on Cursor** makes it wait for a click in the editor when it's started from a menu or the search, for operators that use the mouse position. The other options are Blender's `bl_options`.
+
+## Opening and saving files
+
+With **Invoke Type** **File Browser**, the operator opens the file browser and runs **Execute** with what was picked: **File Path**, **File Paths** or **Folder**, depending on **Pick**:
+
+- **Open File** / **Open Files**: one or several existing files. **Filter** (`*.png;*.jpg`) only shows those.
+- **Save File**: a file name to save to; Blender warns before overwriting.
+- **Folder**: a folder.
+
+A **File Handler** node (**Add › Logic**) runs such an operator when files are dragged onto Blender: set the **Extensions** (`.csv;.txt`) and the editor they're dropped in. The dropped file is the operator's **File Path**, without the browser opening.
+
+## Ending early
+
+**Return** (**Add › Logic › Modal**) ends the operator's flow where it is: **Finish** keeps what it did, **Cancel** acts as if it didn't run (no undo step). Without it, the operator finishes after its flow.
 
 ## Reports
 

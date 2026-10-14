@@ -29,6 +29,7 @@ CATEGORIES = {
     "UPDATE": {"BOOLEAN", "INTEGER", "FLOAT", "VECTOR", "STRING", "ENUM", "POINTER"},
     "BOOLEAN": {"BOOLEAN"},
     "NUMBER": {"INTEGER", "FLOAT"},
+    "INTEGER": {"INTEGER"},
     "STRING": {"STRING"},
     "VECTOR": {"VECTOR"},
     "ENUM": {"ENUM"},

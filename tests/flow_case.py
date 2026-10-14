@@ -22,11 +22,11 @@ def generated_helpers():
     return importlib.import_module(package.__name__ + "._sn_helpers")
 
 
-def capture(function, *args):
-    """What `function(*args)` prints, as lines."""
+def capture(function, *args, **kwargs):
+    """What `function(*args, **kwargs)` prints, as lines."""
     out = io.StringIO()
     with contextlib.redirect_stdout(out):
-        function(*args)
+        function(*args, **kwargs)
     return out.getvalue().splitlines()
 
 

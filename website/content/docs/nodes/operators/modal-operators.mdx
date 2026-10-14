@@ -1,0 +1,31 @@
+---
+title: Modal operators
+description: Operators that keep running and react to the mouse and keyboard.
+icon: MousePointer2
+---
+
+A modal operator keeps running after it starts, gets every event (mouse moves, clicks, keys) until it ends, like Blender's Grab or Knife tools. Set the Operator node's **Invoke Type** to **Modal**:
+
+- **Start** runs once when it starts.
+- **Modal** runs for every event, with the **Event** (its type, whether it was pressed, the mouse position: use **Blender Data** on it or **Is Key**).
+- **End** runs once when it ends, however it ends: clean up there (header text, cursor).
+
+The operator ends when a **Return** node runs in the Modal flow: **Finish** or **Cancel**. **Pass Through** lets Blender handle the event too (e.g. to still zoom the view), **Keep Running** skips the rest of the flow. With **Cancel with Esc / Right Click** (on by default) those keys cancel it.
+
+**Timer** runs the Modal flow regularly, every few seconds, even without events: for animations or polling something.
+
+![A modal operator ending with a left click, showing a header text while it runs](/screenshots/operators-modal.png)
+
+## Nodes for modal operators
+
+**Add › Logic › Modal**:
+
+| Node | |
+| --- | --- |
+| **Return** | Ends the operator, passes the event on or waits for the next one |
+| **Is Key** | Whether the event is a key or mouse button, pressed or released |
+| **Set Header Text** | Text in the editor's header instead of its menus; empty text shows the menus again |
+| **Set Status Text** | Text in the status bar, e.g. the keys the operator reacts to |
+| **Set Cursor** | The mouse cursor; **Default** sets it back |
+
+Modal operators only run from the interface (a button, a shortcut, the search). Run from Python they'd need a window to run in.

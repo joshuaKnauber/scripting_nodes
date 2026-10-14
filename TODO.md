@@ -124,10 +124,10 @@ Agreed 2026-10-14, in this order. Viewport drawing, tools, asset shelves, CLI co
 - [x] Properties: integer / boolean vectors, string Search Function, Get / Set Functions (`get_transform` / `set_transform`), attach types Bone, PoseBone, Node, Strip, ViewLayer, WorkSpace, Curve, GreasePencil, Brush, Action, Texture. Not done: full custom get / set (own storage).
 
 **4.**
-- [ ] UI List (`template_list`, filter / sort) with `panel_prop` per item.
-- [ ] Operators: file browser (`fileselect_add`, filter), custom dialog layout + title / confirm text / width, dynamic description, depends on cursor.
-- [ ] File Handler (drag and drop import).
-- [ ] Modal operators: modal flow, event, return state, cursor, header / status text.
+- [x] UI List (`template_list`; Blender's own name filter / sort). Not done: custom filter / sort functions, `panel_prop` per item.
+- [x] Operators: File Browser invoke type (open file(s), save, folder, filter), dialog title / message / confirm text / width, Depends on Cursor, Return node. Not done: dynamic description (needs property values outside a flow).
+- [x] File Handler (drag and drop import; generated auto_load registers FileHandler / AssetShelf classes).
+- [x] Modal operators: Start / Modal / End flows, Event, timer, Esc cancel; Return, Is Key, Set Header / Status Text, Set Cursor (`tests/gui/operators.py`).
 
 - [ ] **Migrating v3 files** (maybe): a one-time import of a v3 .blend into v4 trees. Map what has an equivalent, leave a note node for the rest, report what wasn't converted.
 
