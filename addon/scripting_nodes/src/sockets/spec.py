@@ -114,6 +114,11 @@ def List(key, label="", **kwargs):
     return _spec("ScriptingListSocket", key, label, **kwargs)
 
 
+def Icon(key="icon", label="Icon", default=MISSING, **kwargs):
+    """A built-in or custom icon. Draw it with nodes/_icon.icon_argument."""
+    return _spec("ScriptingIconSocket", key, label, default, **kwargs)
+
+
 def Socket(idname, key, label="", default=MISSING, **kwargs):
     """Any socket type by bl_idname (for types chosen at runtime)."""
     if idname == "ScriptingFlowSocket":

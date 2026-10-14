@@ -18,6 +18,7 @@ from typing import NamedTuple
 
 import bpy
 
+from ..lib.icons import is_builtin
 from . import errors, naming
 
 PROPERTIES_MODULE = "properties"
@@ -458,7 +459,9 @@ class Definition:
         for i, item in enumerate(items):
             row = (item.value, item.name, item.description)
             if icons:
-                row += (item.icon or "NONE", i)
+                if item.icon and not is_builtin(item.icon):
+                    raise DefinitionError(f"Blender has no icon '{item.icon}'")
+                row += (item.icon or "NONE", 1 << i if prop.enum_flag else i)
             rows.append(repr(row))
         args = ["items=[\n    " + ",\n    ".join(rows) + ",\n]"]
         if prop.default_enum:
@@ -512,11 +515,16 @@ class Definition:
         tree = self.prop.items_function
         name, cache = self.name("items"), self.name("items_cache")
         function, imports = _call(self.module, tree)
+        # (identifier, name, description, icon) items (Enum Item nodes with
+        # an icon) get the number Blender needs with an icon
+        number = "1 << i" if self.prop.enum_flag else "i"
         body = imports + [
             f"global {cache}",
             f"{cache} = [",
-            "    (item, item, '') if isinstance(item, str) else tuple(item)",
-            f"    for item in {function}(self=self, context=context) or ()",
+            "    (item, item, '') if isinstance(item, str)",
+            f"    else (*item, {number}) if len(item) == 4",
+            "    else tuple(item)",
+            f"    for i, item in enumerate({function}(self=self, context=context) or ())",
             "]",
             f"return {cache}",
         ]

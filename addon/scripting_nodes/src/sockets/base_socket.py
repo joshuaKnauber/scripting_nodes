@@ -28,6 +28,11 @@ class ScriptingBaseSocket(bpy.types.NodeSocket):
         """Python expression of this socket's own value (when unconnected)."""
         return "None"
 
+    def literal_code(self, ctx) -> str:
+        """`literal()` for sockets whose value needs the compile context
+        (helpers, ...)."""
+        return self.literal()
+
     def draw_value(self, context, layout, text):
         layout.label(text=text)
 

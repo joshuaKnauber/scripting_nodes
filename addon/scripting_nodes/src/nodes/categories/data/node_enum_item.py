@@ -2,15 +2,19 @@ import re
 
 import bpy
 
-from ....sockets.spec import Data
+from ....sockets.spec import Data, Icon
+from ..._icon import icon_value
 from ...base_node import ScriptingBaseNode
 
 
 class SNA_Node_EnumItem(ScriptingBaseNode, bpy.types.Node):
-    """Create an enum item tuple for use with EnumProperty"""
+    """Create an enum item tuple for use with EnumProperty: (identifier, name,
+    description), with an icon (identifier, name, description, icon). Enum
+    properties number items with icons themselves."""
 
     bl_idname = "SNA_Node_EnumItem"
     bl_label = "Enum Item"
+    sn_inputs = [Icon()]
     sn_outputs = [Data("item", "Item")]
 
     name_prop: bpy.props.StringProperty(
@@ -35,4 +39,9 @@ class SNA_Node_EnumItem(ScriptingBaseNode, bpy.types.Node):
     def emit(self, ctx):
         # (identifier, name, description), the identifier is derived from the name
         item = (self.identifier(), self.name_prop, self.description)
-        ctx.output("item", repr(item))
+        socket = self.socket("icon")
+        if not socket.is_linked and not socket.value:
+            ctx.output("item", repr(item))
+            return
+        values = ", ".join(repr(v) for v in item)
+        ctx.output("item", f"({values}, {icon_value(ctx)})")

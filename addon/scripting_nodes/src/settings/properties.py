@@ -13,6 +13,7 @@ import bpy
 
 from ..core import scheduler
 from ..core.properties import draw_reference, reference
+from ..lib.icons import draw_icon_picker
 from ..lib.ids import get_short_id
 
 PROPERTY_TYPES = [
@@ -527,7 +528,9 @@ def draw_settings(layout, prop, top_level=False):
                 sub = layout.column()
                 sub.prop(item, "identifier")
                 sub.prop(item, "description")
-                sub.prop(item, "icon")
+                row = sub.row()
+                row.label(text="Icon")
+                draw_icon_picker(row, item, "icon", show_name=True)
             layout.prop(prop, "default_enum")
         layout.prop(prop, "enum_flag")
     elif kind in {"POINTER", "COLLECTION"}:

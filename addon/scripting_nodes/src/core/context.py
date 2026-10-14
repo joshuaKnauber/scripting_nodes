@@ -133,14 +133,14 @@ class NodeContext:
                 return value
         if default is not MISSING:
             return default
-        return socket.literal()
+        return socket.literal_code(self)
 
     def inputs(self, key) -> list[str]:
         """Expressions of all sockets of the dynamic input group `key`."""
         values = []
         for socket in self.node.dynamic_sockets(key):
             value = self._value_of(socket) if socket.is_linked else None
-            values.append(value if value is not None else socket.literal())
+            values.append(value if value is not None else socket.literal_code(self))
         return values
 
     def is_linked(self, key) -> bool:
@@ -186,7 +186,9 @@ class NodeContext:
         ):
             return parenthesize(expression)  # Blender collections work as lists
         try:
-            converted = get_conversion(source.bl_idname, socket.bl_idname, expression)
+            converted = get_conversion(
+                source.bl_idname, socket.bl_idname, expression, self.helper
+            )
         except ConversionError as error:
             raise NodeError(f"{socket.name}: {error}") from None
         return parenthesize(converted)
@@ -285,6 +287,11 @@ class NodeContext:
     def helper(self, name) -> str:
         """Name to call a shared helper (core/helpers.py) by."""
         return self._builder.use_helper(name)
+
+    def asset(self, rel, data: bytes) -> str:
+        """Ship the file `rel` (e.g. "icons/logo.png") with the add-on.
+        Returns the path it got (a suffix if another file has that name)."""
+        return self._builder.add_asset(rel, data)
 
     def symbol(self, owner, name) -> str:
         """Expression for `name` defined by another node or tree: the name

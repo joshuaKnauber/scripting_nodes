@@ -65,9 +65,10 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
         "addon/__init__.py": "",
     }
     owners, previews, used_helpers = {}, {}, set()
-    scripts = {}
+    scripts, assets = {}, {}
     builders = {
-        tree.module_name: ModuleBuilder(tree, dev, names, scripts) for tree in trees
+        tree.module_name: ModuleBuilder(tree, dev, names, scripts, assets=assets)
+        for tree in trees
     }
     results = {module: builder.build() for module, builder in builders.items()}
     # `from .other import name` both ways fails: trees in a cycle import each
@@ -76,7 +77,7 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     _cycles.update(import_cycles({m: b.uses for m, b in builders.items()}))
     for module, peers in _cycles.items():
         builders[module] = ModuleBuilder(
-            builders[module].tree, dev, names, scripts, peers
+            builders[module].tree, dev, names, scripts, peers, assets
         )
         results[module] = builders[module].build()
     for tree in trees:
@@ -95,6 +96,7 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     for rel, (source, owner) in scripts.items():
         files[rel] = source  # the user's code, as written
         owners[rel] = [owner] * (source.count("\n") + 1)
+    files.update(assets)
     exported = {name for name in used_helpers if helpers.needs_import(name, dev)}
     if exported:
         files[f"{HELPERS_MODULE}.py"] = helpers.source(exported, dev)
@@ -156,7 +158,7 @@ def import_cycles(uses: dict[str, set[str]]) -> dict[str, set[str]]:
 class ModuleBuilder:
     """Collects the code of one tree module while its nodes emit."""
 
-    def __init__(self, tree, dev, names, scripts=None, module_imports=()):
+    def __init__(self, tree, dev, names, scripts=None, module_imports=(), assets=None):
         self.tree = tree
         # other trees' modules imported as modules (import cycles), and the
         # modules this one imports from
@@ -166,6 +168,8 @@ class ModuleBuilder:
         self.names = names
         # {relpath: (source, owner node id)} of script modules, add-on wide
         self.scripts = scripts if scripts is not None else {}
+        # {relpath: bytes} of other files (icons), add-on wide
+        self.assets = assets if assets is not None else {}
         self.imports = {"import bpy"}
         self.blocks: list[list[Line]] = []
         self.register: list[Line] = []
@@ -263,6 +267,19 @@ class ModuleBuilder:
         line = f"from ..{SCRIPTS_PACKAGE} import {module}"
         self.imports.add(line if alias == module else f"{line} as {alias}")
         return alias
+
+    def add_asset(self, rel, data: bytes) -> str:
+        """Add the file `rel` (e.g. "icons/logo.png") to the add-on. A
+        different file of the same name gets a suffix; returns the path used."""
+        stem, dot, ext = rel.rpartition(".")
+        if not dot:
+            stem, ext = rel, ""
+        candidate, i = rel, 1
+        while self.assets.get(candidate, data) != data:
+            i += 1
+            candidate = f"{stem}_{i}{dot}{ext}"
+        self.assets[candidate] = data
+        return candidate
 
     def import_symbol(self, owner, name):
         """`name` from the module of `owner`'s tree: imported by name, or used

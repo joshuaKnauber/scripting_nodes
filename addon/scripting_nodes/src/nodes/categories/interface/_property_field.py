@@ -12,7 +12,8 @@ differ in which property nodes they accept and in their display toggles.
 
 import bpy
 
-from ....sockets.spec import Interface, String
+from ....sockets.spec import Icon, Interface, String
+from ..._icon import icon_argument
 from ..._property_target import PropertyTargetMixin
 from ...base_node import ScriptingBaseNode
 
@@ -30,7 +31,12 @@ class PropertyFieldNode(PropertyTargetMixin, ScriptingBaseNode):
 
     def socket_specs(self):
         # the property's owner and path keys last, as one group
-        inputs = [Interface(), String("text", "Text"), *self.target_input_specs()]
+        inputs = [
+            Interface(),
+            String("text", "Text"),
+            Icon(),
+            *self.target_input_specs(),
+        ]
         return inputs, [Interface("next")]
 
     def prop_arguments(self, ctx):
@@ -39,6 +45,9 @@ class PropertyFieldNode(PropertyTargetMixin, ScriptingBaseNode):
         # an empty label falls back to the property's own name
         if text.is_linked or text.value:
             args.append(f"text={ctx.input('text')}")
+        icon = icon_argument(ctx)
+        if icon:
+            args.append(icon)
         for name, default in (("emboss", True),) + tuple(self.field_options):
             value = getattr(self, name)
             if value != default:

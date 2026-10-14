@@ -11,11 +11,13 @@ flow kind) are copied to every socket made from the item.
 import bpy
 
 from ..blend_data import rna
+from ..lib.icons import draw_icon_picker
 from .data.socket_blend_data import ScriptingBlendDataSocket
 from .data.socket_boolean import ScriptingBooleanSocket
 from .data.socket_color import ScriptingColorSocket
 from .data.socket_data import ScriptingDataSocket
 from .data.socket_float import ScriptingFloatSocket
+from .data.socket_icon import ScriptingIconSocket
 from .data.socket_integer import ScriptingIntegerSocket
 from .data.socket_list import ScriptingListSocket
 from .data.socket_string import ScriptingStringSocket
@@ -33,6 +35,7 @@ SOCKET_CLASSES = (
     ScriptingVectorSocket,
     ScriptingColorSocket,
     ScriptingListSocket,
+    ScriptingIconSocket,
 )
 
 
@@ -79,7 +82,13 @@ class _InterfaceSocket:
         layout.use_property_split = True
         for name in self.settings:
             layout.prop(self, name)
-        if self.has_default:
+        if not self.has_default:
+            return
+        if self.bl_socket_idname == ScriptingIconSocket.bl_idname:
+            row = layout.row()
+            row.label(text="Default")
+            draw_icon_picker(row, self, "default_value", show_name=True)
+        else:
             layout.prop(self, "default_value")
 
     def init_socket(self, node, socket, data_path):

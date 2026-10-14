@@ -14,6 +14,7 @@ DATA_SOCKETS = [
     ("ScriptingVectorSocket", "Vector", "EMPTY_AXIS", "2 to 4 numbers"),
     ("ScriptingColorSocket", "Color", "COLOR", "RGB(A) color"),
     ("ScriptingListSocket", "List", "OUTLINER_OB_GROUP_INSTANCE", "List of values"),
+    ("ScriptingIconSocket", "Icon", "IMAGE_DATA", "A built-in or custom icon"),
 ]  # fmt: skip
 
 FLOW_SOCKET = "ScriptingFlowSocket"
@@ -37,4 +38,5 @@ SOCKET_IDNAME_TYPE = Literal[
     "ScriptingVectorSocket",
     "ScriptingColorSocket",
     "ScriptingListSocket",
+    "ScriptingIconSocket",
 ]

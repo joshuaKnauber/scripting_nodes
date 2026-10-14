@@ -1,7 +1,8 @@
 import bpy
 
 from ....core import naming
-from ....sockets.spec import Interface, String
+from ....sockets.spec import Icon, Interface, String
+from ..._icon import icon_argument
 from ...base_node import ScriptingBaseNode
 
 
@@ -10,7 +11,7 @@ class SNA_Node_Menu(ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SNA_Node_Menu"
     bl_label = "Menu"
-    sn_inputs = [Interface(), String("label", "Label", default="Menu")]
+    sn_inputs = [Interface(), String("label", "Label", default="Menu"), Icon()]
     sn_outputs = [Interface("content", "Menu"), Interface("next", "After")]
 
     def sn_names(self):
@@ -27,7 +28,8 @@ class SNA_Node_Menu(ScriptingBaseNode, bpy.types.Node):
                 def draw(self, context):
                     {ctx.flow("content", layout="self.layout")}
         """)
+        args = [repr(menu), f"text={label}", icon_argument(ctx)]
         ctx.code(f"""
-            {ctx.layout}.menu({menu!r}, text={label})
+            {ctx.layout}.menu({", ".join(a for a in args if a)})
             {ctx.flow("next")}
         """)

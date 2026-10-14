@@ -40,6 +40,7 @@ Sockets are declared with helpers from `sockets/spec.py`. The first argument is 
 | `String`, `Boolean`, `Float`, `Integer` | value with an editable default (`default=`) |
 | `Vector(dimension=3)`, `Color(alpha=False)` | vectors and colors |
 | `Data`, `BlendData`, `List` | any value, Blender data, lists |
+| `Icon(key="icon")` | an icon id. Draw it with `icon_argument(ctx)` (`nodes/_icon.py`): `icon='NAME'` for a picked icon, `icon_value=...` for a connected one, `None` without |
 | `Socket(idname, key, label)` | a type chosen at runtime |
 
 Options: `default=`, `hide=True`, `enabled=False` (removes the socket from the UI), `dynamic=True` (a group the user can add sockets to; read it with `ctx.inputs(key)`).

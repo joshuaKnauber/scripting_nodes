@@ -162,7 +162,40 @@ CONVERSIONS = {
         "ScriptingColorSocket",
     ): "(tuple({value}[:4]) if len({value}) >= 4 else (0.0, 0.0, 0.0, 1.0))",
     ("ScriptingListSocket", "ScriptingDataSocket"): "{value}",
+    # Icons are icon ids (ints); names of built-in icons are looked up when
+    # the code runs ({sn_icon}: the helper, see HELPERS below)
+    ("ScriptingIntegerSocket", "ScriptingIconSocket"): "{value}",
+    ("ScriptingStringSocket", "ScriptingIconSocket"): "{sn_icon}({value})",
+    ("ScriptingDataSocket", "ScriptingIconSocket"): "{sn_icon}({value})",
+    ("ScriptingIconSocket", "ScriptingIntegerSocket"): "{value}",
+    ("ScriptingIconSocket", "ScriptingDataSocket"): "{value}",
+    ("ScriptingIconSocket", "ScriptingBooleanSocket"): "bool({value})",
+    ("ScriptingIconSocket", "ScriptingListSocket"): "[{value}]",
+    **{
+        (other, "ScriptingIconSocket"): None
+        for other in (
+            "ScriptingBooleanSocket",
+            "ScriptingFloatSocket",
+            "ScriptingVectorSocket",
+            "ScriptingColorSocket",
+            "ScriptingBlendDataSocket",
+            "ScriptingListSocket",
+        )
+    },
+    **{
+        ("ScriptingIconSocket", other): None
+        for other in (
+            "ScriptingStringSocket",
+            "ScriptingFloatSocket",
+            "ScriptingVectorSocket",
+            "ScriptingColorSocket",
+            "ScriptingBlendDataSocket",
+        )
+    },
 }
+
+# helpers (core/helpers.py) conversion templates call, by placeholder
+HELPERS = ("sn_icon",)
 
 
 class ConversionError(ValueError):
@@ -176,7 +209,9 @@ class ConversionError(ValueError):
         super().__init__(f"{self.from_label} can't be used as {self.to_label}")
 
 
-def get_conversion(from_socket_type: str, to_socket_type: str, value_code: str) -> str:
+def get_conversion(
+    from_socket_type: str, to_socket_type: str, value_code: str, helper=None
+) -> str:
     """
     Get the converted code for a value going from one socket type to another.
 
@@ -184,6 +219,7 @@ def get_conversion(from_socket_type: str, to_socket_type: str, value_code: str) 
         from_socket_type: The bl_idname of the source socket
         to_socket_type: The bl_idname of the target socket
         value_code: The code string representing the value to convert
+        helper: name -> call name of a helper, for templates using one
 
     Returns:
         The converted code string, or the original value_code if no conversion needed
@@ -198,6 +234,9 @@ def get_conversion(from_socket_type: str, to_socket_type: str, value_code: str) 
         template = CONVERSIONS[conversion_key]
         if template is None:
             raise ConversionError(from_socket_type, to_socket_type)
+        for name in HELPERS:
+            if "{" + name + "}" in template:
+                template = template.replace("{" + name + "}", helper(name))
         if template.count("{value}") > 1 and not is_simple(value_code):
             # evaluate the source expression only once (it may have side
             # effects or be expensive)

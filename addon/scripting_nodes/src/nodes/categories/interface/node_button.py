@@ -8,7 +8,8 @@ properties (`op.prop = value`) after the `layout.operator(...)` call.
 import bpy
 
 from ....core.context import NodeError
-from ....sockets.spec import Interface, String
+from ....sockets.spec import Icon, Interface, String
+from ..._icon import icon_argument
 from ..._operator_call import OperatorCallMixin
 from ...base_node import ScriptingBaseNode
 
@@ -18,7 +19,7 @@ class SNA_Node_Button(OperatorCallMixin, ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SNA_Node_Button"
     bl_label = "Button"
-    fixed_inputs = [Interface(), String("label", "Label", default="Run")]
+    fixed_inputs = [Interface(), String("label", "Label", default="Run"), Icon()]
     fixed_outputs = [Interface("next")]
 
     emboss: bpy.props.BoolProperty(
@@ -39,6 +40,9 @@ class SNA_Node_Button(OperatorCallMixin, ScriptingBaseNode, bpy.types.Node):
         if not idname:
             raise NodeError("Pick an operator")
         args = [repr(idname), f"text={ctx.input('label')}"]
+        icon = icon_argument(ctx)
+        if icon:
+            args.append(icon)
         if not self.emboss:
             args.append("emboss=False")
         if self.depress:

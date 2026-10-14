@@ -1,0 +1,23 @@
+---
+title: Icons
+description: Built-in icons and your own images on labels, buttons, fields and menus.
+icon: Smile
+---
+
+Nodes that draw something with a label (**Label**, **Button**, **Menu** and the fields **Checkbox**, **Number Field**, **Text Field**, **Vector Field**, **Enum Menu**, **Pointer Field**) have an **Icon** input. **Enum Item** has one too.
+
+![A panel with a picked icon, an Icon node and a Custom Icon](/screenshots/interface-icons.png)
+
+- Click the button on the **Icon** input to search Blender's icons.
+- **Add › Interface › Icons › Icon** gives a built-in icon to connect to several nodes.
+- **Custom Icon** turns an image into an icon. Open an image file or pick an image from the file; it's copied into the add-on's `icons/` folder and loaded when the add-on needs it.
+
+Connected icons are icon ids, the numbers Blender's `icon_value` arguments take. A **String** with an icon's name (`"MESH_DATA"`) and an **Integer** id can be connected too.
+
+## Limitations
+
+- Custom icons need a file: pack the image (**Image › Pack**) or keep its file where the .blend can find it. Images painted in Blender and never saved can't be used. Editing the image file doesn't rebuild the add-on; change something in the tree or reload.
+- The image is shipped as it is. Blender scales it down for the icon, so use a small square image (32 or 64 pixels).
+- Built-in icons are stored by name. An icon Blender doesn't have (renamed or removed in another version) shows as **?** and is an error on the node.
+- Enum items listed with a property (sidebar **Properties**) only take built-in icons. For custom icons in a dropdown, use an **Items Function** with **Enum Item** nodes. There, an item with an icon is `(identifier, name, description, icon)` and the property numbers the items itself.
+- Panels have no icon of their own: draw a **Label** with an icon in the panel's **Header**.

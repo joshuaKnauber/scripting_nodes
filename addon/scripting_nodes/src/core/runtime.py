@@ -27,6 +27,10 @@ from ..lib.paths import ADDON_FOLDER
 from . import errors, persistence
 
 MARKER = ".scripting_nodes"
+# folders of generated files besides the modules: removed files are deleted
+GENERATED = ("addon/", "scripts/", "icons/")
+# folders of binary files (bytes in `files`)
+BINARY = ("icons/",)
 _LEGACY_SIGNATURE = "Add-on created with Scripting Nodes"
 
 # Module name of the addon this session loaded (None if nothing loaded)
@@ -63,7 +67,7 @@ def loaded_module() -> str | None:
 # ---------------------------------------------------------------------------
 
 
-def apply(files: dict[str, str]) -> bool:
+def apply(files: dict[str, str | bytes]) -> bool:
     """Sync disk + Blender with `files`. Returns True if the addon was reloaded."""
     global _loaded
     settings = bpy.context.scene.sna.addon
@@ -99,8 +103,7 @@ def apply(files: dict[str, str]) -> bool:
     stale = [
         rel
         for rel in current
-        if rel not in files
-        and (rel.startswith(("addon/", "scripts/")) or rel == "_sn_helpers.py")
+        if rel not in files and (rel.startswith(GENERATED) or rel == "_sn_helpers.py")
     ]
     was_loaded = is_loaded(module)
     if not changed and not stale and was_loaded:
@@ -189,8 +192,12 @@ def _read_folder(path):
             full = os.path.join(root, name)
             rel = os.path.relpath(full, path).replace(os.sep, "/")
             try:
-                with open(full, encoding="utf-8") as f:
-                    files[rel] = f.read()
+                if rel.startswith(BINARY):
+                    with open(full, "rb") as f:
+                        files[rel] = f.read()
+                else:
+                    with open(full, encoding="utf-8") as f:
+                        files[rel] = f.read()
             except (OSError, UnicodeDecodeError):
                 pass
     return files
@@ -203,8 +210,12 @@ def _write_folder(path, files, remove):
     for rel, source in files.items():
         full = os.path.join(path, *rel.split("/"))
         os.makedirs(os.path.dirname(full), exist_ok=True)
-        with open(full, "w", encoding="utf-8") as f:
-            f.write(source)
+        if isinstance(source, bytes):
+            with open(full, "wb") as f:
+                f.write(source)
+        else:
+            with open(full, "w", encoding="utf-8") as f:
+                f.write(source)
     for rel in remove:
         full = os.path.join(path, *rel.split("/"))
         if os.path.isfile(full):
