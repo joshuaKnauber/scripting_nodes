@@ -137,3 +137,11 @@ Agreed 2026-10-14, in this order. Viewport drawing, tools, asset shelves, CLI co
 - [ ] "Save As" copies keep the addon uid; renaming the copy removes the original's generated folder (persistence).
 - [ ] Per-tree compile caching if large files get slow (currently ~40 ms for 300 nodes).
 - [ ] `normalize_indents` in `lib/code_format.py` is unused now.
+
+## 11. Extensions
+
+v3 had "Node Extensions" (sidebar panel): **packages**, zips of extra node files extracted into the add-on's `nodes/` folder, and **snippets**, shared node setups. Nothing like it in v4 yet.
+
+- [ ] Decide what an extension is in v4: node packages (third-party node classes against the `ScriptingBaseNode` / `emit(ctx)` API), shared functions (see the function library under 4), or both.
+- [ ] Packages: install / remove / list, stored outside the add-on folder (updating Scripting Nodes mustn't delete them), loaded by `auto_load`, errors shown per package. The node API they build on becomes public: needs versioning and docs (`writing-nodes.mdx` is the start).
+- [ ] Generated add-ons that use package nodes: the package's helpers must end up in the export, or the node is refused on export.
