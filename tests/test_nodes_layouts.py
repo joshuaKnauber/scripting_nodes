@@ -215,3 +215,38 @@ class LayoutNodesTest(FlowTestCase):
         source = self.source()
         self.assertIn("self.layout.menu_contents('VIEW3D_MT_add')", source)
         self.assertIn("self.layout.menu_contents('LAYOUT_TEST_MT_tools')", source)
+
+    def test_if_else_draws_in_interface_flows(self):
+        """Linked after a layout, If/Else and Switch become interface nodes."""
+        column = self.then("SNA_Node_Column")
+        branch = self.add("SNA_Node_IfElse")
+        self.assertEqual(branch.inputs[0].kind, "PROGRAM")
+        self.link(column.outputs["next"], branch.inputs[0])
+        label = self.add("SNA_Node_Label")
+        label.socket("text").value = "Shown"
+        self.link(branch.outputs["then"], label.inputs[0])
+        switch = self.add("SNA_Node_Switch")
+        self.link(branch.outputs["next"], switch.inputs[0])
+        self.assertBuilt()
+        for node in (branch, switch):
+            self.assertEqual(
+                {s.kind for s in node.inputs[:1] + list(node.outputs)}, {"INTERFACE"}
+            )
+        self.assertFalse(any(link.is_muted for link in self.tree.links))
+        self.assertIn("    self.layout.label(text='Shown')", self.source())
+        # unlinked, it runs code again
+        self.tree.links.remove(branch.inputs[0].links[0])
+        self.tree.links.remove(branch.outputs["then"].links[0])
+        self.tree.links.remove(branch.outputs["next"].links[0])
+        helpers.flush()
+        self.assertEqual(branch.inputs[0].kind, "PROGRAM")
+
+    def test_if_else_follows_its_outputs(self):
+        """Branches linked to interface nodes first: the input becomes an
+        interface socket, so it can be linked after a layout."""
+        branch = self.add("SNA_Node_IfElse")
+        label = self.add("SNA_Node_Label")
+        self.link(branch.outputs["else"], label.inputs[0])
+        helpers.flush()
+        self.assertEqual(branch.inputs[0].kind, "INTERFACE")
+        self.assertFalse(any(link.is_muted for link in self.tree.links))

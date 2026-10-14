@@ -2,6 +2,7 @@
 
 import json
 import socket
+import threading
 import unittest
 import urllib.error
 import urllib.request
@@ -56,3 +57,22 @@ class MCPServerSecurityTest(unittest.TestCase):
             {"Content-Type": "application/json", "Host": "attacker.example:80"}
         )
         self.assertEqual(status, 403)
+
+
+class MCPToolCallTest(unittest.TestCase):
+    def test_tool_runs_on_the_main_thread(self):
+        """The worker thread hands the call to the main thread's pump."""
+        server = helpers.sn("src.mcp_server.server")
+        bridge = helpers.sn("src.mcp_server.bridge")
+        helpers.new_tree("Main")
+        result = {}
+        params = {"name": "list_node_trees", "arguments": {}}
+        worker = threading.Thread(
+            target=lambda: result.update(server._handle_tools_call(1, params))
+        )
+        worker.start()
+        while worker.is_alive():
+            bridge._drain()
+            worker.join(0.01)
+        self.assertNotIn("isError", result["result"])
+        self.assertIn("Main", result["result"]["content"][0]["text"])

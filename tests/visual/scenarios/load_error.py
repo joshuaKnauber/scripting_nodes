@@ -15,6 +15,7 @@ def setup():
     text = bpy.data.texts.new("my_script.py")
     text.write("print('works')\n")
     script.text_block = text
+    helpers.flush()
     helpers.link(tree, trigger.outputs[0], script.inputs[0])
     helpers.flush()  # loads fine
     text.clear()

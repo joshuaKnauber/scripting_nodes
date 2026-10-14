@@ -107,9 +107,7 @@ def _handle_tools_call(req_id, params):
         return _err(req_id, -32602, f"Unknown tool: {name!r}")
     fn = TOOLS[name]["fn"]
     try:
-        result = bridge.call_on_main(
-            _run_tool, timeout=TOOL_TIMEOUT_SECONDS, fn=fn, args=args
-        )
+        result = bridge.call_on_main(_run_tool, fn, args, timeout=TOOL_TIMEOUT_SECONDS)
         text = json.dumps(result, indent=2, default=str)
         return _ok(req_id, {"content": [{"type": "text", "text": text}]})
     except Exception as exc:

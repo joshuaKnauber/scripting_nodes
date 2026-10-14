@@ -112,6 +112,7 @@ def build():
     text.write(ARRANGE)
     script = add(tree, "SNA_Node_Script", (-750, 700), script_frame)
     script.text_block = text
+    script.function_name = "run"
     get_spacing = add(tree, "SNA_Node_GetProperty", (-1050, 450), script_frame)
     helpers.flush()
     helpers.pick_property(get_spacing, helpers.prop(spacing_id))

@@ -142,7 +142,8 @@ class RnaTest(unittest.TestCase):
         paths = [e.path for e in found]
         self.assertEqual(paths[0], "active_object.active_material_index")
         self.assertIn("active_object.active_material", paths)
-        self.assertIn("active_object.active_material.diffuse_color", paths)
+        # not what's inside it: pick it and type "." for that
+        self.assertNotIn("active_object.active_material.diffuse_color", paths)
         self.assertNotIn("active_object.material_slots", paths)
         found = rna().search(context, "selected_objects[0].loc")
         self.assertEqual(found[0].path, "selected_objects[].location")
@@ -150,6 +151,21 @@ class RnaTest(unittest.TestCase):
         # paths that don't lead anywhere: a plain search
         found = rna().search(context, "render.fps")
         self.assertIn("scene.render.fps", [e.path for e in found])
+
+    def test_search_names_the_result(self):
+        """The last word matches what's found, not data on the way to it."""
+        context = rna().root_step("Context")
+
+        def booleans(step):
+            return step.prop is not None and step.prop.type == "BOOLEAN"
+
+        paths = [e.path for e in rna().search(context, "parti", accept=booleans)]
+        self.assertIn("active_object.particle_systems", paths)
+        for path in paths:
+            self.assertIn("parti", path.rsplit(".", 1)[-1])
+        # more words reach further in: "particle" on the way, "density" found
+        paths = [e.path for e in rna().search(context, "particle density")]
+        self.assertTrue(any("particle" in p and p.endswith("density") for p in paths))
 
     def test_subtypes(self):
         self.assertIn("Mesh", rna().subtypes("ID"))

@@ -62,13 +62,13 @@ class ScriptingNodeTree(bpy.types.NodeTree):
         if not _READY or self.pause_updates:
             return
         self._remove_cyclic_links(list(self.links))
-        self._mute_incompatible_links(list(self.links))
+        self.mute_incompatible_links(list(self.links))
         for node in sn_nodes(self):
             node.update_dynamic_sockets()
         # Links or nodes changed: regenerate this tree on the next flush
         scheduler.request_tree(self)
 
-    def _mute_incompatible_links(self, links):
+    def mute_incompatible_links(self, links=None):
         """Mute links that connect a DATA socket with a PROGRAM socket.
 
         Eval already ignores these, muting gives the user a visual cue
@@ -76,6 +76,7 @@ class ScriptingNodeTree(bpy.types.NodeTree):
         an incompatible SN socket is muted, so other branches off the same
         reroute keep working. Linear in the number of links.
         """
+        links = list(self.links) if links is None else links
         reroute_out = defaultdict(list)  # reroute name -> links leaving it
         for link in links:
             if link.from_node.bl_idname == "NodeReroute":

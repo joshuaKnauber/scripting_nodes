@@ -64,6 +64,7 @@ def setup():
     op.inputs["Label"].value = "Arrange Objects"
     arrange = helpers.add_node(tree, "SNA_Node_Script", (-380, 300))
     arrange.text_block = text("arrange.py", ARRANGE)
+    arrange.function_name = "run"
     helpers.flush()
     arrange.socket("spacing").value = 3.0
     log = helpers.add_node(tree, "SNA_Node_Print", (-60, 260))
@@ -76,6 +77,7 @@ def setup():
     panel.panel_category = "Object Tools"
     info = helpers.add_node(tree, "SNA_Node_Script", (-380, -120))
     info.text_block = text("selection_info.py", SELECTION_INFO)
+    info.function_name = "run"
     helpers.flush()
     button = helpers.add_node(tree, "SNA_Node_Button", (-60, -120))
     helpers.link(tree, panel.outputs["Interface"], info.inputs[0])

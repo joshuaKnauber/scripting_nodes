@@ -3,11 +3,24 @@ title: Scripts
 description: Add Python to your add-on and run it from nodes.
 ---
 
-Nodes build the structure of an add-on: operators, panels, properties. When a step is easier to write in Python, put it in a script. The **Script** node adds a text block (or a `.py` file) to your add-on and runs its `run()` function. The node's inputs and outputs come from that function.
+Nodes build the structure of an add-on: operators, panels, properties. When a step is easier to write in Python, put it in a script. The **Script** node takes a text block (or a `.py` file): it runs the code where the node is, or calls a function of it, whose parameters and return values become the node's inputs and outputs.
 
 ![An operator running arrange.py and a panel drawing with selection_info.py](/screenshots/scripts.png)
 
-## run()
+## Running the code
+
+With **Run the Code** picked (the default), the code goes into the add-on where the flow connects to the node, like several lines of **Python Statement**. It can use what the flow has: `context`, and `layout` in a panel (using it makes the node an interface node).
+
+```python
+bpy.ops.mesh.primitive_cube_add()
+context.active_object.name = "Box"
+```
+
+The node has a flow in and out. For inputs and outputs, put the code in a function and pick it.
+
+## Calling a function
+
+The dropdown on the node lists the script's functions. Pick one, and the node calls it:
 
 ```python
 def run(context, spacing: float = 2.5, axis: int = 0) -> int:
@@ -18,7 +31,7 @@ def run(context, spacing: float = 2.5, axis: int = 0) -> int:
     return count
 ```
 
-gives a node with the inputs **Spacing** (Float, 2.5) and **Axis** (Integer) and the output **Count**. **New** on the node creates a script to start from.
+picked, gives a node with the inputs **Spacing** (Float, 2.5) and **Axis** (Integer) and the output **Count**. **+** next to the text field creates a script to start from; for an empty text, **Add Template** writes one into it.
 
 | In the signature | On the node |
 | --- | --- |
@@ -29,13 +42,15 @@ gives a node with the inputs **Spacing** (Float, 2.5) and **Axis** (Integer) and
 | no annotation, anything else | Data |
 | `-> tuple[int, str]` with `return count, name` | two outputs, **Count** and **Name** |
 
-Parameters named `context`, `layout`, `self` and `event` aren't inputs: the node passes what the flow it's in has (an operator's `context`, a panel's `layout`, ...). A `run()` taking `layout` draws UI and connects to interface flows.
+Parameters named `context`, `layout`, `self` and `event` aren't inputs: the node passes what the flow it's in has (an operator's `context`, a panel's `layout`, ...). A function taking `layout` draws UI and connects to interface flows.
+
+**Data Only** removes the flow sockets of a function that returns something: it's called where its outputs are used, like a **Python Expression** (once per used output).
 
 Edits to the script update the node and reload the add-on, like any other change. Errors show on the Script node.
 
 ## The script is part of the add-on
 
-The whole script is copied into the add-on unchanged, as `scripts/<name>.py`. Everything in it works as in any add-on file: imports, helper functions, classes, handlers.
+With **Add to Add-on** or a function picked, the whole script is copied into the add-on unchanged, as `scripts/<name>.py`. **Add to Add-on** only does that (the node has no sockets); it's what scripts defining classes or `register()` start with. Everything in it works as in any add-on file: imports, helper functions, classes, handlers.
 
 - Classes (operators, panels, ...) are registered for you.
 - If the script defines `register()` and `unregister()`, they are called when the add-on is enabled and disabled instead. Register your classes there yourself, as in a regular add-on.
@@ -53,7 +68,7 @@ def unregister():
     bpy.app.handlers.save_post.remove(on_save)
 ```
 
-A script without `run()` is only added to the add-on, the node has no sockets. Several Script nodes using the same text share one module.
+Several Script nodes using the same text share one module.
 
 ## Generated code
 

@@ -424,6 +424,13 @@ def _with_prefix(entry: Entry, parts, steps) -> Entry:
     )
 
 
+def _names(entry: Entry, word: str) -> bool:
+    """Whether `word` is in the last part of `entry` (its name or label)."""
+    name = entry.path.rsplit(".", 1)[-1].replace("_", " ").lower()
+    text = entry.text.rsplit(" › ", 1)[-1].lower()
+    return word in name or word in text
+
+
 def search(root: Step, query: str, accept=None, depth=3, limit=200) -> list[Entry]:
     """Paths from `root` matching all words of `query`, best first.
     `accept(step)` filters the final steps (e.g. only booleans); data that
@@ -441,6 +448,10 @@ def search(root: Step, query: str, accept=None, depth=3, limit=200) -> list[Entr
     scored = []
     for entry in entries:
         if not all(word in entry.haystack for word in words):
+            continue
+        # the last word names what's found, not data on the way to it: "parti"
+        # finds Particle Systems, not everything inside them
+        if words and not _names(entry, words[-1]):
             continue
         score = entry.path.count(".")
         if accept is not None and not accept(entry.final):

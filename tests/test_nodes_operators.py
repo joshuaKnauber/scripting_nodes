@@ -126,6 +126,26 @@ class OperatorNodesTest(FlowTestCase):
         helpers.flush()
         self.assertIn("Connect an event", errors().node_message(key.id))
 
+    def test_event_info(self):
+        node = self.operator("Where", invoke_type="INVOKE")
+        info = self.add("SNA_Node_EventInfo")
+        self.link(node.outputs["event"], info.socket("event"))
+        last = node.outputs["invoke"]
+        for key in ("type", "shift", "mouse_region", "mouse_offset", "tilt"):
+            printer = self.print_in(last, info.outputs[key])
+            last = printer.outputs[0]
+        self.assertBuilt()
+        source = self.source()
+        self.assertIn("(event.mouse_region_x, event.mouse_region_y)", source)
+        self.assertIn("(event.mouse_x - event.mouse_prev_x, ", source)
+        # running it needs a window: tests/gui/operators.py
+
+    def test_event_info_needs_an_event(self):
+        info = self.add("SNA_Node_EventInfo")
+        self.print_value(info.outputs["type"])
+        helpers.flush()
+        self.assertIn("Connect an event", errors().node_message(info.id))
+
     def test_return_ends_early(self):
         node = self.operator("Early")
         cancel = self.add("SNA_Node_OperatorReturn")

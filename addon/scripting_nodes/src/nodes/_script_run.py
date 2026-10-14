@@ -1,4 +1,5 @@
-"""The `run()` function of a script and the sockets its signature declares.
+"""What a script defines: its functions and the sockets their signatures
+declare, whether it's part of the add-on, whether its code draws UI.
 
     def run(context, obj: Object, factor: float = 2.0) -> int:
 
@@ -47,11 +48,23 @@ class Run:
     draws: bool  # takes `layout`
 
 
-_cache: dict[str, Run | None] = {}
+@dataclass
+class Script:
+    """What a script defines."""
+
+    functions: dict  # name -> Run, top-level functions in order
+    is_module: bool  # defines classes or register(): part of the add-on
+    uses_layout: bool  # the code (run inline) draws UI
 
 
-def read(source: str) -> Run | None:
-    """`run()` of `source`, None if there is none. Raises ScriptError."""
+# functions the add-on calls itself, not offered on the node
+_HOOKS = {"register", "unregister"}
+
+_cache: dict[str, Script] = {}
+
+
+def read(source: str) -> Script:
+    """What `source` defines. Raises ScriptError."""
     if source not in _cache:
         if len(_cache) > 64:
             _cache.clear()
@@ -64,17 +77,31 @@ def _read(source):
         module = ast.parse(source)
     except SyntaxError as exc:
         raise ScriptError(f"Line {exc.lineno}: {exc.msg}") from None
-    function = next(
-        (
-            item
-            for item in module.body
-            if isinstance(item, ast.FunctionDef) and item.name == "run"
-        ),
-        None,
+    functions = {
+        item.name: _function(item)
+        for item in module.body
+        if isinstance(item, ast.FunctionDef) and item.name not in _HOOKS
+    }
+    is_module = any(
+        isinstance(item, ast.ClassDef)
+        or (isinstance(item, ast.FunctionDef) and item.name == "register")
+        for item in module.body
     )
-    if function is None:
-        return None
+    # only code outside functions and classes runs inline
+    code = [
+        item
+        for item in module.body
+        if not isinstance(item, (ast.FunctionDef, ast.ClassDef))
+    ]
+    uses_layout = any(
+        isinstance(node, ast.Name) and node.id == "layout"
+        for item in code
+        for node in ast.walk(item)
+    )
+    return Script(functions, is_module, uses_layout)
 
+
+def _function(function):
     args = function.args
     positional = args.posonlyargs + args.args
     defaults = [None] * (len(positional) - len(args.defaults)) + args.defaults

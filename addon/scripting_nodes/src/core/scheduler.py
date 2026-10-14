@@ -93,6 +93,8 @@ def _flush():
     for _ in range(3):
         if not any([node.sync_sockets() for t in trees for node in _upstream_first(t)]):
             break
+    for tree in trees:
+        tree.mute_incompatible_links()  # flow kinds may have changed
 
     t0 = time.perf_counter()
     files = compiler.compile_addon(dev=True)

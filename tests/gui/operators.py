@@ -1,11 +1,13 @@
 """A modal operator (Invoke Type Modal, with a timer) runs its Modal flow on
-timer events until a Return node finishes it, then its End flow; a UI List
+timer events until a Return node finishes it, then its End flow; Event Info
+reads the events; a UI List
 draws in a sidebar panel.
 
 Runs inside GUI Blender via `python scripts/test.py --gui`. Prints
 "GUI TEST PASSED" or "GUI TEST FAILED: <reason>" and quits.
 """
 
+import ast
 import os
 import sys
 import traceback
@@ -45,8 +47,18 @@ def build():
     branch = add(tree, "SNA_Node_IfElse")
     done = add(tree, "SNA_Node_OperatorReturn")
     ended = add(tree, "SNA_Node_PythonStatement", code="context.scene['ended'] = 1")
+    info = add(tree, "SNA_Node_EventInfo")
+    store = add(
+        tree,
+        "SNA_Node_PythonStatement",
+        code="context.scene['event'] = repr((kind, tuple(mouse), shift))",
+    )
     helpers.flush()
-    helpers.link(tree, modal.outputs["modal"], count.inputs[0])
+    helpers.link(tree, modal.outputs["event"], info.socket("event"))
+    for name, key in (("kind", "type"), ("mouse", "mouse_region"), ("shift", "shift")):
+        helpers.link(tree, info.outputs[key], store.socket("name_" + name))
+    helpers.link(tree, modal.outputs["modal"], store.inputs[0])
+    helpers.link(tree, store.outputs[0], count.inputs[0])
     helpers.link(tree, count.outputs[0], branch.inputs[0])
     helpers.link(tree, enough.outputs[0], branch.socket("condition"))
     helpers.link(tree, branch.outputs["then"], done.inputs[0])
@@ -89,6 +101,9 @@ def step():
             scene = bpy.context.scene
             check(scene.get("ticks") == 3, f"ticks: {scene.get('ticks')}")
             check(scene.get("ended") == 1, "End didn't run")
+            kind, mouse, shift = ast.literal_eval(scene.get("event"))
+            check(kind == "TIMER", f"event type: {kind}")
+            check(len(mouse) == 2 and shift is False, f"event: {mouse}, {shift}")
             check(
                 dict(errors.runtime_errors) == {},
                 f"runtime errors: {dict(errors.runtime_errors)}",

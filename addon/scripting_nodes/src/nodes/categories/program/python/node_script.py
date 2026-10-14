@@ -1,14 +1,20 @@
-"""Script node - Python from a Text block or a file, as a module of the add-on.
+"""Script node - Python from a Text block or a file.
 
-The script is added unchanged as `scripts/<name>.py`: its imports, classes
-and its own `register()` / `unregister()` are part of the add-on. If it has a
-`run()` function, the node calls it; the signature declares the sockets (see
-nodes/_script_run.py):
+The node uses the script in one of three ways (`function_name`):
+
+- Run the Code: the code is put where the node is in the flow, like a Python
+  Statement of several lines.
+- Add to Add-on: the script is added unchanged as a module,
+  `scripts/<name>.py`; its classes are registered, its `register()` /
+  `unregister()` called. The default for scripts defining those.
+- A function: added like that, and the node calls the function; its
+  signature declares the sockets (see nodes/_script_run.py):
 
     def run(context, obj: Object, factor: float = 2.0) -> int:
 """
 
 import os
+import zlib
 
 import bpy
 
@@ -16,6 +22,7 @@ from .....core import naming
 from .....core.context import NodeError
 from .....lib.trees import node_by_id
 from .....sockets.spec import Flow, Socket
+from .node_python_code import MODULES
 from .... import _script_run
 from ....base_node import ScriptingBaseNode
 
@@ -39,19 +46,25 @@ def run(context, name: str = "World") -> str:
 
 
 class SNA_OT_NewScript(bpy.types.Operator):
-    """Create a script from a template"""
+    """Create a script from a template (into the picked text if it's empty)"""
 
     bl_idname = "sna.new_script"
     bl_label = "New Script"
     bl_options = {"REGISTER", "UNDO", "INTERNAL"}
 
+    node_id: bpy.props.StringProperty(options={"HIDDEN"})
+
     def execute(self, context):
-        node = getattr(context, "node", None)
+        node = node_by_id(self.node_id)
         if node is None:
             return {"CANCELLED"}
-        text = bpy.data.texts.new("script.py")
+        text = node.text_block
+        if text is None:
+            text = bpy.data.texts.new("script.py")
+        text.clear()
         text.write(TEMPLATE)
         node.text_block = text
+        node.function_name = "run"
         return {"FINISHED"}
 
 
@@ -77,8 +90,53 @@ class SNA_OT_EditScript(bpy.types.Operator):
         return {"FINISHED"}
 
 
+# `function_name` besides function names; "" picks one from the script
+RUN_CODE = ":code"
+ADD_TO_ADDON = ":addon"
+_items = []  # Blender needs the items of dynamic enums kept alive
+
+
+def _value(name):
+    """A stable enum value per function name: the picked function stays
+    picked when functions are added or moved."""
+    return zlib.crc32(name.encode()) & 0x7FFFFFFF or 2
+
+
+def _function_items(self, context):
+    items = [
+        (RUN_CODE, "Run the Code", "Put the code where the node is in the flow", 0),
+        (
+            ADD_TO_ADDON,
+            "Add to Add-on",
+            "Make the script part of the add-on: its classes are registered, its "
+            "register() and unregister() called",
+            1,
+        ),
+    ]
+    for name in self.script_functions():
+        items.append((name, f"{name}()", f"Call {name}() of the script", _value(name)))
+    _items[:] = items
+    return _items
+
+
+def _get_function(self):
+    try:
+        use = self.script_use()
+    except NodeError:
+        return 0
+    fixed = {RUN_CODE: 0, ADD_TO_ADDON: 1}
+    return fixed[use] if use in fixed else _value(use)
+
+
+def _set_function(self, value):
+    names = {0: RUN_CODE, 1: ADD_TO_ADDON}
+    names.update({_value(name): name for name in self.script_functions()})
+    self.function_name = names.get(value, "")
+
+
 class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
-    """Add a Python script to the add-on and call its run() function."""
+    """Python from a text block or a file: its code where the node is, or
+    one of its functions called with the node's inputs."""
 
     bl_idname = "SNA_Node_Script"
     bl_label = "Script"
@@ -98,6 +156,22 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
     )
     filepath: bpy.props.StringProperty(
         name="File", description="Path to a Python file", subtype="FILE_PATH"
+    )
+    function_name: bpy.props.StringProperty(
+        name="Function", description="Function of the script the node calls"
+    )
+    function: bpy.props.EnumProperty(
+        name="Function",
+        description="Call a function of the script, its parameters and return "
+        "values become sockets",
+        items=_function_items,
+        get=_get_function,
+        set=_set_function,
+    )
+    data_only: bpy.props.BoolProperty(
+        name="Data Only",
+        description="No flow sockets: call the function where its results are "
+        "used (once per used result)",
     )
 
     # -- source ---------------------------------------------------------------
@@ -140,22 +214,59 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
         except OSError as exc:
             raise NodeError(f"Can't read {path}: {exc.strerror or exc}")
 
-    def script_run(self):
-        """`run()` of the script (nodes/_script_run.Run) or None."""
+    def script(self):
+        """What the script defines (nodes/_script_run.Script)."""
         try:
             return _script_run.read(self.script_source())
         except _script_run.ScriptError as exc:
             raise NodeError(f"Script: {exc}")
 
+    def script_functions(self):
+        """Names of the script's functions, [] if it can't be read."""
+        if self.source_name() is None:
+            return []
+        try:
+            return list(self.script().functions)
+        except NodeError:
+            return []
+
+    def script_use(self):
+        """RUN_CODE, ADD_TO_ADDON or the name of the function the node calls.
+        Without a choice: add-on code (classes, register()) is added to the
+        add-on, other code runs."""
+        script = self.script()
+        if self.function_name in (RUN_CODE, ADD_TO_ADDON):
+            return self.function_name
+        if self.function_name in script.functions:
+            return self.function_name
+        return ADD_TO_ADDON if script.is_module else RUN_CODE
+
+    def picked_function(self):
+        """(name, Run) of the function the node calls, or None."""
+        use = self.script_use()
+        if use in (RUN_CODE, ADD_TO_ADDON):
+            return None
+        return use, self.script().functions[use]
+
+    def is_data_only(self, run):
+        return self.data_only and bool(run.outputs) and not run.draws
+
     # -- sockets ----------------------------------------------------------------
 
     def socket_specs(self):
         try:
-            run = self.script_run()
+            script = self.script()
+            picked = self.picked_function()
         except NodeError:
             return self._current_specs()  # keep the links while it's broken
-        if run is None:
-            return [], []
+        if picked is None:
+            if self.script_use() == ADD_TO_ADDON:
+                return [], []
+            kind = "INTERFACE" if script.uses_layout else "PROGRAM"
+            return [Flow(kind=kind)], [Flow("next", kind=kind)]
+        run = picked[1]
+        if self.is_data_only(run):
+            return list(run.inputs), list(run.outputs)
         kind = "INTERFACE" if run.draws else "PROGRAM"
         return (
             [Flow(kind=kind), *run.inputs],
@@ -186,26 +297,46 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
             naming.Symbol("alias", naming.snake(base, "script"), owner=owner),
         ]
 
+    def is_inline(self):
+        return self.script_use() == RUN_CODE
+
     def emit_module(self, ctx):
-        """The script as a module of the add-on, wherever the node is."""
+        """The script as a module of the add-on (wherever the node is), unless
+        its code goes where the node is."""
         source = self.script_source()
-        self.script_run()  # a syntax error shows on the node
-        ctx.script("module", "alias", source)
+        if not self.is_inline():
+            ctx.script("module", "alias", source)
 
     def emit(self, ctx):
-        run = self.script_run()
+        picked = self.picked_function()
+        if picked is None:
+            if self.script_use() == ADD_TO_ADDON:
+                return
+            ctx.code(f"""
+                {ctx.join(self._inline_code(ctx))}
+                {ctx.flow("next")}
+            """)
+            return
+        name, run = picked
         names = ctx.scope.names
         implicit = {
-            "context": "context" if "context" in names else "bpy.context",
+            "context": ctx.context,
             "layout": ctx.layout,
             "self": "self" if "self" in names else "None",
             "event": "event" if "event" in names else "None",
         }
         args = [
-            f"{name}={implicit[name] if name in implicit else ctx.input(name)}"
-            for name in run.params
+            f"{param}={implicit[param] if param in implicit else ctx.input(param)}"
+            for param in run.params
         ]
-        call = f"{ctx.name('alias')}.run({', '.join(args)})"
+        call = f"{ctx.name('alias')}.{name}({', '.join(args)})"
+        if self.is_data_only(run):
+            if len(run.outputs) == 1:
+                ctx.output(run.outputs[0].key, call)
+            else:
+                for i, spec in enumerate(run.outputs):
+                    ctx.output(spec.key, f"{call}[{i}]")
+            return
         if run.outputs:
             results = [ctx.var(naming.snake(s.label, "result")) for s in run.outputs]
             for spec, result in zip(run.outputs, results):
@@ -216,18 +347,54 @@ class SNA_Node_Script(ScriptingBaseNode, bpy.types.Node):
             {ctx.flow("next")}
         """)
 
+    def _inline_code(self, ctx):
+        """The script as it is, after the names it uses from the flow."""
+        source = self.script_source()
+        script = self.script()
+        lines = []
+        if ctx.context != "context":
+            lines.append(f"context = {ctx.context}")
+        if script.uses_layout and ctx.layout != "layout":
+            lines.append(f"layout = {ctx.layout}")
+        for module in MODULES:
+            if f"{module}." in source and module != "bpy":
+                ctx.imports(f"import {module}")
+        lines.append(source)
+        return lines
+
     # -- UI -------------------------------------------------------------------
 
     def draw_label(self):
         source = self.source_name()
-        return naming.snake(source[1]).replace("_", " ").title() if source else "Script"
+        if source is None:
+            return "Script"
+        return "Script: " + naming.snake(source[1]).replace("_", " ").title()
 
     def draw(self, context, layout):
         layout.prop(self, "source_type", expand=True)
         if self.source_type == "EXTERNAL":
             layout.prop(self, "filepath", text="")
+        else:
+            row = layout.row(align=True)
+            row.prop(self, "text_block", text="")
+            if self.text_block is None:
+                row.operator("sna.new_script", text="", icon="ADD").node_id = self.id
+            else:
+                op = row.operator("sna.edit_script", text="", icon="TEXT")
+                op.node_id = self.id
+        if self.source_name() is None:
             return
-        row = layout.row(align=True)
-        row.template_ID(self, "text_block", new="sna.new_script", open="text.open")
-        if self.text_block is not None:
-            row.operator("sna.edit_script", text="", icon="TEXT").node_id = self.id
+        try:
+            picked = self.picked_function()
+        except NodeError:
+            return  # shows on the node
+        if self.text_block is not None and not self.text_block.as_string().strip():
+            layout.label(text="The script is empty", icon="INFO")
+            op = layout.operator("sna.new_script", text="Add Template", icon="FILE")
+            op.node_id = self.id
+            return
+        layout.prop(self, "function", text="")
+        if picked is not None:
+            run = picked[1]
+            if run.outputs and not run.draws:
+                layout.prop(self, "data_only")

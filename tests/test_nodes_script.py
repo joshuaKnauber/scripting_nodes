@@ -57,9 +57,10 @@ class ScriptNodeTest(unittest.TestCase):
     def assertLoaded(self):
         self.assertIsNone(errors().addon_error)
 
-    def script(self, tree, source_text):
+    def script(self, tree, source_text, function="run"):
         node = helpers.add_node(tree, "SNA_Node_Script")
         node.text_block = source_text
+        node.function_name = function
         return node
 
     def triggered(self, source, name="tools.py"):
@@ -91,7 +92,7 @@ class ScriptNodeTest(unittest.TestCase):
             outputs,
             [("next", "ScriptingFlowSocket"), ("output_0", "ScriptingFloatSocket")],
         )
-        self.assertEqual(script.draw_label(), "Tools")
+        self.assertEqual(script.draw_label(), "Script: Tools")
 
         script.text_block = text("stats.py", STATS)
         names = [(s.identifier, s.name) for s in script.outputs]
@@ -101,6 +102,128 @@ class ScriptNodeTest(unittest.TestCase):
         self.assertEqual(script.outputs[1].bl_idname, "ScriptingIntegerSocket")
         self.assertEqual(script.outputs[2].bl_idname, "ScriptingStringSocket")
         self.assertEqual([s.identifier for s in script.inputs], ["flow"])
+
+    def test_template_fills_an_empty_text(self):
+        tree = helpers.new_tree()
+        script = self.script(tree, text("Text", ""))
+        helpers.flush()
+        self.assertEqual([s.identifier for s in script.outputs], ["next"])
+        bpy.ops.sna.new_script(node_id=script.id)
+        self.assertEqual(script.text_block.name, "Text")  # filled, not replaced
+        helpers.flush()
+        self.assertEqual(script.socket("name").value, "World")
+        # without a text, a new one
+        other = helpers.add_node(tree, "SNA_Node_Script")
+        bpy.ops.sna.new_script(node_id=other.id)
+        self.assertIn("def run(", other.text_block.as_string())
+
+    def test_without_a_function_the_code_goes_in_the_flow(self):
+        source = "# count\ncontext.scene['runs'] = context.scene.get('runs', 0) + 1\n"
+        tree, trigger, script = self.triggered(source, "count.py")
+        self.assertEqual([s.identifier for s in script.inputs], ["flow"])
+        self.assertEqual([s.identifier for s in script.outputs], ["next"])
+        code = helpers.tree_source(tree)
+        self.assertIn(
+            "        # count\n"
+            "        context.scene['runs'] = context.scene.get('runs', 0) + 1",
+            code,
+        )
+        self.assertNotIn("scripts/count.py", helpers.addon_files())
+        self.assertLoaded()
+        self.assertNotIn("runs", bpy.context.scene)  # not when it loads
+        run(trigger)
+        run(trigger)
+        self.assertEqual(bpy.context.scene["runs"], 2)
+
+    def test_errors_in_inline_code_show_on_the_node(self):
+        tree, trigger, script = self.triggered("x = 1 / 0\n", "broken.py")
+        self.assertLoaded()
+        with self.assertRaises(RuntimeError):
+            run(trigger)
+        self.assertIn("ZeroDivisionError", errors().node_message(script.id) or "")
+
+    def test_inline_code_drawing_ui(self):
+        tree = helpers.new_tree()
+        panel = helpers.add_node(tree, "SNA_Node_Panel")
+        script = self.script(tree, text("ui.py", "layout.label(text='Hi')\n"), "")
+        helpers.flush()
+        self.assertEqual(script.inputs[0].kind, "INTERFACE")
+        helpers.link(tree, panel.outputs["body"], script.inputs[0])
+        helpers.flush()
+        code = helpers.tree_source(tree)
+        self.assertIn("layout = self.layout\n        layout.label(text='Hi')", code)
+        self.assertLoaded()
+
+    def test_pick_any_function(self):
+        source = (
+            SCALE + "\n\ndef double(value: int = 2) -> int:\n    return value * 2\n"
+        )
+        tree = helpers.new_tree()
+        script = self.script(tree, text("tools.py", source), "")
+        helpers.flush()
+        self.assertEqual(script.script_functions(), ["run", "double"])
+        self.assertEqual(script.function, ":code")
+        self.assertEqual([s.identifier for s in script.inputs], ["flow"])
+        script.function = "double"
+        self.assertEqual(script.function_name, "double")
+        helpers.flush()
+        trigger = helpers.add_node(tree, "SNA_Node_Trigger")
+        helpers.link(tree, trigger.outputs[0], script.inputs[0])
+        helpers.flush()
+        self.assertEqual(script.socket("value").value, 2)
+        self.assertIn("tools.double(value=2)", helpers.tree_source(tree))
+        # still picked when the functions move
+        script.text_block.clear()
+        script.text_block.write("def double(value: int = 2) -> int:\n    return 4\n")
+        self.assertEqual(script.function, "double")
+        script.text_block.clear()
+        script.text_block.write(SCALE)
+        self.assertEqual(script.function, ":code")  # gone
+
+    def test_add_to_addon(self):
+        """Scripts with classes are added to the add-on unless the node is
+        told otherwise; the dropdown shows it."""
+        source = "import bpy\n\n\nclass HELLO_OT_x(bpy.types.Operator):\n    bl_idname = 'hello.x'\n    bl_label = 'X'\n"
+        tree = helpers.new_tree()
+        script = self.script(tree, text("hello.py", source), "")
+        helpers.flush()
+        self.assertEqual(script.function, ":addon")
+        self.assertEqual(len(script.inputs) + len(script.outputs), 0)
+        self.assertTrue(hasattr(bpy.types, "HELLO_OT_x"))
+        script.function = ":code"
+        helpers.flush()
+        self.assertEqual([s.identifier for s in script.inputs], ["flow"])
+        self.assertNotIn("scripts/hello.py", helpers.addon_files())
+        # plain code can be added too: it runs once, when the add-on loads
+        plain = self.script(tree, text("once.py", "x = 1\n"), "")
+        self.assertEqual(plain.function, ":code")
+        plain.function = ":addon"
+        helpers.flush()
+        self.assertIn("scripts/once.py", helpers.addon_files())
+        self.assertLoaded()
+
+    def test_data_only(self):
+        source = "def double(value: int = 2) -> int:\n    return value * 2\n"
+        tree = helpers.new_tree()
+        trigger = helpers.add_node(tree, "SNA_Node_Trigger")
+        script = self.script(tree, text("maths.py", source), "double")
+        script.data_only = True
+        helpers.flush()
+        self.assertEqual([s.identifier for s in script.inputs], ["value"])
+        self.assertEqual([s.identifier for s in script.outputs], ["output_0"])
+        p = helpers.add_node(tree, "SNA_Node_Print")
+        helpers.link(tree, trigger.outputs[0], p.inputs[0])
+        helpers.link(tree, script.outputs[0], p.inputs[1])
+        helpers.flush()
+        self.assertIn("sn_print(str(maths.double(value=2)))", helpers.tree_source(tree))
+        self.assertLoaded()
+
+    def test_old_nodes_call_run(self):
+        tree = helpers.new_tree()
+        script = self.script(tree, text("tools.py", SCALE), "")
+        tree.data_version = 1
+        helpers.sn("src.core.versioning").upgrade([tree])
+        self.assertEqual(script.function_name, "run")
 
     def test_run_is_called(self):
         tree, trigger, script = self.triggered(SCALE)
@@ -284,7 +407,8 @@ class HELLO_PT_auto(Panel):
         self.assertTrue(script.outputs[1].is_linked)
 
     def test_load_error_is_shown_on_the_script_node(self):
-        tree, trigger, script = self.triggered("raise ValueError('broken')\n")
+        source = "raise ValueError('broken')\n\n\ndef run():\n    pass\n"
+        tree, trigger, script = self.triggered(source)
         self.assertIn("broken", errors().addon_error)
         self.assertIn(script.id, errors().load_errors)
         self.assertNotIn(trigger.id, errors().load_errors)

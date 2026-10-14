@@ -157,6 +157,19 @@ class ScriptingBaseNode:
             if _in_group(s, key) and not s.is_dynamic
         ]
 
+    def connected_flow_kind(self, inputs=("flow",), outputs=()):
+        """Kind of the flow connected to the first linked of these sockets
+        (inputs first), "PROGRAM" if none is. For nodes working in both code
+        and interface flows (If/Else, Switch)."""
+        candidates = [(key, False) for key in inputs]
+        candidates += [(key, True) for key in outputs]
+        for key, is_output in candidates:
+            socket = self.socket(key, is_output)
+            other = _linked_flow(socket) if socket is not None else None
+            if other is not None:
+                return "INTERFACE" if other.kind == "INTERFACE" else "PROGRAM"
+        return "PROGRAM"
+
     def sync_sockets(self):
         """Make the node's sockets match `socket_specs()`, keeping links."""
         key = self.as_pointer()
@@ -282,6 +295,20 @@ def _next_identifier(sockets, key):
     while f"{key}__{i}" in used:
         i += 1
     return f"{key}__{i}"
+
+
+def _linked_flow(socket):
+    """The flow socket at the other end of `socket`'s first link, through
+    reroutes, also if the link is muted (its kind may not match yet)."""
+    for link in socket.links:
+        other = link.to_socket if socket.is_output else link.from_socket
+        if other.node.bl_idname == "NodeReroute":
+            other = _linked_flow(
+                other.node.outputs[0] if socket.is_output else other.node.inputs[0]
+            )
+        if other is not None and hasattr(other, "kind"):
+            return other
+    return None
 
 
 def _copy_socket_attrs(source, target):

@@ -5,7 +5,7 @@ import bpy
 
 from .....blend_data.rna import blend_data_spec
 from .....core.context import NodeError
-from .....sockets.spec import Boolean, Flow, String
+from .....sockets.spec import Boolean, Flow, Float, String, Vector
 from ....base_node import ScriptingBaseNode
 from ..node_operator import CURSORS
 from ..node_shortcut import KEYS
@@ -60,13 +60,68 @@ class SNA_Node_IsKey(ScriptingBaseNode, bpy.types.Node):
     )
 
     def emit(self, ctx):
-        if not ctx.is_linked("event") and "event" not in ctx.scope.names:
-            raise NodeError("Connect an event (the Operator's Event output)")
-        event = ctx.input("event", default="event")
+        event = _event(self, ctx)
         check = f"{event}.type == {self.key!r}"
         if self.value != "ANY":
             check += f" and {event}.value == {self.value!r}"
         ctx.output("is_key", check)
+
+
+def _event(node, ctx):
+    if not ctx.is_linked("event") and "event" not in ctx.scope.names:
+        raise NodeError("Connect an event (the Operator's Event output)")
+    return ctx.input("event", default="event")
+
+
+class SNA_Node_EventInfo(ScriptingBaseNode, bpy.types.Node):
+    """What an event is: its key and whether it was pressed, the modifier
+    keys held, where the mouse is and how far it moved, tablet pressure."""
+
+    bl_idname = "SNA_Node_EventInfo"
+    bl_label = "Event Info"
+    sn_inputs = [blend_data_spec("event", "Event", "Event")]
+    sn_outputs = [
+        String("type", "Type"),
+        String("value", "Value"),
+        String("type_prev", "Previous Type"),
+        String("value_prev", "Previous Value"),
+        Boolean("is_repeat", "Is Repeat"),
+        Boolean("shift", "Shift"),
+        Boolean("ctrl", "Ctrl"),
+        Boolean("alt", "Alt"),
+        Boolean("oskey", "OS Key"),
+        String("text", "Text"),
+        Vector("mouse_region", "Mouse in Region", dimension=2),
+        Vector("mouse_window", "Mouse in Window", dimension=2),
+        Vector("mouse_offset", "Mouse Offset", dimension=2),
+        Float("pressure", "Pressure"),
+        Vector("tilt", "Tilt", dimension=2),
+    ]
+
+    def emit(self, ctx):
+        event = _event(self, ctx)
+        for key in (
+            "type",
+            "value",
+            "type_prev",
+            "value_prev",
+            "is_repeat",
+            "shift",
+            "ctrl",
+            "alt",
+            "oskey",
+            "pressure",
+        ):
+            ctx.output(key, f"{event}.{key}")
+        ctx.output("text", f"{event}.unicode")
+        ctx.output("mouse_region", f"({event}.mouse_region_x, {event}.mouse_region_y)")
+        ctx.output("mouse_window", f"({event}.mouse_x, {event}.mouse_y)")
+        ctx.output(
+            "mouse_offset",
+            f"({event}.mouse_x - {event}.mouse_prev_x, "
+            f"{event}.mouse_y - {event}.mouse_prev_y)",
+        )
+        ctx.output("tilt", f"tuple({event}.tilt)")
 
 
 def _text_or_none(node, ctx):

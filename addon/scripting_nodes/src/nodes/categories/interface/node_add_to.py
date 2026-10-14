@@ -7,6 +7,7 @@ from ....core import naming
 from ....core.context import NodeError
 from ....sockets.spec import Boolean, Interface
 from ...base_node import ScriptingBaseNode
+from .ops import add_to_picker
 
 POSITIONS = [
     ("append", "End", "Draw after the existing contents"),
@@ -65,7 +66,17 @@ class AddToNode(ScriptingBaseNode):
         return [naming.Symbol("function", text)]
 
     def draw(self, context, layout):
-        layout.prop(self, "target", text="", icon="VIEWZOOM")
+        if add_to_picker.is_active(self):
+            row = layout.row()
+            row.alert = True
+            row.operator("sna.add_to_picker_cancel", icon="X")
+            layout.label(text="Click a Pick button", icon="INFO")
+            return
+        row = layout.row(align=True)
+        row.prop(self, "target", text="", icon="VIEWZOOM")
+        row.operator(
+            "sna.add_to_picker_start", text="", icon="EYEDROPPER"
+        ).node_id = self.id
         layout.prop(self, "position", expand=True)
 
     def emit(self, ctx):

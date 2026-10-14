@@ -8,6 +8,7 @@ icon: GitBranch
 
 - **If/Else** runs **Then** when its **Condition** is true and **Else** otherwise; **Finally** continues after either.
 - **Switch** runs the flow of the case matching its **Value**, **Default** when none matches. Add, rename and remove cases on the node. Values are compared as text, so an enum property's item (`'MESH'`) or a number (`2`) both work.
+- In a panel or menu, **If/Else** and **Switch** draw instead: link them after a layout node (or link their outputs to interface nodes) and they turn orange, drawing only the branch that matches, e.g. a label that only shows while a checkbox is on.
 - **Switch Data** picks one of two values depending on a condition, without a flow.
 
 ## Conditions

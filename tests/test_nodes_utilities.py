@@ -212,6 +212,27 @@ class UtilityNodesTest(FlowTestCase):
             add_to.class_name("Object  [VIEW3D_MT_object]"), "VIEW3D_MT_object"
         )
 
+    def test_add_to_picker(self):
+        """The eyedropper draws a pick entry into every menu; picking one sets
+        the target and removes the entries again."""
+        node = self.add("SNA_Node_AddToMenu")
+
+        def has_pick(cls):
+            return "_draw_pick" in [f.__name__ for f in cls._dyn_ui_initialize()]
+
+        bpy.ops.sna.add_to_picker_start(node_id=node.id)
+        self.assertTrue(has_pick(bpy.types.VIEW3D_MT_object))
+        self.assertFalse(has_pick(bpy.types.VIEW3D_PT_context_properties))
+        bpy.ops.sna.add_to_picker_select(target="Object  [VIEW3D_MT_object]")
+        self.assertEqual(node.target, "Object  [VIEW3D_MT_object]")
+        self.assertFalse(has_pick(bpy.types.VIEW3D_MT_object))
+        panel = self.add("SNA_Node_AddToPanel")
+        bpy.ops.sna.add_to_picker_start(node_id=panel.id)
+        self.assertTrue(has_pick(bpy.types.VIEW3D_PT_context_properties))
+        bpy.ops.sna.add_to_picker_cancel()
+        self.assertFalse(has_pick(bpy.types.VIEW3D_PT_context_properties))
+        self.assertEqual(panel.target, "")
+
     def test_hidden_add_to_draws_nothing(self):
         node = self.add("SNA_Node_AddToPanel")
         node.target = "VIEW3D_PT_context_properties"

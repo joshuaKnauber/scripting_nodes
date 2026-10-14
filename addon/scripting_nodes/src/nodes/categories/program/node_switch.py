@@ -45,7 +45,8 @@ class SNA_OT_SwitchCaseAdd(bpy.types.Operator):
 
 class SNA_Node_Switch(ScriptingBaseNode, bpy.types.Node):
     """Run the flow of the case matching a value (compared as text, e.g. an
-    enum property's item), Default if none matches."""
+    enum property's item), Default if none matches. In an interface flow it
+    draws the matching case."""
 
     bl_idname = "SNA_Node_Switch"
     bl_label = "Switch"
@@ -58,9 +59,16 @@ class SNA_Node_Switch(ScriptingBaseNode, bpy.types.Node):
             self.cases.add().value = value
 
     def socket_specs(self):
-        outputs = [Flow(f"case_{i}", case.value) for i, case in enumerate(self.cases)]
-        outputs += [Flow("default", "Default"), Flow("next", "Finally")]
-        return [Flow(), Data("value", "Value")], outputs
+        keys = [f"case_{i}" for i in range(len(self.cases))] + ["default", "next"]
+        kind = self.connected_flow_kind(outputs=keys)
+        outputs = [
+            Flow(key, case.value, kind=kind) for key, case in zip(keys, self.cases)
+        ]
+        outputs += [
+            Flow("default", "Default", kind=kind),
+            Flow("next", "Finally", kind=kind),
+        ]
+        return [Flow(kind=kind), Data("value", "Value")], outputs
 
     def draw(self, context, layout):
         col = layout.column(align=True)

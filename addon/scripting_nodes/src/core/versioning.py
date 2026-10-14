@@ -8,10 +8,20 @@ Every tree stores the data version it was last saved with
 
 from ..lib.logger import log
 
-DATA_VERSION = 1
+DATA_VERSION = 2
+
+
+def _script_functions(tree):
+    """Script nodes pick the function they call (they always called run())."""
+    for node in tree.nodes:
+        if node.bl_idname != "SNA_Node_Script" or node.function_name:
+            continue
+        if "run" in node.script_functions():
+            node.function_name = "run"
+
 
 # data version -> function(tree) bringing a tree from version - 1 to it
-STEPS = {}
+STEPS = {2: _script_functions}
 
 
 def upgrade(trees):
