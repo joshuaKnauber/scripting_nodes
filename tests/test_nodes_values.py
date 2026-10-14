@@ -93,8 +93,13 @@ class ValueNodesTest(FlowTestCase):
         enum_icon.socket("item").value = "MESH"
         self.print_icon(enum_icon.outputs["icon"])
         cube_icon, mesh_icon = self.run_trigger()
+        # what Blender shows (the object's icon differs between versions)
+        cube = bpy.data.objects["Cube"]
         self.assertGreater(int(cube_icon), 0)
-        self.assertEqual(cube_icon, mesh_icon)
+        self.assertEqual(int(cube_icon), bpy.types.UILayout.icon(cube))
+        self.assertEqual(
+            int(mesh_icon), bpy.types.UILayout.enum_item_icon(cube, "type", "MESH")
+        )
 
     def print_icon(self, socket):
         """Icons don't convert to text: through an expression."""
