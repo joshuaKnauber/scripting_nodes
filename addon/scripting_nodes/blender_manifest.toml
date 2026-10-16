@@ -18,12 +18,6 @@ license = [
 # Tags for categorization on the extensions platform
 tags = ["Development", "Node"]
 
-# Bundle Python wheels for dependencies
-wheels = [
-  "./wheels/autopep8-2.3.2-py2.py3-none-any.whl",
-  "./wheels/pycodestyle-2.14.0-py2.py3-none-any.whl",
-]
-
 [permissions]
 files = "Writes the generated add-ons to the user scripts folder"
 network = "Optional local MCP server so AI assistants can edit node trees"

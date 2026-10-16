@@ -17,7 +17,7 @@ def files():
 
 
 def properties_source():
-    return files().get("addon/properties.py", "")
+    return files().get("properties.py", "")
 
 
 def run_trigger(trigger):
@@ -238,7 +238,7 @@ class PropertiesTest(unittest.TestCase):
         helpers.add_property("Target", "POINTER", poll_function=function)
         source = properties_source()
         self.assertIn("def poll_target(self, object):", source)
-        self.assertIn("return bool(visible(object, self=self))", source)
+        self.assertIn("return bool(visible(object))", source)
         self.assertIn("poll=poll_target", source)
         self.assertLoaded()
 
@@ -280,11 +280,8 @@ class PropertiesTest(unittest.TestCase):
         source = helpers.tree_source(self.tree)
         self.assertIn("bpy.types.AddonPreferences", source)
         self.assertIn("    verbose: bpy.props.BoolProperty(name='Verbose')", source)
-        self.assertIn(
-            "self.layout.prop(context.preferences.addons[__package__.rsplit('.', 1)[0]]"
-            ".preferences, 'verbose')",
-            source,
-        )
+        # in their own draw() the preferences are `self`
+        self.assertIn("self.layout.prop(self, 'verbose')", source)
         self.assertLoaded()
 
     # -- using properties -----------------------------------------------------
@@ -386,7 +383,7 @@ class PropertiesTest(unittest.TestCase):
         self.assertIn("self.id_data.prop_test.flag = True", source)
         props = properties_source()
         self.assertIn("from .main import on_count_update", props)
-        self.assertIn("update=update_count", props)
+        self.assertIn("update=on_count_update", props)
         self.assertLoaded()
         settings = bpy.context.scene.prop_test
         settings.count = 5

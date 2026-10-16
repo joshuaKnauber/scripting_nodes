@@ -27,7 +27,6 @@ def generated_source():
     runtime = helpers.sn("src.core.runtime")
     path = os.path.join(
         runtime.folder(bpy.context.scene.sna.addon.module_name),
-        "addon",
         tree.module_name + ".py",
     )
     with open(path) as f:

@@ -131,7 +131,7 @@ def flush():
 
 def tree_source(tree):
     """Generated Python source of one tree module, as written to disk
-    (unformatted, so substring checks don't depend on autopep8 wrapping)."""
+    (unformatted, so substring checks don't depend on line wrapping)."""
     return sn("src.core.compiler").compile_tree(tree, pretty=False)
 
 

@@ -13,19 +13,7 @@
 
 # Version, name and Blender compatibility live in blender_manifest.toml.
 
-import importlib.util
-import sys
-from pathlib import Path
-
-# Blender installs the manifest wheels when the extension is installed from a
-# zip. When the source folder is linked into a repo directly (dev / tests),
-# they aren't installed, so put the bundled wheels on sys.path instead.
-if importlib.util.find_spec("autopep8") is None:
-    for whl in (Path(__file__).parent / "wheels").glob("*.whl"):
-        if str(whl) not in sys.path:
-            sys.path.insert(0, str(whl))
-
-from . import auto_load  # noqa: E402
+from . import auto_load
 
 
 def register():

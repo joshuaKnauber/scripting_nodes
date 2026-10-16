@@ -1,0 +1,24 @@
+schema_version = "1.0.0"
+
+id = "object_toolkit"
+version = "1.0.0"
+name = "Object Toolkit"
+tagline = "Add-on created with Scripting Nodes"
+maintainer = "Unknown"
+type = "add-on"
+
+blender_version_min = "4.2.0"
+
+license = [
+  "SPDX:GPL-3.0-or-later",
+]
+
+[permissions]
+files = "Reads and writes files"
+
+[build]
+paths_exclude_pattern = [
+  "__pycache__/",
+  ".*",
+  "*.zip",
+]

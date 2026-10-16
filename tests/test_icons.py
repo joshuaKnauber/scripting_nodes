@@ -201,7 +201,7 @@ class IconsTest(unittest.TestCase):
         mode = helpers.add_property("Mode", "ENUM", enum_flag=True)
         mode.enum_items[0].icon = "MESH_DATA"
         helpers.flush()
-        source = helpers.addon_files()["addon/properties.py"]
+        source = helpers.addon_files()["properties.py"]
         self.assertIn("('Option A', 'Option A', '', 'MESH_DATA', 1)", source)
         self.assertIn("('Option B', 'Option B', '', 'NONE', 2)", source)
         self.assertLoaded()

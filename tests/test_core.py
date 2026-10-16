@@ -37,7 +37,7 @@ def trigger_print_tree(*texts, name="Tree"):
 
 def module_file(tree):
     path = runtime().folder(addon_settings().module_name)
-    return os.path.join(path, "addon", tree.module_name + ".py")
+    return os.path.join(path, tree.module_name + ".py")
 
 
 def read(path):
@@ -126,7 +126,7 @@ class CoreTest(unittest.TestCase):
     def test_hot_reload_picks_up_changes(self):
         tree, trigger, (p,) = trigger_print_tree("one")
         module = addon_settings().module_name
-        tree_mod = f"{module}.addon.{tree.module_name}"
+        tree_mod = f"{module}.{tree.module_name}"
         old_module = sys.modules[tree_mod]
         p.inputs[1].value = "two"
         helpers.flush()
@@ -138,7 +138,7 @@ class CoreTest(unittest.TestCase):
         module = addon_settings().module_name
         before = read(module_file(tree))
         files = helpers.addon_files()
-        files[f"addon/{tree.module_name}.py"] += "\ndef broken(:\n"
+        files[f"{tree.module_name}.py"] += "\ndef broken(:\n"
         runtime().apply(files)
         self.assertTrue(runtime().is_loaded(module))
         self.assertEqual(read(module_file(tree)), before)
@@ -149,7 +149,7 @@ class CoreTest(unittest.TestCase):
         module = addon_settings().module_name
         before = read(module_file(tree))
         files = helpers.addon_files()
-        files[f"addon/{tree.module_name}.py"] += "\nraise RuntimeError('nope')\n"
+        files[f"{tree.module_name}.py"] += "\nraise RuntimeError('nope')\n"
         runtime().apply(files)
         self.assertTrue(runtime().is_loaded(module))
         self.assertEqual(read(module_file(tree)), before)
@@ -412,8 +412,8 @@ class CoreTest(unittest.TestCase):
         tree, _, (p,) = trigger_print_tree("shipped")
         export = helpers.sn("src.core.ops.export")
         files = export.build_files()
-        source = files[f"addon/{tree.module_name}.py"]
-        self.assertIn(repr("shipped"), source)
+        source = files[f"{tree.module_name}.py"]
+        self.assertIn('print("shipped")', source)
         # dev builds route print through the overlay helper, exports don't
         self.assertNotIn("sn_print", source)
         self.assertNotIn("_sn_helpers.py", files)

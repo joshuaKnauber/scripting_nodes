@@ -22,8 +22,11 @@ class SNA_Node_Split(ScriptingBaseNode, bpy.types.Node):
 
     def emit(self, ctx):
         split, first, second = ctx.var("split"), ctx.var("column"), ctx.var("column")
+        args = ctx.args(
+            ctx.keyword("factor", "factor", 0.0), ctx.keyword("align", "align", False)
+        )
         ctx.code(f"""
-            {split} = {ctx.layout}.split(factor={ctx.input("factor")}, align={ctx.input("align")})
+            {split} = {ctx.layout}.split({args})
             {first} = {split}.column()
             {ctx.flow("first", layout=first)}
             {second} = {split}.column()
@@ -48,8 +51,15 @@ class SNA_Node_Grid(ScriptingBaseNode, bpy.types.Node):
 
     def emit(self, ctx):
         grid = ctx.var("grid")
+        args = ctx.args(
+            "row_major=True",
+            ctx.keyword("columns", "columns", 0),
+            ctx.keyword("even_columns", "even_columns", False),
+            ctx.keyword("even_rows", "even_rows", False),
+            ctx.keyword("align", "align", False),
+        )
         ctx.code(f"""
-            {grid} = {ctx.layout}.grid_flow(row_major=True, columns={ctx.input("columns")}, even_columns={ctx.input("even_columns")}, even_rows={ctx.input("even_rows")}, align={ctx.input("align")})
+            {grid} = {ctx.layout}.grid_flow({args})
             {ctx.flow("content", layout=grid)}
             {ctx.flow("next")}
         """)

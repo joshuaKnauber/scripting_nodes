@@ -1,5 +1,6 @@
 import bpy
 
+from .....lib.code_format import f_string
 from .....sockets.spec import Data, Integer, List, String
 from ....base_node import ScriptingBaseNode
 
@@ -189,8 +190,14 @@ class SNA_Node_FormatString(ScriptingBaseNode, bpy.types.Node):
     sn_outputs = [String("string", "String")]
 
     def emit(self, ctx):
-        values = ", ".join(ctx.inputs("value"))
-        ctx.output("string", f"{ctx.input('format')}.format({values})")
+        values = ctx.inputs("value")
+        template = self.socket("format")
+        if not template.is_linked:
+            code = f_string(template.value, values)
+            if code is not None:
+                ctx.output("string", code)
+                return
+        ctx.output("string", f"{ctx.input('format')}.format({', '.join(values)})")
 
 
 class SNA_Node_FindInString(ScriptingBaseNode, bpy.types.Node):

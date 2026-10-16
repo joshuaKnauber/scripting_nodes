@@ -13,7 +13,7 @@ class SNA_Node_Column(ScriptingBaseNode, bpy.types.Node):
     def emit(self, ctx):
         col = ctx.var("col")
         ctx.code(f"""
-            {col} = {ctx.layout}.column(align={ctx.input("align")}, heading={ctx.input("heading")})
+            {col} = {ctx.layout}.column({ctx.args(ctx.keyword("align", "align", False), ctx.keyword("heading", "heading", ""))})
             {ctx.flow("content", layout=col)}
             {ctx.flow("next")}
         """)

@@ -27,8 +27,6 @@ from ..lib.paths import ADDON_FOLDER
 from . import errors, persistence
 
 MARKER = ".scripting_nodes"
-# folders of generated files besides the modules: removed files are deleted
-GENERATED = ("addon/", "scripts/", "icons/")
 # folders of binary files (bytes in `files`)
 BINARY = ("icons/",)
 _LEGACY_SIGNATURE = "Add-on created with Scripting Nodes"
@@ -100,11 +98,8 @@ def apply(files: dict[str, str | bytes]) -> bool:
 
     current = _read_folder(path)
     changed = {rel: src for rel, src in files.items() if current.get(rel) != src}
-    stale = [
-        rel
-        for rel in current
-        if rel not in files and (rel.startswith(GENERATED) or rel == "_sn_helpers.py")
-    ]
+    # everything in the folder is generated (it has the marker)
+    stale = [rel for rel in current if rel not in files]
     was_loaded = is_loaded(module)
     if not changed and not stale and was_loaded:
         _loaded = module
@@ -220,6 +215,10 @@ def _write_folder(path, files, remove):
         full = os.path.join(path, *rel.split("/"))
         if os.path.isfile(full):
             os.remove(full)
+    # folders left empty (subpackages of earlier versions)
+    for root, dirs, names in os.walk(path, topdown=False):
+        if root != path and not os.listdir(root):
+            os.rmdir(root)
     # .pyc files are validated by mtime in whole seconds + size; a quick edit
     # of the same length (e.g. changing one digit) would load stale bytecode.
     for root, dirs, _names in os.walk(path):
@@ -265,9 +264,34 @@ def unload(module: str | None):
                 "WARNING", f"Error while disabling {module}: {exc}"
             ),
         )
+    _unregister_leftovers(module)
     for name in list(sys.modules):
         if name == module or name.startswith(module + "."):
             del sys.modules[name]
+
+
+def _unregister_leftovers(module: str):
+    """Unregister classes of `module` that are still registered: register()
+    failed half way (the generated code registers like hand-written add-ons,
+    without cleaning up after an error)."""
+    classes = []
+    for name, mod in list(sys.modules.items()):
+        if mod is None or not (name == module or name.startswith(module + ".")):
+            continue
+        for value in list(vars(mod).values()):
+            if (
+                isinstance(value, type)
+                and value.__module__ == name
+                and getattr(value, "is_registered", False)
+            ):
+                classes.append(value)
+    # property groups last: other classes may still point at them
+    classes.sort(key=lambda cls: issubclass(cls, bpy.types.PropertyGroup))
+    for cls in classes:
+        try:
+            bpy.utils.unregister_class(cls)
+        except RuntimeError as exc:
+            log("WARNING", f"Could not unregister {cls.__name__}: {exc}")
 
 
 def remove_folder(module: str):

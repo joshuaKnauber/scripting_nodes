@@ -27,7 +27,7 @@ class SNA_Node_Subpanel(ScriptingBaseNode, bpy.types.Node):
         header = ctx.var("header")
         body = ctx.var("panel")
         ctx.code(f"""
-            {header}, {body} = {ctx.layout}.panel({panel_id!r}, default_closed={ctx.input("default_closed")})
+            {header}, {body} = {ctx.layout}.panel({ctx.args(repr(panel_id), ctx.keyword("default_closed", "default_closed", False))})
             {ctx.flow("header", layout=header)}
             if {body}:
                 {ctx.flow("content", layout=body)}

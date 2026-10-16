@@ -6,7 +6,7 @@ import bpy
 from ....core import properties
 from ....core.context import NodeError
 from ....sockets.spec import Icon, Interface, String
-from ..._icon import icon_argument
+from ..._icon import icon_argument, text_argument
 from ..._operator_call import OperatorCallMixin, _operator_rna
 from ...base_node import ScriptingBaseNode
 
@@ -81,7 +81,9 @@ class SNA_Node_OperatorMenu(OperatorCallMixin, ScriptingBaseNode, bpy.types.Node
             raise NodeError("Pick one of the operator's enum properties")
         args = [repr(idname), repr(self.enum_property)]
         if self.style == "DROPDOWN":
-            args.append(f"text={ctx.input('label')}")
+            text = text_argument(ctx)
+            if text:
+                args.append(text)
             icon = icon_argument(ctx)
             if icon:
                 args.append(icon)

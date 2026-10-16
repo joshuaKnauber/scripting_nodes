@@ -27,7 +27,16 @@ RESERVED_SYMBOLS = (
     | {"bpy", "register", "unregister", "persistent", "atexit", "math"}
     | {"self", "context", "layout", "event"}
 )
-RESERVED_MODULES = set(keyword.kwlist) | {"auto_load", "addon", "properties", "scripts"}
+# names in the add-on's package and its __init__.py
+RESERVED_MODULES = set(keyword.kwlist) | {
+    "bpy",
+    "classes",
+    "icons",
+    "properties",
+    "register",
+    "scripts",
+    "unregister",
+}
 
 
 def addon_settings():
@@ -104,10 +113,12 @@ class Names:
         self.prefix = prefix
         self.namespace = namespace
         self._names: dict[tuple[str, str], str] = {}
+        modules = set(RESERVED_MODULES)
         self.used = {
             "symbol": set(RESERVED_SYMBOLS),
-            "module": set(RESERVED_MODULES),
-            "script": set(RESERVED_MODULES),
+            # tree modules and scripts are both imported into __init__.py
+            "module": modules,
+            "script": modules,
             "idname": set(),
         }
 

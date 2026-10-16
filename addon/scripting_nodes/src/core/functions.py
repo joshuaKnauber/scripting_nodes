@@ -12,7 +12,12 @@ Data inputs are the parameters, data outputs the return values. Both are
 matched by the interface item's identifier, so renaming or reordering never
 breaks links.
 
-    def <tree.module_name>(param, ..., *, self=None, context=None, layout=None, event=None):
+    def <function>(param, ..., *, context, layout):
+
+After the parameters come the names of the caller's scope the body uses:
+`self`, `context`, `layout`, `event` (None if the caller has no `self` or
+`event`). Functions are compiled before the trees calling them, so calls
+know what to pass (`implicit_used`).
 """
 
 import keyword
@@ -22,8 +27,38 @@ from . import naming
 
 GROUP_INPUT = "NodeGroupInput"
 GROUP_OUTPUT = "NodeGroupOutput"
-# keyword-only parameters every function takes from its caller
+# keyword-only parameters a function takes from its caller if it uses them
 IMPLICIT = ("self", "context", "layout", "event")
+# function tree name -> the IMPLICIT names its body uses, of the last compile
+implicit_used: dict[str, tuple] = {}
+
+
+def scope_arguments(tree, available: dict) -> list[str]:
+    """`name=value` for the scope names (IMPLICIT) the function uses, from
+    `available` (name -> expression; None where missing)."""
+    used = implicit_used.get(tree.name, IMPLICIT)
+    return [f"{name}={available.get(name, 'None')}" for name in used]
+
+
+def callees_first(trees):
+    """`trees` ordered so that functions come before the trees calling them
+    (Group nodes, property callbacks): calls pass what the body uses."""
+    done, ordered = set(), []
+
+    def visit(tree, path=()):
+        if tree.name in done or tree.name in path:
+            return
+        for node in tree.nodes:
+            callee = getattr(node, "node_tree", None)
+            if node.bl_idname == "SNA_Node_Group" and callee is not None:
+                visit(callee, (*path, tree.name))
+        done.add(tree.name)
+        ordered.append(tree)
+
+    names = {tree.name for tree in trees}
+    for tree in sorted(trees, key=lambda t: not is_function(t)):
+        visit(tree)
+    return [tree for tree in ordered if tree.name in names]
 
 
 def sockets(tree, in_out):

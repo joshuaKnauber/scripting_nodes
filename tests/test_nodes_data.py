@@ -72,7 +72,7 @@ class DataNodesTest(unittest.TestCase):
         self.link(a.outputs["value"], compare.inputs["a"])
         self.link(b.outputs["value"], compare.inputs["b"])
         self.print_value(compare.outputs["result"])
-        self.assertIn("str((3 >= 2.5))", self.source())
+        self.assertIn("str(3 >= 2.5)", self.source())
 
     def test_vector_math(self):
         math = self.add("SNA_Node_VectorMath")

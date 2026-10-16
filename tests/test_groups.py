@@ -1,7 +1,7 @@
 """Functions (node groups): the tree interface, the compiled function and
 the Group node calling it."""
 
-import sys
+import importlib
 import unittest
 
 import bpy
@@ -18,10 +18,10 @@ def errors():
 
 
 def generated(tree):
-    """The generated function of a function tree."""
-    module = next(
-        m for name, m in sys.modules.items() if name.endswith("." + tree.module_name)
-    )
+    """The generated function of a function tree (its module is only
+    imported where it's used)."""
+    addon = bpy.context.scene.sna.addon.module_name
+    module = importlib.import_module(f"{addon}.{tree.module_name}")
     return getattr(module, tree.function_name)
 
 
@@ -76,19 +76,16 @@ class GroupsTest(unittest.TestCase):
     def test_pure_function(self):
         function = self.double()
         source = helpers.tree_source(function)
-        self.assertIn(
-            f"def {function.function_name}(value, *, self=None, context=None, "
-            "layout=None, event=None):",
-            source,
-        )
-        self.assertIn("return (value * 2.0)", source)
+        # only what the body uses from the caller
+        self.assertIn(f"def {function.function_name}(value):", source)
+        self.assertIn("return value * 2.0", source)
         self.assertLoaded()
         self.assertEqual(generated(function)(21.0), 42.0)
 
     def test_flow_function_returns_where_the_flow_ends(self):
         function = self.greet()
         source = helpers.tree_source(function)
-        self.assertIn(f"def {function.function_name}(name, *,", source)
+        self.assertIn(f"def {function.function_name}(name):", source)
         self.assertIn("return name", source)
         self.assertLoaded()
         self.assertEqual(generated(function)("Bob"), "Bob")
@@ -138,7 +135,7 @@ class GroupsTest(unittest.TestCase):
         source = helpers.tree_source(tree)
         module, name = function.module_name, function.function_name
         self.assertIn(f"from .{module} import {name}", source)
-        self.assertIn(f"{name}(4.0, self=self, context=context)", source)
+        self.assertIn(f"{name}(4.0)", source)
         self.assertLoaded()
 
     def test_flow_call_continues_after_the_call(self):
@@ -181,7 +178,8 @@ class GroupsTest(unittest.TestCase):
         self.assertIn(
             "layout.label(text='From a function')", helpers.tree_source(function)
         )
-        self.assertIn("layout=self.layout)", helpers.tree_source(tree))
+        self.assertIn("header(layout=self.layout)", helpers.tree_source(tree))
+        self.assertIn("def header(*, layout):", helpers.tree_source(function))
         self.assertNotIn("return", helpers.tree_source(function))
         self.assertLoaded()
 

@@ -11,6 +11,8 @@ the appropriate conversion wrapper is applied to the generated code.
 # The template uses {value} as a placeholder for the source code. None marks
 # types that can't be converted (ConversionError, shown on the node).
 
+import ast
+
 from ..lib.code_format import is_simple, parenthesize
 
 CONVERSIONS = {
@@ -37,7 +39,8 @@ CONVERSIONS = {
         "ScriptingFloatSocket",
     ): "(float({value}) if str({value}).replace('.','',1).replace('-','',1).isdigit() else 0.0)",
     ("ScriptingBooleanSocket", "ScriptingFloatSocket"): "float({value})",
-    ("ScriptingIntegerSocket", "ScriptingFloatSocket"): "float({value})",
+    # Python mixes ints and floats in arithmetic: no float() needed
+    ("ScriptingIntegerSocket", "ScriptingFloatSocket"): "{value}",
     (
         "ScriptingVectorSocket",
         "ScriptingFloatSocket",
@@ -78,10 +81,7 @@ CONVERSIONS = {
         "ScriptingVectorSocket",
     ): "((1.0, 1.0, 1.0) if {value} else (0.0, 0.0, 0.0))",
     ("ScriptingFloatSocket", "ScriptingVectorSocket"): "({value}, {value}, {value})",
-    (
-        "ScriptingIntegerSocket",
-        "ScriptingVectorSocket",
-    ): "(float({value}), float({value}), float({value}))",
+    ("ScriptingIntegerSocket", "ScriptingVectorSocket"): "({value}, {value}, {value})",
     (
         "ScriptingColorSocket",
         "ScriptingVectorSocket",
@@ -104,7 +104,7 @@ CONVERSIONS = {
     (
         "ScriptingIntegerSocket",
         "ScriptingColorSocket",
-    ): "(float({value}), float({value}), float({value}), 1.0)",
+    ): "({value}, {value}, {value}, 1.0)",
     (
         "ScriptingVectorSocket",
         "ScriptingColorSocket",
@@ -228,6 +228,11 @@ def get_conversion(
     # Same type - no conversion needed
     if from_socket_type == to_socket_type:
         return value_code
+    # a value of any type that's clearly of the type already: `[...]`
+    if from_socket_type == "ScriptingDataSocket" and is_of_type(
+        value_code, to_socket_type
+    ):
+        return value_code
 
     # Look up conversion
     conversion_key = (from_socket_type, to_socket_type)
@@ -246,3 +251,47 @@ def get_conversion(
 
     # No conversion found - return as-is (may cause runtime errors if incompatible)
     return value_code
+
+
+_STRING_METHODS = {"join", "format", "lower", "upper", "strip", "replace", "title"}
+_BOOLEAN_CALLS = {"bool", "isinstance", "hasattr", "callable", "any", "all"}
+
+
+def is_of_type(code: str, socket_type: str) -> bool:
+    """`code` is an expression that can only give a value of `socket_type`
+    (a list display, a comparison, ...): a conversion would only add noise."""
+    try:
+        node = ast.parse(code.strip(), mode="eval").body
+    except SyntaxError:
+        return False
+    call = node.func if isinstance(node, ast.Call) else None
+    called = getattr(call, "id", None) or getattr(call, "attr", None)
+    if socket_type == "ScriptingListSocket":
+        return isinstance(node, (ast.List, ast.ListComp)) or (
+            isinstance(call, ast.Name) and called in ("list", "sorted")
+        )
+    if socket_type == "ScriptingStringSocket":
+        if isinstance(node, ast.Constant):
+            return isinstance(node.value, str)
+        if isinstance(node, ast.JoinedStr):
+            return True
+        if isinstance(call, ast.Name):
+            return called in ("str", "repr")
+        return isinstance(call, ast.Attribute) and called in _STRING_METHODS
+    if socket_type == "ScriptingBooleanSocket":
+        if isinstance(node, ast.Constant):
+            return isinstance(node.value, bool)
+        if isinstance(node, (ast.Compare, ast.BoolOp)):
+            return True
+        if isinstance(node, ast.UnaryOp):
+            return isinstance(node.op, ast.Not)
+        return isinstance(call, ast.Name) and called in _BOOLEAN_CALLS
+    if socket_type == "ScriptingIntegerSocket":
+        if isinstance(node, ast.Constant):
+            return type(node.value) is int
+        return isinstance(call, ast.Name) and called in ("int", "len", "round")
+    if socket_type == "ScriptingFloatSocket":
+        if isinstance(node, ast.Constant):
+            return type(node.value) in (int, float)
+        return isinstance(call, ast.Name) and called in ("float", "int", "len")
+    return False

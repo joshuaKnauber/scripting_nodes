@@ -49,7 +49,8 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 3. `core/compiler.py` + `core/context.py`: root nodes emit at module level, flow nodes when reached, value nodes when their output is used. Every line knows its node (errors, code preview).
 4. `core/runtime.py`: syntax check, write, full disable/enable, roll back on failure. Only touches folders with its marker file.
 5. Errors: `core/errors.py`; `emit()` errors, load errors and runtime errors (`core/tracebacks.py`, via `sys.excepthook`) all show on the node.
-6. Dev vs export differences only in `core/helpers.py`.
+6. Dev vs export differences only in `core/helpers.py` (and `bl_info`, the live add-on is a legacy add-on).
+7. The generated add-on reads like a hand-written one: `__init__.py` with an explicit `classes` tuple (`core/package.py`), exports formatted like `ruff format` (`lib/python_format.py`). `tests/test_example_addon.py` snapshots the export of an example add-on (`SN_UPDATE_SNAPSHOTS=1` to update); CI runs ruff on it (`tests/snapshots/ruff.toml`).
 
 ### Node System
 
@@ -58,9 +59,9 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 - One flow socket type (`ScriptingFlowSocket`) with `kind` PROGRAM/LOGIC/INTERFACE (color + compatibility).
 - Names in the generated code: declared in `sn_names()` (`core/naming.py`: `Class`, `Idname`, `Symbol`), read with `ctx.name(key)` / `node.sn_name(key)`; readable, from labels, suffix only on collision. Locals via `ctx.var()`.
 - References to other nodes: `Reference(types, filter=...)` annotations, stored by node id, picked in a search field (`core/references.py`); usages via `references.users()`; cross-tree names via `ctx.symbol`.
-- Script node: the script becomes `scripts/<name>.py` unchanged (`emit_module` + `ctx.script`), the node calls its `run()`; sockets from the signature (`nodes/_script_run.py`).
+- Script node: the script becomes `scripts/<name>.py` unchanged (`emit_module` + `ctx.script`); the node runs the code inline, calls the function picked in its dropdown (sockets from the signature, `nodes/_script_run.py`) or only adds the script to the add-on.
 - Functions (node groups): the tree interface (`tree.interface`, sidebar Group tab) is the source of truth; Blender's Group Input / Output nodes, interface socket classes in `sockets/interface.py`, compiled in `core/functions.py` + `compiler._group_function`. Make Group / Ungroup are our own operators (Blender's only run in built-in trees).
-- Properties are lists, not nodes (`settings/properties.py`: add-on list on `scene.sna.addon.properties`, groups, Operator / Preferences node lists); nodes pick them by id (`sn_property_references`), code in `core/properties.py` (add-on properties → `addon/properties.py`). Adding to a CollectionProperty can move its items: don't keep Python references across adds.
+- Properties are lists, not nodes (`settings/properties.py`: add-on list on `scene.sna.addon.properties`, groups, Operator / Preferences node lists); nodes pick them by id (`sn_property_references`), code in `core/properties.py` (add-on properties → `properties.py`). Adding to a CollectionProperty can move its items: don't keep Python references across adds.
 - Shared bases: `PropertyListMixin`, `PropertyFieldNode`, `PropertyTargetMixin`, `OperatorCallMixin`, `event_node()`.
 - Saved-data changes need a step in `core/versioning.py`; socket changes don't (re-synced from declarations).
 
@@ -77,9 +78,8 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 
 ### Registration
 
-- `__init__.py` puts bundled wheels on `sys.path` if Blender didn't install them, `register()` runs `auto_load.init()` + `register()`
+- `__init__.py` `register()` runs `auto_load.init()` + `register()`
 - `auto_load.py` discovers submodules, topologically sorts classes, registers strictly (errors aren't swallowed), unregisters in reverse and purges modules so re-enabling imports fresh code
-- Wheels in `wheels/` declared in `blender_manifest.toml`
 
 ## Conventions
 

@@ -85,13 +85,15 @@ class SNA_Node_Group(bpy.types.NodeCustomGroup, ScriptingBaseNode):
             raise NodeError(problem)
 
         args = [ctx.input(item.identifier) for item, _ in functions.parameters(tree)]
-        # pass what the function body may use from the caller's scope
-        for name in ("self", "context", "event"):
-            if name in ctx.scope.names:
-                args.append(f"{name}={name}")
+        # what the function body uses from the caller's scope
         flow_input = functions.flow_input(tree)
-        if flow_input is not None and flow_input.kind == "INTERFACE":
-            args.append(f"layout={ctx.layout}")
+        for name in functions.implicit_used.get(tree.name, functions.IMPLICIT):
+            if name == "context":
+                args.append(f"context={ctx.context}")
+            elif name == "layout":
+                args.append(f"layout={ctx.layout}")
+            else:
+                args.append(f"{name}={name if name in ctx.scope.names else None}")
         call = f"{ctx.symbol(tree, tree.function_name)}({', '.join(args)})"
         returns = [item.identifier for item in functions.returns(tree)]
 

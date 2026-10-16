@@ -110,6 +110,24 @@ class InterfaceNodesTest(unittest.TestCase):
         self.assertIn("op.count = 5", code)
         self.assertLoaded()
 
+    def test_button_text(self):
+        tree = helpers.new_tree()
+        op = helpers.add_node(tree, "SNA_Node_Operator")
+        panel = helpers.add_node(tree, "SNA_Node_Panel")
+        button = helpers.add_node(tree, "SNA_Node_Button")
+        helpers.link(tree, panel.outputs["Interface"], button.inputs[0])
+        helpers.point(button, "operator_sn", op)
+        helpers.flush()
+        # no label: Blender shows the operator's label
+        self.assertIn(f"self.layout.operator({op.operator_idname!r})\n", source(tree))
+        button.icon_only = True
+        button.socket("icon").value = "ADD"
+        helpers.flush()
+        self.assertIn(
+            f"self.layout.operator({op.operator_idname!r}, text=\"\", icon='ADD')",
+            source(tree),
+        )
+
     def test_run_blender_operator(self):
         operator_call = helpers.sn("src.nodes._operator_call")
         choice = next(
@@ -171,7 +189,7 @@ class InterfaceNodesTest(unittest.TestCase):
             "header.label(text='head')",
             "if panel:",
             "box = panel.box()",
-            "col = box.column(align=False, heading='')",
+            "col = box.column()",
             "col.label(text='inner')",
             "self.layout.label(text='after')",
         ]

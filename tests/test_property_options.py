@@ -14,7 +14,7 @@ def errors():
 
 def properties_source():
     files = helpers.sn("src.core.compiler").compile_addon(dev=True)
-    return files.get("addon/properties.py", "")
+    return files.get("properties.py", "")
 
 
 class PropertyOptionsTest(unittest.TestCase):
@@ -86,7 +86,7 @@ class PropertyOptionsTest(unittest.TestCase):
         search = prop.bl_rna.properties["color_name"]
         self.assertTrue(search.is_runtime)  # registered with a callback
         module = __import__(
-            bpy.context.scene.sna.addon.module_name + ".addon.properties",
+            bpy.context.scene.sna.addon.module_name + ".properties",
             fromlist=["search_color_name"],
         )
         self.assertEqual(

@@ -1,10 +1,18 @@
 """Attributes by name (getattr / setattr), for names only known when the
 add-on runs."""
 
+import keyword
+
 import bpy
 
+from .....lib.code_format import parenthesize
 from .....sockets.spec import Boolean, Data, Flow, String
 from ....base_node import ScriptingBaseNode
+
+
+def attribute_name(text):
+    """`text` can be written as `.text` (a name, not a keyword)."""
+    return text.isidentifier() and not keyword.iskeyword(text)
 
 
 class SNA_Node_GetAttribute(ScriptingBaseNode, bpy.types.Node):
@@ -41,7 +49,12 @@ class SNA_Node_SetAttribute(ScriptingBaseNode, bpy.types.Node):
 
     def emit(self, ctx):
         data, name = ctx.input("data"), ctx.input("name")
+        socket = self.socket("name")
+        if socket.is_linked or not attribute_name(socket.value):
+            line = f"setattr({data}, {name}, {ctx.input('value')})"
+        else:
+            line = f"{parenthesize(data)}.{socket.value} = {ctx.input('value')}"
         ctx.code(f"""
-            setattr({data}, {name}, {ctx.input("value")})
+            {line}
             {ctx.flow("next")}
         """)

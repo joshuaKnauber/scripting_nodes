@@ -26,6 +26,11 @@ class SNA_Node_Math(ScriptingBaseNode, bpy.types.Node):
     )
 
     def emit(self, ctx):
-        result = f"{ctx.input('a')} {OPERATIONS[self.operation][1]} {ctx.input('b')}"
+        operator = OPERATIONS[self.operation][1]
+        result = f"{ctx.input('a')} {operator} {ctx.input('b')}"
         ctx.output("result", result)
-        ctx.output("int", f"int({result})")
+        integers = all(ctx.is_integer(key) for key in ("a", "b"))
+        if integers and operator not in ("/", "**"):
+            ctx.output("int", result)  # already one
+        else:
+            ctx.output("int", f"int({result})")

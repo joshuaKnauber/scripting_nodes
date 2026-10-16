@@ -200,7 +200,7 @@ class SNA_Node_GetVariable(ScriptingBaseNode, bpy.types.Node):
 
 ## Using properties
 
-Property definitions live in lists, not nodes (`settings/properties.py`): the add-on's list, groups' lists and the lists of Operator / Preferences nodes. A node picks one with `sn_property_references = {"prop": "BOOLEAN"}`; the value is a picker category from `core/properties.CATEGORIES` (which types it offers) and the property's id is stored in `prop_id`. `core/properties.find(id)` returns where it lives; `PropertyTargetMixin` turns that into `(data, name)` for code. Properties of a node class are written with `PropertyListMixin.annotations(ctx)`; add-on properties go to `addon/properties.py`.
+Property definitions live in lists, not nodes (`settings/properties.py`): the add-on's list, groups' lists and the lists of Operator / Preferences nodes. A node picks one with `sn_property_references = {"prop": "BOOLEAN"}`; the value is a picker category from `core/properties.CATEGORIES` (which types it offers) and the property's id is stored in `prop_id`. `core/properties.find(id)` returns where it lives; `PropertyTargetMixin` turns that into `(data, name)` for code. Properties of a node class are written with `PropertyListMixin.annotations(ctx)`; add-on properties go to `properties.py`.
 
 ## Errors
 

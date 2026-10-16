@@ -62,8 +62,6 @@ class SNA_Node_UIList(PropertyTargetMixin, ScriptingBaseNode, bpy.types.Node):
         name = ctx.name("class")
         ctx.module(f"""
             class {name}(bpy.types.UIList):
-                bl_idname = {name!r}
-
                 def draw_item(self, context, layout, data, item, icon, active_data, active_property, index):
                     {ctx.join([row])}
         """)
@@ -83,8 +81,9 @@ class SNA_Node_UIList(PropertyTargetMixin, ScriptingBaseNode, bpy.types.Node):
             repr(attribute),
             data,
             repr(index),
-            f"rows={ctx.input('rows')}",
+            ctx.keyword("rows", "rows", 5),
         ]
+        args = [arg for arg in args if arg]
         ctx.code(f"""
             {ctx.layout}.template_list({", ".join(args)})
             {ctx.flow("next")}

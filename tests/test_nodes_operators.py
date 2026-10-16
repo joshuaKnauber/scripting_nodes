@@ -112,7 +112,7 @@ class OperatorNodesTest(FlowTestCase):
             "context.window_manager.modal_handler_add(self)",
             "self._timer = context.window_manager.event_timer_add(0.5, window=context.window)",
             'if event.type in {"ESC", "RIGHTMOUSE"} and event.value == "PRESS":',
-            "if (event.type == 'LEFTMOUSE' and event.value == 'PRESS'):",
+            "if event.type == 'LEFTMOUSE' and event.value == 'PRESS':",
             "return {'FINISHED'}",
             "context.window_manager.event_timer_remove(self._timer)",
             "context.area.header_text_set(None)",
@@ -180,7 +180,7 @@ class OperatorNodesTest(FlowTestCase):
         self.assertIn("layout.label(text=sn_text(item))", source)
         self.assertIn(
             "self.layout.template_list('OP_TEST_UL_objects', \"\", bpy.data, 'objects', "
-            "context.scene.op_test, 'index', rows=5)",
+            "context.scene.op_test, 'index')",
             source,
         )
         self.assertTrue(hasattr(bpy.types, "OP_TEST_UL_objects"))

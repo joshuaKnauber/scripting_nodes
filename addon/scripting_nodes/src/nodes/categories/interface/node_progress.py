@@ -26,7 +26,8 @@ class SNA_Node_Progress(ScriptingBaseNode, bpy.types.Node):
     )
 
     def emit(self, ctx):
-        args = [f"factor={ctx.input('factor')}", f"text={ctx.input('text')}"]
+        args = [ctx.keyword("factor", "factor", 0.0), ctx.keyword("text", "text", "")]
+        args = [arg for arg in args if arg]
         if self.progress_type != "BAR":
             args.append(f"type={self.progress_type!r}")
         ctx.code(f"""

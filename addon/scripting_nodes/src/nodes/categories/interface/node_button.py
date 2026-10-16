@@ -9,7 +9,7 @@ import bpy
 
 from ....core.context import NodeError
 from ....sockets.spec import Icon, Interface, String
-from ..._icon import icon_argument
+from ..._icon import icon_argument, text_argument
 from ..._operator_call import OperatorCallMixin
 from ...base_node import ScriptingBaseNode
 
@@ -19,7 +19,7 @@ class SNA_Node_Button(OperatorCallMixin, ScriptingBaseNode, bpy.types.Node):
 
     bl_idname = "SNA_Node_Button"
     bl_label = "Button"
-    fixed_inputs = [Interface(), String("label", "Label", default="Run"), Icon()]
+    fixed_inputs = [Interface(), String("label", "Label"), Icon()]
     fixed_outputs = [Interface("next")]
 
     emboss: bpy.props.BoolProperty(
@@ -28,18 +28,25 @@ class SNA_Node_Button(OperatorCallMixin, ScriptingBaseNode, bpy.types.Node):
     depress: bpy.props.BoolProperty(
         name="Depress", description="Draw the button as if it were pressed"
     )
+    icon_only: bpy.props.BoolProperty(
+        name="Icon Only", description="Draw only the icon, without a text"
+    )
 
     def draw(self, context, layout):
         self.draw_operator_picker(layout)
         row = layout.row(align=True)
         row.prop(self, "emboss", toggle=True)
         row.prop(self, "depress", toggle=True)
+        layout.prop(self, "icon_only")
 
     def emit(self, ctx):
         idname = self.operator_idname()
         if not idname:
             raise NodeError("Pick an operator")
-        args = [repr(idname), f"text={ctx.input('label')}"]
+        args = [repr(idname)]
+        text = 'text=""' if self.icon_only else text_argument(ctx)
+        if text:
+            args.append(text)
         icon = icon_argument(ctx)
         if icon:
             args.append(icon)

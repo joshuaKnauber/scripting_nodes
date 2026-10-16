@@ -3,7 +3,7 @@ import bpy
 from ....core.context import NodeError
 from ....core.references import Reference
 from ....sockets.spec import Icon, Interface, String
-from ..._icon import icon_argument
+from ..._icon import icon_argument, text_argument
 from ...base_node import ScriptingBaseNode
 
 
@@ -25,7 +25,10 @@ class SNA_Node_Popover(ScriptingBaseNode, bpy.types.Node):
         target = ctx.resolve("panel")
         if target is None:
             raise NodeError("Pick a panel")
-        args = [repr(target.sn_name("class")), f"text={ctx.input('label')}"]
+        args = [repr(target.sn_name("class"))]
+        text = text_argument(ctx)
+        if text:
+            args.append(text)
         icon = icon_argument(ctx)
         if icon:
             args.append(icon)

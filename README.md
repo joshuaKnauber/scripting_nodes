@@ -27,7 +27,7 @@ own preferences, extensions or generated add-ons.
 ## Layout
 
 ```
-addon/scripting_nodes/      the extension (blender_manifest.toml, wheels/)
+addon/scripting_nodes/      the extension (blender_manifest.toml)
   src/core/                 update pipeline: scheduler, compiler, runtime, versioning
   src/nodes/                node base class + node categories
   src/sockets/              socket types and type conversions

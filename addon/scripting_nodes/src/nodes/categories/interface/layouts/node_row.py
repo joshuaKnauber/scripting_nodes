@@ -13,7 +13,7 @@ class SNA_Node_Row(ScriptingBaseNode, bpy.types.Node):
     def emit(self, ctx):
         row = ctx.var("row")
         ctx.code(f"""
-            {row} = {ctx.layout}.row(align={ctx.input("align")}, heading={ctx.input("heading")})
+            {row} = {ctx.layout}.row({ctx.args(ctx.keyword("align", "align", False), ctx.keyword("heading", "heading", ""))})
             {ctx.flow("content", layout=row)}
             {ctx.flow("next")}
         """)

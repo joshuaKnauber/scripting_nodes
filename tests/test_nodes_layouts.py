@@ -170,11 +170,11 @@ class LayoutNodesTest(FlowTestCase):
         self.assertBuilt()
         source = self.source()
         for expected in (
-            "split = self.layout.split(factor=0.25, align=False)",
+            "split = self.layout.split(factor=0.25)",
             "grid = self.layout.grid_flow(row_major=True, columns=2,",
             "for index, item in enumerate(bpy.data.objects):",
             "grid.context_pointer_set('item', item)",
-            "self.layout.progress(factor=0.5, text='', type='RING')",
+            "self.layout.progress(factor=0.5, type='RING')",
             "self.layout.operator_context = 'EXEC_DEFAULT'",
         ):
             self.assertIn(expected, source)

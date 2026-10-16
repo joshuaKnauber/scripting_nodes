@@ -161,9 +161,11 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
             f"bl_label = {ctx.input('label')}",
             f"bl_space_type = {self.panel_space_type!r}",
             f"bl_region_type = {self.panel_region_type!r}",
-            f"bl_order = {self.panel_order}",
-            f"bl_options = {literal_set(options)}" if options else "bl_options = set()",
         ]
+        if self.panel_order:
+            attrs.append(f"bl_order = {self.panel_order}")
+        if options:
+            attrs.append(f"bl_options = {literal_set(options)}")
         if self.panel_space_type == "PROPERTIES" and self.panel_context != "NONE":
             attrs.append(f"bl_context = {self.panel_context!r}")
         if self.panel_region_type == "UI" and self.panel_category:
@@ -181,13 +183,18 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
                     {ctx.flow("header", layout="self.layout")}
             """
 
+        poll = ""
+        if not ctx.is_default("visible", True):
+            poll = f"""
+                @classmethod
+                def poll(cls, context):
+                    return {ctx.input("visible")}
+            """
         ctx.module(f"""
             class {ctx.name("class")}(bpy.types.Panel):
                 {ctx.join(attrs)}
 
-                @classmethod
-                def poll(cls, context):
-                    return {ctx.input("visible")}
+                {ctx.join([poll])}
 
                 {ctx.join([header])}
 

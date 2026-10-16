@@ -1,5 +1,5 @@
 """Icons in generated code: the argument for layout calls, and image files
-shipped as custom icons.
+shipped as custom icons. Also the text argument of layout calls.
 
     args.append(icon_argument(ctx))  # "icon='MESH_DATA'", "icon_value=..."
 """
@@ -11,6 +11,15 @@ import bpy
 
 from ..core.context import NodeError
 from ..lib.icons import is_builtin
+
+
+def text_argument(ctx, key="label"):
+    """`text=...` of input `key`, None if it's empty and not connected:
+    Blender then shows the default text (an operator's or panel's label)."""
+    socket = ctx.node.socket(key)
+    if not socket.is_linked and not socket.value:
+        return None
+    return f"text={ctx.input(key)}"
 
 
 def icon_argument(ctx, key="icon"):

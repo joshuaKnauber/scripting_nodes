@@ -20,6 +20,6 @@ class SNA_Node_Separator(ScriptingBaseNode, bpy.types.Node):
     def emit(self, ctx):
         kind = "LINE" if self.line else "SPACE"
         ctx.code(f"""
-            {ctx.layout}.separator(factor={ctx.input("factor")}, type={kind!r})
+            {ctx.layout}.separator({ctx.args(ctx.keyword("factor", "factor", 1.0), f"type={kind!r}")})
             {ctx.flow("next")}
         """)

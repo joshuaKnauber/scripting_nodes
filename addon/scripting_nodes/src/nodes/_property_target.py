@@ -108,6 +108,10 @@ class PropertyTargetMixin(BlendPathMixin):
             owner = ctx.input("data")
         else:
             owner = properties.owner_expression(found, ctx.context)
+            if found.kind == "NODE":
+                # the preferences' own draw(): `self`
+                inside = ctx.scope.lookup((found.owner.as_pointer(), "__self__"))
+                owner = inside or owner
             if owner is None:
                 raise NodeError(
                     f"Connect the {self._data_input_spec().label} it belongs to"

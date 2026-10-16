@@ -16,6 +16,13 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           args: format --check
+      # the generated example add-on must read like hand-written code
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: check --config tests/snapshots/ruff.toml tests/snapshots/object_toolkit
+      - uses: astral-sh/ruff-action@v3
+        with:
+          args: format --check --config tests/snapshots/ruff.toml tests/snapshots/object_toolkit
 
   test:
     runs-on: ubuntu-latest

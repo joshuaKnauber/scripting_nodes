@@ -239,7 +239,7 @@ class ScriptNodeTest(unittest.TestCase):
         helpers.flush()
 
         code = helpers.tree_source(tree)
-        self.assertIn("from ..scripts import tools", code)
+        self.assertIn("from .scripts import tools", code)
         self.assertIn("result = tools.run(obj=", code)
         self.assertIn("factor=3.0, context=context)", code)
         self.assertIn("sn_print(str(result))", code)
@@ -353,7 +353,7 @@ class HELLO_PT_auto(Panel):
         function, _, _ = helpers.new_function("Tools")
         helpers.flush()
         code = helpers.tree_source(tree)
-        self.assertIn("from ..scripts import tools as tools_2", code)
+        self.assertIn("from .scripts import tools_2", code)
         self.assertIn("tools_2.run(", code)
         self.assertLoaded()
 

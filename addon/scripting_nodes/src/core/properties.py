@@ -1,7 +1,7 @@
 """Properties: finding them, picking them from nodes and their code.
 
 Definitions live in lists (settings/properties.py). Add-on properties
-compile to their own module, `addon/properties.py`:
+compile to their own module, `properties.py`:
 
     class MY_ADDON_PG_scene_properties(bpy.types.PropertyGroup):
         count: bpy.props.IntProperty(name="Count", default=3)
@@ -18,6 +18,7 @@ from typing import NamedTuple
 
 import bpy
 
+from ..lib.code_format import sort_imports
 from ..lib.icons import is_builtin
 from . import errors, naming
 
@@ -53,7 +54,7 @@ CONTEXT_OWNERS = {
     "WorkSpace": "workspace",
 }
 
-PREFERENCES = "{context}.preferences.addons[__package__.rsplit('.', 1)[0]].preferences"
+PREFERENCES = "{context}.preferences.addons[__package__].preferences"
 
 
 # -----------------------------------------------------------------------------
@@ -357,7 +358,11 @@ def _call(module, tree):
     import each other at module level)."""
     if tree.module_name == module:
         return tree.function_name, []
-    return tree.function_name, [f"from .{tree.module_name} import {tree.function_name}"]
+    line = f"from .{tree.module_name} import {tree.function_name}"
+    if module == PROPERTIES_MODULE and tree.module_name in _module_imports.importable:
+        _module_imports.lines.add(line)  # no cycle: at the top
+        return tree.function_name, []
+    return tree.function_name, [line]
 
 
 class Definition:
@@ -536,6 +541,12 @@ class Definition:
         if not nodes:
             return None
         targets = [(n.id_data, self.names.get(n.id, "function")) for n in nodes]
+        if len(targets) == 1 and self.module == PROPERTIES_MODULE:
+            tree, function = targets[0]
+            if tree.module_name in _module_imports.importable:
+                # the function itself, imported at the top of properties.py
+                _module_imports.lines.add(f"from .{tree.module_name} import {function}")
+                return function
         name = self.name("update")
         lines = []
         for tree, function in targets:
@@ -548,19 +559,24 @@ class Definition:
         return name
 
     def _items_function(self):
+        from . import functions
+
         tree = self.prop.items_function
         name, cache = self.name("items"), self.name("items_cache")
         function, imports = _call(self.module, tree)
         # (identifier, name, description, icon) items (Enum Item nodes with
         # an icon) get the number Blender needs with an icon
         number = "1 << i" if self.prop.enum_flag else "i"
+        scope = ", ".join(
+            functions.scope_arguments(tree, {"self": "self", "context": "context"})
+        )
         body = imports + [
             f"global {cache}",
             f"{cache} = [",
             "    (item, item, '') if isinstance(item, str)",
             f"    else (*item, {number}) if len(item) == 4",
             "    else tuple(item)",
-            f"    for i, item in enumerate({function}(self=self, context=context) or ())",
+            f"    for i, item in enumerate({function}({scope}) or ())",
             "]",
             f"return {cache}",
         ]
@@ -576,8 +592,9 @@ class Definition:
         tree = self.prop.poll_function
         name = self.name("poll")
         function, imports = _call(self.module, tree)
-        args = "object, self=self" if functions.parameters(tree) else "self=self"
-        body = imports + [f"return bool({function}({args}))"]
+        args = ["object"] if functions.parameters(tree) else []
+        args += functions.scope_arguments(tree, {"self": "self"})
+        body = imports + [f"return bool({function}({', '.join(args)}))"]
         self.functions.append(
             f"def {name}(self, object):\n" + "".join(f"    {line}\n" for line in body)
         )
@@ -589,9 +606,9 @@ class Definition:
         tree = self.prop.search_function
         name = self.name("search")
         function, imports = _call(self.module, tree)
-        args = "edit_text, self=self, context=context"
-        if not functions.parameters(tree):
-            args = "self=self, context=context"
+        args = ["edit_text"] if functions.parameters(tree) else []
+        args += functions.scope_arguments(tree, {"self": "self", "context": "context"})
+        args = ", ".join(args)
         body = imports + [f"return [str(item) for item in {function}({args}) or ()]"]
         self.functions.append(
             f"def {name}(self, context, edit_text):\n"
@@ -611,7 +628,8 @@ class Definition:
             )
         name = self.name(key)
         function, imports = _call(self.module, tree)
-        body = imports + [f"return {function}({value}, self=self)"]
+        args = ", ".join([value, *functions.scope_arguments(tree, {"self": "self"})])
+        body = imports + [f"return {function}({args})"]
         self.functions.append(
             f"def {name}({signature}):\n" + "".join(f"    {line}\n" for line in body)
         )
@@ -677,7 +695,7 @@ def node_annotations(node, ctx):
 
 
 # -----------------------------------------------------------------------------
-# addon/properties.py
+# properties.py
 # -----------------------------------------------------------------------------
 
 
@@ -702,11 +720,33 @@ def _group_order(items):
     return ordered
 
 
-def module_source(names) -> str | None:
-    """Source of addon/properties.py, or None without add-on properties."""
+class _ModuleImports:
+    """Imports at the top of properties.py while it's written: of tree
+    modules that don't import from it (directly or through others), which
+    would be an import cycle."""
+
+    importable: set = set()
+    lines: set = set()
+
+
+_module_imports = _ModuleImports()
+
+
+def module_source(names, importable=frozenset()) -> str | None:
+    """Source of properties.py, or None without add-on properties.
+    `importable`: tree modules it may import at the top."""
     addon = addon_settings()
     if not len(addon.properties):
         return None
+    _module_imports.importable = set(importable)
+    _module_imports.lines = set()
+    try:
+        return _module_source(names, addon)
+    finally:
+        _module_imports.importable = set()
+
+
+def _module_source(names, addon):
     module = PROPERTIES_MODULE
     blocks, register, unregister = [], [], []
 
@@ -765,7 +805,8 @@ def module_source(names) -> str | None:
         register.append(f"{target} = {call}")
         unregister.append(f"del {target}")
 
-    parts = ["import bpy\n"] + [block.rstrip("\n") + "\n" for block in blocks]
+    imports = "\n".join(sort_imports({"import bpy", *_module_imports.lines}))
+    parts = [imports + "\n"] + [block.rstrip("\n") + "\n" for block in blocks]
     parts.append(_function("register", register))
     parts.append(_function("unregister", list(reversed(unregister))))
     return "\n\n".join(parts)

@@ -1,27 +1,29 @@
 """Graph -> addon files. Pure: reads bpy data, writes nothing.
 
-    compile_addon(dev=True) -> {"__init__.py": "...", "addon/<tree>.py": "...", ...}
+    compile_addon(dev=True) -> {"__init__.py": "...", "<tree>.py": "...", ...}
 
-Each tree becomes one module. Root nodes (operators, panels, events, ...) are
+Each tree becomes one module of the add-on package; `__init__.py` imports
+them and registers their classes (core/package.py). Root nodes (operators, panels, events, ...) are
 emitted first; everything else is emitted when a flow reaches it or when a
 value it outputs is used. Nodes write through core/context.NodeContext.
 Scripts (Script nodes) become modules of their own in `scripts/`.
 """
 
 import hashlib
-import os
+import re
 import sys
 import textwrap
 
 import bpy
 
+from ..lib import python_format
+from ..lib.code_format import sort_imports
 from ..lib.logger import log
 from ..lib.sockets import to_socket
 from ..lib.trees import scripting_node_trees, sn_nodes
-from . import errors, functions, helpers, metadata, naming, properties
+from . import errors, functions, helpers, metadata, naming, package, properties
 from .context import Line, NodeContext, NodeError, Scope
 
-TEMPLATES = os.path.join(os.path.dirname(__file__), "templates")
 HELPERS_MODULE = "_sn_helpers"
 SCRIPTS_PACKAGE = "scripts"
 
@@ -48,8 +50,8 @@ _FORMAT_CACHE_SIZE = 256
 def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     """All files of the generated addon. Empty if there are no trees.
 
-    `dev`: live addon (True) or export (False). `pretty`: run autopep8 over
-    the tree modules (slow, export only)."""
+    `dev`: live addon (True) or export (False). `pretty`: format the code
+    like `ruff format` (export; scripts stay as written)."""
     trees = scripting_node_trees()
     if not trees:
         return {}
@@ -59,21 +61,13 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     errors.property_errors.clear()
     names = naming.build(trees, settings)
     naming.use(names)
-    values = {
-        "$MODULE_NAME": settings.module_name,
-        "$LICENSE_HEADER": metadata.license_header(settings),
-        "$BL_INFO": metadata.bl_info(settings),
-    }
-    files = {
-        "__init__.py": _render("init.txt", values),
-        "auto_load.py": _render("auto_load.txt", values),
-        "addon/__init__.py": "",
-    }
+    files = {"__init__.py": ""}  # first in the folder listing
     owners, previews, used_helpers, permissions = {}, {}, set(), set()
     scripts, assets = {}, {}
+    # functions before the trees calling them: calls pass what they use
     builders = {
         tree.module_name: ModuleBuilder(tree, dev, names, scripts, assets=assets)
-        for tree in trees
+        for tree in functions.callees_first(trees)
     }
     results = {module: builder.build() for module, builder in builders.items()}
     # `from .other import name` both ways fails: trees in a cycle import each
@@ -88,15 +82,15 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     for tree in trees:
         builder = builders[tree.module_name]
         source, line_map = results[tree.module_name]
-        rel = f"addon/{tree.module_name}.py"
-        files[rel] = _format(source) if pretty else source
+        rel = f"{tree.module_name}.py"
+        files[rel] = source
         owners[rel] = line_map
         previews.update(_previews(source, line_map))
         used_helpers |= builder.helpers
         permissions |= builder.permissions
-    source = properties.module_source(names)
+    source = properties.module_source(names, _independent_of_properties(builders))
     if source is not None:
-        files[f"addon/{properties.PROPERTIES_MODULE}.py"] = source
+        files[f"{properties.PROPERTIES_MODULE}.py"] = source
     if scripts:
         files[f"{SCRIPTS_PACKAGE}/__init__.py"] = ""
     for rel, (source, owner) in scripts.items():
@@ -107,6 +101,15 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     exported = {name for name in used_helpers if helpers.needs_import(name, dev)}
     if exported:
         files[f"{HELPERS_MODULE}.py"] = helpers.source(exported, dev)
+    files["__init__.py"] = package.source(
+        _package_modules(files, builders, scripts),
+        metadata.license_header(settings),
+        metadata.bl_info(settings) if dev else None,
+    )
+    if pretty:
+        for rel, source in files.items():
+            if rel.endswith(".py") and not rel.startswith(SCRIPTS_PACKAGE + "/"):
+                files[rel] = _format(source)
     if dev and not pretty:
         line_owners.clear()
         line_owners.update(owners)
@@ -115,6 +118,60 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
         used_permissions.clear()
         used_permissions.update(permissions)
     return files
+
+
+def _independent_of_properties(builders) -> set[str]:
+    """Tree modules that don't import from properties.py, not even through
+    other modules: properties.py can import them at the top."""
+    line = f"from .{properties.PROPERTIES_MODULE} import "
+    dependent = {
+        module
+        for module, builder in builders.items()
+        if any(i.startswith(line) for i in builder.imports)
+    }
+    changed = True
+    while changed:
+        changed = False
+        for module, builder in builders.items():
+            if module not in dependent and builder.uses & dependent:
+                dependent.add(module)
+                changed = True
+    return set(builders) - dependent
+
+
+def _package_modules(files, builders, scripts) -> list[package.Module]:
+    """The add-on's modules in registration order: scripts, helpers,
+    properties, then the trees, the ones others import from first."""
+    modules = []
+    for rel in sorted(scripts):
+        name = rel[len(SCRIPTS_PACKAGE) + 1 : -3]
+        source = files[rel]
+        modules.append(
+            package.Module(
+                name,
+                f"{SCRIPTS_PACKAGE}.{name}",
+                source,
+                registers_itself=package.defines(source, "register"),
+            )
+        )
+    for name in (HELPERS_MODULE, properties.PROPERTIES_MODULE):
+        if f"{name}.py" in files:
+            modules.append(package.Module(name, name, files[f"{name}.py"]))
+    uses = {module: builder.uses for module, builder in builders.items()}
+    done = set()
+
+    def visit(module, path=()):
+        if module in done or module in path:
+            return
+        for other in sorted(uses.get(module, ())):
+            if other in uses:
+                visit(other, (*path, module))
+        done.add(module)
+        modules.append(package.Module(module, module, files[f"{module}.py"]))
+
+    for module in sorted(uses):
+        visit(module)
+    return modules
 
 
 def compile_tree(tree, dev=True, pretty=True) -> str:
@@ -270,7 +327,7 @@ class ModuleBuilder:
         for required in helpers.HELPERS[name].requires:
             self.use_helper(required)
         if helpers.needs_import(name, self.dev):
-            self.imports.add(f"from ..{HELPERS_MODULE} import {name}")
+            self.imports.add(f"from .{HELPERS_MODULE} import {name}")
         return helpers.call_name(name, self.dev)
 
     def add_script(self, module, alias, source, owner):
@@ -278,7 +335,7 @@ class ModuleBuilder:
         import it into this module as `alias`."""
         rel = f"{SCRIPTS_PACKAGE}/{module}.py"
         self.scripts.setdefault(rel, (source, owner))
-        line = f"from ..{SCRIPTS_PACKAGE} import {module}"
+        line = f"from .{SCRIPTS_PACKAGE} import {module}"
         self.imports.add(line if alias == module else f"{line} as {alias}")
         return alias
 
@@ -313,14 +370,13 @@ class ModuleBuilder:
     # -- functions (node groups) ---------------------------------------------
 
     def _group_function(self, module_scope) -> list[Line]:
-        """A tree with a group interface compiles to `def <module_name>(params,
-        *, self=None, context=None, layout=None, event=None)`, see
-        core/functions.py."""
+        """A tree with a group interface compiles to `def <function>(params,
+        *, context, ...)` with the names of the caller's scope it uses (self,
+        context, layout, event), see core/functions.py."""
         tree = self.tree
         params = functions.parameters(tree)
         names = [name for _, name in params]
         implicit = list(functions.IMPLICIT)
-        signature = ", ".join(names + ["*"] + [f"{n}=None" for n in implicit])
         values = {}
         for node in functions.group_inputs(tree):
             for item, name in params:
@@ -346,8 +402,11 @@ class ModuleBuilder:
         if body and body[-1].indent == 0 and body[-1].text == "return":
             body.pop()  # a bare return at the end does nothing
 
+        text = "\n".join(line.text for line in body)
+        used = [n for n in implicit if re.search(rf"(?<![.\w]){n}\b", text)]
+        functions.implicit_used[tree.name] = tuple(used)
+        signature = ", ".join(names + (["*", *used] if used else []))
         lines = [Line(0, f"def {tree.function_name}({signature}):", None)]
-        lines.append(Line(4, "context = context or bpy.context", None))
         lines += [Line(4 + line.indent, line.text, line.owner) for line in body]
         return lines
 
@@ -367,24 +426,38 @@ class ModuleBuilder:
     # -- assembly -------------------------------------------------------------
 
     def _assemble(self):
-        blocks = [[Line(0, line, None) for line in sorted(self.imports)]]
-        blocks += self.blocks
+        blocks = list(self.blocks)
         for name, body in (
             ("register", self.register),
             ("unregister", self.unregister),
         ):
+            if not any(line.text for line in body):
+                continue
             function = [Line(0, f"def {name}():", None)]
             function += [Line(4 + line.indent, line.text, line.owner) for line in body]
             blocks.append(function)
+        imports = set(self.imports)
+        code = "\n".join(line.text for block in blocks for line in block)
+        if not re.search(r"\bbpy\b", code):
+            imports.discard("import bpy")
+        if imports:
+            blocks.insert(0, [Line(0, line, None) for line in sort_imports(imports)])
 
         lines: list[Line] = []
         for i, block in enumerate(blocks):
-            if i:
+            if i == 1 and imports and not block[0].text.startswith(_DEFINITIONS):
+                lines.append(Line(0, "", None))  # isort: one after imports
+            elif i:
                 lines += [Line(0, "", None), Line(0, "", None)]
             lines += block
         lines = _finalize(lines)
         source = "\n".join(" " * l.indent + l.text if l.text else "" for l in lines)
-        return source + "\n", [l.owner for l in lines]
+        # nodes put parentheses around the values they combine
+        source = python_format.remove_redundant_parens(source + "\n")
+        return source, [l.owner for l in lines]
+
+
+_DEFINITIONS = ("def ", "class ", "@", "async def ")
 
 
 class _InterfaceNode:
@@ -428,7 +501,33 @@ def _finalize(lines: list[Line]) -> list[Line]:
                 continue
         final.append(line)
         i += 1
-    return final
+    return _blank_lines(final)
+
+
+def _blank_lines(lines: list[Line]) -> list[Line]:
+    """At most two blank lines in a row at the top level and one inside
+    blocks, none at the start of a block (empty bodies of templates)."""
+    if any('"""' in line.text or "'''" in line.text for line in lines):
+        return lines  # blank lines may be part of a string
+    result: list[Line] = []
+    for i, line in enumerate(lines):
+        if line.text:
+            result.append(line)
+            continue
+        following = next((l for l in lines[i + 1 :] if l.text), None)
+        previous = next((l for l in reversed(result) if l.text), None)
+        if following is None or previous is None:
+            continue
+        if previous.text.rstrip().endswith(":") and following.indent > previous.indent:
+            continue
+        blanks = 0
+        for earlier in reversed(result):
+            if earlier.text:
+                break
+            blanks += 1
+        if blanks < (2 if following.indent == 0 else 1):
+            result.append(line)
+    return result
 
 
 def _previews(source, owners):
@@ -443,25 +542,12 @@ def _previews(source, owners):
     }
 
 
-def _render(template, values):
-    with open(os.path.join(TEMPLATES, template)) as f:
-        text = f.read()
-    for key, value in values.items():
-        text = text.replace(key, value)
-    return text
-
-
 def _format(code: str) -> str:
     key = hashlib.sha1(code.encode()).hexdigest()
     cached = _format_cache.get(key)
     if cached is not None:
         return cached
-    try:
-        import autopep8
-
-        formatted = autopep8.fix_code(code, options={"aggressive": 1})
-    except Exception:
-        formatted = code  # formatting is cosmetic, never fail on it
+    formatted = python_format.format_source(code)
     if len(_format_cache) >= _FORMAT_CACHE_SIZE:
         _format_cache.clear()
     _format_cache[key] = formatted

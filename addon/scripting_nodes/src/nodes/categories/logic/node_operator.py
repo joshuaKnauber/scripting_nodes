@@ -276,24 +276,36 @@ class SNA_Node_Operator(PropertyListMixin, ScriptingBaseNode, bpy.types.Node):
                     {ctx.flow("draw", layout="self.layout", outputs=values)}
             """)
 
-        ctx.module(f"""
-            class {ctx.name("class")}(bpy.types.Operator):
-                bl_idname = {self.operator_idname!r}
-                bl_label = {ctx.input("label")}
-                bl_description = {self.operator_description!r}
-                bl_options = {literal_set(options)}
-                {ctx.join(attributes)}
-                {ctx.join(self.annotations(ctx))}
-
+        if not ctx.is_default("available", True):
+            methods.insert(
+                0,
+                f"""
                 @classmethod
                 def poll(cls, context):
                     return {ctx.input("available")}
-
-                {ctx.join(methods)}
-
+            """,
+            )
+        # a modal operator only runs execute() when called with EXEC_DEFAULT
+        if kind != "MODAL" or ctx.is_linked("execute"):
+            methods.append(f"""
                 def execute(self, context):
                     {ctx.flow("execute", outputs=execute_values)}
                     return {{"FINISHED"}}
+            """)
+        head = [
+            f"bl_idname = {self.operator_idname!r}",
+            f"bl_label = {ctx.input('label')}",
+        ]
+        if self.operator_description:
+            head.append(f"bl_description = {self.operator_description!r}")
+        head.append(f"bl_options = {literal_set(options)}")
+        ctx.module(f"""
+            class {ctx.name("class")}(bpy.types.Operator):
+                {ctx.join(head)}
+                {ctx.join(attributes)}
+                {ctx.join(self.annotations(ctx))}
+
+                {ctx.join(methods)}
         """)
 
     # -- dialogs ------------------------------------------------------------

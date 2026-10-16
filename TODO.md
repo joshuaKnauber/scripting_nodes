@@ -13,15 +13,20 @@ and `ruff check` with zero findings.
 - [x] **Readable names** (2026-10): modules, classes, operator idnames and functions come from labels (`main.py`, `MESH_HELPER_OT_duplicate`, `mesh_helper.duplicate`, `greet`), suffix only on collision, claimed in one pass in a fixed order (`core/naming.py`, nodes declare `sn_names()`). Locals `row`, `row_2`.
   - [x] Property names come from the property lists (unique per list, optional pinned Python name).
   - [ ] Renaming an operator's label renames its idname (and breaks keymaps / buttons in other add-ons that call it). Consider pinning idnames once exported, or a separate "Python name" field.
-- [ ] **No default arguments**: `ctx.args(...)` helper drops defaults; skip `poll()` returning `True`, empty `bl_description`, `bl_order = 0`, `options={'ANIMATABLE'}`, ...
-- [ ] **Conventional layout**: `__init__.py` imports the tree modules and registers an explicit `classes = (...)` tuple in dependency order. Drop `auto_load.py`, `bl_info`, the `sys.modules` alias (violates "sys is read-only"), the `addon/` subpackage and empty `register()`.
-- [ ] **Export clean-up pass**: `ast.unparse` (redundant parens, quotes) + blank lines + unused import removal.
+- [x] **Baseline** (2026-10): example add-on Object Toolkit (`tests/visual/scenarios/_toolkit_demo.py`, `scripts/example_addon.py`), export snapshot in `tests/snapshots/object_toolkit/`, zero findings with `tests/snapshots/ruff.toml` and `ruff format`-clean, checked in CI.
+- [x] **No default arguments** (2026-10): `ctx.keyword()` / `ctx.args()` leave out Blender's defaults; no `poll()` returning `True`, empty `bl_description`, `bl_order = 0`, `bl_options = set()`, `execute()` of modal operators, UIList `bl_idname`. Buttons without a label show the operator's name (Icon Only for none).
+  - [ ] `options={'ANIMATABLE'}` and other property defaults; Set Layout State still writes all three states.
+- [x] **Conventional layout** (2026-10): `__init__.py` imports the modules and registers an explicit `classes` tuple in dependency order (`core/package.py`); no `auto_load.py`, `sys.modules` alias, `addon/` subpackage, empty `register()` or unused `import bpy`; `bl_info` only in the live add-on. Imports sorted like isort; properties.py imports update callbacks at the top when there's no cycle.
+  - [ ] Rename `_sn_helpers.py` and the `sn_` helper names to something a person would write (`utils.py`).
+- [x] **Export clean-up pass** (2026-10): autopep8 (and the bundled wheels) replaced by `lib/python_format.py`, which formats like `ruff format`; redundant parentheses removed (AST-checked); f-strings from Format String; `x.name = ...` instead of `setattr` with a constant; no `float()` around integers; no conversions of values already of the type.
+  - [ ] Repeated expressions (`context.scene.my_addon` several times in one statement) into a local variable - see the hoisting question in 4.
 - [ ] **`context` over `bpy.context`**: `ctx.context` exists (`context` inside functions that have it, else `bpy.context`) and property nodes use it; move the Scene node and friends to it.
 - [ ] **Node polish**: For Each without unused index, Print takes any value (no `str()`), variables as module globals with compiler-inserted `global` (instead of getter/setter pairs - decide).
 - [ ] **Trigger nodes are dev only**: left out of export builds.
-- [ ] **Function signatures**: functions always declare `*, self=None, context=None, layout=None, event=None` and `context = context or bpy.context`; only declare and pass what the body uses.
+- [x] **Function signatures** (2026-10): functions only declare (and calls only pass) what the body uses from the caller (`def header(*, layout)`); functions compile before their callers.
+  - [ ] A parameter named after a builtin (`object`) shadows it.
 - [ ] **Export check**: before writing the zip, list guideline issues on the nodes (hard-coded data-block names, `bpy.data.objects`, unescaped data paths, missing permissions, unused/undefined names).
-- [ ] **Regression test**: export a fixture add-on using every node; require zero ruff findings plus a snapshot of the output.
+- [ ] **Regression test**: the Object Toolkit snapshot covers about 40 node types (see Baseline); a fixture using every node is still missing.
 
 ## 2. Add-on metadata
 
@@ -60,7 +65,7 @@ Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender
 
 ## 5. Testing in CI
 
-- [ ] Get `.github/workflows/ci.yml` running (it has never run: nothing pushed yet). Blender 5.0 + 5.1 on Linux, ruff, `extension validate`, headless suite.
+- [x] `.github/workflows/ci.yml`: Blender 5.0 + 5.1 on Linux, ruff (repo and generated example add-on), `extension validate`, headless suite.
 - [ ] GUI tests (`scripts/test.py --gui`) under `xvfb` in CI.
 - [ ] Cache the Blender download; upload the generated fixture add-on and screenshots as artifacts on failure.
 - [ ] Code-quality job for generated add-ons (see 1).

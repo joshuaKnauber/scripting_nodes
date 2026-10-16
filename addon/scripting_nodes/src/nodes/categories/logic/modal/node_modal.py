@@ -1,6 +1,8 @@
 """Nodes for modal operators (Operator node, Invoke Type Modal): ending the
 operator, checking events, text in the header and status bar, the cursor."""
 
+import ast
+
 import bpy
 
 from .....blend_data.rna import blend_data_spec
@@ -124,12 +126,29 @@ class SNA_Node_EventInfo(ScriptingBaseNode, bpy.types.Node):
         ctx.output("tilt", f"tuple({event}.tilt)")
 
 
+def never_empty(code):
+    """`code` is a text that can't be empty: a literal with text in it, or
+    an f-string with text around its values."""
+    try:
+        node = ast.parse(code, mode="eval").body
+    except SyntaxError:
+        return False
+    if isinstance(node, ast.Constant):
+        return isinstance(node.value, str) and bool(node.value)
+    return isinstance(node, ast.JoinedStr) and any(
+        isinstance(part, ast.Constant) and part.value for part in node.values
+    )
+
+
 def _text_or_none(node, ctx):
     """The text, None (Blender's own text again) when it's empty."""
     text = node.socket("text")
     if not text.is_linked:
         return repr(text.value) if text.value else "None"
-    return f"{ctx.input('text')} or None"
+    value = ctx.input("text")
+    if never_empty(value):
+        return value
+    return f"{value} or None"
 
 
 class SNA_Node_SetHeaderText(ScriptingBaseNode, bpy.types.Node):

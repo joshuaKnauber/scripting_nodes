@@ -135,6 +135,27 @@ class NodeContext:
             return default
         return socket.literal_code(self)
 
+    def keyword(self, name, key, default) -> str | None:
+        """`name=<input key>` for a call, None if the input isn't connected
+        and holds `default`, the argument's default: calls only pass what
+        differs from it."""
+        socket = self.node.socket(key)
+        if socket is None:
+            raise NodeError(f"Node has no input '{key}'")
+        if not socket.is_linked and getattr(socket, "value", MISSING) == default:
+            return None
+        return f"{name}={self.input(key)}"
+
+    def is_default(self, key, default) -> bool:
+        """Input `key` isn't connected and holds `default`."""
+        socket = self.node.socket(key)
+        return not socket.is_linked and getattr(socket, "value", MISSING) == default
+
+    @staticmethod
+    def args(*items) -> str:
+        """Arguments of a call, leaving out None ones."""
+        return ", ".join(item for item in items if item)
+
     def inputs(self, key) -> list[str]:
         """Expressions of all sockets of the dynamic input group `key`."""
         values = []
@@ -142,6 +163,18 @@ class NodeContext:
             value = self._value_of(socket) if socket.is_linked else None
             values.append(value if value is not None else socket.literal_code(self))
         return values
+
+    def is_integer(self, key) -> bool:
+        """Input `key` is an integer: an Integer output is connected to it,
+        or it holds a whole number literal."""
+        socket = self.node.socket(key)
+        if socket.is_linked:
+            source = from_socket(socket)
+            return source is not None and source.bl_idname in (
+                "ScriptingIntegerSocket",
+                "ScriptingBooleanSocket",
+            )
+        return type(getattr(socket, "value", None)) is int
 
     def is_linked(self, key) -> bool:
         socket = self.node.socket(key) or self.node.socket(key, output=True)

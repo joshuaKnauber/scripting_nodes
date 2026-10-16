@@ -14,6 +14,10 @@ from ..._property_list import PropertyListMixin
 from ...base_node import ScriptingBaseNode
 
 
+# scope value: the preferences themselves, in their draw()
+SELF = "__self__"
+
+
 class SNA_Node_Preferences(PropertyListMixin, ScriptingBaseNode, bpy.types.Node):
     """The preferences of the addon (shown in Preferences > Add-ons)."""
 
@@ -29,13 +33,13 @@ class SNA_Node_Preferences(PropertyListMixin, ScriptingBaseNode, bpy.types.Node)
         self.draw_property_names(layout)
 
     def emit(self, ctx):
-        # bl_idname must be the addon's package: tree modules live in
-        # <addon>/addon/<tree>.py, so drop the last part of __package__
+        # its fields get `self` as the preferences in draw (_property_target)
+        # bl_idname must be the add-on's package, the one of tree modules
         ctx.module(f"""
             class {ctx.name("class")}(bpy.types.AddonPreferences):
-                bl_idname = __package__.rsplit(".", 1)[0]
+                bl_idname = __package__
                 {ctx.join(self.annotations(ctx))}
 
                 def draw(self, context):
-                    {ctx.flow("draw", layout="self.layout")}
+                    {ctx.flow("draw", layout="self.layout", outputs={SELF: "self"})}
         """)

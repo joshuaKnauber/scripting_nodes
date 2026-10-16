@@ -3,7 +3,7 @@
 [tool.ruff]
 target-version = "py311"
 line-length = 88
-extend-exclude = ["website", "venv", "builds", ".dev_build", "addon/scripting_nodes/wheels"]
+extend-exclude = ["website", "tests/snapshots", "venv", "builds", ".dev_build"]
 
 [tool.ruff.lint]
 select = [
