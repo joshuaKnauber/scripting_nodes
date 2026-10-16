@@ -1,5 +1,7 @@
 """The update -> compile -> load pipeline (src/core)."""
 
+import contextlib
+import io
 import os
 import sys
 import unittest
@@ -127,11 +129,16 @@ class CoreTest(unittest.TestCase):
         tree, trigger, (p,) = trigger_print_tree("one")
         module = addon_settings().module_name
         tree_mod = f"{module}.{tree.module_name}"
-        old_module = sys.modules[tree_mod]
         p.inputs[1].value = "two"
         helpers.flush()
-        self.assertIsNot(sys.modules[tree_mod], old_module)
         self.assertIn(repr("two"), read(module_file(tree)))
+        # the loaded module runs the new code
+        namespace, op = trigger.operator_idname.split(".")
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            getattr(getattr(bpy.ops, namespace), op)()
+        self.assertIn("two", out.getvalue())
+        self.assertIn(tree_mod, sys.modules)
 
     def test_syntax_error_keeps_previous_version(self):
         tree, _, _ = trigger_print_tree("ok")

@@ -22,9 +22,10 @@ import sys
 import addon_utils
 import bpy
 
+from ..lib import reloading
 from ..lib.logger import log
 from ..lib.paths import ADDON_FOLDER
-from . import errors, persistence
+from . import errors, persistence, tracebacks
 
 MARKER = ".scripting_nodes"
 # folders of binary files (bytes in `files`)
@@ -237,9 +238,14 @@ def reload(module: str) -> tuple[bool, str | None]:
     unload(module)
     # Blender only adds scripts/addons to sys.path if it existed at startup
     if ADDON_FOLDER not in sys.path:
-        sys.path.append(ADDON_FOLDER)
+        bpy.utils.refresh_script_paths()
     importlib.invalidate_caches()
     failures = []
+    try:
+        _import_fresh(module)
+        tracebacks.instrument(module)
+    except Exception as exc:  # noqa: BLE001 - the add-on's code failed to import
+        return False, errors.format_exception(exc)
     mod = addon_utils.enable(
         module,
         default_set=False,
@@ -265,9 +271,15 @@ def unload(module: str | None):
             ),
         )
     _unregister_leftovers(module)
-    for name in list(sys.modules):
-        if name == module or name.startswith(module + "."):
-            del sys.modules[name]
+
+
+def _import_fresh(module: str):
+    """Import `module` with the code on disk: modules imported before are
+    reloaded (like Blender reloads changed add-ons), see lib/reloading."""
+    reloading.reload_package(module)
+    package = importlib.import_module(module)
+    # addon_utils.enable reloads the package if its file is newer than this
+    package.__time__ = os.path.getmtime(package.__file__)
 
 
 def _unregister_leftovers(module: str):

@@ -226,11 +226,6 @@ def _draw_overlay():
 # silently if SN isn't installed.
 OVERLAY_LOG_KEY = "_sn_overlay_log"
 
-# Bind the hook at module import time as well as in register(). Reason: the
-# hook needs to be present whenever SN's module is loaded, even if register()
-# hasn't fired yet (or partially failed). Idempotent - just a dict assignment.
-bpy.app.driver_namespace[OVERLAY_LOG_KEY] = add_log
-
 
 @persistent
 def _rebind_overlay_hook(_):

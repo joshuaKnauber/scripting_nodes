@@ -83,12 +83,12 @@ class EventNodesTest(FlowTestCase):
         self.watch("active_object.location")
         self.assertBuilt()
         module = generated_helpers()
-        handler = module._resubscribe
+        handler, subscriptions = module._resubscribe, module._subscriptions
         self.assertIn(handler, bpy.app.handlers.load_post)
         bpy.context.scene.sna.addon.addon_name = "Event Test 2"  # reloads
         helpers.flush()
         self.assertNotIn(handler, bpy.app.handlers.load_post)
-        self.assertEqual(module._subscriptions, [])
+        self.assertEqual(subscriptions, [])  # the old ones, cleared
 
 
 class LayoutNodesTest(FlowTestCase):

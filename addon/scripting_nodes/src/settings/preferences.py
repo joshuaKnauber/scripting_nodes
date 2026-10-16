@@ -2,20 +2,8 @@ import bpy
 from bpy.types import AddonPreferences
 
 
-def _get_addon_name():
-    """Get the addon name for bl_idname.
-
-    For extensions: bl_ext.<repo>.<name> -> bl_ext.<repo>.<name>
-    For legacy addons: scripting_nodes.src... -> scripting_nodes
-    """
-    parts = __package__.split(".")
-    if parts[0] == "bl_ext" and len(parts) >= 3:
-        return ".".join(parts[:3])
-    else:
-        return parts[0]
-
-
-_addon_name = _get_addon_name()
+# the add-on's package (this module is in <package>.src.settings)
+_addon_name = __package__.rsplit(".src.", 1)[0]
 
 
 class SNA_AddonPreferences(AddonPreferences):

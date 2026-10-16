@@ -1,5 +1,4 @@
 import bpy
-import sys
 import typing
 import inspect
 import pkgutil
@@ -23,6 +22,12 @@ def init():
     global modules
     global ordered_classes
 
+    if modules is not None:
+        # enabled again: new class objects from the code on disk (Blender
+        # doesn't take back classes it unregistered)
+        from .src.lib import reloading
+
+        reloading.reload_package(_package_name, skip={_package_name, __name__})
     modules = get_all_submodules(Path(__file__).parent)
     ordered_classes = get_ordered_classes_to_register(modules)
 
@@ -63,17 +68,6 @@ def unregister():
                 bpy.utils.unregister_class(cls)
             except Exception:
                 traceback.print_exc()
-
-
-def purge_modules():
-    """Drop our submodules from sys.modules so the next init() re-imports them."""
-    global modules, ordered_classes
-    prefix = _package_name + "."
-    for name in list(sys.modules):
-        if name.startswith(prefix) and name != __name__:
-            del sys.modules[name]
-    modules = None
-    ordered_classes = None
 
 
 # Import modules

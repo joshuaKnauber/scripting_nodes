@@ -48,7 +48,8 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 2. `core/scheduler.py` flushes on a timer (tests: `flush()`): integrity (ids, references of copies, versioning) → sync sockets → `compiler.compile_addon()` → `runtime.apply(files)`.
 3. `core/compiler.py` + `core/context.py`: root nodes emit at module level, flow nodes when reached, value nodes when their output is used. Every line knows its node (errors, code preview).
 4. `core/runtime.py`: syntax check, write, full disable/enable, roll back on failure. Only touches folders with its marker file.
-5. Errors: `core/errors.py`; `emit()` errors, load errors and runtime errors (`core/tracebacks.py`, via `sys.excepthook`) all show on the node.
+5. Errors: `core/errors.py`; `emit()` errors, load errors and runtime errors (`core/tracebacks.py`: the runtime wraps the generated add-on's functions and methods before it registers) all show on the node. Scripting Nodes follows the extensions platform's rules itself: no changes to `sys` (generated modules are reloaded with `importlib.reload`, imports first, not removed from `sys.modules`: `lib/reloading.py`).
+8. Releases: CI publishes a GitHub release `v<version>` when the manifest version changes on main (suffix like `-beta.1`: pre-release), built with `scripts/share_build.py` (leaves out unfinished features).
 6. Dev vs export differences only in `core/helpers.py` (and `bl_info`, the live add-on is a legacy add-on).
 7. The generated add-on reads like a hand-written one: `__init__.py` with an explicit `classes` tuple (`core/package.py`), exports formatted like `ruff format` (`lib/python_format.py`). `tests/test_example_addon.py` snapshots the export of an example add-on (`SN_UPDATE_SNAPSHOTS=1` to update); CI runs ruff on it (`tests/snapshots/ruff.toml`).
 
@@ -79,7 +80,7 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 ### Registration
 
 - `__init__.py` `register()` runs `auto_load.init()` + `register()`
-- `auto_load.py` discovers submodules, topologically sorts classes, registers strictly (errors aren't swallowed), unregisters in reverse and purges modules so re-enabling imports fresh code
+- `auto_load.py` discovers submodules, topologically sorts classes, registers strictly (errors aren't swallowed), unregisters in reverse; enabling again reloads its modules (`lib/reloading.py`, no `sys.modules` changes)
 
 ## Conventions
 

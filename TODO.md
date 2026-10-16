@@ -3,6 +3,31 @@
 Open work on Serpens v4, roughly in priority order. Details and decisions live
 in the linked docs/threads; keep entries short and remove them when done.
 
+## 0. Next, in this order
+
+**1. Blend Data browser: a proper redesign.** The explorer (sidebar Blend Data
+tab, `blend_data/explorer.py`, `blend_data/ui/explorer_panel.py`) is still
+quite bad and is left out of shared builds (`scripts/share_build.py`
+LEFT_OUT). Redesign before writing its docs.
+- [ ] Decide what it's for and how it's used: finding a path for a node, looking at live data, or both; where it lives (sidebar tab, popup from the path field, its own editor).
+- [ ] Design (mockups / screenshots first), then rebuild it; replaces the v1 browser (one level at a time, + adds nodes, editable values, Go to Its Path / Use This Path, types-only fallback).
+- [ ] Open items of v1 to carry over or drop: Blender's functions (`objects.new()`, `modifiers.remove()`) with a node that calls them; dragging entries into the node editor; recent places.
+- [ ] Data path search in the path field: Blender's search box truncates long entries and refilters our results (see `blend_data/rna.py` search); a popup of our own was proposed.
+- [ ] Ship it: remove it from LEFT_OUT, docs page, screenshots.
+
+**2. UX pass.** Go through the add-on as a new user would and collect what's
+confusing or slow: node editor (adding, picking, errors on nodes), sidebar
+panels (Addon, Properties, Group, MCP), first-run experience. Write the
+findings here as entries, then fix them.
+- [ ] Review and list the findings.
+
+**3. Docs: a big pass** (`website/content/docs/`, 41 pages), after 1 and 2 so
+the docs show the final UI.
+- [ ] Unwritten pages: Export, Panels, Running Operators, Script Nodes.
+- [ ] Pages written for older behavior: Script node (function dropdown, inline code, Data Only), Buttons (no "Run" label), generated code layout (`utils.py`, no `addon/` package), Trigger nodes left out of exports, Blend Data / explorer after the redesign.
+- [ ] Structure and getting started: one path from install to a published add-on; check every page against the current nodes.
+- [ ] Regenerate all screenshots (`scripts/docs_screenshots.py`) once the UI is final.
+
 ## 1. Generated code quality (extensions platform)
 
 Serpens add-ons get rejected on extensions.blender.org for messy code. Goal: an
@@ -39,9 +64,7 @@ and `ruff check` with zero findings.
 ## 3. Node design open questions
 
 - [x] **Blend Data** (done 2026-10, `website/content/docs/blend-data/`): one Blender Data node following a path (Context / Blend File / Input), add-menu presets, typed sockets from RNA with a type picker for open types, `[]` keys by Index / Name / Active, paste + "Copy Data Path for Scripting Nodes", property nodes in Blender mode use the same paths. Follow-ups:
-  - [x] Data explorer v1 (sidebar Blend Data tab): a browser of live data, one level at a time, path shown as code, + adds nodes, editable values, Go to Its Path / Use This Path for the selected node, types-only fallback.
-  - [ ] Explorer: Blender's functions (`objects.new()`, `modifiers.remove()`), needs a node that calls them.
-  - [ ] Explorer: drag entries into the node editor; remember recent places.
+  - [x] Data explorer v1 (sidebar Blend Data tab). To be redesigned: see 0.
 - [x] **Node references** (done 2026-10): `Reference(...)` fields with a search callback, stored by node id, "Used by" in the sidebar, copies point at copied targets, deleted targets drawn red.
 - [x] **Properties as lists** (done 2026-10, `website/content/docs/properties/properties.mdx`): add-on list in Addon Data (one PropertyGroup per attach type, `scene.my_addon.count`), groups with their own list, Operator / Preferences node lists (operator properties are also its outputs), Get / Set / fields / On Property Update pick by id, enum items and pointer poll from functions, `addon/properties.py`. Follow-ups:
   - [ ] The Python name follows the label until it's pinned, so renaming a property in use loses saved values. Pin automatically once the add-on was exported?
@@ -76,7 +99,7 @@ Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender
   - [ ] Rename across sessions: rename the add-on, restart, the folder of the old name is removed (persistence `module_for`).
   - [ ] Stale files: removing or renaming a tree removes its module; `utils.py` disappears when no node uses a helper.
   - [ ] Folders from older versions: a generated folder without the marker but with the legacy signature is taken over; a user's own add-on with the same name never is.
-  - [ ] Disabling: the addon `enabled` toggle unloads/reloads; disabling and re-enabling Serpens while a generated add-on is loaded (no stale classes, timers, handlers, excepthook).
+  - [ ] Disabling: the addon `enabled` toggle unloads/reloads; disabling and re-enabling Serpens while a generated add-on is loaded (no stale classes, timers, handlers).
   - [ ] Module name / class prefix / idname namespace overrides: changing them reloads cleanly under the new names.
   - [ ] Two .blend files with the same add-on name; "Save As" copies (shared uid).
   - [ ] Export: the zip installs into a clean Blender (`extension install-file`), enables, registers and unregisters without errors and without Serpens installed.
@@ -84,8 +107,10 @@ Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender
 
 ## 6. Building and releasing
 
-- [ ] One version source (manifest) and a release script: bump version, changelog entry, `blender --command extension build`, tag.
-- [ ] GitHub release with the zip; decide on extensions.blender.org submission for Serpens itself (it must pass the same guidelines: e.g. `log_overlay.py` writes to `bpy.app.driver_namespace` at import time, MCP server needs the `network` permission and an `online_access` check if it ever goes beyond localhost).
+- [x] One version source (manifest); CI releases `v<version>` when it changes on main (pre-release with a suffix like `-beta.1`), "Run workflow" releases by hand.
+- [ ] Changelog entries in the release notes (now generated from commits).
+- [x] Scripting Nodes passes its own export check (2026-10): clipboard permission, no `bl_ext` parsing, no `sys` changes (runtime errors via wrapping, reloads via `lib/reloading.py`), no import-time `driver_namespace` write.
+- [ ] Submit to extensions.blender.org (open: Allow Running Python is on by default; the MCP server is local only, no `online_access` check).
 - [ ] `scripts/dev.py` / `build.py` cleanup (dev loop could symlink the source like the tests instead of rebuilding a zip).
 - [ ] Website deploy as part of the release; docs screenshots regenerated (`scripts/docs_screenshots.py`).
 
@@ -101,7 +126,7 @@ Done (2026-10): 24 tools in `mcp_server/tools/` (Blender: run_python, screenshot
 
 ## 8. Log overlay
 
-- [ ] Move the import-time `driver_namespace` write into `register()`; the overlay is fed by `lib.logger` listeners and the `sn_print` helper.
+- [x] Move the import-time `driver_namespace` write into `register()`; the overlay is fed by `lib.logger` listeners and the `sn_print` helper.
 - [ ] Show load and runtime errors (core/errors) with a "go to node" action; clear entries per rebuild.
 - [ ] Settings (font size, on/off) per user preference instead of per scene.
 

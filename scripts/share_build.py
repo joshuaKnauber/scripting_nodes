@@ -2,6 +2,7 @@
 
     python scripts/share_build.py           # scripting_nodes-<version>.zip
     python scripts/share_build.py --beta    # scripting_nodes-<version>-beta.zip
+    python scripts/share_build.py --output dist   # only there (CI releases)
 
 Exports HEAD (uncommitted changes aren't included) to a temp folder, leaves
 out features that aren't ready to share (LEFT_OUT), builds the extension with
@@ -55,6 +56,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--beta", action="store_true", help="name it <version>-beta")
     parser.add_argument("--version", help="version to build (default: the manifest's)")
+    parser.add_argument(
+        "--output", help="folder for the zip (default: builds/ and the Desktop)"
+    )
     args = parser.parse_args()
 
     commit = subprocess.run(
@@ -73,7 +77,8 @@ def main():
     )
     subprocess.run(["tar", "-x", "-C", copy], stdin=archive.stdout, check=True)
     archive.wait()
-    shutil.copy(os.path.join(REPO_ROOT, "config.yaml"), copy)
+    if os.path.exists(os.path.join(REPO_ROOT, "config.yaml")):
+        shutil.copy(os.path.join(REPO_ROOT, "config.yaml"), copy)
 
     for paths in LEFT_OUT.values():
         for rel in paths:
@@ -84,8 +89,8 @@ def main():
                 os.remove(path)
     _cut_explorer_settings(copy)
 
-    version = args.version or manifest_version(copy).removesuffix("-beta")
-    if args.beta:
+    version = args.version or manifest_version(copy)
+    if args.beta and "-" not in version:
         version += "-beta"
     result = subprocess.run(
         [sys.executable, "scripts/build.py", "--version", version],
@@ -98,6 +103,8 @@ def main():
         raise SystemExit("Build failed")
 
     outputs = [os.path.join(REPO_ROOT, "builds"), os.path.expanduser("~/Desktop")]
+    if args.output:
+        outputs = [os.path.abspath(args.output)]
     for folder in outputs:
         os.makedirs(folder, exist_ok=True)
         shutil.copy(built, folder)

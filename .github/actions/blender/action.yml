@@ -1,0 +1,26 @@
+name: Blender
+description: Download Blender (cached) to ~/blender, with the libraries it needs headless.
+inputs:
+  version:
+    description: Blender version, e.g. 5.0.1
+    required: true
+runs:
+  using: composite
+  steps:
+    - name: Cache Blender
+      id: cache
+      uses: actions/cache@v4
+      with:
+        path: ~/blender
+        key: blender-${{ inputs.version }}
+    - name: Download Blender
+      if: steps.cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        series=$(echo "${{ inputs.version }}" | cut -d. -f1,2)
+        mkdir -p ~/blender
+        curl -sSL "https://download.blender.org/release/Blender${series}/blender-${{ inputs.version }}-linux-x64.tar.xz" \
+          | tar -xJ -C ~/blender --strip-components=1
+    - name: System libraries
+      shell: bash
+      run: sudo apt-get update && sudo apt-get install -y libxi6 libxkbcommon0 libsm6 libgl1 libxrender1 libxfixes3 libegl1

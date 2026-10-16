@@ -58,7 +58,7 @@ Errors always end up on the node that caused them:
 | --- | --- |
 | `emit()` raises (`NodeError` or a bug) | caught per node by the compiler |
 | syntax / import / register error of the add-on | failing line → node via the compiler's line map |
-| exception while the add-on runs (e.g. clicking a button) | `sys.excepthook` → traceback line → node (`core/tracebacks.py`) |
+| exception while the add-on runs (e.g. clicking a button) | the add-on's functions and methods, wrapped by the runtime before it registers → traceback line → node (`core/tracebacks.py`) |
 
 The generated code contains nothing for this; the line map lives in Scripting Nodes.
 

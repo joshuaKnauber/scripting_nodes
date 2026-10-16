@@ -1,9 +1,16 @@
 name: CI
 
+# Pushes to main also release: when the version in
+# addon/scripting_nodes/blender_manifest.toml changed (and has no release yet),
+# the zip is published as a GitHub release "v<version>". Versions with a
+# suffix ("4.0.0-beta.1") are pre-releases. "Run workflow" releases the
+# current version by hand.
+
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -16,13 +23,16 @@ jobs:
       - uses: astral-sh/ruff-action@v3
         with:
           args: format --check
-      # the generated example add-on must read like hand-written code
+      # the generated example add-on must read like hand-written code (src:
+      # the action checks the whole repo otherwise)
       - uses: astral-sh/ruff-action@v3
         with:
-          args: check --config tests/snapshots/ruff.toml tests/snapshots/object_toolkit
+          args: check --config tests/snapshots/ruff.toml
+          src: tests/snapshots/object_toolkit
       - uses: astral-sh/ruff-action@v3
         with:
-          args: format --check --config tests/snapshots/ruff.toml tests/snapshots/object_toolkit
+          args: format --check --config tests/snapshots/ruff.toml
+          src: tests/snapshots/object_toolkit
 
   test:
     runs-on: ubuntu-latest
@@ -32,21 +42,9 @@ jobs:
         blender: ["5.0.1", "5.1.1"]
     steps:
       - uses: actions/checkout@v4
-      - name: Cache Blender
-        id: cache
-        uses: actions/cache@v4
+      - uses: ./.github/actions/blender
         with:
-          path: ~/blender
-          key: blender-${{ matrix.blender }}
-      - name: Download Blender
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: |
-          series=$(echo "${{ matrix.blender }}" | cut -d. -f1,2)
-          mkdir -p ~/blender
-          curl -sSL "https://download.blender.org/release/Blender${series}/blender-${{ matrix.blender }}-linux-x64.tar.xz" \
-            | tar -xJ -C ~/blender --strip-components=1
-      - name: System libraries
-        run: sudo apt-get update && sudo apt-get install -y libxi6 libxkbcommon0 libsm6 libgl1 libxrender1 libxfixes3 libegl1
+          version: ${{ matrix.blender }}
       - name: Validate manifest
         run: ~/blender/blender --command extension validate addon/scripting_nodes
       - name: Run tests
@@ -55,3 +53,56 @@ jobs:
       # the generated code of every node passes ruff (tests/snapshots/ruff.toml)
       - name: Every node add-on
         run: BLENDER=~/blender/blender python3 scripts/example_addon.py every_node /tmp/every_node
+
+  release:
+    needs: [lint, test]
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          read_version() {
+            python3 -c 'import sys, tomllib; print(tomllib.loads(sys.stdin.read())["version"])'
+          }
+          version=$(read_version < addon/scripting_nodes/blender_manifest.toml)
+          # the version before this push (all its commits), else the last commit
+          base="${{ github.event.before }}"
+          git cat-file -e "$base" 2>/dev/null || base=HEAD~1
+          before=$(git show "$base:addon/scripting_nodes/blender_manifest.toml" 2>/dev/null | read_version || true)
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          release=false
+          if gh release view "v$version" > /dev/null 2>&1; then
+            echo "v$version is released already"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ] || [ "$version" != "$before" ]; then
+            release=true
+          else
+            echo "The version didn't change ($version)"
+          fi
+          echo "release=$release" >> "$GITHUB_OUTPUT"
+          case "$version" in *-*) echo "prerelease=--prerelease" >> "$GITHUB_OUTPUT" ;; esac
+      - uses: ./.github/actions/blender
+        if: steps.version.outputs.release == 'true'
+        with:
+          version: "5.0.1"
+      - name: Build
+        if: steps.version.outputs.release == 'true'
+        run: BLENDER=~/blender/blender python3 scripts/share_build.py --output dist
+      - name: Publish
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "v$VERSION" "dist/scripting_nodes-$VERSION.zip" \
+            --target "$GITHUB_SHA" \
+            --title "Scripting Nodes $VERSION" \
+            --generate-notes \
+            ${{ steps.version.outputs.prerelease }}

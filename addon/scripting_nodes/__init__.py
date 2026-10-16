@@ -17,12 +17,9 @@ from . import auto_load
 
 
 def register():
-    # init() lives here (not at import time) so a disable -> enable cycle
-    # imports fresh submodules instead of re-registering stale classes.
     auto_load.init()
     auto_load.register()
 
 
 def unregister():
     auto_load.unregister()
-    auto_load.purge_modules()

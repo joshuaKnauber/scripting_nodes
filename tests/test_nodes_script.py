@@ -1,6 +1,6 @@
 """Script node: scripts are modules of the add-on, the node calls run()."""
 
-import sys
+import os
 import unittest
 
 import bpy
@@ -366,7 +366,8 @@ class HELLO_PT_auto(Panel):
         helpers.sn("src.core.scheduler").request_full()
         helpers.flush()
         self.assertNotIn("scripts/tools.py", helpers.addon_files())
-        self.assertNotIn(f"{module_name()}.scripts.tools", sys.modules)
+        folder = helpers.sn("src.core.runtime").folder(module_name())
+        self.assertFalse(os.path.exists(os.path.join(folder, "scripts", "tools.py")))
 
     def test_export_contains_scripts(self):
         self.triggered(SCALE)

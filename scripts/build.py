@@ -1,11 +1,12 @@
 import os
 import subprocess
 import sys
-import yaml
 
 
 def get_config():
-    """Load configuration from config.yaml"""
+    """Load configuration from config.yaml ($BLENDER is enough: CI)"""
+    if os.environ.get("BLENDER"):
+        return {"BLENDER_EXECUTABLE": os.environ["BLENDER"]}
     config_path = os.path.join(
         os.path.dirname(os.path.dirname(__file__)), "config.yaml"
     )
@@ -14,6 +15,8 @@ def get_config():
             "Error: config.yaml not found. Please copy config.template.yaml to config.yaml and configure it."
         )
         sys.exit(1)
+
+    import yaml
 
     with open(config_path, "r") as f:
         return yaml.safe_load(f)
