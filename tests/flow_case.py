@@ -16,10 +16,10 @@ def errors():
 
 
 def generated_helpers():
-    """`_sn_helpers` of the loaded add-on (through its package: names in
+    """`utils` of the loaded add-on (through its package: names in
     sys.modules can be left over from earlier loads)."""
     package = sys.modules[bpy.context.scene.sna.addon.module_name]
-    return importlib.import_module(package.__name__ + "._sn_helpers")
+    return importlib.import_module(package.__name__ + ".utils")
 
 
 def capture(function, *args, **kwargs):
@@ -51,6 +51,13 @@ class FlowTestCase(unittest.TestCase):
 
     def link(self, from_socket, to_socket):
         helpers.link(self.tree, from_socket, to_socket)
+
+    def run_from_operator(self):
+        """Start the following nodes from an Operator node instead of the
+        Trigger: exports leave Trigger nodes out."""
+        operator = self.add("SNA_Node_Operator")
+        self.last = operator.outputs["execute"]
+        return operator
 
     def then(self, idname):
         """A flow node after the last one."""

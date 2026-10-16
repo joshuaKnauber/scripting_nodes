@@ -90,16 +90,19 @@ class UtilityNodesTest(FlowTestCase):
         report.socket("message").value = "Done"
         self.link(operator.outputs["execute"], report.inputs[0])
         helpers.flush()
-        self.assertIn("sn_report(self, 'INFO', 'Done')", helpers.tree_source(self.tree))
+        self.assertIn(
+            "utils.report(self, 'INFO', 'Done')", helpers.tree_source(self.tree)
+        )
         namespace, op = operator.operator_idname.split(".")
         self.assertEqual(getattr(getattr(bpy.ops, namespace), op)(), {"FINISHED"})
 
     def test_report_in_exported_addon(self):
+        self.run_from_operator()
         self.then("SNA_Node_Report")
         helpers.flush()
         files = helpers.sn("src.core.compiler").compile_addon(dev=False)
-        self.assertIn("print(f", files["_sn_helpers.py"])
-        self.assertNotIn("sn_print", files["_sn_helpers.py"])
+        self.assertIn("print(f", files["utils.py"])
+        self.assertNotIn("def log", files["utils.py"])
 
     # -- timers -------------------------------------------------------------
 
@@ -110,7 +113,7 @@ class UtilityNodesTest(FlowTestCase):
         printer.socket("text").value = "later"
         self.link(delay.outputs["delayed"], printer.inputs[0])
         self.assertEqual(self.run_trigger(), [])  # not yet
-        timers = generated_helpers()._sn_timers
+        timers = generated_helpers()._timers
         self.assertEqual(len(timers), 1)
         timer = timers[0]
         self.assertTrue(bpy.app.timers.is_registered(timer))
@@ -126,7 +129,7 @@ class UtilityNodesTest(FlowTestCase):
         intervals.socket("times").value = 3
         self.print_value_in(intervals, "repeat", intervals.outputs["index"])
         self.run_trigger()
-        timers = generated_helpers()._sn_timers
+        timers = generated_helpers()._timers
         timer = timers[0]
         out = io.StringIO()
         with contextlib.redirect_stdout(out):
@@ -139,13 +142,13 @@ class UtilityNodesTest(FlowTestCase):
         intervals = self.then("SNA_Node_RunInIntervals")
         intervals.socket("keep_running").value = False
         self.run_trigger()
-        timer = generated_helpers()._sn_timers[0]
+        timer = generated_helpers()._timers[0]
         self.assertIsNone(timer())
 
     def test_timers_stop_on_rebuild(self):
         self.then("SNA_Node_RunWithDelay")
         self.run_trigger()
-        timer = generated_helpers()._sn_timers[0]
+        timer = generated_helpers()._timers[0]
         self.assertTrue(bpy.app.timers.is_registered(timer))
         bpy.context.scene.sna.addon.addon_name = "Utility Test 2"  # reloads
         helpers.flush()
@@ -254,7 +257,7 @@ class UtilityNodesTest(FlowTestCase):
         self.assertIsNone(errors().node_message(shortcut.id))
         source = helpers.tree_source(self.tree)
         self.assertIn(
-            "sn_add_shortcut('3D View', 'VIEW_3D', 'utility_test.greet', 'G', ctrl=True, shift=True)",
+            "utils.add_shortcut('3D View', 'VIEW_3D', 'utility_test.greet', 'G', ctrl=True, shift=True)",
             source,
         )
         shortcut_mod = helpers.sn("src.nodes.categories.logic.node_shortcut")

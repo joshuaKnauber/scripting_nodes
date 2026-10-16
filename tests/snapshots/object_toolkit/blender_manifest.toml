@@ -3,11 +3,11 @@ schema_version = "1.0.0"
 id = "object_toolkit"
 version = "1.0.0"
 name = "Object Toolkit"
-tagline = "Add-on created with Scripting Nodes"
-maintainer = "Unknown"
+tagline = "Rename, place and remember selections of objects"
+maintainer = "Jane Doe"
 type = "add-on"
 
-blender_version_min = "4.2.0"
+blender_version_min = "5.0.0"
 
 license = [
   "SPDX:GPL-3.0-or-later",

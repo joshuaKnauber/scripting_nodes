@@ -17,16 +17,17 @@ and `ruff check` with zero findings.
 - [x] **No default arguments** (2026-10): `ctx.keyword()` / `ctx.args()` leave out Blender's defaults; no `poll()` returning `True`, empty `bl_description`, `bl_order = 0`, `bl_options = set()`, `execute()` of modal operators, UIList `bl_idname`. Buttons without a label show the operator's name (Icon Only for none).
   - [ ] `options={'ANIMATABLE'}` and other property defaults; Set Layout State still writes all three states.
 - [x] **Conventional layout** (2026-10): `__init__.py` imports the modules and registers an explicit `classes` tuple in dependency order (`core/package.py`); no `auto_load.py`, `sys.modules` alias, `addon/` subpackage, empty `register()` or unused `import bpy`; `bl_info` only in the live add-on. Imports sorted like isort; properties.py imports update callbacks at the top when there's no cycle.
-  - [ ] Rename `_sn_helpers.py` and the `sn_` helper names to something a person would write (`utils.py`).
+  - [x] Helpers in `utils.py`, called as `utils.report(...)` (no `sn_` prefixes); Trigger nodes are left out of exports, empty tree modules aren't written.
 - [x] **Export clean-up pass** (2026-10): autopep8 (and the bundled wheels) replaced by `lib/python_format.py`, which formats like `ruff format`; redundant parentheses removed (AST-checked); f-strings from Format String; `x.name = ...` instead of `setattr` with a constant; no `float()` around integers; no conversions of values already of the type.
   - [ ] Repeated expressions (`context.scene.my_addon` several times in one statement) into a local variable - see the hoisting question in 4.
 - [ ] **`context` over `bpy.context`**: `ctx.context` exists (`context` inside functions that have it, else `bpy.context`) and property nodes use it; move the Scene node and friends to it.
 - [ ] **Node polish**: For Each without unused index, Print takes any value (no `str()`), variables as module globals with compiler-inserted `global` (instead of getter/setter pairs - decide).
-- [ ] **Trigger nodes are dev only**: left out of export builds.
+- [x] **Trigger nodes are dev only** (2026-10): left out of export builds (`sn_dev_only`).
 - [x] **Function signatures** (2026-10): functions only declare (and calls only pass) what the body uses from the caller (`def header(*, layout)`); functions compile before their callers.
   - [ ] A parameter named after a builtin (`object`) shadows it.
-- [ ] **Export check**: before writing the zip, list guideline issues on the nodes (hard-coded data-block names, `bpy.data.objects`, unescaped data paths, missing permissions, unused/undefined names).
-- [ ] **Regression test**: the Object Toolkit snapshot covers about 40 node types (see Baseline); a fixture using every node is still missing.
+- [x] **Export check** (2026-10): `core/export_check.py`, sidebar Addon › Extensions Platform (also run on export): `bpy.data` collections, data-blocks by name, writing into the add-on folder, `sys` changes, `__name__` / `bl_ext`, files / network / clipboard without the permission, network without `online_access`, keyconfig without a None check, missing author / tagline. Issues inside a value node's expression are blamed on that node.
+  - [ ] Unescaped data paths (`path_resolve` / msgbus strings built from names); show the issues on the nodes too.
+- [x] **Regression test** (2026-10): the Object Toolkit snapshot, plus an add-on with every node (`tests/visual/scenarios/_every_node_demo.py`, `scripts/example_addon.py every_node`) checked with ruff in CI (constant conditions from unconnected inputs ignored).
 
 ## 2. Add-on metadata
 
@@ -73,7 +74,7 @@ Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender
 - [ ] **Add-on lifecycle coverage.** Already tested: hot reload, rollback on syntax/import errors, rename removes the old add-on, foreign folders untouched, deleting all trees unloads, save → open other → reopen, real undo/redo (GUI), export build. Missing:
   - [ ] *Persist* across file switches: persisted add-on stays loaded after opening another file, non-persisted one unloads, persisted add-ons are re-enabled after a Blender restart (`generated_addons.json` in the extension user dir).
   - [ ] Rename across sessions: rename the add-on, restart, the folder of the old name is removed (persistence `module_for`).
-  - [ ] Stale files: removing or renaming a tree removes its module; `_sn_helpers.py` disappears when no node uses a helper.
+  - [ ] Stale files: removing or renaming a tree removes its module; `utils.py` disappears when no node uses a helper.
   - [ ] Folders from older versions: a generated folder without the marker but with the legacy signature is taken over; a user's own add-on with the same name never is.
   - [ ] Disabling: the addon `enabled` toggle unloads/reloads; disabling and re-enabling Serpens while a generated add-on is loaded (no stale classes, timers, handlers, excepthook).
   - [ ] Module name / class prefix / idname namespace overrides: changing them reloads cleanly under the new names.
@@ -90,12 +91,13 @@ Done (2026-10): native groups - the tree interface (sidebar Group tab) + Blender
 
 ## 7. MCP server
 
-- [ ] Update the tools to the new node API: socket keys instead of indices/names, flow socket `kind`, references by id, node code from the last build (`compiler.node_lines`), `mark_dirty()`.
-- [ ] Tools for property lists (add / edit / pick properties).
-- [ ] Tools for functions: create a function, add/rename/move interface items (`tree.interface`), set a Group node's `node_tree`, make group from nodes. `is_group` is now `is_function` in the tree tools.
-- [ ] Tests for the tools (create nodes, link, set properties, read code) - currently only the security checks are tested.
-- [ ] Optional bearer token, a timeout that doesn't run queued calls after the client gave up, split `tools.py` (1400 lines) into read/write modules.
-- [ ] Docs page for using it with Claude Code / Codex.
+Done (2026-10): 24 tools in `mcp_server/tools/` (Blender: run_python, screenshot, undo, logs; add-on: settings, problems incl. the export check, code, export, run_operator; graph: batched edit_tree with sockets by key and refs, properties, functions, texts, data path search, show_tree). One undo step per call, tool errors say what to do, failed edit_tree batches remove their nodes, timed-out calls don't run late, optional token, Allow Running Python, Start with Blender. Tested: every tool area (`tests/test_mcp_tools.py`), the Object Toolkit built only through the tools matches the snapshot, HTTP + screenshots + undo in a real window (`tests/gui/mcp.py`). Docs: `ai/mcp-server.mdx`, `ai/agents.mdx`.
+
+- [ ] The first screenshot after Blender starts can show the window before the agent's changes (later ones are current).
+- [x] make_group / ungroup (the Ctrl G operators, in a node editor: an area is borrowed if none is open).
+- [ ] Moving interface items; panels in interfaces.
+- [ ] MCP resources / prompts (e.g. the node catalog as a resource, a "build an add-on" prompt).
+- [x] `blender_version_min` defaults to the Blender the add-on is made in.
 
 ## 8. Log overlay
 

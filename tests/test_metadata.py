@@ -45,6 +45,8 @@ class MetadataTest(unittest.TestCase):
         addon.location = "View3D > Sidebar > Render"
         addon.tags = {"Render", "3D View"}
         addon.copyright = "2025-2026 Jane Doe"
+        made_in = (*bpy.app.version[:2], 0)
+        self.assertEqual(tuple(addon.blender_version_min), made_in)  # default
         addon.blender_version_min = (5, 0, 0)
         addon.use_blender_version_max = True
         addon.blender_version_max = (6, 0, 0)

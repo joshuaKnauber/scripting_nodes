@@ -1,5 +1,8 @@
+import string
+
 import bpy
 
+from .....core.context import NodeError
 from .....lib.code_format import f_string
 from .....sockets.spec import Data, Integer, List, String
 from ....base_node import ScriptingBaseNode
@@ -173,8 +176,22 @@ class SNA_Node_PadString(ScriptingBaseNode, bpy.types.Node):
     def emit(self, ctx):
         string, length = ctx.input("string"), ctx.input("length")
         # str.ljust() & co. take exactly one character
-        fill = f"({ctx.input('fill')} or ' ')[0]"
+        socket = self.socket("fill")
+        if socket.is_linked:
+            fill = f"({ctx.input('fill')} or ' ')[0]"
+        else:
+            fill = repr((socket.value or " ")[0])
         ctx.output("string", f"{string}.{self.alignment}({length}, {fill})")
+
+
+def _fields(template):
+    """Number of `{}` fields, None for numbered or named ones."""
+    try:
+        parsed = list(string.Formatter().parse(template))
+    except ValueError:
+        return None
+    fields = [field for _, field, _, _ in parsed if field is not None]
+    return len(fields) if all(field == "" for field in fields) else None
 
 
 class SNA_Node_FormatString(ScriptingBaseNode, bpy.types.Node):
@@ -193,6 +210,9 @@ class SNA_Node_FormatString(ScriptingBaseNode, bpy.types.Node):
         values = ctx.inputs("value")
         template = self.socket("format")
         if not template.is_linked:
+            fields = _fields(template.value)
+            if fields is not None and fields > len(values):
+                raise NodeError(f"Connect a value for each {{}} ({fields})")
             code = f_string(template.value, values)
             if code is not None:
                 ctx.output("string", code)

@@ -34,7 +34,7 @@ Placeholders must be on their own line. They are indented to the column they sit
 | Call | Returns / does |
 | --- | --- |
 | `ctx.imports("import math")` | Add an import line (deduplicated) |
-| `ctx.helper("sn_print")` | Name to call a shared helper by (`core/helpers.py`) |
+| `ctx.helper("log")` | Expression to call a shared helper with, `utils.log` (`core/helpers.py`) |
 | `ctx.symbol(node_or_tree, name)` | Expression for `name`: the name itself, imported with `from .<module> import name` from another tree; `_<module>.name` if the two trees import each other |
 | `ctx.script(module_key, alias_key, source)` | Add `source` unchanged as `scripts/<name>.py` and import it here; returns the name to use it by. Both names are declared in `sn_names()` (`naming.Script`, `naming.Symbol`) with a shared `owner` |
 | `ctx.on_register(line)` / `ctx.on_unregister(line)` | Lines for the module's `register()` / `unregister()` |
@@ -62,5 +62,5 @@ compiles, with a Print node in the loop, to
 
 ```python
 for item_1 in context.scene.objects:
-    sn_print(item_1.name)
+    print(item_1.name)
 ```

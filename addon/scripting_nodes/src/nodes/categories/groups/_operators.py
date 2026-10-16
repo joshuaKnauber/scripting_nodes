@@ -10,8 +10,8 @@ import bpy
 
 from ....core import functions, scheduler
 from ....lib.is_sn import is_sn
-from ....sockets.socket_types import FLOW_SOCKET
 from ....sockets.interface import SOCKET_IDNAMES
+from ....sockets.socket_types import FLOW_SOCKET
 
 IO = (functions.GROUP_INPUT, functions.GROUP_OUTPUT)
 # marks nodes while they're moved, to find them after pasting

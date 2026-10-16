@@ -1,13 +1,12 @@
 import bpy
 
+from ....blend_data.rna import blend_data_spec
 from ....core import naming
 from ....lib.code_format import literal_set
 from ....lib.trees import node_by_id
-from ....blend_data.rna import blend_data_spec
 from ....sockets.spec import Boolean, Interface, List, Logic, String
 from ..._property_list import PropertyListMixin
 from ...base_node import ScriptingBaseNode
-
 
 # Invoke behavior options
 INVOKE_TYPE_ITEMS = [

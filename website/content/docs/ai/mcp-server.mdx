@@ -1,7 +1,50 @@
 ---
 title: MCP server
-description: Let AI agents read and build your node trees.
+description: Let AI agents read and build your node trees, and use Blender.
 icon: Sparkles
 ---
 
-<Callout>This page isn't written yet.</Callout>
+Scripting Nodes has an [MCP](https://modelcontextprotocol.io) server: an AI agent (Claude Code, Codex, Claude Desktop, ...) connected to it can build add-ons with nodes in the Blender you have open, see what it built, try it and fix what's wrong. You watch it happen in the node editor and can step in at any time.
+
+## Starting it
+
+Open the **MCP Server** panel in the node editor's sidebar (Scripting Nodes tab) and click **Start**. It listens on `http://127.0.0.1:7423/` (the port is in the add-on's preferences), only on this computer. **Start with Blender** in the preferences starts it every time. Connecting the agent: see [Claude Code and Codex](/docs/ai/agents).
+
+## What an agent can do
+
+**Build add-ons**
+
+| Tool | |
+| --- | --- |
+| `get_addon` | Overview: name, trees, properties, how many problems. Agents start here |
+| `list_node_types`, `get_node_type` | The nodes, what they do, their sockets and settings |
+| `create_tree`, `get_tree`, `get_node` | Trees and nodes, with their errors and the code they wrote |
+| `edit_tree` | Add, change, link and delete many nodes in one call |
+| `edit_properties` | The add-on's properties, groups and the properties of operators |
+| `edit_function` | The inputs and outputs of functions (node groups) |
+| `make_group`, `ungroup` | Move nodes into a new function and call it, or back (like Ctrl G and Ctrl Alt G) |
+| `read_text`, `write_text` | Scripts of Script nodes |
+| `search_data_paths` | Blender data paths for Blender Data nodes |
+| `set_addon` | Name, author, tagline, version, permissions |
+
+**Check the work**
+
+| Tool | |
+| --- | --- |
+| `get_problems` | Nodes with errors, a build that failed, what the [extensions platform](/docs/publishing/extensions-platform) would reject |
+| `get_code` | The generated Python, live or as exported |
+| `run_operator` | Run an operator of the add-on and see what it printed |
+| `show_tree`, `screenshot` | Open a tree in the node editor; a picture of Blender as you see it |
+| `export_addon` | The installable zip |
+
+**Use Blender**
+
+| Tool | |
+| --- | --- |
+| `run_python` | Run any Python in Blender: set up a scene, inspect data, anything the other tools don't cover |
+| `undo` | Undo the agent's last steps (each tool call is one step, like Ctrl Z) |
+| `get_logs` | Recent messages of Scripting Nodes |
+
+## Safety
+
+The server only accepts connections from this computer and refuses requests from web pages. With `run_python`, an agent can run any code in Blender, like the Python console: turn off **Allow Running Python** in the preferences if you don't want that. A **Token** in the preferences makes clients send it with every request (the install snippets include it).

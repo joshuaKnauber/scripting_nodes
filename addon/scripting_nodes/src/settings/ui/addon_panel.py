@@ -1,4 +1,6 @@
-from ...core import compiler, metadata
+import textwrap
+
+from ...core import compiler, export_check, metadata
 from ...node_tree.editor import in_sn_tree
 import bpy
 
@@ -162,3 +164,51 @@ class SNA_PT_Overwrite_Settings(bpy.types.Panel):
         field_with_hint(
             "idname_namespace_overwrite", f"{addon.idname_namespace}.my_operator"
         )
+
+
+class SNA_PT_Export_Check(bpy.types.Panel):
+    """What reviewers of extensions.blender.org would ask to change."""
+
+    bl_idname = "SNA_PT_Export_Check"
+    bl_label = "Extensions Platform"
+    bl_parent_id = "SNA_PT_Addon_Settings"
+    bl_space_type = "NODE_EDITOR"
+    bl_region_type = "UI"
+    bl_category = "Scripting Nodes"
+    bl_options = {"DEFAULT_CLOSED"}
+    bl_order = 2
+
+    @classmethod
+    def poll(cls, context: bpy.types.Context):
+        return in_sn_tree(context)
+
+    def draw(self, context):
+        layout = self.layout
+        row = layout.row(align=True)
+        row.operator("sna.check_export", icon="CHECKMARK")
+        row.operator("wm.url_open", text="", icon="HELP").url = export_check.GUIDELINES
+        if not export_check.checked:
+            layout.label(text="Checked when you export", icon="INFO")
+            return
+        if not export_check.last:
+            layout.label(text="Nothing to fix", icon="CHECKMARK")
+            return
+        # labels don't wrap: characters that fit next to the button
+        scale = context.preferences.system.ui_scale
+        width = max(16, int((context.region.width / scale - 80) / 7))
+        col = layout.column(align=True)
+        for issue in export_check.last:
+            row = col.box().row()
+            text = row.column(align=True)
+            text.alert = issue.severity == "ERROR"
+            icon = "ERROR" if issue.severity == "ERROR" else "INFO"
+            for i, part in enumerate(_wrap(issue.message, width)):
+                text.label(text=part, icon=icon if i == 0 else "BLANK1")
+            if issue.node_id:
+                op = row.operator("sna.go_to_node", text="", icon="VIEWZOOM")
+                op.node_id = issue.node_id
+
+
+def _wrap(text, width):
+    """Lines of at most `width` characters (labels don't wrap)."""
+    return textwrap.wrap(text, width) or [""]

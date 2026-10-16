@@ -24,4 +24,4 @@ class SNA_Node_Icon(ScriptingBaseNode, bpy.types.Node):
             ctx.output("icon", "0")
             return
         builtin_icon(self.icon)  # known to this Blender
-        ctx.output("icon", f"{ctx.helper('sn_icon')}({self.icon!r})")
+        ctx.output("icon", f"{ctx.helper('icon_id')}({self.icon!r})")

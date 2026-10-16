@@ -1,5 +1,6 @@
 import bpy
 
+from ....core.context import NodeError
 from ....sockets.spec import Flow, Integer
 from ...base_node import ScriptingBaseNode
 
@@ -13,8 +14,8 @@ class SNA_Node_Repeat(ScriptingBaseNode, bpy.types.Node):
     sn_outputs = [Flow("loop", "Loop"), Flow("next", "Done"), Integer("index", "Index")]
 
     def emit(self, ctx):
-        index = ctx.var("index")
-        loop = ctx.flow("loop", outputs={"index": index})
+        index = ctx.var("index") if ctx.is_linked("index") else "_"
+        loop = ctx.flow("loop", outputs={"index": index}, loop=True)
         ctx.code(f"""
             for {index} in range({ctx.input("times")}):
                 {loop}
@@ -42,4 +43,6 @@ class SNA_Node_LoopControl(ScriptingBaseNode, bpy.types.Node):
         return "Stop Loop" if self.action == "break" else "Next Item"
 
     def emit(self, ctx):
+        if not ctx.scope.in_loop():
+            raise NodeError("Only works inside a loop (Repeat, For Each)")
         ctx.code(self.action)

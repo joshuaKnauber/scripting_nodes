@@ -24,7 +24,7 @@ from ..lib.trees import scripting_node_trees, sn_nodes
 from . import errors, functions, helpers, metadata, naming, package, properties
 from .context import Line, NodeContext, NodeError, Scope
 
-HELPERS_MODULE = "_sn_helpers"
+HELPERS_MODULE = "utils"
 SCRIPTS_PACKAGE = "scripts"
 
 # relpath -> owner node id per line, of the last live compile (error blame)
@@ -47,11 +47,13 @@ _FORMAT_CACHE_SIZE = 256
 # -----------------------------------------------------------------------------
 
 
-def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
+def compile_addon(dev=True, pretty=False, settings=None, owners_out=None):
     """All files of the generated addon. Empty if there are no trees.
 
     `dev`: live addon (True) or export (False). `pretty`: format the code
-    like `ruff format` (export; scripts stay as written)."""
+    like `ruff format` (export; scripts stay as written). `owners_out`: a
+    dict that gets {relpath: owner node id per line} (unformatted builds)
+    and {(relpath, "values"): [(value node id, expression)]}."""
     trees = scripting_node_trees()
     if not trees:
         return {}
@@ -82,12 +84,14 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
     for tree in trees:
         builder = builders[tree.module_name]
         source, line_map = results[tree.module_name]
+        used_helpers |= builder.helpers
+        permissions |= builder.permissions
+        if not source.strip():
+            continue  # nothing in it (only Trigger nodes in an export)
         rel = f"{tree.module_name}.py"
         files[rel] = source
         owners[rel] = line_map
         previews.update(_previews(source, line_map))
-        used_helpers |= builder.helpers
-        permissions |= builder.permissions
     source = properties.module_source(names, _independent_of_properties(builders))
     if source is not None:
         files[f"{properties.PROPERTIES_MODULE}.py"] = source
@@ -106,6 +110,10 @@ def compile_addon(dev=True, pretty=False, settings=None) -> dict[str, str]:
         metadata.license_header(settings),
         metadata.bl_info(settings) if dev else None,
     )
+    if owners_out is not None:
+        owners_out.update(owners)
+        for module, builder in builders.items():
+            owners_out[(f"{module}.py", "values")] = builder.values
     if pretty:
         for rel, source in files.items():
             if rel.endswith(".py") and not rel.startswith(SCRIPTS_PACKAGE + "/"):
@@ -167,7 +175,8 @@ def _package_modules(files, builders, scripts) -> list[package.Module]:
             if other in uses:
                 visit(other, (*path, module))
         done.add(module)
-        modules.append(package.Module(module, module, files[f"{module}.py"]))
+        if f"{module}.py" in files:
+            modules.append(package.Module(module, module, files[f"{module}.py"]))
 
     for module in sorted(uses):
         visit(module)
@@ -244,6 +253,8 @@ class ModuleBuilder:
         # what the add-on does that Blender asks permission for (manifest)
         self.permissions: set[str] = set()
         self._locals: set[str] = set()
+        # (node id, expression) of value nodes, written inside other lines
+        self.values: list[tuple[str, str]] = []
         self.module_scope = Scope()
         self._emitted: set[int] = set()
 
@@ -257,7 +268,11 @@ class ModuleBuilder:
             for node in sn_nodes(self.tree):
                 if hasattr(node, "emit_module"):
                     self._emit(node, module_scope, "root", node.emit_module)
-            roots = [n for n in sn_nodes(self.tree) if n.sn_root]
+            roots = [
+                n
+                for n in sn_nodes(self.tree)
+                if n.sn_root and (self.dev or not n.sn_dev_only)
+            ]
             roots.sort(key=lambda n: n.sn_order)
             for node in roots:
                 self._emit(node, module_scope, "root")
@@ -301,7 +316,9 @@ class ModuleBuilder:
         ctx = self._emit(node, scope, "value")
         if ctx is None:
             return "None"
-        return ctx.outputs.get(key, "None")
+        expression = ctx.outputs.get(key, "None")
+        self.values.append((node.id, expression))
+        return expression
 
     def add_block(self, lines):
         if any(line.text for line in lines):
@@ -327,7 +344,8 @@ class ModuleBuilder:
         for required in helpers.HELPERS[name].requires:
             self.use_helper(required)
         if helpers.needs_import(name, self.dev):
-            self.imports.add(f"from .{HELPERS_MODULE} import {name}")
+            self.imports.add(f"from . import {HELPERS_MODULE}")
+            return f"{HELPERS_MODULE}.{helpers.call_name(name, self.dev)}"
         return helpers.call_name(name, self.dev)
 
     def add_script(self, module, alias, source, owner):
@@ -436,10 +454,9 @@ class ModuleBuilder:
             function = [Line(0, f"def {name}():", None)]
             function += [Line(4 + line.indent, line.text, line.owner) for line in body]
             blocks.append(function)
-        imports = set(self.imports)
         code = "\n".join(line.text for block in blocks for line in block)
-        if not re.search(r"\bbpy\b", code):
-            imports.discard("import bpy")
+        # nodes that failed may have added imports their code never used
+        imports = {kept for line in self.imports if (kept := _used_import(line, code))}
         if imports:
             blocks.insert(0, [Line(0, line, None) for line in sort_imports(imports)])
 
@@ -458,6 +475,20 @@ class ModuleBuilder:
 
 
 _DEFINITIONS = ("def ", "class ", "@", "async def ")
+
+
+def _used_import(line: str, code: str) -> str | None:
+    """`line` with only the names `code` uses, None if it uses none."""
+
+    def used(name):
+        return re.search(rf"\b{re.escape(name)}\b", code) is not None
+
+    if not line.startswith("from "):
+        name = line.split(" as ")[-1].split()[-1].split(".")[0]
+        return line if used(name) else None
+    head, names = line.split(" import ", 1)
+    kept = [n.strip() for n in names.split(",") if used(n.split(" as ")[-1].strip())]
+    return f"{head} import {', '.join(kept)}" if kept else None
 
 
 class _InterfaceNode:

@@ -63,7 +63,7 @@ class SNA_Node_TextField(PropertyFieldNode, bpy.types.Node):
                 args.append(ctx.input("placeholder"))
             ctx.code(f"""
                 {ctx.join([label])}
-                {ctx.helper("sn_textbox")}({", ".join(args)})
+                {ctx.helper("textbox")}({", ".join(args)})
                 {ctx.flow("next")}
             """)
             return

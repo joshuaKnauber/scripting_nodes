@@ -47,6 +47,6 @@ class SNA_Node_MultilineLabel(TextSourceMixin, ScriptingBaseNode, bpy.types.Node
         if icon:
             args.append(icon)
         ctx.code(f"""
-            {ctx.helper("sn_label_multiline")}({", ".join(args)})
+            {ctx.helper("label_multiline")}({", ".join(args)})
             {ctx.flow("next")}
         """)

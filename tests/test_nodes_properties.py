@@ -256,7 +256,7 @@ class PropertiesTest(unittest.TestCase):
         self.assertIn(
             "    text: bpy.props.StringProperty(name='Text', default='hi')", source
         )
-        self.assertIn("sn_print(self.text)", source)
+        self.assertIn("utils.log(self.text)", source)
         self.assertLoaded()
         namespace, name = op.operator_idname.split(".")
         rna = getattr(getattr(bpy.ops, namespace), name).get_rna_type()

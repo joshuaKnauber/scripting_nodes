@@ -131,10 +131,13 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
     )
     blender_version_min: bpy.props.IntVectorProperty(
         name="Blender Minimum",
-        description="Oldest Blender version the add-on works in",
+        description=(
+            "Oldest Blender version the add-on works in (default: the one "
+            "it's made in, the generated code may use what's new in it)"
+        ),
         size=3,
         min=0,
-        default=(4, 2, 0),
+        default=(*bpy.app.version[:2], 0),
         update=_rebuild,
     )
     use_blender_version_max: bpy.props.BoolProperty(

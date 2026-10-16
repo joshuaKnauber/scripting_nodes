@@ -65,6 +65,8 @@ class ScriptingBaseNode:
     # Root nodes are emitted on their own (operators, panels, events, ...).
     # Other nodes are emitted when a flow reaches them or a value is used.
     sn_root = False
+    # Root nodes only for building (Trigger): left out of exported add-ons
+    sn_dev_only = False
     # Order of root nodes in the module (lower first). Classes other roots
     # reference at definition time (PropertyGroups) need to come first.
     sn_order = 50

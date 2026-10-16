@@ -13,27 +13,30 @@ def _server_url(port: int) -> str:
     return f"http://127.0.0.1:{port}/"
 
 
+def _token():
+    return get_preferences().mcp_token.strip()
+
+
 def _snippet_claude_code(port: int) -> str:
-    return f"claude mcp add --transport http {SERVER_NAME} {_server_url(port)}"
+    command = f"claude mcp add --transport http {SERVER_NAME} {_server_url(port)}"
+    if _token():
+        command += f' --header "Authorization: Bearer {_token()}"'
+    return command
 
 
 def _snippet_codex(port: int) -> str:
     # ~/.codex/config.toml stanza. Codex reads HTTP MCP servers via the `url` key.
-    return f'[mcp_servers.{SERVER_NAME}]\nurl = "{_server_url(port)}"\n'
+    snippet = f'[mcp_servers.{SERVER_NAME}]\nurl = "{_server_url(port)}"\n'
+    if _token():
+        snippet += f'http_headers = {{ Authorization = "Bearer {_token()}" }}\n'
+    return snippet
 
 
 def _snippet_json(port: int) -> str:
-    return json.dumps(
-        {
-            "mcpServers": {
-                SERVER_NAME: {
-                    "type": "http",
-                    "url": _server_url(port),
-                }
-            }
-        },
-        indent=2,
-    )
+    server = {"type": "http", "url": _server_url(port)}
+    if _token():
+        server["headers"] = {"Authorization": f"Bearer {_token()}"}
+    return json.dumps({"mcpServers": {SERVER_NAME: server}}, indent=2)
 
 
 _SNIPPET_BUILDERS = {

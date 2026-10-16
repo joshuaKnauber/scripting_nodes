@@ -28,4 +28,4 @@ class SNA_Node_CustomIcon(ScriptingBaseNode, bpy.types.Node):
         name, data = image_file(self.image)
         rel = ctx.asset(f"icons/{name}", data)
         file = rel.split("/", 1)[1]
-        ctx.output("icon", f"{ctx.helper('sn_custom_icon')}({file!r})")
+        ctx.output("icon", f"{ctx.helper('custom_icon_id')}({file!r})")

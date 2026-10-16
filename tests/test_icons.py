@@ -16,10 +16,10 @@ def errors():
 
 
 def generated_helpers():
-    """`_sn_helpers` of the loaded add-on (through its package: names in
+    """`utils` of the loaded add-on (through its package: names in
     sys.modules can be left over from earlier loads)."""
     package = sys.modules[bpy.context.scene.sna.addon.module_name]
-    return importlib.import_module(package.__name__ + "._sn_helpers")
+    return importlib.import_module(package.__name__ + ".utils")
 
 
 def builtin_value(name):
@@ -93,12 +93,12 @@ class IconsTest(unittest.TestCase):
         helpers.link(self.tree, icon.outputs[0], label.inputs["icon"])
         helpers.flush()
         source = helpers.tree_source(self.tree)
-        self.assertIn("icon_value=sn_icon('MESH_DATA')", source)
+        self.assertIn("icon_value=utils.icon_id('MESH_DATA')", source)
         self.assertLoaded()
-        sn_icon = generated_helpers().sn_icon
-        self.assertEqual(sn_icon("MESH_DATA"), builtin_value("MESH_DATA"))
-        self.assertEqual(sn_icon("NOT_AN_ICON"), 0)
-        self.assertEqual(sn_icon(42), 42)
+        icon_id = generated_helpers().icon_id
+        self.assertEqual(icon_id("MESH_DATA"), builtin_value("MESH_DATA"))
+        self.assertEqual(icon_id("NOT_AN_ICON"), 0)
+        self.assertEqual(icon_id(42), 42)
 
     def test_strings_convert_to_icons(self):
         label = self.label()
@@ -106,7 +106,9 @@ class IconsTest(unittest.TestCase):
         text.value = "MESH_DATA"
         helpers.link(self.tree, text.outputs[0], label.inputs["icon"])
         helpers.flush()
-        self.assertIn("icon_value=sn_icon('MESH_DATA')", helpers.tree_source(self.tree))
+        self.assertIn(
+            "icon_value=utils.icon_id('MESH_DATA')", helpers.tree_source(self.tree)
+        )
         self.assertLoaded()
 
     def test_icons_arent_numbers(self):
@@ -127,7 +129,7 @@ class IconsTest(unittest.TestCase):
                 files = helpers.addon_files()
                 self.assertTrue(files["icons/Logo.png"].startswith(b"\x89PNG"))
                 self.assertIn(
-                    "icon_value=sn_custom_icon('Logo.png')",
+                    "icon_value=utils.custom_icon_id('Logo.png')",
                     helpers.tree_source(self.tree),
                 )
                 self.assertLoaded()
@@ -137,9 +139,9 @@ class IconsTest(unittest.TestCase):
                 self.assertTrue(os.path.isfile(path))
                 # icon ids only exist with a UI: check the preview loaded
                 generated = generated_helpers()
-                generated.sn_custom_icon("Logo.png")
+                generated.custom_icon_id("Logo.png")
                 self.assertEqual(
-                    tuple(generated._sn_previews["Logo.png"].image_size), (4, 4)
+                    tuple(generated._previews["Logo.png"].image_size), (4, 4)
                 )
                 self.tree.nodes.remove(custom)
                 self.tree.nodes.remove(label)
@@ -186,7 +188,7 @@ class IconsTest(unittest.TestCase):
         helpers.link(self.tree, custom.outputs[0], self.panel.socket("icon"))
         helpers.flush()
         self.assertIn(
-            "bl_icon_value = sn_custom_icon('Logo.png')",
+            "bl_icon_value = utils.custom_icon_id('Logo.png')",
             helpers.tree_source(self.tree),
         )
         self.assertLoaded()

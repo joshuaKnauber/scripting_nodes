@@ -1,7 +1,7 @@
 import bpy
 from bpy.app.handlers import persistent
 
-from ._sn_helpers import sn_redraw
+from . import utils
 
 
 @persistent
@@ -10,7 +10,7 @@ def on_load_pre(*args):
 
 
 def on_spacing_update(self, context):
-    sn_redraw("VIEW_3D")
+    utils.redraw("VIEW_3D")
 
 
 def register():

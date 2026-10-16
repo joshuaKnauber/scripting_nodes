@@ -2,7 +2,7 @@
 
 import bpy
 
-from . import _sn_helpers, interface, logic, operators, properties
+from . import interface, logic, operators, properties, utils
 
 classes = (
     properties.OBJECT_TOOLKIT_PG_selection_set,
@@ -32,6 +32,6 @@ def unregister():
     logic.unregister()
     interface.unregister()
     properties.unregister()
-    _sn_helpers.unregister()
+    utils.unregister()
     for cls in reversed(classes):
         bpy.utils.unregister_class(cls)

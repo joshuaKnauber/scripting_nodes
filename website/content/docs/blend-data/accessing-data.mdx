@@ -55,8 +55,8 @@ The node becomes the path itself, written with the `context` the surrounding fun
 
 ```python
 def execute(self, context):
-    sn_print(str(context.active_object.modifiers['Bevel'].width))
-    sn_print(str(len(context.active_object.data.vertices)))
+    print(str(context.active_object.modifiers['Bevel'].width))
+    print(str(len(context.active_object.data.vertices)))
 ```
 
 To change a value instead of reading it, use **Set Property** with a path, see [Data paths](/docs/blend-data/data-paths).

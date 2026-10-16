@@ -269,7 +269,7 @@ class CoreTest(unittest.TestCase):
         module = vars_tree.module_name
         getter = var.getter_name()
         self.assertIn(f"from .{module} import {getter}", source)
-        self.assertIn(f"sn_print(sn_text({getter}()))", source)
+        self.assertIn(f"utils.log(utils.as_text({getter}()))", source)
         self.assertIsNone(helpers.sn("src.core.errors").addon_error)
 
     def test_import_cycles(self):
@@ -402,22 +402,26 @@ class CoreTest(unittest.TestCase):
         refs = references()
         self.assertEqual({n for n, _ in refs.users(var)}, {get, set_var})
         self.assertEqual(refs.users(op), [(button, "operator_sn")])
-        tools = helpers.sn("src.mcp_server.tools")
-        usages = tools.find_usages(node_id=var.id)["usages"]
-        self.assertEqual({u["sn_id"] for u in usages}, {get.id, set_var.id})
+        graph = helpers.sn("src.mcp_server.tools.graph")
+        usages = graph.get_node(var.id)["used_by"]
+        self.assertEqual({u["node"] for u in usages}, {get.id, set_var.id})
 
     # -- export -----------------------------------------------------------------
 
     def test_export_build(self):
-        tree, _, (p,) = trigger_print_tree("shipped")
+        tree, trigger, (p,) = trigger_print_tree("shipped")
         export = helpers.sn("src.core.ops.export")
+        # Trigger nodes are for building only: not in the export
+        self.assertNotIn(f"{tree.module_name}.py", export.build_files())
+        operator = helpers.add_node(tree, "SNA_Node_Operator")
+        helpers.link(tree, operator.outputs["execute"], p.inputs[0])
         files = export.build_files()
         source = files[f"{tree.module_name}.py"]
         self.assertIn('print("shipped")', source)
         # dev builds route print through the overlay helper, exports don't
-        self.assertNotIn("sn_print", source)
-        self.assertNotIn("_sn_helpers.py", files)
-        self.assertIn("sn_print", read(module_file(tree)))
+        self.assertNotIn("log", source)
+        self.assertNotIn("utils.py", files)
+        self.assertIn("log", read(module_file(tree)))
         for rel, src in files.items():
             if rel.endswith(".py"):
                 compile(src, rel, "exec")

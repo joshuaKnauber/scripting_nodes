@@ -1,7 +1,9 @@
 import inspect
-from ...node_tree.node_tree import ScriptingNodeTree
 import os
+
 import bpy
+
+from ...node_tree.node_tree import ScriptingNodeTree
 
 
 class SN_MT_LayoutMenu(bpy.types.Menu):

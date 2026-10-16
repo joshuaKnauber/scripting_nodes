@@ -30,7 +30,7 @@ __init__.py             imports the modules, registers their classes
 blender_manifest.toml
 <tree>.py               one module per node tree
 properties.py           the add-on's properties (only if there are some)
-_sn_helpers.py          shared helper functions (only if used)
+utils.py                shared helper functions (only if used)
 scripts/<name>.py       scripts of Script nodes, unchanged (only if used)
 ```
 
@@ -64,7 +64,7 @@ The generated code contains nothing for this; the line map lives in Scripting No
 
 ## Dev and export builds
 
-The live add-on and an exported zip come from the same compiler (`compile_addon(dev=True/False)`). The only differences are in `core/helpers.py`: for example `sn_print` also writes to the node editor overlay in dev builds and is plain `print` in exports. Nodes never check the build mode.
+The live add-on and an exported zip come from the same compiler (`compile_addon(dev=True/False)`). The only differences are in `core/helpers.py`: for example `utils.log` also writes to the node editor overlay in dev builds and is plain `print` in exports. Nodes never check the build mode.
 
 ## Saved data
 

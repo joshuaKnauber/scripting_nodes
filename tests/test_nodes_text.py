@@ -15,10 +15,10 @@ def errors():
 
 
 def generated_helpers():
-    """`_sn_helpers` of the loaded add-on (through its package: names in
+    """`utils` of the loaded add-on (through its package: names in
     sys.modules can be left over from earlier loads)."""
     package = sys.modules[bpy.context.scene.sna.addon.module_name]
-    return importlib.import_module(package.__name__ + "._sn_helpers")
+    return importlib.import_module(package.__name__ + ".utils")
 
 
 class FakeLayout:
@@ -73,12 +73,12 @@ class TextNodesTest(unittest.TestCase):
     def test_multiline_label(self):
         node = self.add("SNA_Node_MultilineLabel")
         node.socket("text").value = "Some text"
-        self.assertIn("sn_label_multiline(self.layout, 'Some text')", self.source())
+        self.assertIn("utils.label_multiline(self.layout, 'Some text')", self.source())
         node.socket("icon").value = "INFO"
         node.socket("max_lines").value = 2
         node.alignment = "CENTER"
         self.assertIn(
-            "sn_label_multiline(self.layout, 'Some text', max_lines=2, "
+            "utils.label_multiline(self.layout, 'Some text', max_lines=2, "
             "alignment='CENTER', icon='INFO')",
             self.source(),
         )
@@ -92,7 +92,7 @@ class TextNodesTest(unittest.TestCase):
         helpers.flush()
         self.assertFalse(node.socket("text").enabled)  # the text block replaces it
         self.assertIn(
-            "sn_label_markdown(self.layout, '# Title\\n- one')", self.source()
+            "utils.label_markdown(self.layout, '# Title\\n- one')", self.source()
         )
         self.assertLoaded()
         # editing the text rebuilds (no RNA update: watched)
@@ -105,17 +105,17 @@ class TextNodesTest(unittest.TestCase):
     def test_link(self):
         node = self.add("SNA_Node_Link")
         node.socket("url").value = "https://example.com"
-        self.assertIn("sn_link(self.layout, 'https://example.com')", self.source())
+        self.assertIn("utils.link(self.layout, 'https://example.com')", self.source())
         node.socket("text").value = "Docs"
         node.socket("icon").value = "URL"
         self.assertIn(
-            "sn_link(self.layout, 'https://example.com', text='Docs', icon='URL')",
+            "utils.link(self.layout, 'https://example.com', text='Docs', icon='URL')",
             self.source(),
         )
         self.assertLoaded()
 
     def test_fallbacks_on_older_blender(self):
-        markdown = self.add("SNA_Node_Markdown")  # uses sn_label_multiline too
+        markdown = self.add("SNA_Node_Markdown")  # uses label_multiline too
         link = helpers.add_node(self.tree, "SNA_Node_Link")
         helpers.link(self.tree, markdown.outputs[0], link.inputs[0])
         helpers.flush()
@@ -123,9 +123,7 @@ class TextNodesTest(unittest.TestCase):
         generated = generated_helpers()
 
         layout = FakeLayout()
-        generated.sn_label_multiline(
-            layout, "one\ntwo\nthree", max_lines=2, icon="INFO"
-        )
+        generated.label_multiline(layout, "one\ntwo\nthree", max_lines=2, icon="INFO")
         self.assertEqual(
             layout.calls,
             [
@@ -135,7 +133,7 @@ class TextNodesTest(unittest.TestCase):
         )
 
         layout = FakeLayout()
-        generated.sn_label_markdown(
+        generated.label_markdown(
             layout, "# Title\n\n- **bold** item\n---\nSee [docs](https://x.org)"
         )
         drawn = [
@@ -147,7 +145,7 @@ class TextNodesTest(unittest.TestCase):
         )
 
         layout = FakeLayout()
-        generated.sn_link(layout, "https://x.org", icon="URL")
+        generated.link(layout, "https://x.org", icon="URL")
         _, idname, kwargs, props = layout.calls[0]
         self.assertEqual(idname, "wm.url_open")
         self.assertEqual(kwargs, {"text": "https://x.org", "icon": "URL"})

@@ -19,7 +19,7 @@ The return values are whatever is connected to Group Output when the flow reache
 ```python
 def greet(name, *, self=None, context=None, layout=None, event=None):
     context = context or bpy.context
-    sn_print(''.join(['Hello, ', name]))
+    print(''.join(['Hello, ', name]))
     return ''.join(['Hello, ', name])
 ```
 

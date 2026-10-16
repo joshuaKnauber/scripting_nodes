@@ -28,6 +28,6 @@ class SNA_Node_Link(ScriptingBaseNode, bpy.types.Node):
         if icon:
             args.append(icon)
         ctx.code(f"""
-            {ctx.helper("sn_link")}({", ".join(args)})
+            {ctx.helper("link")}({", ".join(args)})
             {ctx.flow("next")}
         """)

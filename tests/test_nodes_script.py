@@ -215,7 +215,9 @@ class ScriptNodeTest(unittest.TestCase):
         helpers.link(tree, trigger.outputs[0], p.inputs[0])
         helpers.link(tree, script.outputs[0], p.inputs[1])
         helpers.flush()
-        self.assertIn("sn_print(str(maths.double(value=2)))", helpers.tree_source(tree))
+        self.assertIn(
+            "utils.log(str(maths.double(value=2)))", helpers.tree_source(tree)
+        )
         self.assertLoaded()
 
     def test_old_nodes_call_run(self):
@@ -242,7 +244,7 @@ class ScriptNodeTest(unittest.TestCase):
         self.assertIn("from .scripts import tools", code)
         self.assertIn("result = tools.run(obj=", code)
         self.assertIn("factor=3.0, context=context)", code)
-        self.assertIn("sn_print(str(result))", code)
+        self.assertIn("utils.log(str(result))", code)
         files = helpers.addon_files()
         # the script, unchanged
         self.assertEqual(files["scripts/tools.py"], SCALE)

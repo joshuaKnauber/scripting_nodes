@@ -1,6 +1,6 @@
 import bpy
 
-from ._sn_helpers import sn_add_shortcut
+from . import utils
 from .describe import describe
 
 
@@ -56,7 +56,6 @@ def draw_object_menu(self, context):
 
 
 class OBJECT_TOOLKIT_MT_toolkit(bpy.types.Menu):
-    bl_idname = "OBJECT_TOOLKIT_MT_toolkit"
     bl_label = "Toolkit"
 
     def draw(self, context):
@@ -83,7 +82,7 @@ class OBJECT_TOOLKIT_AP_preferences(bpy.types.AddonPreferences):
 
 def register():
     bpy.types.VIEW3D_MT_object.append(draw_object_menu)
-    sn_add_shortcut(
+    utils.add_shortcut(
         "3D View",
         "VIEW_3D",
         "wm.call_menu_pie",

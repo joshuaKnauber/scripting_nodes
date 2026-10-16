@@ -1,7 +1,7 @@
 import bpy
 
-from .....core.context import NodeError
 from .....blend_data.rna import blend_data_spec
+from .....core.context import NodeError
 from .....sockets.data.socket_blend_data import linked_rna_type
 from .....sockets.spec import BlendData, Flow
 from ....base_node import ScriptingBaseNode

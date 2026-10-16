@@ -1,6 +1,7 @@
 import bpy
 
 from .....sockets.spec import Data, Integer, Interface, List
+from ...._loop import for_each
 from ....base_node import ScriptingBaseNode
 
 
@@ -19,10 +20,10 @@ class SNA_Node_DrawForEach(ScriptingBaseNode, bpy.types.Node):
     ]
 
     def emit(self, ctx):
-        item, index = ctx.var("item"), ctx.var("index")
-        loop = ctx.flow("loop", outputs={"item": item, "index": index})
+        header, outputs = for_each(ctx, ctx.input("list"))
+        loop = ctx.flow("loop", outputs=outputs, loop=True)
         ctx.code(f"""
-            for {index}, {item} in enumerate({ctx.input("list")}):
+            {header}
                 {loop}
             {ctx.flow("next")}
         """)

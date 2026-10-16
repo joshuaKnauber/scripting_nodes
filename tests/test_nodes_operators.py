@@ -177,7 +177,7 @@ class OperatorNodesTest(FlowTestCase):
         self.assertBuilt()
         source = self.source()
         self.assertIn("class OP_TEST_UL_objects(bpy.types.UIList):", source)
-        self.assertIn("layout.label(text=sn_text(item))", source)
+        self.assertIn("layout.label(text=utils.as_text(item))", source)
         self.assertIn(
             "self.layout.template_list('OP_TEST_UL_objects', \"\", bpy.data, 'objects', "
             "context.scene.op_test, 'index')",

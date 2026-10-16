@@ -36,6 +36,7 @@ RESERVED_MODULES = set(keyword.kwlist) | {
     "register",
     "scripts",
     "unregister",
+    "utils",
 }
 
 

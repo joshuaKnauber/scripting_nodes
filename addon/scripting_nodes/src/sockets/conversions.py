@@ -23,8 +23,8 @@ CONVERSIONS = {
     ("ScriptingVectorSocket", "ScriptingStringSocket"): "str({value})",
     ("ScriptingColorSocket", "ScriptingStringSocket"): "str({value})",
     # Blender data as text is its name, not "<bpy_struct, Object(...)>"
-    ("ScriptingDataSocket", "ScriptingStringSocket"): "{sn_text}({value})",
-    ("ScriptingBlendDataSocket", "ScriptingStringSocket"): "{sn_text}({value})",
+    ("ScriptingDataSocket", "ScriptingStringSocket"): "{as_text}({value})",
+    ("ScriptingBlendDataSocket", "ScriptingStringSocket"): "{as_text}({value})",
     # To Boolean
     ("ScriptingStringSocket", "ScriptingBooleanSocket"): "bool({value})",
     ("ScriptingFloatSocket", "ScriptingBooleanSocket"): "bool({value})",
@@ -164,10 +164,10 @@ CONVERSIONS = {
     ): "(tuple({value}[:4]) if len({value}) >= 4 else (0.0, 0.0, 0.0, 1.0))",
     ("ScriptingListSocket", "ScriptingDataSocket"): "{value}",
     # Icons are icon ids (ints); names of built-in icons are looked up when
-    # the code runs ({sn_icon}: the helper, see HELPERS below)
+    # the code runs ({icon_id}: the helper, see HELPERS below)
     ("ScriptingIntegerSocket", "ScriptingIconSocket"): "{value}",
-    ("ScriptingStringSocket", "ScriptingIconSocket"): "{sn_icon}({value})",
-    ("ScriptingDataSocket", "ScriptingIconSocket"): "{sn_icon}({value})",
+    ("ScriptingStringSocket", "ScriptingIconSocket"): "{icon_id}({value})",
+    ("ScriptingDataSocket", "ScriptingIconSocket"): "{icon_id}({value})",
     ("ScriptingIconSocket", "ScriptingIntegerSocket"): "{value}",
     ("ScriptingIconSocket", "ScriptingDataSocket"): "{value}",
     ("ScriptingIconSocket", "ScriptingBooleanSocket"): "bool({value})",
@@ -196,7 +196,7 @@ CONVERSIONS = {
 }
 
 # helpers (core/helpers.py) conversion templates call, by placeholder
-HELPERS = ("sn_icon", "sn_text")
+HELPERS = ("icon_id", "as_text")
 
 
 class ConversionError(ValueError):

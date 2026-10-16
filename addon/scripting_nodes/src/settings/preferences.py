@@ -31,6 +31,27 @@ class SNA_AddonPreferences(AddonPreferences):
         max=65535,
     )
 
+    mcp_autostart: bpy.props.BoolProperty(
+        name="Start with Blender",
+        description="Start the MCP server when Blender starts",
+    )
+    mcp_allow_python: bpy.props.BoolProperty(
+        name="Allow Running Python",
+        description=(
+            "Let MCP clients run Python in Blender (run_python). Any program "
+            "on this computer that can reach the port could then run code"
+        ),
+        default=True,
+    )
+    mcp_token: bpy.props.StringProperty(
+        name="Token",
+        description=(
+            "Optional: clients must send it (Authorization: Bearer <token>). "
+            "Read when the server starts"
+        ),
+        subtype="PASSWORD",
+    )
+
     def draw(self, context):
         layout = self.layout
 
@@ -39,6 +60,9 @@ class SNA_AddonPreferences(AddonPreferences):
         col = box.column()
         col.use_property_split = True
         col.prop(self, "mcp_port")
+        col.prop(self, "mcp_autostart")
+        col.prop(self, "mcp_allow_python")
+        col.prop(self, "mcp_token")
         col.label(
             text="Start/stop the server from the node editor sidebar (N panel).",
             icon="INFO",

@@ -25,6 +25,8 @@ def _drain():
             fn, args, kwargs, box = _PENDING.get_nowait()
         except queue.Empty:
             break
+        if box.get("cancelled"):
+            continue  # the caller gave up waiting: don't run it late
         try:
             box["result"] = fn(*args, **kwargs)
         except Exception as exc:
@@ -66,6 +68,7 @@ def call_on_main(fn, *args, timeout=10.0, **kwargs):
     box = {"event": Event()}
     _PENDING.put((fn, args, kwargs, box))
     if not box["event"].wait(timeout=timeout):
+        box["cancelled"] = True
         raise TimeoutError(
             f"MCP tool call timed out after {timeout:.1f}s waiting for main thread"
         )

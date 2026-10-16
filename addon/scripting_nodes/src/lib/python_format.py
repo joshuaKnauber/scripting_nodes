@@ -536,6 +536,8 @@ class _Formatter:
             return item.verbatim
         comment = f"  {item.comment}" if item.comment else ""
         leaves = _remove_redundant_parens(item.leaves)
+        if not self.fits(item.indent, flat(leaves) + comment):
+            leaves = _parenthesize_import(leaves)
         lines = self.line(leaves, item.indent, statement=True)
         lines[-1] += comment
         return lines
@@ -719,6 +721,18 @@ class _Formatter:
         for segment in segments:
             lines += self.line(_strip_space(segment), indent)
         return lines
+
+
+def _parenthesize_import(leaves):
+    """`from x import a, b` that's too long: `from x import (a, b)`, split
+    one name per line."""
+    if not leaves or leaves[0].text != "from":
+        return leaves
+    at = next((i for i, leaf in enumerate(leaves) if leaf.text == "import"), None)
+    if at is None or at + 1 >= len(leaves) or leaves[at + 1].text == "(":
+        return leaves
+    names = [Leaf(leaves[at + 1].text, leaves[at + 1].kind, None), *leaves[at + 2 :]]
+    return [*leaves[: at + 1], Leaf("(", "op", " "), *names, Leaf(")", "op", None)]
 
 
 def _strip_space(leaves):

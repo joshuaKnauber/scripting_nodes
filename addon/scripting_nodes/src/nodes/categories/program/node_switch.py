@@ -83,10 +83,17 @@ class SNA_Node_Switch(ScriptingBaseNode, bpy.types.Node):
     def emit(self, ctx):
         if not self.cases:
             raise NodeError("Add a case")
+        cases = list(enumerate(self.cases))
+        if not ctx.is_linked("default"):
+            # without a default, cases that do nothing can go
+            cases = [(i, case) for i, case in cases if ctx.is_linked(f"case_{i}")]
+            if not cases:
+                ctx.code(ctx.flow("next"))
+                return
         value = ctx.var("value")
         branches = []
-        for i, case in enumerate(self.cases):
-            keyword = "if" if i == 0 else "elif"
+        for n, (i, case) in enumerate(cases):
+            keyword = "if" if n == 0 else "elif"
             branches.append(f"""
                 {keyword} {value} == {case.value!r}:
                     {ctx.flow(f"case_{i}")}

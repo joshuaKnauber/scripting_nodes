@@ -11,6 +11,7 @@ class SNA_Node_Trigger(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Trigger"
     bl_label = "Trigger"
     sn_root = True
+    sn_dev_only = True  # a button on the node, not part of the add-on
     sn_outputs = [Logic()]
 
     @property

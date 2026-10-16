@@ -26,7 +26,6 @@ class SNA_Node_Menu(ScriptingBaseNode, bpy.types.Node):
         menu = ctx.name("class")
         ctx.module(f"""
             class {menu}(bpy.types.Menu):
-                bl_idname = {menu!r}
                 bl_label = {ctx.input("label")}
 
                 def draw(self, context):

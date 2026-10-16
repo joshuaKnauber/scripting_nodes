@@ -2,7 +2,7 @@ import zipfile
 
 import bpy
 
-from .. import compiler, scheduler
+from .. import compiler, export_check, scheduler
 
 
 def build_files():
@@ -39,10 +39,36 @@ class SNA_OT_ExportAddon(bpy.types.Operator):
         except OSError as exc:
             self.report({"ERROR"}, f"Export failed: {exc}")
             return {"CANCELLED"}
-        self.report({"INFO"}, f"Exported to {path}")
+        issues = export_check.run()
+        if issues:
+            self.report(
+                {"WARNING"},
+                f"Exported to {path}. {len(issues)} things to fix for the "
+                "extensions platform, see Addon > Extensions Platform",
+            )
+        else:
+            self.report({"INFO"}, f"Exported to {path}")
         return {"FINISHED"}
 
     def invoke(self, context, event):
         self.filepath = f"{context.scene.sna.addon.module_name}.zip"
         context.window_manager.fileselect_add(self)
         return {"RUNNING_MODAL"}
+
+
+class SNA_OT_CheckExport(bpy.types.Operator):
+    bl_idname = "sna.check_export"
+    bl_label = "Check"
+    bl_description = (
+        "Check the add-on against the moderation guidelines of the extensions platform"
+    )
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        scheduler.flush()
+        issues = export_check.run()
+        if issues:
+            self.report({"WARNING"}, f"{len(issues)} things to fix")
+        else:
+            self.report({"INFO"}, "Nothing to fix")
+        return {"FINISHED"}

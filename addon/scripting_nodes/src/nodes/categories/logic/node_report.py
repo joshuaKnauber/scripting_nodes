@@ -25,6 +25,6 @@ class SNA_Node_Report(ScriptingBaseNode, bpy.types.Node):
     def emit(self, ctx):
         owner = "self" if "self" in ctx.scope.names else "None"
         ctx.code(f"""
-            {ctx.helper("sn_report")}({owner}, {self.kind!r}, {ctx.input("message")})
+            {ctx.helper("report")}({owner}, {self.kind!r}, {ctx.input("message")})
             {ctx.flow("next")}
         """)

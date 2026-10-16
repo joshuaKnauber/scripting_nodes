@@ -13,7 +13,6 @@ from ....sockets.spec import Interface
 from ..._property_list import PropertyListMixin
 from ...base_node import ScriptingBaseNode
 
-
 # scope value: the preferences themselves, in their draw()
 SELF = "__self__"
 

@@ -1,5 +1,5 @@
 """Shortcut node: a keymap item in Blender's add-on keyconfig that runs an
-operator or opens a menu (helper sn_add_shortcut)."""
+operator or opens a menu (helper add_shortcut)."""
 
 import bpy
 
@@ -147,4 +147,4 @@ class SNA_Node_Shortcut(OperatorCallMixin, ScriptingBaseNode, bpy.types.Node):
             )
             args.append(f"properties={{{items}}}")
         args += [f"{m}=True" for m in MODIFIERS if getattr(self, m)]
-        ctx.on_register(f"{ctx.helper('sn_add_shortcut')}({', '.join(args)})")
+        ctx.on_register(f"{ctx.helper('add_shortcut')}({', '.join(args)})")

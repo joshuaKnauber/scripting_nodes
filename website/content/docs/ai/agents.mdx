@@ -4,4 +4,25 @@ description: Connect coding agents to Blender.
 icon: Bot
 ---
 
-<Callout>This page isn't written yet.</Callout>
+Start the [MCP server](/docs/ai/mcp-server) in Blender, then add it to your agent. The **MCP Server** panel copies the setup for you: **Claude Code**, **Codex** or **JSON** (Claude Desktop and others).
+
+**Claude Code**
+
+```bash
+claude mcp add --transport http scripting-nodes http://127.0.0.1:7423/
+```
+
+**Codex** (`~/.codex/config.toml`)
+
+```toml
+[mcp_servers.scripting-nodes]
+url = "http://127.0.0.1:7423/"
+```
+
+Then ask for an add-on: *"Make an add-on with a sidebar panel in the 3D viewport that adds a three-point light rig."* The agent builds it in the open file: the nodes show up in the node editor, the add-on is loaded right away, and you can keep working on it yourself.
+
+Good to know:
+
+- The agent works in the file you have open. Save first, or start from a new file.
+- Every change is one undo step: Ctrl Z works on the agent's changes too.
+- Agents check their work with `get_problems` and `run_operator`, and look at Blender with `screenshot`. Ask for a screenshot if you want to see what they see.

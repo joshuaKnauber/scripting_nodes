@@ -1,7 +1,7 @@
 """Shared helper functions of generated addons.
 
-Nodes use them through `ctx.helper(name)`. Used helpers are written to
-`_sn_helpers.py` in the generated addon. A helper can behave differently in
+Nodes use them through `ctx.helper(name)`, which returns `utils.<name>`: used
+helpers are written to `utils.py` in the generated addon. A helper can behave differently in
 the live (dev) addon than in an exported one; this is the only place where
 dev and export builds differ, nodes never check the build mode.
 """
@@ -27,7 +27,7 @@ class Helper:
 
 
 ICON_HELPER = '''
-def sn_icon(icon):
+def icon_id(icon):
     """Icon id of a built-in icon's name ("MESH_DATA"), 0 for unknown names.
     Icon ids pass through."""
     if not isinstance(icon, str):
@@ -40,28 +40,28 @@ def sn_icon(icon):
 '''
 
 CUSTOM_ICON_HELPER = '''
-_sn_previews = None
+_previews = None
 
 
-def sn_custom_icon(name):
+def custom_icon_id(name):
     """Icon id of the image `icons/<name>` of this add-on (loaded once)."""
-    global _sn_previews
+    global _previews
     import os
 
     import bpy.utils.previews
 
-    if _sn_previews is None:
-        _sn_previews = bpy.utils.previews.new()
-    if name not in _sn_previews:
+    if _previews is None:
+        _previews = bpy.utils.previews.new()
+    if name not in _previews:
         path = os.path.join(os.path.dirname(__file__), "icons", name)
-        _sn_previews.load(name, path, "IMAGE")
-    return _sn_previews[name].icon_id
+        _previews.load(name, path, "IMAGE")
+    return _previews[name].icon_id
 '''
 
 # UILayout.link is new in Blender 5.2, label_multiline / label_markdown after:
 # older versions get a simpler version drawn with labels and buttons
 TEXT_HELPERS = '''
-def sn_label_multiline(layout, text, max_lines=0, alignment="LEFT", **icon):
+def label_multiline(layout, text, max_lines=0, alignment="LEFT", **icon):
     """layout.label_multiline(): text over several lines, wrapped."""
     if hasattr(layout, "label_multiline"):
         layout.label_multiline(
@@ -91,7 +91,7 @@ def sn_label_multiline(layout, text, max_lines=0, alignment="LEFT", **icon):
             column.label(text=line, icon="BLANK1")
 
 
-def sn_label_markdown(layout, text):
+def label_markdown(layout, text):
     """layout.label_markdown(): headers, lists, quotes, links, rules."""
     if hasattr(layout, "label_markdown"):
         layout.label_markdown(text=text)
@@ -110,12 +110,12 @@ def sn_label_markdown(layout, text):
         line = re.sub(r"!?\\[([^\\]]*)\\]\\([^)]*\\)", r"\\1", line)
         line = re.sub(r"\\*\\*|\\*|`", "", line)
         if line:
-            sn_label_multiline(column, line)
+            label_multiline(column, line)
         else:
             column.separator()
 
 
-def sn_textbox(layout, data, prop, lines=3, placeholder=""):
+def textbox(layout, data, prop, lines=3, placeholder=""):
     """layout.textbox(): a multi-line text field (a normal one before)."""
     if hasattr(layout, "textbox"):
         layout.textbox(
@@ -125,7 +125,7 @@ def sn_textbox(layout, data, prop, lines=3, placeholder=""):
     layout.prop(data, prop, text="", placeholder=placeholder)
 
 
-def sn_link(layout, url, text="", **icon):
+def link(layout, url, text="", **icon):
     """layout.link(): a button opening `url`."""
     if hasattr(layout, "link"):
         layout.link(url=url, text=text, **icon)
@@ -135,38 +135,38 @@ def sn_link(layout, url, text="", **icon):
 
 
 REPORT_HELPER = '''
-def sn_report(owner, kind, message):
+def report(owner, kind, message):
     """Report a message from an operator (`owner`, shown in the status bar
     and the Info editor), printed where there is none."""
     message = str(message)
     if hasattr(owner, "report"):
         owner.report({kind}, message)
     else:
-        sn_print(f"{kind.title()}: {message}")
+        log(f"{kind.title()}: {message}")
 '''
 
 
 TIMER_HELPERS = '''
-_sn_timers = []
+_timers = []
 
 
-def sn_run_later(function, delay=0.0, persistent=False):
+def run_later(function, delay=0.0, persistent=False):
     """Call `function` once after `delay` seconds. Timers stop when the
     add-on is disabled (and when a file is loaded unless `persistent`)."""
     import bpy
 
     def timer():
-        if timer in _sn_timers:
-            _sn_timers.remove(timer)
+        if timer in _timers:
+            _timers.remove(timer)
         function()
 
-    _sn_timers.append(timer)
+    _timers.append(timer)
     bpy.app.timers.register(
         timer, first_interval=max(0.0, delay), persistent=persistent
     )
 
 
-def sn_run_in_intervals(function, interval, times=0, persistent=False):
+def run_in_intervals(function, interval, times=0, persistent=False):
     """Call `function(index)` every `interval` seconds: `times` times (0: no
     limit) or until it returns False."""
     import bpy
@@ -178,30 +178,30 @@ def sn_run_in_intervals(function, interval, times=0, persistent=False):
         keep_running = function(index)
         index += 1
         if keep_running is False or (times > 0 and index >= times):
-            if timer in _sn_timers:
-                _sn_timers.remove(timer)
+            if timer in _timers:
+                _timers.remove(timer)
             return None
         return max(0.01, interval)
 
-    _sn_timers.append(timer)
+    _timers.append(timer)
     bpy.app.timers.register(timer, first_interval=0.0, persistent=persistent)
 '''
 
 TIMERS_UNREGISTER = """
 import bpy
 
-for timer in _sn_timers:
+for timer in _timers:
     if bpy.app.timers.is_registered(timer):
         bpy.app.timers.unregister(timer)
-_sn_timers.clear()
+_timers.clear()
 """
 
 
 SHORTCUT_HELPER = '''
-_sn_keymaps = []
+_keymaps = []
 
 
-def sn_add_shortcut(keymap, space_type, idname, key, value="PRESS", properties=None, **modifiers):
+def add_shortcut(keymap, space_type, idname, key, value="PRESS", properties=None, **modifiers):
     """Add a keymap item to Blender's add-on keyconfig (removed when the
     add-on is disabled)."""
     import bpy
@@ -213,12 +213,12 @@ def sn_add_shortcut(keymap, space_type, idname, key, value="PRESS", properties=N
     item = keymap.keymap_items.new(idname, key, value, **modifiers)
     for name, prop_value in (properties or {}).items():
         setattr(item.properties, name, prop_value)
-    _sn_keymaps.append((keymap, item))
+    _keymaps.append((keymap, item))
 '''
 
 
 REDRAW_HELPER = '''
-def sn_redraw(area_type=""):
+def redraw(area_type=""):
     """Redraw the editors of a type ("VIEW_3D"), all with ""."""
     import bpy
 
@@ -231,7 +231,7 @@ def sn_redraw(area_type=""):
 
 # paths starting with // are relative to the .blend file (bpy.path.abspath)
 FILE_HELPERS = '''
-def sn_read_text(path):
+def read_text(path):
     """The text of a file, "" if it doesn't exist."""
     import os
 
@@ -244,7 +244,7 @@ def sn_read_text(path):
         return file.read()
 
 
-def sn_write_text(path, text, append=False):
+def write_text(path, text, append=False):
     """Write text to a file, creating its folder."""
     import os
 
@@ -258,7 +258,7 @@ def sn_write_text(path, text, append=False):
         file.write(str(text))
 
 
-def sn_list_folder(folder, extension="", kind="FILES", full_paths=True):
+def list_folder(folder, extension="", kind="FILES", full_paths=True):
     """Files and/or folders in a folder (sorted), [] if it doesn't exist.
     `extension` filters files (".png", case doesn't matter)."""
     import os
@@ -280,7 +280,7 @@ def sn_list_folder(folder, extension="", kind="FILES", full_paths=True):
     return found
 
 
-def sn_blend_contents(path, data_type):
+def blend_contents(path, data_type):
     """Names of the data of a type ("materials") in a .blend file, sorted."""
     import os
 
@@ -293,7 +293,7 @@ def sn_blend_contents(path, data_type):
         return sorted(getattr(data_from, data_type))
 
 
-def sn_load_blend(path, data_type, names=None, link=False, add_to_scene=False):
+def load_blend(path, data_type, names=None, link=False, add_to_scene=False):
     """Append (or link) data from a .blend file: the given names (a name or
     a list), all with none. Returns the loaded data."""
     import bpy
@@ -322,40 +322,40 @@ def sn_load_blend(path, data_type, names=None, link=False, add_to_scene=False):
 MSGBUS_HELPER = '''
 from bpy.app.handlers import persistent
 
-_sn_subscriptions = []
-_sn_owner = object()
+_subscriptions = []
+_owner = object()
 
 
-def _sn_subscribe_rna(key, notify):
+def _subscribe_rna(key, notify):
     import bpy
 
     bpy.msgbus.subscribe_rna(
-        key=key, owner=_sn_owner, args=(), notify=lambda *args: notify()
+        key=key, owner=_owner, args=(), notify=lambda *args: notify()
     )
 
 
 @persistent
-def _sn_resubscribe(*args):
+def _resubscribe(*args):
     """Loading a file clears subscriptions."""
-    for key, notify in _sn_subscriptions:
-        _sn_subscribe_rna(key, notify)
+    for key, notify in _subscriptions:
+        _subscribe_rna(key, notify)
 
 
-def sn_subscribe(struct, prop, notify):
+def subscribe(struct, prop, notify):
     """Call `notify()` when `prop` of any `struct` ("Object", "location")
     changes (bpy.msgbus), also after loading another file."""
     import bpy
 
     key = (getattr(bpy.types, struct), prop)
-    _sn_subscriptions.append((key, notify))
-    _sn_subscribe_rna(key, notify)
-    if _sn_resubscribe not in bpy.app.handlers.load_post:
-        bpy.app.handlers.load_post.append(_sn_resubscribe)
+    _subscriptions.append((key, notify))
+    _subscribe_rna(key, notify)
+    if _resubscribe not in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.append(_resubscribe)
 '''
 
 
 TEXT_HELPER = '''
-def sn_text(value):
+def as_text(value):
     """A value as text: Blender data (objects, materials, ...) by its name."""
     import bpy
 
@@ -375,9 +375,9 @@ def _function(source, name):
 
 
 HELPERS = {
-    "sn_print": Helper(
+    "log": Helper(
         dev='''
-def sn_print(*args):
+def log(*args):
     """print() that also shows the message in the Scripting Nodes editor."""
     import bpy
 
@@ -389,80 +389,80 @@ def sn_print(*args):
 ''',
         export_name="print",
     ),
-    "sn_icon": Helper(dev=ICON_HELPER, export=ICON_HELPER),
-    "sn_text": Helper(dev=TEXT_HELPER, export=TEXT_HELPER),
-    "sn_report": Helper(
+    "icon_id": Helper(dev=ICON_HELPER, export=ICON_HELPER),
+    "as_text": Helper(dev=TEXT_HELPER, export=TEXT_HELPER),
+    "report": Helper(
         dev=REPORT_HELPER,
-        # sn_print is print() in exported add-ons
-        export=REPORT_HELPER.replace("sn_print(", "print("),
-        requires=("sn_print",),
+        # log is print() in exported add-ons
+        export=REPORT_HELPER.replace("log(", "print("),
+        requires=("log",),
     ),
     **{
         name: Helper(
             dev=_function(TEXT_HELPERS, name),
             export=_function(TEXT_HELPERS, name),
-            requires=("sn_label_multiline",) if name == "sn_label_markdown" else (),
+            requires=("label_multiline",) if name == "label_markdown" else (),
         )
-        for name in ("sn_label_multiline", "sn_label_markdown", "sn_link", "sn_textbox")
+        for name in ("label_multiline", "label_markdown", "link", "textbox")
     },
-    "sn_run_later": Helper(
-        dev=TIMER_HELPERS[: TIMER_HELPERS.index("def sn_run_in_intervals(")],
-        export=TIMER_HELPERS[: TIMER_HELPERS.index("def sn_run_in_intervals(")],
+    "run_later": Helper(
+        dev=TIMER_HELPERS[: TIMER_HELPERS.index("def run_in_intervals(")],
+        export=TIMER_HELPERS[: TIMER_HELPERS.index("def run_in_intervals(")],
         unregister=TIMERS_UNREGISTER,
     ),
-    "sn_run_in_intervals": Helper(
-        dev=_function(TIMER_HELPERS, "sn_run_in_intervals"),
-        export=_function(TIMER_HELPERS, "sn_run_in_intervals"),
-        requires=("sn_run_later",),  # _sn_timers
+    "run_in_intervals": Helper(
+        dev=_function(TIMER_HELPERS, "run_in_intervals"),
+        export=_function(TIMER_HELPERS, "run_in_intervals"),
+        requires=("run_later",),  # _timers
     ),
-    "sn_add_shortcut": Helper(
+    "add_shortcut": Helper(
         dev=SHORTCUT_HELPER,
         export=SHORTCUT_HELPER,
         unregister="""
 import contextlib
 
-for keymap, item in _sn_keymaps:
+for keymap, item in _keymaps:
     # gone if Blender removed the keymap already
     with contextlib.suppress(ReferenceError, RuntimeError):
         keymap.keymap_items.remove(item)
-_sn_keymaps.clear()
+_keymaps.clear()
 """,
     ),
-    "sn_subscribe": Helper(
+    "subscribe": Helper(
         dev=MSGBUS_HELPER,
         export=MSGBUS_HELPER,
         unregister="""
 import bpy
 
-bpy.msgbus.clear_by_owner(_sn_owner)
-if _sn_resubscribe in bpy.app.handlers.load_post:
-    bpy.app.handlers.load_post.remove(_sn_resubscribe)
-_sn_subscriptions.clear()
+bpy.msgbus.clear_by_owner(_owner)
+if _resubscribe in bpy.app.handlers.load_post:
+    bpy.app.handlers.load_post.remove(_resubscribe)
+_subscriptions.clear()
 """,
     ),
-    "sn_redraw": Helper(dev=REDRAW_HELPER, export=REDRAW_HELPER),
+    "redraw": Helper(dev=REDRAW_HELPER, export=REDRAW_HELPER),
     **{
         name: Helper(
             dev=_function(FILE_HELPERS, name), export=_function(FILE_HELPERS, name)
         )
         for name in (
-            "sn_read_text",
-            "sn_write_text",
-            "sn_list_folder",
-            "sn_blend_contents",
-            "sn_load_blend",
+            "read_text",
+            "write_text",
+            "list_folder",
+            "blend_contents",
+            "load_blend",
         )
     },
-    "sn_custom_icon": Helper(
+    "custom_icon_id": Helper(
         dev=CUSTOM_ICON_HELPER,
         export=CUSTOM_ICON_HELPER,
         unregister="""
-global _sn_previews
-if _sn_previews is not None:
+global _previews
+if _previews is not None:
     import bpy.utils.previews
 
-    bpy.utils.previews.remove(_sn_previews)
-    _sn_previews = None
+    bpy.utils.previews.remove(_previews)
+    _previews = None
 """,
     ),
 }
@@ -485,7 +485,7 @@ def source(names, dev: bool) -> str:
             + "".join(f"    {line}\n" if line else "\n" for line in body.splitlines())
         )
     code, imports = _hoist_imports("\n\n".join(parts))
-    header = '"""Generated by Scripting Nodes."""\n'
+    header = '"""Helper functions of the add-on."""\n'
     if imports:
         header += "\n" + "\n".join(sort_imports(imports)) + "\n"
     # isort: one blank line after the imports, two before a definition

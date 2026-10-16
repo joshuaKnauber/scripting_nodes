@@ -49,12 +49,12 @@ class SNA_Node_PieMenu(ScriptingBaseNode, bpy.types.Node):
         # trailing empty slots aren't needed
         while slots and slots[-1] == f"{pie}.separator()":
             slots.pop()
+        start = f"{pie} = self.layout.menu_pie()" if slots else "self.layout.menu_pie()"
         ctx.module(f"""
             class {menu}(bpy.types.Menu):
-                bl_idname = {menu!r}
                 bl_label = {ctx.input("label")}
 
                 def draw(self, context):
-                    {pie} = self.layout.menu_pie()
+                    {start}
                     {ctx.join(slots)}
         """)

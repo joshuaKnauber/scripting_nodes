@@ -1,6 +1,6 @@
 import bpy
 
-from ._sn_helpers import sn_report, sn_write_text
+from . import utils
 from .scripts import toolkit_helpers
 
 
@@ -18,7 +18,7 @@ class OBJECT_TOOLKIT_OT_rename_selected(bpy.types.Operator):
     def execute(self, context):
         for index, item in enumerate(context.selected_objects):
             item.name = f"{self.prefix}_{index + self.start:03}"
-        sn_report(self, "INFO", f"Renamed {len(context.selected_objects)} objects")
+        utils.report(self, "INFO", f"Renamed {len(context.selected_objects)} objects")
         return {"FINISHED"}
 
 
@@ -75,7 +75,7 @@ class OBJECT_TOOLKIT_OT_restore_selection_set(bpy.types.Operator):
                 context.scene.object_toolkit.active_set
             ].objects
         )
-        sn_report(self, "INFO", f"Selected {count} objects")
+        utils.report(self, "INFO", f"Selected {count} objects")
         return {"FINISHED"}
 
 
@@ -95,11 +95,11 @@ class OBJECT_TOOLKIT_OT_export_names(bpy.types.Operator):
         return {"RUNNING_MODAL"}
 
     def execute(self, context):
-        sn_write_text(
+        utils.write_text(
             self.filepath,
             "\n".join(str(i) for i in [obj.name for obj in context.selected_objects]),
         )
-        sn_report(self, "INFO", f"Wrote {self.filepath}")
+        utils.report(self, "INFO", f"Wrote {self.filepath}")
         return {"FINISHED"}
 
 

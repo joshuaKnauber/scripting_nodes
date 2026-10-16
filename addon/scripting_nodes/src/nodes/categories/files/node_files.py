@@ -19,7 +19,7 @@ class SNA_Node_ReadTextFile(ScriptingBaseNode, bpy.types.Node):
     sn_outputs = [String("text", "Text"), List("lines", "Lines")]
 
     def emit(self, ctx):
-        text = f"{ctx.helper('sn_read_text')}({ctx.input('path')})"
+        text = f"{ctx.helper('read_text')}({ctx.input('path')})"
         ctx.output("text", text)
         ctx.output("lines", f"{text}.splitlines()")
 
@@ -46,7 +46,7 @@ class SNA_Node_WriteTextFile(ScriptingBaseNode, bpy.types.Node):
         if self.append:
             args.append("append=True")
         ctx.code(f"""
-            {ctx.helper("sn_write_text")}({", ".join(args)})
+            {ctx.helper("write_text")}({", ".join(args)})
             {ctx.flow("next")}
         """)
 
@@ -108,7 +108,7 @@ class SNA_Node_ListFolder(ScriptingBaseNode, bpy.types.Node):
             args.append(repr(self.kind))
         if not self.full_paths:
             args.append("full_paths=False")
-        ctx.output("paths", f"{ctx.helper('sn_list_folder')}({', '.join(args)})")
+        ctx.output("paths", f"{ctx.helper('list_folder')}({', '.join(args)})")
 
 
 class SNA_Node_JoinPath(ScriptingBaseNode, bpy.types.Node):
@@ -206,7 +206,7 @@ class SNA_Node_LoadFromBlend(ScriptingBaseNode, bpy.types.Node):
             args.append("add_to_scene=True")
         ctx.output("loaded", loaded)
         ctx.code(f"""
-            {loaded} = {ctx.helper("sn_load_blend")}({", ".join(args)})
+            {loaded} = {ctx.helper("load_blend")}({", ".join(args)})
             {ctx.flow("next")}
         """)
 
@@ -225,5 +225,5 @@ class SNA_Node_BlendFileContents(ScriptingBaseNode, bpy.types.Node):
     data_type: bpy.props.EnumProperty(name="Type", items=DATA_TYPES)
 
     def emit(self, ctx):
-        helper = ctx.helper("sn_blend_contents")
+        helper = ctx.helper("blend_contents")
         ctx.output("names", f"{helper}({ctx.input('path')}, {self.data_type!r})")

@@ -21,16 +21,19 @@ class SNA_Node_Split(ScriptingBaseNode, bpy.types.Node):
     ]
 
     def emit(self, ctx):
-        split, first, second = ctx.var("split"), ctx.var("column"), ctx.var("column")
+        split = ctx.var("split")
+        # a column nothing is drawn into still takes its share of the width
+        first = ctx.var("column") if ctx.is_linked("first") else None
+        second = ctx.var("column") if ctx.is_linked("second") else None
         args = ctx.args(
             ctx.keyword("factor", "factor", 0.0), ctx.keyword("align", "align", False)
         )
         ctx.code(f"""
             {split} = {ctx.layout}.split({args})
-            {first} = {split}.column()
-            {ctx.flow("first", layout=first)}
-            {second} = {split}.column()
-            {ctx.flow("second", layout=second)}
+            {f"{first} = {split}.column()" if first else f"{split}.column()"}
+            {ctx.flow("first", layout=first) if first else ""}
+            {f"{second} = {split}.column()" if second else f"{split}.column()"}
+            {ctx.flow("second", layout=second) if second else ""}
             {ctx.flow("next")}
         """)
 

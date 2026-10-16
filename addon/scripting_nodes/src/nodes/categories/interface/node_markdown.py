@@ -23,6 +23,6 @@ class SNA_Node_Markdown(TextSourceMixin, ScriptingBaseNode, bpy.types.Node):
     def emit(self, ctx):
         text = self.text_expression(ctx)
         ctx.code(f"""
-            {ctx.helper("sn_label_markdown")}({ctx.layout}, {text})
+            {ctx.helper("label_markdown")}({ctx.layout}, {text})
             {ctx.flow("next")}
         """)

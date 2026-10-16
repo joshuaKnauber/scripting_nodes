@@ -3,8 +3,8 @@ import bpy
 from ....core.context import NodeError
 from ....core.references import Reference
 from ....sockets.spec import Interface
-from .node_add_to import class_name, classes
 from ...base_node import ScriptingBaseNode
+from .node_add_to import class_name, classes
 
 
 def _search_menus(self, context, edit_text):

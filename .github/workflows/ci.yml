@@ -51,3 +51,7 @@ jobs:
         run: ~/blender/blender --command extension validate addon/scripting_nodes
       - name: Run tests
         run: BLENDER=~/blender/blender python3 scripts/test.py -v
+      - uses: astral-sh/setup-uv@v6
+      # the generated code of every node passes ruff (tests/snapshots/ruff.toml)
+      - name: Every node add-on
+        run: BLENDER=~/blender/blender python3 scripts/example_addon.py every_node /tmp/every_node

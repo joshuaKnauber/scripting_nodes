@@ -1,3 +1,5 @@
+import bpy
+
 from ....core import naming
 from ....lib.code_format import literal_set
 from ....lib.trees import node_by_id
@@ -5,13 +7,12 @@ from ....sockets.spec import Boolean, Icon, Interface, String
 from ..._icon import icon_argument
 from ...base_node import ScriptingBaseNode
 from .ops.panel_picker import (
-    is_picker_active,
     get_active_picker_node_id,
-    get_space_type_items,
-    get_region_type_items,
     get_context_type_items,
+    get_region_type_items,
+    get_space_type_items,
+    is_picker_active,
 )
-import bpy
 
 
 class SNA_OT_PanelNodeSettings(bpy.types.Operator):

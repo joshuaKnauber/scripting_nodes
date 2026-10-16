@@ -46,6 +46,19 @@ class Scope:
     values: dict = field(default_factory=dict)
     # names defined by the enclosing function (self, context, ...)
     names: frozenset = frozenset()
+    # the body of a loop (break / continue work here)
+    loop: bool = False
+
+    def in_loop(self) -> bool:
+        """Inside a loop of the same function (a nested def ends it)."""
+        scope = self
+        while scope is not None:
+            if scope.loop:
+                return True
+            if scope.parent is not None and scope.parent.names != scope.names:
+                return False
+            scope = scope.parent
+        return False
 
     def lookup(self, key):
         scope = self
@@ -248,12 +261,12 @@ class NodeContext:
         finally:
             self._at_module = False
 
-    def flow(self, key, layout=None, outputs=None) -> str:
+    def flow(self, key, layout=None, outputs=None, loop=False) -> str:
         """Placeholder for the code connected to flow output `key`.
 
         `layout`: layout expression for interface flows below it.
         `outputs`: {output key: expression} values that only exist in there
-        (e.g. a loop's item)."""
+        (e.g. a loop's item). `loop`: it's the body of a loop."""
         socket = self.node.socket(key, output=True)
         if socket is None:
             raise NodeError(f"Node has no output '{key}'")
@@ -267,6 +280,7 @@ class NodeContext:
                 layout=layout if layout is not None else base.layout,
                 values=values,
                 names=names if names is not None else base.names,
+                loop=loop,
             )
             return self._builder.compile_flow(socket, scope)
 

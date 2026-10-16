@@ -3,8 +3,8 @@
 import bpy
 
 from ....core import naming
-from ...base_node import ScriptingBaseNode
 from ....sockets.spec import Logic
+from ...base_node import ScriptingBaseNode
 
 
 class EventNode(ScriptingBaseNode):

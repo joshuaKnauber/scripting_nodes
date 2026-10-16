@@ -1,9 +1,9 @@
 """Timers (bpy.app.timers): run a flow later or repeatedly. The timers stop
-when the add-on is disabled (helpers sn_run_later / sn_run_in_intervals)."""
+when the add-on is disabled (helpers run_later / run_in_intervals)."""
 
 import bpy
 
-from ....sockets.spec import Boolean, Flow, Float, Integer
+from ....sockets.spec import Boolean, Float, Flow, Integer
 from ...base_node import ScriptingBaseNode
 
 PERSISTENT = bpy.props.BoolProperty(
@@ -35,7 +35,7 @@ class SNA_Node_RunWithDelay(ScriptingBaseNode, bpy.types.Node):
         ctx.code(f"""
             def {name}():
                 {ctx.flow("delayed")}
-            {ctx.helper("sn_run_later")}({name}, {ctx.input("delay")}{_persistent(self)})
+            {ctx.helper("run_later")}({name}, {ctx.input("delay")}{_persistent(self)})
             {ctx.flow("next")}
         """)
 
@@ -74,6 +74,6 @@ class SNA_Node_RunInIntervals(ScriptingBaseNode, bpy.types.Node):
             def {name}({index}):
                 {repeat}
                 return {ctx.input("keep_running")}
-            {ctx.helper("sn_run_in_intervals")}({", ".join(args)}{_persistent(self)})
+            {ctx.helper("run_in_intervals")}({", ".join(args)}{_persistent(self)})
             {ctx.flow("next")}
         """)

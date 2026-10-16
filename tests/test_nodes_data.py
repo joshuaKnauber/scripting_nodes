@@ -140,8 +140,8 @@ class DataNodesTest(unittest.TestCase):
         self.assertIsNotNone(match, source)
         indent, index_var, item_var = match.groups()
         body = indent + "    "
-        self.assertRegex(source, rf"\n{body}\w+\(sn_text\({item_var}\)\)")
-        self.assertRegex(source, rf"\n{body}\w+\(str\({index_var}\)\)")
+        self.assertRegex(source, rf"\n{body}[\w.]+\(utils\.as_text\({item_var}\)\)")
+        self.assertRegex(source, rf"\n{body}[\w.]+\(str\({index_var}\)\)")
         # outside of the loop the item doesn't exist: error on that node
         self.assertIn("isn't available here", node_errors().get(outside.id, ""))
         self.assertNotIn(inside.id, node_errors())

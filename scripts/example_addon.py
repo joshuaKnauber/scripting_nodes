@@ -1,13 +1,15 @@
-"""Build the example add-on (Object Toolkit) and export it as shipped.
+"""Build an example add-on and export it as shipped.
 
-    python scripts/example_addon.py [out_dir]
+    python scripts/example_addon.py [toolkit | every_node] [out_dir]
 
-Builds `tests/visual/scenarios/_toolkit_demo.py` in headless Blender, prints
-node errors, writes the export build unzipped into `out_dir` (default:
-builds/example/) together with the .blend, then runs `ruff check` on it
-with the rules of generated code (tests/snapshots/ruff.toml).
-tests/test_example_addon.py compares the same export against its snapshot.
-Uses a throwaway user profile like scripts/test.py.
+Builds `tests/visual/scenarios/_<name>_demo.py` (default: toolkit, the
+Object Toolkit; every_node: every node with its defaults) in headless
+Blender, prints node errors, writes the export build unzipped into `out_dir`
+(default: builds/<name>/) together with the .blend, then runs `ruff check`
+and `ruff format --check` on it with the rules of generated code
+(tests/snapshots/ruff.toml). Exits non-zero on findings (CI).
+tests/test_example_addon.py compares the toolkit's export against its
+snapshot. Uses a throwaway user profile like scripts/test.py.
 """
 
 import os
@@ -24,13 +26,13 @@ import bpy
 sys.path.insert(0, {tests!r})
 sys.path.insert(0, {scenarios!r})
 import helpers
-import _toolkit_demo
+import _{name}_demo as demo
 
 out = {out!r}
 try:
     helpers.enable_addon()
     helpers.reset_file()
-    trees = _toolkit_demo.build()
+    demo.build()
     errors = helpers.sn("src.core.errors")
     problems = 0
     for tree in bpy.data.node_groups:
@@ -45,7 +47,7 @@ try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         with open(path, "w") as f:
             f.write(source)
-    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(out, "object_toolkit.blend"))
+    bpy.ops.wm.save_as_mainfile(filepath=os.path.join(out, "{name}.blend"))
     print(f"BUILT {{len(files)}} files, {{problems}} node errors")
 except Exception:
     traceback.print_exc()
@@ -53,12 +55,15 @@ except Exception:
 """
 
 
+# every node with its defaults: unconnected inputs give conditions on
+# constants (`None == None`, `x in []`) a real add-on wouldn't have
+IGNORE = {"every_node": ["--ignore", "RUF060,E711,SIM222,SIM223,RUF034"]}
+
+
 def main():
-    out = os.path.abspath(
-        sys.argv[1]
-        if len(sys.argv) > 1
-        else os.path.join(REPO_ROOT, "builds", "example")
-    )
+    args = sys.argv[1:]
+    name = args.pop(0) if args and args[0] in ("toolkit", "every_node") else "toolkit"
+    out = os.path.abspath(args[0] if args else os.path.join(REPO_ROOT, "builds", name))
     shutil.rmtree(out, ignore_errors=True)
     os.makedirs(out)
     script = os.path.join(out, "_build.py")
@@ -68,6 +73,7 @@ def main():
                 tests=os.path.join(REPO_ROOT, "tests"),
                 scenarios=os.path.join(REPO_ROOT, "tests", "visual", "scenarios"),
                 out=out,
+                name=name,
             )
         )
     user_resources = make_user_resources()
@@ -98,19 +104,16 @@ def main():
     if result.returncode:
         print("\n".join(lines[-40:]))
         sys.exit(result.returncode)
-    print(f"\nExported to {out}/addon\nruff check:", flush=True)
-    subprocess.run(
-        [
-            "uvx",
-            "ruff",
-            "check",
-            "--no-cache",
-            "--statistics",
-            "--config",
-            os.path.join(REPO_ROOT, "tests", "snapshots", "ruff.toml"),
-            os.path.join(out, "addon"),
-        ]
+    print(f"\nExported to {out}/addon\nruff:", flush=True)
+    config = ["--config", os.path.join(REPO_ROOT, "tests", "snapshots", "ruff.toml")]
+    addon = os.path.join(out, "addon")
+    check = subprocess.run(
+        ["uvx", "ruff", "check", "--no-cache", "--statistics", *config]
+        + IGNORE.get(name, [])
+        + [addon]
     )
+    form = subprocess.run(["uvx", "ruff", "format", "--check", *config, addon])
+    sys.exit(check.returncode or form.returncode)
 
 
 if __name__ == "__main__":

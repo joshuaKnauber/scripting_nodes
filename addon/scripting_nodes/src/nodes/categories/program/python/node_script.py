@@ -22,9 +22,9 @@ from .....core import naming
 from .....core.context import NodeError
 from .....lib.trees import node_by_id
 from .....sockets.spec import Flow, Socket
-from .node_python_code import MODULES
 from .... import _script_run
 from ....base_node import ScriptingBaseNode
+from .node_python_code import MODULES
 
 TEMPLATE = '''import bpy
 

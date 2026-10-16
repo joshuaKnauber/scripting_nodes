@@ -1,8 +1,8 @@
 import bpy
 
 from ....sockets.spec import Flow
-from ..data.blend_data.node_context_checks import rna_items
 from ...base_node import ScriptingBaseNode
+from ..data.blend_data.node_context_checks import rna_items
 
 
 class SNA_Node_Redraw(ScriptingBaseNode, bpy.types.Node):
@@ -24,6 +24,6 @@ class SNA_Node_Redraw(ScriptingBaseNode, bpy.types.Node):
     def emit(self, ctx):
         area_type = "" if self.area_type == "ALL" else repr(self.area_type)
         ctx.code(f"""
-            {ctx.helper("sn_redraw")}({area_type})
+            {ctx.helper("redraw")}({area_type})
             {ctx.flow("next")}
         """)

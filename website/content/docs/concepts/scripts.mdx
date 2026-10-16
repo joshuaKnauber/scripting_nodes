@@ -80,6 +80,6 @@ class OBJECT_TOOLS_OT_arrange_objects(bpy.types.Operator):
     ...
     def execute(self, context):
         count = arrange.run(context=context, spacing=3.0, axis=0)
-        sn_print(str(count))
+        print(str(count))
         return {"FINISHED"}
 ```

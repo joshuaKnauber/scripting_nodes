@@ -14,6 +14,6 @@ class SNA_Node_Print(ScriptingBaseNode, bpy.types.Node):
 
     def emit(self, ctx):
         ctx.code(f"""
-            {ctx.helper("sn_print")}({ctx.input("text")})
+            {ctx.helper("log")}({ctx.input("text")})
             {ctx.flow("next")}
         """)

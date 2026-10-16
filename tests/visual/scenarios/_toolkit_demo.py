@@ -31,7 +31,7 @@ def select_objects(names: str) -> int:
     """Select the objects named in a comma separated list."""
     count = 0
     for name in names.split(","):
-        obj = bpy.data.objects.get(name.strip())
+        obj = bpy.context.scene.objects.get(name.strip())
         if obj is not None:
             obj.select_set(True)
             count += 1
@@ -446,7 +446,11 @@ def logic(tree, ids):
 
 
 def build():
-    bpy.context.scene.sna.addon.addon_name = "Object Toolkit"
+    addon = bpy.context.scene.sna.addon
+    addon.addon_name = "Object Toolkit"
+    addon.author = "Jane Doe"
+    addon.tagline = "Rename, place and remember selections of objects"
+    addon.blender_version_min = (5, 0, 0)  # the same snapshot in every Blender
     ids = properties()
     script = bpy.data.texts.new("toolkit_helpers.py")
     script.write(SCRIPT)

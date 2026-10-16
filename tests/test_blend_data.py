@@ -228,7 +228,7 @@ class BlendDataNodeTest(unittest.TestCase):
         self.assertEqual(name.outputs[0].bl_idname, "ScriptingStringSocket")
         self.printed(name.outputs[0])
         self.assertIn(
-            "sn_print(context.active_object.modifiers[0].name)", source(self.tree)
+            "utils.log(context.active_object.modifiers[0].name)", source(self.tree)
         )
 
     def test_keys_and_runtime(self):

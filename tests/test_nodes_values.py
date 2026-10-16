@@ -155,11 +155,12 @@ class ValueNodesTest(FlowTestCase):
     def test_break_outside_a_loop(self):
         node = self.then("SNA_Node_LoopControl")
         helpers.flush()
-        self.assertIsNotNone(errors().addon_error)
-        self.assertIn("outside loop", errors().node_message(node.id) or "")
+        # caught on the node, the add-on still builds
+        self.assertIsNone(errors().addon_error)
+        self.assertIn("inside a loop", errors().node_message(node.id) or "")
 
     def test_redraw(self):
         redraw = self.then("SNA_Node_Redraw")
         redraw.area_type = "VIEW_3D"
-        self.assertIn("sn_redraw('VIEW_3D')", self.source())
+        self.assertIn("utils.redraw('VIEW_3D')", self.source())
         self.run_trigger()

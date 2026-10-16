@@ -93,6 +93,7 @@ class FileNodesTest(FlowTestCase):
             compiler.compile_addon(dev=False)["blender_manifest.toml"]
         )
         self.assertNotIn("permissions", manifest)
+        self.run_from_operator()
         self.then("SNA_Node_CreateFolder").socket("path").value = self.folder
         self.add("SNA_Node_JoinPath")  # no file access, no permission
         self.assertBuilt()

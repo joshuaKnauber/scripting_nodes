@@ -25,7 +25,7 @@ class ScriptingIconSocket(ScriptingBaseSocket):
     def literal_code(self, ctx):
         if not self.value:
             return "0"
-        return f"{ctx.helper('sn_icon')}({self.value!r})"
+        return f"{ctx.helper('icon_id')}({self.value!r})"
 
     def draw_value(self, context, layout, text):
         row = layout.row(align=True)

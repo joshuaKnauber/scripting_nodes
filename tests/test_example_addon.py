@@ -40,12 +40,34 @@ def write_snapshot(files):
             f.write(data)
 
 
+def mcp_call(tool, /, **arguments):
+    """A tool call the way the MCP server runs it."""
+    server = helpers.sn("src.mcp_server.server")
+    spec = server.TOOLS[tool]
+    result = server._run_tool(spec["fn"], arguments, tool, spec["writes"])
+    while isinstance(result, server.Later):
+        result = result.then()
+    return result
+
+
 class ExampleAddonTest(unittest.TestCase):
     def test_export_matches_snapshot(self):
         import _toolkit_demo
 
         helpers.reset_file()
         _toolkit_demo.build()
+        self.assertExportMatches()
+
+    def test_built_through_mcp_matches_snapshot(self):
+        """An agent can build the whole add-on with the MCP tools."""
+        import mcp_toolkit
+
+        helpers.reset_file()
+        mcp_toolkit.build(mcp_call)
+        self.assertEqual(mcp_call("get_problems"), {})
+        self.assertExportMatches()
+
+    def assertExportMatches(self):
         errors = helpers.sn("src.core.errors")
         failed = [
             f"{tree.name} / {node.name}: {errors.node_message(node.id)}"

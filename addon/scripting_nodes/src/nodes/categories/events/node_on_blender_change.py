@@ -70,6 +70,4 @@ class SNA_Node_OnBlenderChange(BlendPathMixin, ScriptingBaseNode, bpy.types.Node
                 {ctx.flow("flow")}
         """)
         struct, prop = watched
-        ctx.on_register(
-            f"{ctx.helper('sn_subscribe')}({struct!r}, {prop!r}, {function})"
-        )
+        ctx.on_register(f"{ctx.helper('subscribe')}({struct!r}, {prop!r}, {function})")

@@ -66,10 +66,10 @@ class EventNodesTest(FlowTestCase):
         self.assertBuilt()
         source = self.source()
         self.assertIn(
-            "sn_subscribe('LayerObjects', 'active', on_layerobjects_active_change)",
+            "utils.subscribe('LayerObjects', 'active', on_layerobjects_active_change)",
             source,
         )
-        self.assertEqual(len(generated_helpers()._sn_subscriptions), 4)
+        self.assertEqual(len(generated_helpers()._subscriptions), 4)
 
     def test_on_blender_change_needs_a_property(self):
         node = self.watch("active_object")
@@ -83,12 +83,12 @@ class EventNodesTest(FlowTestCase):
         self.watch("active_object.location")
         self.assertBuilt()
         module = generated_helpers()
-        handler = module._sn_resubscribe
+        handler = module._resubscribe
         self.assertIn(handler, bpy.app.handlers.load_post)
         bpy.context.scene.sna.addon.addon_name = "Event Test 2"  # reloads
         helpers.flush()
         self.assertNotIn(handler, bpy.app.handlers.load_post)
-        self.assertEqual(module._sn_subscriptions, [])
+        self.assertEqual(module._subscriptions, [])
 
 
 class LayoutNodesTest(FlowTestCase):
@@ -123,7 +123,7 @@ class LayoutNodesTest(FlowTestCase):
         source = self.source()
         self.assertIn("self.layout.label(text='Notes')", source)
         self.assertIn(
-            "sn_textbox(self.layout, context.scene.render, 'filepath', 3, 'Write here')",
+            "utils.textbox(self.layout, context.scene.render, 'filepath', 3, 'Write here')",
             source,
         )
         self.assertIn(
@@ -172,7 +172,7 @@ class LayoutNodesTest(FlowTestCase):
         for expected in (
             "split = self.layout.split(factor=0.25)",
             "grid = self.layout.grid_flow(row_major=True, columns=2,",
-            "for index, item in enumerate(bpy.data.objects):",
+            "for item in bpy.data.objects:",
             "grid.context_pointer_set('item', item)",
             "self.layout.progress(factor=0.5, type='RING')",
             "self.layout.operator_context = 'EXEC_DEFAULT'",

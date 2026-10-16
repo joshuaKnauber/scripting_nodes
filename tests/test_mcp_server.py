@@ -66,7 +66,7 @@ class MCPToolCallTest(unittest.TestCase):
         bridge = helpers.sn("src.mcp_server.bridge")
         helpers.new_tree("Main")
         result = {}
-        params = {"name": "list_node_trees", "arguments": {}}
+        params = {"name": "get_addon", "arguments": {}}
         worker = threading.Thread(
             target=lambda: result.update(server._handle_tools_call(1, params))
         )
