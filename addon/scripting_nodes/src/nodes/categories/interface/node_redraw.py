@@ -2,7 +2,7 @@ import bpy
 
 from ....sockets.spec import Flow
 from ...base_node import ScriptingBaseNode
-from ..data.blend_data.node_context_checks import rna_items
+from ..data.blender_data.node_context_checks import rna_items
 
 
 class SNA_Node_Redraw(ScriptingBaseNode, bpy.types.Node):

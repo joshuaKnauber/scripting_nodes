@@ -10,7 +10,7 @@ Everything in a Blender file can be reached by following a path: the active obje
 
 ## The Blender Data node
 
-Add it from **Add › Data › Blend Data**. The menu has ready-made entries for common starting points (Active Object, Selected Objects, Scene, View Layer, All Objects, Blend File, ...), which add the node already set up.
+Add it from **Add › Data › Blender Data**. The menu has ready-made entries for common starting points (Active Object, Selected Objects, Scene, View Layer, All Objects, Blend File, ...), which add the node already set up.
 
 A path has a **start** and the steps after it:
 
@@ -57,3 +57,18 @@ def execute(self, context):
 ```
 
 To change a value instead of reading it, use **Set Property** with a path, see [Data paths](/docs/blend-data/data-paths).
+
+## Calling Blender's functions
+
+Some things aren't values you read or set but functions you call: adding a modifier, creating an object, linking it to a collection, selecting it. The **Blender Function** node (**Add › Data › Blender Data**) calls one. Its path leads to the data the function belongs to, then you pick the function in the browser, where functions are listed with `()` after the data: **Active Object › Modifiers › new()**.
+
+- The function's parameters become inputs, with Blender's defaults. Optional ones are only written to the code when you change or connect them.
+- What it returns becomes outputs with their real types: `new()` gives the new **Modifier**, so you can set its properties next.
+- Data a function needs (the object for `link()`) has to be connected.
+- The menu has entries for common calls: **Add Modifier**, **New Object**, **Link Object**, **Select Object**.
+
+```python
+def execute(self, context):
+    modifier = context.active_object.modifiers.new(name='Bevel', type='BEVEL')
+    modifier.width = 0.2
+```

@@ -47,7 +47,7 @@ def draw(layout, context):
         _draw_results(layout, state)
         return
     here = browser.location(context)
-    _draw_crumbs(layout, here)
+    _draw_crumbs(layout, context, here)
     # equal widths: a row would size its columns by the rows in view, which
     # change when a list scrolls
     grid = layout.grid_flow(columns=browser.COLUMNS, even_columns=True)
@@ -75,7 +75,7 @@ def draw(layout, context):
     _draw_footer(layout, context, state, here)
 
 
-def _draw_crumbs(layout, here):
+def _draw_crumbs(layout, context, here):
     row = layout.row(align=True)
     row.alignment = "LEFT"
     crumbs = here.crumbs() if here.root else []
@@ -84,6 +84,10 @@ def _draw_crumbs(layout, here):
             row.label(icon="RIGHTARROW_THIN")
         op = row.operator("sna.browser_go", text=text, emboss=False)
         op.count = count
+    function = context.window_manager.sna_browser.function
+    if crumbs and function:
+        row.label(icon="RIGHTARROW_THIN")
+        row.label(text=f"{function}()")
     if not crumbs:
         row.label(text="Pick where the path starts")
 
@@ -108,7 +112,8 @@ def _draw_footer(layout, context, state, here):
         left.label(text=problem, icon="ERROR")
     else:
         left.active = False
-        left.label(text=code_path(here))
+        function = state.function
+        left.label(text=code_path(here) + (f".{function}()" if function else ""))
     right = row.row()
     right.alignment = "RIGHT"
     right.prop(state, "show_all")

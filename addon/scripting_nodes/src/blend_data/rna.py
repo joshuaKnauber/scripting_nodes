@@ -266,7 +266,7 @@ def type_label(step: Step) -> str:
 
 
 def blend_data_spec(key, label_text, type_name, collection=False, **kwargs):
-    """A Blend Data socket typed with `type_name` ("" = any)."""
+    """A Blender Data socket typed with `type_name` ("" = any)."""
     description = ""
     if type_name:
         name = display_name(type_name)
@@ -314,6 +314,74 @@ def value_spec(step: Step, key: str, label_text: str):
             key, label_text, enum_items=encode_enum_items(items) if items else None
         )
     return spec.Data(key, label_text)
+
+
+# -----------------------------------------------------------------------------
+# Functions
+# -----------------------------------------------------------------------------
+
+
+def functions(owner: Step) -> list:
+    """Functions that can be called on a value described by `owner`
+    (`modifiers.new()` is a function of the collection), by name. Blender's
+    callbacks (a panel's `draw`) and functions without `self` aren't."""
+    if not owner.known:
+        return []
+    rna = struct(owner.collection_type if owner.collection else owner.rna_type)
+    if rna is None:
+        return []
+    return [
+        function
+        for function in rna.functions
+        if function.use_self
+        and not function.is_registered
+        and not function.is_registered_optional
+        and not function.identifier.startswith("bl_")
+    ]
+
+
+def function(owner: Step, name: str):
+    """Function `name` of `owner` (functions()), or None."""
+    return next((f for f in functions(owner) if f.identifier == name), None)
+
+
+def function_label(function) -> str:
+    """ "new()", the way the browser and the node show it."""
+    return f"{function.identifier}()"
+
+
+def parameters(function, outputs=False) -> list:
+    """The function's parameters, or what it returns."""
+    return [p for p in function.parameters if p.is_output == outputs]
+
+
+def parameter_step(parameter) -> Step:
+    """What a parameter or result of a function is, like a property's step."""
+    return _step_for_prop(parameter)
+
+
+def parameter_spec(parameter, key: str):
+    """The socket of a function's parameter or result, with its default."""
+    step = parameter_step(parameter)
+    label_text = parameter.name or parameter.identifier.replace("_", " ").title()
+    socket = value_spec(step, key, label_text)
+    default = parameter_default(parameter)
+    if default is not None and not parameter.is_output:
+        socket.default = default
+    return socket
+
+
+def parameter_default(parameter):
+    """The default of a plain value parameter (None for data)."""
+    if parameter.type in {"POINTER", "COLLECTION"}:
+        return None
+    if parameter.type == "ENUM":
+        if parameter.is_enum_flag:
+            return None
+        return parameter.default or None
+    if getattr(parameter, "array_length", 0) and parameter.type != "STRING":
+        return tuple(parameter.default_array)
+    return parameter.default
 
 
 # -----------------------------------------------------------------------------

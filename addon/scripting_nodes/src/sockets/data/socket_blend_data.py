@@ -14,7 +14,7 @@ class ScriptingBlendDataSocket(ScriptingBaseSocket):
     """
 
     bl_idname = "ScriptingBlendDataSocket"
-    bl_label = "Blend Data"
+    bl_label = "Blender Data"
     color = (0.0, 0.75, 0.65, 1)
 
     blend_type: bpy.props.StringProperty()

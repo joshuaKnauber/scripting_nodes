@@ -635,5 +635,120 @@ class BrowserTest(unittest.TestCase):
         self.assertEqual(checkbox.path, "scene.render.use_simplify")
 
 
+class FunctionNodeTest(unittest.TestCase):
+    """The Blender Function node and picking functions in the browser."""
+
+    setUp = LocationsTest.setUp
+    tearDown = LocationsTest.tearDown
+
+    def function_node(self, path, function, root="CONTEXT"):
+        node = helpers.add_node(self.tree, "SNA_Node_BlenderFunction")
+        node.path_root = root
+        node.path = path
+        node.function = function
+        helpers.flush()
+        return node
+
+    def in_operator(self, node):
+        bpy.context.scene.sna.addon.addon_name = "Fn Test"
+        op = helpers.add_node(self.tree, "SNA_Node_Operator")
+        op.socket("label").value = "Run It"
+        helpers.link(self.tree, op.outputs[0], node.inputs[0])
+        helpers.flush()
+        return helpers.tree_source(self.tree)
+
+    def error(self, node):
+        return helpers.sn("src.core.errors").node_message(node.id) or ""
+
+    def test_call_with_result(self):
+        node = self.function_node("active_object.modifiers", "new")
+        self.assertEqual(
+            [s.name for s in node.inputs if s.enabled and not s.hide],
+            ["Program", "Name", "Type"],
+        )
+        result = node.socket("param_modifier", output=True)
+        self.assertEqual(result.blend_type, "Modifier")
+        node.socket("param_name").value = "Smooth"
+        node.socket("param_type").value = "SMOOTH"
+        source = self.in_operator(node)
+        self.assertIn(
+            "modifier = context.active_object.modifiers.new(name='Smooth', type='SMOOTH')",
+            source,
+        )
+        self.assertEqual(bpy.ops.fn_test.run_it(), {"FINISHED"})
+        self.assertIn("Smooth", self.cube.modifiers)
+
+    def test_optional_parameters_left_out(self):
+        node = self.function_node("active_object", "ray_cast")
+        source = self.in_operator(node)
+        # several results, distance and depsgraph only when set
+        self.assertIn(
+            "result, location, normal, index = context.active_object.ray_cast(", source
+        )
+        self.assertNotIn("distance=", source)
+        node.socket("param_distance").value = 10.0
+        helpers.flush()
+        self.assertIn("distance=10.0", helpers.tree_source(self.tree))
+
+    def test_required_data_must_be_connected(self):
+        node = self.function_node("collection.objects", "link")
+        self.in_operator(node)
+        self.assertIn("Connect the", self.error(node))
+
+    def test_unknown_function(self):
+        node = self.function_node("active_object", "no_such_function")
+        self.in_operator(node)
+        self.assertIn("no function no_such_function()", self.error(node))
+
+    def test_browser_picks_a_function(self):
+        node = self.function_node("active_object.modifiers", "")
+        ops = helpers.sn("src.blend_data.ops.browser")
+        browser = helpers.sn("src.blend_data.browser")
+        browser.prepare(bpy.context)
+        state = bpy.context.window_manager.sna_browser
+        state.node_id = node.id
+        state.search = ""
+        browser.go(bpy.context, ops._start(node), node.function)
+        self.assertEqual(browser.problem(bpy.context), "Pick a function")
+        column = state.columns[state.shown - 1]  # Modifiers
+        self.assertEqual(column.title, "Modifiers")
+        names = [e.name for e in column.entries]
+        self.assertIn("new()", names)
+        column.active = names.index("new()")
+        self.assertEqual(state.function, "new")
+        last = state.columns[state.shown - 1]
+        self.assertTrue(last.is_value)
+        self.assertEqual(last.title, "new()")
+        self.assertIn("→ Modifier", last.value)
+        result = bpy.ops.sna.browse_path("EXEC_DEFAULT", node_id=node.id)
+        self.assertEqual(result, {"FINISHED"})
+        self.assertEqual((node.path, node.function), ("active_object.modifiers", "new"))
+
+    def test_search_finds_functions(self):
+        node = self.function_node("active_object", "")
+        browser = helpers.sn("src.blend_data.browser")
+        browser.prepare(bpy.context)
+        state = bpy.context.window_manager.sna_browser
+        state.node_id = node.id
+        browser.go(
+            bpy.context,
+            helpers.sn("src.blend_data.locations").free_location(
+                "bpy.context.active_object"
+            ),
+        )
+        state.search = "modifiers new"
+        targets = [entry.target for entry in state.results]
+        self.assertIn("bpy.context.active_object.modifiers#new", targets)
+        # data nodes don't list functions
+        data = LocationsTest.add(self, "active_object")
+        state.node_id = data.id
+        state.search = ""
+        state.search = "modifiers new"
+        self.assertNotIn(
+            "bpy.context.active_object.modifiers#new",
+            [entry.target for entry in state.results],
+        )
+
+
 if __name__ == "__main__":
     unittest.main()

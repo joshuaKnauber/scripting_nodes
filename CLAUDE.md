@@ -72,7 +72,7 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 - `node_tree/` — tree type, tree ops/UI
 - `nodes/`, `sockets/` — node + socket types
 - `settings/` — scene settings (`bpy.context.scene.sna`), preferences, sidebar panels
-- `blend_data/` — Blender data from RNA types: paths, typed sockets, search (`rna.py`); paste/copy path ops; path browser (popup from a node's path field: `browser.py` state and columns, `locations.py` paths with keys and live data)
+- `blend_data/` — Blender data from RNA types: paths, typed sockets, search (`rna.py`); paste/copy path ops; path browser (popup from a node's path field: `browser.py` state and columns, `locations.py` paths with keys and live data); RNA functions (`rna.functions`) for the Blender Function node
 - `mcp_server/` — local MCP server (loopback, rejects browser requests): `tools/` by area (`blender`: run_python, screenshot, undo; `addon`; `graph`: batched `edit_tree`; `definitions`: properties, functions; `texts`). Tools run on the main thread (`bridge.py`); a tool returning `Later` lets Blender draw before it continues. `tests/mcp_toolkit.py` builds the Object Toolkit through the tools only. `python scripts/open_example.py tests/visual/open_mcp_session.py` opens Blender with the server on :7423.
 - `handlers/` — load/save/undo/depsgraph handlers, msgbus, keymaps, log overlay
 - `lib/` — shared utilities; must not import from other packages of the addon

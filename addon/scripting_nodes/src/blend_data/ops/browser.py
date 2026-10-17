@@ -20,10 +20,13 @@ class SNA_OT_BrowsePath(bpy.types.Operator):
     @classmethod
     def description(cls, context, properties):
         node = node_by_id(properties.node_id)
-        if node is None or not node.path:
+        function = getattr(node, "function", "")
+        if node is None or not (node.path or function):
             return cls.__doc__
-        root = {"CONTEXT": "context", "DATA": "bpy.data"}.get(node.path_root, "data")
-        return f"{cls.__doc__}: {root}.{node.path}"
+        code = {"CONTEXT": "context", "DATA": "bpy.data"}.get(node.path_root, "data")
+        code += f".{node.path}" if node.path else ""
+        code += f".{function}()" if function else ""
+        return f"{cls.__doc__}: {code}"
 
     def invoke(self, context, event):
         node = node_by_id(self.node_id)
@@ -33,7 +36,7 @@ class SNA_OT_BrowsePath(bpy.types.Operator):
         browser.prepare(context)
         state.node_id = self.node_id
         state.search = ""
-        browser.go(context, _start(node))
+        browser.go(context, _start(node), getattr(node, "function", ""))
         return context.window_manager.invoke_props_dialog(
             self, width=ui.WIDTH, title="Blender Data", confirm_text="Use Path"
         )
@@ -50,6 +53,8 @@ class SNA_OT_BrowsePath(bpy.types.Operator):
             self.report({"WARNING"}, problem)
             return {"CANCELLED"}
         locations.apply_to_node(node, browser.location(context))
+        if getattr(node, "sn_calls_functions", False):
+            node.function = context.window_manager.sna_browser.function
         return {"FINISHED"}
 
 

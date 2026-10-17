@@ -19,6 +19,10 @@ SKIP = {
     "SNA_Node_Trigger",  # left out of exports
     "SNA_Node_Group",  # needs a function
 }
+# set up so they write code instead of an error
+SETTINGS = {
+    "SNA_Node_BlenderFunction": {"path": "active_object.modifiers", "function": "new"},
+}
 
 
 def first_flow(sockets, kinds):
@@ -39,6 +43,8 @@ def data_outputs(node):
 def build_node(cls):
     tree = helpers.new_tree(cls.bl_label)
     node = helpers.add_node(tree, cls.bl_idname, (0, 0))
+    for name, value in SETTINGS.get(cls.bl_idname, {}).items():
+        setattr(node, name, value)
     helpers.flush()
     program_in = first_flow(node.inputs, {"PROGRAM", "LOGIC"})
     interface_in = first_flow(node.inputs, {"INTERFACE"})

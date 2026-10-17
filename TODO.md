@@ -12,8 +12,8 @@ explorer. Open:
 - [x] The node shows its path as a button opening the browser (no search field, no start dropdown); the Start column has the node's Data Input.
 - [ ] After typing in the search, the first click on a result only ends text editing.
 - [ ] Values in the columns are from when the browser moved, not live.
-- [ ] Search results found through the types pick collection items by index 0; a node whose Data input isn't connected to a Blender Data node opens at Context.
-- [ ] Blender's functions (`objects.new()`, `modifiers.remove()`) with a node that calls them; dragging entries into the node editor; recent places.
+- [ ] Search results found through the types pick collection items by index 0.
+- [x] Blender's functions: the Blender Function node (`nodes/categories/data/blender_data/node_blender_function.py`), functions listed in the browser for it, parameters and results as typed sockets. Dragging entries and recent places dropped (popups can't drag into the editor; the browser opens at the node's path).
 - [ ] Docs screenshot: Blender's screenshot leaves popups out.
 
 **2. UX pass.** Go through the add-on as a new user would and collect what's

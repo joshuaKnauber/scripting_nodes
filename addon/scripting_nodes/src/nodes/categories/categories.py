@@ -25,12 +25,12 @@ _node_categories = {}
 
 
 def category_label(dirname):
-    """Display name for a category folder: `blend_data` -> `Blend Data`."""
+    """Display name for a category folder: `blender_data` -> `Blender Data`."""
     return dirname.replace("_", " ").title()
 
 
 def menu_idname(path):
-    """Unique menu idname for a category path like `data.blend_data`."""
+    """Unique menu idname for a category path like `data.blender_data`."""
     return "SNA_MT_category_" + path.replace(".", "_")
 
 

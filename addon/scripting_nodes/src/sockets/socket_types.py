@@ -6,7 +6,7 @@ from typing import Literal
 # (bl_idname, label, icon, description)
 DATA_SOCKETS = [
     ("ScriptingDataSocket", "Data", "MOD_DATA_TRANSFER", "Any value"),
-    ("ScriptingBlendDataSocket", "Blend Data", "BLENDER", "Blend data (Scene, Object, ...)"),
+    ("ScriptingBlendDataSocket", "Blender Data", "BLENDER", "Blender data (Scene, Object, ...)"),
     ("ScriptingStringSocket", "String", "SYNTAX_OFF", "Text"),
     ("ScriptingBooleanSocket", "Boolean", "CHECKBOX_HLT", "True or False"),
     ("ScriptingFloatSocket", "Float", "CON_TRANSLIKE", "Decimal number"),

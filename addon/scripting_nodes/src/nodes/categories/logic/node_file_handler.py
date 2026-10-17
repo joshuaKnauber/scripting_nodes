@@ -9,7 +9,7 @@ from ....core.context import NodeError
 from ....core.references import Reference
 from ....sockets.spec import String
 from ...base_node import ScriptingBaseNode
-from ..data.blend_data.node_context_checks import rna_items
+from ..data.blender_data.node_context_checks import rna_items
 
 
 def _file_operator(owner, target):

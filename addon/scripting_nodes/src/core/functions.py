@@ -152,7 +152,7 @@ def calls(tree, target, seen=None) -> bool:
 
 
 def _adopt_blend_type(item, socket):
-    """An untyped Blend Data item takes the type of the first typed socket
+    """An untyped Blender Data item takes the type of the first typed socket
     it's linked to (Blender makes items from links without telling us the
     linked socket)."""
     for link in socket.links:

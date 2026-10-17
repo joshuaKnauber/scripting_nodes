@@ -3,7 +3,7 @@ declare, whether it's part of the add-on, whether its code draws UI.
 
     def run(context, obj: Object, factor: float = 2.0) -> int:
 
-gives the inputs Obj (Blend Data) and Factor (Float, 2.0) and an Integer
+gives the inputs Obj (Blender Data) and Factor (Float, 2.0) and an Integer
 output. `context`, `layout`, `self` and `event` aren't inputs, the node passes
 what the flow has; taking `layout` makes it an interface node. Several return
 values are outputs named after the returned variables:

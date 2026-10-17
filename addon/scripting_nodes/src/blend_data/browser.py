@@ -9,6 +9,11 @@ continues with active. Only the last COLUMNS columns are shown, so there
 are that many slots. A path ending at a plain value shows the value in the
 last column.
 
+For nodes that call a function (Blender Function), the columns also list
+the functions of the data; picking one keeps the browser at the data and
+shows the function in the last column (`state.function`). An entry leading
+to a function has the target `<path>#<name>`.
+
 Clicking an entry (a list's active index changing) moves the browser and
 fills the slots again. Entries are only rebuilt when the browser moves, so
 the values they show are from then.
@@ -32,16 +37,23 @@ def location(context) -> locations.Location:
     return locations.free_location(context.window_manager.sna_browser.path)
 
 
-def go(context, target: locations.Location):
+def go(context, target: locations.Location, function=""):
     state = context.window_manager.sna_browser
     state.path = target.python() if target.root else ""
+    state.function = function
     fill(context)
+
+
+def go_to_target(context, target: str):
+    """Go where an entry leads: a path, or a function (`<path>#<name>`)."""
+    path, _, function = target.partition("#")
+    go(context, locations.free_location(path), function)
 
 
 def _open_entry(self, context):
     if _filling or not 0 <= self.active < len(self.entries):
         return
-    go(context, locations.free_location(self.entries[self.active].target))
+    go_to_target(context, self.entries[self.active].target)
 
 
 def _open_result(self, context):
@@ -49,7 +61,7 @@ def _open_result(self, context):
         return
     target = self.results[self.result_active].target
     self.search = ""  # fills
-    go(context, locations.free_location(target))
+    go_to_target(context, target)
 
 
 def _search(self, context):
@@ -89,6 +101,7 @@ class SNA_BrowserColumn(bpy.types.PropertyGroup):
 
 class SNA_BrowserState(bpy.types.PropertyGroup):
     path: bpy.props.StringProperty()
+    function: bpy.props.StringProperty()  # picked function of the data at path
     node_id: bpy.props.StringProperty()  # the node it picks a path for
     columns: bpy.props.CollectionProperty(type=SNA_BrowserColumn)
     shown: bpy.props.IntProperty()  # slots in use
@@ -125,6 +138,8 @@ def fill(context):
     state = context.window_manager.sna_browser
     here = location(context)
     steps = [None] + (list(range(len(here.parts) + 1)) if here.root else [])
+    if here.root and state.function:
+        steps.append("FUNCTION")
     steps = steps[-COLUMNS:]
     # filters stay with their place when the columns move along
     filters = {slot.at: slot.filter for slot in state.columns if slot.filter}
@@ -142,6 +157,9 @@ def _fill_column(slot, context, here, count, filters):
     slot.note = ""
     slot.is_value = False
     slot.active = -1
+    if count == "FUNCTION":
+        _fill_function(slot, context, here)
+        return
     at = here.truncated(count) if count is not None else None
     slot.at = at.python() if at is not None else "start"
     slot.filter = filters.get(slot.at, "")
@@ -162,7 +180,15 @@ def _fill_column(slot, context, here, count, filters):
             _member_entries(slot, context, at, value)
         else:
             _value(slot, at, value)
-    nxt = here.truncated(count + 1).python() if count < len(here.parts) else None
+    if not slot.is_value and calls_functions(context):
+        for function in rna.functions(at.final_step()):
+            _add(slot.entries, rna.function_label(function), _returns(function),
+                 "SCRIPT", False, f"{at.python()}#{function.identifier}")  # fmt: skip
+    if count < len(here.parts):
+        nxt = here.truncated(count + 1).python()
+    else:
+        function = context.window_manager.sna_browser.function
+        nxt = f"{here.python()}#{function}" if function else None
     for index, entry in enumerate(slot.entries):
         if entry.target == nxt:
             slot.active = index
@@ -199,6 +225,39 @@ def _fill_start(slot, context, here):
         slot.active = 0 if here.root == "CONTEXT" else 1
 
 
+def _fill_function(slot, context, here):
+    """The picked function: what it takes and returns."""
+    function = rna.function(
+        here.final_step(), context.window_manager.sna_browser.function
+    )
+    slot.at = "function"
+    slot.filter = ""
+    slot.is_value = True
+    if function is None:
+        slot.title = "Function"
+        slot.value = "Not found"
+        return
+    slot.title = rna.function_label(function)
+    names = ", ".join(p.identifier for p in rna.parameters(function))
+    returns = _returns(function)
+    slot.value = f"{function.identifier}({names})" + (
+        f" → {returns}" if returns else ""
+    )
+    slot.description = function.description
+
+
+def _returns(function) -> str:
+    """What a function returns: "Modifier", "Boolean, Vector, ...", ""."""
+    results = rna.parameters(function, outputs=True)
+    labels = [rna.type_label(rna.parameter_step(p)) for p in results]
+    return ", ".join(label for label in labels if label)
+
+
+def calls_functions(context) -> bool:
+    node = browsed_node(context)
+    return bool(getattr(node, "sn_calls_functions", False))
+
+
 def browsed_node(context):
     from ..lib.trees import node_by_id
 
@@ -212,6 +271,10 @@ def problem(context) -> str:
     node = browsed_node(context)
     if not here.root:
         return "Pick where the path starts"
+    if getattr(node, "sn_calls_functions", False):
+        if not context.window_manager.sna_browser.function:
+            return "Pick a function"
+        return ""
     if node is not None and not node.path_accepts(here.final_step()):
         return "This node needs a property: pick a value"
     return ""
@@ -341,7 +404,9 @@ def fill_results(context):
 
 def _live_search(context, start, words, depth=4, budget=6000, limit=60):
     """(text, summary, opens, target) of the data below `start` whose labels
-    contain all `words` (the last one in its own label), nearest first."""
+    contain all `words` (the last one in its own label), nearest first. For
+    nodes that call functions, the functions of that data too."""
+    with_functions = calls_functions(context)
     try:
         value = locations.evaluate(start, context)
     except locations.Unavailable:
@@ -352,6 +417,8 @@ def _live_search(context, start, words, depth=4, budget=6000, limit=60):
     for _ in range(depth):
         following = []
         for at, current, labels in frontier:
+            if with_functions:
+                found += _matching_functions(at, labels, words)
             for target, child, text in _children(context, at, current):
                 budget -= 1
                 if budget < 0:
@@ -373,6 +440,18 @@ def _live_search(context, start, words, depth=4, budget=6000, limit=60):
                         visited.add(pointer)
                         following.append((target, child, path_labels))
         frontier = following
+    return found
+
+
+def _matching_functions(at, labels, words):
+    found = []
+    for function in rna.functions(at.final_step()):
+        name = function.identifier.replace("_", " ")
+        haystack = " ".join(labels).lower() + " " + name
+        if words[-1] in name and all(word in haystack for word in words):
+            text = " › ".join(labels + (rna.function_label(function),))
+            target = f"{at.python()}#{function.identifier}"
+            found.append((text, _returns(function), False, target))
     return found
 
 
