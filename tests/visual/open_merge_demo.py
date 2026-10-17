@@ -188,7 +188,7 @@ def build():
     helpers.flush()
     arrange_button.socket("label").value = "Arrange Objects"
     report_button.socket("label").value = "Report Active Object"
-    link(panel.outputs["Interface"], simplify.inputs[0])
+    link(panel.outputs["Draw"], simplify.inputs[0])
     link(simplify.socket("next", output=True), bevel.inputs[0])
     link(bevel.socket("next", output=True), spacing_field.inputs[0])
     link(spacing_field.socket("next", output=True), label.inputs[0])

@@ -16,7 +16,7 @@ class SNA_Node_IfElse(ScriptingBaseNode, bpy.types.Node):
         return [Flow(kind=kind), Boolean("condition", "Condition")], [
             Flow("then", "Then", kind=kind),
             Flow("else", "Else", kind=kind),
-            Flow("next", "Finally", kind=kind),
+            Flow("next", "After", kind=kind),
         ]
 
     def emit(self, ctx):

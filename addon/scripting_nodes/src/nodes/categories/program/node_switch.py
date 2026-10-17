@@ -66,7 +66,7 @@ class SNA_Node_Switch(ScriptingBaseNode, bpy.types.Node):
         ]
         outputs += [
             Flow("default", "Default", kind=kind),
-            Flow("next", "Finally", kind=kind),
+            Flow("next", "After", kind=kind),
         ]
         return [Flow(kind=kind), Data("value", "Value")], outputs
 

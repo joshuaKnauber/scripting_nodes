@@ -59,6 +59,41 @@ class MCPServerSecurityTest(unittest.TestCase):
         self.assertEqual(status, 403)
 
 
+class MCPSnippetTest(unittest.TestCase):
+    """The setups the MCP Server panel copies (mcp_server/ops/server_ops.py)."""
+
+    def setUp(self):
+        self.ops = helpers.sn("src.mcp_server.ops.server_ops")
+        self.prefs = helpers.sn("src.settings.preferences").get_preferences()
+        self.addCleanup(setattr, self.prefs, "mcp_token", self.prefs.mcp_token)
+        self.prefs.mcp_token = ""
+
+    def test_claude_desktop_starts_mcp_remote(self):
+        # claude_desktop_config.json only starts local servers: no "url"
+        server = json.loads(self.ops._snippet_claude_desktop(7423))["mcpServers"][
+            "scripting-nodes"
+        ]
+        self.assertEqual(server["command"], "npx")
+        self.assertEqual(server["args"], ["-y", "mcp-remote", "http://127.0.0.1:7423/"])
+        self.assertNotIn("url", server)
+
+    def test_claude_desktop_token(self):
+        self.prefs.mcp_token = "secret"
+        server = json.loads(self.ops._snippet_claude_desktop(7423))["mcpServers"][
+            "scripting-nodes"
+        ]
+        self.assertEqual(
+            server["args"][-2:], ["--header", "Authorization:${SN_MCP_AUTH}"]
+        )
+        self.assertEqual(server["env"], {"SN_MCP_AUTH": "Bearer secret"})
+
+    def test_json_is_http(self):
+        server = json.loads(self.ops._snippet_json(7423))["mcpServers"][
+            "scripting-nodes"
+        ]
+        self.assertEqual(server, {"type": "http", "url": "http://127.0.0.1:7423/"})
+
+
 class MCPToolCallTest(unittest.TestCase):
     def test_tool_runs_on_the_main_thread(self):
         """The worker thread hands the call to the main thread's pump."""

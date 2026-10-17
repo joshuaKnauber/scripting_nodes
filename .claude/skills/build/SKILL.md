@@ -16,6 +16,6 @@ python3 scripts/share_build.py --beta   # scripting_nodes-<version>-beta.zip
 - `--version X.Y.Z` only if the user asks for a specific version. The default is the version in `addon/scripting_nodes/blender_manifest.toml`.
 - Don't run tests, validation or install checks. This is packaging only.
 
-The script builds from the last commit (HEAD) in a temp copy, so the checkout and its manifest stay untouched. It leaves out features listed in `LEFT_OUT` in the script (currently the data explorer) and copies the zip to `builds/` and `~/Desktop`, replacing an older zip of the same name.
+The script builds from the last commit (HEAD) in a temp copy, so the checkout and its manifest stay untouched. It leaves out features listed in `LEFT_OUT` in the script and copies the zip to `builds/` and `~/Desktop`, replacing an older zip of the same name.
 
 Report back: the zip path on the Desktop, the commit it was built from, and what was left out. If the script prints that there are uncommitted changes, say that they aren't in the build.

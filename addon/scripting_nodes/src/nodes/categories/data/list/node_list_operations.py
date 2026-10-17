@@ -266,7 +266,7 @@ class SNA_Node_ForEachList(ScriptingBaseNode, bpy.types.Node):
     sn_inputs = [Flow(), List("list", "List")]
     sn_outputs = [
         Flow("loop", "Loop"),
-        Flow("next", "Done"),
+        Flow("next", "After"),
         Data("item", "Item"),
         Integer("index", "Index"),
     ]

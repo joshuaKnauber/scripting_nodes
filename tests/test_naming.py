@@ -114,5 +114,27 @@ class NamingTest(unittest.TestCase):
         self.assertEqual(bpy.ops.mesh_helper.new(), {"FINISHED"})
 
 
+class SocketNamesTest(unittest.TestCase):
+    """Flow sockets are named by role (see sockets/spec.py): entry points
+    Run or the method they are (Execute, Draw, ...), what runs after a block
+    After, plain pass-through flows after their kind (Program, Interface)."""
+
+    # names replaced by the role names, not to come back
+    OLD = {"Logic", "Finally", "Done", "Continue", "Layout"}
+
+    def test_flow_socket_names(self):
+        helpers.reset_file()
+        tree = helpers.new_tree()
+        for cls in helpers.node_classes():
+            node = helpers.add_node(tree, cls.bl_idname)
+            for socket in [*node.inputs, *node.outputs]:
+                if socket.bl_idname != "ScriptingFlowSocket":
+                    continue
+                with self.subTest(node=cls.bl_idname, socket=socket.name):
+                    self.assertNotIn(socket.name, self.OLD)
+                    if socket.kind == "LOGIC" and socket.is_output:
+                        self.assertNotEqual(socket.name, "Program")
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -54,7 +54,8 @@ def Flow(key="flow", label="", kind="PROGRAM", **kwargs):
     return SocketSpec("ScriptingFlowSocket", key, label, kind=kind, **kwargs)
 
 
-def Logic(key="flow", label="", **kwargs):
+def Logic(key="flow", label="Run", **kwargs):
+    """An entry point: code Blender runs (an event, an operator's execute)."""
     return Flow(key, label, kind="LOGIC", **kwargs)
 
 

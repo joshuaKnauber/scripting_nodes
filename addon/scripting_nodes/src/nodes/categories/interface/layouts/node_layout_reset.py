@@ -20,7 +20,7 @@ class SNA_Node_LayoutReset(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_LayoutReset"
     bl_label = "Reset Layout"
     sn_inputs = [Interface()]
-    sn_outputs = [Interface("next", "Continue"), Interface("reset", "Layout")]
+    sn_outputs = [Interface("next"), Interface("reset", "Reset")]
 
     def emit(self, ctx):
         ctx.code(f"""

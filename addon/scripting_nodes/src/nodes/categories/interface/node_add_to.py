@@ -46,7 +46,7 @@ class AddToNode(ScriptingBaseNode):
 
     sn_root = True
     sn_inputs = [Boolean("visible", "Is Visible", default=True)]
-    sn_outputs = [Interface("draw", "Interface")]
+    sn_outputs = [Interface("draw", "Draw")]
     base = None
     kind = ""
 

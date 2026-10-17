@@ -11,7 +11,11 @@ class SNA_Node_Repeat(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Repeat"
     bl_label = "Repeat"
     sn_inputs = [Flow(), Integer("times", "Times", default=3)]
-    sn_outputs = [Flow("loop", "Loop"), Flow("next", "Done"), Integer("index", "Index")]
+    sn_outputs = [
+        Flow("loop", "Loop"),
+        Flow("next", "After"),
+        Integer("index", "Index"),
+    ]
 
     def emit(self, ctx):
         index = ctx.var("index") if ctx.is_linked("index") else "_"
@@ -34,7 +38,7 @@ class SNA_Node_LoopControl(ScriptingBaseNode, bpy.types.Node):
     action: bpy.props.EnumProperty(
         name="Action",
         items=[
-            ("break", "Stop Loop", "Leave the loop, continue after it (Done)"),
+            ("break", "Stop Loop", "Leave the loop, continue after it (After)"),
             ("continue", "Next Item", "Skip the rest of this run, go to the next item"),
         ],
     )

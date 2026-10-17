@@ -13,7 +13,7 @@ class SNA_Node_DrawForEach(ScriptingBaseNode, bpy.types.Node):
     bl_label = "Draw For Each"
     sn_inputs = [Interface(), List("list", "List")]
     sn_outputs = [
-        Interface("loop", "Item"),
+        Interface("loop", "Loop"),
         Interface("next", "After"),
         Data("item", "Item"),
         Integer("index", "Index"),

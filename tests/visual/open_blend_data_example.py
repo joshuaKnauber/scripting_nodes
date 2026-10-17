@@ -77,7 +77,7 @@ def build():
     bevel.paste_path('bpy.data.objects["Cube"].modifiers["Bevel"].width')
     button = helpers.add_node(tree, "SNA_Node_Button", (200, -400))
     helpers.point(button, "operator_sn", op)
-    link(panel.outputs["Interface"], simplify.inputs[0])
+    link(panel.outputs["Draw"], simplify.inputs[0])
     link(simplify.socket("next", output=True), frame_end.inputs[0])
     link(frame_end.socket("next", output=True), bevel.inputs[0])
     link(bevel.socket("next", output=True), button.inputs[0])

@@ -551,6 +551,22 @@ class BrowserTest(unittest.TestCase):
         self.assertEqual(node.path_keys[0].mode, "NAME")
         self.assertEqual(node.socket("key_0").value, "Bevel")
 
+    def test_column_filters(self):
+        state = self.go("bpy.context.active_object")
+        column = state.columns[2]  # Start, Context, Active Object
+        self.assertEqual(column.title, "Active Object")
+        column.filter = "modif"
+        column.active = column.entries.find("Modifiers")
+        self.assertEqual(state.path, "bpy.context.active_object.modifiers")
+        # the column shows the same place: it keeps its filter
+        self.assertEqual(state.columns[2].filter, "modif")
+        self.go("bpy.context.active_object.modifiers['Bevel'].width")
+        self.assertEqual(state.columns[0].title, "Active Object")  # moved left
+        self.assertEqual(state.columns[0].filter, "modif")
+        self.go("bpy.context.scene.render")
+        self.assertEqual(state.columns[2].title, "Scene")
+        self.assertEqual(state.columns[2].filter, "")
+
     def open_for(self, node):
         """What invoking sna.browse_path does before the popup shows."""
         ops = helpers.sn("src.blend_data.ops.browser")

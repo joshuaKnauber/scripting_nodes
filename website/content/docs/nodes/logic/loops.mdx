@@ -7,13 +7,13 @@ icon: Repeat
 - **For Each (List)** (**Add › Data › List**) runs **Loop** once per item of a list, with the **Item** and its **Index**. Blender collections (all objects, the selected objects, a mesh's vertices, ...) connect to it directly.
 - **Repeat** (**Add › Program**) runs **Loop** a number of **Times**, with the **Index** counting from 0.
 
-**Done** continues after the last run. **Item** and **Index** only exist inside the loop: using them after it is an error on the node that uses them.
+**After** continues after the last run. **Item** and **Index** only exist inside the loop: using them after it is an error on the node that uses them.
 
 ## Stopping early
 
 **Break / Continue** (**Add › Program**) changes what a loop does, in the flow inside it:
 
-- **Stop Loop** leaves the loop and continues at **Done**.
+- **Stop Loop** leaves the loop and continues at **After**.
 - **Next Item** skips the rest of this run and goes on with the next item.
 
 Put it after an **If/Else** or **Switch** to stop or skip only for some items. Outside of a loop it's an error on the node.

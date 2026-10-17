@@ -14,7 +14,7 @@ class SNA_Node_CombineStrings(ScriptingBaseNode, bpy.types.Node):
         String("first", "String"),
         String("string", "String", dynamic=True),
     ]
-    sn_outputs = [String("combined", "Combined")]
+    sn_outputs = [String("combined", "String")]
 
     def emit(self, ctx):
         strings = [ctx.input("first")] + ctx.inputs("string")

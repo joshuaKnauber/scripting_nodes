@@ -22,6 +22,21 @@ class SNA_UL_BrowserEntries(bpy.types.UIList):
         if item.opens:
             right.label(icon="RIGHTARROW_THIN")
 
+    def filter_items(self, context, data, propname):
+        """Entries with all words of the column's filter in their name or
+        Python name (search results have no filter)."""
+        entries = getattr(data, propname)
+        words = getattr(data, "filter", "").lower().replace("_", " ").split()
+        if not words:
+            return [], []
+        flags = []
+        for entry in entries:
+            name = entry.target.rsplit(".", 1)[-1].replace("_", " ")
+            text = f"{entry.name} {name}".lower()
+            show = all(word in text for word in words)
+            flags.append(self.bitflag_filter_item if show else 0)
+        return flags, []
+
 
 def draw(layout, context):
     state = context.window_manager.sna_browser
@@ -47,6 +62,7 @@ def draw(layout, context):
             continue
         if slot.note:
             col.label(text=slot.note, icon="INFO")
+        col.prop(slot, "filter", text="", icon="FILTER", placeholder="Filter")
         col.template_list(
             SNA_UL_BrowserEntries.bl_idname,
             f"column_{index}",

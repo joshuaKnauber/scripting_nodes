@@ -72,6 +72,12 @@ class SNA_BrowserEntry(bpy.types.PropertyGroup):
 
 class SNA_BrowserColumn(bpy.types.PropertyGroup):
     title: bpy.props.StringProperty()
+    at: bpy.props.StringProperty()  # where in the path the column is
+    filter: bpy.props.StringProperty(
+        name="Filter",
+        description="Only show entries containing these words",
+        options={"TEXTEDIT_UPDATE", "SKIP_SAVE"},
+    )
     entries: bpy.props.CollectionProperty(type=SNA_BrowserEntry)
     active: bpy.props.IntProperty(default=-1, update=_open_entry)
     note: bpy.props.StringProperty()  # why there are no live values
@@ -120,24 +126,28 @@ def fill(context):
     here = location(context)
     steps = [None] + (list(range(len(here.parts) + 1)) if here.root else [])
     steps = steps[-COLUMNS:]
+    # filters stay with their place when the columns move along
+    filters = {slot.at: slot.filter for slot in state.columns if slot.filter}
     _filling = True
     try:
         for slot, count in zip(state.columns, steps):
-            _fill_column(slot, context, here, count)
+            _fill_column(slot, context, here, count, filters)
         state.shown = len(steps)
     finally:
         _filling = False
 
 
-def _fill_column(slot, context, here, count):
+def _fill_column(slot, context, here, count, filters):
     slot.entries.clear()
     slot.note = ""
     slot.is_value = False
     slot.active = -1
-    if count is None:
+    at = here.truncated(count) if count is not None else None
+    slot.at = at.python() if at is not None else "start"
+    slot.filter = filters.get(slot.at, "")
+    if at is None:
         _fill_start(slot, context, here)
         return
-    at = here.truncated(count)
     slot.title = at.crumbs()[-1][0]
     try:
         value = locations.evaluate(at, context)

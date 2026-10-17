@@ -36,5 +36,5 @@ def setup():
     checkbox = helpers.add_node(tree, "SNA_Node_Checkbox", (200, -300))
     checkbox.mode = "BLENDER"
     checkbox.path = "scene.render.use_simplify"
-    helpers.link(tree, panel.outputs["Interface"], checkbox.inputs[0])
+    helpers.link(tree, panel.outputs["Draw"], checkbox.inputs[0])
     return tree

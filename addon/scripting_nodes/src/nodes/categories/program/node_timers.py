@@ -23,7 +23,7 @@ class SNA_Node_RunWithDelay(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_RunWithDelay"
     bl_label = "Run with Delay"
     sn_inputs = [Flow(), Float("delay", "Seconds", default=1.0)]
-    sn_outputs = [Flow("delayed", "Delayed"), Flow("next", "Continue")]
+    sn_outputs = [Flow("delayed", "Delayed"), Flow("next")]
 
     persistent: PERSISTENT
 
@@ -55,7 +55,7 @@ class SNA_Node_RunInIntervals(ScriptingBaseNode, bpy.types.Node):
     sn_outputs = [
         Flow("repeat", "Repeat"),
         Integer("index", "Index"),
-        Flow("next", "Continue"),
+        Flow("next"),
     ]
 
     persistent: PERSISTENT

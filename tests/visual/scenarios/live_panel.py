@@ -16,7 +16,7 @@ def setup():
     l1.inputs[1].value = "Hello from a node tree"
     l2 = helpers.add_node(tree, "SNA_Node_Label", (150, 100))
     l2.inputs[1].value = "Edits reload live"
-    helpers.link(tree, panel.outputs["Interface"], l1.inputs[0])
+    helpers.link(tree, panel.outputs["Draw"], l1.inputs[0])
     helpers.link(tree, l1.outputs[0], l2.inputs[0])
     return tree
 

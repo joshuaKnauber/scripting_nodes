@@ -16,7 +16,7 @@ class SNA_Node_Substring(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Substring"
     bl_label = "Substring In String"
     sn_inputs = [String("string", "String"), String("substring", "Substring")]
-    sn_outputs = [Boolean("is_in", "Is in String")]
+    sn_outputs = [Boolean("is_in", "Contains")]
     sn_header_props = ("mode",)
 
     mode: bpy.props.EnumProperty(name="Mode", items=MODES)

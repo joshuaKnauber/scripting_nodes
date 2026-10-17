@@ -395,7 +395,7 @@ class PropertiesTest(unittest.TestCase):
         helpers.add_property("Offset", "VECTOR", owner=op, vector_size=2)
         panel = self.add("SNA_Node_Panel")
         button = self.add("SNA_Node_Button")
-        helpers.link(self.tree, panel.outputs["Interface"], button.inputs[0])
+        helpers.link(self.tree, panel.outputs["Draw"], button.inputs[0])
         helpers.point(button, "operator_sn", op)
         helpers.flush()
         button.socket("arg_amount").value = 5

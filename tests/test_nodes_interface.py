@@ -43,7 +43,7 @@ class InterfaceNodesTest(unittest.TestCase):
         prop = helpers.add_property("Enabled", "BOOLEAN", in_addon_group=False)
         panel = helpers.add_node(tree, "SNA_Node_Panel")
         checkbox = helpers.add_node(tree, "SNA_Node_Checkbox")
-        helpers.link(tree, panel.outputs["Interface"], checkbox.inputs[0])
+        helpers.link(tree, panel.outputs["Draw"], checkbox.inputs[0])
         helpers.pick_property(checkbox, prop)
         checkbox.toggle = True
         helpers.flush()
@@ -77,7 +77,7 @@ class InterfaceNodesTest(unittest.TestCase):
         tree = helpers.new_tree()
         panel = helpers.add_node(tree, "SNA_Node_Panel")
         field = helpers.add_node(tree, "SNA_Node_NumberField")
-        helpers.link(tree, panel.outputs["Interface"], field.inputs[0])
+        helpers.link(tree, panel.outputs["Draw"], field.inputs[0])
         field.mode = "BLENDER"
         field.path = "scene.frame_end"
         helpers.flush()
@@ -97,7 +97,7 @@ class InterfaceNodesTest(unittest.TestCase):
         helpers.add_property("Count", "INTEGER", owner=op)
         panel = helpers.add_node(tree, "SNA_Node_Panel")
         button = helpers.add_node(tree, "SNA_Node_Button")
-        helpers.link(tree, panel.outputs["Interface"], button.inputs[0])
+        helpers.link(tree, panel.outputs["Draw"], button.inputs[0])
         helpers.point(button, "operator_sn", op)
         helpers.flush()
         button.socket("arg_count").value = 5
@@ -115,7 +115,7 @@ class InterfaceNodesTest(unittest.TestCase):
         op = helpers.add_node(tree, "SNA_Node_Operator")
         panel = helpers.add_node(tree, "SNA_Node_Panel")
         button = helpers.add_node(tree, "SNA_Node_Button")
-        helpers.link(tree, panel.outputs["Interface"], button.inputs[0])
+        helpers.link(tree, panel.outputs["Draw"], button.inputs[0])
         helpers.point(button, "operator_sn", op)
         helpers.flush()
         # no label: Blender shows the operator's label
@@ -173,7 +173,7 @@ class InterfaceNodesTest(unittest.TestCase):
         col = helpers.add_node(tree, "SNA_Node_Column")
         inner = helpers.add_node(tree, "SNA_Node_Label")
         after = helpers.add_node(tree, "SNA_Node_Label")
-        helpers.link(tree, panel.outputs["Interface"], sub.inputs[0])
+        helpers.link(tree, panel.outputs["Draw"], sub.inputs[0])
         helpers.link(tree, sub.outputs["Header"], header.inputs[0])
         helpers.link(tree, sub.outputs["Panel"], box.inputs[0])
         helpers.link(tree, box.outputs["Box"], col.inputs[0])
@@ -210,9 +210,9 @@ class InterfaceNodesTest(unittest.TestCase):
         row = helpers.add_node(tree, "SNA_Node_Row")
         reset = helpers.add_node(tree, "SNA_Node_LayoutReset")
         label = helpers.add_node(tree, "SNA_Node_Label")
-        helpers.link(tree, panel.outputs["Interface"], row.inputs[0])
+        helpers.link(tree, panel.outputs["Draw"], row.inputs[0])
         helpers.link(tree, row.outputs["Row"], reset.inputs[0])
-        helpers.link(tree, reset.outputs["Layout"], label.inputs[0])
+        helpers.link(tree, reset.outputs["Reset"], label.inputs[0])
         helpers.flush()
         self.assertIn("self.layout.label(", source(tree))
         self.assertLoaded()
@@ -222,7 +222,7 @@ class InterfaceNodesTest(unittest.TestCase):
         panel = helpers.add_node(tree, "SNA_Node_Panel")
         menu = helpers.add_node(tree, "SNA_Node_Menu")
         item = helpers.add_node(tree, "SNA_Node_Label")
-        helpers.link(tree, panel.outputs["Interface"], menu.inputs[0])
+        helpers.link(tree, panel.outputs["Draw"], menu.inputs[0])
         helpers.link(tree, menu.outputs["Menu"], item.inputs[0])
         menu.socket("label").value = "More"
         item.inputs[1].value = "in menu"

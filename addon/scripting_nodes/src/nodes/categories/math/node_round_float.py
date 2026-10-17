@@ -10,7 +10,7 @@ class SNA_Node_RoundFloat(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_RoundFloat"
     bl_label = "Round Float"
     sn_inputs = [Float("float", "Float"), Integer("decimals", "Decimals")]
-    sn_outputs = [Float("result", "Rounded Float")]
+    sn_outputs = [Float("result", "Result")]
     sn_header_props = ("round_up_or_down",)
 
     round_up_or_down: bpy.props.EnumProperty(

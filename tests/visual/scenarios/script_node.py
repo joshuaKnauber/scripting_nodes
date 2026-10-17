@@ -80,7 +80,7 @@ def setup():
     info.function_name = "run"
     helpers.flush()
     button = helpers.add_node(tree, "SNA_Node_Button", (-60, -120))
-    helpers.link(tree, panel.outputs["Interface"], info.inputs[0])
+    helpers.link(tree, panel.outputs["Draw"], info.inputs[0])
     helpers.link(tree, info.outputs[0], button.inputs[0])
     helpers.flush()
     helpers.point(button, "operator_sn", op)

@@ -81,7 +81,7 @@ class NodeCompileTest(unittest.TestCase):
                 panel = helpers.add_node(tree, "SNA_Node_Panel")
                 l1 = helpers.add_node(tree, "SNA_Node_Label")
                 l2 = helpers.add_node(tree, "SNA_Node_Label")
-                helpers.link(tree, panel.outputs["Interface"], inp)
+                helpers.link(tree, panel.outputs["Draw"], inp)
                 helpers.link(tree, out, l1.inputs[0])
                 helpers.link(tree, l1.outputs[0], l2.inputs[0])
                 helpers.flush()

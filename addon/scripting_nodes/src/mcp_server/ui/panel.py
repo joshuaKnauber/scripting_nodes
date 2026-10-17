@@ -43,6 +43,11 @@ class SNA_PT_MCPServer(bpy.types.Panel):
         op.target = "CLAUDE_CODE"
         op = copy_row.operator("sna.copy_mcp_snippet", text="Codex", icon="COPYDOWN")
         op.target = "CODEX"
+        copy_row = layout.row(align=True)
+        op = copy_row.operator(
+            "sna.copy_mcp_snippet", text="Claude Desktop", icon="COPYDOWN"
+        )
+        op.target = "CLAUDE_DESKTOP"
         op = copy_row.operator("sna.copy_mcp_snippet", text="JSON", icon="COPYDOWN")
         op.target = "JSON"
 

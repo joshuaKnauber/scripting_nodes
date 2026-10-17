@@ -85,7 +85,7 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
     bl_idname = "SNA_Node_Panel"
     bl_label = "Panel"
     sn_root = True
-    sn_outputs = [Interface("header", "Header"), Interface("body", "Interface")]
+    sn_outputs = [Interface("header", "Header"), Interface("body", "Draw")]
 
     panel_space_type: bpy.props.EnumProperty(
         items=get_space_type_items,

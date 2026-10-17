@@ -32,6 +32,17 @@ def _snippet_codex(port: int) -> str:
     return snippet
 
 
+def _snippet_claude_desktop(port: int) -> str:
+    # claude_desktop_config.json only starts local (stdio) servers: mcp-remote
+    # bridges to the HTTP server. -y: npx mustn't wait for an install prompt.
+    # The header goes through env, mcp-remote's way to pass one with a space.
+    server = {"command": "npx", "args": ["-y", "mcp-remote", _server_url(port)]}
+    if _token():
+        server["args"] += ["--header", "Authorization:${SN_MCP_AUTH}"]
+        server["env"] = {"SN_MCP_AUTH": f"Bearer {_token()}"}
+    return json.dumps({"mcpServers": {SERVER_NAME: server}}, indent=2)
+
+
 def _snippet_json(port: int) -> str:
     server = {"type": "http", "url": _server_url(port)}
     if _token():
@@ -42,12 +53,14 @@ def _snippet_json(port: int) -> str:
 _SNIPPET_BUILDERS = {
     "CLAUDE_CODE": _snippet_claude_code,
     "CODEX": _snippet_codex,
+    "CLAUDE_DESKTOP": _snippet_claude_desktop,
     "JSON": _snippet_json,
 }
 
 _TARGET_LABELS = {
     "CLAUDE_CODE": "Claude Code",
     "CODEX": "Codex",
+    "CLAUDE_DESKTOP": "Claude Desktop",
     "JSON": "JSON",
 }
 
@@ -118,9 +131,15 @@ class SNA_OT_CopyMCPSnippet(bpy.types.Operator):
                 "TOML stanza to paste into ~/.codex/config.toml",
             ),
             (
+                "CLAUDE_DESKTOP",
+                "Claude Desktop",
+                "mcpServers entry for claude_desktop_config.json (needs Node.js: "
+                "it connects through mcp-remote)",
+            ),
+            (
                 "JSON",
                 "JSON",
-                "Generic mcpServers JSON entry (Claude Desktop and similar clients)",
+                "mcpServers entry for clients that connect over HTTP (Cursor, ...)",
             ),
         ],
         default="CLAUDE_CODE",
