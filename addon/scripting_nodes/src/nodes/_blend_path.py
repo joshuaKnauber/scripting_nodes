@@ -67,23 +67,10 @@ class SNA_BlendPathKey(bpy.types.PropertyGroup):
     )
 
 
-def _search_path(self, context, edit_text):
-    results = rna.search(self.path_root_step(), edit_text, accept=self.path_accepts)
-    items = []
-    for entry in results:
-        # data that only leads to what the node takes: pick it, type "."
-        more = "" if self.path_accepts(entry.final) else " ›"
-        items.append((entry.path, f"{entry.text}   {entry.type_label}{more}"))
-    return items
-
-
 class BlendPathMixin:
     path_root: bpy.props.EnumProperty(name="Start", items=ROOT_ITEMS, default="CONTEXT")
-    path: bpy.props.StringProperty(
-        name="Path",
-        description="Search the data, or paste a copied data path",
-        search=_search_path,
-    )
+    # picked in the browser (blend_data/browser.py) or pasted
+    path: bpy.props.StringProperty(name="Path")
     # type of the data the path starts at when the input doesn't tell, and
     # a more specific type for the result (an object's data as Mesh): picked
     # on the sockets (sna.blend_path_type)
@@ -92,8 +79,8 @@ class BlendPathMixin:
     path_keys: bpy.props.CollectionProperty(type=SNA_BlendPathKey)
 
     def path_accepts(self, step) -> bool:
-        """Which final steps the search offers. Overridden by nodes that only
-        work with some properties."""
+        """Which final steps the browser can use for this node. Overridden by
+        nodes that only work with some properties."""
         return True
 
     # -- resolution -----------------------------------------------------------
@@ -214,23 +201,32 @@ class BlendPathMixin:
 
     # -- UI --------------------------------------------------------------------
 
-    def path_label(self):
-        """ "Render › FPS" for the node header."""
-        steps = self.path_steps()
+    def _path_labels(self):
         labels = []
-        for step in steps:
+        for step in self.path_steps():
             if step.is_subscript and labels:
                 labels[-1] += "[]"
             else:
                 labels.append(rna.label(step))
-        return " › ".join(labels[-2:])
+        return labels
+
+    def path_text(self):
+        """ "Active Object › Modifiers[] › Width" for the browse button."""
+        if not self.path:
+            return "Data Input" if self.path_root == "INPUT" else "Pick Data"
+        return " › ".join(self._path_labels())
+
+    def path_label(self):
+        """ "Render › FPS" for the node header."""
+        return " › ".join(self._path_labels()[-2:])
 
     def draw_path(self, layout, header=None):
         """The path editor. `header(row)` adds buttons to its first row."""
         col = layout.column(align=True)
         row = col.row(align=True)
-        row.prop(self, "path_root", text="", icon_only=True)
-        row.prop(self, "path", text="", icon="VIEWZOOM")
+        icon = {"CONTEXT": "WINDOW", "DATA": "FILE_BLEND"}.get(self.path_root, "LINKED")
+        op = row.operator("sna.browse_path", text=self.path_text(), icon=icon)
+        op.node_id = self.id
         op = row.operator("sna.paste_blender_path", text="", icon="PASTEDOWN")
         op.node_id = self.id
         if header is not None:

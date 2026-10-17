@@ -324,8 +324,8 @@ class BlendDataNodeTest(unittest.TestCase):
         self.assertIn("MESH", node.outputs[0].enum_items_data)
 
 
-class ExplorerTest(unittest.TestCase):
-    """blend_data/explorer.py: locations and live data."""
+class LocationsTest(unittest.TestCase):
+    """blend_data/locations.py: locations and live data."""
 
     def setUp(self):
         helpers.reset_file()
@@ -339,8 +339,8 @@ class ExplorerTest(unittest.TestCase):
         for tree in list(bpy.data.node_groups):
             bpy.data.node_groups.remove(tree)
 
-    def explorer(self):
-        return helpers.sn("src.blend_data.explorer")
+    def locations(self):
+        return helpers.sn("src.blend_data.locations")
 
     def add(self, path, root="CONTEXT"):
         node = helpers.add_node(self.tree, "SNA_Node_BlendData")
@@ -349,7 +349,7 @@ class ExplorerTest(unittest.TestCase):
         return node
 
     def test_node_location_is_live(self):
-        ex = self.explorer()
+        ex = self.locations()
         node = self.add("active_object.modifiers[]")
         node.path_keys[0].mode = "NAME"
         node.socket("key_0").value = "Bevel"
@@ -372,7 +372,7 @@ class ExplorerTest(unittest.TestCase):
         self.assertEqual(ex.evaluate(location, bpy.context), self.cube.modifiers.active)
 
     def test_unavailable(self):
-        ex = self.explorer()
+        ex = self.locations()
         node = self.add("active_object.modifiers[]")
         node.path_keys[0].mode = "NAME"
         node.socket("key_0").value = "Nothing"
@@ -389,7 +389,7 @@ class ExplorerTest(unittest.TestCase):
         self.assertEqual(location.final_step().rna_type, "Modifier")
 
     def test_absolute_location_follows_the_chain(self):
-        ex = self.explorer()
+        ex = self.locations()
         active = self.add("active_object")
         bevel = self.add("modifiers[]", root="INPUT")
         bevel.path_keys[0].mode = "NAME"
@@ -409,7 +409,7 @@ class ExplorerTest(unittest.TestCase):
             ex.absolute_location(unlinked)
 
     def test_apply_to_node(self):
-        ex = self.explorer()
+        ex = self.locations()
         active = self.add("active_object")
         chained = self.add("modifiers", root="INPUT")
         helpers.link(self.tree, active.outputs[0], chained.socket("data"))
@@ -431,7 +431,7 @@ class ExplorerTest(unittest.TestCase):
         self.assertFalse(chained.socket("data").is_linked)
 
     def test_set_node_location(self):
-        ex = self.explorer()
+        ex = self.locations()
         node = self.add("active_object")
         location = ex.node_location(node)
         target = location.extended("modifiers").extended(key=ex.Key("NAME", "Bevel"))
@@ -439,6 +439,7 @@ class ExplorerTest(unittest.TestCase):
         self.assertEqual(node.path, "active_object.modifiers[].width")
         self.assertEqual(node.path_keys[0].mode, "NAME")
         self.assertEqual(node.socket("key_0").value, "Bevel")
+
         self.assertEqual(node.outputs[0].bl_idname, "ScriptingFloatSocket")
         # back to the first segment
         ex.set_node_location(node, ex.node_location(node).truncated(1))
@@ -446,7 +447,7 @@ class ExplorerTest(unittest.TestCase):
         self.assertEqual(len(node.path_keys), 0)
 
     def test_free_location_round_trip(self):
-        ex = self.explorer()
+        ex = self.locations()
         for text in (
             "bpy.context",
             "bpy.data",
@@ -461,7 +462,7 @@ class ExplorerTest(unittest.TestCase):
         self.assertEqual(ex.free_location("not a path").root, "")
 
     def test_item_keys(self):
-        ex = self.explorer()
+        ex = self.locations()
         objects = bpy.data.objects
         self.assertEqual(
             ex.item_key(objects, 0, objects[0]), ex.Key("NAME", objects[0].name)
@@ -471,20 +472,151 @@ class ExplorerTest(unittest.TestCase):
             # material slots are named after their material, but not found by it
             self.assertEqual(ex.item_key(slots, 0, slots[0]).mode, "INDEX")
 
-    def test_nodes_with_paths(self):
-        ex = self.explorer()
-        self.assertTrue(ex.uses_paths(self.add("scene")))
-        getter = helpers.add_node(self.tree, "SNA_Node_GetProperty")
-        self.assertFalse(ex.uses_paths(getter))  # Custom mode
-        getter.mode = "BLENDER"
-        self.assertTrue(ex.uses_paths(getter))
-        self.assertFalse(ex.uses_paths(helpers.add_node(self.tree, "SNA_Node_Print")))
-
     def test_context_members(self):
-        members = self.explorer().struct_members(bpy.context, bpy.context)
+        members = self.locations().struct_members(bpy.context, bpy.context)
         names = [identifier for identifier, _, _ in members]
         self.assertIn("scene", names)  # an RNA property of Context
         self.assertIn("active_object", names)  # a context member
+        labels = {identifier: text for identifier, text, _ in members}
+        self.assertEqual(labels["window_manager"], "Window Manager")
+
+
+class BrowserTest(unittest.TestCase):
+    """blend_data/browser.py: the path browser's columns and search."""
+
+    setUp = LocationsTest.setUp
+    tearDown = LocationsTest.tearDown
+    add = LocationsTest.add
+    locations = LocationsTest.locations
+
+    BEVEL = "bpy.context.active_object.modifiers['Bevel']"
+
+    def browser(self):
+        return helpers.sn("src.blend_data.browser")
+
+    def go(self, path):
+        browser = self.browser()
+        browser.prepare(bpy.context)
+        state = bpy.context.window_manager.sna_browser
+        state.search = ""
+        browser.go(bpy.context, self.locations().free_location(path))
+        return state
+
+    def test_columns_follow_the_path(self):
+        state = self.go(self.BEVEL)
+        self.assertEqual(state.shown, 4)  # the last four of Start + 4 steps
+        columns = state.columns[: state.shown]
+        self.assertEqual(
+            [c.title for c in columns],
+            ["Context", "Active Object", "Modifiers", "Bevel"],
+        )
+        for column in columns[:-1]:  # the path's next step is active
+            self.assertGreaterEqual(column.active, 0, column.title)
+        self.assertEqual(columns[2].entries[columns[2].active].name, "Bevel")
+        self.assertEqual(columns[-1].active, -1)
+
+    def test_clicking_an_entry_moves(self):
+        state = self.go(self.BEVEL)
+        modifiers = state.columns[2]
+        bevel = modifiers.entries.find("Bevel")
+        width = next(
+            i for i, e in enumerate(state.columns[3].entries) if e.name == "Width"
+        )
+        state.columns[3].active = width
+        self.assertEqual(state.path, self.BEVEL + ".width")
+        last = state.columns[state.shown - 1]
+        self.assertTrue(last.is_value)
+        self.assertIn("Width", last.title)
+        # the columns moved on by one: Active Object, Modifiers, Bevel, Width
+        self.assertEqual(state.columns[0].title, "Active Object")
+        state.columns[0].active = state.columns[0].entries.find("Modifiers")
+        self.assertEqual(state.path, "bpy.context.active_object.modifiers")
+        self.assertGreaterEqual(bevel, 0)
+
+    def test_search_finds_live_data(self):
+        state = self.go("bpy.context.active_object")
+        state.search = "bevel width"
+        targets = [entry.target for entry in state.results]
+        self.assertEqual(targets[0], self.BEVEL + ".width")  # only on BevelModifier
+        state.result_active = 0
+        self.assertEqual(state.path, self.BEVEL + ".width")
+        self.assertEqual(state.search, "")
+
+    def test_use_path(self):
+        node = self.add("active_object")
+        self.go(self.BEVEL + ".width")
+        result = bpy.ops.sna.browse_path("EXEC_DEFAULT", node_id=node.id)
+        self.assertEqual(result, {"FINISHED"})
+        self.assertEqual(node.path, "active_object.modifiers[].width")
+        self.assertEqual(node.path_keys[0].mode, "NAME")
+        self.assertEqual(node.socket("key_0").value, "Bevel")
+
+    def open_for(self, node):
+        """What invoking sna.browse_path does before the popup shows."""
+        ops = helpers.sn("src.blend_data.ops.browser")
+        state = self.go("")
+        state.node_id = node.id
+        self.browser().go(bpy.context, ops._start(node))
+        return state
+
+    def test_data_input_start(self):
+        active = self.add("active_object")
+        node = self.add("")
+        node.path_root = "INPUT"
+        node.sync_sockets()
+        helpers.link(self.tree, active.outputs[0], node.socket("data"))
+        state = self.open_for(node)
+        # the connected node's path: live data
+        self.assertEqual(state.path, "bpy.context.active_object")
+        start = state.columns[0]
+        self.assertEqual(start.title, "Start")
+        self.assertEqual(start.entries[start.active].name, "Data Input")
+        self.assertEqual(start.entries[2].summary, "Active Object")
+
+    def test_data_input_by_type(self):
+        node = self.add("")
+        node.path_root = "INPUT"
+        node.path_input_type = "Object"
+        state = self.open_for(node)
+        self.assertEqual(state.path, "bpy.types.Object")
+        # no live data: the type's members, a list's item stands for all
+        modifiers = state.columns[1]
+        modifiers.active = modifiers.entries.find("Modifiers")
+        items = state.columns[2]
+        self.assertEqual([e.name for e in items.entries], ["Active", "[0]"])
+        items.active = 1
+        show = next(
+            i
+            for i, e in enumerate(state.columns[3].entries)
+            if e.name == "Show Viewport" or e.target.endswith(".show_viewport")
+        )
+        state.columns[3].active = show
+        result = bpy.ops.sna.browse_path("EXEC_DEFAULT", node_id=node.id)
+        self.assertEqual(result, {"FINISHED"})
+        self.assertEqual(node.path_root, "INPUT")
+        self.assertEqual(node.path, "modifiers[].show_viewport")
+
+    def test_pick_the_data_input(self):
+        node = self.add("scene")
+        state = self.open_for(node)
+        start = state.columns[0]
+        start.active = start.entries.find("Data Input")
+        self.assertEqual(state.path, "bpy.types")  # no type known yet
+        bpy.ops.sna.browse_path("EXEC_DEFAULT", node_id=node.id)
+        self.assertEqual((node.path_root, node.path), ("INPUT", ""))
+
+    def test_property_nodes_need_a_property(self):
+        checkbox = helpers.add_node(self.tree, "SNA_Node_Checkbox")
+        checkbox.mode = "BLENDER"
+        self.open_for(checkbox)
+        self.go("bpy.context.scene.render").node_id = checkbox.id
+        self.assertTrue(self.browser().problem(bpy.context))
+        result = bpy.ops.sna.browse_path("EXEC_DEFAULT", node_id=checkbox.id)
+        self.assertEqual(result, {"CANCELLED"})
+        self.go("bpy.context.scene.render.use_simplify")
+        self.assertEqual(self.browser().problem(bpy.context), "")
+        bpy.ops.sna.browse_path("EXEC_DEFAULT", node_id=checkbox.id)
+        self.assertEqual(checkbox.path, "scene.render.use_simplify")
 
 
 if __name__ == "__main__":

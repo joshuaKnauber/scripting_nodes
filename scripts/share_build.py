@@ -22,24 +22,7 @@ SRC = "addon/scripting_nodes/src"
 
 # Features in main that builds leave out until they're ready. Remove an entry
 # (and its cleanup below) when the feature ships.
-LEFT_OUT = {
-    "data explorer": [
-        f"{SRC}/blend_data/explorer.py",
-        f"{SRC}/blend_data/ops/explorer.py",
-        f"{SRC}/blend_data/ui",
-    ],
-}
-
-
-def _cut_explorer_settings(copy):
-    """The explorer's settings are the last block of SNA_UISettings."""
-    path = os.path.join(copy, SRC, "settings", "ui_state.py")
-    with open(path) as f:
-        text = f.read()
-    marker = "    # Data explorer (blend_data/ui/explorer_panel.py)"
-    if marker in text:
-        with open(path, "w") as f:
-            f.write(text[: text.index(marker)].rstrip() + "\n")
+LEFT_OUT = {}
 
 
 def manifest_version(copy):
@@ -87,7 +70,6 @@ def main():
                 shutil.rmtree(path)
             elif os.path.exists(path):
                 os.remove(path)
-    _cut_explorer_settings(copy)
 
     version = args.version or manifest_version(copy)
     if args.beta and "-" not in version:

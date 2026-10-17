@@ -1,18 +1,14 @@
-"""The data explorer: Blender's data of the open file, one level at a time
-(blend_data/ui/explorer_panel.py).
+"""Locations in Blender's data, for the path browser (blend_data/browser.py).
 
 A Location is a path with concrete keys, like a Blender Data node's path:
 
     Location("CONTEXT", ["active_object", "modifiers", "[]"], [Key("NAME", "Bevel")])
 
-The explorer's location is stored as a Python path in
-`scene.sna.ui.explorer_path` (`free_location`). It only changes when you
-click in the explorer; nodes change only through the explicit "Go to its
-path" (`absolute_location`) and "Use this path" (`apply_to_node`).
-
-`evaluate()` walks the path through the live data. Where that isn't possible
-(nothing active right now) the explorer falls back to the types (rna.py),
-without values.
+The browser stores its location as a Python path (`free_location`).
+`node_location` / `absolute_location` read a node's path, `apply_to_node`
+sets it. `evaluate()` walks a location through the live data; where that
+isn't possible (nothing active right now) the browser falls back to the
+types (rna.py), without values.
 """
 
 from dataclasses import dataclass, field
@@ -77,8 +73,12 @@ class Location:
         return Location(self.root, parts, keys, self.input_type)
 
     def python(self) -> str:
-        """`bpy.context.active_object.modifiers["Bevel"]` (free locations)."""
-        text = {"CONTEXT": "bpy.context", "DATA": "bpy.data"}.get(self.root, "")
+        """`bpy.context.active_object.modifiers["Bevel"]`; a location from
+        the Data input as `bpy.types.Object.modifiers[0]` (rna.parse)."""
+        if self.root == "INPUT":
+            text = f"bpy.types.{self.input_type}" if self.input_type else "bpy.types"
+        else:
+            text = {"CONTEXT": "bpy.context", "DATA": "bpy.data"}.get(self.root, "")
         keys = iter(self.keys)
         for part in self.parts:
             if part != rna.SUBSCRIPT:
@@ -175,7 +175,7 @@ def struct_members(value, context):
     """(identifier, label, property or None) of a struct's members. The
     context also has members that aren't RNA properties (active_object, ...)."""
     result = [
-        (prop.identifier, prop.name or prop.identifier, prop)
+        (prop.identifier, _label(prop.identifier, prop.name), prop)
         for prop in value.bl_rna.properties
         if prop.identifier != "rna_type"
     ]
@@ -183,38 +183,36 @@ def struct_members(value, context):
         known = {identifier for identifier, _, _ in result}
         for name in rna.CONTEXT_MEMBERS:
             if name not in known:
-                result.append((name, name.replace("_", " ").title(), None))
+                result.append((name, _label(name), None))
     return result
 
 
+def _label(identifier, name=""):
+    """The property's name; context members are named like their identifier
+    ("window_manager")."""
+    if name and name != identifier:
+        return name
+    return identifier.replace("_", " ").title()
+
+
 # -----------------------------------------------------------------------------
-# The explorer's location, and nodes' paths
+# The browser's location, and nodes' paths
 # -----------------------------------------------------------------------------
 
 
 def free_location(text) -> Location:
-    """The explorer's location from its stored Python path ("" = the roots)."""
+    """The browser's location from its stored Python path ("" = the start)."""
     if not text:
         return Location("")
-    if text in {"bpy.context", "bpy.data"}:
-        return Location("CONTEXT" if text == "bpy.context" else "DATA")
+    roots = {"bpy.context": "CONTEXT", "bpy.data": "DATA", "bpy.types": "INPUT"}
+    if text in roots:
+        return Location(roots[text])
     try:
         parsed = rna.parse(text)
     except ValueError:
         return Location("")
     keys = [Key("INDEX" if isinstance(k, int) else "NAME", k) for k in parsed.keys]
-    return Location(parsed.root, parsed.segments, keys)
-
-
-def uses_paths(node) -> bool:
-    """Nodes with a Blender data path: Blender Data nodes, and property nodes
-    in Blender mode."""
-    from ..nodes._blend_path import BlendPathMixin
-
-    return (
-        isinstance(node, BlendPathMixin)
-        and getattr(node, "mode", "BLENDER") == "BLENDER"
-    )
+    return Location(parsed.root, parsed.segments, keys, parsed.input_type)
 
 
 def node_location(node) -> Location:
@@ -265,14 +263,21 @@ def absolute_location(node, depth=0) -> Location:
 
 def apply_to_node(node, location: Location):
     """Point `node`'s path at `location`. A node starting at its Data input
-    keeps that start if `location` continues from there."""
+    keeps that start if `location` continues from there; a location from
+    the Data input (root INPUT) makes it start there."""
+    if location.root == "INPUT":
+        node.path_root = "INPUT"
+        if location.input_type and not linked_type(node):
+            node.path_input_type = location.input_type
+        set_node_location(node, location)
+        return
     if node.path_root == "INPUT":
         upstream = _upstream(node)
         try:
             base = absolute_location(upstream) if upstream is not None else None
         except Unavailable:
             base = None
-        if base is not None and _continues(location, base):
+        if base is not None and continues(location, base):
             tail = Location(
                 "INPUT", location.parts[len(base.parts):], location.keys[len(base.keys):]
             )  # fmt: skip
@@ -285,7 +290,29 @@ def apply_to_node(node, location: Location):
     set_node_location(node, location)
 
 
-def _continues(location, base) -> bool:
+def linked_type(node) -> str:
+    """The type of the data connected to `node`'s Data input ("" if none)."""
+    from ..sockets.data.socket_blend_data import linked_rna_type
+
+    socket = node.socket("data")
+    return linked_rna_type(socket)[0] if socket is not None else ""
+
+
+def input_location(node) -> Location:
+    """Where `node`'s Data input leads: the upstream Blender Data node's
+    path (live data), else the input's type."""
+    upstream = _upstream(node) if node.path_root == "INPUT" else None
+    if upstream is not None:
+        try:
+            return absolute_location(upstream)
+        except Unavailable:
+            pass
+    type_name = linked_type(node) or node.path_input_type
+    return Location("INPUT", input_type=type_name)
+
+
+def continues(location, base) -> bool:
+    """Whether `location` starts with `base`."""
     return (
         location.root == base.root
         and location.parts[: len(base.parts)] == base.parts

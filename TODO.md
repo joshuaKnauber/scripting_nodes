@@ -5,15 +5,16 @@ in the linked docs/threads; keep entries short and remove them when done.
 
 ## 0. Next, in this order
 
-**1. Blend Data browser: a proper redesign.** The explorer (sidebar Blend Data
-tab, `blend_data/explorer.py`, `blend_data/ui/explorer_panel.py`) is still
-quite bad and is left out of shared builds (`scripts/share_build.py`
-LEFT_OUT). Redesign before writing its docs.
-- [ ] Decide what it's for and how it's used: finding a path for a node, looking at live data, or both; where it lives (sidebar tab, popup from the path field, its own editor).
-- [ ] Design (mockups / screenshots first), then rebuild it; replaces the v1 browser (one level at a time, + adds nodes, editable values, Go to Its Path / Use This Path, types-only fallback).
-- [ ] Open items of v1 to carry over or drop: Blender's functions (`objects.new()`, `modifiers.remove()`) with a node that calls them; dragging entries into the node editor; recent places.
-- [ ] Data path search in the path field: Blender's search box truncates long entries and refilters our results (see `blend_data/rna.py` search); a popup of our own was proposed.
-- [ ] Ship it: remove it from LEFT_OUT, docs page, screenshots.
+**1. Blend Data browser** (2026-10): a popup from the node's path field
+(`blend_data/browser.py`, columns of the path with live values, search in the
+live data then all paths; Use Path sets the node's path). Replaced the sidebar
+explorer. Open:
+- [x] The node shows its path as a button opening the browser (no search field, no start dropdown); the Start column has the node's Data Input.
+- [ ] After typing in the search, the first click on a result only ends text editing.
+- [ ] Values in the columns are from when the browser moved, not live.
+- [ ] Search results found through the types pick collection items by index 0; a node whose Data input isn't connected to a Blender Data node opens at Context.
+- [ ] Blender's functions (`objects.new()`, `modifiers.remove()`) with a node that calls them; dragging entries into the node editor; recent places.
+- [ ] Docs screenshot: Blender's screenshot leaves popups out.
 
 **2. UX pass.** Go through the add-on as a new user would and collect what's
 confusing or slow: node editor (adding, picking, errors on nodes), sidebar
@@ -64,7 +65,7 @@ and `ruff check` with zero findings.
 ## 3. Node design open questions
 
 - [x] **Blend Data** (done 2026-10, `website/content/docs/blend-data/`): one Blender Data node following a path (Context / Blend File / Input), add-menu presets, typed sockets from RNA with a type picker for open types, `[]` keys by Index / Name / Active, paste + "Copy Data Path for Scripting Nodes", property nodes in Blender mode use the same paths. Follow-ups:
-  - [x] Data explorer v1 (sidebar Blend Data tab). To be redesigned: see 0.
+  - [x] Data explorer v1 (sidebar Blend Data tab), replaced by the path browser popup (see 0).
 - [x] **Node references** (done 2026-10): `Reference(...)` fields with a search callback, stored by node id, "Used by" in the sidebar, copies point at copied targets, deleted targets drawn red.
 - [x] **Properties as lists** (done 2026-10, `website/content/docs/properties/properties.mdx`): add-on list in Addon Data (one PropertyGroup per attach type, `scene.my_addon.count`), groups with their own list, Operator / Preferences node lists (operator properties are also its outputs), Get / Set / fields / On Property Update pick by id, enum items and pointer poll from functions, `addon/properties.py`. Follow-ups:
   - [ ] The Python name follows the label until it's pinned, so renaming a property in use loses saved values. Pin automatically once the add-on was exported?

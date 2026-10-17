@@ -25,18 +25,3 @@ class SNA_UISettings(bpy.types.PropertyGroup):
     active_function_index: bpy.props.IntProperty(
         default=0, update=update_active_function_index
     )
-
-    # Data explorer (blend_data/ui/explorer_panel.py)
-    explorer_path: bpy.props.StringProperty(
-        name="Explorer Path",
-        description="Where the data explorer is (a Python path)",
-    )
-    explorer_filter: bpy.props.StringProperty(
-        name="Filter",
-        description="Only show entries containing this text",
-        options={"TEXTEDIT_UPDATE"},
-    )
-    explorer_show_all: bpy.props.BoolProperty(
-        name="Show Empty and Internal",
-        description="Also show empty pointers and lists, and read-only values",
-    )

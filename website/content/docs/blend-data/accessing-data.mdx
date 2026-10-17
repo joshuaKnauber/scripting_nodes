@@ -18,11 +18,11 @@ A path has a **start** and the steps after it:
 - **Blend File**: everything in the file, e.g. `objects`, `materials`, `scenes`.
 - **Input**: the data connected to the node's **Data** input. Use it to continue from another node, e.g. the `modifiers` of an object.
 
-Type in the path field to search: it only offers what exists at that point, so after `active_object.` you get the properties of an object. The header shows where the path ends, e.g. **Modifiers[] › Width**.
+The node shows its path as a button, e.g. **Active Object › Modifiers[] › Width**; click it to pick the start and the path in the [browser](#browsing-the-open-file). The header shows where the path ends, e.g. **Modifiers[] › Width**.
 
 ## Typed outputs
 
-The output has the type of what the path ends at: **Width** is a Float, **Use Simplify** a Boolean, **Active Object** an Object. Connected nodes know the type too, so a second Blender Data node set to start at its Input only offers the properties of an Object.
+The output has the type of what the path ends at: **Width** is a Float, **Use Simplify** a Boolean, **Active Object** an Object. Connected nodes know the type too, so a second Blender Data node that starts at its Data input only offers the properties of an Object.
 
 Some paths can hold different types: `active_object.data` is a mesh for a mesh object but a camera for a camera. Pick the type with the arrow next to the output (**Data ⌄ Mesh**) to continue with mesh properties like `vertices`.
 
@@ -36,18 +36,15 @@ Lists (collections, drawn with a square socket) work with the **Collection** nod
 - **Name**: by name, e.g. the modifier called "Bevel".
 - **Active**: the list's active item, where the list has one (e.g. `material_slots`).
 
-## Exploring the open file
+## Browsing the open file
 
-The **Blend Data** tab in the node editor's sidebar shows the data of the open file, one level at a time: the real objects, modifiers and values, not just what could be there.
+The path button on the node opens the **Blender Data** browser. It shows the data of the open file, the real objects, modifiers and values, in columns like a file browser: one column per step of the path, starting where the node's path is right now.
 
-![The data explorer at the active object's Bevel modifier](/screenshots/blend-data-explorer.png)
+- Start at **Context** (the active object, the scene, ...), **Blend File** (all objects, materials, ...) or the node's **Data Input**, and click entries to go into them. From the Data input the browser shows the data of the connected Blender Data node, or what its type has. The steps above the columns go back. Entries with an arrow can be opened (objects, modifiers, lists); the others are values, shown with what they are right now. Empty entries and read-only values are hidden until you tick **Empty and Internal**.
+- **Search** finds data by name: first in the data below where you are (`bevel width` from the active object finds its Bevel modifier's width), then every path from the start.
+- **Use Path** (or Enter) sets the node's path to where you are. A node that starts at its Data input keeps that input when the path continues from it.
 
-- Start at **Context** (the active object, the scene, ...) or **Blend File** (all objects, materials, ...) and click entries to go into them. The top shows where you are as a path, the same way a node writes it. **Back** goes up one step, the home button back to the start.
-- Entries with an arrow can be opened (objects, modifiers, lists); below them are the values with what they are right now. Empty entries and read-only values are hidden until you tick **Show Empty and Internal**.
-- **+** adds a Blender Data node for an entry.
-- With a Blender Data node selected (or a property node in Blender mode), **Go to Its Path** shows the data at the end of its path, and **Use This Path** sets its path to where you are. Browsing never changes a node by itself.
-
-When the data isn't there right now (no active object, for example), the explorer lists what the type has instead, without values.
+When the data isn't there right now (no active object, for example), a column lists what the type has instead, without values.
 
 ## Generated code
 

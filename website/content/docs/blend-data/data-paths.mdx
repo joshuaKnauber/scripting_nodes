@@ -8,13 +8,13 @@ Nodes that work with one property (**Get Property**, **Set Property** and the fi
 
 ![A panel drawing Use Simplify, End Frame and a Bevel modifier's width by their paths](/screenshots/blend-data-paths.png)
 
-The path works like the one of the [Blender Data](/docs/blend-data/accessing-data) node, but must end at a property. The fields only offer properties they can draw: a Checkbox searches booleans, a Number Field numbers. Set Property gets a **Value** input of the property's type.
+The path works like the one of the [Blender Data](/docs/blend-data/accessing-data) node, but must end at a property. The fields only take properties they can draw: a Checkbox a boolean, a Number Field a number; the browser says so when the path ends somewhere else. Set Property gets a **Value** input of the property's type.
 
-The search finds data by name: `parti` lists the particle systems and the properties named after particles, not everything inside them. Add words to reach further in (`particle density`), or follow what you type: `active_object.active_material.` lists everything on the material. Data that only leads to a property (like *Active Material* in a Number Field) is marked with **›**; pick it and type a dot to continue.
+The browser's search finds data by name: `parti` lists the particle systems and the properties named after particles, not everything inside them. Add words to reach further in (`particle density`), or type a path: `active_object.active_material.` lists everything on the material.
 
 ## Copying paths from Blender
 
-You don't have to know the path. Right-click any field in Blender and choose **Copy Data Path for Scripting Nodes**, then use the paste button next to the path field (or **Add › Data › Blend Data › Paste Data Path** for a new node).
+You don't have to know the path. Right-click any field in Blender and choose **Copy Data Path for Scripting Nodes**, then use the paste button next to the path (or **Add › Data › Blend Data › Paste Data Path** for a new node).
 
 Pasting turns the path into steps and inputs:
 
