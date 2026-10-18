@@ -23,6 +23,8 @@ Interface flows draw from top to bottom. Layout nodes change where the nodes aft
 
 **UI List** draws Blender's list widget for a collection, like the lists of materials or vertex groups. Connect the collection to **Items** and pick an **Active Index**: an Integer property storing which item is selected (an add-on property, or one of Blender's). The **Item** flow draws each row, with the row's **Item** and **Index**; without it the list shows the items' names. The list can be filtered and sorted by name on its own.
 
+The list's own filter options (the arrow at its bottom) filter by name and sort, like in Blender's lists. To show only some items, pick a **Filter Function**: a [function](/docs/nodes/functions/creating-functions) that gets an item and returns a Boolean, e.g. whether an object is a mesh. Only items it returns True for are listed.
+
 ![A UI List of the objects with icons, next to the nodes](/screenshots/interface-ui-list.png)
 
 To add and remove items, put buttons below the list that run operators with **Collection Add** / **Collection Remove**.

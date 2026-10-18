@@ -185,6 +185,57 @@ class OperatorNodesTest(FlowTestCase):
         )
         self.assertTrue(hasattr(bpy.types, "OP_TEST_UL_objects"))
 
+    def test_ui_list_filter_function(self):
+        # Is Mesh(Object) -> Boolean, picked as the list's Filter Function
+        function, group_input, group_output = helpers.new_function(
+            "Is Mesh",
+            inputs=[("Object", "ScriptingBlendDataSocket")],
+            outputs=[("Keep", "ScriptingBooleanSocket")],
+        )
+        check = helpers.add_node(function, "SNA_Node_PythonExpression")
+        check.code = "obj.type == 'MESH'"
+        helpers.flush()
+        helpers.link(function, group_input.outputs[0], check.socket("name_obj"))
+        helpers.link(function, check.outputs[0], group_output.inputs[0])
+
+        prop = helpers.add_property("Index", "INTEGER")
+        panel = self.add("SNA_Node_Panel")
+        ui_list = self.add("SNA_Node_UIList")
+        ui_list.label = "Meshes"
+        self.link(panel.outputs["body"], ui_list.inputs[0])
+        objects = self.add("SNA_Node_BlendData")
+        objects.path_root = "DATA"
+        objects.path = "objects"
+        helpers.flush()
+        self.link(objects.outputs[0], ui_list.socket("items"))
+        helpers.pick_property(ui_list, helpers.prop(prop.id))
+        ui_list.filter_function = function
+        self.assertBuilt()
+        source = self.source()
+        self.assertIn("def filter_items(self, context, data, property):", source)
+        self.assertIn("if flags[i] and not is_mesh(item):", source)
+
+        # the list keeps meshes only, and Blender's name filter still works
+        mesh = bpy.data.objects.new("Mesh", bpy.data.meshes.new("Mesh"))
+        empty = bpy.data.objects.new("Empty", None)
+        self.addCleanup(bpy.data.objects.remove, empty)
+        self.addCleanup(bpy.data.objects.remove, mesh)
+        ui_list_class = bpy.types.OP_TEST_UL_meshes
+
+        class FakeList:
+            bitflag_filter_item = 1 << 30
+            filter_name = ""
+            use_filter_sort_alpha = False
+
+        fake = FakeList()
+        flags, _ = ui_list_class.filter_items(fake, bpy.context, bpy.data, "objects")
+        shown = {o.name for o, f in zip(bpy.data.objects, flags) if f}
+        self.assertIn("Mesh", shown)
+        self.assertNotIn("Empty", shown)
+        fake.filter_name = "nothing like it"
+        flags, _ = ui_list_class.filter_items(fake, bpy.context, bpy.data, "objects")
+        self.assertFalse(any(flags))
+
     def test_file_handler(self):
         loader = self.operator("Load CSV", invoke_type="FILE_BROWSER")
         handler = self.add("SNA_Node_FileHandler")
