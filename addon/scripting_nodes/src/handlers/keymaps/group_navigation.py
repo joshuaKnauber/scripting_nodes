@@ -62,7 +62,7 @@ class SNA_OT_GroupEnter(bpy.types.Operator):
 
 
 class SNA_OT_GroupExit(bpy.types.Operator):
-    """Pop the editor's tree path back to the parent."""
+    """Go up one level, to the tree the group was entered from."""
 
     bl_idname = "sna.group_exit"
     bl_label = "Exit Group"
@@ -73,7 +73,8 @@ class SNA_OT_GroupExit(bpy.types.Operator):
         return _in_sn_editor(context) and len(context.space_data.path) > 1
 
     def execute(self, context):
-        bpy.ops.node.tree_path_parent()
+        # node.tree_path_parent() goes to the top tree by default
+        context.space_data.path.pop()
         return {"FINISHED"}
 
 

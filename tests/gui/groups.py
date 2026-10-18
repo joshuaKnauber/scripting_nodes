@@ -118,6 +118,18 @@ def step():
             check(linked(strings[0].outputs[0], first.inputs["text"]), "string link")
             check(helpers.sn("src.core.errors").addon_error is None, "addon error")
             check("'grouped'" in helpers.tree_source(tree), "ungrouped code missing")
+
+            # Ctrl+Tab goes up one level of nested groups, not to the top
+            outer, middle, inner = (helpers.new_tree(n) for n in "ABC")
+            with editor(outer):
+                space = bpy.context.space_data
+                space.path.append(middle)
+                space.path.append(inner)
+                check(bpy.ops.sna.group_exit() == {"FINISHED"}, "exit failed")
+                check(space.edit_tree == middle, f"exit went to {space.edit_tree}")
+                bpy.ops.sna.group_exit()
+                check(space.edit_tree == outer, "second exit")
+                check(len(space.path) == 1, "path not at the top")
             print("GUI TEST PASSED")
             bpy.ops.wm.quit_blender()
             return None
