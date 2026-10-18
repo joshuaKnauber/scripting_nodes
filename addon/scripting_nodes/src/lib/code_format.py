@@ -5,25 +5,6 @@ import sys
 from .python_format import remove_redundant_parens
 
 
-def _trim_blank_edges(lines):
-    while lines and not lines[0].strip():
-        lines.pop(0)
-    while lines and not lines[-1].strip():
-        lines.pop()
-    return lines
-
-
-def normalize_indents(code):
-    """Remove the common indentation. Leading/trailing blank lines are dropped,
-    blank lines in between are kept (they may be part of a string)."""
-    lines = _trim_blank_edges(code.split("\n"))
-    indents = [len(line) - len(line.lstrip()) for line in lines if line.strip()]
-    if not indents:
-        return ""
-    cut = min(indents)
-    return "\n".join(line[cut:] if line.strip() else "" for line in lines)
-
-
 _ATOMIC = (
     ast.Name,
     ast.Constant,
