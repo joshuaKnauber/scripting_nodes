@@ -6,7 +6,8 @@ Each tree becomes one module of the add-on package; `__init__.py` imports
 them and registers their classes (core/package.py). Root nodes (operators, panels, events, ...) are
 emitted first; everything else is emitted when a flow reaches it or when a
 value it outputs is used. Nodes write through core/context.NodeContext.
-Scripts (Script nodes) become modules of their own in `scripts/`.
+Scripts (Addon Data › Scripts, core/scripts.py) become modules of their own
+in `scripts/`.
 """
 
 import hashlib
@@ -22,6 +23,7 @@ from ..lib.logger import log
 from ..lib.sockets import to_socket
 from ..lib.trees import scripting_node_trees, sn_nodes
 from . import errors, functions, helpers, metadata, naming, package, properties
+from . import scripts as script_list
 from .context import Line, NodeContext, NodeError, Scope
 
 HELPERS_MODULE = "utils"
@@ -66,6 +68,8 @@ def compile_addon(dev=True, pretty=False, settings=None, owners_out=None):
     files = {"__init__.py": ""}  # first in the folder listing
     owners, previews, used_helpers, permissions = {}, {}, set(), set()
     scripts, assets = {}, {}
+    # the add-on's scripts (errors keyed by script id, like nodes)
+    errors.node_errors.update(script_list.add_to_addon(names, scripts))
     # functions before the trees calling them: calls pass what they use
     builders = {
         tree.module_name: ModuleBuilder(tree, dev, names, scripts, assets=assets)

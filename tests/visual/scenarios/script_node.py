@@ -1,4 +1,4 @@
-"""Script nodes: an operator runs arrange.py, a panel draws with
+"""Scripts of the add-on: an operator runs arrange.py, a panel draws with
 selection_info.py. Node editor, the script in a Text Editor and the
 generated panel in the 3D viewport.
 
@@ -62,8 +62,8 @@ def setup():
     tree = helpers.new_tree("Object Tools")
     op = helpers.add_node(tree, "SNA_Node_Operator", (-700, 260))
     op.inputs["Label"].value = "Arrange Objects"
-    arrange = helpers.add_node(tree, "SNA_Node_Script", (-380, 300))
-    arrange.text_block = text("arrange.py", ARRANGE)
+    arrange = helpers.add_node(tree, "SNA_Node_ScriptFunction", (-380, 300))
+    arrange.script_id = helpers.add_script(text("arrange.py", ARRANGE)).id
     arrange.function_name = "run"
     helpers.flush()
     arrange.socket("spacing").value = 3.0
@@ -75,8 +75,8 @@ def setup():
     panel = helpers.add_node(tree, "SNA_Node_Panel", (-700, -120))
     panel.inputs["Label"].value = "Object Tools"
     panel.panel_category = "Object Tools"
-    info = helpers.add_node(tree, "SNA_Node_Script", (-380, -120))
-    info.text_block = text("selection_info.py", SELECTION_INFO)
+    info = helpers.add_node(tree, "SNA_Node_ScriptFunction", (-380, -120))
+    info.script_id = helpers.add_script(text("selection_info.py", SELECTION_INFO)).id
     info.function_name = "run"
     helpers.flush()
     button = helpers.add_node(tree, "SNA_Node_Button", (-60, -120))

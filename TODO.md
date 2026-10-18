@@ -24,8 +24,8 @@ findings here as entries, then fix them.
 
 **3. Docs: a big pass** (`website/content/docs/`, 41 pages), after 1 and 2 so
 the docs show the final UI.
-- [ ] Unwritten pages: Export, Panels, Running Operators, Script Nodes.
-- [ ] Pages written for older behavior: Script node (function dropdown, inline code, Data Only), Buttons (no "Run" label), generated code layout (`utils.py`, no `addon/` package), Trigger nodes left out of exports, Blend Data / explorer after the redesign.
+- [ ] Unwritten pages: Export, Panels, Running Operators.
+- [ ] Pages written for older behavior: Buttons (no "Run" label), generated code layout (`utils.py`, no `addon/` package), Trigger nodes left out of exports, Blend Data / explorer after the redesign.
 - [ ] Structure and getting started: one path from install to a published add-on; check every page against the current nodes.
 - [ ] Regenerate all screenshots (`scripts/docs_screenshots.py`) once the UI is final.
 

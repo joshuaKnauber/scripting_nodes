@@ -56,6 +56,7 @@ def build(call):
         }
     )
     call("write_text", text="toolkit_helpers.py", content=SCRIPT)
+    call("edit_scripts", add=[{"text": "toolkit_helpers.py"}])
     describe(call)
     ops = operators(call, props, members)
     interface(call, props, members, ops)
@@ -317,9 +318,9 @@ def operators(call, props, members):
             {"ref": "stored", "type": get, "props": {"prop": members["Objects"]}},
             {
                 "ref": "select",
-                "type": "SNA_Node_Script",
+                "type": "SNA_Node_ScriptFunction",
                 "props": {
-                    "text_block": "toolkit_helpers.py",
+                    "script": "toolkit_helpers.py",
                     "function": "select_objects",
                 },
             },

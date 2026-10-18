@@ -262,8 +262,8 @@ def operators(tree, ids, script):
     helpers.link(tree, active.outputs[0], item.socket("index"))
     stored = field(tree, "SNA_Node_GetProperty", ids["set_objects"], (-850, -1150))
     helpers.link(tree, item.outputs[0], stored.socket("data"))
-    select = helpers.add_node(tree, "SNA_Node_Script", (-850, -900))
-    select.text_block = script
+    select = helpers.add_node(tree, "SNA_Node_ScriptFunction", (-850, -900))
+    select.script_id = helpers.add_script(script).id
     select.function_name = "select_objects"
     helpers.flush()
     helpers.link(tree, stored.outputs[0], select.socket("names"))

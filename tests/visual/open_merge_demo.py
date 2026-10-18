@@ -102,7 +102,7 @@ def build():
     # -- script node ----------------------------------------------------------
     script_frame = frame(
         tree,
-        "Script node: arrange.py is a module, the node calls run()",
+        "Script Function: arrange.py is a script of the add-on, the node calls run()",
         (-1100, 760),
         (0.2, 0.28, 0.22),
     )
@@ -110,8 +110,8 @@ def build():
     arrange_op.socket("label").value = "Arrange Objects"
     text = bpy.data.texts.new("arrange.py")
     text.write(ARRANGE)
-    script = add(tree, "SNA_Node_Script", (-750, 700), script_frame)
-    script.text_block = text
+    script = add(tree, "SNA_Node_ScriptFunction", (-750, 700), script_frame)
+    script.script_id = helpers.add_script(text).id
     script.function_name = "run"
     get_spacing = add(tree, "SNA_Node_GetProperty", (-1050, 450), script_frame)
     helpers.flush()

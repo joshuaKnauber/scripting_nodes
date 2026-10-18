@@ -11,15 +11,6 @@ from ..lib.logger import log
 DATA_VERSION = 3
 
 
-def _script_functions(tree):
-    """Script nodes pick the function they call (they always called run())."""
-    for node in tree.nodes:
-        if node.bl_idname != "SNA_Node_Script" or node.function_name:
-            continue
-        if "run" in node.script_functions():
-            node.function_name = "run"
-
-
 def _renamed_nodes(tree):
     """Nodes whose bl_idname changed (nodes/_renamed.py) become the renamed
     node: same settings, input values, links and id."""
@@ -64,8 +55,9 @@ def replace_node(tree, node, idname):
     return new
 
 
-# data version -> function(tree) bringing a tree from version - 1 to it
-STEPS = {2: _script_functions, 3: _renamed_nodes}
+# data version -> function(tree) bringing a tree from version - 1 to it (none
+# for changes during the beta that files don't need to survive)
+STEPS = {3: _renamed_nodes}
 
 
 def upgrade(trees):
@@ -74,6 +66,8 @@ def upgrade(trees):
         if version >= DATA_VERSION:
             continue
         for step in range(version + 1, DATA_VERSION + 1):
+            if step not in STEPS:
+                continue
             try:
                 STEPS[step](tree)
             except Exception as exc:

@@ -1,9 +1,13 @@
-"""Scripts: text blocks and files used by Script nodes."""
+"""Scripts: text blocks and files of the add-on's scripts (Addon Data ›
+Scripts) and of Inline Script nodes."""
 
 import os
 
 import bpy
 
+from ...core import scheduler
+from ...core import scripts as script_list
+from ...lib.ids import get_short_id
 from ...lib.trees import scripting_node_trees, sn_nodes
 from . import tool
 from ._common import ToolError, find_node
@@ -11,40 +15,121 @@ from ._common import ToolError, find_node
 _LIMIT = 400
 
 
-def _target(node="", text="", file=""):
+def _owner(node):
+    """What has the script of `node`: an Inline Script node itself, the list
+    script of a Script Function."""
+    if node.bl_idname == "SNA_Node_ScriptFunction":
+        return node.script_item()
+    return node if node.bl_idname == "SNA_Node_InlineScript" else None
+
+
+def _find_script(label):
+    for text, script in script_list.choices():
+        if text == label:
+            return script
+    names = [text for text, _ in script_list.choices()]
+    raise ToolError(f"No script {label!r} in the add-on. Scripts: {names}")
+
+
+def _target(node="", script="", text="", file=""):
     """("text", block) or ("file", path) of what to read / write."""
-    if sum(bool(x) for x in (node, text, file)) != 1:
-        raise ToolError("Give one of node (a Script node), text or file")
-    if node:
-        script = find_node(node)
-        if script.bl_idname != "SNA_Node_Script":
-            raise ToolError(f"{script.name!r} isn't a Script node")
-        if script.source_type == "INTERNAL":
-            if script.text_block is None:
-                raise ToolError("The Script node has no text block: pick one")
-            return "text", script.text_block
-        if not script.filepath:
-            raise ToolError("The Script node has no file: set its filepath")
-        return "file", bpy.path.abspath(script.filepath)
+    if sum(bool(x) for x in (node, script, text, file)) != 1:
+        raise ToolError("Give one of node, script, text or file")
+    if node or script:
+        if node:
+            found = find_node(node)
+            owner = _owner(found)
+            if owner is None:
+                raise ToolError(
+                    f"{found.name!r} isn't an Inline Script or Script Function node"
+                )
+        else:
+            owner = _find_script(script)
+        if owner.source_type == "INTERNAL":
+            if owner.text_block is None:
+                raise ToolError("It has no text block: pick one")
+            return "text", owner.text_block
+        if not owner.filepath:
+            raise ToolError("It has no file: set its filepath")
+        return "file", bpy.path.abspath(owner.filepath)
     if text:
         return "text", text
     return "file", os.path.abspath(bpy.path.abspath(file))
 
 
+def _uses(owner, block, path):
+    if block is not None:
+        return owner.source_type == "INTERNAL" and owner.text_block == block
+    return (
+        owner.source_type == "EXTERNAL"
+        and bool(owner.filepath)
+        and os.path.abspath(bpy.path.abspath(owner.filepath)) == path
+    )
+
+
+@tool(
+    "edit_scripts",
+    """Add scripts to the add-on or remove them (Addon Data › Scripts). A
+    script of the add-on is part of it unchanged: its classes are
+    registered, its register() / unregister() called. Script Function nodes
+    call its functions: set their "script" (the label listed here) and
+    "function". Write the code with write_text first.
+
+    add: [{"text": "tools.py"}] or [{"file": "//tools.py"}]
+    remove: ["tools.py"]""",
+    {
+        "add": {"type": "array", "items": {"type": "object"}},
+        "remove": {"type": "array", "items": {"type": "string"}},
+    },
+    writes=True,
+)
+def edit_scripts(add=(), remove=()):
+    addon = bpy.context.scene.sna.addon
+    for label in remove:
+        script = _find_script(label)
+        callers = script_list.callers(script)
+        index = next(i for i, s in enumerate(addon.scripts) if s.id == script.id)
+        addon.scripts.remove(index)
+        for node in callers:
+            node.mark_dirty()
+    for spec in add:
+        text, file = spec.get("text", ""), spec.get("file", "")
+        if bool(text) == bool(file):
+            raise ToolError('Each script needs "text" or "file"')
+        if text and text not in bpy.data.texts:
+            raise ToolError(f"No text block {text!r}: write it with write_text first")
+        script = addon.scripts.add()
+        script.id = get_short_id()
+        if text:
+            script.text_block = bpy.data.texts[text]
+        else:
+            script.source_type = "EXTERNAL"
+            script.filepath = file
+    scheduler.request_full()
+    return {
+        "scripts": [
+            {"script": label, "functions": script.script_functions()}
+            for label, script in script_list.choices()
+        ]
+    }
+
+
 @tool(
     "read_text",
-    """Read a script: the text of a Script node, a text block by name or a
-    file. Long texts come in pages of lines (offset, limit).""",
+    """Read a script: of a script of the add-on (its label), an Inline Script
+    or Script Function node, a text block by name or a file. Long texts come
+    in pages of lines (offset, limit).""",
     {
         "node": {"type": "string"},
+        "script": {"type": "string"},
         "text": {"type": "string"},
         "file": {"type": "string"},
         "offset": {"type": "integer"},
         "limit": {"type": "integer"},
     },
 )
-def read_text(node="", text="", file="", offset=0, limit=_LIMIT):
-    kind, target = _target(node, text, file)
+def read_text(node="", script="", text="", file="", offset=0, limit=_LIMIT):
+    kind, target = _target(node, script, text, file)
     if kind == "text":
         block = (
             target if isinstance(target, bpy.types.Text) else bpy.data.texts.get(target)
@@ -71,9 +156,10 @@ def read_text(node="", text="", file="", offset=0, limit=_LIMIT):
     "write_text",
     """Write a script: all of it (content) or by replacing a unique piece
     (replace: {"old": ..., "new": ...}). A text block that doesn't exist is
-    created. Script nodes using it rebuild.""",
+    created. Nodes and scripts using it rebuild.""",
     {
         "node": {"type": "string"},
+        "script": {"type": "string"},
         "text": {"type": "string"},
         "file": {"type": "string"},
         "content": {"type": "string"},
@@ -81,10 +167,10 @@ def read_text(node="", text="", file="", offset=0, limit=_LIMIT):
     },
     writes=True,
 )
-def write_text(node="", text="", file="", content=None, replace=None):
+def write_text(node="", script="", text="", file="", content=None, replace=None):
     if (content is None) == (replace is None):
         raise ToolError("Give content or replace")
-    kind, target = _target(node, text, file)
+    kind, target = _target(node, script, text, file)
     block = None
     if kind == "text":
         block = (
@@ -112,20 +198,17 @@ def write_text(node="", text="", file="", content=None, replace=None):
         with open(target, "w", encoding="utf-8") as f:
             f.write(content)
     rebuilt = []
+    for script in script_list.scripts():
+        if _uses(script, block, target):
+            script_list.changed(script)
+            rebuilt.append(script_list.label(script))
     for tree in scripting_node_trees():
-        for script in sn_nodes(tree):
-            if script.bl_idname != "SNA_Node_Script":
-                continue
-            uses = (block is not None and script.text_block == block) or (
-                block is None
-                and script.filepath
-                and os.path.abspath(bpy.path.abspath(script.filepath)) == target
-            )
-            if uses:
-                script.mark_dirty()
-                rebuilt.append(script.id)
+        for node in sn_nodes(tree):
+            if node.bl_idname == "SNA_Node_InlineScript" and _uses(node, block, target):
+                node.mark_dirty()
+                rebuilt.append(node.id)
     return {
         "name": block.name if block else target,
         "lines": content.count("\n") + 1,
-        "script_nodes": rebuilt,
+        "rebuilt": rebuilt,
     }

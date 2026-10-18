@@ -3,56 +3,22 @@ title: Scripts
 description: Add Python to your add-on and run it from nodes.
 ---
 
-Nodes build the structure of an add-on: operators, panels, properties. When a step is easier to write in Python, put it in a script. The **Script** node takes a text block (or a `.py` file): it runs the code where the node is, or calls a function of it, whose parameters and return values become the node's inputs and outputs.
+Nodes build the structure of an add-on: operators, panels, properties. When a step is easier to write in Python, put it in a script, a text block or a `.py` file. Scripts are used two ways:
+
+| | For |
+| --- | --- |
+| **Addon Data › Scripts** | Scripts that are part of the add-on: classes, handlers, helper functions. **Script Function** nodes call their functions |
+| **Inline Script** node | A few lines in an operator, a panel or any other flow, run where the node is |
 
 ![An operator running arrange.py and a panel drawing with selection_info.py](/screenshots/scripts.png)
 
-## Running the code
+## Scripts of the add-on
 
-With **Run the Code** picked (the default), the code goes into the add-on where the flow connects to the node, like several lines of **Python Statement**. It can use what the flow has: `context`, and `layout` in a panel (using it makes the node an interface node).
+**+** in **Addon Data › Scripts** (the sidebar of the node editor) adds a script; pick a text block or a file. **+** next to the text field creates a script to start from; for an empty text, **Add Template** writes one into it. Removing a script from the list keeps its text.
 
-```python
-bpy.ops.mesh.primitive_cube_add()
-context.active_object.name = "Box"
-```
+Every script of the list is part of the add-on, unchanged, as `scripts/<name>.py`. Everything in it works as in any add-on file: imports, helper functions, classes, handlers.
 
-The node has a flow in and out. For inputs and outputs, put the code in a function and pick it.
-
-## Calling a function
-
-The dropdown on the node lists the script's functions. Pick one, and the node calls it:
-
-```python
-def run(context, spacing: float = 2.5, axis: int = 0) -> int:
-    objects = sorted(context.selected_objects, key=lambda o: o.name)
-    for i, obj in enumerate(objects):
-        obj.location[axis] = i * spacing
-    count = len(objects)
-    return count
-```
-
-picked, gives a node with the inputs **Spacing** (Float, 2.5) and **Axis** (Integer) and the output **Count**. **+** next to the text field creates a script to start from; for an empty text, **Add Template** writes one into it.
-
-| In the signature | On the node |
-| --- | --- |
-| `bool`, `int`, `float`, `str` | Boolean, Integer, Float, String with the default value |
-| `Vector`, `Color` | Vector (size from the default), Color |
-| `list`, `tuple[...]`, ... | List |
-| Blender types (`Object`, `bpy.types.Mesh`, ...) | Blender Data |
-| no annotation, anything else | Data |
-| `-> tuple[int, str]` with `return count, name` | two outputs, **Count** and **Name** |
-
-Parameters named `context`, `layout`, `self` and `event` aren't inputs: the node passes what the flow it's in has (an operator's `context`, a panel's `layout`, ...). A function taking `layout` draws UI and connects to interface flows.
-
-**Data Only** removes the flow sockets of a function that returns something: it's called where its outputs are used, like a **Python Expression** (once per used output).
-
-Edits to the script update the node and reload the add-on, like any other change. Errors show on the Script node.
-
-## The script is part of the add-on
-
-With **Add to Add-on** or a function picked, the whole script is copied into the add-on unchanged, as `scripts/<name>.py`. **Add to Add-on** only does that (the node has no sockets); it's what scripts defining classes or `register()` start with. Everything in it works as in any add-on file: imports, helper functions, classes, handlers.
-
-- Classes (operators, panels, ...) are registered for you.
+- Classes (operators, panels, …) are registered for you.
 - If the script defines `register()` and `unregister()`, they are called when the add-on is enabled and disabled instead. Register your classes there yourself, as in a regular add-on.
 
 ```python
@@ -68,12 +34,61 @@ def unregister():
     bpy.app.handlers.save_post.remove(on_save)
 ```
 
-Several Script nodes using the same text share one module.
+Below the list, the selected script's functions: click one to add a **Script Function** node calling it. The nodes calling the script are listed under it.
+
+## Script Function
+
+Pick a script of the add-on and one of its functions. Its parameters become the node's inputs, its return values the outputs:
+
+```python
+def run(context, spacing: float = 2.5, axis: int = 0) -> int:
+    objects = sorted(context.selected_objects, key=lambda o: o.name)
+    for i, obj in enumerate(objects):
+        obj.location[axis] = i * spacing
+    count = len(objects)
+    return count
+```
+
+gives a node with the inputs **Spacing** (Float, 2.5) and **Axis** (Integer) and the output **Count**. Without a pick, the node calls `run()`, or the script's first function.
+
+| In the signature | On the node |
+| --- | --- |
+| `bool`, `int`, `float`, `str` | Boolean, Integer, Float, String with the default value |
+| `Vector`, `Color` | Vector (size from the default), Color |
+| `list`, `tuple[...]`, ... | List |
+| Blender types (`Object`, `bpy.types.Mesh`, ...) | Blender Data |
+| no annotation, anything else | Data |
+| `-> tuple[int, str]` with `return count, name` | two outputs, **Count** and **Name** |
+
+Parameters named `context`, `layout`, `self` and `event` aren't inputs: the node passes what the flow it's in has (an operator's `context`, a panel's `layout`, ...). A function taking `layout` draws UI and connects to interface flows.
+
+**Without Flow** removes the flow sockets of a function that returns something: it's called where its outputs are used, like a **Python Expression** (once per used output). Use it to compute a value in a panel.
+
+## Inline Script
+
+The code goes into the add-on where the flow connects to the node, like several lines of **Python Statement**:
+
+```python
+for obj in context.selected_objects:
+    obj.location.z += amount
+moved = len(context.selected_objects)
+```
+
+- `context` is Blender's context where the code runs. In a panel, `layout` draws into it (using it makes the node an interface node); in operators `self` and `event` work too.
+- Names the code uses without defining them become inputs: `amount` above. Connect values to them; in the add-on they're set before the code (`amount = 0.5`).
+- **+ Output** lists the variables the code assigns (outside functions, classes and comprehensions): pick `moved` and the node gets a **moved** output, the variable's value after the code.
+- `math`, `random`, `os`, `json`, … are imported when the code uses them.
+
+**+** next to the text field creates a text to start from.
+
+## Editing
+
+Edits to a script update the nodes using it and reload the add-on, like any other change. Errors show where they belong: syntax errors and errors while the add-on loads in the Scripts list, errors while the code runs on the node that ran it.
 
 ## Generated code
 
 ```python
-from ..scripts import arrange
+from .scripts import arrange
 
 
 class OBJECT_TOOLS_OT_arrange_objects(bpy.types.Operator):

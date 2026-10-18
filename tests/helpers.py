@@ -124,6 +124,14 @@ def point(owner, attr, target):
     sn("src.core.references").point(owner, attr, target)
 
 
+def add_script(text_block):
+    """A script of the add-on (Addon Data › Scripts) using `text_block`."""
+    script = bpy.context.scene.sna.addon.scripts.add()
+    script.id = sn("src.lib.ids").get_short_id()
+    script.text_block = text_block
+    return script
+
+
 def flush():
     """Run all pending regeneration / compile / reload work synchronously."""
     sn("src.core.scheduler").flush()

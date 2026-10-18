@@ -60,7 +60,7 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 - One flow socket type (`ScriptingFlowSocket`) with `kind` PROGRAM/LOGIC/INTERFACE (color + compatibility).
 - Names in the generated code: declared in `sn_names()` (`core/naming.py`: `Class`, `Idname`, `Symbol`), read with `ctx.name(key)` / `node.sn_name(key)`; readable, from labels, suffix only on collision. Locals via `ctx.var()`.
 - References to other nodes: `Reference(types, filter=...)` annotations, stored by node id, picked in a search field (`core/references.py`); usages via `references.users()`; cross-tree names via `ctx.symbol`.
-- Script node: the script becomes `scripts/<name>.py` unchanged (`emit_module` + `ctx.script`); the node runs the code inline, calls the function picked in its dropdown (sockets from the signature, `nodes/_script_run.py`) or only adds the script to the add-on.
+- Scripts: the add-on's scripts are a list (`scene.sna.addon.scripts`, Addon Data › Scripts, `settings/scripts.py`), each added as `scripts/<name>.py` unchanged (`core/scripts.py`, compiler); Script Function nodes pick one by id and call a function (sockets from the signature, `core/script_signatures.py`); Inline Script puts its code in the flow (unknown names become inputs, picked assigned variables outputs).
 - Functions (node groups): the tree interface (`tree.interface`, sidebar Group tab) is the source of truth; Blender's Group Input / Output nodes, interface socket classes in `sockets/interface.py`, compiled in `core/functions.py` + `compiler._group_function`. Make Group / Ungroup are our own operators (Blender's only run in built-in trees).
 - Properties are lists, not nodes (`settings/properties.py`: add-on list on `scene.sna.addon.properties`, groups, Operator / Preferences node lists); nodes pick them by id (`sn_property_references`), code in `core/properties.py` (add-on properties → `properties.py`). Adding to a CollectionProperty can move its items: don't keep Python references across adds.
 - Shared bases: `PropertyListMixin`, `PropertyFieldNode`, `PropertyTargetMixin`, `OperatorCallMixin`, `event_node()`.
@@ -71,7 +71,7 @@ Node graphs → files of a regular Blender add-on in `<user scripts>/addons/<mod
 - `core/` — scheduler, compiler, runtime, references, versioning, templates of the generated addon
 - `node_tree/` — tree type, tree ops/UI
 - `nodes/`, `sockets/` — node + socket types
-- `settings/` — scene settings (`bpy.context.scene.sna`), preferences, sidebar panels
+- `settings/` — scene settings (`bpy.context.scene.sna`), preferences, sidebar panels, the add-on's property and script lists
 - `blend_data/` — Blender data from RNA types: paths, typed sockets, search (`rna.py`); paste/copy path ops; path browser (popup from a node's path field: `browser.py` state and columns, `locations.py` paths with keys and live data); RNA functions (`rna.functions`) for the Blender Function node
 - `mcp_server/` — local MCP server (loopback, rejects browser requests): `tools/` by area (`blender`: run_python, screenshot, undo; `addon`; `graph`: batched `edit_tree`; `definitions`: properties, functions; `texts`). Tools run on the main thread (`bridge.py`); a tool returning `Later` lets Blender draw before it continues. `tests/mcp_toolkit.py` builds the Object Toolkit through the tools only. `python scripts/open_example.py tests/visual/open_mcp_session.py` opens Blender with the server on :7423.
 - `handlers/` — load/save/undo/depsgraph handlers, msgbus, keymaps, log overlay

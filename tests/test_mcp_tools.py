@@ -250,15 +250,17 @@ class MCPToolsTest(unittest.TestCase):
             text="tools.py",
             content="def double(x: float) -> float:\n    return x * 2\n",
         )
+        scripts = call("edit_scripts", add=[{"text": "tools.py"}])["scripts"]
+        self.assertEqual(scripts, [{"script": "tools.py", "functions": ["double"]}])
         call("create_tree", name="Main")
         node = call(
             "edit_tree",
             tree="Main",
             add=[
                 {
-                    "type": "SNA_Node_Script",
-                    "props": {"text_block": "tools.py", "function": "double"},
-                }
+                    "type": "SNA_Node_ScriptFunction",
+                    "props": {"script": "tools.py", "function": "double"},
+                },
             ],
         )["nodes"][0]
         self.assertIn("x", [s["key"] for s in node["inputs"]])
