@@ -36,6 +36,35 @@ class InterfaceNodesTest(unittest.TestCase):
     def assertLoaded(self):
         self.assertIsNone(errors().addon_error)
 
+    # -- icons --------------------------------------------------------------
+
+    def test_display_icon(self):
+        tree = helpers.new_tree()
+        panel = helpers.add_node(tree, "SNA_Node_Panel")
+        icon = helpers.add_node(tree, "SNA_Node_DisplayIcon")
+        helpers.link(tree, panel.outputs["Draw"], icon.inputs[0])
+        helpers.flush()
+        # template_icon takes an icon id; scale 1 is the default
+        self.assertIn(
+            "layout.template_icon(icon_value=utils.icon_id('BLENDER'))",
+            helpers.tree_source(tree),
+        )
+        icon.socket("scale").value = 4.0
+        icon.socket("icon").value = "MESH_CUBE"
+        helpers.flush()
+        self.assertIn(
+            "template_icon(icon_value=utils.icon_id('MESH_CUBE'), scale=4.0)",
+            helpers.tree_source(tree),
+        )
+        self.assertLoaded()
+        # a connected icon (here a custom one's id) is passed as it is
+        picked = helpers.add_node(tree, "SNA_Node_Icon")
+        picked.icon = "LIGHT"
+        helpers.link(tree, picked.outputs[0], icon.socket("icon"))
+        helpers.flush()
+        self.assertIn("icon_value=utils.icon_id('LIGHT')", helpers.tree_source(tree))
+        self.assertLoaded()
+
     # -- property fields ------------------------------------------------------
 
     def test_checkbox_on_scene_property(self):
