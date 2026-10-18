@@ -12,7 +12,7 @@ import subprocess
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from test import REPO_ROOT, find_blender, make_user_resources  # noqa: E402
+from test import REPO_ROOT, find_blender, make_user_resources, run_gui  # noqa: E402
 
 NO_SPLASH = (
     "import bpy; bpy.context.preferences.view.show_splash = False; "
@@ -34,8 +34,7 @@ def take(scenario, output, size=(1600, 1000)):
         env=env,
         capture_output=True,
     )
-    cmd = [
-        find_blender(),
+    args = [
         "--window-geometry",
         "0",
         "0",
@@ -48,12 +47,9 @@ def take(scenario, output, size=(1600, 1000)):
         output,
     ]
     try:
-        result = subprocess.run(
-            cmd, env=env, capture_output=True, text=True, timeout=120
-        )
+        out = run_gui(find_blender(), args, env, timeout=120)
     finally:
         shutil.rmtree(user_resources, ignore_errors=True)
-    out = result.stdout + result.stderr
     if "SCREENSHOT FAILED" in out or not os.path.exists(output):
         return out[-4000:]
     return None

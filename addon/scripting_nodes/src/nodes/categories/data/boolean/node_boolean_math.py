@@ -7,7 +7,7 @@ from ....base_node import ScriptingBaseNode
 class SNA_Node_BooleanMath(ScriptingBaseNode, bpy.types.Node):
     """Combine two booleans with and/or."""
 
-    bl_idname = "SNA_BooleanMath"
+    bl_idname = "SNA_Node_BooleanMath"
     bl_label = "Boolean Math"
     sn_inputs = [Boolean("a", "Boolean"), Boolean("b", "Boolean")]
     sn_outputs = [Boolean("result", "Result")]

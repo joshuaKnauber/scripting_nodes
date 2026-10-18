@@ -162,14 +162,18 @@ class NodeContext:
         socket = self.node.socket(key)
         if socket is None:
             raise NodeError(f"Node has no input '{key}'")
-        if not socket.is_linked and getattr(socket, "value", MISSING) == default:
+        if self.is_default(key, default):
             return None
         return f"{name}={self.input(key)}"
 
     def is_default(self, key, default) -> bool:
-        """Input `key` isn't connected and holds `default`."""
+        """Input `key` isn't connected and holds `default` (vectors and colors
+        compared as tuples)."""
         socket = self.node.socket(key)
-        return not socket.is_linked and getattr(socket, "value", MISSING) == default
+        value = getattr(socket, "value", MISSING)
+        if isinstance(default, tuple) and value is not MISSING:
+            value = tuple(value)[: len(default)]
+        return not socket.is_linked and value == default
 
     @staticmethod
     def args(*items) -> str:

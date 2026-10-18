@@ -147,7 +147,12 @@ def node_classes():
 
     def walk(cls):
         for sub in cls.__subclasses__():
-            if issubclass(sub, bpy.types.Node) and getattr(sub, "is_registered", False):
+            renamed = getattr(sub, "sn_renamed_to", None)  # old idnames
+            if (
+                issubclass(sub, bpy.types.Node)
+                and getattr(sub, "is_registered", False)
+                and not renamed
+            ):
                 out.append(sub)
             walk(sub)
 

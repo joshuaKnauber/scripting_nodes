@@ -37,7 +37,7 @@ class NodeFixesTest(unittest.TestCase):
         tree = helpers.new_tree()
         trigger = helpers.add_node(tree, "SNA_Node_Trigger")
         p = helpers.add_node(tree, "SNA_Node_Print")
-        node = helpers.add_node(tree, "SNA_BooleanMath")
+        node = helpers.add_node(tree, "SNA_Node_BooleanMath")
         node.comparison = "OR"
         node.inputs[0].value = True
         node.inputs[1].value = False

@@ -102,7 +102,12 @@ def step():
             check(scene.get("ticks") == 3, f"ticks: {scene.get('ticks')}")
             check(scene.get("ended") == 1, "End didn't run")
             kind, mouse, shift = ast.literal_eval(scene.get("event"))
-            check(kind == "TIMER", f"event type: {kind}")
+            # the last event the modal saw: a timer, or the mouse if it moved
+            # over the window meanwhile
+            check(
+                kind.startswith("TIMER") or kind.endswith("MOUSEMOVE"),
+                f"event type: {kind}",
+            )
             check(len(mouse) == 2 and shift is False, f"event: {mouse}, {shift}")
             check(
                 dict(errors.runtime_errors) == {},

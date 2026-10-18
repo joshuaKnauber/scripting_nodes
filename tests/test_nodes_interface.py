@@ -65,6 +65,28 @@ class InterfaceNodesTest(unittest.TestCase):
         self.assertIn("icon_value=utils.icon_id('LIGHT')", helpers.tree_source(tree))
         self.assertLoaded()
 
+    def test_display_preview(self):
+        tree = helpers.new_tree()
+        panel = helpers.add_node(tree, "SNA_Node_Panel")
+        preview = helpers.add_node(tree, "SNA_Node_DisplayPreview")
+        helpers.link(tree, panel.outputs["Draw"], preview.inputs[0])
+        helpers.flush()
+        self.assertIn("Connect a material", errors().node_message(preview.id))
+        material = helpers.add_node(tree, "SNA_Node_BlendData")
+        material.path = "active_object.active_material"
+        helpers.flush()
+        helpers.link(tree, material.outputs[0], preview.socket("data"))
+        preview.socket("show_buttons").value = False
+        helpers.flush()
+        source = helpers.tree_source(tree)
+        self.assertIn("preview_data = context.active_object.active_material", source)
+        self.assertIn("if preview_data is not None:", source)
+        self.assertIn(
+            "template_preview(preview_data, show_buttons=False, preview_id='interface_test.display_preview')",
+            source,
+        )
+        self.assertLoaded()
+
     # -- property fields ------------------------------------------------------
 
     def test_checkbox_on_scene_property(self):

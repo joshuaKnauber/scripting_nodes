@@ -34,6 +34,38 @@ def find_blender():
     sys.exit("Blender not found: set $BLENDER or BLENDER_EXECUTABLE in config.yaml")
 
 
+def run_gui(blender, args, env, timeout=180):
+    """Run GUI Blender with `args` and return its output. On macOS it starts
+    behind the other windows (`open -g`) instead of taking the focus; window
+    screenshots (screencapture -l) and simulated events work there too.
+    Raises subprocess.TimeoutExpired."""
+    app = blender.split("/Contents/MacOS/")[0] if sys.platform == "darwin" else ""
+    if not app.endswith(".app"):
+        result = subprocess.run(
+            [blender, *args], env=env, capture_output=True, text=True, timeout=timeout
+        )
+        return result.stdout + result.stderr
+    with tempfile.TemporaryDirectory() as folder:
+        out, err = os.path.join(folder, "out"), os.path.join(folder, "err")
+        cmd = ["open", "-g", "-n", "-W", "-a", app, "--stdout", out, "--stderr", err]
+        # the app doesn't inherit this process's environment
+        for key in ("BLENDER_USER_RESOURCES", "PYTHONUNBUFFERED"):
+            if key in env:
+                cmd += ["--env", f"{key}={env[key]}"]
+        try:
+            subprocess.run(cmd + ["--args", *args], timeout=timeout)
+        except subprocess.TimeoutExpired:
+            # the script (and what follows it) identifies this Blender
+            subprocess.run(["pkill", "-f", " ".join(args[-2:])])
+            raise
+        output = ""
+        for path in (out, err):
+            if os.path.exists(path):
+                with open(path, errors="replace") as f:
+                    output += f.read()
+        return output
+
+
 def make_user_resources(keep=None):
     root = keep or tempfile.mkdtemp(prefix="sn_test_")
     repo = os.path.join(root, "extensions", "user_default")
@@ -105,14 +137,7 @@ def run_gui_tests(blender, pattern=""):
             capture_output=True,
         )
         try:
-            result = subprocess.run(
-                [blender, "--python", os.path.join(gui_dir, name)],
-                env=env,
-                capture_output=True,
-                text=True,
-                timeout=180,
-            )
-            output = result.stdout + result.stderr
+            output = run_gui(blender, ["--python", os.path.join(gui_dir, name)], env)
         except subprocess.TimeoutExpired as e:
             output = f"timeout\n{e.stdout or ''}"
         finally:

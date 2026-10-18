@@ -56,6 +56,8 @@ def node_classes():
             continue
         seen.add(cls)
         stack.extend(cls.__subclasses__())
+        if getattr(cls, "sn_renamed_to", None):
+            continue  # an old bl_idname (nodes/_renamed.py)
         if getattr(cls, "bl_idname", None) and getattr(cls, "is_registered", False):
             yield cls
 

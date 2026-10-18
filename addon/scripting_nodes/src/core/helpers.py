@@ -229,6 +229,190 @@ def redraw(area_type=""):
 '''
 
 
+# Viewport drawing (nodes/categories/drawing): gpu shaders and blf text.
+# Points are 2D (pixels, drawing on top) or 3D (the scene), as tuples,
+# vectors or lists of them.
+DRAW_HANDLER_HELPER = """
+_draw_handlers = []
+
+
+def add_draw_handler(space, function, draw_type):
+    \"\"\"Draw `function` in the editors of `space` (bpy.types.SpaceView3D, ...),
+    removed when the add-on is disabled.\"\"\"
+    handler = space.draw_handler_add(function, (), "WINDOW", draw_type)
+    _draw_handlers.append((space, handler))
+"""
+
+DRAW_HELPERS = """
+def _positions(points):
+    return [(p[0], p[1], p[2] if len(p) > 2 else 0.0) for p in points]
+
+
+def _rgba(color):
+    color = tuple(color)
+    return color if len(color) == 4 else (*color[:3], 1.0)
+
+
+def _batch(shader_name, primitive, points, indices=None, **uniforms):
+    import gpu
+    from gpu_extras.batch import batch_for_shader
+
+    shader = gpu.shader.from_builtin(shader_name)
+    batch = batch_for_shader(shader, primitive, {"pos": _positions(points)}, indices=indices)
+    shader.bind()
+    for name, value in uniforms.items():
+        if name == "color":
+            value = _rgba(value)
+        shader.uniform_float(name, value if isinstance(value, float) else tuple(value))
+    batch.draw(shader)
+
+
+def draw_lines(points, color=(1.0, 1.0, 1.0, 1.0), width=2.0, mode="LINE_STRIP"):
+    \"\"\"Lines through `points`: LINE_STRIP connects them, LINE_LOOP closes
+    the shape, LINES draws pairs.\"\"\"
+    import gpu
+
+    points = list(points)
+    if mode == "LINE_LOOP" and points:
+        points.append(points[0])
+        mode = "LINE_STRIP"
+    if len(points) < 2:
+        return
+    viewport = gpu.state.viewport_get()
+    _batch(
+        "POLYLINE_UNIFORM_COLOR",
+        mode,
+        points,
+        viewportSize=(viewport[2], viewport[3]),
+        lineWidth=float(width),
+        color=color,
+    )
+
+
+def draw_points(points, color=(1.0, 1.0, 1.0, 1.0), size=6.0):
+    points = list(points)
+    if points:
+        _batch("POINT_UNIFORM_COLOR", "POINTS", points, color=color, size=float(size))
+
+
+def draw_polygon(points, color=(1.0, 1.0, 1.0, 1.0)):
+    \"\"\"A filled shape with `points` as its outline (also concave ones).\"\"\"
+    from mathutils.geometry import tessellate_polygon
+
+    points = _positions(points)
+    if len(points) < 3:
+        return
+    triangles = tessellate_polygon([points])
+    _batch("UNIFORM_COLOR", "TRIS", points, indices=triangles, color=color)
+
+
+def draw_rectangle(position, size, color=(1.0, 1.0, 1.0, 1.0), fill=True, width=2.0):
+    \"\"\"A rectangle from its bottom left corner (pixels).\"\"\"
+    x, y = position[0], position[1]
+    w, h = size[0], size[1]
+    corners = [(x, y), (x + w, y), (x + w, y + h), (x, y + h)]
+    if fill:
+        draw_polygon(corners, color)
+    else:
+        draw_lines(corners, color, width, "LINE_LOOP")
+
+
+def draw_circle(center, radius, color=(1.0, 1.0, 1.0, 1.0), fill=False, width=2.0,
+                segments=32, normal=(0.0, 0.0, 1.0)):
+    \"\"\"A circle around `center`, facing `normal` (in 2D: the screen).\"\"\"
+    from math import cos, pi, sin
+
+    from mathutils import Vector
+
+    center = Vector(_positions([center])[0])
+    axis = Vector(normal).normalized()
+    side = axis.orthogonal().normalized()
+    up = axis.cross(side)
+    points = []
+    for i in range(max(3, int(segments))):
+        angle = 2 * pi * i / max(3, int(segments))
+        points.append(center + (side * cos(angle) + up * sin(angle)) * radius)
+    if fill:
+        draw_polygon(points, color)
+    else:
+        draw_lines(points, color, width, "LINE_LOOP")
+
+
+def draw_text(text, position, size=16.0, color=(1.0, 1.0, 1.0, 1.0), align="LEFT",
+              shadow=False):
+    \"\"\"Text at `position` (pixels), sized like Blender's interface.\"\"\"
+    import blf
+    import bpy
+
+    font = 0
+    blf.size(font, size * bpy.context.preferences.system.ui_scale)
+    width = blf.dimensions(font, str(text))[0]
+    x = position[0] - {"LEFT": 0, "CENTER": width / 2, "RIGHT": width}[align]
+    blf.position(font, x, position[1], 0)
+    blf.color(font, *_rgba(color))
+    if shadow:
+        blf.enable(font, blf.SHADOW)
+        blf.shadow(font, 3, 0.0, 0.0, 0.0, 0.8)
+        blf.shadow_offset(font, 1, -1)
+    blf.draw(font, str(text))
+    if shadow:
+        blf.disable(font, blf.SHADOW)
+
+
+def draw_image(image, position, size, opacity=1.0):
+    \"\"\"An image from its bottom left corner (pixels).\"\"\"
+    import gpu
+    from gpu_extras.batch import batch_for_shader
+
+    if image is None:
+        return
+    x, y = position[0], position[1]
+    w, h = size[0], size[1]
+    shader = gpu.shader.from_builtin("IMAGE_COLOR")
+    batch = batch_for_shader(
+        shader,
+        "TRI_FAN",
+        {
+            "pos": ((x, y, 0), (x + w, y, 0), (x + w, y + h, 0), (x, y + h, 0)),
+            "texCoord": ((0, 0), (1, 0), (1, 1), (0, 1)),
+        },
+    )
+    shader.bind()
+    shader.uniform_sampler("image", gpu.texture.from_image(image))
+    shader.uniform_float("color", (1.0, 1.0, 1.0, float(opacity)))
+    batch.draw(shader)
+
+
+def draw_object(obj, color=(1.0, 1.0, 1.0, 1.0), style="WIRE", width=1.0, size=4.0):
+    \"\"\"The evaluated mesh of `obj` (modifiers applied) as wireframe, faces
+    or points, where it is in the scene.\"\"\"
+    import bpy
+
+    if obj is None:
+        return
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+    evaluated = obj.evaluated_get(depsgraph)
+    try:
+        mesh = evaluated.to_mesh()
+    except RuntimeError:  # no geometry (an empty, a light, ...)
+        return
+    if mesh is None:
+        return
+    matrix = obj.matrix_world
+    points = [matrix @ v.co for v in mesh.vertices]
+    if style == "POINTS":
+        draw_points(points, color, size)
+    elif style == "FACES":
+        mesh.calc_loop_triangles()
+        triangles = [tuple(t.vertices) for t in mesh.loop_triangles]
+        if triangles:
+            _batch("UNIFORM_COLOR", "TRIS", points, indices=triangles, color=color)
+    else:
+        lines = [points[i] for edge in mesh.edges for i in edge.vertices]
+        draw_lines(lines, color, width, "LINES")
+    evaluated.to_mesh_clear()
+"""
+
 # paths starting with // are relative to the .blend file (bpy.path.abspath)
 FILE_HELPERS = '''
 def read_text(path):
@@ -374,6 +558,21 @@ def _function(source, name):
     return source[start:] if end == -1 else source[start:end]
 
 
+# what each drawing helper calls (_positions, _batch are shared)
+_DRAW_REQUIRES = {
+    "_positions": (),
+    "_rgba": (),
+    "_batch": ("_positions", "_rgba"),
+    "draw_lines": ("_batch",),
+    "draw_points": ("_batch",),
+    "draw_polygon": ("_batch", "_positions"),
+    "draw_rectangle": ("draw_polygon", "draw_lines"),
+    "draw_circle": ("draw_polygon", "draw_lines", "_positions"),
+    "draw_text": ("_rgba",),
+    "draw_image": (),
+    "draw_object": ("draw_points", "draw_lines", "_batch"),
+}
+
 HELPERS = {
     "log": Helper(
         dev='''
@@ -441,6 +640,23 @@ _subscriptions.clear()
 """,
     ),
     "redraw": Helper(dev=REDRAW_HELPER, export=REDRAW_HELPER),
+    "add_draw_handler": Helper(
+        dev=DRAW_HANDLER_HELPER,
+        export=DRAW_HANDLER_HELPER,
+        unregister="""
+for space, handler in _draw_handlers:
+    space.draw_handler_remove(handler, "WINDOW")
+_draw_handlers.clear()
+""",
+    ),
+    **{
+        name: Helper(
+            dev=_function(DRAW_HELPERS, name),
+            export=_function(DRAW_HELPERS, name),
+            requires=_DRAW_REQUIRES[name],
+        )
+        for name in _DRAW_REQUIRES
+    },
     **{
         name: Helper(
             dev=_function(FILE_HELPERS, name), export=_function(FILE_HELPERS, name)

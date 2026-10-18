@@ -1,5 +1,6 @@
 import ast
 import string
+import sys
 
 from .python_format import remove_redundant_parens
 
@@ -165,10 +166,10 @@ def sort_imports(imports) -> list[str]:
         module = line.split()[1]
         if module.startswith("."):
             groups[2].append(line)
-        elif module.split(".")[0] in ("bpy", "bmesh", "mathutils", "gpu", "blf"):
-            groups[1].append(line)
-        else:
+        elif module.split(".")[0] in sys.stdlib_module_names:
             groups[0].append(line)
+        else:  # third party, like ruff: bpy, bpy_extras, gpu_extras, ...
+            groups[1].append(line)
     result = []
     for group in groups:
         if group:

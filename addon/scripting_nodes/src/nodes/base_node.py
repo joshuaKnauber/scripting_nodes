@@ -347,9 +347,22 @@ def _apply_spec(socket, spec: SocketSpec, created):
             socket.link_limit = 1  # flow code continues in one place
         if spec.default is not MISSING and hasattr(socket, "value"):
             try:
-                socket.value = spec.default
+                socket.value = _fit(spec.default, socket.value)
             except (TypeError, ValueError):
                 pass
+
+
+def _fit(value, current):
+    """`value` for a socket holding `current`: vectors and colors store 4
+    numbers, a default like (20.0, 20.0) fills the first ones."""
+    if isinstance(value, tuple) and not isinstance(current, str):
+        try:
+            size = len(current)
+        except TypeError:
+            return value
+        if len(value) < size:
+            return (*value, *tuple(current)[len(value) :])
+    return value
 
 
 def _sync(node, sockets, specs, is_output):
