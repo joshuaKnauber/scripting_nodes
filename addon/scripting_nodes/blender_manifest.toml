@@ -1,7 +1,7 @@
 schema_version = "1.0.0"
 
 id = "scripting_nodes"
-version = "4.0.0-beta.2"
+version = "4.0.0-beta.3"
 name = "Scripting Nodes"
 tagline = "Build Blender addons visually with nodes"
 maintainer = "Joshua Knauber, Finn Knauber"
