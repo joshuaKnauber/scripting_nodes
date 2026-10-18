@@ -2,10 +2,13 @@ import bpy
 
 from .....sockets.spec import Boolean, Interface
 from ....base_node import ScriptingBaseNode
+from ._sublayout import sublayout
 
 
 class SNA_Node_LayoutState(ScriptingBaseNode, bpy.types.Node):
-    """Enable, deactivate or highlight the following elements of the layout."""
+    """Enable, deactivate or highlight the elements after it. They're drawn
+    in a layout of their own, so elements before it and after a Reset Layout
+    aren't changed."""
 
     bl_idname = "SNA_Node_LayoutState"
     bl_label = "Set Layout State"
@@ -31,14 +34,16 @@ class SNA_Node_LayoutState(ScriptingBaseNode, bpy.types.Node):
         layout.prop(self, "operator_context", text="")
 
     def emit(self, ctx):
-        layout = ctx.layout
-        operator_context = ""
+        layout, create = sublayout(ctx)
+        settings = [
+            f"{layout}.{key} = {ctx.input(key)}"
+            for key, default in (("enabled", True), ("active", True), ("alert", False))
+            if not ctx.is_default(key, default)
+        ]
         if self.operator_context != "UNCHANGED":
-            operator_context = f"{layout}.operator_context = {self.operator_context!r}"
+            settings.append(f"{layout}.operator_context = {self.operator_context!r}")
         ctx.code(f"""
-            {layout}.enabled = {ctx.input("enabled")}
-            {layout}.active = {ctx.input("active")}
-            {layout}.alert = {ctx.input("alert")}
-            {ctx.join([operator_context])}
-            {ctx.flow("next")}
+            {create}
+            {ctx.join(settings)}
+            {ctx.flow("next", layout=layout, horizontal=ctx.horizontal)}
         """)

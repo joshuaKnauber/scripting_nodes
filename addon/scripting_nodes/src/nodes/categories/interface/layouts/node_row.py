@@ -14,6 +14,6 @@ class SNA_Node_Row(ScriptingBaseNode, bpy.types.Node):
         row = ctx.var("row")
         ctx.code(f"""
             {row} = {ctx.layout}.row({ctx.args(ctx.keyword("align", "align", False), ctx.keyword("heading", "heading", ""))})
-            {ctx.flow("content", layout=row)}
+            {ctx.flow("content", layout=row, horizontal=True)}
             {ctx.flow("next")}
         """)

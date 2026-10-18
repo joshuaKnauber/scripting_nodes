@@ -51,7 +51,7 @@ class SNA_Node_UIList(PropertyTargetMixin, ScriptingBaseNode, bpy.types.Node):
     def emit_module(self, ctx):
         values = {"item_data": "item", "index": "index"}
         if ctx.is_linked("item"):
-            row = ctx.flow("item", layout="layout", outputs=values)
+            row = ctx.flow("item", layout="layout", outputs=values, horizontal=True)
         else:
             row = """
                 if isinstance(getattr(item, "name", None), str):

@@ -96,7 +96,7 @@ class AddToNode(ScriptingBaseNode):
         ctx.module(f"""
             def {function}(self, context):
                 {ctx.join([check])}
-                {ctx.flow("draw", layout="self.layout")}
+                {ctx.flow("draw", layout="self.layout", horizontal=self.kind == "header")}
         """)
         ctx.on_register(f"bpy.types.{name}.{self.position}({function})")
         ctx.on_unregister(f"bpy.types.{name}.remove({function})")

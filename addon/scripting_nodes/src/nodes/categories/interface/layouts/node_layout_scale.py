@@ -2,11 +2,13 @@ import bpy
 
 from .....sockets.spec import Float, Interface
 from ....base_node import ScriptingBaseNode
+from ._sublayout import sublayout
 
 
 class SNA_Node_LayoutScale(ScriptingBaseNode, bpy.types.Node):
-    """Scale the following elements of the layout, or give them a fixed size.
-    0 keeps Blender's default."""
+    """Scale the elements after it, or give them a fixed size. 0 keeps
+    Blender's default. They're drawn in a layout of their own, so elements
+    before it and after a Reset Layout keep their size."""
 
     bl_idname = "SNA_Node_LayoutScale"
     bl_label = "Set Layout Scale"
@@ -30,8 +32,14 @@ class SNA_Node_LayoutScale(ScriptingBaseNode, bpy.types.Node):
 
     def emit(self, ctx):
         attr = "ui_units" if self.fixed_scale else "scale"
+        layout, create = sublayout(ctx)
+        settings = [
+            f"{layout}.{attr}_{axis} = {ctx.input(axis)}"
+            for axis in ("x", "y")
+            if not ctx.is_default(axis, 0.0)
+        ]
         ctx.code(f"""
-            {ctx.layout}.{attr}_x = {ctx.input("x")}
-            {ctx.layout}.{attr}_y = {ctx.input("y")}
-            {ctx.flow("next")}
+            {create}
+            {ctx.join(settings)}
+            {ctx.flow("next", layout=layout, horizontal=ctx.horizontal)}
         """)

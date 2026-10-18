@@ -181,7 +181,7 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
         if ctx.is_linked("header"):
             header = f"""
                 def draw_header(self, context):
-                    {ctx.flow("header", layout="self.layout")}
+                    {ctx.flow("header", layout="self.layout", horizontal=True)}
             """
 
         poll = ""

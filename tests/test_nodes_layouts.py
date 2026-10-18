@@ -175,9 +175,47 @@ class LayoutNodesTest(FlowTestCase):
             "for item in bpy.data.objects:",
             "grid.context_pointer_set('item', item)",
             "self.layout.progress(factor=0.5, type='RING')",
-            "self.layout.operator_context = 'EXEC_DEFAULT'",
+            "col = self.layout.column()",
+            "col.operator_context = 'EXEC_DEFAULT'",
         ):
             self.assertIn(expected, source)
+
+    def test_scale_with_reset_layout(self):
+        # Blender applies a layout's scale to all of it, also what came before
+        # and after a Reset Layout: the scale gets a layout of its own
+        row = self.then("SNA_Node_Row")
+        first = self.add("SNA_Node_Label")
+        first.socket("text").value = "Before"
+        self.link(row.outputs["content"], first.inputs[0])
+        scale = self.add("SNA_Node_LayoutScale")
+        scale.socket("y").value = 2.0
+        self.link(first.outputs[0], scale.inputs[0])
+        big = self.add("SNA_Node_Label")
+        big.socket("text").value = "Big"
+        self.link(scale.outputs[0], big.inputs[0])
+        reset = self.add("SNA_Node_LayoutReset")
+        self.link(big.outputs[0], reset.inputs[0])
+        after = self.add("SNA_Node_Label")
+        after.socket("text").value = "After"
+        self.link(reset.outputs["reset"], after.inputs[0])
+        state = self.add("SNA_Node_LayoutState")
+        state.socket("alert").value = True
+        self.link(after.outputs[0], state.inputs[0])
+        self.assertBuilt()
+        source = self.source()
+        for expected in (
+            "row.label(text='Before')",
+            "row_2 = row.row()",  # side by side, like the row
+            "row_2.scale_y = 2.0",
+            "row_2.label(text='Big')",
+            "self.layout.label(text='After')",
+            "col = self.layout.column()",
+            "col.alert = True",
+        ):
+            self.assertIn(expected, source)
+        # unchanged settings aren't written
+        for unexpected in ("scale_x", ".enabled", ".active", "self.layout.scale"):
+            self.assertNotIn(unexpected, source)
 
     def test_operator_menu(self):
         menu = self.then("SNA_Node_OperatorMenu")

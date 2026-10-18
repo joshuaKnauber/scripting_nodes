@@ -48,6 +48,8 @@ class Scope:
     names: frozenset = frozenset()
     # the body of a loop (break / continue work here)
     loop: bool = False
+    # the layout places its items side by side (a row, a header)
+    horizontal: bool = False
 
     def in_loop(self) -> bool:
         """Inside a loop of the same function (a nested def ends it)."""
@@ -131,6 +133,11 @@ class NodeContext:
     def layout(self) -> str:
         """Expression of the current UI layout (inside interface flows)."""
         return self.scope.layout or "self.layout"
+
+    @property
+    def horizontal(self) -> bool:
+        """The current layout places its items side by side (a row)."""
+        return self.scope.horizontal
 
     # -- values -------------------------------------------------------------
 
@@ -261,10 +268,11 @@ class NodeContext:
         finally:
             self._at_module = False
 
-    def flow(self, key, layout=None, outputs=None, loop=False) -> str:
+    def flow(self, key, layout=None, outputs=None, loop=False, horizontal=False) -> str:
         """Placeholder for the code connected to flow output `key`.
 
-        `layout`: layout expression for interface flows below it.
+        `layout`: layout expression for interface flows below it, with
+        `horizontal` if it places its items side by side (a row).
         `outputs`: {output key: expression} values that only exist in there
         (e.g. a loop's item). `loop`: it's the body of a loop."""
         socket = self.node.socket(key, output=True)
@@ -278,6 +286,7 @@ class NodeContext:
             scope = Scope(
                 parent=base,
                 layout=layout if layout is not None else base.layout,
+                horizontal=horizontal if layout is not None else base.horizontal,
                 values=values,
                 names=names if names is not None else base.names,
                 loop=loop,
