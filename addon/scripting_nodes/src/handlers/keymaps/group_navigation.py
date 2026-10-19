@@ -1,5 +1,5 @@
 """Group keys in SN editors: Tab / Ctrl+Tab enter/exit node groups, Ctrl+G
-makes a group, Ctrl+Alt+G ungroups (nodes/categories/groups/_operators.py).
+makes a group, Ctrl+Alt+G ungroups (nodes/categories/functions/_operators.py).
 
 Blender's default keymap binds Tab to `node.group_edit`, but that operator
 has built-in poll logic that doesn't always accept custom NodeCustomGroup

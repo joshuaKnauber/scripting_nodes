@@ -4,9 +4,11 @@ the script (same as tests/visual/scenarios/script_node.py)."""
 import importlib.util
 import os
 
-WINDOW_SIZE = (1600, 1000)
+WINDOW_SIZE = (1500, 900)
 LAYOUT = "split"
 SIDEBAR_TAB = "Object Tools"
+CROP = (0, 0, 0.79, 0.9)  # not the properties editor or timeline
+FRAME = "corner"
 
 _path = os.path.join(
     os.path.dirname(os.path.abspath(__file__)),

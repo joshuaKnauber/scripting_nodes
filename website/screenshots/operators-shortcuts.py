@@ -24,7 +24,7 @@ def setup():
     panel.inputs["Label"].value = "Tools"
     menu = add("SNA_Node_Menu", -200, -150)
     menu.inputs["Label"].value = "Quick Tools"
-    helpers.link(tree, panel.outputs["Interface"], menu.inputs[0])
+    helpers.link(tree, panel.outputs["Draw"], menu.inputs[0])
     menu_shortcut = add("SNA_Node_Shortcut", 400, 200)
     menu_shortcut.action = "MENU"
     helpers.point(menu_shortcut, "menu", menu)

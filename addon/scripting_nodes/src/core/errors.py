@@ -6,6 +6,7 @@ be restored by undo or saved into the .blend.
 """
 
 import traceback
+from contextlib import contextmanager
 
 # node id -> short message
 node_errors: dict[str, str] = {}
@@ -22,6 +23,23 @@ property_errors: dict[str, str] = {}
 
 # Error of the last attempt to load the generated addon (None when it loaded)
 addon_error: str | None = None
+
+
+@contextmanager
+def kept():
+    """Keep the live add-on's node and property errors while another build
+    (the export, its check) runs: yields a dict that gets that build's node
+    errors."""
+    saved = dict(node_errors), dict(property_errors)
+    found = {}
+    try:
+        yield found
+    finally:
+        found.update(node_errors)
+        node_errors.clear()
+        node_errors.update(saved[0])
+        property_errors.clear()
+        property_errors.update(saved[1])
 
 
 def set_node_error(node_id: str, exc: BaseException):
@@ -47,6 +65,14 @@ def node_message(node_id: str) -> str | None:
         or load_errors.get(node_id)
         or runtime_errors.get(node_id)
     )
+
+
+def nodes_with_errors(tree=None):
+    """Nodes showing an error, in `tree` or in all trees."""
+    from ..lib.trees import scripting_node_trees, sn_nodes
+
+    trees = [tree] if tree is not None else scripting_node_trees()
+    return [node for t in trees for node in sn_nodes(t) if node_message(node.id)]
 
 
 def format_exception(exc: BaseException) -> str:

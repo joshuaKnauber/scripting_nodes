@@ -24,7 +24,7 @@ class SNA_Node_MenuContents(ScriptingBaseNode, bpy.types.Node):
     source: bpy.props.EnumProperty(
         name="Menu",
         items=[
-            ("CUSTOM", "Custom", "A Menu node of this add-on", "USER", 0),
+            ("CUSTOM", "This Add-on", "A Menu node of this add-on", "NODETREE", 0),
             ("BLENDER", "Blender", "One of Blender's menus", "BLENDER", 1),
         ],
     )

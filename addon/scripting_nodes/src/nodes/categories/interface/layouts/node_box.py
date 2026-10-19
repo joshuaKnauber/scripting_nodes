@@ -5,6 +5,8 @@ from ....base_node import ScriptingBaseNode
 
 
 class SNA_Node_Box(ScriptingBaseNode, bpy.types.Node):
+    """Draw the connected UI in a box."""
+
     bl_idname = "SNA_Node_Box"
     bl_label = "Box"
     sn_inputs = [Interface()]

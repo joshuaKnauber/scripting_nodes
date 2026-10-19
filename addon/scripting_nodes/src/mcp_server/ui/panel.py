@@ -23,6 +23,11 @@ class SNA_PT_MCPServer(bpy.types.Panel):
         prefs = get_preferences()
         running = server.is_running()
 
+        col = layout.column(align=True)
+        col.active = False
+        col.label(text="Lets AI agents (Claude, Codex, ...) build")
+        col.label(text="and test your add-on in this Blender.")
+
         row = layout.row(align=True)
         if running:
             row.label(text=f"Running on :{prefs.mcp_port}", icon="CHECKMARK")
@@ -32,10 +37,11 @@ class SNA_PT_MCPServer(bpy.types.Panel):
         row = layout.row(align=True)
         row.scale_y = 2.0
         if running:
-            row.operator("sna.stop_mcp_server", text="Stop", icon="PAUSE")
+            row.operator("sna.stop_mcp_server", text="Stop", icon="CANCEL")
         else:
             row.operator("sna.start_mcp_server", text="Start", icon="PLAY")
 
+        layout.label(text="Copy the setup for:")
         copy_row = layout.row(align=True)
         op = copy_row.operator(
             "sna.copy_mcp_snippet", text="Claude Code", icon="COPYDOWN"
@@ -55,3 +61,6 @@ class SNA_PT_MCPServer(bpy.types.Panel):
         col.use_property_split = True
         col.enabled = not running
         col.prop(prefs, "mcp_port", text="Port")
+        col = layout.column()
+        col.use_property_split = True
+        col.prop(prefs, "mcp_allow_python", text="Agents Run Python")

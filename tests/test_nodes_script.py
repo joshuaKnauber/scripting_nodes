@@ -223,12 +223,25 @@ class ScriptNodeTest(unittest.TestCase):
         self.assertIn("utils.log(utils.as_text(names))", helpers.tree_source(tree))
         self.assertLoaded()
         run(trigger)
-        # a variable the code doesn't assign anymore
+        # a variable the code doesn't assign anymore (commented out while
+        # debugging): a hint, the flow still runs, the output is None
         script.text_block.clear()
-        script.text_block.write("total = 1\n")
+        script.text_block.write("# names = []\ntotal = 1\n")
         script.mark_dirty()
         helpers.flush()
-        self.assertIn("doesn't assign 'names'", errors().node_message(script.id))
+        self.assertIsNone(errors().node_message(script.id))
+        self.assertIn("so None: names", script.setup_hint())
+        self.assertIn("utils.log(utils.as_text(None))", helpers.tree_source(tree))
+        self.assertTrue(script.outputs["names"].is_linked)  # kept for later
+        self.assertLoaded()
+        self.assertEqual(run(trigger), {"FINISHED"})
+        # assigned again: the variable
+        script.text_block.clear()
+        script.text_block.write("names = []\ntotal = 1\n")
+        script.mark_dirty()
+        helpers.flush()
+        self.assertIsNone(script.setup_hint())
+        self.assertIn("utils.log(utils.as_text(names))", helpers.tree_source(tree))
 
     def test_inline_self_only_where_available(self):
         tree, trigger, script = self.inline_triggered("print(event)\n")
@@ -278,9 +291,22 @@ class ScriptNodeTest(unittest.TestCase):
             "def other():\n    pass\n\n\ndef double(value: int = 2) -> int:\n    return 4\n"
         )
         self.assertEqual(script.function, "double")
+        # gone: the node says so instead of calling another function
         source.clear()
         source.write("def other():\n    pass\n")
-        self.assertEqual(script.function, "other")  # gone: the first one
+        self.assertEqual(script.function_used(), "double")
+        self.assertEqual(script.function, "")
+        with self.assertRaisesRegex(Exception, r"has no function double\(\)"):
+            script.picked()
+        script.mark_dirty()
+        helpers.flush()
+        self.assertTrue(script.socket("value"))  # links kept while broken
+        # picking another script starts at its run()
+        script.script = script_label = helpers.sn("src.core.scripts").label(
+            self.add_script(text("more.py", SCALE))
+        )
+        self.assertEqual(script.script, script_label)
+        self.assertEqual(script.function, "run")
 
     def test_script_without_functions(self):
         """Any script can be part of the add-on: classes are registered."""
@@ -498,6 +524,28 @@ class HELLO_PT_auto(Panel):
         helpers.flush()
         self.assertFalse(errors().node_message(script.id))
         self.assertTrue(script.outputs[1].is_linked)
+
+    def test_runtime_error_in_a_script_shows_on_the_caller(self):
+        source = "def run():\n    x = 1\n    return x / 0\n"
+        tree, trigger, script = self.triggered(source)
+        self.assertLoaded()
+        with self.assertRaises(RuntimeError):
+            run(trigger)
+        message = errors().node_message(script.id) or ""
+        self.assertIn("ZeroDivisionError", message)
+        self.assertIn("tools.py, line 3", message)
+        self.assertIn("line 3", errors().node_message(script.script_item().id))
+
+    def test_taken_name_is_shown(self):
+        tree = helpers.new_tree()
+        script = self.add_script(text("utils.py", STATS))
+        self.script(tree, None, module=script)
+        helpers.flush()
+        scripts = helpers.sn("src.core.scripts")
+        self.assertEqual(scripts.exported_name(script), "utils_2.py")
+        other = self.add_script(text("stats.py", STATS))
+        helpers.flush()
+        self.assertEqual(scripts.exported_name(other), "stats.py")
 
     def test_load_error_is_shown_on_the_script_node(self):
         source = "raise ValueError('broken')\n\n\ndef run():\n    pass\n"

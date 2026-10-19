@@ -37,6 +37,30 @@ def go_to_node(context, node):
     return False
 
 
+_next_error = 0  # position in the list of nodes with errors
+
+
+class SNA_OT_GoToNextError(bpy.types.Operator):
+    """Show the next node with an error (in any tree)"""
+
+    bl_idname = "sna.go_to_next_error"
+    bl_label = "Next Error"
+    bl_options = {"REGISTER", "INTERNAL"}
+
+    def execute(self, context):
+        global _next_error
+        from ...core import errors
+
+        nodes = errors.nodes_with_errors()
+        if not nodes:
+            self.report({"INFO"}, "No node has an error")
+            return {"CANCELLED"}
+        _next_error %= len(nodes)
+        go_to_node(context, nodes[_next_error])
+        _next_error += 1
+        return {"FINISHED"}
+
+
 class SNA_OT_GoToNode(bpy.types.Operator):
     """Navigate to a specific node in a node tree"""
 

@@ -91,7 +91,7 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
     ### Metadata (core/metadata.py: blender_manifest.toml and bl_info)
 
     tagline: bpy.props.StringProperty(
-        name="Description",
+        name="Tagline",
         description="One line about the add-on (at most 64 characters)",
         update=_rebuild,
     )
@@ -172,8 +172,9 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
     ### Build Settings
 
     enabled: bpy.props.BoolProperty(
-        name="Enabled",
-        description="Enable or disable the addon",
+        name="Live",
+        description="Run the add-on in Blender while you edit it, rebuilt on "
+        "every change (exporting works either way)",
         default=True,
         update=_rebuild,
     )

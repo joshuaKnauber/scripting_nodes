@@ -210,7 +210,7 @@ def draw_reference(layout, owner, attr, text=""):
         row.alert = True
         row.prop(owner, attr, text=text, icon="ERROR")
     else:
-        row.prop(owner, attr, text=text)
+        row.prop(owner, attr, text=text, placeholder="Pick a property")
     return row
 
 

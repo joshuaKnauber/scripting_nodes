@@ -26,9 +26,9 @@ def setup():
     helpers.link(tree, repeat.outputs["Index"], switch.inputs["Value"])
     helpers.link(tree, switch.outputs["3"], skip.inputs[0])
     helpers.link(tree, switch.outputs["7"], stop.inputs[0])
-    helpers.link(tree, switch.outputs["Finally"], printer.inputs[0])
+    helpers.link(tree, switch.socket("next", output=True), printer.inputs[0])
     helpers.link(tree, repeat.outputs["Index"], printer.inputs["text"])
-    helpers.link(tree, repeat.outputs["Done"], done.inputs[0])
+    helpers.link(tree, repeat.socket("next", output=True), done.inputs[0])
     return tree
 
 

@@ -50,11 +50,13 @@ def _spec(idname, key, label="", default=MISSING, **kwargs):
 
 
 def Flow(key="flow", label="", kind="PROGRAM", **kwargs):
-    """Program flow (gray). Use Logic() for entry points, Interface() for UI."""
+    """Program flow (gray). Use Logic() for entry points, Interface() for UI.
+    Without a label it's the node's main flow: named after its kind, drawn
+    without a label. Label the other flows by role (Then, Loop, Execute)."""
     return SocketSpec("ScriptingFlowSocket", key, label, kind=kind, **kwargs)
 
 
-def Logic(key="flow", label="Run", **kwargs):
+def Logic(key="flow", label="", **kwargs):
     """An entry point: code Blender runs (an event, an operator's execute)."""
     return Flow(key, label, kind="LOGIC", **kwargs)
 

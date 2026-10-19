@@ -1,8 +1,10 @@
 import bpy
 
-from ...core import errors, folders
+from ...core import errors, folders, functions
+from ...core import scripts as script_list
 from ...settings.scripts import draw_script
 from ..editor import is_sn_editor
+from .data_panel import draw_used_by
 from ..file_list import FOLDER, SCRIPT, TREE, active, layout_rows, row_entry
 
 
@@ -34,12 +36,26 @@ class SNA_UL_Files(bpy.types.UIList):
             tree = shown.item
             icon = "NODETREE" if tree.is_function else "FILE_SCRIPT"
             row.prop(tree, "name", text="", emboss=False, icon=icon)
+            if tree.is_function and not functions.callers(tree):
+                sub = row.row()
+                sub.alignment = "RIGHT"
+                sub.active = False
+                sub.label(text="unused")
+            if errors.nodes_with_errors(tree):
+                row.label(text="", icon="ERROR")
             return
         script = shown.item
         if script.source_type == "INTERNAL" and script.text_block is not None:
             row.prop(script.text_block, "name", text="", emboss=False, icon="TEXT")
         else:
             row.label(text=shown.name, icon="TEXT")
+        exported = script_list.exported_name(script)
+        if exported and exported != script_list.label(script):
+            # its own name is taken (by a tree, utils.py, ...)
+            sub = row.row()
+            sub.alignment = "RIGHT"
+            sub.active = False
+            sub.label(text=f"as {exported}")
         if errors.node_message(script.id):
             row.label(text="", icon="ERROR")
 
@@ -62,6 +78,7 @@ class SNA_MT_AddFile(bpy.types.Menu):
     def draw(self, context):
         layout = self.layout
         layout.operator("sna.add_node_tree", text="Node Tree", icon="FILE_SCRIPT")
+        layout.operator("sna.new_group", text="Function", icon="NODETREE")
         layout.operator("sna.add_script", text="Script", icon="TEXT")
         layout.separator()
         layout.operator("sna.add_folder", text="Folder", icon="NEWFOLDER")
@@ -99,3 +116,11 @@ class SNA_PT_Files(bpy.types.Panel):
         selected = active(context)
         if selected is not None and selected.kind == SCRIPT:
             draw_script(layout.column(), selected.item)
+        elif (
+            selected is not None and selected.kind == TREE and selected.item.is_function
+        ):
+            callers = functions.callers(selected.item)
+            if callers:
+                draw_used_by(layout, callers)
+            else:
+                layout.label(text="No Function node calls it", icon="INFO")

@@ -6,9 +6,9 @@ icon: SquareFunction
 
 A function is a node tree with inputs and outputs, like a node group in Geometry Nodes. It becomes a Python function in your add-on, and **Group** nodes call it from other trees.
 
-![A tree calling three functions: Greet from an operator, Header and Double inside a panel](/screenshots/functions-call.png)
+![A tree calling three functions: Greet from an operator, Header and Double inside a panel](/screenshots/functions-call.webp)
 
-![The panel this tree draws in the 3D viewport sidebar](/screenshots/functions-panel.png)
+![The panel this tree draws in the 3D viewport sidebar](/screenshots/functions-panel.webp)
 
 ## Creating a function
 
@@ -16,5 +16,8 @@ A function is a node tree with inputs and outputs, like a node group in Geometry
 - **Ctrl+Alt+G** puts the nodes of the selected Group nodes back.
 - **Tab** enters the selected Group node, **Ctrl+Tab** goes back up.
 - **Add > Groups** has Group Input, Group Output, an empty Group node (its **New** button creates a function) and one entry per function.
+- **+ › Function** in the sidebar's **Files** list creates one in the selected folder. New functions go next to the tree they're made from.
 
-![After Ctrl+G on Combine Strings and Print: the new function, with Group Input / Output for the links that crossed the selection](/screenshots/functions-make-group.png)
+Functions are listed in **Files** with the other trees. Functions no Group node calls are marked *unused*; select one to see the nodes calling it. Deleting a function that's still used asks first, and the nodes calling it then ask for another one.
+
+![After Ctrl+G on Combine Strings and Print: the new function, with Group Input / Output for the links that crossed the selection](/screenshots/functions-make-group.webp)

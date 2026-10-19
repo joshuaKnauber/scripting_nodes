@@ -22,6 +22,9 @@ class PythonNodesTest(FlowTestCase):
         )
         names = [s.name for s in node.inputs]
         self.assertEqual(names, ["value", "factor", "things"])
+        self.assertEqual(
+            node.setup_hint(), "Not connected, so None: value, factor, things"
+        )
 
     def test_expression_runs_with_inputs_put_in(self):
         node = self.code_node("SNA_Node_PythonExpression", "math.floor(a * 10) + b")
@@ -65,7 +68,16 @@ class PythonNodesTest(FlowTestCase):
         node = self.code_node("SNA_Node_PythonExpression", "a +")
         self.print_value(node.outputs["result"])
         helpers.flush()
-        self.assertEqual(errors().node_message(node.id), "Not valid Python")
+        self.assertEqual(
+            errors().node_message(node.id),
+            "Not valid Python: invalid syntax",
+        )
+        node.code = "(1 + 2"
+        helpers.flush()
+        self.assertEqual(
+            errors().node_message(node.id),
+            "Not valid Python: '(' was never closed (column 1)",
+        )
         node.code = "layout.label(text='x')"
         helpers.flush()
         self.assertEqual(

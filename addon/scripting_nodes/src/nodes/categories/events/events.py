@@ -69,18 +69,34 @@ def _pair(name):
 
 # new choices go at the end: saved nodes store the choice's position
 SNA_Node_OnLoad = event_node(
-    "SNA_Node_OnLoad", "On Load", {**_pair("load"), "Failed": "load_post_fail"}
+    "SNA_Node_OnLoad",
+    "On Load",
+    {**_pair("load"), "Failed": "load_post_fail"},
+    "Before or after a .blend file is opened, or when opening it failed",
 )
 SNA_Node_OnSave = event_node(
-    "SNA_Node_OnSave", "On Save", {**_pair("save"), "Failed": "save_post_fail"}
+    "SNA_Node_OnSave",
+    "On Save",
+    {**_pair("save"), "Failed": "save_post_fail"},
+    "Before or after the file is saved, or when saving failed",
 )
-SNA_Node_OnUndo = event_node("SNA_Node_OnUndo", "On Undo", _pair("undo"))
-SNA_Node_OnRedo = event_node("SNA_Node_OnRedo", "On Redo", _pair("redo"))
+SNA_Node_OnUndo = event_node(
+    "SNA_Node_OnUndo", "On Undo", _pair("undo"), "Before or after an undo step"
+)
+SNA_Node_OnRedo = event_node(
+    "SNA_Node_OnRedo", "On Redo", _pair("redo"), "Before or after a redo step"
+)
 SNA_Node_OnFrameChange = event_node(
-    "SNA_Node_OnFrameChange", "On Frame Change", _pair("frame_change")
+    "SNA_Node_OnFrameChange",
+    "On Frame Change",
+    _pair("frame_change"),
+    "Before or after the current frame changes (playback, scrubbing)",
 )
 SNA_Node_OnDepsgraphUpdate = event_node(
-    "SNA_Node_OnDepsgraphUpdate", "On Depsgraph Update", _pair("depsgraph_update")
+    "SNA_Node_OnDepsgraphUpdate",
+    "On Depsgraph Update",
+    _pair("depsgraph_update"),
+    "Before or after Blender updates the scene's data (runs very often)",
 )
 SNA_Node_OnRenderStart = event_node(
     "SNA_Node_OnRenderStart",

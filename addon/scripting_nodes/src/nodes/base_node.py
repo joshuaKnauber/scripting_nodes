@@ -1,3 +1,4 @@
+import textwrap
 from typing import Dict, Tuple
 
 import bpy
@@ -224,20 +225,53 @@ class ScriptingBaseNode:
 
     # -- UI -------------------------------------------------------------------
 
+    def setup_hint(self):
+        """What the node still needs, shown while it has no error (nodes
+        nothing uses aren't compiled), or instead of a "Pick ..." error when
+        its pick was deleted. None if nothing."""
+        for attr, field in references.fields(self).items():
+            if references.is_missing(self, attr):
+                return f"The {(field.name or attr).lower()} it used was deleted"
+        return None
+
+    def inner_error(self):
+        """An error elsewhere that this node shows too (e.g. in the function
+        a Function node calls), None if there is none."""
+        return None
+
+    def draw_message(self, layout, text, icon):
+        """`text` wrapped to the node's width."""
+        col = layout.box().column(align=True)
+        col.alert = icon == "ERROR"
+        width = max(10, int((self.width - 40) / 6.8))  # characters, roughly
+        lines = [
+            part
+            for line in text.splitlines() or [""]
+            for part in textwrap.wrap(line, width) or [""]
+        ]
+        for i, line in enumerate(lines[:6]):
+            col.label(text=line, icon=icon if i == 0 else "BLANK1")
+
     def draw_buttons(self, context, layout):
         error = errors.node_message(self.id)
-        if error:
-            box = layout.box()
-            box.alert = True
-            box.label(text=error, icon="ERROR")
+        hint = self.setup_hint()
+        if error and not (hint and error.startswith("Pick ")):
+            self.draw_message(layout, error, "ERROR")
+        elif hint:
+            self.draw_message(layout, hint, "ERROR" if error else "INFO")
+        inner = None if error else self.inner_error()
+        if inner:
+            self.draw_message(layout, inner, "ERROR")
         if context.scene.sna.dev.show_node_code:
             from ..core.compiler import node_lines
 
             lines = node_lines.get(self.id)
             if lines:
                 col = layout.box().column(align=True)
+                # cut at the end: Blender cuts labels in the middle
+                width = max(10, int((self.width - 24) / 6.2))
                 for line in lines[:40]:
-                    col.label(text=line)
+                    col.label(text=line if len(line) <= width else line[:width] + "…")
         for prop in self.sn_header_props:
             layout.prop(self, prop, text="")
         self.draw(context, layout)
@@ -259,7 +293,10 @@ def draw_reference(layout, owner, attr, text=""):
         row.alert = True
         row.prop(owner, attr, text=text, icon="ERROR")
         return
-    row.prop(owner, attr, text=text)
+    field = references.fields(owner).get(attr)
+    name = field.name.lower() if field and field.name else "node"
+    article = "an" if name[0] in "aeiou" else "a"
+    row.prop(owner, attr, text=text, placeholder=f"Pick {article} {name}")
     target = references.resolve(owner, attr)
     if target is not None:
         row.operator("sna.go_to_node", text="", icon="VIEWZOOM").node_id = target.id

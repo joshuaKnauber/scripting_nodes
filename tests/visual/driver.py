@@ -7,7 +7,9 @@ saves a screenshot and quits.
 A scenario may also define `after(context)` which runs once the addon has
 flushed (e.g. to open panels or trigger generated operators), and set
 `AREA_ONLY = True` to capture just the node editor instead of the window and
-`ZOOM_OUT = n` to zoom out n steps after framing the nodes.
+`ZOOM_OUT = n` to zoom out n steps after framing the nodes and
+`UI_SCALE = 1.25` to draw the interface bigger (Preferences > Interface >
+Resolution Scale).
 """
 
 import importlib.util
@@ -100,6 +102,11 @@ def step():
         if s == 0:
             helpers.enable_addon()
             _state["scenario"] = load_scenario()
+            # the mouse rests somewhere over the window: no tooltip in the shot
+            bpy.context.preferences.view.show_tooltips = False
+            bpy.context.preferences.view.ui_scale = getattr(
+                _state["scenario"], "UI_SCALE", 1.0
+            )
             _state["tree"] = _state["scenario"].setup()
             helpers.flush()
         elif s == 1:

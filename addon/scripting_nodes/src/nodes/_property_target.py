@@ -26,6 +26,9 @@ from ..core import properties
 from ..core.context import NodeError
 from ..sockets.spec import BlendData, Socket
 from ._blend_path import BlendPathMixin
+from ._property_list import SELF
+
+PREFERENCES = "SNA_Node_Preferences"
 
 
 class PropertyTargetMixin(BlendPathMixin):
@@ -36,7 +39,7 @@ class PropertyTargetMixin(BlendPathMixin):
     mode: bpy.props.EnumProperty(
         name="Mode",
         items=[
-            ("CUSTOM", "Custom", "A property of this add-on"),
+            ("CUSTOM", "This Add-on", "A property of this add-on"),
             ("BLENDER", "Blender", "A Blender property (search or paste a data path)"),
         ],
         default="CUSTOM",
@@ -109,8 +112,13 @@ class PropertyTargetMixin(BlendPathMixin):
         else:
             owner = properties.owner_expression(found, ctx.context)
             if found.kind == "NODE":
-                # the preferences' own draw(): `self`
-                inside = ctx.scope.lookup((found.owner.as_pointer(), "__self__"))
+                # in the operator's / preferences' own methods: `self`
+                inside = ctx.scope.lookup((found.owner.as_pointer(), SELF))
+                if inside is None and found.owner.bl_idname != PREFERENCES:
+                    raise NodeError(
+                        f"Only inside '{found.owner.name}': it's that "
+                        "operator's property"
+                    )
                 owner = inside or owner
             if owner is None:
                 raise NodeError(
@@ -118,12 +126,21 @@ class PropertyTargetMixin(BlendPathMixin):
                 )
         return properties.holder(found, owner), properties.python_name(found)
 
+    def setup_hint(self):
+        if self.mode == "BLENDER":
+            return None if self.path else "Search or paste a property"
+        if properties.is_missing(self, "prop"):
+            return "The property it used was deleted"
+        if self.target() is None:
+            return "Pick a property"
+        return super().setup_hint()
+
     # -- UI -----------------------------------------------------------------
 
     def draw_target(self, layout):
         if self.mode == "CUSTOM":
             row = properties.draw_reference(layout, self, "prop")
-            row.prop(self, "mode", icon="USER", icon_only=True, text="")
+            row.prop(self, "mode", icon="NODETREE", icon_only=True, text="")
         else:
             self.draw_path(
                 layout,

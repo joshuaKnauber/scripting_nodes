@@ -1,4 +1,5 @@
 import defaultMdxComponents from 'fumadocs-ui/mdx';
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 import { ImageZoom, type ImageZoomProps } from 'fumadocs-ui/components/image-zoom';
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
@@ -13,6 +14,8 @@ export function getMDXComponents(components?: MDXComponents) {
     ...defaultMdxComponents,
     // Click-to-zoom on every image, so Blender screenshots stay readable
     img: (props) => <ImageZoom {...(props as ImageZoomProps)} />,
+    Accordion,
+    Accordions,
     Callout,
     Card,
     DownloadButton,

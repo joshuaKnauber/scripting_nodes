@@ -2,14 +2,16 @@ import zipfile
 
 import bpy
 
-from .. import compiler, export_check, scheduler
+from .. import compiler, errors, export_check, scheduler
 from ..assets import FileCopy
 
 
 def build_files():
-    """Files of the addon as shipped (export build, formatted)."""
+    """Files of the addon as shipped (export build, formatted). The nodes
+    keep the live add-on's errors."""
     scheduler.flush()  # sockets / references up to date
-    return compiler.compile_addon(dev=False, pretty=True)
+    with errors.kept():
+        return compiler.compile_addon(dev=False, pretty=True)
 
 
 def write_zip(path, files):
@@ -31,6 +33,9 @@ class SNA_OT_ExportAddon(bpy.types.Operator):
     filter_glob: bpy.props.StringProperty(default="*.zip", options={"HIDDEN"})
 
     def execute(self, context):
+        if not context.scene.sna.addon.addon_name.strip():
+            self.report({"ERROR"}, "Give the add-on a name first (Addon Name)")
+            return {"CANCELLED"}
         path = (
             self.filepath if self.filepath.endswith(".zip") else self.filepath + ".zip"
         )

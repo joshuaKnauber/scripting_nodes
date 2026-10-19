@@ -183,17 +183,17 @@ def draw_script(layout, script):
         return
     if functions:
         col = layout.column(align=True)
-        col.label(text="Functions:")
+        col.label(text="Add a node calling:")
         for name in functions:
             op = col.operator("sna.add_script_function", text=f"{name}()", icon="ADD")
             op.script_id, op.function = script.id, name
     callers = script_list.callers(script)
     if callers:
-        box = layout.box()
-        col = box.column(align=True)
+        col = layout.box().column(align=True)
+        col.label(text="Used by")
         for node in callers:
             row = col.row(align=True)
-            row.label(text=f"{node.function_used()}()", icon="NODE")
-            row.label(text=f"[{node.id_data.name}]")
-            op = row.operator("sna.go_to_node", text="", icon="VIEWZOOM")
+            text = f"{node.function_used()}() ({node.id_data.name})"
+            row.label(text=text, icon="NODE")
+            op = row.operator("sna.go_to_node", text="", icon="VIEWZOOM", emboss=False)
             op.node_id = node.id

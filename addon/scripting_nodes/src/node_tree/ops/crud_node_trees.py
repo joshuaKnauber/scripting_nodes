@@ -3,9 +3,10 @@ and move them (node_tree/file_list.py)."""
 
 import bpy
 
-from ...core import folders, scheduler
+from ...core import folders, functions, scheduler
 from ...core import scripts as script_list
 from ...lib.ids import get_short_id
+from ...lib.trees import node_by_id
 from .. import file_list
 from ..file_list import FOLDER, SCRIPT, TREE
 from ..node_tree import ScriptingNodeTree
@@ -49,6 +50,33 @@ class SNA_OT_AddScript(bpy.types.Operator):
         return {"FINISHED"}
 
 
+class SNA_OT_NewScriptFor(bpy.types.Operator):
+    """Add a new script from a template and pick it on the node"""
+
+    bl_idname = "sna.new_script_for"
+    bl_label = "New Script"
+    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
+
+    node_id: bpy.props.StringProperty(options={"HIDDEN"})
+
+    def execute(self, context):
+        node = node_by_id(self.node_id)
+        if node is None:
+            return {"CANCELLED"}
+        script = context.scene.sna.addon.scripts.add()
+        script.id = get_short_id()
+        script.source_type = "INTERNAL"
+        text = bpy.data.texts.new(script.sn_template_name)
+        text.write(script.sn_template)
+        script.text_block = text
+        file_list.select(context, SCRIPT, script)
+        node.script_id = script.id
+        node.function_name = ""
+        node.mark_dirty()
+        scheduler.request_full()
+        return {"FINISHED"}
+
+
 class SNA_OT_AddFolder(bpy.types.Operator):
     """Add a folder (a package of the add-on) to the selected folder"""
 
@@ -75,18 +103,36 @@ class SNA_OT_RemoveFile(bpy.types.Operator):
             return "Remove the selected folder, its contents move to the folder above"
         if selected is not None and selected.kind == SCRIPT:
             return "Remove the selected script from the add-on (its text stays)"
+        if selected is not None and selected.item.is_function:
+            return "Delete the selected function (nodes calling it ask for another one)"
         return "Remove the selected node tree"
 
     @classmethod
     def poll(cls, context: bpy.types.Context):
         return file_list.active(context) is not None
 
+    def invoke(self, context, event):
+        selected = file_list.active(context)
+        if selected.kind == TREE and selected.item.is_function:
+            used = len(functions.callers(selected.item))
+            if used:
+                return context.window_manager.invoke_confirm(
+                    self,
+                    event,
+                    title=f"Delete {selected.item.name}?",
+                    message=f"Used by {used} node{'s' if used != 1 else ''}",
+                )
+        return self.execute(context)
+
     def execute(self, context: bpy.types.Context):
         selected = file_list.active(context)
         if selected.kind == FOLDER:
             folders.remove(selected.item.path)
         elif selected.kind == TREE:
+            callers = functions.callers(selected.item)
             bpy.data.node_groups.remove(selected.item)
+            for node in callers:
+                node.mark_dirty()  # asks for another function
         else:
             scripts = context.scene.sna.addon.scripts
             callers = script_list.callers(selected.item)

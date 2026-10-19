@@ -21,7 +21,7 @@ Always run `scripts/test.py` after touching the core or nodes. `tests/test_nodes
 
 Setup: `cp config.template.yaml config.yaml` and set your `BLENDER_EXECUTABLE` path.
 
-Docs site (Fumadocs, Next.js static export) lives in `website/`. Pages are MDX in `website/content/docs/`; screenshots are generated from scenarios in `website/screenshots/` via `python ./scripts/docs_screenshots.py`. See `website/README.md`.
+Docs site (Fumadocs, Next.js static export) lives in `website/`. Pages are MDX in `website/content/docs/`; screenshots are generated from scenarios in `website/screenshots/` via `python ./scripts/docs_screenshots.py` (framed on `website/wallpaper.jpg`, saved as .webp). Use the `docs` skill for writing pages and composing screenshots. See `website/README.md`.
 
 ## Blender Python API Reference
 

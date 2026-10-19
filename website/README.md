@@ -29,7 +29,8 @@ Sidebar order and folder titles come from `meta.json` in each folder. Pages not
 listed in `pages` are appended alphabetically, so listing them is only needed to
 control order. `"---Label---"` adds a separator.
 
-Available components without imports: `Callout` (`type`: info, tip, warn,
+Available components without imports: `Accordions`/`Accordion` (`title`;
+for details most readers can skip), `Callout` (`type`: info, tip, warn,
 error, success; optional `title`), `Cards`/`Card`, `Steps`/`Step`, `Tabs`/`Tab`,
 `Video` (`title`, `src`; a placeholder without `src`) and `DownloadButton`. See
 `components/mdx.tsx` to add more.
@@ -40,20 +41,26 @@ Images live in `public/screenshots/` and are referenced from MDX with an
 absolute path. Every image can be clicked to zoom.
 
 ```mdx
-![A Trigger node connected to a Print node](/screenshots/first-addon.png)
+![A Trigger node connected to a Print node](/screenshots/first-addon.webp)
 ```
 
-You can drop a manual screenshot in there, but prefer a scenario so it can be
-regenerated when the UI changes. A scenario is a Python file in `screenshots/`
-that builds a node tree inside Blender:
+Every screenshot is a scenario: a Python file in `screenshots/` that builds a
+node tree inside Blender. The capture is framed on `wallpaper.jpg` (rounded
+corners, shadow, a crop of the wallpaper per name), so don't drop in manual
+screenshots.
 
 ```python
 # screenshots/first-addon.py
 import helpers  # tests/helpers.py
 
-AREA_ONLY = True            # capture only the node editor, not the whole window
-WINDOW_SIZE = (900, 480)    # Blender window size in pixels
+AREA_ONLY = True            # capture only the biggest area, not the whole window
+WINDOW_SIZE = (900, 480)    # Blender window size in points
 ZOOM_OUT = 3                # zoom steps out after framing the nodes
+FRAME = "float"             # float, corner, right or bottom (edges it runs off)
+# CROP = (0, 0, 0.8, 0.7)   # keep only this part of the capture (fractions)
+# UI_SCALE = 1.25           # Blender's resolution scale
+# LAYOUT = "split"          # node editor left, 3D viewport right
+# SIDEBAR_TAB = "My Tab"    # sidebar tab to show
 
 
 def setup():
@@ -68,13 +75,16 @@ def after(context):  # optional, runs once the add-on has compiled the tree
     ...
 ```
 
-Then render it to `public/screenshots/<name>.png` (needs `BLENDER_EXECUTABLE`
-in the repo's `config.yaml`):
+Then render it to `public/screenshots/<name>.webp` (needs Pillow and
+`BLENDER_EXECUTABLE` in the repo's `config.yaml`):
 
 ```bash
 npm run screenshots                 # all scenarios
 npm run screenshots -- first-addon  # only names containing "first-addon"
 ```
+
+The `docs` skill (`.claude/skills/docs/`) has the guidelines for composing
+shots and writing pages.
 
 ## Layout and styling
 

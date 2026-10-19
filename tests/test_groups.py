@@ -259,6 +259,19 @@ class GroupsTest(unittest.TestCase):
         helpers.flush()
         self.assertIn("more than one flow input", errors().node_message(call.id))
 
+    def test_errors_inside_show_on_the_call(self):
+        function = self.greet()
+        broken = helpers.add_node(function, "SNA_Node_RunOperator")
+        p = next(n for n in function.nodes if n.bl_idname == "SNA_Node_Print")
+        helpers.link(function, p.outputs[0], broken.inputs[0])
+        tree = helpers.new_tree("Main")
+        trigger = helpers.add_node(tree, "SNA_Node_Trigger")
+        call = helpers.call_function(tree, function)
+        helpers.link(tree, trigger.outputs[0], call.inputs[0])
+        helpers.flush()
+        self.assertEqual(errors().nodes_with_errors(), [broken])
+        self.assertEqual(call.inner_error(), "1 error inside (Tab)")
+
     def test_functions_cant_call_themselves(self):
         outer = self.double()
         inner, _, _ = helpers.new_function("Inner", inputs=[("X", FLOAT)])
@@ -268,6 +281,10 @@ class GroupsTest(unittest.TestCase):
         self.assertFalse(poll(call, inner))  # itself
         self.assertFalse(poll(call, outer))  # calls this one
         self.assertTrue(poll(call, self.greet()))
+        # set anyway (a pasted node): an error, not a hang
+        call.node_tree = outer
+        helpers.flush()
+        self.assertEqual(call.setup_hint(), f"{outer.name} can't call itself")
 
     def test_trees_without_interface_are_not_functions(self):
         tree = helpers.new_tree("Main")

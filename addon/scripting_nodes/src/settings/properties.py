@@ -299,7 +299,7 @@ class SNA_Property(PropertySettings, bpy.types.PropertyGroup):
     )
     in_addon_group: _p(
         bpy.props.BoolProperty,
-        name="In Add-on Group",
+        name="Under Add-on",
         description=(
             "Store it in the add-on's group (scene.my_addon.count) instead of "
             "directly on the data (scene.count)"
@@ -504,8 +504,10 @@ def draw_list(layout, owner, owner_id="", rows=4):
     return items[index] if 0 <= index < len(items) else None
 
 
-def draw_settings(layout, prop, top_level=False):
-    """Settings of one property definition."""
+def draw_settings(layout, prop, top_level=False, on_node=False):
+    """Settings of one property definition: an add-on property
+    (`top_level`), a group member, or one of an Operator / Preferences node
+    (`on_node`). Rarely needed settings are under Advanced (closed)."""
     from ..core import errors
 
     layout.use_property_split = True
@@ -521,7 +523,7 @@ def draw_settings(layout, prop, top_level=False):
     kind = prop.property_type
     if kind == "GROUP":
         if top_level:
-            layout.label(text="Properties")
+            layout.label(text=f"Members of {prop.name}")
             member = draw_list(layout, "GROUP", prop.id)
             if member is not None:
                 draw_settings(layout.box(), member)
@@ -599,18 +601,25 @@ def draw_settings(layout, prop, top_level=False):
             col.prop(prop, "pointer_type")
             col.prop(prop, "poll_function")
 
+    header, body = layout.panel(f"sna_property_advanced_{prop.id}", default_closed=True)
+    header.label(text="Advanced")
+    if body is None:
+        return
+    body.use_property_split = True
+    body.use_property_decorate = False
     if kind in TRANSFORMABLE:
-        col = layout.column()
-        col.prop(prop, "get_function")
-        col.prop(prop, "set_function")
-
-    col = layout.column(heading="Options")
+        col = body.column()
+        col.prop(prop, "get_function", placeholder="Pick a function")
+        col.prop(prop, "set_function", placeholder="Pick a function")
+    col = body.column(heading="Options")
     col.prop(prop, "option_hidden")
-    col.prop(prop, "option_skip_save")
-    if kind in {"BOOLEAN", "INTEGER", "FLOAT", "VECTOR", "STRING", "ENUM"}:
-        col.prop(prop, "option_animatable")
-    col.prop(prop, "option_library_editable")
-    layout.prop(prop, "python_name")
+    if on_node:
+        col.prop(prop, "option_skip_save")
+    else:
+        if kind in {"BOOLEAN", "INTEGER", "FLOAT", "VECTOR", "STRING", "ENUM"}:
+            col.prop(prop, "option_animatable")
+        col.prop(prop, "option_library_editable")
+    body.prop(prop, "python_name")
 
 
 def _draw_limits(col, prop):

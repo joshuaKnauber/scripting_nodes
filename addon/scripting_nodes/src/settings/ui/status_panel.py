@@ -20,7 +20,8 @@ class SNA_OT_CopyAddonError(bpy.types.Operator):
 
 
 class SNA_PT_AddonStatus(bpy.types.Panel):
-    """Shown above everything else while the generated addon has an error."""
+    """Above everything else: whether the add-on runs, the nodes with errors
+    (in any tree) and the error that kept it from loading."""
 
     bl_idname = "SNA_PT_AddonStatus"
     bl_label = "Addon Error"
@@ -32,10 +33,31 @@ class SNA_PT_AddonStatus(bpy.types.Panel):
 
     @classmethod
     def poll(cls, context):
-        return in_sn_tree(context) and bool(errors.addon_error)
+        return in_sn_tree(context)
 
     def draw(self, context):
-        box = self.layout.box()
+        layout = self.layout
+        broken = errors.nodes_with_errors()
+        if broken:
+            trees = sorted({node.id_data.name for node in broken})
+            col = layout.column(align=True)
+            row = col.row()
+            row.alert = True
+            count = len(broken)
+            text = f"{count} error{'s' if count > 1 else ''} in {', '.join(trees)}"
+            row.label(text=text, icon="ERROR")
+            col.operator("sna.go_to_next_error", text="Go to Error", icon="VIEWZOOM")
+        elif not errors.addon_error:
+            row = layout.row()
+            row.active = False
+            running = context.scene.sna.addon.enabled
+            row.label(
+                text="Running, no errors" if running else "Not running (Addon)",
+                icon="CHECKMARK" if running else "PAUSE",
+            )
+        if not errors.addon_error:
+            return
+        box = layout.box()
         box.alert = True
         row = box.row()
         row.label(text="The addon couldn't be loaded", icon="ERROR")

@@ -333,7 +333,13 @@ class ModuleBuilder:
         if target.node.bl_idname == functions.GROUP_OUTPUT:
             return self._group_return(target.node, scope)
         ctx = self._emit(target.node, scope, "statement")
-        return ctx.lines() if ctx else []
+        if ctx is not None:
+            return ctx.lines()
+        # a broken node is left out, what comes after it still runs
+        after = next((s for s in target.node.outputs if s.identifier == "next"), None)
+        if after is None or not after.enabled:
+            return []
+        return self.compile_flow(after, scope)
 
     def evaluate(self, node, key, scope) -> str:
         """Expression of output `key` of a value node."""

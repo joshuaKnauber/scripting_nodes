@@ -366,6 +366,22 @@ class FoldersTest(unittest.TestCase):
         path = helpers.sn("src.core.runtime").folder(addon().module_name)
         self.assertTrue(os.path.isfile(os.path.join(path, "a", "b", "main.py")))
 
+    def test_functions_in_the_files_list(self):
+        bpy.ops.sna.add_folder()
+        bpy.ops.sna.new_group()  # + › Function: in the selected folder
+        function = next(t for t in bpy.data.node_groups if t.is_function)
+        self.assertEqual(function.folder, "New Folder")
+        self.assertEqual(file_list().active(bpy.context).item, function)
+        tree = helpers.new_tree("Main")
+        call = helpers.call_function(tree, function)
+        self.assertEqual(helpers.sn("src.core.functions").callers(function), [call])
+        # deleting it: the nodes calling it ask for another one
+        file_list().select(bpy.context, "TREE", function)
+        bpy.ops.sna.remove_file()
+        helpers.flush()
+        self.assertFalse(any(t.is_function for t in bpy.data.node_groups))
+        self.assertIsNone(call.node_tree)
+
 
 if __name__ == "__main__":
     unittest.main()

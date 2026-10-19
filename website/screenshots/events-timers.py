@@ -23,7 +23,7 @@ def setup():
     tick = add("SNA_Node_Print", 450, 60)
     helpers.link(tree, operator.outputs["Execute"], delay.inputs[0])
     helpers.link(tree, delay.outputs["Delayed"], later.inputs[0])
-    helpers.link(tree, delay.outputs["Continue"], intervals.inputs[0])
+    helpers.link(tree, delay.socket("next", output=True), intervals.inputs[0])
     helpers.link(tree, intervals.outputs["Repeat"], tick.inputs[0])
     helpers.link(tree, intervals.outputs["Index"], format_.inputs[-1])
     helpers.link(tree, format_.outputs[0], tick.inputs["text"])

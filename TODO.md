@@ -10,43 +10,43 @@ only (first run, properties, functions, scripts, errors, panels). Fix in this
 order: bugs, quick fixes, then the decided changes.
 
 Bugs:
-- [ ] Script Function silently calls another function when the picked one is removed (fallback in `function_used`). Keep the name, error "utils.py has no function 'x'".
-- [ ] Script runtime errors: the overlay names the script's id (`tracebacks.py`, the owner is a list script), the calling node shows nothing.
-- [ ] List scripts are renamed (`utils.py` → `scripts/utils_2.py`): the scripts package shares the top-level names ("utils" reserved). Own namespace.
-- [ ] Export clears the live node errors (`compile_addon` clears `errors.node_errors`, the export leaves out Triggers). Keep them; the export reports "N nodes have errors".
-- [ ] Preferences can't be seen before export: the live add-on isn't in `preferences.addons` (`default_set=False`). See C below.
-- [ ] The log overlay keeps errors of nodes that compile again.
-- [ ] Python Expression / Statement syntax errors only say "Not valid Python" (Inline Script gives line and message).
-- [ ] Get / Set Property with nothing picked: no error. Deleted targets say "Pick a property" instead of "'Strength' was deleted"; Button / Get Property only show a red field.
-- [ ] An operator property read outside its operator (Get Property in a Panel) compiles and fails at draw on the Label: NodeError on the Get Property.
-- [ ] A function calling itself: no error.
-- [ ] An empty add-on name is accepted (module `sna_addon`, manifest name "").
+- [x] Script Function silently calls another function when the picked one is removed (fallback in `function_used`). Keep the name, error "utils.py has no function 'x'".
+- [x] Script runtime errors: the overlay names the script's id (`tracebacks.py`, the owner is a list script), the calling node shows nothing.
+- [x] Scripts share one module namespace with trees and the generated `utils.py` (a top-level `utils.py` script becomes `utils_2.py`, a script and a tree of the same name in different folders collide too). The Files list shows the exported name ("as utils_2.py"); per-folder names would avoid most collisions.
+- [x] Export clears the live node errors (`compile_addon` clears `errors.node_errors`, the export leaves out Triggers). Keep them; the export reports "N nodes have errors".
+- [x] Preferences can't be seen before export: Preview on the Preferences node draws the generated draw() in a popup, on a stand-in property group (same properties, the preview's own values); nothing goes into the user's preferences.
+- [x] The log overlay keeps errors of nodes that compile again.
+- [x] Python Expression / Statement syntax errors only say "Not valid Python" (Inline Script gives line and message).
+- [x] Get / Set Property with nothing picked: no error. Deleted targets say "Pick a property" instead of "'Strength' was deleted"; Button / Get Property only show a red field.
+- [x] An operator property read outside its operator (Get Property in a Panel) compiles and fails at draw on the Label: NodeError on the Get Property.
+- [x] A function calling itself: no error.
+- [x] An empty add-on name is accepted (module `sna_addon`, manifest name "").
 
 Quick fixes:
-- [ ] Errors on nodes wrap instead of being cut ("Pick an operat…"); wider defaults where labels are cut.
-- [ ] Placeholders on empty pickers ("Pick an operator…", "Pick a script…", "Pick a property…"); an empty Script Function offers "New Script" (creates and picks one).
-- [ ] Variables subpanel shows "None": a hint which node makes a variable.
-- [ ] Functions list: + / −, rows "1 input · 1 output · used 1×", callers under "Used by" with node labels. Scripts' "Functions:" → "Add node:".
-- [ ] Wording: Overwrites → Overrides; socket "kind" → "Flow Kind" with a description; Tagline / Description one word; the Addon header checkbox labeled.
-- [ ] Generated panels' sidebar category defaults to the add-on name.
-- [ ] Make Group: named "Function", sockets named after the outer sockets, frame the nodes on enter, refuse entry nodes (Trigger, Operator, Panel).
-- [ ] Export: Addon panel open by default, Export below Metadata and the check; the check warns "N Trigger nodes aren't exported" and when the export has no code.
-- [ ] Descriptions for the ~15 nodes without one (Events, Box / Column / Row, Label, Math, Group).
-- [ ] Node code preview cuts at the line end, not mid-identifier.
-- [ ] MCP panel: one line what it is, "Copy setup for:", "Runs Python: on / off".
-- [ ] Header refresh button: tooltip "Rebuild now (normally automatic)".
-- [ ] Metadata: validate email / URL / version inline; show the final module id under the name.
+- [x] Errors on nodes wrap instead of being cut ("Pick an operat…"); wider defaults where labels are cut.
+- [x] Placeholders on empty pickers ("Pick an operator…", "Pick a script…", "Pick a property…"); an empty Script Function offers "New Script" (creates and picks one).
+- [x] Variables subpanel shows "None": a hint which node makes a variable.
+- [x] Functions list: + / −, rows "1 input · 1 output · used 1×", callers under "Used by" with node labels. Scripts' "Functions:" → "Add node:".
+- [x] Wording: Overwrites → Overrides; socket "kind" → "Flow Kind" with a description; Tagline / Description one word; the Addon header checkbox labeled.
+- [x] Generated panels' sidebar category defaults to the add-on name.
+- [x] Make Group: named "Function", sockets named after the outer sockets, frame the nodes on enter, refuse entry nodes (Trigger, Operator, Panel).
+- [x] Export: Addon panel open by default, Export below Metadata and the check; the check warns "N Trigger nodes aren't exported" and when the export has no code.
+- [x] Descriptions for the ~15 nodes without one (Events, Box / Column / Row, Label, Math, Group).
+- [x] Node code preview cuts at the line end, not mid-identifier.
+- [x] MCP panel: one line what it is, "Copy setup for:", "Runs Python: on / off".
+- [x] Header refresh button: tooltip "Rebuild now (normally automatic)".
+- [x] Metadata: validate email / URL / version inline; show the final module id under the name.
 
 Decided:
-- [ ] A. One word: "Function" everywhere (Group Input / Output stay, Blender's).
-- [ ] B. The interface is only editable on function trees (adding a socket turned a tree into a function); "+" in the Functions list creates one with Group Input / Output.
-- [ ] C. Operator / Preferences properties: a compact list on the node with an edit popup (now only in the Node tab, "Properties: sidebar (N)"); a live preview of the Preferences layout.
-- [ ] D. Errors in other trees: badges on tree / function rows and group nodes, the tree name in overlay lines, a status line "Loaded · 2 errors" with "Go to next error".
-- [ ] E. A broken flow node skips only itself (now everything after it is dropped).
-- [ ] F. Unconnected automatic inputs (Inline Script, Python Expression names) warn: they are None.
-- [ ] G. Flow socket labels by role, not kind: the main flow in / out unlabeled (the color is the kind, tooltip explains it), labels only for branches (Then / Else, Loop / After, Execute / Invoke, Draw / Header). No "Run" default on `Logic()`.
-- [ ] H. Add menu categories (Program vs Logic split, Data vs Math): reorganize, Joshua validates.
-- [ ] I. Property editor: only the options that apply per owner, Advanced collapsed (Get / Set, Python Name, Options); groups apart from properties; rename "In Add-on Group".
+- [x] A. One word: "Function" everywhere (Group Input / Output stay, Blender's).
+- [x] B. A tree that gets sockets becomes a function: the Files list shows it (icon, "unused", Used by), its root nodes keep working. The Functions list has + / −.
+- [x] C. Operator / Preferences properties: a compact list on the node with an edit popup (the preview of the Preferences layout: see the bug above).
+- [x] D. Errors in other trees: badges on tree / function rows and group nodes, the tree name in overlay lines, a status line "Loaded · 2 errors" with "Go to next error".
+- [x] E. A broken flow node skips only itself (now everything after it is dropped).
+- [x] F. Unconnected automatic inputs (Inline Script, Python Expression names) warn: they are None.
+- [x] G. Flow socket labels by role, not kind: the main flow in / out unlabeled (the color is the kind, tooltip explains it), labels only for branches (Then / Else, Loop / After, Execute / Invoke, Draw / Header). No "Run" default on `Logic()`.
+- [x] H. Add menu categories reorganized (Events, Operators, Interface, Flow, Data, Blender Data, Math, Properties, Variables, Functions, Python, Files, Drawing; `categories.ORDER`): validated.
+- [x] I. Property editor: only the options that apply per owner, Advanced collapsed (Get / Set, Python Name, Options); groups apart from properties; rename "In Add-on Group".
 
 Details and screenshots of the review: `/tmp/ux/triage.md`, `/tmp/ux/<area>/`.
 

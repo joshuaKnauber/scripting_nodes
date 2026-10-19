@@ -25,7 +25,7 @@ def setup():
     icon = add("SNA_Node_IconFromData", -150, -150)
     helpers.flush()
     link = lambda a, b: helpers.link(tree, a, b)  # noqa: E731
-    link(panel.outputs["Interface"], ui_list.inputs[0])
+    link(panel.outputs["Draw"], ui_list.inputs[0])
     link(objects.outputs[0], ui_list.inputs["Items"])
     helpers.pick_property(ui_list, helpers.prop(index.id))
     item = ui_list.socket("item_data", output=True)

@@ -115,12 +115,12 @@ class NamingTest(unittest.TestCase):
 
 
 class SocketNamesTest(unittest.TestCase):
-    """Flow sockets are named by role (see sockets/spec.py): entry points
-    Run or the method they are (Execute, Draw, ...), what runs after a block
-    After, plain pass-through flows after their kind (Program, Interface)."""
+    """Flow sockets are named by role (see sockets/spec.py): the method an
+    entry point is (Execute, Draw, ...), what runs after a block After. A
+    node's main flow is named after its kind and drawn without a label."""
 
     # names replaced by the role names, not to come back
-    OLD = {"Logic", "Finally", "Done", "Continue", "Layout"}
+    OLD = {"Run", "Finally", "Done", "Continue", "Layout"}
 
     def test_flow_socket_names(self):
         helpers.reset_file()
@@ -132,8 +132,6 @@ class SocketNamesTest(unittest.TestCase):
                     continue
                 with self.subTest(node=cls.bl_idname, socket=socket.name):
                     self.assertNotIn(socket.name, self.OLD)
-                    if socket.kind == "LOGIC" and socket.is_output:
-                        self.assertNotEqual(socket.name, "Program")
 
 
 if __name__ == "__main__":

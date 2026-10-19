@@ -10,6 +10,8 @@ import _properties  # noqa: E402
 
 AREA_ONLY = True
 WINDOW_SIZE = (900, 420)
+SIDEBAR_TAB = "Properties Demo"
+FRAME = "right"
 
 
 def setup():

@@ -19,6 +19,7 @@ from typing import List, Optional, Tuple
 
 import bpy
 
+from ..core import references
 from ..core.references import Reference
 from ..sockets.data.socket_string import encode_enum_items
 from ..sockets.spec import Socket
@@ -244,7 +245,7 @@ class OperatorCallMixin:
     mode: bpy.props.EnumProperty(
         name="Mode",
         items=[
-            ("CUSTOM", "Custom", "Reference an Operator node in this addon"),
+            ("CUSTOM", "This Add-on", "An Operator node of this add-on"),
             ("BLENDER", "Blender", "Call a built-in Blender operator"),
         ],
         default="CUSTOM",
@@ -264,6 +265,13 @@ class OperatorCallMixin:
             target = self.resolve_reference("operator_sn")
             return target.operator_idname if target else ""
         return _blender_operator_idname(self.operator_blender)
+
+    def setup_hint(self):
+        if self.mode == "BLENDER" and not self.operator_blender:
+            return "Pick an operator"
+        if self.mode == "CUSTOM" and not references.target_id(self, "operator_sn"):
+            return "Pick an operator"
+        return super().setup_hint()
 
     def _target_prop_specs(self):
         if self.mode == "CUSTOM":
@@ -314,9 +322,9 @@ class OperatorCallMixin:
         row = layout.row(align=True)
         if self.mode == "CUSTOM":
             self.draw_reference(row, "operator_sn")
-            row.prop(self, "mode", icon="USER", icon_only=True, text="")
+            row.prop(self, "mode", icon="NODETREE", icon_only=True, text="")
         else:
             sub = row.row(align=True)
             sub.alert = bool(self.operator_blender) and not self.operator_idname()
-            sub.prop(self, "operator_blender", text="")
+            sub.prop(self, "operator_blender", text="", placeholder="Search Blender's")
             row.prop(self, "mode", icon="BLENDER", icon_only=True, text="")

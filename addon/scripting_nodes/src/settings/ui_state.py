@@ -20,16 +20,3 @@ class SNA_UISettings(bpy.types.PropertyGroup):
     # the Files list (sidebar), synced by a watcher
     files: bpy.props.CollectionProperty(type=SNA_FileRow)
     active_file: bpy.props.IntProperty(default=-1, update=update_active_file)
-
-    def update_active_function_index(self, context):
-        # Functions are indexed into bpy.data.node_groups directly, not refs
-        if not hasattr(context.space_data, "node_tree"):
-            return
-        if 0 <= self.active_function_index < len(bpy.data.node_groups):
-            tree = bpy.data.node_groups[self.active_function_index]
-            if getattr(tree, "is_sn", False) and tree.is_function:
-                context.space_data.node_tree = tree
-
-    active_function_index: bpy.props.IntProperty(
-        default=0, update=update_active_function_index
-    )

@@ -14,6 +14,8 @@ OPERATIONS = {
 
 
 class SNA_Node_Math(ScriptingBaseNode, bpy.types.Node):
+    """Calculate with numbers: add, multiply, round, compare and more."""
+
     bl_idname = "SNA_Node_Math"
     bl_label = "Math"
     sn_inputs = [Float("a", "A"), Float("b", "B")]

@@ -93,10 +93,18 @@ def version_max(settings) -> str | None:
 def problems(settings) -> list[str]:
     """What's wrong with the metadata (fixed or left out when written)."""
     found = []
+    if not settings.addon_name.strip():
+        found.append("Give the add-on a name (Addon Name)")
+    email = settings.email.strip()
+    if email and not re.fullmatch(r"[^@\s<>]+@[^@\s<>]+\.[^@\s<>]+", email):
+        found.append(f"Email isn't an address: '{email}'")
+    website = settings.website.strip()
+    if website and not re.match(r"https?://[^\s/]+\.[^\s]+", website):
+        found.append("Website needs https:// and a domain")
     if settings.copyright.strip() and copyright(settings) is None:
         found.append("Copyright needs a year and a name: '2026 Jane Doe'")
     if settings.tagline and short_text(settings.tagline, "") != settings.tagline:
-        found.append("Description: 64 characters, end with a letter")
+        found.append("Tagline: 64 characters, end with a letter")
     if settings.use_blender_version_max and version_max(settings) is None:
         found.append("Blender: Up To must be above the minimum")
     return found

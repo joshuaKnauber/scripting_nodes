@@ -49,7 +49,12 @@ class SNA_OT_PanelNodeSettings(bpy.types.Operator):
         if node.panel_region_type == "UI":
             row = layout.row(align=True)
             row.label(text="Tab")
-            row.prop(node, "panel_category", text="")
+            row.prop(
+                node,
+                "panel_category",
+                text="",
+                placeholder=context.scene.sna.addon.addon_name,
+            )
             layout.separator()
 
         # Location toggle section
@@ -104,8 +109,7 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
     )
     panel_category: bpy.props.StringProperty(
         name="Category",
-        description="Sidebar tab name",
-        default="Scripting Nodes",
+        description="Sidebar tab name (empty: the add-on's name)",
     )
     panel_order: bpy.props.IntProperty(
         name="Order", description="Panel ordering index (higher values appear lower)"
@@ -169,8 +173,9 @@ class SNA_Node_Panel(ScriptingBaseNode, bpy.types.Node):
             attrs.append(f"bl_options = {literal_set(options)}")
         if self.panel_space_type == "PROPERTIES" and self.panel_context != "NONE":
             attrs.append(f"bl_context = {self.panel_context!r}")
-        if self.panel_region_type == "UI" and self.panel_category:
-            attrs.append(f"bl_category = {self.panel_category!r}")
+        if self.panel_region_type == "UI":
+            category = self.panel_category or bpy.context.scene.sna.addon.addon_name
+            attrs.append(f"bl_category = {category!r}")
         # the icon of the panel's tab with compact tabs (Blender 5.2, older
         # versions ignore it)
         icon = icon_argument(ctx) if self.panel_region_type == "UI" else None

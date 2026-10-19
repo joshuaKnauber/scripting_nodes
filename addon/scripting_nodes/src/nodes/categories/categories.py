@@ -24,6 +24,32 @@ class SN_MT_LayoutMenu(bpy.types.Menu):
 _node_categories = {}
 
 
+# Add menu order: roughly the order an add-on is built in; folders not
+# listed come after, alphabetically
+ORDER = (
+    "events",
+    "operators",
+    "interface",
+    "flow",
+    "data",
+    "blender_data",
+    "math",
+    "properties",
+    "variables",
+    "functions",
+    "python",
+    "files",
+    "drawing",
+)
+
+
+def ordered(names):
+    """Category folder names in menu order."""
+    names = [n for n in names if n != "nodes"]
+    rank = {name: i for i, name in enumerate(ORDER)}
+    return sorted(names, key=lambda n: (rank.get(n, len(ORDER)), n))
+
+
 def category_label(dirname):
     """Display name for a category folder: `blender_data` -> `Blender Data`."""
     return dirname.replace("_", " ").title()
@@ -75,9 +101,7 @@ def poll(cls, context):
 
 def register_node_menus():
     categories = get_node_categories()
-    for cat in sorted(categories.keys()):
-        if cat == "nodes":
-            continue
+    for cat in ordered(categories):
         register_menu(cat)
         register_category_menus(categories[cat], cat)
 
@@ -129,7 +153,7 @@ def draw_submenu(self, context):
     if "nodes" in category and len(category["nodes"]) and len(category.keys()) > 1:
         layout.separator()
 
-    if self.path == "groups":
+    if self.path == "functions":
         draw_groups_menu(layout, context)
         return
 
@@ -166,11 +190,12 @@ def draw_presets(layout, node):
 
 
 def draw_groups_menu(layout, context):
-    """Group Input / Output, an empty Group node and one entry per function."""
+    """Group Input / Output, an empty Function node and one entry per
+    function."""
     for idname, text in (
         ("NodeGroupInput", "Group Input"),
         ("NodeGroupOutput", "Group Output"),
-        ("SNA_Node_Group", "Group"),
+        ("SNA_Node_Group", "Function"),
     ):
         op = layout.operator("node.add_node", text=text)
         op.type = idname
@@ -199,9 +224,8 @@ def draw_node_menu(self, context):
     layout = self.layout
 
     layout.separator()
-    for cat in sorted(categories.keys()):
-        if not cat == "nodes":
-            layout.menu(menu_idname(cat), text=category_label(cat))
+    for cat in ordered(categories):
+        layout.menu(menu_idname(cat), text=category_label(cat))
 
     layout.menu("SNA_MT_LayoutMenu", text="Layout")
 

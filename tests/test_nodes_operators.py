@@ -31,6 +31,12 @@ class OperatorNodesTest(FlowTestCase):
             printer.socket("text").value = text
         return printer
 
+    def test_broken_node_skips_only_itself(self):
+        run = self.then("SNA_Node_RunOperator")  # no operator picked
+        self.print_value(self.string("after"))
+        self.assertIn("'after'", self.source())
+        self.assertIn("Pick an operator", errors().node_message(run.id))
+
     def test_open_file(self):
         node = self.operator(invoke_type="FILE_BROWSER", file_filter="*.txt;*.csv")
         self.print_in(node.outputs["execute"], node.outputs["path"])

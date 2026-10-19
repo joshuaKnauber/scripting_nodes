@@ -16,7 +16,7 @@ from typing import NamedTuple
 
 import bpy
 
-from . import compiler, metadata
+from . import compiler, errors, metadata
 
 GUIDELINES = (
     "https://developer.blender.org/docs/features/extensions/moderation/guidelines/"
@@ -61,8 +61,10 @@ def run(settings=None) -> list[Issue]:
     global last, checked
     settings = settings or bpy.context.scene.sna.addon
     owners: dict = {}
-    files = compiler.compile_addon(dev=False, settings=settings, owners_out=owners)
-    issues = check(files, owners, settings)
+    with errors.kept() as node_errors:
+        files = compiler.compile_addon(dev=False, settings=settings, owners_out=owners)
+    issues = check(files, owners, settings) + _check_build(node_errors, owners)
+    issues.sort(key=lambda i: (i.severity != "ERROR", i.file, i.line))
     last, checked = issues, True
     return issues
 
@@ -99,6 +101,35 @@ def check(files, owners, settings) -> list[Issue]:
             unique.append(issue)
     unique.sort(key=lambda i: (i.severity != "ERROR", i.file, i.line))
     return unique
+
+
+def _check_build(node_errors, owners):
+    """Nodes with errors (left out of the export) and Trigger nodes (only for
+    testing, never exported)."""
+    from ..lib.trees import scripting_node_trees
+
+    found = [
+        Issue("ERROR", f"Has an error, left out: {message.splitlines()[-1]}", node_id)
+        for node_id, message in node_errors.items()
+    ]
+    triggers = [
+        node
+        for tree in scripting_node_trees()
+        for node in tree.nodes
+        if node.bl_idname == "SNA_Node_Trigger"
+    ]
+    if triggers:
+        found.append(
+            Issue(
+                "WARNING",
+                f"{len(triggers)} Trigger node{'s' if len(triggers) > 1 else ''} "
+                "only for testing, not exported",
+                triggers[0].id,
+            )
+        )
+    if not any(any(lines) for key, lines in owners.items() if isinstance(key, str)):
+        found.append(Issue("WARNING", "The export has no code from nodes or scripts"))
+    return found
 
 
 def _value_node(segment, values):

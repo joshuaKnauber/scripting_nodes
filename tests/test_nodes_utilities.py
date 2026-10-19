@@ -260,7 +260,7 @@ class UtilityNodesTest(FlowTestCase):
             "utils.add_shortcut('3D View', 'VIEW_3D', 'utility_test.greet', 'G', ctrl=True, shift=True)",
             source,
         )
-        shortcut_mod = helpers.sn("src.nodes.categories.logic.node_shortcut")
+        shortcut_mod = helpers.sn("src.nodes.categories.operators.node_shortcut")
         self.assertEqual(shortcut_mod.key_text(shortcut), "Ctrl Shift G")
 
     def test_shortcut_with_properties_and_value(self):
@@ -276,6 +276,25 @@ class UtilityNodesTest(FlowTestCase):
             helpers.tree_source(self.tree),
         )
         self.assertIsNone(errors().addon_error)  # no keyconfig in background
+
+    def test_shortcut_leaves_out_values_that_failed(self):
+        # Event Info has no event when the add-on registers its shortcuts:
+        # the value is left out (keymap items can't hold None), not a load error
+        shortcut = self.add("SNA_Node_Shortcut")
+        shortcut.mode = "BLENDER"
+        shortcut.operator_blender = "mesh.primitive_cube_add"
+        helpers.flush()
+        info = self.add("SNA_Node_EventInfo")
+        self.link(info.outputs["shift"], shortcut.socket("arg_enter_editmode"))
+        shortcut.socket("arg_size").value = 3.0
+        helpers.flush()
+        source = helpers.tree_source(self.tree)
+        self.assertIn("properties={'size': 3.0})", source)
+        self.assertNotIn("None", source)
+        self.assertIsNone(errors().node_message(shortcut.id))
+        self.assertIn("enter_editmode (Event Info)", shortcut.setup_hint())
+        self.assertIsNotNone(errors().node_message(info.id))
+        self.assertIsNone(errors().addon_error)
 
     def test_shortcut_opens_menu(self):
         panel = self.add("SNA_Node_Panel")
@@ -300,7 +319,7 @@ class UtilityNodesTest(FlowTestCase):
         shortcut.keymap = "Nowhere"
         helpers.flush()
         self.assertIn("Unknown place", errors().node_message(shortcut.id))
-        keymaps = helpers.sn("src.nodes.categories.logic.node_shortcut").keymaps()
+        keymaps = helpers.sn("src.nodes.categories.operators.node_shortcut").keymaps()
         self.assertEqual(keymaps["Object Mode"], "EMPTY")
         self.assertEqual(keymaps["Node Editor"], "NODE_EDITOR")
         self.assertFalse(any("Modal" in name for name in keymaps))

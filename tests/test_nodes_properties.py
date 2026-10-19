@@ -262,6 +262,26 @@ class PropertiesTest(unittest.TestCase):
         rna = getattr(getattr(bpy.ops, namespace), name).get_rna_type()
         self.assertIn("text", rna.properties.keys())
 
+    def test_operator_property_only_inside_the_operator(self):
+        op = self.add("SNA_Node_Operator")
+        prop = helpers.add_property("Amount", "INTEGER", owner=op)
+        inside = self.add("SNA_Node_GetProperty")
+        helpers.pick_property(inside, prop)
+        printer = self.add("SNA_Node_Print")
+        helpers.link(self.tree, op.outputs["Execute"], printer.inputs[0])
+        helpers.link(self.tree, inside.outputs[0], printer.inputs["text"])
+        panel = self.add("SNA_Node_Panel")
+        outside = self.add("SNA_Node_GetProperty")
+        helpers.pick_property(outside, prop)
+        label = self.add("SNA_Node_Label")
+        helpers.link(self.tree, panel.outputs["body"], label.inputs[0])
+        helpers.link(self.tree, outside.outputs[0], label.inputs["text"])
+        helpers.flush()
+        errors = helpers.sn("src.core.errors")
+        self.assertIsNone(errors.node_message(inside.id))
+        self.assertIn("self.amount", helpers.tree_source(self.tree))
+        self.assertIn("Only inside 'Operator'", errors.node_message(outside.id))
+
     def test_copied_operator_gets_its_own_property_ids(self):
         op = self.add("SNA_Node_Operator")
         prop = helpers.add_property("Text", "STRING", owner=op)
@@ -283,6 +303,13 @@ class PropertiesTest(unittest.TestCase):
         # in their own draw() the preferences are `self`
         self.assertIn("self.layout.prop(self, 'verbose')", source)
         self.assertLoaded()
+        # the preview's stand-in has the same properties
+        node_module = helpers.sn("src.nodes.categories.interface.node_preferences")
+        prefs_cls = node_module.live_preferences_class()
+        self.assertIsNotNone(prefs_cls)
+        preview = node_module.stand_in(prefs_cls)
+        self.assertFalse(preview.verbose)
+        self.assertEqual(node_module.stand_in(prefs_cls), preview)
 
     # -- using properties -----------------------------------------------------
 
@@ -362,10 +389,19 @@ class PropertiesTest(unittest.TestCase):
         helpers.pick_property(checkbox, prop)
         properties = helpers.sn("src.core.properties")
         self.assertFalse(properties.is_missing(checkbox, "prop"))
+        self.assertIsNone(checkbox.setup_hint())
         bpy.context.scene.sna.addon.properties.remove(0)
         helpers.flush()
         self.assertTrue(properties.is_missing(checkbox, "prop"))
         self.assertEqual(checkbox.prop, "")
+        self.assertEqual(checkbox.setup_hint(), "The property it used was deleted")
+
+    def test_unused_nodes_say_what_they_need(self):
+        getter = self.add("SNA_Node_GetProperty")
+        button = self.add("SNA_Node_Button")
+        helpers.flush()
+        self.assertEqual(getter.setup_hint(), "Pick a property")
+        self.assertEqual(button.setup_hint(), "Pick an operator")
 
     def test_on_property_update(self):
         count = helpers.add_property("Count", "INTEGER").id

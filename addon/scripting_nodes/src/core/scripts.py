@@ -130,6 +130,16 @@ def callers(script):
     ]
 
 
+def exported_name(script):
+    """File name of the script in the add-on (`utils_2.py` when its own name
+    is taken), None before it's built."""
+    source = script.source_name()
+    if source is None:
+        return None
+    module = naming.current().get(source[0], "module")
+    return f"{module}.py" if module else None
+
+
 def add_to_addon(names_registry, files):
     """Add the list's scripts to `files` ({rel: (source, owner id)}).
     Returns {script id: error} of those that can't be added."""

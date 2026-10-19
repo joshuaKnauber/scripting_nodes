@@ -5,6 +5,8 @@ from ....base_node import ScriptingBaseNode
 
 
 class SNA_Node_Column(ScriptingBaseNode, bpy.types.Node):
+    """Draw the connected UI below each other."""
+
     bl_idname = "SNA_Node_Column"
     bl_label = "Column"
     sn_inputs = [Interface(), Boolean("align", "Align"), String("heading", "Heading")]

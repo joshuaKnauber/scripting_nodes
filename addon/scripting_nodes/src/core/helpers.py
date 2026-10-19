@@ -212,7 +212,8 @@ def add_shortcut(keymap, space_type, idname, key, value="PRESS", properties=None
     keymap = keyconfig.keymaps.new(name=keymap, space_type=space_type)
     item = keymap.keymap_items.new(idname, key, value, **modifiers)
     for name, prop_value in (properties or {}).items():
-        setattr(item.properties, name, prop_value)
+        if prop_value is not None:  # keymap items can't hold None
+            setattr(item.properties, name, prop_value)
     _keymaps.append((keymap, item))
 '''
 

@@ -86,3 +86,19 @@ class ExportCheckTest(FlowTestCase):
         bpy.ops.sna.export_addon(filepath=path)
         self.assertTrue(export_check().checked)
         self.assertTrue(export_check().last)
+
+    def test_nodes_with_errors_and_triggers(self):
+        """The export keeps the nodes' errors and lists them; Trigger nodes
+        are only for testing."""
+        errors = helpers.sn("src.core.errors")
+        button = self.then("SNA_Node_RunOperator")  # no operator picked
+        helpers.flush()
+        message = errors.node_message(button.id)
+        self.assertTrue(message)
+        found = messages(export_check().run(), button)
+        self.assertTrue(any("Has an error" in m for m in found), found)
+        helpers.sn("src.core.ops.export").build_files()
+        self.assertEqual(errors.node_message(button.id), message)
+
+        found = messages(export_check().run())  # FlowTestCase's Trigger
+        self.assertIn("1 Trigger node only for testing, not exported", found)

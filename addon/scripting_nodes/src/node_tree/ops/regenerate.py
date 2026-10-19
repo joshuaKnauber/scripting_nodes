@@ -6,7 +6,9 @@ from ...core import scheduler
 class SNA_OT_RegenerateAllNodes(bpy.types.Operator):
     bl_idname = "sna.regenerate"
     bl_label = "Rebuild Addon"
-    bl_description = "Rebuild the generated addon and reload it"
+    bl_description = (
+        "Rebuild the add-on now and reload it (it rebuilds on every change anyway)"
+    )
     bl_options = {"REGISTER", "INTERNAL"}
 
     def execute(self, context: bpy.types.Context):

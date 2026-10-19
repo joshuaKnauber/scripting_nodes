@@ -27,7 +27,7 @@ def setup():
     bevel = helpers.add_node(tree, "SNA_Node_NumberField", (-60, 0))
     bevel.mode = "BLENDER"
     bevel.paste_path('bpy.data.objects["Cube"].modifiers["Bevel"].width')
-    link(panel.outputs["Interface"], simplify.inputs[0])
+    link(panel.outputs["Draw"], simplify.inputs[0])
     link(simplify.socket("next", output=True), frame_end.inputs[0])
     link(frame_end.socket("next", output=True), bevel.inputs[0])
     helpers.flush()

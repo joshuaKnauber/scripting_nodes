@@ -1,6 +1,5 @@
 import bpy
 from ..editor import in_sn_tree
-from ...core import functions
 from ...core.references import target_label, users
 from ...lib.trees import (
     scripting_node_trees,
@@ -42,7 +41,7 @@ def _draw_node_list(layout, types, icons):
             sub.label(text=node.id_data.name)
         sub.label(text=f"({len(users(node))})")
     if not nodes:
-        col.label(text="None")
+        col.label(text="Add a Global or Local Variable node", icon="INFO")
 
 
 class SNA_PT_Data(bpy.types.Panel):
@@ -87,14 +86,7 @@ class SNA_PT_DataProperties(bpy.types.Panel):
             if prop.id and getattr(node, "prop_id", "") == prop.id
         ]
         if users:
-            box = layout.box()
-            col = box.column(align=True)
-            for node in users:
-                row = col.row(align=True)
-                row.label(text=node.bl_label, icon="NODE")
-                row.label(text=f"[{node.id_data.name}]")
-                op = row.operator("sna.go_to_node", text="", icon="VIEWZOOM")
-                op.node_id = node.id
+            draw_used_by(layout, users)
 
 
 class SNA_PT_DataVariables(bpy.types.Panel):
@@ -114,90 +106,21 @@ class SNA_PT_DataVariables(bpy.types.Panel):
         _draw_node_list(self.layout, VARIABLE_NODES, VARIABLE_ICONS)
 
 
-def _draw_group_callers(layout, group_tree):
-    """List the Group nodes that call this function."""
-    callers = functions.callers(group_tree)
-    if not callers:
-        return
-    box = layout.box()
-    col = box.column(align=True)
-    for node in callers:
+def draw_used_by(layout, nodes):
+    """The nodes using something, with jump buttons."""
+    col = layout.box().column(align=True)
+    col.label(text="Used by")
+    for node in nodes:
         row = col.row(align=True)
-        row.label(text=node.bl_label, icon="NODE")
-        row.label(text=f"[{node.id_data.name}]")
-        op = row.operator("sna.go_to_node", text="", icon="VIEWZOOM")
+        name = node.label or getattr(node, "draw_label", lambda: node.name)()
+        row.label(text=f"{name} ({node.id_data.name})", icon="NODE")
+        op = row.operator("sna.go_to_node", text="", icon="VIEWZOOM", emboss=False)
         op.node_id = node.id
-
-
-class SNA_UL_FunctionsList(bpy.types.UIList):
-    bl_idname = "SNA_UL_FunctionsList"
-
-    def draw_item(
-        self, context, layout, data, item, icon, active_data, active_propname
-    ):
-        # item is a NodeTree from bpy.data.node_groups
-        in_count = len(functions.sockets(item, "INPUT"))
-        out_count = len(functions.sockets(item, "OUTPUT"))
-        ref_count = len(functions.callers(item))
-
-        if self.layout_type in {"DEFAULT", "COMPACT"}:
-            row = layout.row(align=True)
-            row.label(text=item.name, icon="NODETREE")
-            sub = row.row()
-            sub.alignment = "RIGHT"
-            sub.label(text=f"in:{in_count} out:{out_count}")
-            sub.label(text=f"({ref_count})")
-        elif self.layout_type == "GRID":
-            layout.alignment = "CENTER"
-            layout.label(text=item.name, icon="NODETREE")
-
-    def filter_items(self, context, data, propname):
-        trees = getattr(data, propname)
-        flt_flags = [self.bitflag_filter_item] * len(trees)
-        for i, tree in enumerate(trees):
-            if not (getattr(tree, "is_sn", False) and tree.is_function):
-                flt_flags[i] = 0
-        return flt_flags, []
-
-
-class SNA_PT_DataFunctions(bpy.types.Panel):
-    bl_idname = "SNA_PT_DataFunctions"
-    bl_order = 2
-    bl_label = "Functions"
-    bl_space_type = "NODE_EDITOR"
-    bl_region_type = "UI"
-    bl_category = "Scripting Nodes"
-    bl_parent_id = "SNA_PT_Data"
-
-    @classmethod
-    def poll(cls, context):
-        return in_sn_tree(context)
-
-    def draw(self, context):
-        layout = self.layout
-        sna = context.scene.sna
-
-        row = layout.row()
-        row.template_list(
-            "SNA_UL_FunctionsList",
-            "",
-            bpy.data,
-            "node_groups",
-            sna.ui,
-            "active_function_index",
-            rows=4,
-        )
-
-        # Show the Call Group nodes that reference the active function
-        if 0 <= sna.ui.active_function_index < len(bpy.data.node_groups):
-            tree = bpy.data.node_groups[sna.ui.active_function_index]
-            if getattr(tree, "is_sn", False) and tree.is_function:
-                _draw_group_callers(layout, tree)
 
 
 class SNA_PT_DataAssets(bpy.types.Panel):
     bl_idname = "SNA_PT_DataAssets"
-    bl_order = 3
+    bl_order = 2
     bl_label = "Assets"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"

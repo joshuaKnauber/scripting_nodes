@@ -6,6 +6,8 @@ from ...base_node import ScriptingBaseNode
 
 
 class SNA_Node_Label(ScriptingBaseNode, bpy.types.Node):
+    """Draw a line of text, with an optional icon."""
+
     bl_idname = "SNA_Node_Label"
     bl_label = "Label"
     sn_inputs = [Interface(), String("text", "Label"), Icon()]

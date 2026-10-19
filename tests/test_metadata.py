@@ -122,6 +122,21 @@ class MetadataTest(unittest.TestCase):
         manifest = tomllib.loads(export_files()["blender_manifest.toml"])
         self.assertNotIn("copyright", manifest)
         self.assertNotIn("blender_version_max", manifest)
+        self.addon.email = "not an email"
+        self.addon.website = "example.com"
+        self.addon.addon_name = ""
+        problems = metadata.problems(self.addon)[:3]
+        self.assertEqual(
+            problems,
+            [
+                "Give the add-on a name (Addon Name)",
+                "Email isn't an address: 'not an email'",
+                "Website needs https:// and a domain",
+            ],
+        )
+        self.addon.email = "jane@example.com"
+        self.addon.website = "https://example.com/tools"
+        self.assertEqual(len(metadata.problems(self.addon)), 3)
 
     def test_blender_accepts_the_manifest(self):
         self.fill()

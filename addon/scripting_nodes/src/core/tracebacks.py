@@ -38,6 +38,7 @@ METHODS = (
 
 def _blame(exc_type, exc, tb):
     from . import runtime
+    from . import scripts as script_list
     from .compiler import line_owners
 
     module = runtime.loaded_module()
@@ -45,27 +46,38 @@ def _blame(exc_type, exc, tb):
         return
     root = os.path.realpath(runtime.folder(module))
     node_id = None
+    in_script = None  # (script, line) of the innermost line of a list script
     for frame in traceback.extract_tb(tb):
         path = os.path.realpath(frame.filename)
         if not path.startswith(root + os.sep):
             continue
         rel = os.path.relpath(path, root).replace(os.sep, "/")
         owners = line_owners.get(rel, [])
-        if (
-            frame.lineno
-            and 0 < frame.lineno <= len(owners)
-            and owners[frame.lineno - 1]
-        ):
-            node_id = owners[frame.lineno - 1]  # innermost wins
-    if node_id is None:
-        return
+        if not (frame.lineno and 0 < frame.lineno <= len(owners)):
+            continue
+        owner = owners[frame.lineno - 1]
+        script = script_list.find(owner) if owner else None
+        if script is not None:
+            in_script = (script, frame.lineno)
+        elif owner:
+            node_id, in_script = owner, None  # innermost wins
     message = f"{exc_type.__name__}: {exc}"
-    errors.runtime_errors[node_id] = message
+    if in_script is not None:
+        script, line = in_script
+        message += f" ({script_list.label(script)}, line {line})"
+        errors.runtime_errors[script.id] = message
     from ..lib.screen import redraw_all
     from ..lib.trees import node_by_id
 
+    if node_id is None:
+        # the script's own function: the list shows it, the caller's wrapper
+        # (if a node called it) logs it
+        redraw_all()
+        return
+    errors.runtime_errors[node_id] = message
     node = node_by_id(node_id)
-    log("ERROR", f"Error in node '{node.name if node else node_id}': {message}")
+    where = f"'{node.name}' ({node.id_data.name})" if node else f"'{node_id}'"
+    log("ERROR", f"Error in node {where}: {message}")
     redraw_all()
 
 

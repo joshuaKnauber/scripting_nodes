@@ -7,6 +7,7 @@ import time
 
 from bpy.app.handlers import persistent
 
+from ...core import errors
 from ...lib import logger
 from ...node_tree.editor import is_sn_editor
 
@@ -157,6 +158,16 @@ def _breadcrumb_text(space):
     return "  >  ".join(names) if names else None
 
 
+def _fixed(entry):
+    """A runtime error of a node (core/tracebacks.py) after the add-on was
+    rebuilt (that clears them)."""
+    return (
+        entry.level == "ERROR"
+        and entry.message.startswith("Error in node")
+        and not errors.runtime_errors
+    )
+
+
 def _draw_overlay():
     """Draw handler callback - breadcrumb (always) + log overlay (when enabled)."""
     ctx = bpy.context
@@ -197,7 +208,9 @@ def _draw_overlay():
 
     entries = _get_state()["entries"]
     now = time.time()
-    visible = [e for e in entries if now - e.timestamp < EXPIRE_SECONDS][-MAX_VISIBLE:]
+    visible = [
+        e for e in entries if now - e.timestamp < EXPIRE_SECONDS and not _fixed(e)
+    ][-MAX_VISIBLE:]
     if not visible:
         return
 
