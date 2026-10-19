@@ -25,19 +25,23 @@ RESERVED_SYMBOLS = (
     set(keyword.kwlist)
     | set(dir(builtins))
     | {"bpy", "register", "unregister", "persistent", "atexit", "math"}
+    | {"base_package"}  # the add-on's package in modules of folders
     | {"self", "context", "layout", "event"}
 )
 # names in the add-on's package and its __init__.py
 RESERVED_MODULES = set(keyword.kwlist) | {
+    "assets",
     "bpy",
     "classes",
     "icons",
     "properties",
     "register",
-    "scripts",
     "unregister",
     "utils",
 }
+
+# owner of a folder's package name (core/folders.py): FOLDER + path
+FOLDER = "folder:"
 
 
 def addon_settings():
@@ -102,7 +106,7 @@ def Symbol(key, base, owner=""):
 
 
 def Script(key, base, owner):
-    """A module of a script, `scripts/<name>.py`, shared by `owner`."""
+    """A module of a script, `<folder>/<name>.py`, shared by `owner`."""
     return Name(key, "script", snake(base, "script"), owner=owner)
 
 
@@ -152,13 +156,19 @@ def unique(base, used: set) -> str:
 def build(trees=None, settings=None) -> Names:
     """Claim every name of the add-on, in a fixed order."""
     from ..lib.trees import scripting_node_trees, sn_nodes
-    from . import functions, properties
+    from . import folders, functions, properties
 
     trees = sorted(
         trees if trees is not None else scripting_node_trees(), key=lambda t: t.name
     )
     settings = settings or addon_settings()
     names = Names(settings.class_prefix, settings.idname_namespace)
+    # folders are packages, their modules are imported into __init__.py too
+    scripts = getattr(settings, "scripts", ())
+    used = [t.folder for t in trees] + [s.folder for s in scripts]
+    for path in sorted({p for folder in used for p in folders.ancestors(folder)}):
+        base = snake(folders.basename(path), "folder")
+        names.claim(FOLDER + path, Name("package", "module", base))
     for tree in trees:
         names.claim(tree.id, Name("module", "module", snake(tree.name, "tree")))
         if functions.is_function(tree):
@@ -194,6 +204,45 @@ def name(owner, key) -> str:
     if result is None:
         raise KeyError(f"'{owner.name}' declares no name '{key}'")
     return result
+
+
+def package(path: str) -> str:
+    """Import path of the package of folder `path`, e.g. `ui.panels`."""
+    from . import folders
+
+    keys = [FOLDER + ancestor for ancestor in folders.ancestors(path)]
+    names = current()
+    if any(names.get(key, "package") is None for key in keys):
+        names = build_current()  # moved since the last build (UI, tests)
+    return ".".join(names.get(key, "package") for key in keys)
+
+
+def module_path(tree) -> str:
+    """Import path of a tree's module, e.g. `ui.panels.main`."""
+    module = name(tree, "module")
+    return ".".join(p for p in (package(tree.folder), module) if p)
+
+
+def relative_import(line: str, package: str) -> str:
+    """`from .x import y` (relative to the add-on's folder) relative to
+    `package`, the package of the module it's in ("" for the top level):
+    `from ..x import y` in `ui`, `from . import y` for `from .ui import y`."""
+    if not package or not line.startswith("from ."):
+        return line
+    head, sep, names = line.partition(" import ")
+    target = head[len("from .") :].split(".") if head != "from ." else []
+    current = package.split(".")
+    common = 0
+    while common < min(len(target), len(current)) and target[common] == current[common]:
+        common += 1
+    dots = "." * (len(current) - common + 1)
+    return f"from {dots}{'.'.join(target[common:])}{sep}{names}"
+
+
+def build_current() -> Names:
+    global _current
+    _current = build()
+    return _current
 
 
 def current() -> Names:

@@ -125,7 +125,7 @@ def point(owner, attr, target):
 
 
 def add_script(text_block):
-    """A script of the add-on (Addon Data › Scripts) using `text_block`."""
+    """A script of the add-on (Files list, folder "Scripts") using `text_block`."""
     script = bpy.context.scene.sna.addon.scripts.add()
     script.id = sn("src.lib.ids").get_short_id()
     script.text_block = text_block

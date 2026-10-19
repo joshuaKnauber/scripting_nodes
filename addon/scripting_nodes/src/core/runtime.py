@@ -26,6 +26,7 @@ from ..lib import reloading
 from ..lib.logger import log
 from ..lib.paths import ADDON_FOLDER
 from . import errors, persistence, tracebacks
+from .assets import FOLDER as ASSETS, FileCopy
 
 MARKER = ".scripting_nodes"
 # folders of binary files (bytes in `files`)
@@ -138,8 +139,8 @@ def apply(files: dict[str, str | bytes]) -> bool:
 
 def _check_syntax(files):
     for rel, source in files.items():
-        if not rel.endswith(".py"):
-            continue
+        if not rel.endswith(".py") or not isinstance(source, str):
+            continue  # assets are copied as they are
         try:
             compile(source, rel, "exec")
         except SyntaxError as e:
@@ -188,7 +189,9 @@ def _read_folder(path):
             full = os.path.join(root, name)
             rel = os.path.relpath(full, path).replace(os.sep, "/")
             try:
-                if rel.startswith(BINARY):
+                if rel.startswith(ASSETS + "/"):
+                    files[rel] = FileCopy(full)  # compared by size and time
+                elif rel.startswith(BINARY):
                     with open(full, "rb") as f:
                         files[rel] = f.read()
                 else:
@@ -206,7 +209,9 @@ def _write_folder(path, files, remove):
     for rel, source in files.items():
         full = os.path.join(path, *rel.split("/"))
         os.makedirs(os.path.dirname(full), exist_ok=True)
-        if isinstance(source, bytes):
+        if isinstance(source, FileCopy):
+            source.copy_to(full)
+        elif isinstance(source, bytes):
             with open(full, "wb") as f:
                 f.write(source)
         else:

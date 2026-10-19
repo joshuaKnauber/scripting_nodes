@@ -6,6 +6,8 @@ import bpy
 
 from ..core import metadata, scheduler
 from ..lib.ids import get_short_id
+from .assets import SNA_Asset
+from .folders import SNA_TreeFolder
 from .properties import SNA_Property
 from .scripts import SNA_Script
 
@@ -227,10 +229,18 @@ class SNA_AddonSettings(bpy.types.PropertyGroup):
     properties: bpy.props.CollectionProperty(type=SNA_Property)
     active_property: bpy.props.IntProperty()
 
-    ### Scripts (settings/scripts.py)
+    ### Folders of the tree list (core/folders.py)
+
+    folders: bpy.props.CollectionProperty(type=SNA_TreeFolder)
+
+    ### Scripts (settings/scripts.py, in the Files list)
 
     scripts: bpy.props.CollectionProperty(type=SNA_Script)
-    active_script: bpy.props.IntProperty()
+
+    ### Assets (settings/assets.py, core/assets.py)
+
+    assets: bpy.props.CollectionProperty(type=SNA_Asset)
+    active_asset: bpy.props.IntProperty()
 
     ### Calculated Values
 

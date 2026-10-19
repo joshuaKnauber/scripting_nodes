@@ -348,6 +348,17 @@ class NodeContext:
         """Name to call a shared helper (core/helpers.py) by."""
         return self._builder.use_helper(name)
 
+    def addon_folder(self) -> str:
+        """Expression for the folder the add-on is installed in (its modules
+        are <add-on>/<folders>/<tree>.py)."""
+        from . import folders
+
+        self.imports("import os")
+        folder = "__file__"
+        for _ in range(len(folders.split(self.node.id_data.folder)) + 1):
+            folder = f"os.path.dirname({folder})"
+        return folder
+
     def asset(self, rel, data: bytes) -> str:
         """Ship the file `rel` (e.g. "icons/logo.png") with the add-on.
         Returns the path it got (a suffix if another file has that name)."""
@@ -358,13 +369,13 @@ class NodeContext:
         itself in this tree, `_<module>.name` (module imported) for others."""
         return self._builder.import_symbol(owner, name)
 
-    def script(self, module_key, alias_key, source) -> str:
+    def script(self, module_key, alias_key, source, folder="") -> str:
         """Add `source` (the user's code, unchanged) as a module of its own,
-        `scripts/<name>.py`. `module_key` / `alias_key`: names declared in
+        `<folder>/<name>.py`. `module_key` / `alias_key`: names declared in
         `sn_names()` (`naming.Script` and `naming.Symbol`). Returns the name
         this module uses it by."""
         return self._builder.add_script(
-            self.name(module_key), self.name(alias_key), source, self.node.id
+            self.name(module_key), self.name(alias_key), source, self.node.id, folder
         )
 
     def on_register(self, line):

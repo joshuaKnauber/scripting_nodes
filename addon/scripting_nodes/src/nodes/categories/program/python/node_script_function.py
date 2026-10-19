@@ -70,7 +70,7 @@ class SNA_Node_ScriptFunction(ScriptingBaseNode, bpy.types.Node):
     script_id: bpy.props.StringProperty(options={"HIDDEN"})
     script: bpy.props.StringProperty(
         name="Script",
-        description="Script of the add-on (Addon Data › Scripts)",
+        description="Script of the add-on (in the Files list)",
         get=_get_script,
         set=_set_script,
         search=_search_script,
@@ -151,7 +151,8 @@ class SNA_Node_ScriptFunction(ScriptingBaseNode, bpy.types.Node):
 
     def emit(self, ctx):
         name, run = self.picked()
-        alias = ctx.script("module", "alias", self.script_item().script_source())
+        script = self.script_item()
+        alias = ctx.script("module", "alias", script.script_source(), script.folder)
         names = ctx.scope.names
         implicit = {
             "context": ctx.context,

@@ -6,8 +6,8 @@ Each tree becomes one module of the add-on package; `__init__.py` imports
 them and registers their classes (core/package.py). Root nodes (operators, panels, events, ...) are
 emitted first; everything else is emitted when a flow reaches it or when a
 value it outputs is used. Nodes write through core/context.NodeContext.
-Scripts (Addon Data › Scripts, core/scripts.py) become modules of their own
-in `scripts/`.
+Scripts (core/scripts.py) become modules of their own, unchanged. Trees and
+scripts in folders are modules of packages (core/folders.py).
 """
 
 import hashlib
@@ -23,11 +23,11 @@ from ..lib.logger import log
 from ..lib.sockets import to_socket
 from ..lib.trees import scripting_node_trees, sn_nodes
 from . import errors, functions, helpers, metadata, naming, package, properties
+from . import assets as asset_list
 from . import scripts as script_list
 from .context import Line, NodeContext, NodeError, Scope
 
 HELPERS_MODULE = "utils"
-SCRIPTS_PACKAGE = "scripts"
 
 # relpath -> owner node id per line, of the last live compile (error blame)
 line_owners: dict[str, list] = {}
@@ -85,6 +85,7 @@ def compile_addon(dev=True, pretty=False, settings=None, owners_out=None):
             builders[module].tree, dev, names, scripts, peers, assets
         )
         results[module] = builders[module].build()
+    module_files = {}
     for tree in trees:
         builder = builders[tree.module_name]
         source, line_map = results[tree.module_name]
@@ -92,35 +93,41 @@ def compile_addon(dev=True, pretty=False, settings=None, owners_out=None):
         permissions |= builder.permissions
         if not source.strip():
             continue  # nothing in it (only Trigger nodes in an export)
-        rel = f"{tree.module_name}.py"
+        rel = module_files[tree.module_name] = tree.module_file
+        for folder in _packages(rel):
+            files.setdefault(f"{folder}/__init__.py", "")
         files[rel] = source
         owners[rel] = line_map
         previews.update(_previews(source, line_map))
     source = properties.module_source(names, _independent_of_properties(builders))
     if source is not None:
         files[f"{properties.PROPERTIES_MODULE}.py"] = source
-    if scripts:
-        files[f"{SCRIPTS_PACKAGE}/__init__.py"] = ""
     for rel, (source, owner) in scripts.items():
+        for folder in _packages(rel):
+            files.setdefault(f"{folder}/__init__.py", "")
         files[rel] = source  # the user's code, as written
         owners[rel] = [owner] * (source.count("\n") + 1)
-    files.update(assets)
+    files.update(assets)  # icons
+    # the add-on's assets (errors keyed by asset id, like nodes)
+    shipped = {}
+    errors.node_errors.update(asset_list.add_to_addon(shipped))
+    files.update(shipped)
     files["blender_manifest.toml"] = metadata.manifest(settings, permissions)
     exported = {name for name in used_helpers if helpers.needs_import(name, dev)}
     if exported:
         files[f"{HELPERS_MODULE}.py"] = helpers.source(exported, dev)
     files["__init__.py"] = package.source(
-        _package_modules(files, builders, scripts),
+        _package_modules(files, builders, scripts, module_files),
         metadata.license_header(settings),
         metadata.bl_info(settings) if dev else None,
     )
     if owners_out is not None:
         owners_out.update(owners)
-        for module, builder in builders.items():
-            owners_out[(f"{module}.py", "values")] = builder.values
+        for module, rel in module_files.items():
+            owners_out[(rel, "values")] = builders[module].values
     if pretty:
         for rel, source in files.items():
-            if rel.endswith(".py") and not rel.startswith(SCRIPTS_PACKAGE + "/"):
+            if rel.endswith(".py") and rel not in scripts:
                 files[rel] = _format(source)
     if dev and not pretty:
         line_owners.clear()
@@ -130,6 +137,17 @@ def compile_addon(dev=True, pretty=False, settings=None, owners_out=None):
         used_permissions.clear()
         used_permissions.update(permissions)
     return files
+
+
+def script_file(package: str, module: str) -> str:
+    """File of a script's module in the add-on, e.g. `scripts/tools.py`."""
+    return "/".join([*package.split("."), module] if package else [module]) + ".py"
+
+
+def _packages(rel: str) -> list[str]:
+    """Folders of the add-on above file `rel`: "a/b/c.py" -> ["a", "a/b"]."""
+    parts = rel.split("/")[:-1]
+    return ["/".join(parts[: i + 1]) for i in range(len(parts))]
 
 
 def _independent_of_properties(builders) -> set[str]:
@@ -151,17 +169,17 @@ def _independent_of_properties(builders) -> set[str]:
     return set(builders) - dependent
 
 
-def _package_modules(files, builders, scripts) -> list[package.Module]:
+def _package_modules(files, builders, scripts, module_files) -> list[package.Module]:
     """The add-on's modules in registration order: scripts, helpers,
     properties, then the trees, the ones others import from first."""
     modules = []
     for rel in sorted(scripts):
-        name = rel[len(SCRIPTS_PACKAGE) + 1 : -3]
+        path = rel[: -len(".py")].replace("/", ".")
         source = files[rel]
         modules.append(
             package.Module(
-                name,
-                f"{SCRIPTS_PACKAGE}.{name}",
+                path.rpartition(".")[2],
+                path,
                 source,
                 registers_itself=package.defines(source, "register"),
             )
@@ -179,8 +197,10 @@ def _package_modules(files, builders, scripts) -> list[package.Module]:
             if other in uses:
                 visit(other, (*path, module))
         done.add(module)
-        if f"{module}.py" in files:
-            modules.append(package.Module(module, module, files[f"{module}.py"]))
+        rel = module_files.get(module)
+        if rel is not None:
+            path = rel[: -len(".py")].replace("/", ".")
+            modules.append(package.Module(module, path, files[rel]))
 
     for module in sorted(uses):
         visit(module)
@@ -352,12 +372,12 @@ class ModuleBuilder:
             return f"{HELPERS_MODULE}.{helpers.call_name(name, self.dev)}"
         return helpers.call_name(name, self.dev)
 
-    def add_script(self, module, alias, source, owner):
-        """Add `source` as `scripts/<module>.py` (once for the add-on) and
+    def add_script(self, module, alias, source, owner, folder=""):
+        """Add `source` as `<folder>/<module>.py` (once for the add-on) and
         import it into this module as `alias`."""
-        rel = f"{SCRIPTS_PACKAGE}/{module}.py"
-        self.scripts.setdefault(rel, (source, owner))
-        line = f"from .{SCRIPTS_PACKAGE} import {module}"
+        package = naming.package(folder)
+        self.scripts.setdefault(script_file(package, module), (source, owner))
+        line = f"from .{package} import {module}"
         self.imports.add(line if alias == module else f"{line} as {alias}")
         return alias
 
@@ -382,11 +402,13 @@ class ModuleBuilder:
             return name
         module = tree.module_name
         self.uses.add(module)
+        path = tree.module_path
         if module not in self.module_imports:
-            self.imports.add(f"from .{module} import {name}")
+            self.imports.add(f"from .{path} import {name}")
             return name
         alias = f"_{module}"
-        self.imports.add(f"from . import {module} as {alias}")
+        package, _, module_name = path.rpartition(".")
+        self.imports.add(f"from .{package} import {module_name} as {alias}")
         return f"{alias}.{name}"
 
     # -- functions (node groups) ---------------------------------------------
@@ -458,9 +480,16 @@ class ModuleBuilder:
             function = [Line(0, f"def {name}():", None)]
             function += [Line(4 + line.indent, line.text, line.owner) for line in body]
             blocks.append(function)
+        package = naming.package(self.tree.folder)
+        if package:
+            blocks = [[_in_subpackage(line) for line in block] for block in blocks]
         code = "\n".join(line.text for block in blocks for line in block)
+        if package and re.search(rf"\b{BASE_PACKAGE}\b", code):
+            self.imports.add(f"from . import __package__ as {BASE_PACKAGE}")
         # nodes that failed may have added imports their code never used
         imports = {kept for line in self.imports if (kept := _used_import(line, code))}
+        # imports are written relative to the add-on's folder
+        imports = {naming.relative_import(line, package) for line in imports}
         if imports:
             blocks.insert(0, [Line(0, line, None) for line in sort_imports(imports)])
 
@@ -479,6 +508,18 @@ class ModuleBuilder:
 
 
 _DEFINITIONS = ("def ", "class ", "@", "async def ")
+
+# `__package__` of the add-on in modules of its folders (Blender's idiom for
+# sub-modules of extensions)
+BASE_PACKAGE = "base_package"
+
+
+def _in_subpackage(line: Line) -> Line:
+    """`__package__` (the add-on) in a module of a folder."""
+    if "__package__" not in line.text:
+        return line
+    text = re.sub(r"\b__package__\b", BASE_PACKAGE, line.text)
+    return line._replace(text=text)
 
 
 def _used_import(line: str, code: str) -> str | None:

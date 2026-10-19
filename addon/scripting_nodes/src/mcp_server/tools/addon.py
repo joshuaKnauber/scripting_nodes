@@ -7,8 +7,10 @@ import traceback
 
 import bpy
 
-from ...core import compiler, errors, export_check, properties, runtime
+from ...core import assets as asset_list
+from ...core import compiler, errors, export_check, properties, runtime, scheduler
 from ...core.ops import export
+from ...lib.ids import get_short_id
 from ...lib.trees import node_by_id, scripting_node_trees
 from . import tool
 from ._common import ToolError, set_rna, tree_info
@@ -204,11 +206,60 @@ def get_code(tree="", export=False):
     if tree:
         from ._common import find_tree
 
-        rel = f"{find_tree(tree).module_name}.py"
+        rel = find_tree(tree).module_file
         if rel not in files:
             return {"files": {}, "note": "The tree writes no code (yet)"}
         return {"files": {rel: files[rel]}}
     return {"files": files}
+
+
+@tool(
+    "edit_assets",
+    """Add files or folders to the add-on's assets (Addon Data › Assets) or
+    remove them. They ship in the add-on's `assets` folder; an Asset node
+    (SNA_Node_Asset, prop "asset": the asset's name) gives the path in the
+    installed add-on, e.g. to load an image or a .blend with assets.
+
+    add: [{"file": "/path/logo.png"}, {"file": "//textures", "name": "tex"}]
+    ("//" is relative to the .blend; name: in assets/, default the file's)
+    remove: ["logo.png"]""",
+    {
+        "add": {"type": "array", "items": {"type": "object"}},
+        "remove": {"type": "array", "items": {"type": "string"}},
+    },
+    writes=True,
+)
+def edit_assets(add=(), remove=()):
+    addon = bpy.context.scene.sna.addon
+    for name in remove:
+        names = asset_list.file_names()
+        index = next(
+            (i for i, a in enumerate(addon.assets) if names[a.id] == name), None
+        )
+        if index is None:
+            raise ToolError(f"No asset {name!r}. Assets: {sorted(names.values())}")
+        users = asset_list.users(addon.assets[index])
+        addon.assets.remove(index)
+        for node in users:
+            node.mark_dirty()
+    for spec in add:
+        if not spec.get("file"):
+            raise ToolError('Each asset needs a "file" (a file or a folder)')
+        asset = addon.assets.add()
+        asset.id = get_short_id()
+        if spec.get("name"):
+            asset.name = spec["name"]
+        asset.filepath = spec["file"]
+    scheduler.request_full()
+    scheduler.flush()
+    names = asset_list.file_names()
+    result = []
+    for asset in addon.assets:
+        info = {"name": names[asset.id], "source": asset.filepath}
+        if errors.node_message(asset.id):
+            info["error"] = errors.node_message(asset.id)
+        result.append(info)
+    return {"assets": result}
 
 
 @tool(

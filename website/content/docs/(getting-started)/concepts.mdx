@@ -12,6 +12,8 @@ Each Blender file holds one add-on. Its name and build settings are in the node 
 
 An add-on is made of one or more node trees. Each tree becomes one Python module of the add-on. Split them however you like, for example one tree per tool.
 
+The **Files** list in the sidebar shows the add-on's node trees and [scripts](/docs/concepts/scripts), sorted into folders: **+** adds a node tree, a script or a folder to the selected folder, the arrow button moves the selected file or folder, double click renames. A folder becomes a package of the add-on: a tree *Object Panel* in *UI › Panels* is the module `ui/panels/object_panel.py`. Removing a folder keeps its contents, they move to the folder above.
+
 ## Nodes
 
 Nodes come in three kinds:

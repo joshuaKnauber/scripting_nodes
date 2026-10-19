@@ -77,6 +77,8 @@ class ExampleAddonTest(unittest.TestCase):
         ]
         self.assertEqual(failed, [])
         files = helpers.sn("src.core.ops.export").build_files()
+        contents = helpers.sn("src.core.assets").contents
+        files = {rel: contents(data) for rel, data in files.items()}
         files = {
             rel: data if isinstance(data, bytes) else data.encode()
             for rel, data in files.items()

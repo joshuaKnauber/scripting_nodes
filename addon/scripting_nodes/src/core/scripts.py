@@ -1,8 +1,8 @@
 """Python from a Text block or a file: the add-on's scripts (Addon Data ›
 Scripts, `scene.sna.addon.scripts`) and Inline Script nodes.
 
-Every script of the list is part of the add-on as `scripts/<name>.py`,
-unchanged: its classes are registered, its `register()` / `unregister()`
+Every script of the list is part of the add-on as `<folder>/<name>.py`
+(core/folders.py), unchanged: its classes are registered, its `register()` / `unregister()`
 called. Script Function nodes pick one by id and call its functions; their
 signatures declare the sockets (core/script_signatures.py).
 """
@@ -133,7 +133,7 @@ def callers(script):
 def add_to_addon(names_registry, files):
     """Add the list's scripts to `files` ({rel: (source, owner id)}).
     Returns {script id: error} of those that can't be added."""
-    from .compiler import SCRIPTS_PACKAGE
+    from .compiler import script_file
 
     problems = {}
     for script in scripts():
@@ -146,7 +146,8 @@ def add_to_addon(names_registry, files):
             problems[script.id] = str(exc)
             continue
         module = names_registry.claim(script.id, names(script)[0])
-        files.setdefault(f"{SCRIPTS_PACKAGE}/{module}.py", (source, script.id))
+        rel = script_file(naming.package(script.folder), module)
+        files.setdefault(rel, (source, script.id))
     return problems
 
 

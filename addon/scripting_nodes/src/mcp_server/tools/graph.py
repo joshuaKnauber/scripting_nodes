@@ -135,20 +135,30 @@ def get_node_type(type):
 @tool(
     "create_tree",
     """A new node tree. Each tree becomes a module of the add-on. To make it
-    a function (node group), give it inputs/outputs, see edit_function.""",
-    {"name": {"type": "string"}},
+    a function (node group), give it inputs/outputs, see edit_function.
+    folder: e.g. "UI/Panels", a package of the add-on (ui/panels/<tree>.py).""",
+    {"name": {"type": "string"}, "folder": {"type": "string"}},
     required=["name"],
     writes=True,
 )
-def create_tree(name):
+def create_tree(name, folder=""):
     if bpy.data.node_groups.get(name) is not None:
         raise ToolError(f"A node tree {name!r} exists already")
     tree = bpy.data.node_groups.new(name, "ScriptingNodeTree")
+    _set_folder(tree, folder)
     from ...core import scheduler
 
     scheduler.request_full()
     flush()
     return tree_info(tree)
+
+
+def _set_folder(tree, path):
+    from ...core import folders, scheduler
+
+    tree.folder = folders.join(*(folders.clean_name(p) for p in folders.split(path)))
+    folders.add(tree.folder)
+    scheduler.request_full()
 
 
 @tool(
@@ -323,13 +333,21 @@ def _link_pair(item):
         "link": {"type": "array"},
         "unlink": {"type": "array"},
         "rename": {"type": "string", "description": "New name of the tree"},
+        "folder": {
+            "type": "string",
+            "description": 'Move the tree to this folder, e.g. "UI/Panels"; "/" for the top level',
+        },
     },
     required=["tree"],
     writes=True,
 )
-def edit_tree(tree, add=(), edit=(), delete=(), link=(), unlink=(), rename=""):
+def edit_tree(
+    tree, add=(), edit=(), delete=(), link=(), unlink=(), rename="", folder=""
+):
     tree = find_tree(tree)
     added = []
+    if folder:
+        _set_folder(tree, folder)
     try:
         return _edit_tree(tree, added, add, edit, delete, link, unlink, rename)
     except Exception as exc:

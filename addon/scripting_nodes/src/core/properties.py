@@ -358,11 +358,21 @@ def _call(module, tree):
     import each other at module level)."""
     if tree.module_name == module:
         return tree.function_name, []
-    line = f"from .{tree.module_name} import {tree.function_name}"
+    line = f"from .{tree.module_path} import {tree.function_name}"
     if module == PROPERTIES_MODULE and tree.module_name in _module_imports.importable:
         _module_imports.lines.add(line)  # no cycle: at the top
         return tree.function_name, []
-    return tree.function_name, [line]
+    return tree.function_name, [_relative(line, module)]
+
+
+def _relative(line, module):
+    """Import `line` (relative to the add-on's folder) inside `module`."""
+    from ..lib.trees import scripting_node_trees
+
+    for tree in scripting_node_trees():
+        if tree.module_name == module:
+            return naming.relative_import(line, naming.package(tree.folder))
+    return line  # properties.py, at the top level
 
 
 class Definition:
@@ -545,13 +555,14 @@ class Definition:
             tree, function = targets[0]
             if tree.module_name in _module_imports.importable:
                 # the function itself, imported at the top of properties.py
-                _module_imports.lines.add(f"from .{tree.module_name} import {function}")
+                _module_imports.lines.add(f"from .{tree.module_path} import {function}")
                 return function
         name = self.name("update")
         lines = []
         for tree, function in targets:
             if tree.module_name != self.module:
-                lines.append(f"from .{tree.module_name} import {function}")
+                line = f"from .{tree.module_path} import {function}"
+                lines.append(_relative(line, self.module))
         lines += [f"{function}(self, context)" for _, function in targets]
         self.functions.append(
             f"def {name}(self, context):\n" + "".join(f"    {line}\n" for line in lines)

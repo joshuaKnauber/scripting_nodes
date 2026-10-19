@@ -7,16 +7,16 @@ Nodes build the structure of an add-on: operators, panels, properties. When a st
 
 | | For |
 | --- | --- |
-| **Addon Data › Scripts** | Scripts that are part of the add-on: classes, handlers, helper functions. **Script Function** nodes call their functions |
+| **Files** list | Scripts that are part of the add-on: classes, handlers, helper functions. **Script Function** nodes call their functions |
 | **Inline Script** node | A few lines in an operator, a panel or any other flow, run where the node is |
 
 ![An operator running arrange.py and a panel drawing with selection_info.py](/screenshots/scripts.png)
 
 ## Scripts of the add-on
 
-**+** in **Addon Data › Scripts** (the sidebar of the node editor) adds a script; pick a text block or a file. **+** next to the text field creates a script to start from; for an empty text, **Add Template** writes one into it. Removing a script from the list keeps its text.
+**+ › Script** in the **Files** list (the sidebar of the node editor) adds a script to the selected folder; select it to pick a text block or a file below the list. **+** next to the text field creates a script to start from; for an empty text, **Add Template** writes one into it. Removing a script from the list keeps its text.
 
-Every script of the list is part of the add-on, unchanged, as `scripts/<name>.py`. Everything in it works as in any add-on file: imports, helper functions, classes, handlers.
+Every script of the list is part of the add-on, unchanged, as `<folder>/<name>.py`: a script `tools.py` in the folder *Scripts* is `scripts/tools.py`, at the top level `tools.py`. Everything in it works as in any add-on file: imports, helper functions, classes, handlers. Relative imports between scripts (`from . import helpers`) only work while they're in the same folder, like in any Python package.
 
 - Classes (operators, panels, …) are registered for you.
 - If the script defines `register()` and `unregister()`, they are called when the add-on is enabled and disabled instead. Register your classes there yourself, as in a regular add-on.

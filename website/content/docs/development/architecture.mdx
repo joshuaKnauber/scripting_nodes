@@ -29,12 +29,17 @@ The add-on is written to `<user scripts>/addons/<module name>/`:
 __init__.py             imports the modules, registers their classes
 blender_manifest.toml
 <tree>.py               one module per node tree
+<folder>/<file>.py      trees and scripts in folders: a package per folder (core/folders.py)
 properties.py           the add-on's properties (only if there are some)
 utils.py                shared helper functions (only if used)
-scripts/<name>.py       the add-on's scripts (Addon Data › Scripts), unchanged
+scripts/<name>.py       the add-on's scripts (Files list, folder "Scripts" by default), unchanged
+assets/<name>           the add-on's assets (Addon Data › Assets), copied (core/assets.py)
+icons/<image>           images of Custom Icon nodes
 ```
 
 The layout is the one of a hand-written add-on: `__init__.py` (`core/package.py`) imports the modules and registers an explicit `classes` tuple, read from the generated modules (every top-level class deriving from a registrable `bpy.types` type, moved after the classes its properties or `bl_parent_id` need). Modules defining `register()` / `unregister()` have them called after the classes are registered (before they're unregistered). The live add-on also gets `bl_info`, since it's loaded as a legacy add-on; the export is an extension.
+
+A tree's or script's folder (`tree.folder` / `script.folder`, a path like `UI/Panels`) is its package: folder names claim module names like trees do (`core/naming.py`, still unique add-on wide, so `__init__.py` can import every module by name). Nodes write imports relative to the add-on's folder (`from .properties import ...`); the compiler makes them relative to the module's package (`naming.relative_import`), and in a folder `__package__` becomes `base_package` (`from .. import __package__ as base_package`), Blender's idiom for sub-modules. Scripts default to the folder `Scripts` (a property default, so scripts saved before folders keep `scripts/<name>.py`). The Files list shows `scene.sna.ui.files`, one row per folder, tree and script, synced by a scheduler watcher (`node_tree/file_list.py`). Moving files can turn a module name into a package and back; `lib/reloading.py` reloads such modules (reload finds the spec again) and clears packages' stale submodule names first.
 
 Exports are formatted like `ruff format` (`lib/python_format.py`, no dependencies), and tree modules lose the parentheses nodes put around the values they combine (`remove_redundant_parens`, kept only if the syntax tree stays the same). `tests/test_example_addon.py` compares the export of an example add-on against `tests/snapshots/object_toolkit/`, which CI checks with `ruff` (`tests/snapshots/ruff.toml`).
 

@@ -1,13 +1,11 @@
-"""The add-on's scripts (Addon Data › Scripts): text blocks or files that are
-part of the add-on (core/scripts.py), and the source fields they share with
-Inline Script nodes."""
+"""The add-on's scripts (in the Files list, node_tree/file_list.py): text
+blocks or files that are part of the add-on (core/scripts.py), and the source
+fields they share with Inline Script nodes."""
 
 import bpy
 
-from ..core import scheduler
 from ..core import scripts as script_list
 from ..core.context import NodeError
-from ..lib.ids import get_short_id
 from ..lib.trees import node_by_id
 
 SCRIPT_TEMPLATE = '''import bpy
@@ -59,6 +57,9 @@ class SNA_Script(script_list.ScriptSource, bpy.types.PropertyGroup):
         subtype="FILE_PATH",
         update=_changed,
     )
+    # folder in the tree list (core/folders.py), its package in the add-on.
+    # Scripts saved before folders existed are in scripts/: the default
+    folder: bpy.props.StringProperty(name="Folder", default="Scripts")
 
     sn_template = SCRIPT_TEMPLATE
     sn_template_name = "script.py"
@@ -114,43 +115,6 @@ class SNA_OT_EditScript(bpy.types.Operator):
         return {"FINISHED"}
 
 
-class SNA_OT_AddScript(bpy.types.Operator):
-    """Add a script to the add-on"""
-
-    bl_idname = "sna.add_script"
-    bl_label = "Add Script"
-    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
-
-    def execute(self, context):
-        addon = context.scene.sna.addon
-        script = addon.scripts.add()
-        script.id = get_short_id()
-        addon.active_script = len(addon.scripts) - 1
-        scheduler.request_full()
-        return {"FINISHED"}
-
-
-class SNA_OT_RemoveScript(bpy.types.Operator):
-    """Remove the selected script from the add-on (its text stays)"""
-
-    bl_idname = "sna.remove_script"
-    bl_label = "Remove Script"
-    bl_options = {"REGISTER", "UNDO", "INTERNAL"}
-
-    def execute(self, context):
-        addon = context.scene.sna.addon
-        index = addon.active_script
-        if not 0 <= index < len(addon.scripts):
-            return {"CANCELLED"}
-        callers = script_list.callers(addon.scripts[index])
-        addon.scripts.remove(index)
-        addon.active_script = min(index, len(addon.scripts) - 1)
-        for node in callers:
-            node.mark_dirty()
-        scheduler.request_full()
-        return {"FINISHED"}
-
-
 class SNA_OT_AddScriptFunction(bpy.types.Operator):
     """Add a node calling this function"""
 
@@ -174,18 +138,6 @@ class SNA_OT_AddScriptFunction(bpy.types.Operator):
         node.function_name = self.function
         node.mark_dirty()
         return {"FINISHED"}
-
-
-class SNA_UL_Scripts(bpy.types.UIList):
-    bl_idname = "SNA_UL_Scripts"
-
-    def draw_item(self, context, layout, data, item, icon, active_data, prop):
-        from ..core import errors
-
-        row = layout.row(align=True)
-        row.label(text=script_list.label(item), icon="FILE_SCRIPT")
-        if errors.node_message(item.id):
-            row.label(text="", icon="ERROR")
 
 
 def draw_source(layout, owner):
@@ -213,22 +165,11 @@ def draw_source(layout, owner):
     return True
 
 
-def draw_scripts(layout, context):
-    """The Scripts panel: the list, the active script, its functions and the
-    nodes calling them."""
+def draw_script(layout, script):
+    """A script of the add-on (selected in the Files list): its source, its
+    functions and the nodes calling them."""
     from ..core import errors
 
-    addon = context.scene.sna.addon
-    row = layout.row()
-    row.template_list(
-        "SNA_UL_Scripts", "", addon, "scripts", addon, "active_script", rows=3
-    )
-    col = row.column(align=True)
-    col.operator("sna.add_script", text="", icon="ADD")
-    col.operator("sna.remove_script", text="", icon="REMOVE")
-    if not 0 <= addon.active_script < len(addon.scripts):
-        return
-    script = addon.scripts[addon.active_script]
     if not draw_source(layout.column(), script):
         return
     message = errors.node_message(script.id)

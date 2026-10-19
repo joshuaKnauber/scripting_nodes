@@ -7,8 +7,8 @@ from ...lib.trees import (
     sn_nodes,
 )
 from ...nodes._reference_types import VARIABLE_NODES
+from ...settings.assets import draw_assets
 from ...settings.properties import draw_list, draw_settings
-from ...settings.scripts import draw_scripts
 
 # Icons for variable types
 VARIABLE_ICONS = {
@@ -195,10 +195,10 @@ class SNA_PT_DataFunctions(bpy.types.Panel):
                 _draw_group_callers(layout, tree)
 
 
-class SNA_PT_DataScripts(bpy.types.Panel):
-    bl_idname = "SNA_PT_DataScripts"
+class SNA_PT_DataAssets(bpy.types.Panel):
+    bl_idname = "SNA_PT_DataAssets"
     bl_order = 3
-    bl_label = "Scripts"
+    bl_label = "Assets"
     bl_space_type = "NODE_EDITOR"
     bl_region_type = "UI"
     bl_category = "Scripting Nodes"
@@ -209,4 +209,4 @@ class SNA_PT_DataScripts(bpy.types.Panel):
         return in_sn_tree(context)
 
     def draw(self, context):
-        draw_scripts(self.layout, context)
+        draw_assets(self.layout, context)

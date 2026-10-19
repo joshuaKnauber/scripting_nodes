@@ -202,9 +202,11 @@ def tree_info(tree):
 
     info = {
         "name": tree.name,
-        "module": f"{tree.module_name}.py",
+        "module": tree.module_file,
         "nodes": sum(1 for _ in sn_nodes(tree)),
     }
+    if tree.folder:
+        info["folder"] = tree.folder
     if functions.is_function(tree):
         info["function"] = tree.function_name
     return info

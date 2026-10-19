@@ -31,6 +31,9 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     # Version of the saved data layout, see core/versioning.py
     data_version: bpy.props.IntProperty(default=0)
     pause_updates: bpy.props.BoolProperty(default=False)
+    # folder in the tree list, e.g. "UI/Panels": a package of the add-on
+    # (core/folders.py). Set through the tree list's operators
+    folder: bpy.props.StringProperty(name="Folder", default="")
 
     @classmethod
     def valid_socket_type(cls, idname):
@@ -46,6 +49,16 @@ class ScriptingNodeTree(bpy.types.NodeTree):
     def module_name(self):
         """Python module of this tree, e.g. `main` (core/naming.py)."""
         return naming.name(self, "module")
+
+    @property
+    def module_path(self):
+        """Import path of the module, e.g. `ui.panels.main`."""
+        return naming.module_path(self)
+
+    @property
+    def module_file(self):
+        """File of the module in the add-on, e.g. `ui/panels/main.py`."""
+        return self.module_path.replace(".", "/") + ".py"
 
     @property
     def function_name(self):

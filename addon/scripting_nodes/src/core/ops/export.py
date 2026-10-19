@@ -3,6 +3,7 @@ import zipfile
 import bpy
 
 from .. import compiler, export_check, scheduler
+from ..assets import FileCopy
 
 
 def build_files():
@@ -14,7 +15,10 @@ def build_files():
 def write_zip(path, files):
     with zipfile.ZipFile(path, "w", zipfile.ZIP_DEFLATED) as zf:
         for rel, source in sorted(files.items()):
-            zf.writestr(rel, source)
+            if isinstance(source, FileCopy):
+                zf.write(source.source, rel)
+            else:
+                zf.writestr(rel, source)
 
 
 class SNA_OT_ExportAddon(bpy.types.Operator):

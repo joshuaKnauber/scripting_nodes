@@ -16,8 +16,21 @@ The file nodes are in **Add › Files**. Paths starting with `//` are relative t
 | **Path Info** | The full path, folder, file name, name without extension and extension of a path, and whether it exists |
 | **Load from Blend File** | Appends (or links) data from another .blend file: the **Names** given, or everything of the type. Objects and collections can be added to the scene |
 | **Blend File Contents** | The names of the data of a type in a .blend file, without loading anything |
+| **Asset** | The path of one of the add-on's assets in the installed add-on |
 
-To load files shipped with your add-on, join **Add-on Info**'s **Folder** with the file name. **Load from Blend File** with that path loads assets from a .blend inside your add-on.
+## Assets
+
+Files your add-on needs (images, a .blend with node groups or materials, presets, a folder of textures) are its **assets**: add them in **Addon Data › Assets** in the sidebar. **+** picks a file, or with **Whole Folder** the folder the file browser shows. They're copied into the add-on's `assets` folder, while you work and in exports, and copied again when they change.
+
+- The **name** of an asset is its name in `assets/`, the file's name to start with. Double click to rename it.
+- **Add Node** (or **+** on an **Asset** node) adds an **Asset** node: its **Path** is where the asset is in the installed add-on, e.g. for **Load from Blend File** or **Read Text File**. Nodes keep their asset when it's renamed.
+- Paths starting with `//` need a saved .blend. A source that doesn't exist shows an error on the asset and the nodes using it. Removing an asset keeps its file.
+
+```python
+path = os.path.join(os.path.dirname(__file__), "assets", "materials.blend")
+```
+
+**Add-on Info**'s **Folder** is the add-on's folder, for anything else it ships.
 
 ## Permissions
 

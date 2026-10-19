@@ -5,7 +5,7 @@ import os
 
 import bpy
 
-from ...core import scheduler
+from ...core import folders, scheduler
 from ...core import scripts as script_list
 from ...lib.ids import get_short_id
 from ...lib.trees import scripting_node_trees, sn_nodes
@@ -69,13 +69,15 @@ def _uses(owner, block, path):
 
 @tool(
     "edit_scripts",
-    """Add scripts to the add-on or remove them (Addon Data › Scripts). A
-    script of the add-on is part of it unchanged: its classes are
-    registered, its register() / unregister() called. Script Function nodes
-    call its functions: set their "script" (the label listed here) and
-    "function". Write the code with write_text first.
+    """Add scripts to the add-on or remove them (the Files list). A script of
+    the add-on is part of it unchanged: its classes are registered, its
+    register() / unregister() called. Script Function nodes call its
+    functions: set their "script" (the label listed here) and "function".
+    Write the code with write_text first. "folder" is its package, like a
+    tree's ("UI/Helpers" -> ui/helpers/tools.py, "" the top level); scripts
+    without one go to "Scripts" (scripts/tools.py).
 
-    add: [{"text": "tools.py"}] or [{"file": "//tools.py"}]
+    add: [{"text": "tools.py", "folder": "Scripts"}] or [{"file": "//tools.py"}]
     remove: ["tools.py"]""",
     {
         "add": {"type": "array", "items": {"type": "object"}},
@@ -100,6 +102,10 @@ def edit_scripts(add=(), remove=()):
             raise ToolError(f"No text block {text!r}: write it with write_text first")
         script = addon.scripts.add()
         script.id = get_short_id()
+        if "folder" in spec:
+            path = folders.split(spec["folder"])
+            script.folder = folders.join(*(folders.clean_name(p) for p in path))
+            folders.add(script.folder)
         if text:
             script.text_block = bpy.data.texts[text]
         else:
@@ -108,7 +114,11 @@ def edit_scripts(add=(), remove=()):
     scheduler.request_full()
     return {
         "scripts": [
-            {"script": label, "functions": script.script_functions()}
+            {
+                "script": label,
+                "folder": script.folder,
+                "functions": script.script_functions(),
+            }
             for label, script in script_list.choices()
         ]
     }

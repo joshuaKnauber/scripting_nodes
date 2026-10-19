@@ -169,6 +169,7 @@ def _name_key(name):
 
 def _import_key(line):
     """`import x` before `from x import y` (isort's force-sort-within-sections
-    off), then by module."""
+    off), relative imports furthest first (`..` before `.`), then by module."""
     parts = line.split()
-    return (parts[0] == "from", parts[1].lstrip(".").lower(), line)
+    module = parts[1].lstrip(".")
+    return (parts[0] == "from", len(module) - len(parts[1]), module.lower(), line)

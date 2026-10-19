@@ -42,11 +42,13 @@ try:
                 problems += 1
                 print(f"NODE ERROR {{tree.name}} / {{node.name}}: {{message}}")
     files = helpers.sn("src.core.ops.export").build_files()
+    contents = helpers.sn("src.core.assets").contents
     for rel, source in files.items():
         path = os.path.join(out, "addon", rel)
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        with open(path, "w") as f:
-            f.write(source)
+        data = contents(source)
+        with open(path, "wb" if isinstance(data, bytes) else "w") as f:
+            f.write(data)
     bpy.ops.wm.save_as_mainfile(filepath=os.path.join(out, "{name}.blend"))
     print(f"BUILT {{len(files)}} files, {{problems}} node errors")
 except Exception:

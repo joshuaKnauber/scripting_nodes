@@ -1,4 +1,4 @@
-"""Scripts: the add-on's scripts (Addon Data › Scripts) are modules of the
+"""Scripts: the add-on's scripts (in the Files list) are modules of the
 add-on, Script Function nodes call their functions, Inline Script puts its
 code in the flow."""
 

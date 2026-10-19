@@ -22,7 +22,5 @@ class SNA_Node_AddonInfo(ScriptingBaseNode, bpy.types.Node):
         settings = bpy.context.scene.sna.addon
         ctx.output("name", repr(settings.addon_name))
         ctx.output("version", repr(metadata.version(settings.version)))
-        # tree modules are <add-on>/<tree>.py
         ctx.output("module", "__package__")
-        ctx.imports("import os")
-        ctx.output("folder", "os.path.dirname(__file__)")
+        ctx.output("folder", ctx.addon_folder())

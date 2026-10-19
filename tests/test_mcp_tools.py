@@ -251,7 +251,10 @@ class MCPToolsTest(unittest.TestCase):
             content="def double(x: float) -> float:\n    return x * 2\n",
         )
         scripts = call("edit_scripts", add=[{"text": "tools.py"}])["scripts"]
-        self.assertEqual(scripts, [{"script": "tools.py", "functions": ["double"]}])
+        self.assertEqual(
+            scripts,
+            [{"script": "tools.py", "folder": "Scripts", "functions": ["double"]}],
+        )
         call("create_tree", name="Main")
         node = call(
             "edit_tree",
