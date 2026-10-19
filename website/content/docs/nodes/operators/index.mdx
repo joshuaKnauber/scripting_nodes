@@ -1,0 +1,54 @@
+---
+title: Operators
+description: The actions of your add-on, the shortcuts that run them and the nodes for modal tools.
+icon: MousePointerClick
+---
+
+In Blender, everything you can click does its work through an **operator**. Add Cube, Shade Smooth, Save, Undo: each is an operator, a named action with settings. A button in a panel, a menu entry, a keyboard shortcut and the operator search (F3) only point at one. So when your add-on needs a button that does something, you make an operator for it and let the button run it.
+
+The operator nodes are under **Add › Operators**, the nodes for modal operators under **Add › Operators › Modal**.
+
+![An Operator node running Blender's Add Cube and reporting it, and a sidebar panel with a button that runs the operator](/screenshots/operators-overview.webp)
+
+A minimal setup:
+
+<Steps>
+<Step>
+Add an **Operator** node and type its **Label**, e.g. "Add Small Cube". That's the button's text and the name in the operator search.
+</Step>
+<Step>
+Connect what it should do to **Execute**, e.g. a **Run Operator** set to Blender's **Add Cube** with **size** 0.5. The play button on the Operator node runs it to try it out.
+</Step>
+<Step>
+Draw a [Button](/docs/nodes/interface/fields-and-buttons#buttons) in a [Panel](/docs/nodes/interface/panels) and pick your operator in it. You can also give it a [Shortcut](/docs/nodes/operators/shortcuts).
+</Step>
+</Steps>
+
+## Nodes
+
+| Node | Does |
+| --- | --- |
+| [**Operator**](/docs/nodes/operators/creating-operators) | An operator of your add-on: what it does (**Execute**), its properties, its dialog |
+| [**Run Operator**](/docs/nodes/operators/running-operators) | Runs one of your operators or any of Blender's from a flow |
+| [**Report**](/docs/nodes/operators/creating-operators#reports) | Shows an info, warning or error message in the status bar |
+| [**Shortcut**](/docs/nodes/operators/shortcuts) | A keyboard shortcut that runs an operator or opens a menu |
+| [**File Handler**](/docs/nodes/operators/files#drag-and-drop) | Runs an operator when files are dragged onto Blender |
+| [**Return**](/docs/nodes/operators/creating-operators#ending-early) | Ends the operator's flow: finish, cancel, or (modal) pass the event on or wait |
+| [**Is Key**](/docs/nodes/operators/modal-operators#nodes-for-modal-operators) | Whether an event is a given key or mouse button, pressed or released |
+| [**Event Info**](/docs/nodes/operators/modal-operators#event-info) | The event's key, modifier keys, mouse position and movement, tablet pressure |
+| [**Set Header Text**](/docs/nodes/operators/modal-operators#nodes-for-modal-operators) | Shows a text at the top of the editor, e.g. what a modal tool does |
+| [**Set Status Text**](/docs/nodes/operators/modal-operators#nodes-for-modal-operators) | Shows a text in the status bar, e.g. the keys a modal tool reacts to |
+| [**Set Cursor**](/docs/nodes/operators/modal-operators#nodes-for-modal-operators) | Changes the mouse cursor until it's set back |
+
+Two settings windows belong to these nodes: **Operator Settings** is the popup behind **Settings** on the Operator node (see [Settings](/docs/nodes/operators/creating-operators#settings)), and **Record Shortcut** is the key button on the Shortcut node that listens for the keys you press (see [Shortcuts](/docs/nodes/operators/shortcuts)).
+
+## Pages
+
+- [Creating operators](/docs/nodes/operators/creating-operators): the Operator node, its settings, reports, ending early.
+- [Running operators](/docs/nodes/operators/running-operators): Run Operator, yours and Blender's.
+- [Popups and dialogs](/docs/nodes/operators/popups): ask for values or a confirmation first.
+- [Files and drag and drop](/docs/nodes/operators/files): the file browser and dropped files.
+- [Modal operators](/docs/nodes/operators/modal-operators): tools that follow the mouse until you click.
+- [Shortcuts](/docs/nodes/operators/shortcuts): keys that run operators or open menus.
+
+To run nodes when something happens in Blender instead of when someone clicks, see [Events](/docs/nodes/events).

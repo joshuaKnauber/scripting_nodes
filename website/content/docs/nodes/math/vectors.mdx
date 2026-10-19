@@ -1,0 +1,56 @@
+---
+title: Vectors
+description: Calculate with locations, directions and scales, and split vectors into their components.
+icon: Move3d
+---
+
+A vector is a group of 2 to 4 numbers: a location `(1, 0, 2)`, a scale, a direction, a color. **Vector Math** calculates with two vectors at once, **Combine Vector** and **Separate Vector** build a vector from numbers and take it apart again. A fixed vector comes from the **Vector** node in [Values](/docs/nodes/data/values#fixed-values).
+
+## Vector Math
+
+**Vector Math** calculates with **A** and **B**. Pick the operation in the first dropdown on the node, and the size of the vectors (**Vec2**, **Vec3**, **Vec4**) in the second:
+
+| Operation | Result |
+| --- | --- |
+| **Add** | A + B, component by component. Moves a location by an offset |
+| **Subtract** | A − B. The direction from B to A: `target - location` points at the target |
+| **Multiply** | Each component of A times the same one of B: `(2, 3, 4) × (1, 0, 2)` is `(2, 0, 8)`. Scales a vector per axis |
+| **Divide** | Each component of A divided by the same one of B |
+| **Cross Product** | A vector at a right angle to both A and B. Only for 3D vectors: the size dropdown disappears |
+| **Dot Product** | A Float: how much A and B point the same way. Positive if they point in a similar direction, 0 at a right angle, negative if opposite |
+| **Normalize** | A with a length of 1, same direction. Uses only **A** |
+| **Length** | A Float: the length of A. Uses only **A** |
+| **Distance** | A Float: the distance between the points A and B |
+
+For **Dot Product**, **Length** and **Distance** the output **Result** is a Float, for the other operations a Vector. **B** is hidden for **Normalize** and **Length**.
+
+To scale a whole vector by one number, **Multiply** it with a Float: a Float connected to a Vector input becomes that number in every component, so `0.5` turns into `(0.5, 0.5, 0.5)`.
+
+## Combine and separate
+
+**Combine Vector** makes a **Vector** from its **X**, **Y** and **Z** inputs, and **W** for 4D. **Separate Vector** gives the **X**, **Y**, **Z** (and **W**) of a **Vector**. Pick **2D**, **3D** or **4D** in the dropdown on the node.
+
+Use them to change one component: separate an object's location, change **Z**, combine it again and set the location.
+
+## Limitations
+
+- **Normalize** of a zero-length vector `(0, 0, 0)` and **Divide** with a 0 component raise an error when the add-on runs.
+- The results are plain tuples of numbers, not Blender's `mathutils.Vector`. They work wherever Blender takes a vector (a location, a scale), but have no methods like `.normalized()`. For matrices, quaternions or rotations, use a [Python Expression](/docs/nodes/python/blender-api#python-expression) with `mathutils`.
+- **Add**, **Subtract**, **Multiply**, **Divide**, **Dot Product** and **Distance** use as many components as the node's size: a **Vec2** node ignores the Z of a 3D vector, and a **Vec4** node raises an error for a 3D one. **Normalize** and **Length** use all components of **A**.
+
+<Accordions>
+<Accordion title="What it generates">
+
+| Node | Python |
+| --- | --- |
+| **Vector Math** Add / Subtract / Multiply / Divide | `tuple(a[i] + b[i] for i in range(3))` |
+| **Cross Product** | `(a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0])` |
+| **Dot Product** | `sum(a[i] * b[i] for i in range(3))` |
+| **Normalize** | `tuple(v / math.sqrt(sum(x * x for x in a)) for v in a)` |
+| **Length** | `math.sqrt(sum(x * x for x in a))` |
+| **Distance** | `math.sqrt(sum((a[i] - b[i]) ** 2 for i in range(3)))` |
+| **Combine Vector** | `(x, y, z)` |
+| **Separate Vector** | `vector[0]`, `vector[1]`, `vector[2]` |
+
+</Accordion>
+</Accordions>

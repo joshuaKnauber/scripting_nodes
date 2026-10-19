@@ -1,0 +1,62 @@
+---
+title: Get and Set Variable
+description: Read a variable's value and change it by setting, adding or toggling.
+icon: ArrowLeftRight
+---
+
+**Get Variable** reads the current value of a variable, **Set Variable** changes it. Both work with [local](/docs/nodes/variables/local-variables) and [global](/docs/nodes/variables/global-variables) variables. Pick the variable in the search field on the node; its sockets take the variable's type.
+
+## Get Variable
+
+| | |
+| --- | --- |
+| Variable (search field) | The **Local Variable** or **Global Variable** node to read. Lists the global variables of the add-on and the local variables of this tree |
+| **Value** (output) | The variable's value at the moment the node that uses it runs |
+
+Get Variable has no flow sockets: connect **Value** wherever you need it. The arrow button next to the search field jumps to the variable's node.
+
+## Set Variable
+
+| | |
+| --- | --- |
+| Variable (search field) | The variable to change |
+| Operation (dropdown) | How to change it, see below |
+| **Value** / **Amount** (input) | The new value, or the amount to add |
+
+| Operation | Does | Input |
+| --- | --- | --- |
+| **Set** | Gives the variable a new value | **Value** |
+| **Change By** | Adds **Amount** to the current value. Numbers count up (down with a negative amount), text gets **Amount** added to its end, a list gets the items of a list **Amount** added | **Amount** |
+| **Toggle** | Switches a Boolean between True and False | none |
+
+The flow continues at the output once the variable has changed.
+
+## Errors on the node
+
+| Message | Fix |
+| --- | --- |
+| Pick a variable | The search field is empty |
+| The variable it used was deleted | Its Local Variable or Global Variable node was removed: pick another |
+| Local variables can only be used in their own tree | The node was copied into another tree; use a Global Variable there |
+
+**Change By** uses Python's `+`, so both values must fit together: adding a number to text fails when it runs. Turn the number into text first, or use **Set** with a **Combine Strings**.
+
+<Accordions>
+<Accordion title="What it generates">
+
+For a local variable `total`:
+
+```python
+total = 5            # Set
+total = total + 1    # Change By
+flag = not flag      # Toggle
+```
+
+For a global variable, the same goes through its functions:
+
+```python
+set_click_count(get_click_count() + 1)
+```
+
+</Accordion>
+</Accordions>

@@ -2,6 +2,7 @@
   "title": "Functions",
   "icon": "SquareFunction",
   "pages": [
+    "index",
     "creating-functions",
     "inputs-and-outputs",
     "calling-functions"

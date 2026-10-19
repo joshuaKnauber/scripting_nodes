@@ -4,39 +4,106 @@ description: Add your own operators, the actions behind buttons, menus and short
 icon: MousePointerClick
 ---
 
-An **Operator** node (**Add › Logic**) is an action of your add-on: what a [Button](/docs/nodes/interface/fields-and-buttons), a [Shortcut](/docs/nodes/operators/shortcuts) or [Run Operator](/docs/nodes/operators/running-operators) runs. Its **Execute** flow is what it does. The play button on the node runs it.
+An **Operator** node (**Add › Operators**) is an action of your add-on. Whatever you connect to its **Execute** output runs when someone clicks a [Button](/docs/nodes/interface/fields-and-buttons#buttons) for it, presses its [Shortcut](/docs/nodes/operators/shortcuts), picks it in the operator search (F3) or when a [Run Operator](/docs/nodes/operators/running-operators) node runs it. The play button on the node runs it right away, which is the quickest way to test it.
 
-- **Label** is the operator's name in the interface and in the operator search (F3). Its Python name (`my_addon.label`) comes from it.
-- **Is Available** turns the operator off: buttons running it are grayed out, shortcuts do nothing. Connect a condition, e.g. whether an object is selected.
-- Its [properties](/docs/properties/properties#operator-and-preferences-properties) are listed in the sidebar's **Node** tab and are outputs of the node in its flows.
+![An Operator node running Blender's Add Cube and reporting it, and a sidebar panel with a button that runs the operator](/screenshots/operators-overview.webp)
+
+## The node
+
+| Input | |
+| --- | --- |
+| **Label** | The operator's name: the text on its buttons, its name in the operator search and in **Edit › Undo History**. Its Python name comes from it: "Add Small Cube" in an add-on called Object Tools becomes `object_tools.add_small_cube` |
+| **Is Available** | Whether the operator can run now. When it's off, buttons for it are grayed out and its shortcut does nothing. Connect a condition, e.g. whether there is an active object |
+
+| Output | |
+| --- | --- |
+| **Execute** | What the operator does |
+| **Invoke** | Only with **Invoke Type** **Invoke**: runs first when it's started from the interface, then **Execute** runs |
+| **Start**, **Modal**, **End** | Only with **Invoke Type** **Modal**, see [Modal operators](/docs/nodes/operators/modal-operators) |
+| **Draw** | Only with **Properties Dialog** and **Properties Popup**: lays out the dialog yourself, see [Popups and dialogs](/docs/nodes/operators/popups) |
+| **Event** | With **Invoke** and **Modal**: the mouse or key event that started it (and, in a modal operator, the current one) |
+| **File Path**, **File Paths**, **Folder** | With **File Browser**: what was picked, see [Files and drag and drop](/docs/nodes/operators/files) |
+| One output per property | The value of each of the operator's properties |
+
+### Properties
+
+An operator can have [properties](/docs/concepts/properties#operator-and-preferences-properties): settings like a count or a name, shown in its dialog and in the **Adjust Last Operation** panel after it ran. Add them with **Add Properties** on the node; they're listed on the node and in the sidebar's **Node** tab. Each one becomes an output of the node in its flows, and an input on **Button**, **Shortcut** and **Run Operator** nodes that run it, so each button can run it with other values.
 
 ## Settings
 
-**Settings** on the node opens the rest:
+**Settings** on the node opens the **Operator Settings** popup:
 
-- **Description**: the tooltip.
-- **Invoke Type**: what happens when it's started from the interface (a button, a menu, a shortcut):
-  - **Execute** runs right away.
-  - **Properties Dialog**, **Properties Popup** and **Confirm** ask first, see [Popups and dialogs](/docs/nodes/operators/popups).
-  - **Invoke** gives an **Invoke** flow (with the **Event** that started it) that runs before **Execute**.
-  - **File Browser** opens Blender's file browser first, see below.
-  - **Modal** keeps the operator running, see [Modal operators](/docs/nodes/operators/modal-operators).
-- **Register** shows it in the operator search and the **Adjust Last Operation** panel, **Undo** adds an undo step. **Depends on Cursor** makes it wait for a click in the editor when it's started from a menu or the search, for operators that use the mouse position. The other options are Blender's `bl_options`.
+![The Operator Settings popup: description, Invoke Behavior set to Properties Dialog with a title and confirm button, and the Options](/screenshots/operators-settings.webp)
 
-## Opening and saving files
+- **Description** is the tooltip of buttons for the operator.
+- **Invoke Behavior** (the **Invoke Type**) decides what happens when it's started from the interface: a button, a menu, a shortcut, the search.
 
-With **Invoke Type** **File Browser**, the operator opens the file browser and runs **Execute** with what was picked: **File Path**, **File Paths** or **Folder**, depending on **Pick**:
+| Invoke Type | What happens |
+| --- | --- |
+| **Execute** | Runs **Execute** right away (the default) |
+| **Invoke** | Runs the **Invoke** flow first, with the **Event** that started it (e.g. the mouse position), then **Execute** |
+| **Properties Dialog** | A dialog with the properties and an OK button, see [Popups and dialogs](/docs/nodes/operators/popups) |
+| **Properties Popup** | The properties in a popup; it runs each time one of them changes |
+| **Confirm** | Asks first: a message and a confirm button |
+| **File Browser** | Opens Blender's file browser, then runs with the picked file or folder, see [Files and drag and drop](/docs/nodes/operators/files) |
+| **Modal** | Keeps running and gets every mouse and key event until it ends, see [Modal operators](/docs/nodes/operators/modal-operators) |
 
-- **Open File** / **Open Files**: one or several existing files. **Filter** (`*.png;*.jpg`) only shows those.
-- **Save File**: a file name to save to; Blender warns before overwriting.
-- **Folder**: a folder.
+Run from Python or from a **Run Operator** node with its default context (**Exec Default**), an operator skips all of this and runs **Execute** directly with the property values it's given.
 
-A **File Handler** node (**Add › Logic**) runs such an operator when files are dragged onto Blender: set the **Extensions** (`.csv;.txt`) and the editor they're dropped in. The dropped file is the operator's **File Path**, without the browser opening.
+### Options
+
+**Options** in the popup are Blender's operator flags (`bl_options`):
+
+| Option | Default | |
+| --- | --- | --- |
+| **Register** | On | Shows it in the operator search and the **Adjust Last Operation** panel |
+| **Undo** | On | Adds an undo step after it ran |
+| **Undo Grouped** | Off | One undo step when it runs several times in a row |
+| **Blocking** | Off | Blocks other operators while it runs |
+| **Internal** | Off | Hides it from the operator search |
+| **Preset** | Off | Adds a preset menu for its properties to its dialog |
+| **Depends on Cursor** | Off | Started from a menu or the search, it first waits for a click in the editor, with the **Cursor** you pick. For operators that use the mouse position |
 
 ## Ending early
 
-**Return** (**Add › Logic › Modal**) ends the operator's flow where it is: **Finish** keeps what it did, **Cancel** acts as if it didn't run (no undo step). Without it, the operator finishes after its flow.
+**Return** (**Add › Operators › Modal**) ends the operator's flow where it is. The node's title shows its choice:
+
+- **Finish** ends it as finished: what it did gets an undo step.
+- **Cancel** ends it as cancelled: no undo step and no **Adjust Last Operation** panel. Changes it made before stay, so cancel before you change anything.
+- **Pass Through** and **Keep Running** are for [modal operators](/docs/nodes/operators/modal-operators).
+
+Without a Return node, an operator finishes when its flow ends. A Return in the **Invoke** flow ends the operator before **Execute** runs.
 
 ## Reports
 
-A **Report** node shows a message in the status bar and the Info editor: **Info**, **Warning** or **Error** (errors also show a popup). Use it in an operator's flows, or in a function called from one. Elsewhere (a panel, a handler, a timer) there's nothing to report to, and the message is printed instead.
+**Report** (**Add › Operators**) shows a **Message** in the status bar and in the Info editor. Pick the type on the node:
+
+| Type | |
+| --- | --- |
+| **Info** | A plain message |
+| **Warning** | A warning, shown in yellow |
+| **Error** | An error, also shown as a popup at the mouse |
+
+Reports belong to an operator. Use the node in an operator's flows, or in a [function](/docs/nodes/functions) called from one. Elsewhere (a panel's draw flow, an [event](/docs/nodes/events), a timer) there is no operator to report from, and the message is printed to the console instead, with its type in front ("Warning: ...").
+
+<Accordions>
+<Accordion title="What it generates">
+
+The operator from the screenshot, in an add-on called Object Tools:
+
+```python
+class OBJECT_TOOLS_OT_add_small_cube(bpy.types.Operator):
+    bl_idname = "object_tools.add_small_cube"
+    bl_label = "Add Small Cube"
+    bl_options = {"REGISTER", "UNDO"}
+
+    def execute(self, context):
+        bpy.ops.mesh.primitive_cube_add(size=0.5)
+        utils.report(self, "INFO", "Added a small cube")
+        return {"FINISHED"}
+```
+
+`utils.report` calls `self.report()` when there's an operator, `print()` otherwise. Properties become annotations (`count: bpy.props.IntProperty(name="Count")`), **Description** becomes `bl_description`, a connected **Is Available** becomes a `poll()` class method. **Invoke** adds `invoke(self, context, event)` running the Invoke flow, then `return self.execute(context)`. A Return node writes `return {"FINISHED"}` or `return {"CANCELLED"}`.
+
+</Accordion>
+</Accordions>

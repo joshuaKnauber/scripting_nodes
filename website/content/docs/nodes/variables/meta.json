@@ -1,0 +1,10 @@
+{
+  "title": "Variables",
+  "icon": "Variable",
+  "pages": [
+    "index",
+    "local-variables",
+    "global-variables",
+    "get-and-set"
+  ]
+}

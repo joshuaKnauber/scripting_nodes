@@ -62,8 +62,17 @@ Leave out any section that has nothing to say. Short pages are fine. `nodes/inte
 - Reference `/screenshots/<name>.webp`. The scenario lives in `website/screenshots/<name>.py`. Name it `<section>-<topic>` (`interface-layouts`).
 - Never drop in a manual screenshot. Everything is regenerated from scenarios when the UI changes.
 
+## MDX pitfalls
+
+One broken page breaks the whole dev server, so avoid these:
+
+- Quote a frontmatter `description` that contains `: ` (`description: "Store settings: define them in a list"`).
+- Write a `<` in text as `&lt;` (`**&lt;**`), and `{` / `}` outside code as `&#123;` / `&#125;`.
+- Don't indent `<Accordion>` / `</Accordion>` tags: after a list item an indented closing tag doesn't parse.
+
 ## After editing
 
-- `cd website && npm run build` must pass (MDX errors, broken components).
+- `cd website && npm run check` must pass: it compiles every page and checks links and images.
+- `npm run build` must pass when nothing else uses the folder (it shares `.next` with a running dev server).
 - Look at the page in `npm run dev` when you changed layout or components.
 - Run `python scripts/docs_screenshots.py <name>` for every scenario you touched, then look at each image (Read the .webp).

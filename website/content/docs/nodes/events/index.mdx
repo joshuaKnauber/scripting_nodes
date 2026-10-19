@@ -1,0 +1,33 @@
+---
+title: Events
+description: Run nodes when something happens in Blender, later, or at an interval.
+icon: Zap
+---
+
+Event nodes start a flow without anyone clicking a button: when a file is opened, when the frame changes, when the active object changes, when Blender quits. The timer nodes run part of a flow later or again and again. They're all under **Add › Events**.
+
+For things people click, use an [operator](/docs/nodes/operators) instead. For changes to your own add-on's properties, use [On Property Update](/docs/nodes/properties/property-updates).
+
+![On Load, On Blender Change and On Blender Close nodes, each running a Print node](/screenshots/events-handlers.webp)
+
+## Nodes
+
+| Node | Runs |
+| --- | --- |
+| [**On Load**](/docs/nodes/events/handlers#blender-events) | Before or after a .blend file is opened, or when opening it failed |
+| [**On Save**](/docs/nodes/events/handlers#blender-events) | Before or after the file is saved, or when saving failed |
+| [**On Undo**](/docs/nodes/events/handlers#blender-events) | Before or after an undo step |
+| [**On Redo**](/docs/nodes/events/handlers#blender-events) | Before or after a redo step |
+| [**On Frame Change**](/docs/nodes/events/handlers#blender-events) | Before or after the current frame changes |
+| [**On Playback**](/docs/nodes/events/handlers#blender-events) | When animation playback starts or stops |
+| [**On Depsgraph Update**](/docs/nodes/events/handlers#blender-events) | Before or after Blender updates the scene's data (very often) |
+| [**On Render Start**](/docs/nodes/events/handlers#blender-events) | Before each rendered frame, or once when a render starts |
+| [**On Render Finish**](/docs/nodes/events/handlers#blender-events) | After each rendered frame, when the render completes or is cancelled, or after a frame was saved |
+| [**On Bake**](/docs/nodes/events/handlers#blender-events) | When a bake starts, completes or is cancelled |
+| [**On Composite**](/docs/nodes/events/handlers#blender-events) | Before or after the compositor runs, or when it's cancelled |
+| [**On Append or Link**](/docs/nodes/events/handlers#blender-events) | Before or after data is appended or linked from another file |
+| [**On Blender Close**](/docs/nodes/events/handlers#on-blender-close) | When Blender quits |
+| [**On Blender Change**](/docs/nodes/events/handlers#on-blender-change) | When a Blender property changes, e.g. the active object or the render engine |
+| [**Run with Delay**](/docs/nodes/events/timers) | Its **Delayed** flow once, after some seconds |
+| [**Run in Intervals**](/docs/nodes/events/timers) | Its **Repeat** flow every few seconds |
+| [**Trigger**](/docs/nodes/events/trigger) | Its flow when you click its button, for testing while you build. Not part of the exported add-on |

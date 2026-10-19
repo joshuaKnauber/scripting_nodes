@@ -1,17 +1,68 @@
 ---
 title: Popups and dialogs
-description: Ask for input or confirmation before an operator runs.
+description: Ask for values or a confirmation before an operator runs.
 icon: MessageSquare
 ---
 
-An operator's **Invoke Type** (**Settings** on the Operator node) decides what happens before it runs when it's started from the interface:
+An operator can ask before it runs: a dialog with its properties and an OK button, or a question like "Delete all objects?". Set the Operator node's **Invoke Type** under **Settings** to one of the popup types. The popup opens when the operator is started from the interface: a button, a menu, a shortcut or the search.
 
-| Invoke Type | |
-| --- | --- |
-| **Properties Dialog** | A dialog with the operator's properties and an OK button. **Title**, **Confirm Button** text and **Width** can be set |
-| **Properties Popup** | The properties in a popup; the operator runs again each time one changes |
-| **Confirm** | A question with a confirm button: **Title**, **Message** and **Confirm Button** text |
+![A dialog titled "Add a Row of Cubes" with a Count field, a Size field, a Random Rotation checkbox and an Add button, in the 3D Viewport](/screenshots/operators-dialog.webp)
 
-The properties are the operator's own, listed in the sidebar's **Node** tab. To lay out the dialog yourself, connect the Operator node's **Draw** flow: it's drawn instead of the list of properties, with any of the interface nodes.
+## Asking for values
 
-Run from Python or a **Run Operator** node with the default context, operators skip their dialog and run with the properties they're given.
+<Steps>
+<Step>
+Add the values you want to ask for as [properties](/docs/concepts/properties#operator-and-preferences-properties) of the operator: **Add Properties** on the node. Their defaults are what the dialog shows first.
+</Step>
+<Step>
+Open **Settings** and set **Invoke Behavior** to **Properties Dialog**.
+</Step>
+<Step>
+Use the properties in **Execute**: each one is an output of the Operator node. **Execute** runs when OK is clicked.
+</Step>
+</Steps>
+
+## Popup types
+
+| Invoke Type | Shows | Settings |
+| --- | --- | --- |
+| **Properties Dialog** | The properties with **Cancel** and OK buttons. **Execute** runs on OK | **Title** (default: the operator's label), **Confirm Button** text (default "OK"), **Width** in pixels (default 300) |
+| **Properties Popup** | The properties in a popup without buttons. **Execute** runs each time one changes, undoing the previous run, so people see the result while they adjust it. Needs the **Register** and **Undo** options | |
+| **Confirm** | A question with a confirm button; **Execute** runs when it's clicked. Moving the mouse away closes it without running | **Title**, **Message**, **Confirm Button** text |
+
+## Your own layout
+
+By default the dialog lists all properties. With **Properties Dialog** or **Properties Popup**, the Operator node has a **Draw** output: connect [interface nodes](/docs/nodes/interface) to it and they're drawn instead. Draw the operator's own properties with the field nodes (pick the property in the field; on the operator's own properties the data input is hidden), and add labels, rows, boxes, icons. See [Fields and buttons](/docs/nodes/interface/fields-and-buttons).
+
+## Things to know
+
+- Dialogs only open when the operator is started from the interface. Run from Python, or from a [Run Operator](/docs/nodes/operators/running-operators) node with **Exec Default**, it runs **Execute** right away with the values it's given. Set Run Operator's context to **Invoke Default** to show the dialog from a flow.
+- A [Button](/docs/nodes/interface/fields-and-buttons#buttons) follows its layout: inside a **Set Layout State** with **Buttons Run** **Execute**, its operator skips the dialog. The default shows it.
+- After the operator ran, its properties also show in the **Adjust Last Operation** panel (bottom left of the 3D Viewport) if **Register** and **Undo** are on, and changing them there runs it again.
+
+<Accordions>
+<Accordion title="What it generates">
+
+The popup types are an `invoke()` method calling Blender's window manager:
+
+```python
+class OBJECT_TOOLS_OT_add_cubes(bpy.types.Operator):
+    bl_idname = "object_tools.add_cubes"
+    bl_label = "Add Cubes"
+    bl_options = {"REGISTER", "UNDO"}
+    count: bpy.props.IntProperty(name="Count", default=5)
+
+    def invoke(self, context, event):
+        return context.window_manager.invoke_props_dialog(
+            self, title="Add a Row of Cubes", confirm_text="Add"
+        )
+
+    def execute(self, context):
+        ...
+        return {"FINISHED"}
+```
+
+**Properties Popup** calls `invoke_props_popup(self, event)`, **Confirm** calls `invoke_confirm(self, event, title=..., message=..., confirm_text=...)`. A connected **Draw** flow becomes the operator's `draw(self, context)` method, drawing into `self.layout`.
+
+</Accordion>
+</Accordions>

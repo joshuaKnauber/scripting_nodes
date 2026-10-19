@@ -1,38 +1,91 @@
 ---
 title: Menus
-description: Add menus and entries to Blender's menus.
+description: Dropdown menus, pie menus, popovers and operator menus.
 icon: Menu
 ---
 
+A **Menu** node draws a dropdown button, and the nodes connected to its **Menu** output are what the menu shows when it opens. Pie menus open around the mouse with a shortcut, popovers open a panel as a popup.
+
+![A Shading menu button and a Mode dropdown in the Object Tools panel, next to their nodes](/screenshots/interface-menus.webp)
+
 ## Your own menus
 
-A **Menu** node draws a dropdown button where it's connected (in a panel, another menu, a header). Its **Menu** flow is the menu's contents: buttons, labels, fields, other menus. **After** continues the layout after the button.
+Add a **Menu** (**Add › Interface › Menu**) where the button should be: in a panel, another menu, a header. Then connect the menu's entries to its **Menu** output, usually [Buttons](/docs/nodes/interface/fields-and-buttons). In a menu, entries are drawn below each other as menu items.
 
-The menu exists even when no layout draws its button, so it can only be opened by a shortcut too.
+| Socket | |
+| --- | --- |
+| **Label** | The menu's title, and the text on the button (`Menu` by default) |
+| **Icon** | The button's icon |
+| **Menu** | The menu's contents: buttons, labels, fields, separators, other **Menu** nodes for submenus |
+| **After** | Continues the layout after the button |
+
+The menu exists even when no flow draws its button, so a Menu node with nothing connected to its input can still be opened by a [Shortcut](/docs/nodes/operators/shortcuts) or **Open Menu**.
 
 ## Pie menus
 
-A **Pie Menu** is a menu around the mouse, opened with a shortcut. It has one output per direction (**Left**, **Right**, **Top**, ...): connect a button to one, or a **Column** with several. Directions without anything stay empty.
+A **Pie Menu** (**Add › Interface › Pie Menu**) is a menu around the mouse, like the one Blender opens with **Z** in the 3D Viewport. It doesn't draw a button; open it with a [Shortcut](/docs/nodes/operators/shortcuts) set to **Open Menu**, or with **Open Menu**.
 
-![A pie menu with three buttons, opened with Shift Q in the 3D Viewport](/screenshots/interface-pie-menu.webp)
+![A Pie Menu with Smooth, Flat and Frame buttons in three directions, and a Shortcut opening it with Shift Q in the 3D Viewport](/screenshots/interface-pie-menu.webp)
 
-## Opening menus
+It has one output per direction: **Left**, **Right**, **Bottom**, **Top**, **Top Left**, **Top Right**, **Bottom Left**, **Bottom Right**. Connect a button to a direction, or several nodes: each direction draws as a column, so they stack. Directions with nothing connected stay empty. **Label** is the title shown in the middle.
+
+## Opening menus and panels
 
 - A [Shortcut](/docs/nodes/operators/shortcuts) set to **Open Menu** opens a menu, pie menu or panel at the mouse.
-- **Open Menu** does the same from a flow, e.g. at the end of an operator.
-- **Popover** is a button opening a panel as a popup, like Blender's shading options in the 3D Viewport header. The panel still shows where its Panel node places it; to only use it as a popover, set its region to **Header**.
+- **Open Menu** (**Add › Interface › Open Menu**) does the same from a program flow, e.g. at the end of an [operator](/docs/nodes/operators/creating-operators). Pick the **Menu**, **Pie Menu** or **Panel** node in its field.
 
-## Adding to Blender's menus, panels and headers
+## Popovers
 
-**Add to Menu**, **Add to Panel** and **Add to Header** (**Add › Interface**) draw into Blender's own interface: a button in the 3D Viewport's **Object** menu, a section in a panel of the Properties editor, a button in an editor's header.
+**Popover** draws a button that opens a panel as a popup, like the shading options in the 3D Viewport's header. Pick a [Panel](/docs/nodes/interface/panels) node of your add-on in its field. **Label** and **Icon** are the button's text and icon; without a **Label** it shows the panel's title.
 
-![A label and a button added to the Object properties' Transform panel](/screenshots/interface-add-to.webp)
+The panel still shows where its Panel node places it. To use a panel only as a popover, set its region to **Header** in the Panel's **Settings › Location**.
 
-- Click the eyedropper next to the field: every menu, panel or header gets a red **Pick** button. Open the one you want and click its button. **Cancel Picker** on the node removes the buttons again.
-- Or search the field for the menu, panel or header by its name. With **Preferences › Interface › Python Tooltips** on, hovering a menu shows its class name (`VIEW3D_MT_object`), which can be typed too.
-- **End** draws after the existing contents, **Start** before them.
-- **Is Visible** turns the contents off, e.g. only for meshes.
+## Operator Menu
 
-Menus, panels and headers of other add-ons can be extended the same way while they're enabled.
+**Operator Menu** draws one entry per item of an operator's Enum property. Blender's **Object › Mode** menu works like this: it's the `object.mode_set` operator with one entry per item of its `mode` property.
 
-Only menus, panels and headers defined in Python can be extended; the search lists those. A few of Blender's are built in C (the 3D Viewport sidebar's Transform panel, for example) and can't be.
+1. Pick the operator: one of yours, or one of Blender's with the Blender button next to the field.
+2. Pick the Enum property in the field below (it lists the operator's Enum properties).
+3. Choose the style: **Dropdown** is a dropdown button with one entry per item, **Buttons** a row of buttons, one per item.
+
+With **Dropdown**, **Label** and **Icon** set the dropdown button's text and icon.
+
+## Menu Contents
+
+**Menu Contents** draws the entries of a menu right where it is, instead of a button that opens it. Pick one of your **Menu** nodes, or switch the button next to the field to **Blender** and search for one of Blender's menus by name. Use it to repeat a menu's entries in a panel, or to build a menu out of other menus.
+
+To add entries to one of Blender's menus, use [Add to Menu](/docs/nodes/interface/adding-to-blender) instead.
+
+## Limitations
+
+- A pie menu has at most eight directions. For more entries, connect a **Column** with several buttons to one direction, or a **Menu** for a submenu.
+- **Open Menu** opens at the mouse, so run it from something the user started: an operator run from a button or a shortcut.
+
+<Accordions>
+<Accordion title="What it generates">
+
+A **Menu** becomes a `bpy.types.Menu` class, and the button `layout.menu()`:
+
+```python
+class OBJECT_TOOLS_MT_shading(bpy.types.Menu):
+    bl_label = 'Shading'
+
+    def draw(self, context):
+        self.layout.operator('object.shade_smooth', text='Smooth', icon='MOD_SMOOTH')
+        self.layout.operator('object.shade_flat', text='Flat', icon='MESH_CUBE')
+
+
+# in the panel's draw():
+self.layout.menu('OBJECT_TOOLS_MT_shading', text='Shading', icon='SHADING_RENDERED')
+```
+
+| Node | Python |
+| --- | --- |
+| **Pie Menu** | A `bpy.types.Menu` class drawing into `self.layout.menu_pie()`, a `column()` per used direction and `separator()` for empty ones before them |
+| **Open Menu** | `bpy.ops.wm.call_menu(name=...)`, `wm.call_menu_pie` or `wm.call_panel` |
+| **Popover** | `layout.popover('OBJECT_TOOLS_PT_...', text=..., icon=...)` |
+| **Operator Menu** | `layout.operator_menu_enum('object.mode_set', 'mode', text='Mode')` (Dropdown) or `layout.operator_enum('object.mode_set', 'mode')` (Buttons) |
+| **Menu Contents** | `layout.menu_contents('VIEW3D_MT_object')` |
+
+</Accordion>
+</Accordions>

@@ -70,14 +70,18 @@ def get_node_categories():
     else:
         node_categories = {}
 
-        for cls in auto_load.ordered_classes:
+        from ...core import node_packages
+
+        for cls in auto_load.ordered_classes + auto_load.package_classes:
             # issubclass picks up NodeCustomGroup subclasses too
             if isinstance(cls, type) and issubclass(cls, bpy.types.Node):
                 path = os.path.dirname(inspect.getfile(cls))
                 dirs = path.split(os.sep)
-
-                if "categories" in dirs:
+                # node packages: their folders, merged with ours
+                node_path = node_packages.category_path(cls.__module__)
+                if node_path is None and "categories" in dirs:
                     node_path = dirs[dirs.index("categories") + 1 :]
+                if node_path:
                     parent = node_categories
                     for dir in node_path:
                         if dir not in parent:

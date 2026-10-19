@@ -1,0 +1,5 @@
+{
+  "title": "Data",
+  "icon": "Database",
+  "pages": ["index", "values", "comparing-and-logic", "text", "lists", "enum-items"]
+}

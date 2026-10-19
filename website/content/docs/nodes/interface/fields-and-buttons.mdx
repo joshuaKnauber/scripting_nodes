@@ -1,26 +1,138 @@
 ---
 title: Fields and buttons
-description: Draw properties as fields and operators as buttons.
+description: Draw properties as fields people can edit, and buttons that run operators.
 icon: SquareMousePointer
 ---
 
-## Fields
+A field shows a property and lets people change it: a checkbox, a number, a text, a dropdown. A **Button** runs an operator, the action behind a button. Both draw where you connect them in an interface flow, e.g. after a [Panel](/docs/nodes/interface/panels)'s **Draw** output.
 
-Field nodes draw one property: one of your [properties](/docs/properties/properties) or, with the Blender button next to the field, any of Blender's (search or paste its path). **Text** replaces the property's name, **Icon** adds an icon.
+![A sidebar panel with an expanded Enum Menu, a Checkbox, a Number Field as a slider, a Vector Field, a Text Field with a placeholder and a material selector, next to their nodes](/screenshots/interface-fields-overview.webp)
 
-| Node | Properties | Styles and options |
+## Showing a property
+
+Every field node draws one property. It can be one of your add-on's [properties](/docs/concepts/properties) or any of Blender's.
+
+<Steps>
+<Step>
+Add a field for the property's type, e.g. **Add › Interface › Number Field** for a number, and connect it to a panel's **Draw** output.
+</Step>
+<Step>
+Pick the property in the field on the node. It lists your add-on's properties of that type.
+</Step>
+<Step>
+For one of Blender's properties, click the button next to the picker (the node tree icon) and switch it to **Blender**. Then search the property or paste its path, like `scene.render.fps`. See [Data paths](/docs/concepts/data-paths) for how paths work and how to copy one from any field in Blender.
+</Step>
+</Steps>
+
+![A Frame Rate field and a Display Name toggle drawing Blender's properties by their paths, and a Text Field suggesting object names, next to their nodes](/screenshots/interface-fields-blender.webp)
+
+A property belongs to some data: a Scene property is stored on each scene, an Object property on each object. For your add-on's properties the node gets an input named after that data (**Scene**, **Object**, ...). Leave it unconnected to use the current one: `context.scene`, the active object, the active material and so on. Connect it to show the property of other data, e.g. of each object in a **Draw For Each** loop (see [Layouts](/docs/nodes/interface/layouts)).
+
+Some properties have no current owner, so the input must be connected:
+
+- A property of a [group](/docs/concepts/properties) needs the group item it belongs to, e.g. the **Item** of a **UI List** row.
+- An Operator node's own properties only work inside that operator (its **Draw** flow); the input is hidden there.
+- Add-on preferences find their owner on their own.
+
+## Field nodes
+
+| Node | Draws | Styles and options |
 | --- | --- | --- |
-| **Checkbox** | Booleans | **Toggle** draws a button, **Invert** a checkbox that's on for False |
-| **Number Field** | Integers and floats | **Slider** |
-| **Vector Field** | Vectors and colors | **Expand** draws each value, **Slider** |
-| **Text Field** | Strings | **Field**; **Text Box** over several **Lines**; **Search**, suggesting the names of a collection's items (connect e.g. all objects to **Search In**). **Placeholder** is the gray text in an empty field |
-| **Enum Menu** | Enums | **Dropdown** (or a row with **Expand**); **Icon View** with large previews of the items' icons |
-| **Pointer Field** | Pointers | **Field**; **Data-block Selector**, Blender's selector with an optional **New** and **Open** operator (`material.new`) |
+| **Checkbox** | Booleans | **Toggle** draws a button that stays pressed while the value is on. **Invert** draws a checkbox that's checked while the value is False |
+| **Number Field** | Integers and floats | **Slider** fills the field from the property's minimum to its maximum |
+| **Vector Field** | Vectors and colors | **Expand** draws the values side by side. **Slider** draws each value as a slider |
+| **Text Field** | Strings | Style **Field**, **Text Box** or **Search**, see below |
+| **Enum Menu** | Enums | Style **Dropdown** or **Icon View**, see below |
+| **Pointer Field** | Pointers (a property that holds an object, a material, ...) | Style **Field** or **Data-block Selector**, see below |
 
-Blender versions without a text box draw a normal text field instead.
+Every field has these inputs and settings:
+
+- **Text** replaces the property's name. Leave it empty to show the name.
+- **Icon** draws an icon in front, see [Icons](/docs/nodes/interface/icons).
+- **Emboss** (on by default) draws the field's background. Turn it off for a flat field.
+
+In Blender mode, the path search only offers properties the field can draw: a **Checkbox** takes booleans, a **Text Field** strings, and so on.
+
+### Text Field
+
+- **Field** is a one-line text field. **Placeholder** is the gray text shown while it's empty.
+- **Text Box** is a field over several lines. **Lines** sets how many are visible. A text box has no label of its own, so a **Text** is drawn as a label above it. Blender versions without text boxes draw a one-line field instead.
+- **Search** suggests names while you type. Connect a collection of Blender data to **Search In**, e.g. a **Blender Data** node with all objects (`bpy.data.objects`). The field stays a string: it stores the name, not the object.
+
+### Enum Menu
+
+- **Dropdown** opens a menu of the items. **Expand** draws them as a row of buttons instead, **Icon Only** shows only the items' icons.
+- **Icon View** draws a large preview of the selected item's icon, which opens a grid of all items' icons. **Scale** sets its size (5 by default), **Labels** shows the items' names under the icons in the grid. It looks best with [custom icons](/docs/nodes/interface/icons) on the items. **Text**, **Icon** and **Emboss** don't apply to this style.
+
+### Pointer Field
+
+- **Field** is a search field listing the data the property can hold.
+- **Data-block Selector** is Blender's selector, like the material slot in the Material Properties: a dropdown to pick one, its name and a button to unlink it. **New Operator** adds a button that makes new data, e.g. `material.new`; **Open Operator** adds a button that loads a file, e.g. `image.open`. Leave them empty for no button. This style has no **Text** or **Icon** input. It only works for properties that hold data-blocks (objects, materials, images, ...), not other pointers.
 
 ## Buttons
 
-- **Button** runs an operator: one of yours or Blender's. Its properties are inputs, so one operator can do different things from different buttons. Without a **Label** it shows the operator's name; **Icon Only** draws just the icon.
-- **Operator Menu** draws one button per item of an operator's enum property, as a **Dropdown** or a row of **Buttons**. Blender's **Object › Mode** menu is `object.mode_set` with its `mode` property.
-- **Link** opens a website, **Menu** a menu and **Popover** a panel (see [Menus](/docs/nodes/interface/menus)).
+A **Button** runs an operator when it's clicked.
+
+![A panel with a Select All button, an add-on operator's button with its Count set to 10, and a Shade Smooth button showing the operator's own name, next to their nodes](/screenshots/interface-fields-buttons.webp)
+
+Pick the operator on the node: one of your [Operator](/docs/nodes/operators/creating-operators) nodes, or, after switching the button next to it to **Blender**, any of Blender's operators (search by name or by id like `object.select_all`).
+
+The operator's properties become inputs on the node. Set them to make one operator do different things from different buttons: Blender's **Select All** has an **action** input (Toggle, Select, Deselect, Invert), so one button selects and another deselects. Inputs left at the operator's default value aren't passed, so the operator behaves as if the property was never set.
+
+| Input or setting | |
+| --- | --- |
+| **Label** | The button's text. Empty shows the operator's name |
+| **Icon** | An icon in front of the text |
+| **Emboss** | Draws the button's background (on by default). Off draws a flat button |
+| **Depress** | Draws the button as pressed in |
+| **Icon Only** | Draws only the icon, no text |
+
+Whether a button opens its operator's dialog or runs it right away follows the layout. Change it with **Set Layout State › Buttons Run** (see [Layouts](/docs/nodes/interface/layouts)).
+
+Other nodes that draw buttons:
+
+- **Link** opens a web page, see [Text and links](/docs/nodes/interface/text).
+- **Operator Menu**, **Menu** and **Popover** open a list of choices, a menu or a panel, see [Menus](/docs/nodes/interface/menus).
+
+## Limitations
+
+- A Blender operator's inputs are named by their Python names (`action`, `keep_sharp_edges`), not by the labels Blender shows in the operator's settings.
+- Not every operator property gets an input: properties holding data or lists (pointers and collections), enums where several items can be on at once, boolean arrays, and properties Blender hides aren't offered. Your own operators' Group and Collection properties aren't offered either.
+- **Search** needs a collection reached by a path, like `bpy.data.objects` or `scene.objects`. A list made by other nodes doesn't work; the node shows an error.
+- Fields of your add-on's Object properties use the active object when **Object** isn't connected. Without an active object the panel can't draw them and the error shows on the node. Hide the panel then (its **Is Visible** input), or check for an object with a [condition](/docs/nodes/flow).
+
+<Accordions>
+<Accordion title="What it generates">
+
+Fields are `layout.prop()` calls on the data that holds the property. Options only appear when they differ from Blender's defaults:
+
+```python
+self.layout.prop(context.scene.scatter_tools, "mode", expand=True)
+self.layout.prop(context.scene.scatter_tools, "strength", slider=True)
+self.layout.prop(context.scene.render, "fps", text="Frame Rate")
+self.layout.prop(context.object, "show_name", toggle=True)
+```
+
+`scatter_tools` is the group your add-on's Scene properties are stored in, named after the add-on's module.
+
+The other styles use Blender's templates:
+
+| Style | Call |
+| --- | --- |
+| Text Field › **Search** | `layout.prop_search(data, "target", bpy.data, "objects")` |
+| Text Field › **Text Box** | `layout.textbox(data, "notes", initial_visible_lines=3, placeholder=...)`, through a helper that falls back to `layout.prop` |
+| Enum Menu › **Icon View** | `layout.template_icon_view(data, "preset", show_labels=True, scale=5.0)` |
+| Pointer Field › **Data-block Selector** | `layout.template_ID(context.object, "active_material", new="material.new")` |
+
+A button is `layout.operator()`. Inputs that differ from the operator's defaults are set on the returned properties:
+
+```python
+op = self.layout.operator(
+    "object.select_all", text="Select All", icon="RESTRICT_SELECT_OFF"
+)
+op.action = "SELECT"
+self.layout.operator("object.shade_smooth")
+```
+
+</Accordion>
+</Accordions>

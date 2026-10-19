@@ -1,0 +1,5 @@
+{
+  "title": "Blender Data",
+  "icon": "Box",
+  "pages": ["index", "reading-data", "blender-functions", "checks"]
+}

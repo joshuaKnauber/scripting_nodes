@@ -2,9 +2,11 @@
   "title": "Operators",
   "icon": "MousePointerClick",
   "pages": [
+    "index",
     "creating-operators",
     "running-operators",
     "popups",
+    "files",
     "modal-operators",
     "shortcuts"
   ]

@@ -1,0 +1,16 @@
+---
+title: Variables
+description: Keep values while your add-on runs, in one flow or for the whole add-on.
+icon: Variable
+---
+
+Variables (**Add › Variables**) hold a value your nodes can read and change later: a total counted up in a loop, a flag that a modal operator is running, the last object you worked on. They live in memory and are gone when Blender closes. To keep a value in the .blend file or show it as a field in a panel, use a [property](/docs/concepts/properties) instead; [Variables](/docs/concepts/variables) explains the difference.
+
+| Node | Does |
+| --- | --- |
+| [**Local Variable**](/docs/nodes/variables/local-variables) | Creates a variable that exists in the rest of the flow it's in, starting at **Initial Value** |
+| [**Global Variable**](/docs/nodes/variables/global-variables) | Creates a variable shared by the whole add-on, readable from every tree |
+| [**Get Variable**](/docs/nodes/variables/get-and-set#get-variable) | Reads the current value of a variable you pick on the node |
+| [**Set Variable**](/docs/nodes/variables/get-and-set#set-variable) | Changes a variable: **Set** a new value, **Change By** an amount, or **Toggle** a boolean |
+
+The label of a **Local Variable** or **Global Variable** node is the variable's name. Set the label (**F2**, or **Label** in the sidebar's **Node** tab) before you pick it elsewhere, so the pickers and the generated code read well.

@@ -1,0 +1,23 @@
+---
+title: Drawing
+description: Draw lines, shapes, text and images into Blender's editors.
+icon: PenTool
+---
+
+The drawing nodes put your own graphics into an editor: an outline around the active object, a label next to it, a ruler, a heads-up display in the corner of the 3D Viewport. A **Viewport Draw** node runs its flow every time the editor redraws, and the **Draw** nodes in that flow do the drawing. They're in **Add › Drawing**.
+
+![The active object outlined in blue with its name drawn above it, next to the nodes](/screenshots/drawing-viewport.webp)
+
+| Node | |
+| --- | --- |
+| [**Viewport Draw**](/docs/nodes/drawing/viewport-drawing) | Runs its **Draw** flow every time an editor redraws, in the scene or on top of it |
+| [**Draw Lines**](/docs/nodes/drawing/shapes#draw-lines) | Lines through a list of points: connected, closed or in pairs |
+| [**Draw Points**](/docs/nodes/drawing/shapes#draw-points) | A dot at each point of a list |
+| [**Draw Polygon**](/docs/nodes/drawing/shapes#draw-polygon) | A filled shape with a list of points as its outline |
+| [**Draw Rectangle**](/docs/nodes/drawing/shapes#draw-rectangle) | A filled or outlined rectangle in pixels |
+| [**Draw Circle**](/docs/nodes/drawing/shapes#draw-circle) | A filled or outlined circle, in pixels or in the scene |
+| [**Draw Text**](/docs/nodes/drawing/shapes#draw-text) | Text in pixels, left, centered or right aligned |
+| [**Draw Image**](/docs/nodes/drawing/shapes#draw-image) | An image of the blend file in pixels |
+| [**Draw Object**](/docs/nodes/drawing/shapes#draw-object) | An object's mesh as wireframe, faces or points, where it is in the scene |
+| [**Location to Screen**](/docs/nodes/drawing/screen-positions#location-to-screen) | The pixel position of a 3D location in the 3D Viewport |
+| [**Screen to Location**](/docs/nodes/drawing/screen-positions#screen-to-location) | The 3D location under a pixel position, and the ray through it |

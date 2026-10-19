@@ -127,14 +127,17 @@ docs show the final UI.
 - [ ] Reset Variable; full custom property get / set (own storage).
 - [ ] Skipped for now: tools, asset shelves, CLI commands, gizmos.
 
-## 9. Extensions
+## 9. Extensions (node packages)
 
-v3 had "Node Extensions": **packages** (zips of extra node files) and
-**snippets** (shared node setups). Nothing like it in v4 yet.
+Zips of extra nodes, installed in Preferences (`core/node_packages.py`,
+`src/api.py` is the public node API, `from . import sn`). Done: install /
+remove / list with errors per package, category folders merged with ours,
+index files, optional `nodes.toml` (id, name, version, author, api).
 
-- [ ] Decide what an extension is in v4: node packages (third-party node classes against the `ScriptingBaseNode` / `emit(ctx)` API), shared functions (asset libraries, copy / paste as text), or both.
-- [ ] Packages: install / remove / list, stored outside the add-on folder, loaded by `auto_load`, errors shown per package. The node API becomes public: needs versioning and docs (`writing-nodes.mdx` is the start).
-- [ ] Generated add-ons using package nodes: the package's helpers must end up in the export, or the node is refused on export.
+- [ ] Docs: a "Node packages" page (zip layout, `nodes.toml`, `sn`, what `ctx` offers) next to `writing-nodes.mdx`, with an example package to download.
+- [ ] Files using nodes of a package that isn't installed: Blender shows them as missing; name the package in the status line (store the package id on the tree or in the node's idname prefix).
+- [ ] Packages' helper code: nodes only emit code, so a package's helpers must be emitted too (`ctx.module`). Check it in the export check (an import of the package in generated code).
+- [ ] Shared functions (v3 snippets): asset libraries or copy / paste as text, later.
 
 ## 10. Smaller things
 

@@ -4,9 +4,11 @@ Link, next to the node tree."""
 import bpy
 import helpers
 
-WINDOW_SIZE = (1600, 800)
+WINDOW_SIZE = (1250, 640)
 LAYOUT = "split"
 SIDEBAR_TAB = "Text"
+CROP = (0, 0, 0.835, 0.76)
+FRAME = "corner"
 
 MARKDOWN = """## Getting started
 - Select an object
@@ -19,10 +21,10 @@ Read the [manual](https://docs.blender.org) for more."""
 def setup():
     bpy.context.scene.sna.addon.addon_name = "Text Demo"
     tree = helpers.new_tree("Interface")
-    panel = helpers.add_node(tree, "SNA_Node_Panel", (-900, 100))
+    panel = helpers.add_node(tree, "SNA_Node_Panel", (-720, 100))
     panel.inputs["Label"].value = "Text"
     panel.panel_category = "Text"
-    intro = helpers.add_node(tree, "SNA_Node_MultilineLabel", (-600, 150))
+    intro = helpers.add_node(tree, "SNA_Node_MultilineLabel", (-480, 150))
     intro.socket("text").value = (
         "This text is longer than the panel is wide, so it wraps over "
         "several lines instead of being cut off."
@@ -30,12 +32,14 @@ def setup():
     intro.socket("icon").value = "INFO"
     notes = bpy.data.texts.new("Notes.md")
     notes.write(MARKDOWN)
-    markdown = helpers.add_node(tree, "SNA_Node_Markdown", (-300, 150))
+    markdown = helpers.add_node(tree, "SNA_Node_Markdown", (-240, 150))
     markdown.text_block = notes
     link = helpers.add_node(tree, "SNA_Node_Link", (0, 150))
     link.socket("url").value = "https://www.blender.org"
     link.socket("text").value = "blender.org"
     link.socket("icon").value = "URL"
+    for node in (intro, markdown, link):
+        node.width = 210
     helpers.link(tree, panel.outputs["body"], intro.inputs[0])
     helpers.link(tree, intro.outputs[0], markdown.inputs[0])
     helpers.link(tree, markdown.outputs[0], link.inputs[0])

@@ -62,6 +62,16 @@ def _forget_submodules(module, package):
             delattr(module, key)
 
 
+def _defined_by(loaded, package, name):
+    """Whether `name` is something the loaded `package` defines itself, not
+    one of its modules (on disk, maybe new) or a dunder like __package__."""
+    module = loaded.get(package)
+    if module is None or name.startswith("__"):
+        return False
+    folder = os.path.dirname(module.__file__)
+    return _on_disk(folder, name) is None
+
+
 def import_order(loaded: dict) -> list[str]:
     """Names of the `loaded` modules ({name: module}), the ones others import
     from first."""
@@ -84,7 +94,15 @@ def import_order(loaded: dict) -> list[str]:
                 target = f"{base}.{node.module}" if node.module else base
                 if node.module:  # `from . import x` imports x, not the package
                     found.add(target)
-                found |= {f"{target}.{alias.name}" for alias in node.names}
+                for alias in node.names:
+                    imported = f"{target}.{alias.name}"
+                    found.add(imported)
+                    if imported not in loaded and _defined_by(
+                        loaded, target, alias.name
+                    ):
+                        # a name the package's __init__ defines (`from . import
+                        # sn` in node packages): it runs first
+                        found.add(target)
         deps[name] = (found & set(loaded)) - {name}
     order, done = [], set()
 

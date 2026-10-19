@@ -1,0 +1,18 @@
+---
+title: Flow
+description: Branch, repeat and print in the code your nodes run.
+icon: GitBranch
+---
+
+Flow nodes (**Add › Flow**) decide which nodes run, how often, and in what context. They sit on a flow like any other step: link them after an operator's **Execute**, an event or a [function](/docs/nodes/functions)'s **Run**. **If/Else** and **Switch** also work in panels and menus, where they choose what to draw.
+
+| Node | Does |
+| --- | --- |
+| [**If/Else**](/docs/nodes/flow/conditions#ifelse) | Runs **Then** when **Condition** is true, **Else** otherwise. In a panel it draws one of the two |
+| [**Switch**](/docs/nodes/flow/conditions#switch) | Runs the case whose name matches **Value**, **Default** when none does. **Add Case** on the node adds outputs |
+| [**Repeat**](/docs/nodes/flow/loops#repeat) | Runs **Loop** a number of **Times**, with the **Index** counting from 0 |
+| [**Break / Continue**](/docs/nodes/flow/loops#stopping-early) | Inside a loop: **Stop Loop** leaves it, **Next Item** skips to the next run |
+| [**Print**](/docs/nodes/flow/print-and-temp-override#print) | Writes a message to the console, and to the node editor while you develop |
+| [**Temp Override**](/docs/nodes/flow/print-and-temp-override#temp-override) | Runs **During** with a different context: another area, region, active object or selection |
+
+To compare values or combine conditions, use **Compare**, **Boolean Math** and **Invert Boolean** ([Comparing and logic](/docs/nodes/data/comparing-and-logic)). To loop over a list or a Blender collection, use [For Each (List)](/docs/nodes/data/lists#for-each-list), or [Draw For Each](/docs/nodes/interface/lists#draw-for-each) in a panel.

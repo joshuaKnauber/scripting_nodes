@@ -1,0 +1,22 @@
+---
+title: Functions
+description: Reuse a group of nodes as a function with inputs and outputs.
+icon: SquareFunction
+---
+
+A function is a node tree with inputs and outputs, like a node group in Geometry Nodes. Build it once, then call it from any tree with a **Function** node. It becomes a Python function in your add-on. Use functions for steps you need in several places, or to split a big tree into parts with names.
+
+| Node | Does |
+| --- | --- |
+| [**Function**](/docs/nodes/functions/calling-functions) | Calls a function. Its inputs are the function's parameters, its outputs the return values. **Tab** enters it |
+| [**Group Input**](/docs/nodes/functions/inputs-and-outputs) | Inside a function: the values passed in, and the flow it starts with |
+| [**Group Output**](/docs/nodes/functions/inputs-and-outputs) | Inside a function: the values it returns, and where the caller's flow continues |
+
+| Action | Where | Does |
+| --- | --- | --- |
+| [**Make Function**](/docs/nodes/functions/creating-functions#make-function) | **Ctrl+G** | Moves the selected nodes into a new function and calls it in their place |
+| [**Ungroup**](/docs/nodes/functions/creating-functions#ungroup) | **Ctrl+Alt+G** | Puts the nodes of the selected Function nodes back into this tree |
+| [**New Function**](/docs/nodes/functions/creating-functions#new-function) | **New** on a Function node, **+ › Function** in the **Files** list | Creates an empty function with Group Input and Group Output |
+| Enter / exit | **Tab** / **Ctrl+Tab** | Opens the function of the selected Function node, and goes back up |
+
+All of them are in **Add › Functions**, along with one entry per function of the add-on that adds a Function node already set to it.

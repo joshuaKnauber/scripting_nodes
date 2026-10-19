@@ -2,8 +2,9 @@
   "title": "Events",
   "icon": "Zap",
   "pages": [
+    "index",
     "handlers",
-    "property-updates",
-    "timers"
+    "timers",
+    "trigger"
   ]
 }

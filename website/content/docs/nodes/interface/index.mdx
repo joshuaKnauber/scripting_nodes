@@ -1,0 +1,80 @@
+---
+title: Interface
+description: "Panels, menus, buttons and fields: everything your add-on shows in Blender."
+icon: PanelsTopLeft
+---
+
+The interface nodes build what users see: a [panel](/docs/nodes/interface/panels) in the sidebar, a menu, a [preferences](/docs/nodes/interface/preferences) page, or entries [added to Blender's own menus](/docs/nodes/interface/adding-to-blender). A root node (**Panel**, **Menu**, **Pie Menu**, **Preferences**, **Add to Menu**, ...) starts an interface flow, and the nodes connected after it draw from top to bottom. Find them under **Add › Interface**, the layout nodes under **Add › Interface › Layouts** and the icon nodes under **Add › Interface › Icons**.
+
+## Where it's drawn
+
+| Node | Does |
+| --- | --- |
+| [**Panel**](/docs/nodes/interface/panels) | A panel in an editor's sidebar, the Properties editor or another region |
+| [**Subpanel**](/docs/nodes/interface/panels#subpanels) | A collapsible section inside a panel |
+| [**Popover**](/docs/nodes/interface/menus#popovers) | A button opening a panel as a popup |
+| [**Menu**](/docs/nodes/interface/menus#your-own-menus) | A dropdown button and the menu it opens |
+| [**Pie Menu**](/docs/nodes/interface/menus#pie-menus) | A menu around the mouse, opened with a shortcut |
+| [**Open Menu**](/docs/nodes/interface/menus#opening-menus-and-panels) | Opens a menu, pie menu or panel at the mouse from a flow |
+| [**Operator Menu**](/docs/nodes/interface/menus#operator-menu) | One entry per item of an operator's enum property |
+| [**Menu Contents**](/docs/nodes/interface/menus#menu-contents) | Draws the entries of a menu in place |
+| [**Add to Menu**](/docs/nodes/interface/adding-to-blender) | Draws into one of Blender's menus |
+| [**Add to Panel**](/docs/nodes/interface/adding-to-blender) | Draws into one of Blender's panels |
+| [**Add to Header**](/docs/nodes/interface/adding-to-blender) | Draws into an editor's header |
+| [**Preferences**](/docs/nodes/interface/preferences) | The add-on's settings in **Preferences › Add-ons** |
+| [**Redraw**](/docs/nodes/interface/panels#redrawing) | Redraws editors so panels show new values |
+
+## Layout
+
+| Node | Does |
+| --- | --- |
+| [**Row**](/docs/nodes/interface/layouts#containers) | Draws its contents side by side |
+| [**Column**](/docs/nodes/interface/layouts#containers) | Draws its contents below each other |
+| [**Box**](/docs/nodes/interface/layouts#containers) | A framed column |
+| [**Split**](/docs/nodes/interface/layouts#containers) | Two columns with a set share of the width |
+| [**Grid**](/docs/nodes/interface/layouts#containers) | Fills its contents into a grid |
+| [**Separator**](/docs/nodes/interface/layouts#changing-the-layout) | Space or a line |
+| [**Set Layout State**](/docs/nodes/interface/layouts#changing-the-layout) | Grays out or highlights what follows, sets how buttons run |
+| [**Set Layout Scale**](/docs/nodes/interface/layouts#changing-the-layout) | Makes what follows bigger, or a fixed size |
+| [**Set Property Layout**](/docs/nodes/interface/layouts#changing-the-layout) | Labels next to fields and keyframe dots, like Blender's panels |
+| [**Reset Layout**](/docs/nodes/interface/layouts#changing-the-layout) | Continues in the panel's own layout, outside rows and boxes |
+| [**Set Context Data**](/docs/nodes/interface/layouts#set-context-data) | Gives buttons after it data their operator reads from `context` |
+| [**Progress**](/docs/nodes/interface/layouts#drawing-other-things) | A progress bar or ring |
+| [**Display Preview**](/docs/nodes/interface/layouts#drawing-other-things) | The rendered preview of a material, texture, light or world |
+
+## Lists
+
+| Node | Does |
+| --- | --- |
+| [**UI List**](/docs/nodes/interface/lists#ui-list) | Blender's list widget for a collection, with a selected item |
+| [**Draw For Each**](/docs/nodes/interface/lists#draw-for-each) | Draws its flow once per item of a list or collection |
+
+## Fields and buttons
+
+| Node | Does |
+| --- | --- |
+| [**Button**](/docs/nodes/interface/fields-and-buttons) | A button that runs an operator |
+| [**Checkbox**](/docs/nodes/interface/fields-and-buttons) | A Boolean property as a checkbox or toggle |
+| [**Number Field**](/docs/nodes/interface/fields-and-buttons) | An Integer or Float property |
+| [**Text Field**](/docs/nodes/interface/fields-and-buttons) | A String property as a field, text box or search field |
+| [**Vector Field**](/docs/nodes/interface/fields-and-buttons) | A vector or color property |
+| [**Enum Menu**](/docs/nodes/interface/fields-and-buttons) | An Enum property as a dropdown, buttons or icon previews |
+| [**Pointer Field**](/docs/nodes/interface/fields-and-buttons) | A Pointer property, or Blender's data-block selector |
+
+## Text
+
+| Node | Does |
+| --- | --- |
+| [**Label**](/docs/nodes/interface/text) | A line of text with an optional icon |
+| [**Multiline Label**](/docs/nodes/interface/text) | Text wrapped over several lines |
+| [**Markdown**](/docs/nodes/interface/text) | Text formatted with markdown |
+| [**Link**](/docs/nodes/interface/text) | A link that opens a web page |
+
+## Icons
+
+| Node | Does |
+| --- | --- |
+| [**Icon**](/docs/nodes/interface/icons) | One of Blender's icons |
+| [**Custom Icon**](/docs/nodes/interface/icons) | An image as icon, shipped with the add-on |
+| [**Display Icon**](/docs/nodes/interface/icons) | Draws an icon on its own, at any size |
+| [**Icon from Data**](/docs/nodes/interface/icons) | The icon Blender shows for data or an enum item |

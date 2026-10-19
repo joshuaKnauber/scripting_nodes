@@ -1,0 +1,58 @@
+---
+title: Screen positions
+description: Convert between 3D locations and pixel positions of the 3D Viewport.
+icon: Crosshair
+---
+
+The 3D Viewport shows the scene from a view. These two nodes convert between the scene's 3D locations and pixel positions in the viewport: to draw a label next to an object, or to find the point in the scene under the mouse.
+
+Both use the 3D Viewport the code runs in: the one a [**Viewport Draw**](/docs/nodes/drawing/viewport-drawing) flow is drawing, or the one an operator was started in (a button in its sidebar, a [shortcut](/docs/nodes/operators/shortcuts) over it). Anywhere else, like a timer or a panel in the Properties editor, there's no view to convert with and the node fails.
+
+## Location to Screen
+
+Where a 3D **Location** is in the viewport, in pixels from the bottom left corner.
+
+| | |
+| --- | --- |
+| **Location** (input) | A 3D location, like an object's `location` |
+| **Position** | The pixel position, x and y. `(0, 0)` when the location is behind the view |
+| **Visible** | Off when the location is behind the view, so it has no position |
+
+Connect **Position** to **Draw Text**'s **Position** in a **Viewport Draw** set to **On Top**, and the text follows the object while the user orbits the view. The [Viewport Draw page](/docs/nodes/drawing/viewport-drawing) builds this step by step.
+
+## Screen to Location
+
+The scene under a pixel position, like the mouse.
+
+| | |
+| --- | --- |
+| **Position** (input) | Pixels in the viewport, e.g. **Mouse in Region** of an **Event Info** node |
+| **Depth** (input) | A 3D location that sets how far into the scene the result is: the result lies in the plane through **Depth** that faces the view. Default `(0, 0, 0)`, the world origin |
+| **Location** | The 3D location under **Position**, at the depth of **Depth** |
+| **Ray Origin** | Where a ray from the view through **Position** starts |
+| **Ray Direction** | The direction of that ray |
+
+To place something on the surface under the mouse, cast a ray into the scene with **Ray Origin** and **Ray Direction**, for example with a [**Blender Function**](/docs/nodes/blender-data) node calling `Scene.ray_cast`. To place it at a fixed distance, use **Location** with a **Depth**, like the 3D cursor's location. In a [modal operator](/docs/nodes/operators/modal-operators), connect **Event Info**'s **Mouse in Region** to **Position** to follow the mouse.
+
+<Accordions>
+<Accordion title="What it generates">
+
+Both use `bpy_extras.view3d_utils` with the region and view of the context:
+
+```python
+from bpy_extras import view3d_utils
+
+# Location to Screen: Position and Visible
+view3d_utils.location_3d_to_region_2d(context.region, context.region_data, location) or (0.0, 0.0)
+view3d_utils.location_3d_to_region_2d(context.region, context.region_data, location) is not None
+
+# Screen to Location: Location, Ray Origin, Ray Direction
+view3d_utils.region_2d_to_location_3d(context.region, context.region_data, position, depth)
+view3d_utils.region_2d_to_origin_3d(context.region, context.region_data, position)
+view3d_utils.region_2d_to_vector_3d(context.region, context.region_data, position)
+```
+
+In a **Viewport Draw** flow, `context` is `bpy.context`. If `context.region_data` isn't a 3D view (another editor), the call raises an error.
+
+</Accordion>
+</Accordions>

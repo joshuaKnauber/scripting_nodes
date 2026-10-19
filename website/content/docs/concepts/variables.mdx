@@ -1,0 +1,38 @@
+---
+title: Variables
+description: Values your add-on keeps in memory while it runs, and when to use a property instead.
+icon: Variable
+---
+
+A variable is a named place for a value while your add-on runs. You give it a starting value, nodes change it, and later nodes read the new value. A variable lives in memory only: it isn't saved in the .blend file, and it doesn't show up as a field in the interface.
+
+The nodes are in [Variables](/docs/nodes/variables): **Local Variable** and **Global Variable** create one, **Get Variable** reads it, **Set Variable** changes it.
+
+## Local or global
+
+| | Local variable | Global variable |
+| --- | --- | --- |
+| Exists | From its node to the end of one flow, each time that flow runs | Once for the whole add-on |
+| Starts at its **Initial Value** | Every time the flow passes the node | When the add-on loads (and on every rebuild while you develop) |
+| Usable from | Nodes after it in the same flow, same tree | Every flow in every tree |
+| Typical use | A total in a loop, an intermediate result you use several times | A counter, a "running" flag of a modal operator or a timer, a cache |
+
+Start with a local variable. It can't be changed by something you didn't expect, and it's back at its starting value the next time. Make it global when two flows need the same value: an operator writes it and a panel reads it, or a timer needs to know what the last run did.
+
+## Variable or property
+
+A [property](/docs/concepts/properties) also stores a value, but it belongs to Blender data (the scene, an object, the add-on's preferences), is saved with the file, can be undone and can be drawn as a field in a panel.
+
+| Use a property when | Use a variable when |
+| --- | --- |
+| The user should see or edit the value | Only your nodes use the value |
+| It should be saved in the .blend file | Losing it when Blender closes is fine |
+| It belongs to a scene, object or other data | There's one value for the whole add-on, or one per run |
+| Undo should restore it | It's internal state: a counter, a flag, a cache |
+| It holds a number, text, a color, a pointer to Blender data | It holds anything, including Python objects a property can't store |
+
+A global variable keeps its value across files: opening another .blend doesn't reset it, but enabling the add-on again or a rebuild while you develop does.
+
+## Names
+
+The label of a Local Variable or Global Variable node is the variable's name in the pickers and in the generated code. A Local Variable labeled `Total` becomes `total`. A Global Variable labeled `Click Count` becomes `_click_count`, read and written through `get_click_count()` and `set_click_count()`, so other files of the add-on can import it.

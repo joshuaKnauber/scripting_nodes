@@ -1,0 +1,9 @@
+{
+  "title": "Files",
+  "icon": "FolderOpen",
+  "pages": [
+    "index",
+    "files",
+    "blend-files"
+  ]
+}

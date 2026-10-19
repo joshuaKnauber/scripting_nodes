@@ -8,7 +8,8 @@
     "start": "wrangler dev",
     "types:check": "next typegen && tsc --noEmit",
     "screenshots": "python3 ../scripts/docs_screenshots.py",
-    "deploy": "wrangler deploy"
+    "deploy": "wrangler deploy",
+    "check": "node scripts/check-mdx.mjs content/docs && python3 ../scripts/docs_links.py"
   },
   "dependencies": {
     "cn": "^0.4.0",

@@ -1,0 +1,14 @@
+{
+  "title": "Concepts",
+  "pages": [
+    "addon-and-files",
+    "flows-and-sockets",
+    "live-updates",
+    "properties",
+    "blender-data",
+    "data-paths",
+    "variables",
+    "scripts",
+    "assets"
+  ]
+}

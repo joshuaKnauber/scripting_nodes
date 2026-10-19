@@ -1,0 +1,21 @@
+---
+title: Math
+description: Calculate with numbers and vectors.
+icon: Calculator
+---
+
+The Math nodes (**Add › Math**) calculate with numbers and vectors: add two values, round a float, map a frame number to a percentage, get the distance between two points. Like the [Data](/docs/nodes/data) nodes, they're value nodes: they compute their result where it's used, and again for every input it's connected to.
+
+| Node | |
+| --- | --- |
+| [**Math**](/docs/nodes/math/math#math) | Add, subtract, multiply, divide, power or modulo of two numbers |
+| [**Round Float**](/docs/nodes/math/math#rounding-and-limiting) | Rounds to a number of decimals: up, down or to the nearest |
+| [**Clamp**](/docs/nodes/math/math#rounding-and-limiting) | Limits a value to a range |
+| [**Map Range**](/docs/nodes/math/math#map-range) | Maps a value from one range to another |
+| [**Convert Angle**](/docs/nodes/math/math#angles) | Degrees to radians and back |
+| [**Random Value**](/docs/nodes/math/math#random-value) | A random float, integer, boolean, vector or color |
+| [**Vector Math**](/docs/nodes/math/vectors#vector-math) | Add, subtract, multiply, divide, cross and dot product, normalize, length and distance of vectors |
+| [**Combine Vector**](/docs/nodes/math/vectors#combine-and-separate) | A vector from X, Y, Z (and W) |
+| [**Separate Vector**](/docs/nodes/math/vectors#combine-and-separate) | The X, Y, Z (and W) of a vector |
+
+Fixed numbers and vectors come from the **Integer**, **Float** and **Vector** nodes in [Values](/docs/nodes/data/values). For anything these nodes don't cover, a [Python Expression](/docs/nodes/python/blender-api#python-expression) does it in one line: `math.sqrt(value)`, `max(a, b)`, `abs(value)`.

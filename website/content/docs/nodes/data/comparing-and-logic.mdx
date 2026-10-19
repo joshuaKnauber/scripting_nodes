@@ -1,0 +1,77 @@
+---
+title: Comparing and logic
+description: Compare values, combine true/false results and pick a value by a condition.
+icon: Scale
+---
+
+**Compare** checks two values and gives a Boolean: True or False. Connect it to the **Condition** of an [If/Else](/docs/nodes/flow) to run different nodes, or to a **Switch Data** to pick a value. **Boolean Math** and **Invert Boolean** combine and flip these results.
+
+![A panel label reading "2 objects selected": List Length of the selected objects, Compare with 0, and Switch Data choosing between a Format String and "Nothing selected"](/screenshots/data-compare.webp)
+
+## Compare
+
+**Compare** (**Add › Data**) compares **A** with **B** and gives **Result**. Pick the comparison in the dropdown on the node:
+
+| Option | True when |
+| --- | --- |
+| **=** | A equals B |
+| **≠** | A doesn't equal B |
+| **&lt;** / **≤** | A is less than (or equal to) B |
+| **>** / **≥** | A is greater than (or equal to) B |
+
+**A** and **B** are Data inputs: they take any value, but have no field to type into. Connect both, e.g. a value from a [Value node](/docs/nodes/data/values) like **Integer** or **String**. An unconnected input is `None`.
+
+**=** and **≠** work with any values: numbers, texts, objects. Comparing an enum property with one of its items needs the item's identifier, like `"CUBE"` (see [Enum Item](/docs/nodes/data/enum-items)). The other comparisons need values that have an order: numbers with numbers, texts with texts (alphabetically, upper case before lower case).
+
+To check whether a text contains another text, use [Substring In String](/docs/nodes/data/text#searching-text). For lists, use [List Contains](/docs/nodes/data/lists#reading-lists).
+
+## Boolean Math
+
+**Boolean Math** (**Add › Data › Boolean**) combines its two **Boolean** inputs:
+
+- **And**: True only if both are True.
+- **Or**: True if at least one is True.
+
+Chain several nodes for more than two conditions.
+
+## Invert Boolean
+
+**Invert Boolean** (**Add › Data › Boolean**) turns True into False and False into True. Use it for "if not": "if the object is *not* a mesh".
+
+## Switch Data
+
+**Switch Data** (**Add › Data**) gives **True** when **Condition** is True, and **False** otherwise. Pick the type of the values in the dropdown on the node (String, Float, Blender Data, ...); the **False**, **True** and **Result** sockets change to it.
+
+It picks a value without a flow. Where an [If/Else](/docs/nodes/flow) would need two branches with a node each, one **Switch Data** feeds one input: the label in the screenshot shows "Nothing selected" when the count is 0.
+
+Only the chosen value is computed. In the screenshot, the **Format String** connected to **True** only runs when something is selected.
+
+## Limitations
+
+- **&lt;**, **≤**, **>** and **≥** raise an error when the add-on runs if the values have no order: a number with a text, two objects, or an unconnected input (`None`).
+- Floats can be off by tiny amounts after calculations: `0.1 + 0.2` is `0.30000000000000004`, not `0.3`. Compare floats with **&lt;** / **>**, or round them first with [Round Float](/docs/nodes/math/math#rounding-and-limiting).
+
+<Accordions>
+<Accordion title="What it generates">
+
+Each node becomes a Python expression where its result is used. The panel in the screenshot:
+
+```python
+def draw(self, context):
+    self.layout.label(
+        text=f"{len(context.selected_objects)} objects selected"
+        if len(context.selected_objects) > 0
+        else 'Nothing selected',
+        icon='RESTRICT_SELECT_OFF',
+    )
+```
+
+| Node | Python |
+| --- | --- |
+| **Compare** | `a == b`, `a != b`, `a < b`, `a <= b`, `a > b`, `a >= b` |
+| **Boolean Math** | `a and b`, `a or b` |
+| **Invert Boolean** | `not a` |
+| **Switch Data** | `true_value if condition else false_value` |
+
+</Accordion>
+</Accordions>

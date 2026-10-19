@@ -4,4 +4,55 @@ description: Turn your node trees into a zip that installs without Scripting Nod
 icon: PackageOpen
 ---
 
-<Callout>This page isn't written yet.</Callout>
+**Export Addon** writes your add-on as an extension zip: plain Python files and a `blender_manifest.toml`. Anyone can install it in Blender, without Scripting Nodes.
+
+## Exporting
+
+<Steps>
+<Step>
+Fill in the [add-on settings](/docs/publishing/addon-settings): at least the **Addon Name**, and the **Tagline**, **Author** and **Version** under **Metadata**.
+</Step>
+<Step>
+Click **Export Addon** at the bottom of the **Addon** panel in the node editor's sidebar.
+</Step>
+<Step>
+Pick where to save the zip. Its name starts as the add-on's module name, like `render_tools.zip`.
+</Step>
+</Steps>
+
+The export runs the [Extensions platform check](/docs/publishing/extensions-platform) afterwards. When it finds something, the status bar says how many things there are to fix, and **Addon › Extensions Platform** lists them. The zip is written either way.
+
+## Installing the zip
+
+In Blender: **Edit › Preferences › Get Extensions**, then **Install from Disk…** in the menu at the top right, and pick the zip. Dragging the zip into Blender's window works too. The add-on shows up under **Add-ons**, enabled.
+
+To test the zip in the Blender you build it in, turn off the live add-on first (the checkbox in the **Addon** panel's header) or open another file. Both versions use the same class names and operator ids and get in each other's way.
+
+## What's in the zip
+
+| File | |
+| --- | --- |
+| `__init__.py` | Imports the modules, registers the classes in a `classes` tuple, calls the scripts' `register()` |
+| `blender_manifest.toml` | The [metadata](/docs/publishing/addon-settings) and permissions |
+| `<tree>.py` | One module per node tree, named after the tree (`material_library.py`). Trees in a folder are in that package (`ui/panels/sidebar.py`) |
+| `utils.py` | Helper functions the nodes use (drawing, files, timers, ...), only the ones your add-on needs |
+| `properties.py` | The add-on's properties, if it has any |
+| Scripts | Each script of the **Files** list, unchanged, in its folder (`scripts/tools.py`) |
+| `assets/` | The add-on's [assets](/docs/nodes/files/files#asset), copied from their source files |
+
+The code is formatted like `ruff format` and reads like a hand-written add-on: you can keep working on it in a code editor, without Scripting Nodes.
+
+## Differences from the live add-on
+
+The add-on running while you work and the export come from the same nodes. A few things differ:
+
+- **Trigger** nodes are only for testing and aren't exported.
+- Nodes with an error are left out, so the rest still works. The check lists each one as *Has an error, left out*.
+- **Print** and messages to the node editor's log become plain `print()` calls.
+- The live add-on is a legacy add-on with a `bl_info`; the export is an extension with a manifest instead.
+
+## Limitations
+
+- An export with nothing in it (no node trees, no scripts) is refused: *Nothing to export - add a node tree first*.
+- Without an **Addon Name**, the export stops with *Give the add-on a name first*.
+- The zip isn't signed or uploaded anywhere. To publish it, upload it on [extensions.blender.org](https://extensions.blender.org); see [Extensions platform](/docs/publishing/extensions-platform).

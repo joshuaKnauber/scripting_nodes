@@ -16,6 +16,9 @@ blender_version = bpy.app.version
 
 modules = None
 ordered_classes = None
+# node packages (src/core/node_packages.py): loaded, and registered on their own
+packages = []
+package_classes = []  # classes of the packages that registered
 
 
 def init():
@@ -30,6 +33,9 @@ def init():
         reloading.reload_package(_package_name, skip={_package_name, __name__})
     modules = get_all_submodules(Path(__file__).parent)
     ordered_classes = get_ordered_classes_to_register(modules)
+    from .src.core import node_packages
+
+    packages[:] = node_packages.load_all()
 
 
 def register():
@@ -44,15 +50,70 @@ def register():
             bpy.utils.unregister_class(cls)
         raise
 
+    package_classes.clear()
+    for package in packages:
+        _register_package(package)
+
     for module in modules:
         if module.__name__ == __name__:
             continue
         if hasattr(module, "register"):
             module.register()
+    for package in packages:
+        if package.error:
+            continue
+        for module in package.modules:
+            if hasattr(module, "register"):
+                try:
+                    module.register()
+                except Exception as exc:
+                    traceback.print_exc()
+                    package.error = f"register(): {type(exc).__name__}: {exc}"
+
+
+def _register_package(package):
+    """Register a package's classes; on an error none of them stay
+    registered and the error stays with the package."""
+    if package.error:
+        return
+    own = [
+        cls
+        for module in package.modules
+        for cls in iter_classes_in_module(module)
+        if cls.__module__ == module.__name__
+    ]
+    base_types = get_register_base_types()
+    own = [c for c in own if any(issubclass(c, base) for base in base_types)]
+    registered = []
+    try:
+        deps = {
+            cls: {d for d in iter_my_deps_from_annotations(cls, set(own))}
+            for cls in own
+        }
+        for cls in toposort(deps):
+            bpy.utils.register_class(cls)
+            registered.append(cls)
+    except Exception as exc:
+        traceback.print_exc()
+        for cls in reversed(registered):
+            bpy.utils.unregister_class(cls)
+        package.error = f"{type(exc).__name__}: {exc}"
+        return
+    package.classes = registered
+    package_classes.extend(registered)
 
 
 def unregister():
     # exact reverse of register: module hooks first, then classes
+    for package in reversed(packages):
+        if package.error:
+            continue
+        for module in reversed(package.modules):
+            if hasattr(module, "unregister"):
+                try:
+                    module.unregister()
+                except Exception:
+                    traceback.print_exc()
     for module in reversed(modules):
         if module.__name__ == __name__:
             continue
@@ -62,7 +123,7 @@ def unregister():
             except Exception:
                 traceback.print_exc()
 
-    for cls in reversed(ordered_classes):
+    for cls in reversed(package_classes + ordered_classes):
         if getattr(cls, "is_registered", False):
             try:
                 bpy.utils.unregister_class(cls)

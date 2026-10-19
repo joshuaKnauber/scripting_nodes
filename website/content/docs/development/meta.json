@@ -3,6 +3,7 @@
   "pages": [
     "architecture",
     "writing-nodes",
+    "node-packages",
     "context-reference",
     "testing"
   ]

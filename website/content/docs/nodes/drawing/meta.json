@@ -1,0 +1,10 @@
+{
+  "title": "Drawing",
+  "icon": "PenTool",
+  "pages": [
+    "index",
+    "viewport-drawing",
+    "shapes",
+    "screen-positions"
+  ]
+}

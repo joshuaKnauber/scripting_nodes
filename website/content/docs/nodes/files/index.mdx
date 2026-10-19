@@ -1,0 +1,21 @@
+---
+title: Files
+description: Read and write text files, work with folders and paths, load data from .blend files.
+icon: FolderOpen
+---
+
+The file nodes read and write files on disk, list folders, take paths apart and load data from other .blend files. Use them to save settings or reports, import a library of materials, or find the files your add-on ships with. They're in **Add › Files**.
+
+![An operator writing the names of the selected objects to a text file and printing how many lines it has](/screenshots/files-text.webp)
+
+| Node | |
+| --- | --- |
+| [**Read Text File**](/docs/nodes/files/files#read-text-file) | The text of a file and its lines |
+| [**Write Text File**](/docs/nodes/files/files#write-text-file) | Writes text to a file, replacing it or adding to its end |
+| [**Create Folder**](/docs/nodes/files/files#create-folder) | Creates a folder and the folders above it |
+| [**List Folder**](/docs/nodes/files/files#list-folder) | The files and/or folders in a folder, sorted by name |
+| [**Join Path**](/docs/nodes/files/files#join-path) | Joins folder and file names into one path |
+| [**Path Info**](/docs/nodes/files/files#path-info) | The parts of a path, and whether it exists |
+| [**Asset**](/docs/nodes/files/files#asset) | The path of a file or folder your add-on ships with |
+| [**Load from Blend File**](/docs/nodes/files/blend-files#load-from-blend-file) | Appends or links data from another .blend file |
+| [**Blend File Contents**](/docs/nodes/files/blend-files#blend-file-contents) | The names of the data of a type in a .blend file, without loading it |

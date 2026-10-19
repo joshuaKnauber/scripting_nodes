@@ -1,8 +1,9 @@
 {
-  "title": "Python scripts",
+  "title": "Python",
   "icon": "FileCode",
   "pages": [
-    "script-nodes",
-    "blender-api"
+    "index",
+    "blender-api",
+    "script-nodes"
   ]
 }

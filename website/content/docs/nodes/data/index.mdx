@@ -1,0 +1,101 @@
+---
+title: Data
+description: Fixed values, text, lists, comparisons and enum items.
+icon: Database
+---
+
+The Data nodes give values to other nodes: a number, a text, a list, whether two values are equal. They're in **Add › Data**, with the submenus **Boolean**, **Input**, **List** and **String**.
+
+## Value nodes
+
+Most Data nodes have no flow sockets (the diamond-shaped ones), only data inputs and outputs. These value nodes don't run at a point in a flow. They compute their result where something uses it: connect a **Float** to a **Print**, and the number is written right into the Print's code.
+
+Two things follow from this:
+
+- A value node computes again for every input it's connected to. A **Random Value** connected to two inputs gives two different numbers, and a **Current Time** connected twice reads the clock twice.
+- A value node can't remember anything. **Create List** makes a new, empty list every time it's used, so a **List Append** that adds to it adds to a list nobody sees again. To build up a list or a total, store it in a [variable](/docs/concepts/variables) first. [Lists](/docs/nodes/data/lists) shows how.
+
+The nodes that change a list (**List Append**, **List Sort**, ...) and **For Each (List)** do have flow sockets: they run in a flow, like a **Print**.
+
+## Socket types
+
+The color of a socket shows the type of value it carries.
+
+| Type | Holds |
+| --- | --- |
+| **Data** | Any value. Gray, no field: an unconnected Data input is `None` |
+| **Blender Data** | Blender data: an object, a scene, a material, ... |
+| **String** | Text |
+| **Boolean** | True or False |
+| **Float** | A decimal number |
+| **Integer** | A whole number |
+| **Vector** | 2 to 4 numbers, like a location |
+| **Color** | 3 (RGB) or 4 (RGBA) numbers from 0 to 1 |
+| **List** | A list of values (square socket). Blender collections like `bpy.data.objects` connect to it too |
+| **Icon** | A built-in icon or a custom one |
+
+You can connect most types to each other. The value is converted on the way:
+
+| From → to | Result |
+| --- | --- |
+| Anything → **String** | The value as text (`str()`). Blender data gives its name: an object becomes `"Cube"` |
+| Anything → **Boolean** | `bool()`: 0, empty text, empty lists and `None` are False, everything else True |
+| **Integer** → **Float** | The same number |
+| **Float** → **Integer** | Cut off to a whole number: 2.9 becomes 2 |
+| **String** → **Float** / **Integer** | The number in the text, 0 if the text isn't a number |
+| **Float** / **Integer** → **Vector** / **Color** | The number in every component: 0.5 becomes `(0.5, 0.5, 0.5)` |
+| **Vector** ↔ **Color** | The first three components; a color gets alpha 1 |
+| **Vector** / **Color** / **List** → **Float** / **Integer** | The first component |
+| Single value → **List** | A list with that one value; a text becomes a list of its characters |
+| Anything → **Data** | Unchanged |
+
+Some connections can't work and show an error on the node: Blender data into a number, vector or color, or a plain value into a Blender Data input.
+
+## Nodes
+
+| Node | |
+| --- | --- |
+| [**Boolean**](/docs/nodes/data/values#fixed-values) | True or False |
+| [**Integer**](/docs/nodes/data/values#fixed-values) | A whole number |
+| [**Float**](/docs/nodes/data/values#fixed-values) | A decimal number |
+| [**String**](/docs/nodes/data/values#fixed-values) | A text |
+| [**Vector**](/docs/nodes/data/values#fixed-values) | A vector with 2, 3 or 4 components |
+| [**Color**](/docs/nodes/data/values#fixed-values) | An RGB or RGBA color |
+| [**None**](/docs/nodes/data/values#fixed-values) | Python's `None`, "no value" |
+| [**Current Time**](/docs/nodes/data/values#current-time) | The date and time as text, and as seconds |
+| [**Add-on Info**](/docs/nodes/data/values#add-on-info) | Your add-on's name, version, module and folder |
+| [**Compare**](/docs/nodes/data/comparing-and-logic#compare) | Whether two values are equal, or which is bigger |
+| [**Boolean Math**](/docs/nodes/data/comparing-and-logic#boolean-math) | And / Or of two booleans |
+| [**Invert Boolean**](/docs/nodes/data/comparing-and-logic#invert-boolean) | True becomes False and False becomes True |
+| [**Switch Data**](/docs/nodes/data/comparing-and-logic#switch-data) | One of two values, depending on a condition |
+| [**Format String**](/docs/nodes/data/text#putting-values-into-text) | Puts values into a text at each `{}` |
+| [**Combine Strings**](/docs/nodes/data/text#putting-values-into-text) | Joins texts with a separator |
+| [**Join List**](/docs/nodes/data/text#splitting-and-joining) | Joins the items of a list into one text |
+| [**Split String**](/docs/nodes/data/text#splitting-and-joining) | Splits a text into a list |
+| [**Replace String**](/docs/nodes/data/text#changing-text) | Replaces every occurrence of a text |
+| [**Slice String**](/docs/nodes/data/text#changing-text) | Part of a text by position |
+| [**Change Case**](/docs/nodes/data/text#changing-text) | UPPER, lower, Title Case, ... |
+| [**Trim String**](/docs/nodes/data/text#changing-text) | Removes spaces at the start and end |
+| [**Pad String**](/docs/nodes/data/text#changing-text) | Fills a text up to a length, e.g. `007` |
+| [**String Length**](/docs/nodes/data/text#searching-text) | The number of characters |
+| [**Find in String**](/docs/nodes/data/text#searching-text) | Where a text appears, and how often |
+| [**Substring In String**](/docs/nodes/data/text#searching-text) | Whether a text contains, starts or ends with another |
+| [**Create List**](/docs/nodes/data/lists#reading-lists) | A list from its inputs |
+| [**List Get Item**](/docs/nodes/data/lists#reading-lists) | The item at a position |
+| [**List Length**](/docs/nodes/data/lists#reading-lists) | The number of items |
+| [**List Index**](/docs/nodes/data/lists#reading-lists) | The position of an item |
+| [**List Contains**](/docs/nodes/data/lists#reading-lists) | Whether an item is in the list |
+| [**List Slice**](/docs/nodes/data/lists#reading-lists) | A part of the list |
+| [**List Append**](/docs/nodes/data/lists#changing-lists) | Adds an item at the end |
+| [**List Insert**](/docs/nodes/data/lists#changing-lists) | Adds an item at a position |
+| [**List Extend**](/docs/nodes/data/lists#changing-lists) | Adds all items of another list |
+| [**List Set Item**](/docs/nodes/data/lists#changing-lists) | Replaces the item at a position |
+| [**List Remove**](/docs/nodes/data/lists#changing-lists) | Removes an item |
+| [**List Pop**](/docs/nodes/data/lists#changing-lists) | Removes the item at a position and gives it |
+| [**List Clear**](/docs/nodes/data/lists#changing-lists) | Removes all items |
+| [**List Reverse**](/docs/nodes/data/lists#changing-lists) | Reverses the order |
+| [**List Sort**](/docs/nodes/data/lists#changing-lists) | Sorts the items |
+| [**For Each (List)**](/docs/nodes/data/lists#for-each-list) | Runs a flow once per item |
+| [**Enum Item**](/docs/nodes/data/enum-items) | One entry of an enum property's dropdown |
+
+Numbers and vectors are calculated with the [Math](/docs/nodes/math) nodes.

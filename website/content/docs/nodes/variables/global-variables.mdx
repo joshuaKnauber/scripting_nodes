@@ -1,0 +1,67 @@
+---
+title: Global variables
+description: A value shared by the whole add-on, readable and changeable from every tree.
+icon: Globe
+---
+
+A **Global Variable** exists once for the whole add-on. Any flow in any tree can read it with **Get Variable** and change it with **Set Variable**, and it keeps its value between runs: an operator can count up and a panel can show the count.
+
+![A Global Variable "Click Count", an operator that adds 1 to it, and a panel showing "Clicks: 3" above a Count Click button](/screenshots/variables-global.webp)
+
+## Counting clicks
+
+<Steps>
+<Step>
+Add **Add › Variables › Global Variable** anywhere in a tree. It has no flow sockets. Label it `Click Count` (**F2**) and pick **Integer** in its dropdown.
+</Step>
+<Step>
+In an operator's **Execute** flow, add **Set Variable**, pick `Click Count`, choose **Change By** and set **Amount** to `1`.
+</Step>
+<Step>
+In a panel, combine `Clicks: ` with a **Get Variable** of `Click Count` and draw it with a **Label**. Add a **Button** for the operator.
+</Step>
+</Steps>
+
+Each click runs the operator, and the panel redraws with the new count.
+
+## The node
+
+| | |
+| --- | --- |
+| Data type (dropdown) | What the variable holds: **Data** (anything), **Blender Data**, **String**, **Boolean**, **Float**, **Integer**, **Vector**, **Color**, **List** or **Icon** |
+| **Initial Value** (input) | The value the variable has when the add-on starts |
+| Label | The variable's name, also in the generated code (`Click Count` becomes `_click_count`, with `get_click_count()` and `set_click_count()`) |
+
+## When it resets
+
+The variable is set to its **Initial Value** whenever the add-on's code loads:
+
+- when the add-on is enabled, and when Blender starts with it enabled;
+- while you develop, every time Scripting Nodes rebuilds the add-on, which happens after most edits to your nodes.
+
+It isn't saved in the .blend file, and every open .blend shares the same value. If the value should survive closing Blender, or belong to a scene or object, use a [property](/docs/concepts/properties) instead.
+
+Keep **Initial Value** a fixed value. It's evaluated once, when the add-on loads, before any scene or object is ready; a connected node that reads Blender data there can fail.
+
+<Accordions>
+<Accordion title="What it generates">
+
+A Global Variable is a module-level variable of its tree's file, with a function to read it and one to change it:
+
+```python
+_click_count = 0
+
+
+def get_click_count():
+    return _click_count
+
+
+def set_click_count(value):
+    global _click_count
+    _click_count = value
+```
+
+**Get Variable** and **Set Variable** call these functions. In other trees they're imported: `from .object_tools import get_click_count, set_click_count`.
+
+</Accordion>
+</Accordions>

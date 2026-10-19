@@ -6,7 +6,7 @@ icon: Download
 
 <DownloadButton />
 
-Scripting Nodes needs Blender 5.0 or newer.
+Scripting Nodes needs Blender 5.0 or newer. It's a Blender extension: you install the `.zip` from disk, there's nothing to unpack.
 
 ## Install
 
@@ -15,25 +15,39 @@ Scripting Nodes needs Blender 5.0 or newer.
 
 ### Download
 
-Use the button above to get the latest `.zip`. Older versions are on [GitHub releases](https://github.com/joshuaknauber/scripting_nodes/releases).
+Use the button above to get the latest `.zip`. All versions, including pre-releases (versions like `4.0.0-beta.3`), are on [GitHub releases](https://github.com/joshuaknauber/scripting_nodes/releases).
 
 </Step>
 <Step>
 
 ### Install from disk
 
-In Blender, open **Edit → Preferences → Get Extensions**, click the dropdown in the top right and choose **Install from Disk…**, then pick the downloaded `.zip`.
+In Blender, open **Edit › Preferences › Get Extensions**, click the dropdown in the top right corner and choose **Install from Disk…**, then pick the downloaded `.zip`. Dragging the `.zip` into Blender's window works too.
 
 </Step>
 <Step>
 
 ### Open the editor
 
-Switch any area to the **Scripting Node Editor**. That's where your node trees live.
+Switch any area to the **Scripting Node Editor** and click **New** to create a node tree. The [Start guide](/docs) builds a first add-on from there.
 
 </Step>
 </Steps>
 
+## Permissions
+
+Blender lists what an extension does outside of Blender. Scripting Nodes asks for:
+
+| Permission | Why |
+| --- | --- |
+| Files | It writes the add-on you build to Blender's user scripts folder (`scripts/addons/<your add-on>`), so Blender can load it while you work |
+| Network | Only for the optional [MCP server](/docs/ai/mcp-server), which listens on your own computer for AI assistants |
+| Clipboard | Copying and pasting data paths |
+
 ## Update
 
-Install the new `.zip` the same way. Your node trees are saved in your `.blend` files, so they're not affected.
+Install the new `.zip` the same way, it replaces the old version. Your node trees are saved in your `.blend` files, so they're not affected. Files made with an earlier 4.x version are updated when you open them.
+
+## Uninstall
+
+Remove Scripting Nodes in **Preferences › Add-ons**. Add-ons you exported keep working: they don't need Scripting Nodes.

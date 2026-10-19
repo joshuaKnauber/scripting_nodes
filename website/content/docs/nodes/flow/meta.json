@@ -1,0 +1,10 @@
+{
+  "title": "Flow",
+  "icon": "GitBranch",
+  "pages": [
+    "index",
+    "conditions",
+    "loops",
+    "print-and-temp-override"
+  ]
+}

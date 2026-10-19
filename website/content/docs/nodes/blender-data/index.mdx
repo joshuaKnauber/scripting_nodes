@@ -1,0 +1,22 @@
+---
+title: Blender Data
+description: Read Blender's data, call its functions and check the mode or an object's type.
+icon: Box
+---
+
+These nodes reach into the open file: the active object, its modifiers, the scene's settings, all materials. They read data by following a [data path](/docs/concepts/data-paths), call Blender's functions to create and change data, and answer common questions about Blender's state. Find them under **Add › Blender Data**. New to this? Start with [Blender data](/docs/concepts/blender-data).
+
+| Node | Does |
+| --- | --- |
+| [**Blender Data**](/docs/nodes/blender-data/reading-data) | Follows a path from the context, the file or a connected input and outputs the value with its real type |
+| [**Blender Function**](/docs/nodes/blender-data/blender-functions) | Calls a function of Blender data: add a modifier, create an object, link it to a collection |
+| [**Is in Mode**](/docs/nodes/blender-data/checks#is-in-mode) | Whether Blender is in a mode (Edit Mode of a mesh, Sculpt Mode, ...), and the current mode |
+| [**Is Object Type**](/docs/nodes/blender-data/checks#is-object-type) | Whether an object is a mesh, a curve, a light, ... |
+| [**Area by Type**](/docs/nodes/blender-data/checks#area-by-type) | The first editor of a type in the window and its main region, for **Temp Override** |
+
+The menu also has entries that add a node already set up:
+
+- Blender Data: **Active Object**, **Selected Objects**, **Scene**, **View Layer**, **Window Manager**, **Preferences**, **Blend File**, **All Objects**, and **Paste Data Path** (a Blender Data node from a copied path).
+- Blender Function: **Add Modifier**, **New Object**, **Link Object**, **Select Object**.
+
+To change one of Blender's values, use **Set Property** in Blender mode ([Get and set properties](/docs/nodes/properties/get-and-set)). To run one of Blender's operators, use **Run Operator** ([Running operators](/docs/nodes/operators/running-operators)).

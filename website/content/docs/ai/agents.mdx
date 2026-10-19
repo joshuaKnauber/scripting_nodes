@@ -4,13 +4,15 @@ description: Connect coding agents to Blender.
 icon: Bot
 ---
 
-Start the [MCP server](/docs/ai/mcp-server) in Blender, then add it to your agent. The **MCP Server** panel copies the setup for you: **Claude Code**, **Codex**, **Claude Desktop** or **JSON** (clients that connect over HTTP, like Cursor).
+Start the [MCP server](/docs/ai/mcp-server) in Blender, then add it to your agent. The **MCP Server** panel copies the setup for you: **Claude Code**, **Codex**, **Claude Desktop** or **JSON** (clients that connect over HTTP, like Cursor). The copied setup uses the port from the panel, and the token if you set one.
 
 **Claude Code**
 
 ```bash
 claude mcp add --transport http scripting-nodes http://127.0.0.1:7423/
 ```
+
+With a **Token** set in the preferences, the copied command adds `--header "Authorization: Bearer <token>"`.
 
 **Codex** (`~/.codex/config.toml`)
 
@@ -33,6 +35,19 @@ url = "http://127.0.0.1:7423/"
 ```
 
 Claude Desktop only starts servers on your computer from this file, so it connects through [mcp-remote](https://www.npmjs.com/package/mcp-remote), which needs [Node.js](https://nodejs.org). Restart Claude Desktop after saving. Adding the address as a connector in Claude Desktop's settings doesn't work: connectors are reached from the internet, not from your computer.
+
+**JSON** (for Cursor and other clients that connect over HTTP)
+
+```json
+{
+  "mcpServers": {
+    "scripting-nodes": {
+      "type": "http",
+      "url": "http://127.0.0.1:7423/"
+    }
+  }
+}
+```
 
 Then ask for an add-on: *"Make an add-on with a sidebar panel in the 3D viewport that adds a three-point light rig."* The agent builds it in the open file: the nodes show up in the node editor, the add-on is loaded right away, and you can keep working on it yourself.
 

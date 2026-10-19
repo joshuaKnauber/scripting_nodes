@@ -50,6 +50,12 @@ A cut edge says "this continues". Cut only where nothing important is, and only 
 5. **Clean state.** No tooltips (the driver turns them off), no error popups, no half-typed fields, no `[INFO]` overlays unless they're the point.
 6. **Consistent example.** Within a section, reuse one example add-on (a shared `_*.py` builder), so readers recognize the same nodes across pages.
 
+## Helpers that already exist
+
+- **Popups and dialogs** (operator dialogs, menus, settings popups): an operator started directly in `after()` opens nothing in the capture. Use `invoke_in(context, "VIEW_3D", "my_addon.op", mouse=(0.5, 0.55), delay=1.0)` from `_operators_common.py`. It moves the cursor to where the popup should open and runs the operator with `INVOKE_DEFAULT` from a timer, in that area. See `operators-dialog.py`.
+- **Small nodes:** `view_all` leaves wide margins. `zoom_in()` in `_operators_common.py`, or `_blend_data_zoom.py`, zooms in again after the driver has framed the tree.
+- **Example add-ons:** `_start_addon.py` (Monkey Tools), `_interface_tools.py` (Object Tools panel), `_data_panel.py`, `_concepts_graph.py`, `_publishing.py`. Reuse them before building a new one.
+
 ## Checking a shot
 
 Always look at the result (Read the .webp) before you're done. Check these:

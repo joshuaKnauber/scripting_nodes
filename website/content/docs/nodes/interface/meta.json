@@ -2,11 +2,15 @@
   "title": "Interface",
   "icon": "PanelsTopLeft",
   "pages": [
+    "index",
     "panels",
-    "menus",
     "layouts",
     "fields-and-buttons",
     "text",
-    "icons"
+    "icons",
+    "lists",
+    "menus",
+    "adding-to-blender",
+    "preferences"
   ]
 }

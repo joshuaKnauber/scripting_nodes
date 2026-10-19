@@ -1,38 +1,50 @@
 ---
 title: Concepts
-description: The few ideas everything else builds on.
+description: The ideas everything else builds on, each with a link to its full page.
 icon: Lightbulb
 ---
 
-## Add-on
+The short version of how Scripting Nodes works. Each section links to the page that covers it in full.
 
-Each Blender file holds one add-on. Its name and build settings are in the node editor's sidebar, in the **Scripting Nodes** tab. While you work, the add-on is installed and enabled in Blender like any other, so you can use it right away.
+## One add-on per file
 
-## Node trees
+Each `.blend` file holds one add-on. Its name and settings are in the node editor's sidebar, in the **Scripting Nodes** tab. While you work, the add-on is installed and enabled in Blender like any other, so you can use it right away. See [Add-on and files](/docs/concepts/addon-and-files).
 
-An add-on is made of one or more node trees. Each tree becomes one Python module of the add-on. Split them however you like, for example one tree per tool.
+## Node trees are files
 
-The **Files** list in the sidebar shows the add-on's node trees and [scripts](/docs/concepts/scripts), sorted into folders: **+** adds a node tree, a script or a folder to the selected folder, the arrow button moves the selected file or folder, double click renames. A folder becomes a package of the add-on: a tree *Object Panel* in *UI › Panels* is the module `ui/panels/object_panel.py`. Removing a folder keeps its contents, they move to the folder above.
+An add-on is made of node trees. Each tree becomes one Python file (a module) of the add-on, so split them the way you'd split code: one tree per tool, or one for operators and one for the interface. The **Files** list in the sidebar sorts trees and [scripts](/docs/concepts/scripts) into folders, and each folder becomes a package of the add-on. See [Add-on and files](/docs/concepts/addon-and-files).
 
-## Nodes
+## Three kinds of nodes
 
-Nodes come in three kinds:
+- **Root nodes** stand on their own: Operator, Panel, Menu, events. They become the classes and handlers Blender registers.
+- **Flow nodes** do something when a flow reaches them: Print, Run Operator, Set Property, If/Else.
+- **Value nodes** compute something: Math, Combine Strings, Blender data. Their code goes where their output is used.
 
-- **Root nodes** exist on their own: operators, panels, menus, events, properties. They become the classes and handlers Blender registers.
-- **Flow nodes** do something when the flow reaches them: print, set a property, run an operator, branch.
-- **Value nodes** compute something: math, strings, Blender data. They run when another node uses their output.
+See [Flows and sockets](/docs/concepts/flows-and-sockets).
 
 ## Sockets
 
-- **Flow sockets** (diamonds) set the order things run in. They come in three colors: **Program** runs code, **Logic** (white) starts a flow: an event's or Trigger's **Run**, an operator's **Execute**, **Interface** draws UI.
-- **Data sockets** (circles) pass values such as text, numbers or objects between nodes.
+- **Flow sockets** (diamonds) set the order things happen in. **Logic** flows (white) start code Blender runs, like an operator's **Execute**. **Program** flows (gray) continue it. **Interface** flows (yellow) draw UI, like a panel's **Draw**.
+- **Data sockets** (circles) pass values: text, numbers, vectors, Blender data, lists. Connecting two different types converts the value where it can.
+
+See [Flows and sockets](/docs/concepts/flows-and-sockets).
+
+## Data
+
+[Properties](/docs/concepts/properties) store values in Blender data or on your operators, and show up as fields. [Blender data](/docs/concepts/blender-data) and [data paths](/docs/concepts/data-paths) read and change what's in the scene. [Variables](/docs/concepts/variables) keep values while your add-on runs.
 
 ## Functions
 
-A node tree with inputs and outputs is a [function](/docs/nodes/functions/creating-functions), like a node group in Geometry Nodes. Use it from other trees to reuse parts of a graph.
+A node tree with inputs and outputs is a [function](/docs/nodes/functions/creating-functions), like a node group in Geometry Nodes. Call it from other trees to reuse part of a graph.
 
-## From graph to code
+## Scripts and assets
 
-Every node contributes a piece of Python. When you change the graph, Scripting Nodes rebuilds the add-on and reloads it a moment later. If something is wrong, the error is shown on the node that caused it, and the previous version of your add-on keeps running.
+When something is easier to write in Python, add a [script](/docs/concepts/scripts). Files your add-on needs, like images or `.blend` files, are [assets](/docs/concepts/assets) that ship with it.
 
-When you're done, [export](/docs/publishing/export) the add-on as a zip that works without Scripting Nodes.
+## Live rebuilds
+
+Every change to the graph rebuilds the add-on and reloads it a moment later. If something is wrong, the error shows on the node that caused it, and the last working version keeps running. See [Live updates](/docs/concepts/live-updates).
+
+## Export
+
+When you're done, [export](/docs/publishing/export) the add-on as a zip. It works without Scripting Nodes, and the code inside reads like a hand-written add-on.

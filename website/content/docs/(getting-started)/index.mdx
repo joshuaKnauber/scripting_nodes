@@ -1,54 +1,87 @@
 ---
-title: Start Guide
-description: Scripting Nodes builds Blender add-ons from node graphs. This guide takes you from installing it to a running add-on.
+title: Start guide
+description: Install Scripting Nodes and build a small add-on with an operator and a sidebar panel.
 icon: GraduationCap
 ---
 
-import { Download, Lightbulb, Package, Workflow } from 'lucide-react';
+import { Boxes, Download, Lightbulb, Package, Workflow } from 'lucide-react';
+
+Scripting Nodes builds Blender add-ons from node graphs. You connect nodes in a node editor, and Scripting Nodes writes the Python: operators, panels, menus, properties, handlers. The add-on runs in Blender while you build it, and it updates every time you change a node. When it's done, you export it as a zip that installs like any other add-on, without Scripting Nodes.
 
 <Video title="Intro to Scripting Nodes" />
 
-## Overview
-
-You connect nodes in a node editor, and Scripting Nodes turns the graph into Python that registers as a regular add-on, with operators, panels, properties and everything else. The add-on runs while you build it, and you export it as a zip when it's done.
-
-<Cards>
-  <Card icon={<Lightbulb />} title="Concepts" href="/docs/concepts" description="Node trees, nodes, sockets and how they become code." />
-  <Card icon={<Download />} title="Download" href="/docs/download" description="Install Scripting Nodes in Blender." />
-  <Card icon={<Workflow />} title="Nodes" href="/docs/nodes/operators/creating-operators" description="Operators, interface, events, logic and functions." />
-  <Card icon={<Package />} title="Publishing" href="/docs/publishing/export" description="Export your add-on and share it." />
-</Cards>
-
 ## Build your first add-on
 
-The smallest useful graph: a button that prints a message to the console.
+You'll make an add-on called **Monkey Tools**: a panel in the 3D viewport's sidebar with a button that adds a monkey to the scene. It takes four nodes.
+
+![An Operator, Run Operator, Panel and Button node next to the Monkeys panel in the 3D viewport's sidebar, after the button added a monkey](/screenshots/start-panel.webp)
 
 <Steps>
 <Step>
 
 ### Create a node tree
 
-[Install Scripting Nodes](/docs/download), switch an area to the **Scripting Node Editor** and click **New**.
+[Install Scripting Nodes](/docs/download), then switch any area to the **Scripting Node Editor** (the editor type menu in the area's top left corner) and click **New**. Press **N** to open the sidebar and go to the **Scripting Nodes** tab.
+
+Every `.blend` file holds one add-on, and a new file gets a random name. Type **Monkey Tools** into **Addon Name**. The panel's tab in the 3D viewport will be named after it.
 
 </Step>
 <Step>
 
-### Add the nodes
+### Add an operator
 
-Add a **Trigger** node (Logic) and a **Print** node (Program), then connect the Trigger's **Run** output to the Print's **Program** input. Type a message into the **Text** field.
+An operator is the action behind a button. Add an **Operator** node (**Add › Operators › Operator**) and type **Add Monkey** into its **Label**. That's the name the button shows.
 
-![A Trigger node connected to a Print node](/screenshots/first-addon.webp)
+Add a **Run Operator** node (**Add › Operators › Run Operator**) to the right of it. The dropdown next to its operator field switches between **This Add-on** and **Blender**: choose **Blender**, then search for **Add Monkey** and pick `mesh.primitive_monkey_add`. The node gets an input for each setting of Blender's operator (size, location, ...). Leave them as they are.
+
+Connect the Operator's **Execute** output to the Run Operator's flow input, the diamond on its left. **Execute** is what the operator does when it runs.
+
+![An Operator node labeled Add Monkey connected to a Run Operator node running mesh.primitive_monkey_add](/screenshots/start-operator.webp)
+
+Click the play button next to **Settings** on the Operator node. A monkey appears in the scene. Your add-on is already running.
 
 </Step>
 <Step>
 
-### Run it
+### Add a panel with a button
 
-Click **Trigger** on the node. The message shows up in Blender's system console. Trigger nodes are only for trying things out while you build: they're left out when you export the add-on.
+Add a **Panel** node (**Add › Interface › Panel**) and set its **Label** to **Monkeys**. By default it's a panel in the 3D viewport's sidebar.
+
+Add a **Button** node (**Add › Interface › Button**). In its operator field, pick **Add Monkey**, your Operator node. Connect the Panel's **Draw** output to the Button's input. The yellow sockets are interface flows: they draw the panel's content from top to bottom.
+
+</Step>
+<Step>
+
+### Use it
+
+In a 3D viewport, press **N** and open the **Monkey Tools** tab. The **Monkeys** panel has an **Add Monkey** button. Click it.
+
+Change something, for example the Operator's **Label**, and the button changes a moment later. There's nothing to reload: Scripting Nodes rebuilds the add-on after every change, see [Live updates](/docs/concepts/live-updates).
+
+</Step>
+<Step>
+
+### Share it
+
+Save the `.blend` file to keep working on it later. To give the add-on to someone else, click **Export Addon** in the sidebar's **Addon** panel. You get a zip that installs in Blender like any other extension, see [Export](/docs/publishing/export).
 
 </Step>
 </Steps>
 
-<Callout>
-  The graph recompiles as you edit it, so changes take effect without reloading anything.
-</Callout>
+## Trying out a flow
+
+To run something without building an operator and a button first, use a **Trigger** node (**Add › Events › Trigger**). Its **Trigger** button runs whatever is connected to its output. Connect a **Print** node (**Add › Flow › Print**) and type a message into **Text**: clicking **Trigger** prints it to Blender's system console, and the node editor shows it in its top left corner for a few seconds.
+
+![A Trigger node connected to a Print node, the printed message "It works!" in the corner of the node editor](/screenshots/first-addon.webp)
+
+Trigger nodes are for testing while you build. They're left out when you export the add-on.
+
+## Next steps
+
+<Cards>
+  <Card icon={<Lightbulb />} title="Concepts" href="/docs/concepts" description="Node trees, flows, sockets and how a graph becomes an add-on." />
+  <Card icon={<Workflow />} title="Operators" href="/docs/nodes/operators/creating-operators" description="Settings, properties, dialogs and file browsers for your operators." />
+  <Card icon={<Boxes />} title="Interface" href="/docs/nodes/interface" description="Panels, menus, layouts and fields." />
+  <Card icon={<Package />} title="Publishing" href="/docs/publishing/export" description="Export your add-on and share it." />
+  <Card icon={<Download />} title="Download" href="/docs/download" description="Install or update Scripting Nodes." />
+</Cards>

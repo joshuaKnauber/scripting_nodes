@@ -1,22 +1,23 @@
 ---
 title: Scripts
 description: Add Python to your add-on and run it from nodes.
+icon: FileCode
 ---
 
-Nodes build the structure of an add-on: operators, panels, properties. When a step is easier to write in Python, put it in a script, a text block or a `.py` file. Scripts are used two ways:
+Nodes build the structure of an add-on: operators, panels, properties. When a step is easier to write in Python, put it in a script: a text block in the `.blend` file or a `.py` file on disk. Scripts are used two ways:
 
 | | For |
 | --- | --- |
 | **Files** list | Scripts that are part of the add-on: classes, handlers, helper functions. **Script Function** nodes call their functions |
-| **Inline Script** node | A few lines in an operator, a panel or any other flow, run where the node is |
+| **Inline Script** node (**Add › Python**) | A few lines in an operator, a panel or any other flow, run where the node is |
 
 ![An operator running arrange.py and a panel drawing with selection_info.py](/screenshots/scripts.webp)
 
 ## Scripts of the add-on
 
-**+ › Script** in the **Files** list (the sidebar of the node editor) adds a script to the selected folder; select it to pick a text block or a file below the list. **+** next to the text field creates a script to start from; for an empty text, **Add Template** writes one into it. Removing a script from the list keeps its text.
+**+ › Script** in the [Files list](/docs/concepts/addon-and-files#files) (the **Scripting Nodes** tab of the node editor's sidebar) adds a script to the selected folder. Select it, then choose **Text** (a text block) or **File** (a `.py` file) below the list and pick one. **+** next to the text field creates a text from a template; for an empty text, **Add Template** writes the template into it. The text button next to a picked text opens it in a Text Editor. Removing a script from the list keeps its text.
 
-Every script of the list is part of the add-on, unchanged, as `<folder>/<name>.py`: a script `tools.py` in the folder *Scripts* is `scripts/tools.py`, at the top level `tools.py`. Everything in it works as in any add-on file: imports, helper functions, classes, handlers. Relative imports between scripts (`from . import helpers`) only work while they're in the same folder, like in any Python package.
+Every script of the list is part of the add-on, unchanged, as `<folder>/<name>.py`: a script `tools.py` in the folder *Scripts* (where new scripts go) is `scripts/tools.py`, at the top level `tools.py`. If the name is taken, by a node tree for example, the list shows the name it got (**as tools_2.py**). Everything in it works as in any add-on file: imports, helper functions, classes, handlers. Relative imports between scripts (`from . import helpers`) only work while they're in the same folder, like in any Python package.
 
 - Classes (operators, panels, …) are registered for you.
 - If the script defines `register()` and `unregister()`, they are called when the add-on is enabled and disabled instead. Register your classes there yourself, as in a regular add-on.
@@ -34,11 +35,11 @@ def unregister():
     bpy.app.handlers.save_post.remove(on_save)
 ```
 
-Below the list, the selected script's functions: click one to add a **Script Function** node calling it. The nodes calling the script are listed under it.
+Below the list, under **Add a node calling:**, are the selected script's functions: click one to add a **Script Function** node calling it. **Used by** lists the nodes calling the script, with a button to jump to each.
 
 ## Script Function
 
-Pick a script of the add-on and one of its functions. Its parameters become the node's inputs, its return values the outputs:
+A **Script Function** node (**Add › Python**) picks a script of the add-on and one of its functions. Its parameters become the node's inputs, its return values the outputs:
 
 ```python
 def run(context, spacing: float = 2.5, axis: int = 0) -> int:
@@ -83,9 +84,10 @@ moved = len(context.selected_objects)
 
 ## Editing
 
-Edits to a script update the nodes using it and reload the add-on, like any other change. Errors show where they belong: syntax errors and errors while the add-on loads in the Scripts list, errors while the code runs on the node that ran it.
+Edits to a script update the nodes using it and reload the add-on, like any other change ([Live updates](/docs/concepts/live-updates)). Saving a `.py` file on disk counts as an edit. Errors show where they belong: syntax errors and errors while the add-on loads on the script in the **Files** list, errors while the code runs on the script with the line (*ZeroDivisionError: division by zero (arrange.py, line 7)*) and on the node that called it.
 
-## Generated code
+<Accordions>
+<Accordion title="What it generates">
 
 ```python
 from .scripts import arrange
@@ -98,3 +100,6 @@ class OBJECT_TOOLS_OT_arrange_objects(bpy.types.Operator):
         print(str(count))
         return {"FINISHED"}
 ```
+
+</Accordion>
+</Accordions>

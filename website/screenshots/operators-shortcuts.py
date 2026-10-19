@@ -4,7 +4,7 @@ opens a menu everywhere."""
 import helpers
 
 AREA_ONLY = True
-WINDOW_SIZE = (1200, 560)
+WINDOW_SIZE = (900, 560)
 
 
 def setup():
@@ -12,20 +12,20 @@ def setup():
     add = lambda idname, x, y: helpers.add_node(tree, idname, (x, y))  # noqa: E731
     operator = add("SNA_Node_Operator", -500, 150)
     operator.inputs["Label"].value = "Greet"
-    printer = add("SNA_Node_Print", -200, 150)
+    printer = add("SNA_Node_Print", -290, 150)
     printer.inputs["Text"].value = "Hello"
     helpers.link(tree, operator.outputs["Execute"], printer.inputs[0])
-    shortcut = add("SNA_Node_Shortcut", 100, 200)
+    shortcut = add("SNA_Node_Shortcut", -70, 170)
     helpers.point(shortcut, "operator_sn", operator)
     shortcut.key = "G"
     shortcut.ctrl = shortcut.shift = True
     shortcut.keymap = "3D View"
-    panel = add("SNA_Node_Panel", -500, -150)
+    panel = add("SNA_Node_Panel", -500, -90)
     panel.inputs["Label"].value = "Tools"
-    menu = add("SNA_Node_Menu", -200, -150)
+    menu = add("SNA_Node_Menu", -290, -90)
     menu.inputs["Label"].value = "Quick Tools"
     helpers.link(tree, panel.outputs["Draw"], menu.inputs[0])
-    menu_shortcut = add("SNA_Node_Shortcut", 400, 200)
+    menu_shortcut = add("SNA_Node_Shortcut", -70, -50)
     menu_shortcut.action = "MENU"
     helpers.point(menu_shortcut, "menu", menu)
     menu_shortcut.key = "Q"

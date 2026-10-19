@@ -1,0 +1,22 @@
+---
+title: Properties
+description: Read and change properties, react to changes and edit collection properties.
+icon: SlidersHorizontal
+---
+
+These nodes use [properties](/docs/concepts/properties): the settings your add-on defines in **Addon Data › Properties**, an operator's own options, or any of Blender's settings by [data path](/docs/concepts/data-paths). Define the properties first; the nodes then pick one. Find them under **Add › Properties**, the collection nodes under **Add › Properties › Collection** and the custom property nodes under **Add › Properties › Custom Properties**.
+
+| Node | Does |
+| --- | --- |
+| [**Get Property**](/docs/nodes/properties/get-and-set) | The value of a property of your add-on or of Blender |
+| [**Set Property**](/docs/nodes/properties/get-and-set) | Changes a property of your add-on or of Blender |
+| [**On Property Update**](/docs/nodes/properties/property-updates) | Runs when a property of your add-on changes |
+| [**Collection Add**](/docs/nodes/properties/collections) | Adds an item to a collection property and outputs it |
+| [**Collection Remove**](/docs/nodes/properties/collections) | Removes the item at an index |
+| [**Collection Clear**](/docs/nodes/properties/collections) | Removes all items |
+| [**Collection Length**](/docs/nodes/properties/collections) | The number of items |
+| [**Collection Get Item**](/docs/nodes/properties/collections) | The item at an index |
+| [**Get Custom Property**](/docs/nodes/properties/custom-properties) | A value stored on data with `data["name"]`, and whether it exists |
+| [**Set Custom Property**](/docs/nodes/properties/custom-properties) | Sets or removes such a value |
+
+To draw a property in a panel, use the field nodes (**Checkbox**, **Number Field**, ...) in [Fields and buttons](/docs/nodes/interface/fields-and-buttons).

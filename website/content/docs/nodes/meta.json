@@ -1,11 +1,18 @@
 {
   "title": "Nodes",
   "pages": [
+    "events",
     "operators",
     "interface",
-    "events",
-    "logic",
+    "flow",
+    "data",
+    "blender-data",
+    "math",
+    "properties",
+    "variables",
     "functions",
-    "python"
+    "python",
+    "files",
+    "drawing"
   ]
 }

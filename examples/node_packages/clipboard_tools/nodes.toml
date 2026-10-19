@@ -1,0 +1,5 @@
+id = "clipboard_tools"
+name = "Clipboard Tools"
+version = "1.0.0"
+author = "Scripting Nodes"
+api = 1

@@ -3,6 +3,8 @@
 import os
 import sys
 
+import bpy
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _demo  # noqa: E402
 
@@ -19,5 +21,8 @@ def setup():
 
 
 def after(context):
+    for tree in bpy.data.node_groups:
+        for node in tree.nodes:
+            node.select = False
     # frame the nodes next to the sidebar, not under it
     context.preferences.system.use_region_overlap = False

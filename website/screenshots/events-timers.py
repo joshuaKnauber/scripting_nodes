@@ -4,23 +4,23 @@ in intervals."""
 import helpers
 
 AREA_ONLY = True
-WINDOW_SIZE = (1300, 560)
+WINDOW_SIZE = (1000, 520)
 
 
 def setup():
     tree = helpers.new_tree("Timers")
     add = lambda idname, x, y: helpers.add_node(tree, idname, (x, y))  # noqa: E731
-    operator = add("SNA_Node_Operator", -700, 100)
+    operator = add("SNA_Node_Operator", -640, 100)
     operator.inputs["Label"].value = "Start Countdown"
-    delay = add("SNA_Node_RunWithDelay", -400, 100)
+    delay = add("SNA_Node_RunWithDelay", -430, 100)
     delay.inputs["Seconds"].value = 2.0
-    later = add("SNA_Node_Print", -100, 220)
+    later = add("SNA_Node_Print", -210, 230)
     later.inputs["Text"].value = "Two seconds later"
-    intervals = add("SNA_Node_RunInIntervals", -100, -20)
+    intervals = add("SNA_Node_RunInIntervals", -210, 0)
     intervals.inputs["Times"].value = 3
-    format_ = add("SNA_Node_FormatString", 180, -220)
+    format_ = add("SNA_Node_FormatString", 10, -130)
     format_.inputs["Format"].value = "Tick {}"
-    tick = add("SNA_Node_Print", 450, 60)
+    tick = add("SNA_Node_Print", 230, 40)
     helpers.link(tree, operator.outputs["Execute"], delay.inputs[0])
     helpers.link(tree, delay.outputs["Delayed"], later.inputs[0])
     helpers.link(tree, delay.socket("next", output=True), intervals.inputs[0])

@@ -1,0 +1,5 @@
+{
+  "title": "Properties",
+  "icon": "SlidersHorizontal",
+  "pages": ["index", "get-and-set", "property-updates", "collections", "custom-properties"]
+}
