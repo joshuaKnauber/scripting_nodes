@@ -37,10 +37,10 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
       searchToggle={{ enabled: false }}
       nav={{
         ...base.nav,
-        children: <SearchButton className="ms-auto" />,
+        children: <SearchButton key="search" className="ms-auto" />,
         component: <DocsHeader pages={pages} />,
       }}
-      sidebar={{ collapsible: false, footer: <SidebarFooter /> }}
+      sidebar={{ collapsible: false, footer: <SidebarFooter key="footer" /> }}
       containerProps={{ style: containerStyle }}
     >
       {children}
